@@ -1,0 +1,11 @@
+.parent {
+    display: flex;
+}
+
+.left {
+    max-width: 30%;
+}
+
+.right {
+    max-width: 70%;
+}

@@ -1,0 +1,10 @@
+{% load menu %}
+
+<ul>
+    {% for page in menuitems %}
+        <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+        {% if page.get_children|length  > 0%}
+            {% menu parent=page %}
+        {% endif %}
+    {% endfor %}
+</ul>

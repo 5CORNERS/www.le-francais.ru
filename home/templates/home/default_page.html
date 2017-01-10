@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load menu static %}
+
+{% block body_class %}template-homepage{% endblock %}
+
+{% block content %}
+    <div class="parent">
+        <div class="left">
+            {% get_site_root as site_root %}
+            {% menu parent=site_root %}
+        </div>
+        <div class="right">
+            {{ page.body | safe }}
+        </div>
+    </div>
+
+{% endblock %}
