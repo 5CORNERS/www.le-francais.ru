@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 from urllib.parse import urlparse, parse_qs
 
@@ -8,6 +10,7 @@ from wagtail.wagtailcore.models import Page, Site
 from bs4 import BeautifulSoup
 
 from home.models import DefaultPage
+
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
