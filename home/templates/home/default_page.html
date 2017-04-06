@@ -1,16 +1,12 @@
 {% extends "base.html" %}
-{% load menu static %}
 
 {% block body_class %}template-homepage{% endblock %}
 
 {% block content %}
-    <div class="parent">
-        <div class="left">
-            {% get_site_root as site_root %}
-            {% menu parent=site_root %}
-        </div>
-        <div class="right">
-            {{ page.body | safe }}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-3">{{ page.title }}</div>
+            <div class="col-md-6">{{ page.body | safe }}</div>
         </div>
     </div>
 

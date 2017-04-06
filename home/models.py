@@ -8,7 +8,7 @@ from wagtail.wagtailcore.fields import StreamField
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailimages.blocks import ImageChooserBlock
 
-from le_francais.blocks.AudioBlock import AudioBlock
+from home.blocks.AudioBlock import AudioBlock
 
 
 class DefaultPage(Page):
