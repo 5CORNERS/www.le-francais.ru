@@ -19,6 +19,20 @@ class DefaultPage(Page):
         ('audio', AudioBlock())
     ])
 
+
 DefaultPage.content_panels = Page.content_panels + [
+    StreamFieldPanel('body'),
+]
+
+
+class PageWithSidebar(Page):
+    body = StreamField([
+        ('paragraph', RichTextBlock()),
+        ('image', ImageChooserBlock()),
+        ('html', RawHTMLBlock()),
+        ('audio', AudioBlock())
+    ])
+
+PageWithSidebar.content_panels = Page.content_panels + [
     StreamFieldPanel('body'),
 ]

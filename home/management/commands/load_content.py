@@ -9,7 +9,7 @@ from django.core.management import BaseCommand
 from wagtail.wagtailcore.models import Page, Site
 from bs4 import BeautifulSoup
 
-from home.models import DefaultPage
+from home.models import DefaultPage, PageWithSidebar
 
 
 class Command(BaseCommand):
@@ -50,5 +50,8 @@ class Command(BaseCommand):
             slug = 'home' if parsed_location.path == '/' else parsed_location.path.rsplit('/', 1)[1]
             title = document.find('title').get_text().rsplit(u'- Самоучитель французского языка', 1)[0].strip()
             parent = Page.objects.get(url_path=parent_path)
-            parent.add_child(instance=DefaultPage(title=title, slug=slug, show_in_menus=1, body=json.dumps(body)))
+            if parsed_location.path == '/':
+                parent.add_child(instance=DefaultPage(title=title, slug=slug, show_in_menus=1, body=json.dumps(body)))
+            else:
+                parent.add_child(instance=PageWithSidebar(title=title, slug=slug, show_in_menus=1, body=json.dumps(body)))
         Site.objects.create(hostname='localhost', port=80, is_default_site=True, root_page=Page.objects.get(id=3))
