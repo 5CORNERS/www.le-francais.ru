@@ -116,3 +116,25 @@ body {
         flex-direction: column;
     }
 }
+
+.transcription-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #eceeef;
+    border-left: 1px solid #eceeef;
+}
+
+.transcription {
+    border-top: 1px solid #eceeef;
+    border-right: 1px solid #eceeef;
+    flex-grow: 1;
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.transcription-word {
+    width: 50%;
+    padding: .75rem;
+}

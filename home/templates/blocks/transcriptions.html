@@ -1,0 +1,12 @@
+<div class="transcription-list">
+    {% for child_value in self %}
+        <div class="transcription">
+            <div class="transcription-word">
+                {{ child_value.word }}
+            </div>
+            <div class="transcription-word">
+                {{ child_value.translation }}
+            </div>
+        </div>
+    {% endfor %}
+</div>

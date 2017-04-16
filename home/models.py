@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.db import models
 from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel
-from wagtail.wagtailcore.blocks import RichTextBlock, RawHTMLBlock
+from wagtail.wagtailcore.blocks import RichTextBlock, RawHTMLBlock, ListBlock, StructBlock, CharBlock
 from wagtail.wagtailcore.fields import StreamField
 
 from wagtail.wagtailcore.models import Page
@@ -30,7 +30,12 @@ class PageWithSidebar(Page):
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
         ('html', RawHTMLBlock()),
-        ('audio', AudioBlock())
+        ('audio', AudioBlock()),
+        ('translations', ListBlock(StructBlock([
+            ('word', RichTextBlock(required=True)),
+            ('translation', RichTextBlock(required=True))
+        ]), template="blocks/transcriptions.html")
+         )
     ])
 
 PageWithSidebar.content_panels = Page.content_panels + [
