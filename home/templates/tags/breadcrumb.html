@@ -1,0 +1,9 @@
+{% load wagtailcore_tags %}
+
+<ol class="breadcrumb">
+    {% for breadcrumb_page in breadcrumb_pages %}
+        <li class="breadcrumb-item {% if calling_page.url == breadcrumb_page.url %}active{% endif %}">
+            <a href="{% pageurl breadcrumb_page %}">{{ breadcrumb_page.title }}</a>
+        </li>
+    {% endfor %}
+</ol>

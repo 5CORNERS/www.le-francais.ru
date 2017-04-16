@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static menu %}
+{% load static site_tags %}
 
 {% block body_class %}template-homepage{% endblock %}
 
@@ -21,6 +21,7 @@
                 </button>
             </div>
             <div class="col-11 col-sm-7 offset-sm-3 g-col-md-8 offset-md-2 main">
+                {% breadcrumb calling_page=self %}
                 {{ page.body | safe }}
             </div>
         </div>

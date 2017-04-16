@@ -34,3 +34,17 @@ def top_menu(context, parent, calling_page=None):
         # required by the pageurl tag that we want to use within this template
         'request': context['request'],
     }
+
+
+@register.inclusion_tag('tags/breadcrumb.html', takes_context=True)
+def breadcrumb(context, calling_page):
+    breadcrumb_pages = []
+    breadcrumb_page = calling_page
+    while breadcrumb_page.get_parent() is not None:
+        breadcrumb_pages.append(breadcrumb_page)
+        breadcrumb_page = breadcrumb_page.get_parent()
+    return {
+        'calling_page': calling_page,
+        'breadcrumb_pages': reversed(breadcrumb_pages),
+        'request': context['request'],
+    }
