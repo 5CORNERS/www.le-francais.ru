@@ -31,14 +31,20 @@ class Command(BaseCommand):
             for iframe in content_element.find_all('iframe'):
                 src_url = urlparse(iframe['src'])
                 params = parse_qs(src_url.query)
-                if 'up_MP3' not in params:
+                if 'up_MP3' in params:
+                    file_url = params['up_MP3'][0]
+                elif 'up_FILE' in params:
+                    file_url = params['up_FILE'][0]
+                else:
                     continue
-                file_url = params['up_MP3'][0]
                 # iframe.parent.text = '%splitter%'
                 # element['class'] = 'player'
                 # element['data-file-url'] = file_url
                 audio_files.append(file_url)
-                iframe.replaceWith('%splitter%')
+                element_to_replace = iframe
+                while len(element_to_replace.parent.contents) <= 1:
+                    element_to_replace = element_to_replace.parent
+                element_to_replace.replaceWith('%splitter%')
             body = []
             html_parts = content_element.prettify().split('%splitter%')
             for i in range(0, len(html_parts)):
