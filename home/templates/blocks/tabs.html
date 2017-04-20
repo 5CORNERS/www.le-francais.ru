@@ -1,0 +1,17 @@
+<ul class="nav nav-tabs">
+    {% for child_value in self %}
+        <li class="nav-item">
+            <a class="nav-link {% if forloop.first %}active{% endif %}" data-toggle="tab"
+               href="#{{ child_value.href }}" role="tab"
+               aria-controls="{{ child_value.href }}">{{ child_value.title }}</a>
+        </li>
+    {% endfor %}
+</ul>
+
+<div class="tab-content">
+    {% for child_value in self %}
+        <div id="{{ child_value.href }}" class="tab-pane {% if forloop.first %}active{% endif %}" role="tabpanel">
+            {{ child_value.body }}
+        </div>
+    {% endfor %}
+</div>

@@ -138,3 +138,7 @@ body {
     width: 50%;
     padding: .75rem;
 }
+
+.nav.nav-tabs{
+    margin-bottom: 1em;
+}

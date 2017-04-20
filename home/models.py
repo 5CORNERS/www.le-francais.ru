@@ -9,6 +9,7 @@ from wagtail.wagtailcore.models import Page
 from wagtail.wagtailimages.blocks import ImageChooserBlock
 
 from home.blocks.AudioBlock import AudioBlock
+from home.blocks.TabsBlock import TabsBlock
 
 
 class DefaultPage(Page):
@@ -31,6 +32,7 @@ class PageWithSidebar(Page):
         ('image', ImageChooserBlock()),
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
+        ('tabs', TabsBlock()),
         ('translations', ListBlock(StructBlock([
             ('word', RichTextBlock(required=True)),
             ('translation', RichTextBlock(required=True))
