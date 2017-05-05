@@ -115,15 +115,11 @@ DATABASES['default'].update(db_from_env)
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
+SITE_ID = 1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
@@ -156,3 +152,7 @@ ALLOWED_HOSTS = [
     'localhost',
     'fe61337f.ngrok.io'
 ]
+
+# pybbm settings
+
+PYBB_PROFILE_RELATED_NAME = None
