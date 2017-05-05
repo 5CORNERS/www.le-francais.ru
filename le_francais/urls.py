@@ -17,9 +17,9 @@ urlpatterns = [
 
     url(r'^search/$', search_views.search, name='search'),
 
+    url(r'^forum/', include('pybb.urls', namespace='pybb')),
     url(r'', include(wagtail_urls)),
 
-    url(r'^forum/', include('pybb.urls', namespace='pybb')),
 ]
 
 
