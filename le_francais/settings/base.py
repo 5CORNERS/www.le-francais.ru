@@ -89,7 +89,6 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
 
                 'pybb.context_processors.processor',
-                'account.context_processors.account'
             ],
         },
     },
