@@ -19,7 +19,7 @@ urlpatterns = [
 
     url(r'', include(wagtail_urls)),
 
-    (r'^forum/', include('pybb.urls', namespace='pybb')),
+    url(r'^forum/', include('pybb.urls', namespace='pybb')),
 ]
 
 
