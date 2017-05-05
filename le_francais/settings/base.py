@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'pybb',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -65,6 +67,8 @@ MIDDLEWARE_CLASSES = [
 
     'wagtail.wagtailcore.middleware.SiteMiddleware',
     'wagtail.wagtailredirects.middleware.RedirectMiddleware',
+
+    'pybb.middleware.PybbMiddleware',
 ]
 
 ROOT_URLCONF = 'le_francais.urls'
@@ -82,6 +86,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
+                'pybb.context_processors.processor',
             ],
         },
     },

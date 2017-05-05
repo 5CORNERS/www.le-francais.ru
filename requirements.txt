@@ -7,3 +7,5 @@ wagtail==1.9.1
 gunicorn==19.6.0
 psycopg2==2.6.2
 whitenoise==3.3.0
+sorl-thumbnail==12.4a1
+pybbm==0.18.4
