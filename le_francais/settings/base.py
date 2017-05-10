@@ -154,5 +154,3 @@ ALLOWED_HOSTS = [
 ]
 
 # pybbm settings
-
-PYBB_PROFILE_RELATED_NAME = None
