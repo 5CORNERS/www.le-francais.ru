@@ -1,4 +1,7 @@
 .idea
 db.sqlite3
 .env
-/Procfile.local
+Procfile.local
+venv
+*.pyc
+staticfiles
