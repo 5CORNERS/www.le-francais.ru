@@ -1,12 +1,13 @@
-<form action="{% url 'login' %}" method="post" accept-charset="utf-8">
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Login</h2>
+  <form method="post">
     {% csrf_token %}
-    {% for field in form %}
-        <label>{{ field.label }}</label>
-        {% if field.errors %}
-            {{ field.errors }}
-        {% endif %}
-        {{ field }}
-    {% endfor %}
-    <input type="hidden" name="next" value="{{ next }}" />
-    <input class="button small" type="submit" value="Submit"/>
-</form>
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+  </form>
+  <br>
+  <p><strong>-- OR --</strong></p>
+  <a href="{% url 'social:begin' 'google-oauth2' %}">Login with Google</a><br>
+{% endblock %}
