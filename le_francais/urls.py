@@ -12,16 +12,18 @@ from wagtail.wagtaildocs import urls as wagtaildocs_urls
 
 urlpatterns = [
     url(r'^django-admin/', include(admin.site.urls)),
-
     url(r'^login/$', auth_views.login, name='login'),
     url(r'^logout/$', auth_views.logout, name='logout'),
+    url(r'^registration/', include('registration.backends.hmac.urls')),
+    url(r'^oauth/', include('social_django.urls', namespace='social')),
     url(r'^admin/', include(wagtailadmin_urls)),
     url(r'^documents/', include(wagtaildocs_urls)),
 
     url(r'^search/$', search_views.search, name='search'),
 
     url(r'^forum/', include('pybb.urls', namespace='pybb')),
-    url(r'', include(wagtail_urls)),
+    url(r'^', include('social_django.urls', namespace='social')),
+    url(r'^', include(wagtail_urls)),
 
 ]
 

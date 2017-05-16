@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     'pybb',
+    'social_django',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -70,6 +71,7 @@ MIDDLEWARE_CLASSES = [
     'wagtail.wagtailredirects.middleware.RedirectMiddleware',
 
     'pybb.middleware.PybbMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'le_francais.urls'
@@ -89,6 +91,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
 
                 'pybb.context_processors.processor',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -110,6 +114,13 @@ DATABASES = {
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
 
+#A list of authentication backend classes to use when attempting to authenticate a user.
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+
+    'django.contrib.auth.backends.ModelBackend',
+)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
@@ -153,4 +164,12 @@ ALLOWED_HOSTS = [
     'fe61337f.ngrok.io'
 ]
 
-# pybbm settings
+#Django-registration settings
+
+ACCOUNT_ACTIVATION_DAYS = 7 # One-week activation window;
+
+#Social-Auth settings
+
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '984233441228-m8un6479b9r2nr71f69ugvsh2mvjq981.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'Y0CiV0MWBUrGN-GsM_H9sJt7'
