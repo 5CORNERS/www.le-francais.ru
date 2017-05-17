@@ -1,17 +1,42 @@
 import json
 from typing import Dict, List
 from urllib.parse import urlparse, parse_qs
+import csv
+from io import StringIO
+from typing import List
+from urllib.parse import urlparse
 
 import io
 import urllib3
 import xmltodict
 from bs4 import BeautifulSoup
-from googleapiclient.discovery import Resource
+from googleapiclient.discovery import Resource, build
 from googleapiclient.http import MediaIoBaseDownload
 from wagtail.wagtailcore.models import Page, Site
 
 from home.models import DefaultPage, LessonPage, PageWithSidebar
 
+def import_content(http):
+    drive_service = build('drive', 'v3', http=http)
+    request = drive_service.files().export_media(fileId='1KhbjJr4cD2J6-9vzaC9NgQfReQJa5hL4dDb4v0-2Ttk',
+                                                 mimeType='text/csv')
+    fh = io.BytesIO()
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while done is False:
+        status, done = downloader.next_chunk()
+    table_reader = csv.reader(StringIO(fh.getvalue().decode('utf-8')))
+    lessons = {}
+    for row in table_reader:
+        try:
+            lesson_information = LessonInformation(row, drive_service)
+            lessons[lesson_information.number] = lesson_information
+        except:
+            pass
+    load_old_site_pages(lessons)
+    for lesson in lessons.values():
+        if lesson.content_type == 'Пустой таб' or lesson.content is not None:
+            add_new_lesson(lesson)
 
 def find_between(s, first, last):
     try:
