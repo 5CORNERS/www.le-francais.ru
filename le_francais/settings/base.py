@@ -116,6 +116,7 @@ DATABASES['default'].update(db_from_env)
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.vk.VKOAuth2',
 
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -222,5 +223,7 @@ SOCIAL_AUTH_PIPELINE = (
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '984233441228-m8un6479b9r2nr71f69ugvsh2mvjq981.apps.googleusercontent.com'
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'Y0CiV0MWBUrGN-GsM_H9sJt7'
 
-SOCIAL_AUTH_VK_OAUTH2_KEY = 'Oe3O7aQiabVMnYbQFPa9'
-SOCIAL_AUTH_VK_OAUTH2_SECRET = '1f0b7c471f0b7c471f0b7c47b01f57648f11f0b1f0b7c4746175ba7d68c63bbd7110781'
+# API options https://vk.com/editapp?id=6035656&section=options
+
+SOCIAL_AUTH_VK_OAUTH2_KEY = '6035656'
+SOCIAL_AUTH_VK_OAUTH2_SECRET = 'Oe3O7aQiabVMnYbQFPa9'
