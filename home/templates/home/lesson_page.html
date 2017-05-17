@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static site_tags %}
+
+{% block body_class %}template-homepage{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/lesson.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-8 col-sm-3 col-md-2 sidebar" id="sidebar">
+                {% if self.get_children %}
+                    {% sidebar_menu parent=self %}
+                {% else %}
+                    {% sidebar_menu parent=self.get_parent calling_page=self %}
+                {% endif %}
+            </div>
+            <div class="col-1 sidebar-collapse">
+                <button class="sidebar-collapse-button" type="button" data-toggle="toggle"
+                        data-target="#sidebar" aria-controls="sidebar" aria-expanded="false"
+                        aria-label="Toggle sidebar">
+                    <div class="arrow-icon">
+                </button>
+            </div>
+            <div class="col-sm-7 offset-sm-3 g-col-md-8 offset-md-2 main">
+                {% breadcrumb calling_page=self %}
+                <h1>{{ page.title }}</h1>
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#body" role="tab" aria-controls="body">
+                            Диалог урока
+                        </a>
+                    </li>
+                    {% for child_value in self.other_tabs %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if forloop.first %}active{% endif %}" data-toggle="tab"
+                               href="#{{ child_value.href }}" role="tab"
+                               aria-controls="{{ child_value.href }}">{{ child_value.title }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if self.summary %}
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#summary" role="tab" aria-controls="body">
+                                Конспект
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if self.repetition_material %}
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#repetition_material" role="tab"
+                               aria-controls="body">
+                                Материал для повторения
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                <div class="tab-content">
+                    <div id="body" class="tab-pane active" role="tabpanel">{{ self.body }}</div>
+                    {% for child_value in self.other_tabs %}
+                        <div id="{{ child_value.href }}" class="tab-pane {% if forloop.first %}active{% endif %}"
+                             role="tabpanel">
+                            {{ child_value.body }}
+                        </div>
+                    {% endfor %}
+                    {% if self.summary %}
+                        <div id="summary" class="tab-pane" role="tabpanel">
+                            <div>
+                                <object data="{{ self.summary }}" type="application/pdf" class="tabpanel_pdf">
+                                    alt : <a href="{{ self.summary }}">summary.pdf</a>
+                                </object>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if self.repetition_material %}
+                        <div id="repetition_material" class="tab-pane" role="tabpanel">
+                            <div>
+                                <object data="{{ self.repetition_material }}" type="application/pdf" class="tabpanel_pdf">
+                                    alt : <a href="{{ self.repetition_material }}">repetition_material.pdf</a>
+                                </object>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
