@@ -2,6 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 from django.db import models
 from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel
+from django.db.models import URLField
+from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel, MultiFieldPanel, FieldPanel
 from wagtail.wagtailcore.blocks import RichTextBlock, RawHTMLBlock, ListBlock, StructBlock, CharBlock
 from wagtail.wagtailcore.fields import StreamField
 
@@ -9,7 +11,7 @@ from wagtail.wagtailcore.models import Page
 from wagtail.wagtailimages.blocks import ImageChooserBlock
 
 from home.blocks.AudioBlock import AudioBlock
-from home.blocks.TabsBlock import TabsBlock
+from home.blocks.TabsBlock import TabsBlock, TabBlock
 
 
 class DefaultPage(Page):
@@ -42,4 +44,23 @@ class PageWithSidebar(Page):
 
 PageWithSidebar.content_panels = Page.content_panels + [
     StreamFieldPanel('body'),
+]
+
+class LessonPage(Page):
+    summary = URLField(null=True, blank=True)
+    repetition_material = URLField(null=True, blank=True)
+    body = StreamField([
+        ('paragraph', RichTextBlock()),
+        ('image', ImageChooserBlock()),
+        ('html', RawHTMLBlock()),
+        ('audio', AudioBlock())
+    ])
+    other_tabs = StreamField([('tab', TabBlock())])
+
+
+LessonPage.content_panels = Page.content_panels + [
+    FieldPanel('repetition_material'),
+    FieldPanel('summary'),
+    StreamFieldPanel('body'),
+    StreamFieldPanel('other_tabs')
 ]
