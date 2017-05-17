@@ -15,7 +15,7 @@ urlpatterns = [
     url(r'^login/$', auth_views.login, name='login'),
     url(r'^logout/$', auth_views.logout, name='logout'),
     url(r'^registration/', include('registration.backends.hmac.urls')),
-    url(r'^oauth/', include('social_django.urls', namespace='social')),
+    url(r'^social/', include('social_django.urls', namespace='social')),
     url(r'^admin/', include(wagtailadmin_urls)),
     url(r'^documents/', include(wagtaildocs_urls)),
 
