@@ -117,6 +117,9 @@ DATABASES['default'].update(db_from_env)
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',
     'social_core.backends.vk.VKOAuth2',
+    'social_core.backends.yandex.YandexOAuth2',
+    'social_core.backends.mailru.MailruOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
 
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -223,7 +226,19 @@ SOCIAL_AUTH_PIPELINE = (
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '984233441228-m8un6479b9r2nr71f69ugvsh2mvjq981.apps.googleusercontent.com'
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'Y0CiV0MWBUrGN-GsM_H9sJt7'
 
-# API options https://vk.com/editapp?id=6035656&section=options
-
 SOCIAL_AUTH_VK_OAUTH2_KEY = '6035656'
 SOCIAL_AUTH_VK_OAUTH2_SECRET = 'Oe3O7aQiabVMnYbQFPa9'
+
+SOCIAL_AUTH_YANDEX_OAUTH2_KEY = 'f93fe2caad314e8086d535b63c906b0f'
+SOCIAL_AUTH_YANDEX_OAUTH2_SECRET = '1e3e4233097f45ab9513ddbffec6f816'
+
+SOCIAL_AUTH_MAILRU_OAUTH2_KEY = '754050'
+SOCIAL_AUTH_MAILRU_OAUTH2_SECRET = 'ee92b0f6edb039891153744f3ee9ec4a'
+
+SOCIAL_AUTH_FACEBOOK_OAUTH2_KEY = '1845102379143034'
+SOCIAL_AUTH_FACEBOOK_OAUTH2_SECRET = 'd8bc268964b121ac2b10802f55fd900f'
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+  'locale': 'ru_RU',
+  'fields': 'id, name, email, age_range'
+}
