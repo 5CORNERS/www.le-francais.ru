@@ -1,22 +1,25 @@
-import json
-from typing import Dict, List
-from urllib.parse import urlparse, parse_qs
 import csv
+import io
+import json
 from io import StringIO
+from typing import Dict
 from typing import List
+from urllib.parse import parse_qs
 from urllib.parse import urlparse
 
-import io
 import urllib3
 import xmltodict
 from bs4 import BeautifulSoup
-from googleapiclient.discovery import Resource, build
+from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from wagtail.wagtailcore.models import Page, Site
 
 from home.models import DefaultPage, LessonPage, PageWithSidebar
 
+
 def import_content(http):
+    if Page.objects.count() > 100:
+        return
     drive_service = build('drive', 'v3', http=http)
     request = drive_service.files().export_media(fileId='1KhbjJr4cD2J6-9vzaC9NgQfReQJa5hL4dDb4v0-2Ttk',
                                                  mimeType='text/csv')
@@ -37,6 +40,7 @@ def import_content(http):
     for lesson in lessons.values():
         if lesson.content_type == 'Пустой таб' or lesson.content is not None:
             add_new_lesson(lesson)
+
 
 def find_between(s, first, last):
     try:
@@ -166,7 +170,7 @@ def load_old_site_pages(lessons_information: Dict[int, LessonInformation]):
                     body=json.dumps(body)
                 )
             )
-    Site.objects.create(hostname='localhost', port=80, is_default_site=True, root_page=Page.objects.get(id=3))
+    Site.objects.create(hostname='localhost', port=80, is_default_site=True, root_page=Page.objects.get(slug='home'))
 
 
 def add_new_lesson(lesson_information: LessonInformation):

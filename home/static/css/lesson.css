@@ -2,3 +2,7 @@
     width: 100%;
     height: 600px;
 }
+
+.block-paragraph {
+    white-space: pre-line;
+}
