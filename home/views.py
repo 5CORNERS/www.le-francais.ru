@@ -1,3 +1,5 @@
+import threading
+
 import httplib2
 from django.http.response import HttpResponse
 from django.shortcuts import redirect
@@ -18,5 +20,8 @@ def authorize(request):
 def authorized(request):
     credentials = flow.step2_exchange(request.GET['code'])
     http = credentials.authorize(httplib2.Http())
-    import_content(http)
+    t = threading.Thread(target=import_content,
+                         args=(http,))
+    t.setDaemon(True)
+    t.start()
     return HttpResponse('')
