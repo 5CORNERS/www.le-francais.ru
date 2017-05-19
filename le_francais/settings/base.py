@@ -119,7 +119,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.vk.VKOAuth2',
     'social_core.backends.yandex.YandexOAuth2',
     'social_core.backends.mailru.MailruOAuth2',
-    'social_core.backends.facebook.FacebookAppOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
 
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -196,7 +196,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.auth_allowed',
 
     # Checks if the current social-account is already associated in the site.
-    'social_core.pipeline.social_auth.social_user',
+    #'social_core.pipeline.social_auth.social_user',
 
     # Make up a username for this person, appends a random string at the end if
     # there's any collision.
@@ -235,6 +235,6 @@ SOCIAL_AUTH_YANDEX_OAUTH2_SECRET = '1e3e4233097f45ab9513ddbffec6f816'
 SOCIAL_AUTH_MAILRU_OAUTH2_KEY = '754050'
 SOCIAL_AUTH_MAILRU_OAUTH2_SECRET = 'ee92b0f6edb039891153744f3ee9ec4a'
 
-SOCIAL_AUTH_FACEBOOK_OAUTH2_KEY = '181297095728060'
+SOCIAL_AUTH_FACEBOOK_APP_ID = '181297095728060'
 SOCIAL_AUTH_FACEBOOK_OAUTH2_SECRET = '627c4fc295bdc301df89d871eb68c9b4'
 SOCIAL_AUTH_FACEBOOK_API_VERSION = '2.9'
