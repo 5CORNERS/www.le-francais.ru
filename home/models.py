@@ -59,8 +59,8 @@ class LessonPage(Page):
 
 
 LessonPage.content_panels = Page.content_panels + [
-    FieldPanel('repetition_material'),
-    FieldPanel('summary'),
     StreamFieldPanel('body'),
-    StreamFieldPanel('other_tabs')
+    StreamFieldPanel('other_tabs'),
+    FieldPanel('summary'),
+    FieldPanel('repetition_material')
 ]
