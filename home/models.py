@@ -1,12 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.db import models
-from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel
-from django.db.models import URLField
-from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel, MultiFieldPanel, FieldPanel
-from wagtail.wagtailcore.blocks import RichTextBlock, RawHTMLBlock, ListBlock, StructBlock, CharBlock
+from django.db.models import CharField
+from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel, FieldPanel
+from wagtail.wagtailcore.blocks import RichTextBlock, RawHTMLBlock, ListBlock, StructBlock
 from wagtail.wagtailcore.fields import StreamField
-
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailimages.blocks import ImageChooserBlock
 
@@ -47,8 +44,8 @@ PageWithSidebar.content_panels = Page.content_panels + [
 ]
 
 class LessonPage(Page):
-    summary = URLField(null=True, blank=True)
-    repetition_material = URLField(null=True, blank=True)
+    summary = CharField(max_length=100, null=True, blank=True)
+    repetition_material = CharField(max_length=100, null=True, blank=True)
     body = StreamField([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
