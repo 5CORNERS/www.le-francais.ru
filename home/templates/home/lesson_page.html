@@ -33,12 +33,6 @@
                             Диалог урока
                         </a>
                     </li>
-                    {% for child_value in self.other_tabs %}
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#{{ child_value.value.href }}" role="tab"
-                               aria-controls="{{ child_value.value.href }}">{{ child_value.value.title }}</a>
-                        </li>
-                    {% endfor %}
                     {% if self.summary %}
                         <li class="nav-item">
                             <a class="nav-link" data-toggle="tab" href="#summary" role="tab" aria-controls="body">
@@ -54,6 +48,12 @@
                             </a>
                         </li>
                     {% endif %}
+                    {% for child_value in self.other_tabs %}
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#{{ child_value.value.href }}" role="tab"
+                               aria-controls="{{ child_value.value.href }}">{{ child_value.value.title }}</a>
+                        </li>
+                    {% endfor %}
                 </ul>
 
                 <div class="tab-content">
