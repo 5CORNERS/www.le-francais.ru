@@ -5,3 +5,5 @@ Procfile.local
 venv
 *.pyc
 staticfiles
+ggroups2pybbm/*.dat
+`
