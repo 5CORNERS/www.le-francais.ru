@@ -159,6 +159,10 @@ LOGIN_REDIRECT_URL = '/forum'
 
 LOGOUT_REDIRECT_URL = '/login'
 
+# PyBBM settings
+
+PYBB_MARKUP = 'markdown'
+
 # Wagtail settings
 
 WAGTAIL_SITE_NAME = "le_francais"
