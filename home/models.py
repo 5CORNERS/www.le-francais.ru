@@ -54,6 +54,9 @@ class LessonPage(Page):
     ])
     other_tabs = StreamField([('tab', TabBlock())])
 
+    def lesson_number(self):
+        return self.slug.split("lecon-",1)[1]
+
 
 LessonPage.content_panels = Page.content_panels + [
     StreamFieldPanel('body'),
