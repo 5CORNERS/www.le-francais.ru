@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load static site_tags %}
 
+{% block title %}
+    {% if self.lesson_number %}Урок {{ self.lesson_number }}{% else %}{{ block.super }}{% endif %}
+{% endblock %}
+
 {% block body_class %}template-homepage{% endblock %}
 
 {% block extra_css %}
