@@ -46,6 +46,7 @@ PageWithSidebar.content_panels = Page.content_panels + [
 class LessonPage(Page):
     summary = CharField(max_length=100, null=True, blank=True)
     repetition_material = CharField(max_length=100, null=True, blank=True)
+    audio_material = CharField(max_length=100, null=True, blank=True)
     body = StreamField([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
@@ -61,6 +62,7 @@ class LessonPage(Page):
 LessonPage.content_panels = Page.content_panels + [
     StreamFieldPanel('body'),
     FieldPanel('summary'),
+    FieldPanel('audio_material'),
     FieldPanel('repetition_material'),
     StreamFieldPanel('other_tabs')
 ]
