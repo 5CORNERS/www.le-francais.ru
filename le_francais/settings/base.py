@@ -162,6 +162,7 @@ LOGOUT_REDIRECT_URL = '/login'
 # PyBBM settings
 
 PYBB_MARKUP = 'markdown'
+PYBB_TEMPLATE = 'forum.html'
 
 # Wagtail settings
 
