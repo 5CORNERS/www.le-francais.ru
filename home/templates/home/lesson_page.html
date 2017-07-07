@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% load site_tags %}
 {% load static site_tags %}
 
 {% block title %}
-    {% if self.lesson_number %}Урок {{ self.lesson_number }}{% else %}{{ block.super }}{% endif %}
+    {% if not self.title %}Урок {{ self.lesson_number }}{% else %}{{ block.super }}{% endif %}
 {% endblock %}
 
 {% block body_class %}template-homepage{% endblock %}
@@ -38,25 +39,47 @@
                     </audio>
                 </div>
                 <ul class="nav nav-tabs">
-                    <li class="nav-item">
-                        <a class="nav-link active" data-toggle="tab" href="#body" role="tab" aria-controls="body">
-                            Диалог урока
-                        </a>
-                    </li>
+                    {% assign tab_class "nav-link active" %}
+                    {% if self.comments_for_lesson %}
+                        <li class="nav-item">
+                            <a class="{{tab_class}}" data-toggle="tab" href="#comments_for_lesson" role="tab" aria-controls="body">
+                                Комментарии к уроку
+                            </a>
+                        </li>
+                        {% assign tab_class "nav-link" %}
+                    {% endif %}
+                    {% if self.body %}
+                        <li class="nav-item">
+                            <a class="{{tab_class}}" data-toggle="tab" href="#body" role="tab" aria-controls="body">
+                                Диалог урока
+                            </a>
+                        </li>
+                        {% assign tab_class "nav-link" %}
+                    {% endif %}
+                    {% if self.dictionary %}
+                        <li class="nav-item">
+                            <a class="{{tab_class}}" data-toggle="tab" href="#dictionary" role="tab" aria-controls="body">
+                                Словарик
+                            </a>
+                        </li>
+                        {% assign tab_class "nav-link" %}
+                    {% endif %}
                     {% if self.summary %}
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#summary" role="tab" aria-controls="body">
+                            <a class="{{tab_class}}" data-toggle="tab" href="#summary" role="tab" aria-controls="body">
                                 Конспект
                             </a>
                         </li>
+                        {% assign tab_class "nav-link" %}
                     {% endif %}
                     {% if self.repetition_material %}
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#repetition_material" role="tab"
+                            <a class="{{tab_class}}" data-toggle="tab" href="#repetition_material" role="tab"
                                aria-controls="body">
                                 Материал для повторения
                             </a>
                         </li>
+                        {% assign tab_class "nav-link" %}
                     {% endif %}
                     {% for child_value in self.other_tabs %}
                         <li class="nav-item">
@@ -67,14 +90,21 @@
                 </ul>
 
                 <div class="tab-content">
-                    <div id="body" class="tab-pane active" role="tabpanel">{{ self.body }}</div>
-                    {% for child_value in self.other_tabs %}
-                        <div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
-                            {{ child_value.value.body }}
-                        </div>
-                    {% endfor %}
+                {% assign pane_class "tab-pane active" %}
+                    {% if self.comments_for_lesson %}
+                        <div id="comments_for_lesson" class="{{pane_class}}" role="tabpanel">{{ self.comments_for_lesson }}</div>
+                        {% assign pane_class "tab-pane" %}
+                    {% endif %}
+                    {% if self.body %}
+                        <div id="body" class="{{pane_class}}" role="tabpanel">{{ self.body }}</div>
+                        {% assign pane_class "tab-pane" %}
+                    {% endif %}
+                    {% if self.dictionary %}
+                        <div id="dictionary" class="{{pane_class}}" role="tabpanel">{{ self.dictionary }}</div>
+                        {% assign pane_class "tab-pane" %}
+                    {% endif %}
                     {% if self.summary %}
-                        <div id="summary" class="tab-pane" role="tabpanel">
+                        <div id="summary" class="{{pane_class}}" role="tabpanel">
                             <div>
                                 <object data="//files.le-francais.ru{{ self.summary }}" type="application/pdf"
                                         class="tabpanel_pdf">
@@ -82,9 +112,10 @@
                                 </object>
                             </div>
                         </div>
+                        {% assign pane_class "tab-pane" %}
                     {% endif %}
                     {% if self.repetition_material %}
-                        <div id="repetition_material" class="tab-pane" role="tabpanel">
+                        <div id="repetition_material" class="{{pane_class}}" role="tabpanel">
                             <div>
                                 <object data="//files.le-francais.ru{{ self.repetition_material }}"
                                         type="application/pdf" class="tabpanel_pdf">
@@ -92,7 +123,13 @@
                                 </object>
                             </div>
                         </div>
+                        {% assign pane_class "tab_pane" %}
                     {% endif %}
+                    {% for child_value in self.other_tabs %}
+                            <div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
+                                {{ child_value.value.body }}
+                            </div>
+                        {% endfor %}
                 </div>
             </div>
         </div>
