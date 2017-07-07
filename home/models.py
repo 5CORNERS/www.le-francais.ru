@@ -47,12 +47,28 @@ class LessonPage(Page):
     summary = CharField(max_length=100, null=True, blank=True)
     repetition_material = CharField(max_length=100, null=True, blank=True)
     audio_material = CharField(max_length=100, null=True, blank=True)
+    comments_for_lesson = StreamField([
+        ('paragraph', RichTextBlock()),
+        ('image', ImageChooserBlock()),
+        ('html', RawHTMLBlock()),
+        ('audio', AudioBlock())
+    ], null=True, blank=True)
     body = StreamField([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock())
     ])
+    dictionary = StreamField([
+        ('paragraph', RichTextBlock()),
+        ('image', ImageChooserBlock()),
+        ('html', RawHTMLBlock()),
+        ('audio', AudioBlock()),
+        ('translations', ListBlock(StructBlock([
+            ('word', RichTextBlock(required=True)),
+            ('translation', RichTextBlock(required=True))
+        ]), template="blocks/transcriptions.html")),
+    ], null=True, blank=True)
     other_tabs = StreamField([('tab', TabBlock())])
 
     def lesson_number(self):
@@ -61,7 +77,9 @@ class LessonPage(Page):
 
 LessonPage.content_panels = Page.content_panels + [
     FieldPanel('audio_material'),
+    StreamFieldPanel('comments_for_lesson'),
     StreamFieldPanel('body'),
+    StreamFieldPanel('dictionary'),
     FieldPanel('summary'),
     FieldPanel('repetition_material'),
     StreamFieldPanel('other_tabs')
