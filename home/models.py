@@ -1,11 +1,16 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.db.models import CharField
-from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel, FieldPanel
+from django.db.models import CharField, SmallIntegerField, OneToOneField, BooleanField, SET_NULL
+from django.forms import CheckboxInput
+from .form import TopicForm
+
+from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel, FieldPanel, MultiFieldPanel
 from wagtail.wagtailcore.blocks import RichTextBlock, RawHTMLBlock, ListBlock, StructBlock
 from wagtail.wagtailcore.fields import StreamField
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailimages.blocks import ImageChooserBlock
+
+from pybb.models import Topic, Forum, Category
 
 from home.blocks.AudioBlock import AudioBlock
 from home.blocks.TabsBlock import TabsBlock, TabBlock
@@ -43,7 +48,9 @@ PageWithSidebar.content_panels = Page.content_panels + [
     StreamFieldPanel('body'),
 ]
 
+
 class LessonPage(Page):
+    lesson_number = SmallIntegerField(blank=True, null=True)
     summary = CharField(max_length=100, null=True, blank=True)
     repetition_material = CharField(max_length=100, null=True, blank=True)
     audio_material = CharField(max_length=100, null=True, blank=True)
@@ -71,8 +78,16 @@ class LessonPage(Page):
     ], null=True, blank=True)
     other_tabs = StreamField([('tab', TabBlock())])
 
-    def lesson_number(self):
-        return self.slug.split("lecon-",1)[1]
+    def get_lesson_number(self):
+        return self.slug.split("lecon-", 1)[1]
+
+    has_own_topic = BooleanField(default=False)
+    topic = OneToOneField(
+        Topic,
+        on_delete=SET_NULL,
+        null=True,
+        blank=True
+    )
 
 
 LessonPage.content_panels = Page.content_panels + [
@@ -84,3 +99,14 @@ LessonPage.content_panels = Page.content_panels + [
     FieldPanel('repetition_material'),
     StreamFieldPanel('other_tabs')
 ]
+LessonPage.settings_panels = LessonPage.settings_panels + [
+    FieldPanel('lesson_number'),
+    MultiFieldPanel(
+        [
+            FieldPanel('has_own_topic',widget=CheckboxInput),
+            # FieldPanel('topic', widget=TopicForm),
+        ],
+        heading='Topic',
+        classname='collapsible collapsed'
+    )
+    ]
