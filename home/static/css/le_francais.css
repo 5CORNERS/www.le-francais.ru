@@ -346,4 +346,13 @@ td.forum-last-post, td.topic-last-post {
     line-height: 1.1;
 }
 
+.updated {
+    font-size: .8em;
+    color: #999;
+}
 
+.updated-message{
+    font-size: .8em;
+    color: #999;
+    text-align: right;
+}

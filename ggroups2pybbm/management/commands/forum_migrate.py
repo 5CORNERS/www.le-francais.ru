@@ -37,7 +37,7 @@ class Command(BaseCommand):
                 username=user.username)
             if created:
                 new_user.email = user.mail
-            new_user.set_password(User.objects.make_random_password())
-            new_user.date_joined = user.registration_date
-            new_user.last_login = user.last_visit_date
-            new_user.save()
+                new_user.set_password(User.objects.make_random_password())
+                new_user.date_joined = user.registration_date
+                new_user.last_login = user.last_visit_date
+                new_user.save()

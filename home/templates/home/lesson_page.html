@@ -32,12 +32,14 @@
             <div class="col-sm-7 offset-sm-3 g-col-md-8 offset-md-2 main">
                 {% breadcrumb calling_page=self %}
                 <h1>{{ page.title }}</h1>
+                {% if self.audio_material != 'None' %}
                 <div class="block-audio">
                     <audio>
                         <source src="{% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}"
                                 type="audio/mpeg">
                     </audio>
                 </div>
+                {% endif %}
                 <ul class="nav nav-tabs">
                     {% assign tab_class "nav-link active" %}
                     {% if self.comments_for_lesson %}
@@ -131,6 +133,26 @@
                             </div>
                         {% endfor %}
                 </div>
+            {% if self.has_own_topic %}
+                <div class="topic">
+                    <h1>Related topic</h1>
+                    <div class="posts">
+                        {% if self.topic.head %}
+                            {% with self.topic.head as post %}
+                                <a class="first_post">{% include "related_post.html" %}</a>
+                            {% endwith %}
+                        {% endif %}
+                        {% if self.topic.last_post %}
+                            {% with self.topic.last_post as post %}
+                                {% if not post == self.topic.head  %}
+                                    <a class="last_post">{% include "related_post.html" %}</a>
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                    </div>
+                <a href="{{self.topic.get_absolute_url}}" target="_blank">Topic link</a>
+                </div>
+            {% endif %}
             </div>
         </div>
     </div>
