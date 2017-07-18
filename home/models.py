@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 from django.db.models import CharField, SmallIntegerField, OneToOneField, BooleanField, SET_NULL
 from django.forms import CheckboxInput
-from .form import TopicForm
 
 from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel, FieldPanel, MultiFieldPanel
 from wagtail.wagtailcore.blocks import RichTextBlock, RawHTMLBlock, ListBlock, StructBlock
