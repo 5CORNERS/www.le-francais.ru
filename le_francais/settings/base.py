@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'home',
     'search',
     'ggroups2pybbm',
+    'forum',
 
     'wagtail.wagtailforms',
     'wagtail.wagtailredirects',
@@ -105,6 +106,12 @@ WSGI_APPLICATION = 'le_francais.wsgi.application'
 
 DATABASES = {
     'default': {
+        # 'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        # 'NAME': 'postgres',                      # Or path to database file if using sqlite3.
+        # 'USER': 'postgres',                      # Not used with sqlite3.
+        # 'PASSWORD': '123',                  # Not used with sqlite3.
+        # 'HOST': '192.168.0.27',                      # Set to empty string for localhost. Not used with sqlite3.
+        # 'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
@@ -161,8 +168,14 @@ LOGOUT_REDIRECT_URL = '/login'
 
 # PyBBM settings
 
-PYBB_MARKUP = 'markdown'
+PYBB_MARKUP_ENGINES_PATHS = {
+    'custom_markdown': 'forum.markup_engines.CustomMarkdownParser'
+}
+PYBB_MARKUP = 'custom_markdown'
 PYBB_TEMPLATE = 'forum.html'
+PYBB_NICE_URL = False
+# disable pybb smiles
+PYBB_SMILES = dict()
 
 # Wagtail settings
 
