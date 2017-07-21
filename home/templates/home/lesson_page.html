@@ -3,7 +3,7 @@
 {% load static site_tags %}
 
 {% block title %}
-    {% if not self.title %}Урок {{ self.lesson_number }}{% else %}{{ block.super }}{% endif %}
+    {% if not self.seo_title %}Французский язык - Урок {{ self.lesson_number }}{% else %}{{ block.super }}{% endif %}
 {% endblock %}
 
 {% block body_class %}template-homepage{% endblock %}
@@ -13,6 +13,8 @@
 {% endblock %}
 
 {% block content %}
+
+    {% assign url request.build_absolute_uri %}
     <div class="container-fluid">
         <div class="row">
             <div class="col-8 col-sm-3 col-md-2 sidebar" id="sidebar">
@@ -44,7 +46,7 @@
                     {% assign tab_class "nav-link active" %}
                     {% if self.comments_for_lesson %}
                         <li class="nav-item">
-                            <a class="{{tab_class}}" data-toggle="tab" href="#comments_for_lesson" role="tab" aria-controls="body">
+                            <a class="nav-link" data-toggle="tab" href="#comments_for_lesson" role="tab" aria-controls="body">
                                 Комментарии к уроку
                             </a>
                         </li>
@@ -52,7 +54,7 @@
                     {% endif %}
                     {% if self.body %}
                         <li class="nav-item">
-                            <a class="{{tab_class}}" data-toggle="tab" href="#body" role="tab" aria-controls="body">
+                            <a class="nav-link" data-toggle="tab" href="#body" role="tab" aria-controls="body">
                                 Диалог урока
                             </a>
                         </li>
@@ -60,7 +62,7 @@
                     {% endif %}
                     {% if self.dictionary %}
                         <li class="nav-item">
-                            <a class="{{tab_class}}" data-toggle="tab" href="#dictionary" role="tab" aria-controls="body">
+                            <a class="nav-link" data-toggle="tab" href="#dictionary" role="tab" aria-controls="body">
                                 Словарик
                             </a>
                         </li>
@@ -68,7 +70,7 @@
                     {% endif %}
                     {% if self.summary %}
                         <li class="nav-item">
-                            <a class="{{tab_class}}" data-toggle="tab" href="#summary" role="tab" aria-controls="body">
+                            <a class="nav-link" data-toggle="tab" href="#resume" role="tab" aria-controls="body">
                                 Конспект
                             </a>
                         </li>
@@ -76,7 +78,7 @@
                     {% endif %}
                     {% if self.repetition_material %}
                         <li class="nav-item">
-                            <a class="{{tab_class}}" data-toggle="tab" href="#repetition_material" role="tab"
+                            <a class="nav-link" data-toggle="tab" href="#revision" role="tab"
                                aria-controls="body">
                                 Материал для повторения
                             </a>
@@ -94,19 +96,20 @@
                 <div class="tab-content">
                 {% assign pane_class "tab-pane active" %}
                     {% if self.comments_for_lesson %}
-                        <div id="comments_for_lesson" class="{{pane_class}}" role="tabpanel">{{ self.comments_for_lesson }}</div>
+                        <div id="comments_for_lesson" class="tab-pane"
+                             role="tabpanel">{{ self.comments_for_lesson }}</div>
                         {% assign pane_class "tab-pane" %}
                     {% endif %}
                     {% if self.body %}
-                        <div id="body" class="{{pane_class}}" role="tabpanel">{{ self.body }}</div>
+                        <div id="body" class="tab-pane" role="tabpanel">{{ self.body }}</div>
                         {% assign pane_class "tab-pane" %}
                     {% endif %}
                     {% if self.dictionary %}
-                        <div id="dictionary" class="{{pane_class}}" role="tabpanel">{{ self.dictionary }}</div>
+                        <div id="dictionary" class="tab-pane" role="tabpanel">{{ self.dictionary }}</div>
                         {% assign pane_class "tab-pane" %}
                     {% endif %}
                     {% if self.summary %}
-                        <div id="summary" class="{{pane_class}}" role="tabpanel">
+                        <div id="resume" class="tab-pane" role="tabpanel">
                             <div>
                                 <object data="//files.le-francais.ru{{ self.summary }}" type="application/pdf"
                                         class="tabpanel_pdf">
@@ -117,7 +120,7 @@
                         {% assign pane_class "tab-pane" %}
                     {% endif %}
                     {% if self.repetition_material %}
-                        <div id="repetition_material" class="{{pane_class}}" role="tabpanel">
+                        <div id="revision" class="tab-pane" role="tabpanel">
                             <div>
                                 <object data="//files.le-francais.ru{{ self.repetition_material }}"
                                         type="application/pdf" class="tabpanel_pdf">
@@ -133,8 +136,30 @@
                             </div>
                         {% endfor %}
                 </div>
-            {% if self.has_own_topic %}
-                <div class="topic">
+
+	            <script type='text/javascript'>
+
+                    $(document).ready(function () {
+
+                        // Javascript to enable link to tab
+                        var hash = document.location.hash;
+                        var prefix = "tab_";
+                        if (hash) {
+                            $('.nav-tabs a[href=' + hash.replace(prefix, "") + ']').tab('show');
+                        }
+
+                        // Change hash for page-reload
+                        $('.nav-tabs a').on('shown.bs.tab', function (e) {
+                            window.location.hash = e.target.hash.replace("#", "#" + prefix);
+                        });
+
+                    });
+
+	            </script>
+
+
+                {% if self.has_own_topic %}
+                <div class="topic" id="topic">
                     <h1>Related topic</h1>
                     <div class="posts">
                         {% if self.topic.head %}
@@ -152,7 +177,7 @@
                     </div>
                 <a href="{{self.topic.get_absolute_url}}" target="_blank">Topic link</a>
                 </div>
-            {% endif %}
+                {% endif %}
             </div>
         </div>
     </div>
