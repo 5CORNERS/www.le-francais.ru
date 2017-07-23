@@ -10,11 +10,27 @@
 
     <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
-            {% for menuitem in menuitems %}
-                <li class="nav-item {% if calling_page.url == menuitem.url %}active{% endif %}">
-                    <a class="nav-link" href="{% pageurl menuitem %}">{{ menuitem.title }}</a>
-                </li>
-            {% endfor %}
+            <li class="nav-item {% if calling_page.url == menuitem.url %}active{% endif %}">
+                <a class="nav-link" href="/lecons">Уроки французского</a>
+            </li>
+            <li class="nav-item {% if calling_page.url == menuitem.url %}active{% endif %}">
+                <a class="nav-link" href="/lecons_a1">Уроки французского A1</a>
+            </li>
+            <li class="nav-item {% if calling_page.url == menuitem.url %}active{% endif %}">
+                <a class="nav-link" href="/lecons_b2">Уроки французского B2</a>
+            </li>
+            <li class="nav-item {% if calling_page.url == menuitem.url %}active{% endif %}">
+                <a class="nav-link" href="/forum">Форум</a>
+            </li>
+            <li class="nav-item {% if calling_page.url == menuitem.url %}active{% endif %}">
+                <a class="nav-link" href="/aller_en_france_de_russie">Из России во Францию</a>
+            </li>
+            <li class="nav-item {% if calling_page.url == menuitem.url %}active{% endif %}">
+                <a class="nav-link" href="/oh-la-la">Oh-la-la!</a>
+            </li>
+            <li class="nav-item {% if calling_page.url == menuitem.url %}active{% endif %}">
+                <a class="nav-link" href="/contact">Об авторах</a>
+            </li>
         </ul>
     </div>
 </nav>
