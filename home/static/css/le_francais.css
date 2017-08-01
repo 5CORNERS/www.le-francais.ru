@@ -50,19 +50,28 @@
 }
 
 body {
-    padding-top: 80px;
+    padding-top: 50px;
 }
 
 @media (min-width: 768px) {
-    body {
-        padding-top: 150px;
-    }
-
     .main {
-        padding-right: 60px;
-        padding-bottom: 40px;
-        padding-left: 60px;
+        padding: 50px 60px 40px;
     }
+}
+
+.row ._no-padding {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.treeview .list-group {
+    margin-bottom: 0;
+}
+
+.list-group-item:first-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top: 0;
 }
 
 .sidebar {
@@ -142,13 +151,15 @@ body {
 .nav.nav-tabs {
     margin-bottom: 1em;
 }
-.forum-block{
+
+.forum-block {
     max-width: 1230px;
     margin-right: auto;
     margin-left: auto;
     padding-left: 15px;
     padding-right: 15px;
 }
+
 .category h1 {
     border-radius: 5px;
     font-weight: 400;
@@ -336,7 +347,8 @@ td.forum-last-post, td.topic-last-post {
 .post-control a:hover {
     background: #eaeaea
 }
-.topic h1{
+
+.topic h1 {
     color: #08c;
     font-size: 1.3em;
     font-weight: 400;
@@ -351,7 +363,7 @@ td.forum-last-post, td.topic-last-post {
     color: #999;
 }
 
-.updated-message{
+.updated-message {
     font-size: .8em;
     color: #999;
     text-align: right;

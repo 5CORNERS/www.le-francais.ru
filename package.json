@@ -1,0 +1,8 @@
+{
+  "name": "www.le-francais.ru",
+  "version": "0.0.1",
+  "description": "www.le-francais.ru site",
+  "dependencies": {
+    "bootstrap-treeview": "^1.2.0"
+  }
+}

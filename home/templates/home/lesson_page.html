@@ -8,8 +8,13 @@
 
 {% block body_class %}template-homepage{% endblock %}
 
+{% block extra_js %}
+    <script type="text/javascript" src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
+{% endblock %}
+
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/lesson.css' %}">
+    <link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -17,12 +22,8 @@
     {% assign url request.build_absolute_uri %}
     <div class="container-fluid">
         <div class="row">
-            <div class="col-8 col-sm-3 col-md-2 sidebar" id="sidebar">
-                {% if self.get_children %}
-                    {% sidebar_menu parent=self %}
-                {% else %}
-                    {% sidebar_menu parent=self.get_parent calling_page=self %}
-                {% endif %}
+            <div class="col-8 col-sm-3 _no-padding" >
+                <div id="sidebar"></div>
             </div>
             <div class="col-1 sidebar-collapse">
                 <button class="sidebar-collapse-button" type="button" data-toggle="toggle"
