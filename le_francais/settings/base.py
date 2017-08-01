@@ -221,7 +221,7 @@ SOCIAL_AUTH_PIPELINE = (
     # there's any collision.
     'social_core.pipeline.user.get_username',
 
-    # Send a validation email to the user to verify its email address.
+    # Send a validation email to the user to verify fits email address.
     # Disabled by default.
     # 'social_core.pipeline.mail.mail_validation',
 
@@ -257,3 +257,5 @@ SOCIAL_AUTH_MAILRU_OAUTH2_SECRET = 'ee92b0f6edb039891153744f3ee9ec4a'
 SOCIAL_AUTH_FACEBOOK_KEY = '181297095728060'
 SOCIAL_AUTH_FACEBOOK_SECRET = '627c4fc295bdc301df89d871eb68c9b4'
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+
+WAGTAILAPI_LIMIT_MAX = 300
