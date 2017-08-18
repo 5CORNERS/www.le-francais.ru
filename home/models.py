@@ -29,7 +29,7 @@ def get_nav_root(page: Page) -> Page:
     while not is_nav_root(current_page):
         if current_page.get_parent() is None:
             break
-        current_page = current_page.get_parent()
+        current_page = current_page.get_parent().specific
     return current_page
 
 
