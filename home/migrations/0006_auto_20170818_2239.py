@@ -12,7 +12,6 @@ import wagtail.wagtailimages.blocks
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pybb', '0007_auto_20170702_2327'),
         ('home', '0005_lessonpage_audio_material'),
     ]
 
