@@ -18,33 +18,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='lessonpage',
-            name='comments_for_lesson',
-            field=wagtail.wagtailcore.fields.StreamField((('paragraph', wagtail.wagtailcore.blocks.RichTextBlock()), ('image', wagtail.wagtailimages.blocks.ImageChooserBlock()), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock()), ('audio', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.URLBlock()),)))), blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name='lessonpage',
-            name='dictionary',
-            field=wagtail.wagtailcore.fields.StreamField((('paragraph', wagtail.wagtailcore.blocks.RichTextBlock()), ('image', wagtail.wagtailimages.blocks.ImageChooserBlock()), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock()), ('audio', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.URLBlock()),))), ('translations', wagtail.wagtailcore.blocks.ListBlock(wagtail.wagtailcore.blocks.StructBlock((('word', wagtail.wagtailcore.blocks.RichTextBlock(required=True)), ('translation', wagtail.wagtailcore.blocks.RichTextBlock(required=True)))), template='blocks/transcriptions.html'))), blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name='lessonpage',
-            name='has_own_topic',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='lessonpage',
             name='is_nav_root',
             field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='lessonpage',
-            name='lesson_number',
-            field=models.SmallIntegerField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name='lessonpage',
-            name='topic',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='pybb.Topic'),
         ),
         migrations.AddField(
             model_name='pagewithsidebar',
