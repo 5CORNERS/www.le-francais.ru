@@ -1,0 +1,9 @@
+{
+  "name": "www.le-francais.ru",
+  "description": "www.le-francais.ru site",
+  "homepage": "https://github.com/5CORNERS/www.le-francais.ru",
+  "private": true,
+  "dependencies": {
+    "bootstrap-treeview": "^1.2.0"
+  }
+}
