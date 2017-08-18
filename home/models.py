@@ -15,6 +15,24 @@ from home.blocks.AudioBlock import AudioBlock
 from home.blocks.TabsBlock import TabsBlock, TabBlock
 
 
+def is_nav_root(page: Page) -> bool:
+    if isinstance(page, PageWithSidebar) and page.is_nav_root:
+        return True
+    if isinstance(page, LessonPage) and page.is_nav_root:
+        return True
+    else:
+        return False
+
+
+def get_nav_root(page: Page) -> Page:
+    current_page = page
+    while not is_nav_root(current_page):
+        if current_page.get_parent() is None:
+            break
+        current_page = current_page.get_parent()
+    return current_page
+
+
 class DefaultPage(Page):
     body = StreamField([
         ('paragraph', RichTextBlock()),
@@ -30,6 +48,7 @@ DefaultPage.content_panels = Page.content_panels + [
 
 
 class PageWithSidebar(Page):
+    is_nav_root = BooleanField(default=False)
     body = StreamField([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
@@ -43,12 +62,21 @@ class PageWithSidebar(Page):
          )
     ])
 
+    def get_nav_root(self) -> Page:
+        return get_nav_root(self)
+
+
 PageWithSidebar.content_panels = Page.content_panels + [
     StreamFieldPanel('body'),
 ]
 
+PageWithSidebar.settings_panels = PageWithSidebar.settings_panels + [
+    FieldPanel('is_nav_root'),
+]
+
 
 class LessonPage(Page):
+    is_nav_root = BooleanField(default=False)
     lesson_number = SmallIntegerField(blank=True, null=True)
     summary = CharField(max_length=100, null=True, blank=True)
     repetition_material = CharField(max_length=100, null=True, blank=True)
@@ -88,6 +116,9 @@ class LessonPage(Page):
         blank=True
     )
 
+    def get_nav_root(self) -> Page:
+        return get_nav_root(self)
+
 
 LessonPage.content_panels = Page.content_panels + [
     FieldPanel('audio_material'),
@@ -98,14 +129,16 @@ LessonPage.content_panels = Page.content_panels + [
     FieldPanel('repetition_material'),
     StreamFieldPanel('other_tabs')
 ]
+
 LessonPage.settings_panels = LessonPage.settings_panels + [
     FieldPanel('lesson_number'),
+    FieldPanel('is_nav_root'),
     MultiFieldPanel(
         [
-            FieldPanel('has_own_topic',widget=CheckboxInput),
+            FieldPanel('has_own_topic', widget=CheckboxInput),
             # FieldPanel('topic', widget=TopicForm),
         ],
         heading='Topic',
         classname='collapsible collapsed'
     )
-    ]
+]

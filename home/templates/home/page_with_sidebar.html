@@ -12,6 +12,10 @@
     <link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
 {% endblock %}
 
+{% block meta %}
+    <meta name="nav-root-id" data-value="{{ self.get_nav_root.id }}">
+{% endblock %}
+
 {% block content %}
     <div class="container-fluid">
         <div class="row">
