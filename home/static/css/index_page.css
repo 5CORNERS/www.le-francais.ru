@@ -1,0 +1,46 @@
+.page-reference {
+    padding: 20px;
+    border: 1px solid black;
+}
+
+.caption {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 30px;
+}
+
+.subcaption {
+    font-size: 14px;
+    margin-top: 30px;
+    color: #666c7d;
+}
+
+.page-references {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    margin-top: 20px;
+}
+
+a.page-reference:focus,
+a.page-reference:hover {
+    text-decoration: none;
+}
+
+a.page-reference:focus .page-reference_title,
+a.page-reference:hover .page-reference_title {
+    text-decoration: underline;
+}
+
+.page-reference {
+    width: 27%;
+    margin: 10px 3%;
+    height: 150px;
+}
+
+.page-reference_text {
+    margin-top: 30px;
+    font-size: 14px;
+    color: #666c7d;
+}
+
