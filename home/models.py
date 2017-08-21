@@ -1,15 +1,16 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.db.models import CharField, SmallIntegerField, OneToOneField, BooleanField, SET_NULL
+from django.db.models import CharField, SmallIntegerField, OneToOneField, BooleanField, SET_NULL, ForeignKey
+from django.db.models.fields import TextField
 from django.forms import CheckboxInput
-
-from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel, FieldPanel, MultiFieldPanel
+from modelcluster.fields import ParentalKey
+from pybb.models import Topic, Forum, Category
+from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel, FieldPanel, MultiFieldPanel, PageChooserPanel, \
+    InlinePanel
 from wagtail.wagtailcore.blocks import RichTextBlock, RawHTMLBlock, ListBlock, StructBlock
 from wagtail.wagtailcore.fields import StreamField
-from wagtail.wagtailcore.models import Page
+from wagtail.wagtailcore.models import Page, Orderable
 from wagtail.wagtailimages.blocks import ImageChooserBlock
-
-from pybb.models import Topic, Forum, Category
 
 from home.blocks.AudioBlock import AudioBlock
 from home.blocks.TabsBlock import TabsBlock, TabBlock
@@ -33,7 +34,30 @@ def get_nav_root(page: Page) -> Page:
     return current_page
 
 
+class IndexPage(Page):
+    content_panels = Page.content_panels + [
+        InlinePanel('related_pages', label="Related pages")
+    ]
+
+
+class IndexPageReferences(Orderable):
+    page = ParentalKey(IndexPage, related_name='related_pages')
+    referenced_page = ForeignKey(
+        'wagtailcore.Page',
+        null=True,
+        blank=True,
+        on_delete=SET_NULL,
+        related_name='+',
+    )
+
+    panels = [
+        PageChooserPanel('referenced_page')
+    ]
+
+
 class DefaultPage(Page):
+    # Used to build a reference on main page
+    subtitle = TextField(null=True, blank=True)
     body = StreamField([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
@@ -43,11 +67,13 @@ class DefaultPage(Page):
 
 
 DefaultPage.content_panels = Page.content_panels + [
+    FieldPanel('subtitle'),
     StreamFieldPanel('body'),
 ]
 
 
 class PageWithSidebar(Page):
+    subtitle = TextField(null=True, blank=True)
     is_nav_root = BooleanField(default=False)
     body = StreamField([
         ('paragraph', RichTextBlock()),
@@ -67,6 +93,7 @@ class PageWithSidebar(Page):
 
 
 PageWithSidebar.content_panels = Page.content_panels + [
+    FieldPanel('subtitle'),
     StreamFieldPanel('body'),
 ]
 
@@ -77,6 +104,7 @@ PageWithSidebar.settings_panels = PageWithSidebar.settings_panels + [
 
 class LessonPage(Page):
     is_nav_root = BooleanField(default=False)
+    subtitle = TextField(null=True, blank=True)
     lesson_number = SmallIntegerField(blank=True, null=True)
     summary = CharField(max_length=100, null=True, blank=True)
     repetition_material = CharField(max_length=100, null=True, blank=True)
@@ -121,6 +149,7 @@ class LessonPage(Page):
 
 
 LessonPage.content_panels = Page.content_panels + [
+    FieldPanel('subtitle'),
     FieldPanel('audio_material'),
     StreamFieldPanel('comments_for_lesson'),
     StreamFieldPanel('body'),
