@@ -36,7 +36,8 @@ def get_navigation_object_from_page(page: Page) -> dict:
         "href": page.get_url()
     }
     for child in page.get_children():
-        page_object["nodes"].append(get_navigation_object_from_page(child))
+        if child.show_in_menus:
+            page_object["nodes"].append(get_navigation_object_from_page(child))
     if len(page_object["nodes"]) == 0:
         page_object.pop('nodes', None)
     return page_object
