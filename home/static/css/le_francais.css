@@ -152,7 +152,7 @@ body {
     margin-bottom: 1em;
 }
 
-.forum-block {
+.category, .forum, .topic, .post-form, .mark-all {
     max-width: 1230px;
     margin-right: auto;
     margin-left: auto;

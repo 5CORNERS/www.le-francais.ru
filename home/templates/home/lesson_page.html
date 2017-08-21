@@ -48,47 +48,41 @@
                 </div>
                 {% endif %}
                 <ul class="nav nav-tabs">
-                    {% assign tab_class "nav-link active" %}
                     {% if self.comments_for_lesson %}
                         <li class="nav-item">
-                            <a class="{{tab_class}}" data-toggle="tab" href="#comments_for_lesson" role="tab" aria-controls="body">
+                            <a class="nav-link" data-toggle="tab" href="#comments_for_lesson" role="tab" aria-controls="body">
                                 Комментарии к уроку
                             </a>
                         </li>
-                        {% assign tab_class "nav-link" %}
                     {% endif %}
                     {% if self.body %}
                         <li class="nav-item">
-                            <a class="{{tab_class}}" data-toggle="tab" href="#body" role="tab" aria-controls="body">
+                            <a class="nav-link" data-toggle="tab" href="#body" role="tab" aria-controls="body">
                                 Диалог урока
                             </a>
                         </li>
-                        {% assign tab_class "nav-link" %}
                     {% endif %}
                     {% if self.dictionary %}
                         <li class="nav-item">
-                            <a class="{{tab_class}}" data-toggle="tab" href="#dictionary" role="tab" aria-controls="body">
+                            <a class="nav-link" data-toggle="tab" href="#dictionary" role="tab" aria-controls="body">
                                 Словарик
                             </a>
                         </li>
-                        {% assign tab_class "nav-link" %}
                     {% endif %}
                     {% if self.summary %}
                         <li class="nav-item">
-                            <a class="{{tab_class}}" data-toggle="tab" href="#resume" role="tab" aria-controls="body">
+                            <a class="nav-link" data-toggle="tab" href="#resume" role="tab" aria-controls="body">
                                 Конспект
                             </a>
                         </li>
-                        {% assign tab_class "nav-link" %}
                     {% endif %}
                     {% if self.repetition_material %}
                         <li class="nav-item">
-                            <a class="{{tab_class}}" data-toggle="tab" href="#revision" role="tab"
+                            <a class="nav-link" data-toggle="tab" href="#revision" role="tab"
                                aria-controls="body">
                                 Материал для повторения
                             </a>
                         </li>
-                        {% assign tab_class "nav-link" %}
                     {% endif %}
                     {% for child_value in self.other_tabs %}
                         <li class="nav-item">

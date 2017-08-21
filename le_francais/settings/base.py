@@ -106,12 +106,6 @@ WSGI_APPLICATION = 'le_francais.wsgi.application'
 
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        # 'NAME': 'postgres',                      # Or path to database file if using sqlite3.
-        # 'USER': 'postgres',                      # Not used with sqlite3.
-        # 'PASSWORD': '123',                  # Not used with sqlite3.
-        # 'HOST': '192.168.0.27',                      # Set to empty string for localhost. Not used with sqlite3.
-        # 'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
@@ -160,11 +154,11 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-LOGIN_URL = '/login'
+LOGIN_URL = '/login/'
 
-LOGIN_REDIRECT_URL = '/forum'
+LOGIN_REDIRECT_URL = '/forum/'
 
-LOGOUT_REDIRECT_URL = '/login'
+LOGOUT_REDIRECT_URL = '/login/'
 
 # PyBBM settings
 
@@ -221,7 +215,7 @@ SOCIAL_AUTH_PIPELINE = (
     # there's any collision.
     'social_core.pipeline.user.get_username',
 
-    # Send a validation email to the user to verify fits email address.
+    # Send a validation email to the user to verify its email address.
     # Disabled by default.
     # 'social_core.pipeline.mail.mail_validation',
 
@@ -257,5 +251,3 @@ SOCIAL_AUTH_MAILRU_OAUTH2_SECRET = 'ee92b0f6edb039891153744f3ee9ec4a'
 SOCIAL_AUTH_FACEBOOK_KEY = '181297095728060'
 SOCIAL_AUTH_FACEBOOK_SECRET = '627c4fc295bdc301df89d871eb68c9b4'
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
-
-WAGTAILAPI_LIMIT_MAX = 300
