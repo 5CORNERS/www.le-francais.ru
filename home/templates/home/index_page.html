@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static site_tags %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/index_page.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="caption">Этот сайт поможет вам научиться говорить по-французски. Точка.</div>
+            </div>
+            <div class="col-md-6">
+                <div class="subcaption">
+                    Нет, не точка. Не просто научиться говорить по-французски, а делать это с
+                    наименьшими трудозатратами и получать от этого удовольствие. Важен будет не только (и не столько)
+                    результат, но и процесс. И все это безвозмездно, то есть даром (понимай: бесплатно ).
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-9">
+                <div class="page-references">
+                    {% for reference in self.related_pages.all %}
+                        <a class="page-reference" href="">
+                            <h4 class="page-reference_title">{{ reference.referenced_page.title }}</h4>
+                            <div class="page-reference_text">{{ reference.referenced_page.specific.subtitle }}</div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
