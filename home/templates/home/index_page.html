@@ -24,7 +24,7 @@
                 <div class="page-references">
                     {% for reference in self.related_pages.all %}
                         <a class="page-reference" href="">
-                            <h4 class="page-reference_title">{{ reference.referenced_page.title }}</h4>
+                            <h4 class="page-reference_title">{{ reference.referenced_page.reference_title }}</h4>
                             <div class="page-reference_text">{{ reference.referenced_page.specific.subtitle }}</div>
                         </a>
                     {% endfor %}

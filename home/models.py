@@ -57,6 +57,7 @@ class IndexPageReferences(Orderable):
 
 class DefaultPage(Page):
     # Used to build a reference on main page
+    reference_title = TextField(null=True, blank=True)
     subtitle = TextField(null=True, blank=True)
     body = StreamField([
         ('paragraph', RichTextBlock()),
@@ -67,12 +68,14 @@ class DefaultPage(Page):
 
 
 DefaultPage.content_panels = Page.content_panels + [
+    FieldPanel('reference_title'),
     FieldPanel('subtitle'),
     StreamFieldPanel('body'),
 ]
 
 
 class PageWithSidebar(Page):
+    reference_title = TextField(null=True, blank=True)
     subtitle = TextField(null=True, blank=True)
     is_nav_root = BooleanField(default=False)
     body = StreamField([
@@ -93,6 +96,7 @@ class PageWithSidebar(Page):
 
 
 PageWithSidebar.content_panels = Page.content_panels + [
+    FieldPanel('reference_title'),
     FieldPanel('subtitle'),
     StreamFieldPanel('body'),
 ]
@@ -104,6 +108,7 @@ PageWithSidebar.settings_panels = PageWithSidebar.settings_panels + [
 
 class LessonPage(Page):
     is_nav_root = BooleanField(default=False)
+    reference_title = TextField(null=True, blank=True)
     subtitle = TextField(null=True, blank=True)
     lesson_number = SmallIntegerField(blank=True, null=True)
     summary = CharField(max_length=100, null=True, blank=True)
@@ -149,6 +154,7 @@ class LessonPage(Page):
 
 
 LessonPage.content_panels = Page.content_panels + [
+    FieldPanel('reference_title'),
     FieldPanel('subtitle'),
     FieldPanel('audio_material'),
     StreamFieldPanel('comments_for_lesson'),
