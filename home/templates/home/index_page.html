@@ -23,8 +23,8 @@
             <div class="col-md-9">
                 <div class="page-references">
                     {% for reference in self.related_pages.all %}
-                        <a class="page-reference" href="">
-                            <h4 class="page-reference_title">{{ reference.referenced_page.reference_title }}</h4>
+                        <a class="page-reference" href="{{ reference.referenced_page.url }}">
+                            <h4 class="page-reference_title">{{ reference.referenced_page.specific.reference_title }}</h4>
                             <div class="page-reference_text">{{ reference.referenced_page.specific.subtitle }}</div>
                         </a>
                     {% endfor %}
