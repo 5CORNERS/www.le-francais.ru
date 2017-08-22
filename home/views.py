@@ -43,7 +43,8 @@ def get_navigation_object_from_page(page: Page, current_page_id: int) -> dict:
     page_object = {
         "text": page.title,
         "nodes": [],
-        "href": page.get_url()
+        "href": page.get_url(),
+        "state": {}
     }
     if page.id == current_page_id:
         page_object["state"] = {

@@ -21,12 +21,18 @@ function addExpandedStateToNavdata(navData) {
     {};
   navData.forEach(function (node) {
     var href = navData.href;
-    if(href in state){
+    if (href in state) {
       var expanded = state[href];
-      if (!(state in node)) {
-        node.state = {}
-      }
+
       node.state.expanded = expanded
+    }
+    if (node.nodes) {
+      addExpandedStateToNavdata(node.nodes);
+      node.nodes.forEach(function (child) {
+        if (child.state && (child.state.expanded || child.state.selected)) {
+          node.state.expanded = true;
+        }
+      })
     }
   });
   return navData
