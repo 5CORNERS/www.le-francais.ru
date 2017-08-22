@@ -29,15 +29,20 @@ def authorized(request):
     return HttpResponse('')
 
 
-def get_navigation_object_from_page(page: Page) -> dict:
+def get_navigation_object_from_page(page: Page, current_page_id: int) -> dict:
     page_object = {
         "text": page.title,
         "nodes": [],
         "href": page.get_url()
     }
+    if page.id == current_page_id:
+        page_object["state"] = {
+            "selected": True
+        }
+        page_object["selectable"] = False
     for child in page.get_children():
         if child.show_in_menus:
-            page_object["nodes"].append(get_navigation_object_from_page(child))
+            page_object["nodes"].append(get_navigation_object_from_page(child, current_page_id))
     if len(page_object["nodes"]) == 0:
         page_object.pop('nodes', None)
     return page_object
@@ -47,5 +52,6 @@ def get_nav_data(request):
     if "rootId" not in request.GET:
         return HttpResponse(status=400, content="Root page id not provided")
     root_id = request.GET['rootId']
-    nav_items = get_navigation_object_from_page(Page.objects.get(id=root_id))["nodes"]
+    page_id = int(request.GET['pageId'])
+    nav_items = get_navigation_object_from_page(Page.objects.get(id=root_id), page_id)["nodes"]
     return HttpResponse(content=json.dumps(nav_items))
