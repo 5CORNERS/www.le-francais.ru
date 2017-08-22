@@ -1,0 +1,48 @@
+{% extends 'pybb/base.html' %}
+{% load i18n %}
+
+{% block title %}{{ PYBB_DEFAULT_TITLE }}{% endblock title %}
+
+{% block breadcrumb %}
+    {% with extra_crumb=_("Index") %}
+        {% include "pybb/breadcrumb.html" %}
+    {% endwith %}
+{% endblock %}
+
+{% block content %}
+    <div class="btn-group top-page-controls">
+        <a href="{% url 'pybb:topic_latest' %}"
+           class="btn btn-default">
+            {% trans "Last updates in topics" %}
+        </a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'pybb:mark_all_as_read' %}"
+               class="btn btn-default">
+                {% trans "Mark all forums as read" %}
+            </a>
+        {% endif %}
+    </div>
+    {% if categories %}
+        {% for category in categories %}
+            {% include 'pybb/category.html' %}
+        {% endfor %}
+    {% else %}
+        <h2>{% trans "Forum categories are not created" %}</h2>
+        <a href="{% url 'admin:pybb_category_add' %}"
+           class="btn btn-primary">
+            {% trans "Add a category now" %}
+        </a>
+    {% endif %}
+    <div class="btn-group">
+        <a href="{% url 'pybb:topic_latest' %}"
+           class="btn btn-default">
+            {% trans "Last updates in topics" %}
+        </a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'pybb:mark_all_as_read' %}"
+               class="btn btn-default">
+                {% trans "Mark all forums as read" %}
+            </a>
+        {% endif %}
+    </div>
+{% endblock content %}
