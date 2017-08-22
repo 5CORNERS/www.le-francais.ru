@@ -1,0 +1,79 @@
+{% extends 'pybb/base.html' %}
+{% load pybb_tags i18n thumbnail %}
+
+{% block title %}{{ target_user.username }}{% endblock %}
+
+{% block content %}
+    {% pybb_get_profile user=target_user as profile %}
+    <h1>{{ target_user.username }}</h1>
+    <div class="userinfo">
+        {% include "pybb/avatar.html" with user=target_user %}
+        <div class="info">
+            {% if profile.icq or profile.skype or profile.jabber or profile.site or profile.interests %}
+                <div class="label label-info">{% trans "Information" %}</div>
+            {% endif %}
+            {% if profile.icq %}
+                <div>ICQ: {{ profile.icq }}</div>
+            {% endif %}
+            {% if profile.skype %}
+                <div>Skype: {{ profile.skype }}</div>
+            {% endif %}
+            {% if profile.jabber %}
+                <div>Jabber: {{ profile.jabber }}</div>
+            {% endif %}
+            {% if profile.site %}
+                <div>{% trans 'Personal site' %}: <a href="{{ profile.site }}">{{ profile.site }}</a></div>
+            {% endif %}
+            {% if profile.interests %}
+                <div>{% trans 'Interests' %}: {{ profile.interests }}</div>
+            {% endif %}
+
+            <div class="label label-info">{% trans "Statistics" %}</div>
+            <div>
+                <a href="{% url 'user_topics' target_user %}">
+                    {% trans "Number of topics" %}:
+                    {{ topic_count }}
+                </a>
+            </div>
+            <div>
+                <a href="{% url 'user_posts' target_user %}">
+                    {% trans "Number of posts" %}:
+                    {{ profile.post_count }}
+                </a>
+            </div>
+            <div>
+                {% trans "Date of registration" %}:
+                {% pybb_time target_user.date_joined %}
+            </div>
+        </div>
+        <div class="clear"></div>
+    </div><br>
+    <div class='controls'>
+        {% if request.user|pybb_may_manage_moderators %}
+            <a href="{% url 'pybb:edit_privileges' target_user.get_username %}" class="btn btn-default">{% trans 'Moderator' %}</a>
+        {% endif %}
+        {% if perms.pybb.block_users and target_user != user %}
+            {% if target_user.is_active %}
+                <form method="post" action="{% url 'pybb:block_user' target_user.username %}" style="display: inline-block;">{% csrf_token %}
+                    <button class="btn btn-danger">{% trans 'Block' %}</button>
+                </form>
+            {% else %}
+                <form method="post" action="{% url 'pybb:unblock_user' target_user.username %}" style="display: inline-block;">{% csrf_token %}
+                    <button class="btn btn-success">{% trans 'Unblock' %}</button>
+                </form>
+            {% endif %}
+        {% endif %}
+        {% if perms.pybb.can_edit %}
+            <a href="{% url 'admin:profiles_profile_change' target_user.profile.id %}" class="btn btn-default">{% trans 'Admin' %}</a>
+        {% endif %}
+        {% if target_user == user %}
+            <a class="btn btn-default" href="{% url 'pybb:edit_profile' %}">{% trans 'Profile settings' %}</a>
+            <a class="btn btn-default" href="{% url 'postman:inbox' %}">
+                {% trans 'Personal messages' %} {% if postman_unread_count %}({{ postman_unread_count }}){% endif %}
+            </a>
+        {% endif %}
+        {% if target_user != user %}
+            <a class="btn btn-default" href="{% url 'postman:write' target_user.username %}">{% trans "Write personal message" %}</a>
+        {% endif %}
+    </div>
+{% endblock %}
