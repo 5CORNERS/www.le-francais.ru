@@ -17,3 +17,5 @@ social-auth-app-django
 markdown
 urllib3
 pymdown-extensions
+django-simple-captcha==0.5.3
+git+https://github.com/hovel/django-pure-pagination.git#egg=django_pure_pagination

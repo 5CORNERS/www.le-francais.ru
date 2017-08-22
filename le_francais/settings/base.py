@@ -28,8 +28,6 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 INSTALLED_APPS = [
     'home',
     'search',
-    'ggroups2pybbm',
-    'forum',
 
     'wagtail.wagtailforms',
     'wagtail.wagtailredirects',
@@ -55,6 +53,13 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     'pybb',
+    'forum',
+    'profiles',
+    'pure_pagination',
+    'sorl.thumbnail',
+    'captcha',
+    'registration',
+
     'social_django',
 ]
 
@@ -170,6 +175,7 @@ PYBB_TEMPLATE = 'forum.html'
 PYBB_NICE_URL = False
 # disable pybb smiles
 PYBB_SMILES = dict()
+PYBB_DEFAULT_TITLE = 'Forum'
 
 # Wagtail settings
 
