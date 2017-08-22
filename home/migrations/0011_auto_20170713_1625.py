@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pybb', '0007_auto_20170703_1731'),
+        # ('pybb', '0007_auto_20170703_1731'),
         ('home', '0010_auto_20170712_1933'),
     ]
 
