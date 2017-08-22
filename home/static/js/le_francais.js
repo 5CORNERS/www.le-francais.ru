@@ -2,11 +2,50 @@ function getNavRootId() {
   return $('meta[name="nav-root-id"]').attr("data-value")
 }
 
+function getPageId() {
+  return $('meta[name="page-id"]').attr("data-value")
+}
+
+
+function setNodeState(href, isExpanded) {
+  var nodesCollapsedState = localStorage.getItem("nodesCollapsedState") != null ?
+    JSON.parse(localStorage.getItem("nodesCollapsedState")) :
+    {};
+  nodesCollapsedState[href] = isExpanded;
+  localStorage.setItem("nodesCollapsedState", JSON.stringify(nodesCollapsedState))
+}
+
+function addExpandedStateToNavdata(navData) {
+  var state = localStorage.getItem("nodesCollapsedState") != null ?
+    JSON.parse(localStorage.getItem("nodesCollapsedState")) :
+    {};
+  navData.forEach(function (node) {
+    var href = navData.href;
+    if(href in state){
+      var expanded = state[href];
+      if (!(state in node)) {
+        node.state = {}
+      }
+      node.state.expanded = expanded
+    }
+  });
+  return navData
+}
+
 $(document).ready(function () {
-  $.getJSON('/api/nav/?rootId=' + getNavRootId(), function (navData) {
+  $.getJSON('/api/nav/?rootId=' + getNavRootId() + '&pageId=' + getPageId(), function (navData) {
+    navData = addExpandedStateToNavdata(navData);
     $('#sidebar').treeview({
-      enableLinks: true,
-      data: navData
+      data: navData,
+      onNodeSelected: function (event, data) {
+        window.location.href = data.href;
+      },
+      onNodeExpanded: function (event, data) {
+        setNodeState(data.href, true)
+      },
+      onNodeCollapsed: function (event, data) {
+        setNodeState(data.href, false)
+      }
     });
   });
   $(".sidebar-collapse-button").click(function () {
