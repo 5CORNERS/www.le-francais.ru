@@ -9,19 +9,10 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        # ('pybb', '0007_auto_20170703_1731'),
         ('home', '0010_auto_20170712_1933'),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='lessontopic',
-            name='lesson_page',
-        ),
-        migrations.RemoveField(
-            model_name='lessontopic',
-            name='topic_ptr',
-        ),
         migrations.AddField(
             model_name='lessonpage',
             name='topic',
