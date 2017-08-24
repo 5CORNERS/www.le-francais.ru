@@ -34,6 +34,9 @@ function addExpandedStateToNavdata(navData) {
         }
       })
     }
+    if(node.state && node.state.selected) {
+      node.state.expanded = true;
+    }
   });
   return navData
 }
@@ -42,6 +45,7 @@ $(document).ready(function () {
   $.getJSON('/api/nav/?rootId=' + getNavRootId() + '&pageId=' + getPageId(), function (navData) {
     navData = addExpandedStateToNavdata(navData);
     $('#sidebar').treeview({
+      levels: 0,
       data: navData,
       onNodeSelected: function (event, data) {
         window.location.href = data.href;
