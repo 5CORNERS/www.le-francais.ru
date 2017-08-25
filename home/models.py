@@ -145,12 +145,12 @@ class LessonPage(Page):
 		return self.slug.split("lecon-", 1)[1]
 
 	has_own_topic = BooleanField(default=False)
-	# topic = OneToOneField(
-	# 	Topic,
-	# 	on_delete=SET_NULL,
-	# 	null=True,
-	# 	blank=True
-	# )
+	topic = OneToOneField(
+		Topic,
+		on_delete=SET_NULL,
+		null=True,
+		blank=True
+	)
 
 	def get_nav_root(self) -> Page:
 		return get_nav_root(self)
