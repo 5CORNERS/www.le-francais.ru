@@ -51,57 +51,60 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'bootstrapform',
 
-    'pybb',
-    'forum',
-    'profiles',
-    'pure_pagination',
-    'sorl.thumbnail',
-    'captcha',
-    'registration',
+	'pybb',
+	'postman',
+	'forum',
+	'forum_messages',
+	'profiles',
+	'pure_pagination',
+	'sorl.thumbnail',
+	'captcha',
+	'registration',
 
-    'social_django',
+	'social_django',
 ]
 
 MIDDLEWARE_CLASSES = [
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+	'django.contrib.messages.middleware.MessageMiddleware',
+	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'django.middleware.security.SecurityMiddleware',
 
-    'wagtail.wagtailcore.middleware.SiteMiddleware',
-    'wagtail.wagtailredirects.middleware.RedirectMiddleware',
+	'wagtail.wagtailcore.middleware.SiteMiddleware',
+	'wagtail.wagtailredirects.middleware.RedirectMiddleware',
 
-    'pybb.middleware.PybbMiddleware',
-    'social_django.middleware.SocialAuthExceptionMiddleware',
+	'pybb.middleware.PybbMiddleware',
+	'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'le_francais.urls'
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(PROJECT_DIR, 'templates'),
-        ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+	{
+		'BACKEND': 'django.template.backends.django.DjangoTemplates',
+		'DIRS': [
+			os.path.join(PROJECT_DIR, 'templates'),
+		],
+		'APP_DIRS': True,
+		'OPTIONS': {
+			'context_processors': [
+				'django.template.context_processors.debug',
+				'django.template.context_processors.request',
+				'django.contrib.auth.context_processors.auth',
+				'django.contrib.messages.context_processors.messages',
 
-                'pybb.context_processors.processor',
-                'social_django.context_processors.backends',
-                'social_django.context_processors.login_redirect',
-            ],
-        },
-    },
+				'pybb.context_processors.processor',
+				'social_django.context_processors.backends',
+				'social_django.context_processors.login_redirect',
+			],
+		},
+	},
 ]
 
 WSGI_APPLICATION = 'le_francais.wsgi.application'
@@ -111,8 +114,14 @@ WSGI_APPLICATION = 'le_francais.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'postgres',                      # Or path to database file if using sqlite3.
+        'USER': 'postgres',                      # Not used with sqlite3.
+        'PASSWORD': '123',                  # Not used with sqlite3.
+        'HOST': '192.168.0.27',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
@@ -122,13 +131,13 @@ DATABASES['default'].update(db_from_env)
 # A list of authentication backend classes to use when attempting to authenticate a user.
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',
-    'social_core.backends.vk.VKOAuth2',
-    'social_core.backends.yandex.YandexOAuth2',
-    'social_core.backends.mailru.MailruOAuth2',
-    'social_core.backends.facebook.FacebookOAuth2',
+	'social_core.backends.google.GoogleOAuth2',
+	'social_core.backends.vk.VKOAuth2',
+	'social_core.backends.yandex.YandexOAuth2',
+	'social_core.backends.mailru.MailruOAuth2',
+	'social_core.backends.facebook.FacebookOAuth2',
 
-    'django.contrib.auth.backends.ModelBackend',
+	'django.contrib.auth.backends.ModelBackend',
 )
 
 # Internationalization
@@ -145,12 +154,12 @@ SITE_ID = 1
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+	'django.contrib.staticfiles.finders.FileSystemFinder',
+	'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
 STATICFILES_DIRS = [
-    os.path.join(PROJECT_DIR, 'static'),
+	os.path.join(PROJECT_DIR, 'static'),
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
@@ -168,7 +177,7 @@ LOGOUT_REDIRECT_URL = '/login/'
 # PyBBM settings
 
 PYBB_MARKUP_ENGINES_PATHS = {
-    'custom_markdown': 'forum.markup_engines.CustomMarkdownParser'
+	'custom_markdown': 'forum.markup_engines.CustomMarkdownParser'
 }
 PYBB_MARKUP = 'custom_markdown'
 PYBB_TEMPLATE = 'forum.html'
@@ -186,8 +195,8 @@ WAGTAIL_SITE_NAME = "le_francais"
 BASE_URL = 'http://example.com'
 
 ALLOWED_HOSTS = [
-    'localhost',
-    'fe61337f.ngrok.io'
+	'localhost',
+	'fe61337f.ngrok.io'
 ]
 
 # Django-registration settings
@@ -199,48 +208,48 @@ ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window;
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/forum'
 SOCIAL_AUTH_PIPELINE = (
-    # Get the information we can about the user and return it in a simple
-    # format to create the user instance later. On some cases the details are
-    # already part of the auth response from the provider, but sometimes this
-    # could hit a provider API.
-    'social_core.pipeline.social_auth.social_details',
+	# Get the information we can about the user and return it in a simple
+	# format to create the user instance later. On some cases the details are
+	# already part of the auth response from the provider, but sometimes this
+	# could hit a provider API.
+	'social_core.pipeline.social_auth.social_details',
 
-    # Get the social uid from whichever service we're authing thru. The uid is
-    # the unique identifier of the given user in the provider.
-    'social_core.pipeline.social_auth.social_uid',
+	# Get the social uid from whichever service we're authing thru. The uid is
+	# the unique identifier of the given user in the provider.
+	'social_core.pipeline.social_auth.social_uid',
 
-    # Verifies that the current auth process is valid within the current
-    # project, this is where emails and domains whitelists are applied (if
-    # defined).
-    'social_core.pipeline.social_auth.auth_allowed',
+	# Verifies that the current auth process is valid within the current
+	# project, this is where emails and domains whitelists are applied (if
+	# defined).
+	'social_core.pipeline.social_auth.auth_allowed',
 
-    # Checks if the current social-account is already associated in the site.
-    #'social_core.pipeline.social_auth.social_user',
+	# Checks if the current social-account is already associated in the site.
+	# 'social_core.pipeline.social_auth.social_user',
 
-    # Make up a username for this person, appends a random string at the end if
-    # there's any collision.
-    'social_core.pipeline.user.get_username',
+	# Make up a username for this person, appends a random string at the end if
+	# there's any collision.
+	'social_core.pipeline.user.get_username',
 
-    # Send a validation email to the user to verify its email address.
-    # Disabled by default.
-    # 'social_core.pipeline.mail.mail_validation',
+	# Send a validation email to the user to verify its email address.
+	# Disabled by default.
+	# 'social_core.pipeline.mail.mail_validation',
 
-    # Associates the current social details with another user account with
-    # a similar email address. Disabled by default.
-    'social_core.pipeline.social_auth.associate_by_email',
+	# Associates the current social details with another user account with
+	# a similar email address. Disabled by default.
+	'social_core.pipeline.social_auth.associate_by_email',
 
-    # Create a user account if we haven't found one yet.
-    'social_core.pipeline.user.create_user',
+	# Create a user account if we haven't found one yet.
+	'social_core.pipeline.user.create_user',
 
-    # Create the record that associates the social account with the user.
-    'social_core.pipeline.social_auth.associate_user',
+	# Create the record that associates the social account with the user.
+	'social_core.pipeline.social_auth.associate_user',
 
-    # Populate the extra_data field in the social record with the values
-    # specified by settings (and the default ones like access_token, etc).
-    'social_core.pipeline.social_auth.load_extra_data',
+	# Populate the extra_data field in the social record with the values
+	# specified by settings (and the default ones like access_token, etc).
+	'social_core.pipeline.social_auth.load_extra_data',
 
-    # Update the user record with any changed info from the auth service.
-    'social_core.pipeline.user.user_details',
+	# Update the user record with any changed info from the auth service.
+	'social_core.pipeline.user.user_details',
 )
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '984233441228-m8un6479b9r2nr71f69ugvsh2mvjq981.apps.googleusercontent.com'
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'Y0CiV0MWBUrGN-GsM_H9sJt7'

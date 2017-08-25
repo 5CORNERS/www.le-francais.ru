@@ -9,6 +9,9 @@ from django.http.response import HttpResponse
 from django.shortcuts import redirect
 from django.views import generic
 from oauth2client.client import OAuth2WebServerFlow
+from home.models import PageWithSidebar, LessonPage
+
+
 from pure_pagination import Paginator, PaginationMixin
 from pybb import defaults
 from pybb.forms import PostForm
@@ -40,32 +43,35 @@ def authorized(request):
 
 
 def get_navigation_object_from_page(page: Page, current_page_id: int) -> dict:
-    page_object = {
-        "text": page.title,
-        "nodes": [],
-        "href": page.get_url(),
-        "state": {}
-    }
-    if page.id == current_page_id:
-        page_object["state"] = {
-            "selected": True
-        }
-        page_object["selectable"] = False
-    for child in page.get_children():
-        if child.show_in_menus:
-            page_object["nodes"].append(get_navigation_object_from_page(child, current_page_id))
-    if len(page_object["nodes"]) == 0:
-        page_object.pop('nodes', None)
-    return page_object
+	page_object = {
+		"text": page.title,
+		"nodes": [],
+		"href": page.get_url(),
+		"state": {}
+	}
+	if isinstance(page.specific, PageWithSidebar) or isinstance(page.specific, LessonPage):
+		if not page.specific.is_selectable:
+			page_object["selectable"] = False
+	if page.id == current_page_id:
+		page_object["state"] = {
+			"selected": True
+		}
+		page_object["selectable"] = False
+	for child in page.get_children():
+		if child.show_in_menus:
+			page_object["nodes"].append(get_navigation_object_from_page(child, current_page_id))
+	if len(page_object["nodes"]) == 0:
+		page_object.pop('nodes', None)
+	return page_object
 
 
 def get_nav_data(request):
-    if "rootId" not in request.GET:
-        return HttpResponse(status=400, content="Root page id not provided")
-    root_id = request.GET['rootId']
-    page_id = int(request.GET['pageId'])
-    nav_items = get_navigation_object_from_page(Page.objects.get(id=root_id), page_id)["nodes"]
-    return HttpResponse(content=json.dumps(nav_items))
+	if "rootId" not in request.GET:
+		return HttpResponse(status=400, content="Root page id not provided")
+	root_id = request.GET['rootId']
+	page_id = int(request.GET['pageId'])
+	nav_items = get_navigation_object_from_page(Page.objects.get(id=root_id), page_id)["nodes"]
+	return HttpResponse(content=json.dumps(nav_items))
 
 
 class Search(PaginationMixin, generic.ListView):

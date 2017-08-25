@@ -80,8 +80,12 @@
     {% get_site_root as site_root %}
     {% top_menu parent=site_root calling_page=self %}
 {% endblock %}
-<div class="breadcrumb">{% block breadcrumb %}{% endblock %}</div>
-<div class="block-forum"> {% block content %}{% endblock %}</div>
+<div class="block-forum">
+<div class="container-fluid wrapper">
+	<div class="breadcrumb">{% block breadcrumb %}{% endblock %}</div>
+	{% block content %}{% endblock %}
+	</div>
+</div>
 
 {# Global javascript #}
 <script type="text/javascript" src="{% static 'js/le_francais.js' %}"></script>
