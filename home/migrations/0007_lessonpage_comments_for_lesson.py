@@ -11,6 +11,7 @@ import wagtail.wagtailimages.blocks
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('home', '0006_auto_20170818_2239'),
         ('home', '0006_lessonpage_dictionary'),
     ]
 

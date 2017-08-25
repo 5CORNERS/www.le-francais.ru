@@ -34,6 +34,9 @@ function addExpandedStateToNavdata(navData) {
         }
       })
     }
+    if (node.state && node.state.selected) {
+      node.state.expanded = true;
+    }
   });
   return navData
 }
@@ -42,6 +45,7 @@ $(document).ready(function () {
   $.getJSON('/api/nav/?rootId=' + getNavRootId() + '&pageId=' + getPageId(), function (navData) {
     navData = addExpandedStateToNavdata(navData);
     $('#sidebar').treeview({
+      levels: 0,
       data: navData,
       onNodeSelected: function (event, data) {
         window.location.href = data.href;
@@ -61,4 +65,16 @@ $(document).ready(function () {
   });
 
   $('audio').audioPlayer();
+
+  // Javascript to enable link to tab
+  var url = document.location.toString();
+  if (url.match('#')) {
+    $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+  }
+  $('.nav-tabs a:first').tab('show');
+
+// Change hash for page-reload
+  $('.nav-tabs a').on('shown.bs.tab', function (e) {
+    window.location.hash = e.target.hash;
+  })
 });
