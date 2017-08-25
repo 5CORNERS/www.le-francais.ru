@@ -8,6 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('home', '0007_auto_20170819_0906'),
         ('home', '0007_lessonpage_comments_for_lesson'),
     ]
 
