@@ -51,6 +51,8 @@ urlpatterns = [
     url(r'^forum/post/move/processing/$', move_post_processing, name='move_post_processing'),
     url(r'^forum/', include('pybb.urls', namespace='pybb')),
 
+    url(r'^messages/', include('forum_messages.urls')),
+
     url(r'^', include('social_django.urls', namespace='social')),
     url(r'^', include(wagtail_urls)),
 
