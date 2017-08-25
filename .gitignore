@@ -3,7 +3,6 @@ db.sqlite3
 .env
 Procfile.local
 venv
-home/migrations
 *.pyc
 staticfiles
 ggroups2pybbm/*.dat
