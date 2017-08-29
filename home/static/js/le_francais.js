@@ -42,27 +42,30 @@ function addExpandedStateToNavdata(navData) {
 }
 
 $(document).ready(function () {
-  $.getJSON('/api/nav/?rootId=' + getNavRootId() + '&pageId=' + getPageId(), function (navData) {
-    navData = addExpandedStateToNavdata(navData);
-    $('#sidebar').treeview({
-      levels: 0,
-      data: navData,
-      onNodeSelected: function (event, data) {
-        window.location.href = data.href;
-      },
-      onNodeExpanded: function (event, data) {
-        setNodeState(data.href, true)
-      },
-      onNodeCollapsed: function (event, data) {
-        setNodeState(data.href, false)
-      }
+  var navTreeElement = document.getElementById("sidebar");
+  if(navTreeElement != null){
+    $.getJSON('/api/nav/?rootId=' + getNavRootId() + '&pageId=' + getPageId(), function (navData) {
+      navData = addExpandedStateToNavdata(navData);
+      $(navTreeElement).treeview({
+        levels: 0,
+        data: navData,
+        onNodeSelected: function (event, data) {
+          window.location.href = data.href;
+        },
+        onNodeExpanded: function (event, data) {
+          setNodeState(data.href, true)
+        },
+        onNodeCollapsed: function (event, data) {
+          setNodeState(data.href, false)
+        }
+      });
     });
-  });
-  $(".sidebar-collapse-button").click(function () {
-    var $target = $($(this).data("target"));
-    $target.toggleClass('in');
-    $(this).attr('aria-expanded', $target.hasClass('in'));
-  });
+    $(".sidebar-collapse-button").click(function () {
+      var $target = $($(this).data("target"));
+      $target.toggleClass('in');
+      $(this).attr('aria-expanded', $target.hasClass('in'));
+    });
+  }
 
   $('audio').audioPlayer();
 
