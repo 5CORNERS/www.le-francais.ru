@@ -21,4 +21,4 @@ django-bootstrap-form
 django-postman==3.5.1
 
 git+https://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26#egg=django_pure_pagination
-git+https://github.com/hovel/pybbm.git@32c21aa39783cd667a6984e31bba5c84e3c45a99#egg=pybbm
+git+https://github.com/5CORNERS/pybbm.git#egg=pybbm
