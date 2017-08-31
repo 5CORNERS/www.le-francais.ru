@@ -1,3 +1,8 @@
+td {
+    vertical-align: top;
+    padding: 1px 4px;
+}
+
 .parent {
     display: flex;
 }
