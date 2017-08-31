@@ -184,6 +184,8 @@ PYBB_TEMPLATE = 'forum.html'
 PYBB_NICE_URL = False
 # disable pybb smiles
 PYBB_SMILES = dict()
+# disable auto subscribe
+PYBB_DEFAULT_AUTOSUBSCRIBE = False
 PYBB_DEFAULT_TITLE = 'Forum'
 
 # Wagtail settings
