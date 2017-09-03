@@ -70,15 +70,20 @@ $(document).ready(function () {
   $('audio').audioPlayer();
 
   // Javascript to enable link to tab
-  var url = document.location.toString();
-  if (url.match('#')) {
-    $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+  var hash = document.location.hash;
+  if (hash != "") {
+    hash = hash.substring(1);
+    $('.nav-tabs a[href="#' + hash + '"]').tab('show');
   } else {
     $('.nav-tabs a:first').tab('show');
   }
 
+  window.onhashchange = function () {
+    $('.nav-tabs a[href="#' + location.hash.substring(1) + '"]').tab('show');
+  };
+
 // Change hash for page-reload
   $('.nav-tabs a').on('shown.bs.tab', function (e) {
-    window.location.hash = e.target.hash;
+    history.pushState(null, null, e.target.hash);
   })
 });
