@@ -360,7 +360,7 @@ td.forum-last-post, td.topic-last-post {
 
     .sidebar-collapse-button {
         display: initial;
-        position: fixed;
+        position: absolute;
         top: 70px;
         left: 0;
         z-index: 1000;
