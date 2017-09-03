@@ -28,17 +28,15 @@
 	{% assign url request.build_absolute_uri %}
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-8 col-sm-3 _no-padding">
-				<div id="sidebar"></div>
+			<div class="sidebar-wrapper col-sm-3 _no-padding">
+                <div id="sidebar"></div>
 			</div>
-			<div class="col-1 sidebar-collapse">
-				<button class="sidebar-collapse-button" type="button" data-toggle="toggle"
-				        data-target="#sidebar" aria-controls="sidebar" aria-expanded="false"
-				        aria-label="Toggle sidebar">
-					<div class="arrow-icon">
-				</button>
-			</div>
-			<div class="col-sm-7 offset-sm-3 g-col-md-8 offset-md-2 main">
+            <button class="sidebar-collapse-button" type="button" data-toggle="toggle"
+                    data-target=".sidebar-wrapper" aria-controls="sidebar" aria-expanded="false"
+                    aria-label="Toggle sidebar">
+                <div class="arrow-icon">
+            </button>
+            <div class="col-12 col-sm-7 main">
 				{% breadcrumb calling_page=self %}
 				<h1>{{ page.title }}</h1>
 				{% if self.audio_material != 'None' %}

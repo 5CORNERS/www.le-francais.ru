@@ -16,25 +16,13 @@ td {
 }
 
 .main {
-    padding: 0 40px 40px;
+    padding-top: 70px;
 }
 
 /* Sidebar navigation */
 .nav-sidebar {
     display: flex;
     flex-direction: column;
-}
-
-.sidebar-collapse-button {
-    position: fixed;
-    left: 0;
-    z-index: 1000;
-    padding: 5px;
-    border: 1px solid #eee;
-    border-left: none;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    background: #f5f5f5;
 }
 
 .nav-sidebar a {
@@ -58,7 +46,7 @@ body {
     padding-top: 50px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 576px) {
     .main {
         padding: 50px 60px 40px;
     }
@@ -88,26 +76,6 @@ body {
     width: 0;
     height: 100%;
     background-color: #f5f5f5;
-}
-
-.sidebar.in {
-    width: 100%;
-    height: 100%;
-}
-
-.sidebar-collapse-button .arrow-icon {
-    width: 15px;
-    height: 22px;
-    background: url("/static/images/chevron-right.png");
-    background-repeat: no-repeat;
-}
-
-.sidebar-collapse-button[aria-expanded="true"] {
-    left: 66.666667%;
-}
-
-.sidebar-collapse-button[aria-expanded="true"] .arrow-icon {
-    background: url("/static/images/chevron-left.png");
 }
 
 @media (min-width: 768px) {
@@ -372,4 +340,50 @@ td.forum-last-post, td.topic-last-post {
     font-size: .8em;
     color: #999;
     text-align: right;
+}
+
+.sidebar-collapse-button {
+    display: none;
+}
+
+@media (max-width: 576px) {
+    .sidebar-wrapper {
+        position: absolute;
+        display: none;
+    }
+
+    .sidebar-wrapper.active {
+        z-index: 1000;
+        width: 80%;
+        display: initial;
+    }
+
+    .sidebar-collapse-button {
+        display: initial;
+        position: fixed;
+        top: 70px;
+        left: 0;
+        z-index: 1000;
+        padding: 5px;
+        border: 1px solid #eee;
+        border-left: none;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+        background: #f5f5f5;
+    }
+
+    .sidebar-collapse-button .arrow-icon {
+        width: 15px;
+        height: 22px;
+        background: url("/static/images/chevron-right.png");
+        background-repeat: no-repeat;
+    }
+
+    .sidebar-collapse-button[aria-expanded="true"] {
+        left: 80%;
+    }
+
+    .sidebar-collapse-button[aria-expanded="true"] .arrow-icon {
+        background: url("/static/images/chevron-left.png");
+    }
 }
