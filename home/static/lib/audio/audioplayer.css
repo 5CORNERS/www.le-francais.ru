@@ -10,6 +10,7 @@
     margin-bottom: 1rem;
     margin-top: 1rem;
     max-width: 500px;
+    display: flex;
 }
 
 .audioplayer-mini {
@@ -18,7 +19,7 @@
 }
 
 .audioplayer > div {
-    position: absolute;
+    position: relative;
 }
 
 .audioplayer-playpause {
@@ -29,7 +30,6 @@
     cursor: pointer;
     z-index: 2;
     top: 0;
-    left: 0;
 }
 
 .audioplayer:not(.audioplayer-mini) .audioplayer-playpause {
@@ -102,13 +102,11 @@
 .audioplayer-time-current {
     border-left: 1px solid #111;
     border-left-color: rgba(0, 0, 0, .25);
-    left: 2.5em; /* 40 */
 }
 
 .audioplayer-time-duration {
     border-right: 1px solid #555;
     border-right-color: rgba(255, 255, 255, .1);
-    right: 2.5em; /* 40 */
 }
 
 .audioplayer-novolume .audioplayer-time-duration {
@@ -122,8 +120,7 @@
     cursor: pointer;
     z-index: 1;
     top: 50%;
-    right: 6.875em; /* 110 */
-    left: 6.875em; /* 110 */
+    flex-grow: 1;
     margin-top: -0.438em; /* 7 */
 }
 
@@ -154,12 +151,13 @@
     height: 100%;
     border-left: 1px solid #111;
     border-left-color: rgba(0, 0, 0, .25);
+    border-right: 1px solid #555;
+    border-right-color: rgba(255, 255, 255, .1);
     text-align: left;
     text-indent: -9999px;
     cursor: pointer;
     z-index: 2;
     top: 0;
-    right: 0;
 }
 
 .audioplayer-volume:hover,
@@ -217,6 +215,22 @@
     -ms-transform: rotate(45deg);
     -o-transform: rotate(45deg);
     transform: rotate(45deg);
+}
+
+.audioplayer-volume-adjust {
+    height: 6.25em; /* 100 */
+    cursor: default;
+    position: absolute;
+    left: 0;
+    right: -1px;
+    top: -9999px;
+    background: #292b2c;
+    -webkit-border-top-left-radius: 2px;
+    -webkit-border-top-right-radius: 2px;
+    -moz-border-radius-topleft: 2px;
+    -moz-border-radius-topright: 2px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
 }
 
 .audioplayer-volume-adjust {
@@ -313,4 +327,22 @@
     -ms-transition: color .25s ease, background-color .25s ease, opacity .5s ease;
     -o-transition: color .25s ease, background-color .25s ease, opacity .5s ease;
     transition: color .25s ease, background-color .25s ease, opacity .5s ease;
+}
+
+.audioplayer-download {
+    width: 2.5em; /* 40 */
+    height: 100%;
+    border-left: 1px solid #111;
+    border-left-color: rgba(0, 0, 0, .25);
+    cursor: pointer;
+    z-index: 2;
+    top: 0;
+}
+
+a.audioplayer-download-button {
+    color: white;
+    text-decoration: none;
+    line-height: 33px;
+    text-align: center;
+    width: 100%;
 }

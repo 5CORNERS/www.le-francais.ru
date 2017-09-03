@@ -1,3 +1,3 @@
-<audio>
+<audio {% if self.downloadable %}data-downloadable{% endif %}>
   <source src="{{ self.url }}" type="audio/mpeg">
 </audio>
