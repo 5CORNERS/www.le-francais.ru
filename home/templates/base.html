@@ -25,10 +25,8 @@
 	<!— End Google Tag Manager —>
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <title>
-        {% block title %}Французский язык - {% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}
-        {% endif %}{% endblock %}
-        {% block title_suffix %}{% endblock %}</title>
+    <title>{% block title %}{% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>
+	<link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
     <meta name="description" content=""/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
