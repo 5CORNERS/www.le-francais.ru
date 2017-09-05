@@ -1,11 +1,16 @@
+from django.shortcuts import render
+from django.contrib.auth import login
+from django.http import HttpResponse
+from django.contrib.auth.forms import AuthenticationForm
+from registration.forms import *
 import json
+
 import threading
 from datetime import datetime, timedelta
 
 import httplib2
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http.response import HttpResponse
 from django.shortcuts import redirect
 from django.views import generic
 from oauth2client.client import OAuth2WebServerFlow
@@ -48,6 +53,8 @@ def get_navigation_object_from_page(page: Page, current_page_id: int) -> dict:
 		"state": {}
 	}
 	if isinstance(page.specific, PageWithSidebar) or isinstance(page.specific, LessonPage):
+		if page.specific.menu_title != '':
+			page_object["text"] = page.specific.menu_title
 		if not page.specific.is_selectable:
 			page_object["selectable"] = False
 	if page.id == current_page_id:
@@ -168,3 +175,30 @@ def move_post_processing(request):
 
 	# FIXME print "success"
 	return redirect(first_moved_post.get_absolute_url())
+
+
+
+
+def ajax_login(request):
+    form = AuthenticationForm()
+    if request.method == 'POST':
+        form = AuthenticationForm(None, request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return HttpResponse(json.dumps({'success': 'ok'})
+                , mimetype='application/json')
+    return render(request, 'templates/ajax_login.html', {'form': form})
+
+
+def ajax_registration(request):
+    form = RegistrationForm()
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            return HttpResponse(json.dumps({'success': 'ok', 'mail_activation': True})
+                , mimetype='application/json')
+    return render(request, 'templates/ajax_registration.html', {'form': form})
+
+
+def socialauth_success(request):
+    return render(request, 'templates/socialauth_success.html', {})

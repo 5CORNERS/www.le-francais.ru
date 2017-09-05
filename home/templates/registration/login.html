@@ -1,4 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+	<link rel="stylesheet" href="{% static 'css/login.css' %}">
+	<link href='http://fonts.googleapis.com/css?family=Raleway:500' rel='stylesheet' type='text/css'>
+{% endblock %}
 
 {% block content %}
   <h2>Login</h2>

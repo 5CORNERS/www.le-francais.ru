@@ -37,6 +37,8 @@ urlpatterns = [
     url(r'^accounts/', include('registration.backends.default.urls')),
     url(r'^accounts/', include('django.contrib.auth.urls')),
 
+    url(r'^captcha/', include('captcha.urls')),
+
     url(r'^forum/profile/edit/$', ProfileEditView.as_view(form_class=AORProfileForm), name='pybb:edit_profile'),
     url(r'^forum/users/(?P<username>[^/]+)/topics/$', UserTopics.as_view(),
         name='user_topics'),

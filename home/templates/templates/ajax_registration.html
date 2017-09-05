@@ -1,0 +1,5 @@
+{% load crispy_forms_tags i18n %}
+    <form method="post" action="{% url 'views.ajax_registration' %}" class="form-horizontal">{% csrf_token %}
+{{ crispy form }}
+    </form>
+

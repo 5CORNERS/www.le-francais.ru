@@ -77,6 +77,7 @@ DefaultPage.content_panels = Page.content_panels + [
 class PageWithSidebar(Page):
     reference_title = TextField(null=True, blank=True)
     subtitle = TextField(null=True, blank=True)
+    menu_title = TextField(blank=True)
     is_nav_root = BooleanField(default=False)
     is_selectable = BooleanField(default=True)
     body = StreamField([
@@ -102,6 +103,10 @@ PageWithSidebar.content_panels = Page.content_panels + [
     StreamFieldPanel('body'),
 ]
 
+PageWithSidebar.promote_panels = PageWithSidebar.promote_panels + [
+    FieldPanel('menu_title')
+]
+
 PageWithSidebar.settings_panels = PageWithSidebar.settings_panels + [
     FieldPanel('is_nav_root'),
     FieldPanel('is_selectable'),
@@ -109,6 +114,7 @@ PageWithSidebar.settings_panels = PageWithSidebar.settings_panels + [
 
 
 class LessonPage(Page):
+    menu_title = TextField(blank=True)
     is_nav_root = BooleanField(default=False)
     is_selectable = BooleanField(default=True)
     reference_title = TextField(null=True, blank=True)
@@ -166,6 +172,10 @@ LessonPage.content_panels = Page.content_panels + [
     FieldPanel('summary'),
     FieldPanel('repetition_material'),
     StreamFieldPanel('other_tabs')
+]
+
+LessonPage.promote_panels = LessonPage.promote_panels + [
+    FieldPanel('menu_title')
 ]
 
 LessonPage.settings_panels = LessonPage.settings_panels + [

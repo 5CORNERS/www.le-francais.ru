@@ -62,6 +62,7 @@ INSTALLED_APPS = [
 	'sorl.thumbnail',
 	'captcha',
 	'registration',
+	'crispy_forms',
 
 	'social_django',
 ]
@@ -96,6 +97,7 @@ TEMPLATES = [
 			'context_processors': [
 				'django.template.context_processors.debug',
 				'django.template.context_processors.request',
+				"django.template.context_processors.i18n",
 				'django.contrib.auth.context_processors.auth',
 				'django.contrib.messages.context_processors.messages',
 
@@ -127,6 +129,10 @@ DATABASES = {
 
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20971520
+FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520
+
 
 # A list of authentication backend classes to use when attempting to authenticate a user.
 
@@ -170,7 +176,7 @@ MEDIA_URL = '/media/'
 
 LOGIN_URL = '/login/'
 
-LOGIN_REDIRECT_URL = '/forum/'
+LOGIN_REDIRECT_URL = '/'
 
 LOGOUT_REDIRECT_URL = '/login/'
 

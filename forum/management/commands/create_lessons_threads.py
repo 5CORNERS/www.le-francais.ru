@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core.management import BaseCommand
 from pybb.models import Forum, Topic, Post
 from markdown import Markdown
+import pymdownx
 from home.models import LessonPage
 
 
@@ -73,7 +74,7 @@ class Command(BaseCommand):
                     char = line[i]
                     if (char == '.' or char == ',' or char == ';' or char == ':' or char == '!' or char == '?' or char == ')')\
                             and not line[i+1] == ' ':
-                        if not(line[i+1] == '.') and not(re.match(r'^-?[0-9/]+$',line[i+1])):
+                        if not(line[i+1] == '.') and not(re.match(r'[0-9]+',line[i+1])):
                             char = char + ' '
                     if char == '(' and not line[i-1] == ' ':
                         char = ' ' + char
