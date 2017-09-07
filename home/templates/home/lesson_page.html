@@ -39,7 +39,7 @@
 				<h1>{{ page.title }}</h1>
 				{% if self.audio_material != 'None' %}
 					<div class="block-audio">
-						<audio data-downloadable>
+						<audio>
 							<source src="
 
 									{% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}"
@@ -136,7 +136,7 @@
 						</div>
 					{% endfor %}
 				</div>
-
+            <br>
 				<div class="row controls text-center">
 					{% assign prev self.get_prev_sibling %}
 					{% assign next self.get_next_sibling %}
@@ -188,7 +188,7 @@
 						</div>
 					</div>
 				{% endif %}
-		</div>
+		</>
 	</div>
 	</div>
 {% endblock %}
