@@ -14,14 +14,14 @@ from search import views as search_views
 from pybb.views import ProfileEditView
 from home.views import Search, MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing
 from home.forms import AORProfileForm, RegistrationFormCaptcha
-from profiles.views import UserTopics, UserPosts, safe_logout
+from profiles.views import  safe_logout, UserTopics, UserPosts
 from registration.backends.default.views import RegistrationView
 
 urlpatterns = [
     url(r'^django-admin/', include(admin.site.urls)),
     url(r'^login/$', auth_views.login, name='login'),
     url(r'^logout/$', auth_views.logout, name='logout'),
-    url(r'^registration/', include('registration.backends.hmac.urls')),
+    url(r'^registration/', include('registration.backends.hmac.urls'), name='registration'),
     url(r'^social/', include('social_django.urls', namespace='social')),
     url(r'^admin/', include(wagtailadmin_urls)),
     url(r'^documents/', include(wagtaildocs_urls)),
@@ -54,6 +54,8 @@ urlpatterns = [
     url(r'^forum/', include('pybb.urls', namespace='pybb')),
 
     url(r'^messages/', include('forum_messages.urls')),
+
+    url(r'^robots\.txt$', include('robots.urls')),
 
     url(r'^', include('social_django.urls', namespace='social')),
     url(r'^', include(wagtail_urls)),

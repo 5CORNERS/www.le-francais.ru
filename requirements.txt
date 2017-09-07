@@ -1,7 +1,8 @@
 dj-database-url==0.4.1
 bs4==0.0.1
 xmltodict==0.10.2
-Django==1.10
+Django==1.11
+django-robots
 wagtail==1.11.1
 gunicorn==19.6.0
 psycopg2==2.6.2
