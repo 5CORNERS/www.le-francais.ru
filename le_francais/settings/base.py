@@ -209,6 +209,7 @@ WAGTAIL_SITE_NAME = "le_francais"
 BASE_URL = 'http://example.com'
 
 ALLOWED_HOSTS = [
+	'hidden-refuge-27954.herokuapp.com',
 	'localhost',
 	'fe61337f.ngrok.io',
 	'192.168.0.27'
