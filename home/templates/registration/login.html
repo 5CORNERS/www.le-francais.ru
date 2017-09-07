@@ -1,23 +1,59 @@
 {% extends 'base.html' %}
 {% load static %}
 
+
 {% block extra_head %}
 	<link rel="stylesheet" href="{% static 'css/login.css' %}">
 	<link href='http://fonts.googleapis.com/css?family=Raleway:500' rel='stylesheet' type='text/css'>
 {% endblock %}
 
 {% block content %}
-  <h2>Login</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
-  </form>
-  <br>
-  <p><strong>-- OR --</strong></p>
-  <a href="{% url 'social:begin' 'google-oauth2' %}">Login with Google</a><br>
-  <a href="{% url 'social:begin' 'yandex-oauth2' %}">Login with Yandex</a><br>
-  <a href="{% url 'social:begin' 'mailru-oauth2' %}">Login with Mail.ru</a><br>
-  <a href="{% url 'social:begin' 'vk-oauth2' %}">Login with VK</a><br>
-  <a href="{% url 'social:begin' 'facebook' %}">Login with Facebook</a><br>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-4"></div>
+			<div class="col-md-4">
+				<div class="popover-title"><h2>Авторизация</h2></div>
+				<div class="row">
+					<div class="col-md-4">
+						<form role="form" class="form-horizontal" method="post"
+						      action="{% url 'login' %}">{% csrf_token %}
+							<div class="form-group">
+								<div class="input-group">
+									<input class="form" style="margin: 3px" id="{{ form.username.id_for_label }}"
+									       maxlength="50"
+									       name="{{ form.username.html_name }}" placeholder="Email"
+									       type="text" required="required"/>
+									{{ field.errors }}
+								</div>
+								<div class="input-group">
+									<input class="form" style="margin: 3px" id="{{ form.password.id_for_label }}"
+									       maxlength="50"
+									       name="{{ form.password.html_name }}" placeholder="Пароль" type="password"
+									       required="required"/>
+									{{ field.errors }}
+								</div>
+								<div class="text-right"><a href="{% url 'password_reset' %}">Забыли пароль?</a></div>
+								<button type="submit" class="btn btn-primary align-left">Login</button>
+								<input type="hidden" name="next" value="{{ next }}" />
+								<a class="btn btn-default register align-right" type="button"
+								   href="{% url 'registration_register' %}?next={{ request.full_path }}">Register</a>
+							</div>
+						</form>
+					</div>
+
+					<div class="col-md-8 align-center">
+						<a href="{% url 'social:begin' 'google-oauth2' %}">Login with Google</a><br>
+						<a href="{% url 'social:begin' 'yandex-oauth2' %}">Login with Yandex</a><br>
+						<a href="{% url 'social:begin' 'mailru-oauth2' %}">Login with Mail.ru</a><br>
+						<a href="{% url 'social:begin' 'vk-oauth2' %}">Login with VK</a><br>
+						<a href="{% url 'social:begin' 'facebook' %}">Login with Facebook</a><br>
+
+					</div>
+				</div>
+
+
+			</div>
+			<div class="col-md-4"></div>
+		</div>
+	</div>
 {% endblock %}
