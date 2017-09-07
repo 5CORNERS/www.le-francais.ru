@@ -1,5 +1,5 @@
 from annoying.fields import AutoOneToOneField
-from django.contrib.auth.models import User
+from custom_user.models import User
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
