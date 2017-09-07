@@ -1,45 +1,49 @@
 {% load wagtailcore_tags %}
 
 <nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                    aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/">Le-Francais.ru</a>
-        </div>
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+			        aria-expanded="false" aria-controls="navbar">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="/">Le-Francais.ru</a>
+		</div>
 
-        <div class="collapse navbar-collapse" id="navbar">
-            <ul class="nav navbar-nav">
-{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
-{#                    <a href="/lecons">Уроки французского</a>#}
-{#                </li>#}
-{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
-{#                    <a href="/lecons_a1">Уроки французского A1</a>#}
-{#                </li>#}
-{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
-{#                    <a href="/lecons_b2">Уроки французского B2</a>#}
-{#                </li>#}
-                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-                    <a href="/forum">Форум</a>
-                </li>
-{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
-{#                    <a href="/aller_en_france_de_russie">Из России во Францию</a>#}
-{#                </li>#}
-{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
-{#                    <a href="/oh-la-la">Oh-la-la!</a>#}
-{#                </li>#}
-                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-                    <a href="/contact">Об авторах</a>
-                </li>
-                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-                    <a href="{% url 'login' %}?next={{ request.path }}">Войти</a>
-                </li>
-            </ul>
-        </div>
-    </div>
+		<div class="collapse navbar-collapse" id="navbar">
+			<ul class="nav navbar-nav">
+				{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
+				{#                    <a href="/lecons">Уроки французского</a>#}
+				{#                </li>#}
+				{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
+				{#                    <a href="/lecons_a1">Уроки французского A1</a>#}
+				{#                </li>#}
+				{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
+				{#                    <a href="/lecons_b2">Уроки французского B2</a>#}
+				{#                </li>#}
+				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
+					<a href="/forum">Форум</a>
+				</li>
+				{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
+				{#                    <a href="/aller_en_france_de_russie">Из России во Францию</a>#}
+				{#                </li>#}
+				{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
+				{#                    <a href="/oh-la-la">Oh-la-la!</a>#}
+				{#                </li>#}
+				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
+					<a href="/contact">Об авторах</a>
+				</li>
+
+				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
+					<a href="/login/?next={{ request.path }}">Вход</a>
+				</li>
+				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
+					<a href="/logout/?next={{ request.path }}">Выход</a>
+				</li>
+			</ul>
+		</div>
+	</div>
 </nav>
