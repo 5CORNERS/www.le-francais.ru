@@ -43,7 +43,7 @@ INSTALLED_APPS = [
 
     'modelcluster',
     'taggit',
-
+	'robots',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'bootstrapform',
 
+	'custom_user',
 	'pybb',
 	'postman',
 	'forum',
@@ -135,6 +136,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520
 
 
 # A list of authentication backend classes to use when attempting to authenticate a user.
+AUTH_USER_MODEL = 'custom_user.User'
 
 AUTHENTICATION_BACKENDS = (
 	'social_core.backends.google.GoogleOAuth2',
@@ -194,6 +196,10 @@ PYBB_SMILES = dict()
 PYBB_DEFAULT_AUTOSUBSCRIBE = False
 PYBB_DEFAULT_TITLE = 'Forum'
 
+# Postman settings
+
+POSTMAN_AUTO_MODERATE_AS = True
+
 # Wagtail settings
 
 WAGTAIL_SITE_NAME = "le_francais"
@@ -204,7 +210,8 @@ BASE_URL = 'http://example.com'
 
 ALLOWED_HOSTS = [
 	'localhost',
-	'fe61337f.ngrok.io'
+	'fe61337f.ngrok.io',
+	'192.168.0.27'
 ]
 
 # Django-registration settings
@@ -264,6 +271,7 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'Y0CiV0MWBUrGN-GsM_H9sJt7'
 
 SOCIAL_AUTH_VK_OAUTH2_KEY = '6035656'
 SOCIAL_AUTH_VK_OAUTH2_SECRET = 'Oe3O7aQiabVMnYbQFPa9'
+SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']
 
 SOCIAL_AUTH_YANDEX_OAUTH2_KEY = 'f93fe2caad314e8086d535b63c906b0f'
 SOCIAL_AUTH_YANDEX_OAUTH2_SECRET = '1e3e4233097f45ab9513ddbffec6f816'
