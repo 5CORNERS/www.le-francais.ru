@@ -1,4 +1,4 @@
-{% load wagtailcore_tags %}
+{% load i18n wagtailcore_tags %}
 
 <nav class="navbar navbar-inverse navbar-fixed-top">
 	<div class="container">
@@ -37,12 +37,52 @@
 					<a href="/contact">Об авторах</a>
 				</li>
 
-				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-					<a href="/login/?next={{ request.path }}">Вход</a>
-				</li>
-				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-					<a href="/logout/?next={{ request.path }}">Выход</a>
-				</li>
+
+				{% if request.user.is_authenticated %}
+					<li class="dropdown">
+						<a href="{{ request.user.profile.get_absolute_url }}" class="dropdown-toggle"
+						   data-toggle="dropdown">
+							{{ request.user.username }}
+							<b class="caret"></b>
+						</a>
+						<ul class="dropdown-menu">
+							<li><a href="{{ request.user.profile.get_absolute_url }}">{% trans "Profile" %}</a></li>
+							<li><a href="{% url 'pybb:edit_profile' %}">{% trans 'Settings' %}</a></li>
+						<li>
+						<a href="{% url 'postman:inbox' %}">
+							{% trans 'Messages' %}
+							{% if postman_unread_count %}({{ postman_unread_count }}){% endif %}
+						</a>
+					</li>
+							{% if request.user.is_staff %}
+								<li class="divider"></li>
+								<li class="{{ menu_admin }}"><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a>
+								</li>
+							{% endif %}
+
+							<li class="divider"></li>
+
+							<li><a>
+								<form action="{% url 'auth_logout' %}?next={{ request.path }}" method="post">{% csrf_token %}
+									<button class="btn btn-logout">{% trans "Logout" %}</button>
+								</form>
+							</a></li>
+						</ul>
+
+
+					</li>
+				{% else %}
+					<li class="dropdown">
+						<a href="{% url 'auth_login' %}?next={{ request.path }}" class="dropdown-toggle" data-toggle="dropdown">
+							{% trans "Profile" %}
+							<b class="caret"></b>
+						</a>
+						<ul class="dropdown-menu">
+							<li><a href="{% url 'auth_login' %}?next={{ request.path }}">{% trans "Login" %}</a></li>
+							<li><a href="{% url 'registration_register' %}?next={{ request.path }}">{% trans "Registration" %}</a></li>
+						</ul>
+					</li>
+				{% endif %}
 			</ul>
 		</div>
 	</div>
