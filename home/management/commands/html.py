@@ -34,29 +34,30 @@ class Command(BaseCommand):
 	def to_html_all_lecons(self):
 		for page in LessonPage.objects.all():
 			html = self.read_page(page)
-			self.write_to_file(page.slug, html)
+			self.write_to_file(self.sortable(page.slug), html)
 
 	def from_html_all_lecons(self):
-		files = os.listdir('html_files')
-		for file in files:
-			slug = file.rstrip('.html')
-			self.write_blocks_to_page(
-				blocks=self.read_file('html_files\\' + file),
-				page=LessonPage.objects.get(slug=slug)
-			)
+		file_names = os.listdir('html_files')
+		for file_name in file_names:
+			if file_name.split('-')[0] == 'lecon' and int(file_name.split('-')[1].split('.')[0])<134:
+				slug = self.unsortable(file_name).rstrip('.html')
+				self.write_blocks_to_page(
+					blocks=self.read_file('html_files\\' + file_name),
+					page=LessonPage.objects.get(slug=slug)
+				)
 			
 
 	def from_html_lecon(self, num):
 		page = self.get_page_by_number(num)
 		self.write_blocks_to_page(
-			blocks=self.read_file('html_files\\' + page.slug + '.html'),
+			blocks=self.read_file('html_files\\' + self.sortable(page.slug) + '.html'),
 			page=page
 		)
 
 	def to_html_lecon(self, num):
 		page = self.get_page_by_number(num)
 		html = self.read_page(page)
-		self.write_to_file(page.slug, html)
+		self.write_to_file(self.sortable(page.slug), html)
 
 	def write_blocks_to_page(self, blocks, page):
 		for block in blocks['comments_for_lesson']:
@@ -81,6 +82,8 @@ class Command(BaseCommand):
 			num = '0' + str(i) if i < 10 else str(i)
 			if block.block_type == 'html':
 				doc = doc + '\n<!--BLOCK_HTML_' + num + '-->\n' + block.value
+			elif block.block_type == 'paragraph':
+				doc = doc + '\n<!--BLOCK_PRGF_' + num + '-->\n'
 			else:
 				doc = doc + '\n<!--BLOCK_AUDI_' + num + '-->\n'
 		doc = doc + '\n<!--TAB_BODY_END--><br><a name="tab_body_end"/><br>\n'
@@ -112,6 +115,7 @@ class Command(BaseCommand):
 		type_block = 'null'
 		i = -1
 		with open(file_path, 'r', encoding='utf-8') as f:
+			self.stdout.write(file_path)
 			for line in f:
 				if line == '\n':
 					pass
@@ -143,3 +147,10 @@ class Command(BaseCommand):
 
 	def get_page_by_number(self, num):
 		return LessonPage.objects.get(lesson_number=num)
+
+	def sortable(self, file_name:str):
+		self.stdout.write(file_name)
+		return 'lecon-' + '{0:03}'.format(int(file_name.split('-')[1].rstrip('.html')))
+
+	def unsortable(self, sortable_file_name:str):
+		return 'lecon-' + str(int(sortable_file_name.split('-')[1].split('.')[0])) + '.html'
