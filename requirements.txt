@@ -17,7 +17,7 @@ social-auth-app-django
 markdown
 urllib3
 pymdown-extensions
-django-simple-captcha
+django-simple-captcha==5.5
 django-bootstrap-form
 django-postman==3.5.1
 django-crispy-forms
