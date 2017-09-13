@@ -7,3 +7,4 @@ venv
 staticfiles
 ggroups2pybbm/*.dat
 `
+/le_francais/settings/production.py
