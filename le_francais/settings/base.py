@@ -51,7 +51,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+	'django.contrib.sitemaps',
     'bootstrapform',
+	'django.core.mail',
 
 	'custom_user',
 	'pybb',
@@ -154,7 +156,7 @@ AUTHENTICATION_BACKENDS = (
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
-USE_L10N = True
+USE_L10N = False
 USE_TZ = True
 SITE_ID = 1
 
@@ -181,6 +183,11 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 
 LOGOUT_REDIRECT_URL = '/login/'
+
+
+# Robots settings
+
+ROBOTS_USE_SITEMAP = False
 
 # PyBBM settings
 
@@ -209,6 +216,8 @@ WAGTAIL_SITE_NAME = "le_francais"
 BASE_URL = 'http://example.com'
 
 ALLOWED_HOSTS = [
+	'www.le-francais.ru'
+	'le-francais.ru'
 	'hidden-refuge-27954.herokuapp.com',
 	'localhost',
 	'fe61337f.ngrok.io',
@@ -267,12 +276,16 @@ SOCIAL_AUTH_PIPELINE = (
 	# Update the user record with any changed info from the auth service.
 	'social_core.pipeline.user.user_details',
 )
+
+SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']
+
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '984233441228-m8un6479b9r2nr71f69ugvsh2mvjq981.apps.googleusercontent.com'
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'Y0CiV0MWBUrGN-GsM_H9sJt7'
 
 SOCIAL_AUTH_VK_OAUTH2_KEY = '6035656'
 SOCIAL_AUTH_VK_OAUTH2_SECRET = 'Oe3O7aQiabVMnYbQFPa9'
-SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']
 
 SOCIAL_AUTH_YANDEX_OAUTH2_KEY = 'f93fe2caad314e8086d535b63c906b0f'
 SOCIAL_AUTH_YANDEX_OAUTH2_SECRET = '1e3e4233097f45ab9513ddbffec6f816'
@@ -282,4 +295,3 @@ SOCIAL_AUTH_MAILRU_OAUTH2_SECRET = 'ee92b0f6edb039891153744f3ee9ec4a'
 
 SOCIAL_AUTH_FACEBOOK_KEY = '181297095728060'
 SOCIAL_AUTH_FACEBOOK_SECRET = '627c4fc295bdc301df89d871eb68c9b4'
-SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']

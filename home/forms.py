@@ -26,6 +26,7 @@ class AORProfileForm(EditProfileForm):
 
     signature = forms.CharField(widget=forms.Textarea, label=_('Signature'),
         required=False)
+    # time_zone = forms.ChoiceField()
 
 
 class SearchForm(forms.Form):

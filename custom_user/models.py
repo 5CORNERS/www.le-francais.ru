@@ -5,7 +5,7 @@ from django.db.models import EmailField
 
 class User(AbstractUser):
 	email = EmailField(_('email address'), unique=True, error_messages={
-		'unique': _("A user with that username already exists."),
+		'unique': _("A user with that email adress already exists."),
 	}, )
 	USERNAME_FIELD = 'email'
 	EMAIL_FIELD = 'email'
