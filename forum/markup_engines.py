@@ -22,24 +22,3 @@ class CustomMarkdownParser(MarkdownParser):
 			],
 			safe_mode='escape',
 		)
-
-
-class MarkdownWidget(Textarea):
-	class Media:
-		css = {
-			'all': (
-				'markitup/skins/simple/style.css',
-				'markitup/sets/markdown/style.css',
-			),
-		}
-		js = (
-			'markitup/ajax_csrf.js',
-			'markitup/jquery.markitup.js',
-			'markitup/sets/markdown/set.js',
-			'pybb/js/markitup.js',
-		)
-
-	def render(self, *args, **kwargs):
-		tpl = get_template('pybb/markup/markdown_widget.html')
-		ctx = Context({'widget_output': super(MarkdownWidget, self).render(*args, **kwargs)})
-		return tpl.render(ctx)

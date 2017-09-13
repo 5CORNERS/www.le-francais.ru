@@ -17,9 +17,16 @@ class Command(BaseCommand):
 			default=False,
 			help='push html back to site',
 		)
+		parser.add_argument('--slug', action='store_true', dest='slug', default=False)
 
 	def handle(self, *args, **options):
-		if options['arg'][0] == 'all':
+		if options['slug']:
+			for slug in options['arg']:
+				if options['push']:
+					self.from_html_page(slug)
+				else:
+					self.to_html_page(slug)
+		elif options['arg'][0] == 'all':
 			if options['push']:
 				self.from_html_all_lecons()
 			else:
@@ -30,6 +37,18 @@ class Command(BaseCommand):
 					self.from_html_lecon(num)
 				else:
 					self.to_html_lecon(num)
+
+	def from_html_page(self,slug):
+		page = self.get_page_by_slug(slug)
+		self.write_blocks_to_page(
+			blocks=self.read_file('html_files\\' + page.slug + '.html'),
+			page=page
+		)
+
+	def to_html_page(self,slug):
+		page = self.get_page_by_slug(slug)
+		html = self.read_page_body(page)
+		self.write_to_file(page.slug, html)
 
 	def to_html_all_lecons(self):
 		for page in LessonPage.objects.all():
@@ -147,6 +166,12 @@ class Command(BaseCommand):
 
 	def get_page_by_number(self, num):
 		return LessonPage.objects.get(lesson_number=num)
+
+	def get_page_by_slug(self, slug):
+		try:
+			return LessonPage.objects.get(slug=slug)
+		except:
+			return PageWithSidebar.objects.get(slug=slug)
 
 	def sortable(self, file_name:str):
 		self.stdout.write(file_name)
