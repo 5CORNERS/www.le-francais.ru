@@ -59,6 +59,8 @@ urlpatterns = [
 
 	url(r'^messages/', include('forum_messages.urls')),
 
+	url(r'^old_site/', include('old_site.urls')),
+
 	url(r'^', include('social_django.urls', namespace='social')),
 	url(r'^', include(wagtail_urls)),
 
