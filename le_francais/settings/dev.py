@@ -13,6 +13,7 @@ ADMINS = [('semyon', 'semyon@atamas.com')]
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
+DEFAULT_FROM_EMAIL = 'no_reply@files.le-francais.ru'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', "localhost")
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', "")

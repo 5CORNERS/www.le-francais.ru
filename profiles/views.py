@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from custom_user.models import User
 from django.contrib.auth.views import logout_then_login
 from django.shortcuts import get_object_or_404
 from django.views import generic

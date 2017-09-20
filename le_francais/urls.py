@@ -4,18 +4,17 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.contrib.sitemaps.views import sitemap
-from pybb.views import ProfileEditView
 from registration.backends.default.views import RegistrationView
 from wagtail.wagtailadmin import urls as wagtailadmin_urls
 from wagtail.wagtailcore import urls as wagtail_urls
 from wagtail.wagtaildocs import urls as wagtaildocs_urls
 
-from custom_user.form import MyCustomUserForm
-from home.forms import AORProfileForm, RegistrationFormCaptcha
+from custom_user.forms import MyCustomUserForm
+from home.forms import AORProfileForm
 from home.urls import site_import_urls, api_urls
 from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing
 from profiles.views import safe_logout, UserTopics, UserPosts
+from pybb.views import ProfileEditView
 from search import views as search_views
 
 urlpatterns = [
@@ -25,7 +24,6 @@ urlpatterns = [
 	url(r'^django-admin/', include(admin.site.urls)),
 	url(r'^login/$', auth_views.login, name='login'),
 	url(r'^logout/$', auth_views.logout, name='logout'),
-	url(r'^registration/', include('registration.backends.hmac.urls'), name='registration'),
 	url(r'^social/', include('social_django.urls', namespace='social')),
 	url(r'^admin/', include(wagtailadmin_urls)),
 	url(r'^documents/', include(wagtaildocs_urls)),
@@ -35,10 +33,9 @@ urlpatterns = [
 	url(r'^import/', include(site_import_urls)),
 	url(r'^api/', include(api_urls)),
 
-	url(r'^accounts/register/$', RegistrationView.as_view(form_class=MyCustomUserForm),
-	    name="registration_register"),
+	url(r'^accounts/register/$', RegistrationView.as_view(form_class=MyCustomUserForm), name="registration_register"),
 	url(r'^accounts/logout/$', safe_logout, name='auth_logout'),
-	url(r'^accounts/', include('registration.backends.default.urls')),
+	url(r'^accounts/', include('registration.backends.model_activation.urls')),
 	url(r'^accounts/', include('django.contrib.auth.urls')),
 
 	url(r'^captcha/', include('captcha.urls')),

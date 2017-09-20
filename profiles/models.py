@@ -1,5 +1,5 @@
 from annoying.fields import AutoOneToOneField
-from custom_user.models import User
+from custom_user.models import User as MyUser
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
@@ -15,7 +15,7 @@ class Profile(PybbProfile):
         (PROFILE_DATE_SHOW_REVERTED, _(u'Reverted')),
         (PROFILE_DATE_SHOW_CLASSIC, _(u'Classic')),
     )
-    user = AutoOneToOneField(User, related_name='profile')
+    user = AutoOneToOneField(MyUser, related_name='profile')
     date_show_type = models.IntegerField(verbose_name=_(u'Date show type'), choices=PROFILE_DATE_SHOW_TYPES,
                                          default=PROFILE_DATE_SHOW_REVERTED)
 
