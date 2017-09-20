@@ -189,6 +189,7 @@ LOGOUT_REDIRECT_URL = '/login/'
 # Robots settings
 
 ROBOTS_USE_SITEMAP = False
+ROBOTS_USE_HOST = False
 
 # PyBBM settings
 
