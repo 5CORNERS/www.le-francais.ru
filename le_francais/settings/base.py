@@ -204,7 +204,7 @@ PYBB_SMILES = dict()
 # disable auto subscribe
 PYBB_DEFAULT_AUTOSUBSCRIBE = False
 PYBB_DEFAULT_TITLE = 'Forum'
-
+PYBB_PERMISSION_HANDLER = 'forum.permissions.CustomPermissionHandler'
 # Postman settings
 
 POSTMAN_AUTO_MODERATE_AS = True
@@ -215,9 +215,10 @@ WAGTAIL_SITE_NAME = "le_francais"
 
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
-BASE_URL = 'http://example.com'
+BASE_URL = '192.168.0.27:8000'
 
 ALLOWED_HOSTS = [
+	'94.188.74.123',
 	'hidden-refuge-27954.herokuapp.com',
 	'www.le-francais.ru',
 	'le-francais.ru',
