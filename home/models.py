@@ -36,7 +36,8 @@ def get_nav_root(page: Page) -> Page:
 
 class IndexPage(Page):
     content_panels = Page.content_panels + [
-        InlinePanel('related_pages', label="Related pages")
+        InlinePanel('related_pages', label="Related pages"),
+        InlinePanel('related_reviews', label="Related reviews"),
     ]
 
 
@@ -49,11 +50,27 @@ class IndexPageReferences(Orderable):
         on_delete=SET_NULL,
         related_name='+',
     )
-
     panels = [
-        PageChooserPanel('referenced_page')
+        PageChooserPanel('referenced_page'),
     ]
 
+
+class IndexReviewsReferences(Orderable):
+    page = ParentalKey(IndexPage, related_name='related_reviews')
+    referenced_review = ForeignKey(
+        'wagtailcore.Page',
+        null=True,
+        blank=True,
+        on_delete=SET_NULL,
+        related_name='+'
+    )
+    review_title = CharField(null=True,blank=True, max_length=255)
+    review_subtitle = CharField(null=True,blank=True, max_length=1024)
+    panels = [
+        PageChooserPanel('referenced_review'),
+        FieldPanel('review_title'),
+        FieldPanel('review_subtitle')
+    ]
 
 class DefaultPage(Page):
     # Used to build a reference on main page

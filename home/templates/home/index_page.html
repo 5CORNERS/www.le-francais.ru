@@ -2,37 +2,87 @@
 {% load static site_tags %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/index_page.css' %}">
+	<link rel="stylesheet" href="{% static 'css/index_page.css' %}">
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="caption">Этот сайт поможет вам научиться говорить по-французски. Точка.</div>
-            </div>
-            <div class="col-md-6">
-                <div class="subcaption">
-                    Нет, не точка. Не просто научиться говорить по-французски, а делать это с
-                    наименьшими трудозатратами и получать от этого удовольствие. Важен будет не только (и не столько)
-                    результат, но и процесс. И все это безвозмездно, то есть даром (понимай: бесплатно ).
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-9">
-                <div class="page-references">
-                    {% for reference in self.related_pages.all %}
-                        <a class="page-reference" href="{{ reference.referenced_page.url }}">
-                            <h4 class="page-reference_title">{{ reference.referenced_page.specific.reference_title }}</h4>
-                            <div class="page-reference_text">{{ reference.referenced_page.specific.subtitle }}</div>
-                        </a>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-	    <div class="row">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="caption">Этот сайт поможет вам научиться говорить по-французски. Точка.</div>
+			</div>
+			<div class="col-md-6">
+				<div class="too_many_letters">
+					Нет, не точка. Не просто научиться говорить по-французски, а делать это с
+					наименьшими трудозатратами и получать от этого удовольствие. Важен будет не только (и не столько)
+					результат, но и процесс. И все это безвозмездно, то есть даром (понимай:&nbsp;бесплатно).
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-9">
+				<div class="page-references">
+					{% for reference in self.related_pages.all %}
+						<a class="page-reference" href="{{ reference.referenced_page.url }}">
+							<h4 class="page-reference_title">{{ reference.referenced_page.specific.reference_title }}</h4>
+							<div class="page-reference_text">{{ reference.referenced_page.specific.subtitle }}</div>
+						</a>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			{#			<div class="col-md-3">#}
+			{#				<div class="caption">Some review-block caption</div>#}
+			{#			</div>#}
+			<div class="col-md-9">
+				<div class="too_many_letters">
+					<p>Я сознательно не пишу "изучить французский язык". "Изучить" — понятие более широкое. Здесь же
+						ставится вполне приземленная, но весьма утилитарная цель: овладеть современным разговорным
+						французским, то есть иметь возможность устно объясняться по-французски и понимать, что вам
+						отвечают.
+						Не много. Но и не мало :-).</p>
 
-	    </div>
-    </div>
+					<p style="margin-bottom:15px ">Вся соль нашего "самоучителя" — в его уроках, виртуозно исполненных однажды и доступных теперь
+						всем
+						вам. Вот крохотный пример того, что вас ждет :):</p>
+					<div class="block-audio">
+						<audio>
+							<source src="//files.le-francais.ru/vocabulaire/aguiche/teaser-17.mp3" type="audio/mpeg">
+						</audio>
+					</div>
+					<p style="margin-top: 5px; ">Кроме того, вам доступен весь набор комплементарных материалов — подкасты, аудио-словари,
+						конспекты,
+						сопутствующие ссылки по теме и — sic! — апробированная методика, которая позволила мне не
+						потратить
+						на занятия языком ни одной лишней минуты. Потому что нет никаких домашних заданий — в том виде,
+						в
+						котором мы привыкли об этом думать. Вне уроков, конечно, работать приходится — чудес не бывает.
+						Известный факт: иностранный язык берется задницей. Но та "задница", которую я вам предлагаю —
+						она
+						сладка :).</p>
+
+					<p>Всё то, что делается вне уроков во имя изучения языка — всё это делается в фоне и не отнимает ни
+						сил, ни дополнительного времени (я надеюсь, вы понимаете, что речь не идет ни о каком
+						шарлатанстве
+						типа 25-го кадра или обучения во сне). Ко всему прочему, это прикольно. Факт.</p>
+
+					<p>Одним словом, ребята, получился классный аудио-самоучитель французского языка для начинающих,
+						поверьте.</p>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-9">
+				<div class="page-references">
+					{% for reference in self.related_reviews.all %}
+						<a class="page-reference" href="{{ reference.referenced_review.url }}">
+							<h4 class="page-reference_title">{{ reference.review_title }}</h4>
+							<div class="page-reference_text">{{ reference.review_subtitle }}</div>
+						</a>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}
