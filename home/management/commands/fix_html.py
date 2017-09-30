@@ -1,16 +1,16 @@
 import re
-import bs4
 
+import bs4
 from django.core.management import BaseCommand
 
-from home.models import LessonPage, PageWithSidebar
+from home.models import LessonPage
 from ._private import set_block
 
 
 class Command(BaseCommand):
 	def handle(self, *args, **options):
-		for page in LessonPage.objects.all():
-			self.del_lang(page).save()
+		# for page in LessonPage.objects.all():
+		# 	self.del_lang(page).save()
 		# self.span_fix(LessonPage)
 		# self.span_fix(PageWithSidebar)
 		# self.del_comments(LessonPage)
@@ -18,19 +18,37 @@ class Command(BaseCommand):
 		# self.replace_img(PageWithSidebar)
 		# 
 		# self.fix_span_in_transcript()
+		self.del_pdf_iframe()
+
+	def del_pdf_iframe(self):
+		for page in LessonPage.objects.all():
+			for i in range(len(page.body.stream_data)):
+				block = page.body.__getitem__(i)
+				if block.block_type == 'html':
+					soup = bs4.BeautifulSoup(block.value, "html5lib")
+					pdf_elements = soup.find_all(name='div', attrs={'class': 'sites-embed-border-on sites-embed'})
+					self.stdout.write('Номер урока '+str(page.lesson_number)+' ' + str(pdf_elements.__len__()))
+					for pdf_element in pdf_elements:
+						for child in pdf_element.contents:
+							if child.name == 'h4' and child.string.find('Конспект') != -1:
+								pdf_element.decompose()
+					block.value = str(soup)
+					set_block(i, block, page.body)
+			page.save()
+
 
 	def span_fix(self, PageModel):
 		# for page in PageModel.objects.all():
 		# 	if page.lesson_number < 135:
-				page = LessonPage.objects.get(lesson_number=24)
-				print('Lesson_number ' + str(page.lesson_number))
-				for i in range(len(page.body.stream_data)):
-					block = page.body.__getitem__(i)
-					if block.block_type == 'html':
-						new_value = self.replace(block.value)
-						block.value = new_value
-						set_block(i, block, page.body)
-				page.save()
+		page = LessonPage.objects.get(lesson_number=24)
+		print('Lesson_number ' + str(page.lesson_number))
+		for i in range(len(page.body.stream_data)):
+			block = page.body.__getitem__(i)
+			if block.block_type == 'html':
+				new_value = self.replace(block.value)
+				block.value = new_value
+				set_block(i, block, page.body)
+		page.save()
 
 	def replace(self, value):
 		new_value = value
@@ -92,12 +110,12 @@ class Command(BaseCommand):
 
 	def replace_img(self, PageModel):
 		exts = {
-			r'(MP3|mp3)':'mp3',
-			r'(MSW|msw)':'msw',
-			r'(PDF|pdf)':'pdf',
-			r'(BX|bx)':'bx',
-			r'(MOVIEICON|movieicon)':'movieicon',
-			r'(DOWNLOAD|download)':'download',
+			r'(MP3|mp3)': 'mp3',
+			r'(MSW|msw)': 'msw',
+			r'(PDF|pdf)': 'pdf',
+			r'(BX|bx)': 'bx',
+			r'(MOVIEICON|movieicon)': 'movieicon',
+			r'(DOWNLOAD|download)': 'download',
 		}
 		for page in PageModel.objects.all():
 			for i in range(len(page.body.stream_data)):
