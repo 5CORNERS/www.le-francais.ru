@@ -10,18 +10,18 @@
 {% block content %}
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-md-4"></div>
-			<div class="col-md-4">
+			<div class="col-md-3 col-xs-offset-0"></div>
+			<div class="col-md-5">
 				<div class="popover-title"><h2>Авторизация</h2></div>
 				<div class="row">
-					<div class="col-md-4">
+					<div class="col-xs-6">
 						<form role="form" class="form-horizontal" method="post"
 						      action="{% url 'login' %}">{% csrf_token %}
 							<div class="form-group">
 								<div class="input-group">
-									<input class="form" style="margin: 3px" id="{{ form.username.id_for_label }}"
+									<input class="form" style="margin: 3px" id="{{ form.email.id_for_label }}"
 									       maxlength="50"
-									       name="{{ form.username.html_name }}" placeholder="Email"
+									       name="{{ form.email.html_name }}" placeholder="Email"
 									       type="text" required="required"/>
 									{{ field.errors }}
 								</div>
@@ -39,7 +39,7 @@
 						</form>
 					</div>
 
-					<div class="col-md-8 align-center">
+					<div class="col-xs-6 align-center">
 						<a href="{% url 'social:begin' 'google-oauth2' %}">Login with Google</a><br>
 						<a href="{% url 'social:begin' 'yandex-oauth2' %}">Login with Yandex</a><br>
 						<a href="{% url 'social:begin' 'mailru-oauth2' %}">Login with Mail.ru</a><br>
@@ -51,7 +51,7 @@
 
 
 			</div>
-			<div class="col-md-4"></div>
+			<div class="col-md-3 col-xs-offset-0"></div>
 		</div>
 	</div>
 {% endblock %}

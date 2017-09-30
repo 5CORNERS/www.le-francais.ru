@@ -12,7 +12,7 @@
     {% trans "posted by" %}
     {% if topic.last_post.user %}
         <a href="{% url 'pybb:user' topic.last_post.user.username %}">
-            {{ topic.last_post.user }}
+            {{ topic.last_post.user.username }}
         </a>
     {% endif %}
 {% endif %}

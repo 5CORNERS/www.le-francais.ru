@@ -45,6 +45,15 @@
 
 
 
+
+
+
+
+
+
+
+
+
 										{% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}"
 								        type="audio/mpeg">
 							</audio>
@@ -148,11 +157,6 @@
 						<a class="pull-left btn btn-default" href="{{ self.get_prev_sibling.get_url }}"> Предыдущий
 							урок </a>
 					{% endif %}
-					{% if self.has_own_topic %}
-						<a class="btn btn-primary" href="{{ self.topic.get_absolute_url }}">
-							Обсудить на форуме
-						</a>
-					{% endif %}
 
 					{% if next.content_type.name == 'lesson page' %}
 						<a class="pull-right btn btn-default" href="{{ self.get_next_sibling.get_url }}"> Следующий
@@ -160,34 +164,33 @@
 					{% endif %}
 
 				</div>
-				<div class="row">
-					<div class="text">Не стесняйтесь задавать вопросы и комментировать.</div>
-				</div>
+
 				{% if self.has_own_topic %}
-					<div class="row">{% block extra_head_content %}
+					<div class="row" style="margin: auto">{% block extra_head_content %}
 						<link rel="stylesheet" type="text/css" href="{% static 'css/forum.css' %}">
 					{% endblock %}
 						<div class="block-forum">
 							<div class="topic" id="topic">
-								<h1>Related topic</h1>
+								<h1>Вопросы и комментарии к уроку.</h1>
+								<h6>Не стесняйтесь задавать вопросы и комментировать. </h6>
 								<div class="posts">
-									{% if self.topic.head %}
-										{% with self.topic.head as post %}
-											<div class="first_post">{% include "related_post.html" %}</div>
-										{% endwith %}
-									{% endif %}
-									{% if self.topic.last_post %}
-										<div class="text-left">Последняя запись на форуме.</div>
+									{% with self.topic.head as post %}
+										<div class="first_post">{% include "related_post.html" %}</div>
+									{% endwith %}
+									<div class="text-left">Последний комментарий к уроку.</div>
+									{% if self.topic.last_post.id == topic.head.id %}
 										{% with self.topic.last_post as post %}
 											{% if not post == self.topic.head %}
 												<div class="last_post">{% include "related_post.html" %}</div>
 											{% endif %}
 										{% endwith %}
-										{% else %}
-										<div class="row">Будьте первым, кто оставит свой комментарий!</div>
+									{% else %}
+										<br>
+										<div class="text-left">Пока нет. Станьте первым! :)</div>
+										<br>
 									{% endif %}
 								</div>
-								<a href="{{ self.topic.get_absolute_url }}" target="_blank">Topic link</a>
+								<a class="btn btn-primary" href="{{ self.topic.get_absolute_url }}" target="_blank">Добавте свой комментарий</a>
 							</div>
 						</div>
 					</div>

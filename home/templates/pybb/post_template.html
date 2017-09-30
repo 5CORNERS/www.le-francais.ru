@@ -10,7 +10,7 @@
     <thead>
     <tr>
         <td class="post-author">
-            <a href="{{ post_user_profile.get_absolute_url }}">
+            <a href="{% url 'pybb:user' post.user.username %}">
                 <span class="post-username">{{ post.user.username }}</span>
             </a>
         </td>
