@@ -7008,3 +7008,40 @@
 	border-collapse: collapse;
     background-color: transparent;
 }
+
+.block-forum details {
+  display: block;
+}
+
+.block-forum details[open] > summary::before {
+  content: "\25BC";
+}
+
+.block-forum details summary {
+  display: block;
+  cursor: pointer;
+}
+
+.block-forum details summary:focus {
+  outline: none;
+}
+
+.block-forum details summary::before {
+  content: "\25B6";
+  padding-right: 0.5em;
+}
+
+.block-forum details summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Attach the "no-details" class to details tags
+   in browsers that do not support them to get
+   open/show functionality. */
+.block-forum details.no-details:not([open]) > * {
+  display: none;
+}
+
+.block-forum details.no-details:not([open]) summary {
+  display: block;
+}
