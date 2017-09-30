@@ -1,13 +1,16 @@
 import re
 from datetime import datetime
+import pytz
+
+from django.conf import settings
 
 import pandas as pd
-from django.contrib.auth.models import User
+from custom_user.models import User
 from django.core.management import BaseCommand
 from markdown import Markdown
-from pybb.models import Forum, Topic, Post
 
 from home.models import LessonPage
+from pybb.models import Forum, Topic, Post
 
 
 class Command(BaseCommand):
@@ -17,13 +20,14 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 		_parser = Markdown(
 			extensions=[
+				'forum.mdownx.nofollowlinks',
 				'markdown.extensions.nl2br',
 				'pymdownx.extra',
-				'pymdownx.magiclink',
 				'pymdownx.emoji',
 				'pymdownx.tasklist',
 				'pymdownx.details',
 				'pymdownx.superfences',
+				'pymdownx.details',
 			],
 			safe_mode='escape',
 		)
@@ -33,30 +37,30 @@ class Command(BaseCommand):
 			if isinstance(table[lesson_number], float):
 				pass
 			else:
-				page = LessonPage.objects.get(lesson_number=lesson_number)
+				try:
+					page = LessonPage.objects.get(lesson_number=lesson_number)
+				except:
+					self.stdout.write("Lesson page doesn't exist")
+					break
 				page.has_own_topic = True
 				new_topic, topic_created = Topic.objects.get_or_create(
 					forum=Forum.objects.get(name='Lessons Forum'),
 					name='Урок-' + str(page.lesson_number),
-					user=User.objects.get(username='admin'),
+					user=User.objects.get(username='ILYA'),
 					slug='lecon' + str(page.lesson_number),
 				)
-				if topic_created:
-					page.topic_id = new_topic.id
-					self.stdout.write(str(lesson_number) + ' thread created')
-					body = 'Мы перенесли сюда запись из Народного конспекта к этому уроку.\n' + table[
-						lesson_number] + '\nЕсли Вы хотите расширить этот конспект, оформите свое дополение отдельной записью и сделайте об этом пометку в комментарии —  мы дополним этот пост вашим материалом.'
-					new_post = Post(
-						body=body,
-						topic_id=new_topic.id,
-						user_id=new_topic.user_id,
-						user_ip='1.1.1.1',
-						created=datetime.now(),
-					)
-					new_post.save()
-					self.stdout.write(str(lesson_number) + ' post created')
-				else:
-					self.stdout.write(str(lesson_number) + ' thread not created')
+				page.topic_id = new_topic.id
+				self.stdout.write(str(lesson_number) + ' thread created')
+				body = table[lesson_number]
+				new_post = Post(
+					body=body,
+					topic_id=new_topic.id,
+					user_id=new_topic.user_id,
+					user_ip='1.1.1.1',
+					created=datetime.now(tz=pytz.timezone(settings.TIME_ZONE)),
+				)
+				new_post.save()
+				self.stdout.write(str(lesson_number) + ' post created')
 				page.save()
 
 	def create_other_threads(self):
@@ -99,8 +103,7 @@ class Command(BaseCommand):
 		if isinstance(line, str):
 			for i in range(len(line) - 1):
 				char = line[i]
-				if (
-													char == '.' or char == ',' or char == ';' or char == ':' or char == '!' or char == '?' or char == ')') \
+				if (char == '.' or char == ',' or char == ';' or char == ':' or char == '!' or char == '?' or char == ')') \
 						and not line[i + 1] == ' ':
 					if not (line[i + 1] == '.') and not (re.match(r'[0-9]+', line[i + 1])):
 						char = char + ' '
