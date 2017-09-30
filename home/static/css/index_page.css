@@ -15,6 +15,12 @@
     color: #666c7d;
 }
 
+.too_many_letters {
+    font-size: 14px;
+    margin-top: 30px;
+    color: #282b36;
+}
+
 .page-references {
     display: flex;
     flex-wrap: wrap;
@@ -34,7 +40,9 @@ a.page-reference:hover .page-reference_title {
 
 .page-reference {
     width: 27%;
-    margin: 10px 3%;
+    margin-top: 10px;
+    margin-right: 6%;
+    margin-bottom: 10px;
     min-height: 150px;
 }
 
