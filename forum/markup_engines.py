@@ -12,7 +12,7 @@ class CustomMarkdownParser(MarkdownParser):
 		super(CustomMarkdownParser, self).__init__()
 		self._parser = Markdown(
 			extensions=[
-				'forum.mdownx.nofollowlinks',
+				'forum.customextensions.nofollowlinks',
 				'markdown.extensions.nl2br',
 				'pymdownx.extra',
 				'pymdownx.emoji',
