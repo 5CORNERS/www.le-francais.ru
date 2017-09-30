@@ -25,7 +25,8 @@
 				{#                    <a href="/lecons_b2">Уроки французского B2</a>#}
 				{#                </li>#}
 				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-					<a href="/forum">Форум</a>
+					<a style="color: rgb(170,170,170)" onmouseover="this.style.color='white'"
+					   onmouseout="this.style.color='rgb(170,170,170)'" href="/forum">Форум</a>
 				</li>
 				{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
 				{#                    <a href="/aller_en_france_de_russie">Из России во Францию</a>#}
@@ -34,9 +35,14 @@
 				{#                    <a href="/oh-la-la">Oh-la-la!</a>#}
 				{#                </li>#}
 				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-					<a href="/contact">Об авторах</a>
+					<a href="/changements">Что происходит?</a>
 				</li>
-
+				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
+					<a href="/collecte">Сами мы не местные...</a>
+				</li>
+				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
+					<a href="/old_site/index.html">Старая версия сайта</a>
+				</li>
 
 				{% if request.user.is_authenticated %}
 					<li class="dropdown">
@@ -69,14 +75,14 @@
 								</form>
 							</a></li>
 						</ul>
-
-
 					</li>
+
 				{% else %}
+
 					<li class="dropdown">
 						<a href="{% url 'auth_login' %}?next={{ request.path }}" class="dropdown-toggle"
 						   data-toggle="dropdown">
-							{% trans "Profile" %}
+							Войти
 							<b class="caret"></b>
 						</a>
 						<ul class="dropdown-menu">
@@ -86,11 +92,8 @@
 							</li>
 						</ul>
 					</li>
-					<li class="divider"></li>
 				{% endif %}
-				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-					<a href="/old_site/index.html">Старый сайт</a>
-				</li>
+
 			</ul>
 		</div>
 	</div>
