@@ -84,6 +84,8 @@
           var source = $(theAudio).find('source').attr('src');
           thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="' + source + '" class="' + cssClass.downloadButton + ' glyphicon glyphicon-download"></a></div>');
         }
+        else {
+        }
 
         var theBar = thePlayer.find('.' + cssClass.bar),
           barPlayed = thePlayer.find('.' + cssClass.barPlayed),

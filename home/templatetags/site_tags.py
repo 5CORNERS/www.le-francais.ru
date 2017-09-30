@@ -35,7 +35,6 @@ def top_menu(context, parent, calling_page=None):
         'request': context['request'],
     }
 
-
 @register.inclusion_tag('tags/breadcrumb.html', takes_context=True)
 def breadcrumb(context, calling_page):
     breadcrumb_pages = []
