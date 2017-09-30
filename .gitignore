@@ -8,7 +8,7 @@ staticfiles
 ggroups2pybbm/*.dat
 `
 /le_francais/settings/production.py
-
+/old_site
 /forum/avatars/
 /forum/all_posts.txt
 /forum/posts_ids.txt
