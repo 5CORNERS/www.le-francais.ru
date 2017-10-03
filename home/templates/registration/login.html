@@ -19,9 +19,9 @@
 						      action="{% url 'login' %}">{% csrf_token %}
 							<div class="form-group">
 								<div class="input-group">
-									<input class="form" style="margin: 3px" id="{{ form.email.id_for_label }}"
+									<input class="form" style="margin: 3px" id="id_username"
 									       maxlength="50"
-									       name="{{ form.email.html_name }}" placeholder="Email"
+									       name="username" placeholder="Email"
 									       type="text" required="required"/>
 									{{ field.errors }}
 								</div>
