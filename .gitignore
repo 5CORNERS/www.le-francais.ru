@@ -4,8 +4,6 @@ db.sqlite3
 Procfile.local
 venv
 *.pyc
-staticfiles
-ggroups2pybbm/*.dat
 /src/
 /temp.html
 /temp2.html
@@ -14,16 +12,14 @@ ggroups2pybbm/*.dat
 /package-lock.json
 /temp1.html
 /html_files/
-home/locale/
 
-media/
+media
 node_modules/
 /old_site/templates/*
 home/static/components/bootstrap-treeview/
 home/static/components/bootstrap/
 home/static/components/jquery/
 home/static/css/css_adapter.py
-/media/
 pandoc-1.19.2.1-windows.msi
 forum/dat
 home/migrations/0003_indexreviewsreferences.py
