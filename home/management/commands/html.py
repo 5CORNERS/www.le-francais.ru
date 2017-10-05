@@ -117,9 +117,20 @@ class Command(BaseCommand):
 				doc = doc + '\n<!--BLOCK_HTML_' + num + '-->\n' + block.value
 		doc = doc + '\n<!--TAB_COMMENTS_END--><br><a name="tab_comments_end"/><br>\n'
 		return doc
+	
+	def read_page_dictionary(self, page):
+		doc = '\n<!--TAB_DICTIONARY--><br><a name="tab_dictionary"/><br>\n'
+		for i in range(len(page.dictionary.stream_data)):
+			block = page.dictionary.__getitem__(i)
+			num = '0' + str(i) if i < 10 else str(i)
+			if block.block_type == 'html':
+				doc = doc + '\n<!--BLOCK_HTML_' + num + '-->\n' + block.value
+		doc = doc + '\n<!--TAB_DICTIONARY_END--><br><a name="tab_dictionary_end"/><br>\n'
+		return doc
+		
 
 	def read_page(self, page):
-		return self.read_page_comments(page) + self.read_page_body(page)
+		return self.read_page_comments(page) + self.read_page_body(page) + self.read_page_dictionary(page)
 
 
 	def write_to_file(self, file_name, doc):
