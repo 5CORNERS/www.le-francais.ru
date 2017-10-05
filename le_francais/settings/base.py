@@ -205,6 +205,7 @@ PYBB_SMILES = dict()
 PYBB_DEFAULT_AUTOSUBSCRIBE = False
 PYBB_DEFAULT_TITLE = 'Forum'
 PYBB_PERMISSION_HANDLER = 'forum.permissions.CustomPermissionHandler'
+
 # Postman settings
 
 POSTMAN_AUTO_MODERATE_AS = True
