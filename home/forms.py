@@ -3,7 +3,7 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils.translation import ugettext as _
 from pybb.forms import EditProfileForm
-from registration.forms import RegistrationFormUniqueEmail
+
 
 from profiles.models import Profile
 
@@ -12,8 +12,7 @@ class CaptchaTestForm(forms.Form):
     captcha = CaptchaField()
 
 
-class RegistrationFormCaptcha(RegistrationFormUniqueEmail):
-    captcha = CaptchaField(label=_('Captcha'))
+
 
 
 class AuthenticationFormCaptcha(AuthenticationForm):
