@@ -9,8 +9,8 @@
 <!--[if gt IE 8]><!-->
 <html class="no-js"> <!--<![endif]-->
 <head>
-	<!-- Google Tag Manager -->
-	<script>(function (w, d, s, l, i) {
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
         w[l] = w[l] || [];
         w[l].push({
             'gtm.start': new Date().getTime(), event: 'gtm.js'
@@ -22,141 +22,144 @@
             'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
         f.parentNode.insertBefore(j, f);
     })(window, document, 'script', 'dataLayer', 'GTM-WC2Q4XT');</script>
-	<!-- End Google Tag Manager -->
-	<meta charset="utf-8"/>
-	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-	<title>
-		{% block title %}{% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}{% endif %}{% endblock %}
-		{% block title_suffix %}{% endblock %}</title>
+    <!-- End Google Tag Manager -->
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>
+        {% block title %}{% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}{% endif %}{% endblock %}
+        {% block title_suffix %}{% endblock %}</title>
 
-	<link rel="icon" href="{% static 'favicon/favicon.ico' %}">
-	<link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicon/apple-icon-57x57.png' %}">
-	<link rel="apple-touch-icon" sizes="60x60" href="{% static 'favicon/apple-icon-60x60.png' %}">
-	<link rel="apple-touch-icon" sizes="72x72" href="{% static 'favicon/apple-icon-72x72.png' %}">
-	<link rel="apple-touch-icon" sizes="76x76" href="{% static 'favicon/apple-icon-76x76.png' %}">
-	<link rel="apple-touch-icon" sizes="114x114" href="{% static 'favicon/apple-icon-114x114.png' %}">
-	<link rel="apple-touch-icon" sizes="120x120" href="{% static 'favicon/apple-icon-120x120.png' %}">
-	<link rel="apple-touch-icon" sizes="144x144" href="{% static 'favicon/apple-icon-144x144.png' %}">
-	<link rel="apple-touch-icon" sizes="152x152" href="{% static 'favicon/apple-icon-152x152.png' %}">
-	<link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon/apple-icon-180x180.png' %}">
-	<link rel="icon" type="image/png" sizes="192x192" href="{% static 'favicon/android-icon-192x192.png' %}">
-	<link rel="manifest" href="{% static 'favicon/manifest.json' %}">
-	<meta name="msapplication-TileColor" content="#ffffff">
-	<meta name="msapplication-TileImage" content="{% static 'favicon/ms-icon-144x144.png' %}">
-	<meta name="theme-color" content="#ffffff">
-	<meta name="description" content=""/>
+    <link rel="icon" href="{% static 'favicon/favicon.ico' %}">
+    <link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicon/apple-icon-57x57.png' %}">
+    <link rel="apple-touch-icon" sizes="60x60" href="{% static 'favicon/apple-icon-60x60.png' %}">
+    <link rel="apple-touch-icon" sizes="72x72" href="{% static 'favicon/apple-icon-72x72.png' %}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'favicon/apple-icon-76x76.png' %}">
+    <link rel="apple-touch-icon" sizes="114x114" href="{% static 'favicon/apple-icon-114x114.png' %}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{% static 'favicon/apple-icon-120x120.png' %}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{% static 'favicon/apple-icon-144x144.png' %}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'favicon/apple-icon-152x152.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon/apple-icon-180x180.png' %}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'favicon/android-icon-192x192.png' %}">
+    <link rel="manifest" href="{% static 'favicon/manifest.json' %}">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="{% static 'favicon/ms-icon-144x144.png' %}">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content=""/>
 
-	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-	<script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
 
-	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-	      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
-	<!-- Optional theme -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
-	      integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
-	<!-- Latest compiled and minified JavaScript -->
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-	        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-	        crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
 
-	<script src="https://use.fontawesome.com/706b330c41.js"></script>
+    <script src="https://use.fontawesome.com/706b330c41.js"></script>
 
-	<script src="{% static 'lib/audio/audioplayer.js' %}"></script>
-	<link rel="stylesheet" href="{% static 'lib/audio/audioplayer.css' %}">
+    <script src="{% static 'lib/audio/audioplayer.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/audio/audioplayer.css' %}">
 
-	<script>
-    $(document).ready(function(){
-    $('.markdown-block .sqs-block-content h2').addClass('ui-closed').css('cursor','pointer');
-    $(".markdown-block .sqs-block-content h2").nextUntil("h2").slideToggle();
-    $(".markdown-block .sqs-block-content h2").click(function() {
+    <script>
+        $(document).ready(function () {
+            $('.markdown-block .sqs-block-content h2').addClass('ui-closed').css('cursor', 'pointer');
+            $(".markdown-block .sqs-block-content h2").nextUntil("h2").slideToggle();
+            $(".markdown-block .sqs-block-content h2").click(function () {
 
-      $(this).nextUntil("h2").slideToggle();
-      $(this).toggleClass('ui-closed ui-open');
-      });
-    });
+                $(this).nextUntil("h2").slideToggle();
+                $(this).toggleClass('ui-closed ui-open');
+            });
+        });
     </script>
 
-	{# Global stylesheets #}
-	<link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.css' %}">
-	<link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.css' %}">
-	<link rel="canonical" href="http://www.le-francais.ru{{ self.url_path | slice:"5:" }}"/>
+    {# Global stylesheets #}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.css' %}">
+    <link rel="canonical" href="http://www.le-francais.ru{{ self.url_path | slice:"5:" }}"/>
 
-	{% block extra_css %}
-		{# Override this in templates to add extra stylesheets #}
-	{% endblock %}
+    {% block extra_css %}
+        {# Override this in templates to add extra stylesheets #}
+    {% endblock %}
 
-	{% block meta %}
-		{# Override this in templates to add extra stylesheets #}
-	{% endblock %}
+    {% block meta %}
+        {# Override this in templates to add extra stylesheets #}
+    {% endblock %}
 </head>
 
 <body class="{% block body_class %}{% endblock %}" data-spy="scroll" data-target="#myScrollspy" data-offset="15">
 <!— Google Tag Manager (noscript) —>
 <noscript>
-	<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WC2Q4XT"
-	        height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WC2Q4XT"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe>
 </noscript>
 <!— End Google Tag Manager (noscript) —>
 {% wagtailuserbar %}
 
 {% block menu %}
-	{% get_site_root as site_root %}
-	{% top_menu parent=site_root calling_page=self %}
+    {% get_site_root as site_root %}
+    {% top_menu parent=site_root calling_page=self %}
 {% endblock %}
-
-{% block content %}{% endblock %}
-
+<div class="_content">
+    {% block content %}{% endblock %}
+</div>
 {# Global javascript #}
 <script type="text/javascript" src="{% static 'js/le_francais.js' %}"></script>
 
 {% block extra_js %}
-	{# Override this in templates to add extra javascript #}
+    {# Override this in templates to add extra javascript #}
 {% endblock %}
-</body>
-<footer>
-	<nav class="navbar navbar-inverse">
-		<div class="container">
-			<div class="row text-left">
-				<ul class="hr">
-					<li>
-						<a href="/contact">Об авторах</a>
-					</li>
-					<li>
-						<a href="/forum">Форум</a>
-					</li>
-					<li>
-						<a href="/ bourse-de-l-emploi">Биржа труда</a>
-					</li>
-					<li>
-						<a href="/collecte">Поддержать проект</a>
-					</li>
-					<li>
-						<a href="/terms_of_use">Условия использования</a></li>
-					<li><a href="//vk.com/le_francais_ru" class="btn btn-social-icon btn-sm btn-vk"><span
-							class="fa fa-vk"></span></a>
-					</li>
-					<li><a href="//www.facebook.com/groups/lefrancais.ru/"
-					       class="btn btn-social-icon btn-sm btn-facebook">
-						<span class="fa fa-facebook"></span></a>
-					</li>
-					<li>
-						<a href="//plus.google.com/+Le-francaisRu" class="btn btn-social-icon btn-sm btn-google">
-							<span class="fa fa-google-plus"></span>
-						</a>
-					</li>
-					<li>
-						<a href="//twitter.com/le_francais_ru" class="btn btn-social-icon btn-sm btn-twitter">
-							<span class="fa fa-twitter"></span>
-						</a>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</nav>
-	</div>
+<footer class="footer">
+    <nav class="navbar navbar-inverse">
+        <div class="container">
+            <div class="row text-left">
+                <ul class="hr">
+                    <li>
+                        <a href="/contact">Об авторах</a>
+                    </li>
+                    <li>
+                        <a href="/forum">Форум</a>
+                    </li>
+                    <li>
+                        <a href="/ bourse-de-l-emploi">Биржа&nbsp;труда</a>
+                    </li>
+                    <li>
+                        <a href="/collecte">Поддержать&nbsp;проект</a>
+                    </li>
+                    <li>
+                        <a href="/terms_of_use">Условия спользования</a></li>
+                    <li><a href="//vk.com/le_francais_ru" class="btn btn-social-icon btn-sm btn-vk"
+                           target="_blank"><span
+                            class="fa fa-vk"></span></a>
+                    </li>
+                    <li><a href="//www.facebook.com/groups/lefrancais.ru/"
+                           class="btn btn-social-icon btn-sm btn-facebook" target="_blank">
+                        <span class="fa fa-facebook"></span></a>
+                    </li>
+                    <li>
+                        <a href="//plus.google.com/+Le-francaisRu" class="btn btn-social-icon btn-sm btn-google"
+                           target="_blank">
+                            <span class="fa fa-google-plus"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="//twitter.com/le_francais_ru" class="btn btn-social-icon btn-sm btn-twitter"
+                           target="_blank">
+                            <span class="fa fa-twitter"></span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    </div>
 </footer>
+</body>
 </html>
