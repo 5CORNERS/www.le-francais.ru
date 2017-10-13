@@ -3,199 +3,185 @@
 {% load static site_tags %}
 
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}
-	{{ self.seo_title }}{% endif %}{% endblock %}
+    {{ self.seo_title }}{% endif %}{% endblock %}
 
 {% block body_class %}template-homepage{% endblock %}
 
 {% block extra_js %}
-	<script type="text/javascript"
-	        src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
 {% endblock %}
 
 {% block extra_css %}
-	<link rel="stylesheet" href="{% static 'css/lesson.css' %}">
-	<link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/lesson.css' %}">
+    <link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
 {% endblock %}
 
 {% block meta %}
-	<meta name="nav-root-id" data-value="{{ self.get_nav_root.id }}">
-	<meta name="page-id" data-value="{{ self.id }}">
+    <meta name="nav-root-id" data-value="{{ self.get_nav_root.id }}">
+    <meta name="page-id" data-value="{{ self.id }}">
 {% endblock %}
 
 {% block content %}
 
-	{% assign url request.build_absolute_uri %}
-	<div class="container-fluid">
-		<div class="row">
-			<div class="sidebar-wrapper col-sm-3 _no-padding">
-				<div id="sidebar"></div>
-			</div>
-			<button class="sidebar-collapse-button" type="button" data-toggle="toggle"
-			        data-target=".sidebar-wrapper" aria-controls="sidebar" aria-expanded="false"
-			        aria-label="Toggle sidebar">
-				<div class="arrow-icon">
-			</button>
-			<div class="col-12 col-sm-7 main">
-				<div class="row">{% breadcrumb calling_page=self %}
-					<h1>{{ page.title }}</h1>
-					{% if self.audio_material != 'None' %}
-						<div class="block-audio">
-							<audio data-downloadable>
-								<source src="
+    {% assign url request.build_absolute_uri %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="sidebar-wrapper col-xs-3 _no-padding">
+                <div id="sidebar"></div>
+            </div>
+            <button class="sidebar-collapse-button" type="button" data-toggle="toggle"
+                    data-target=".sidebar-wrapper" aria-controls="sidebar" aria-expanded="false"
+                    aria-label="Toggle sidebar">
+                <div class="arrow-icon">
+            </button>
+            <div class="col-12 col-sm-7 main">
+                <div class="row">{% breadcrumb calling_page=self %}
+                    <h1>{{ page.title }}</h1>
+                    {% if self.audio_material != 'None' %}
+                        <div class="block-audio">
+                            <audio data-downloadable>
+                                <source src="
+                                        {% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}"
+                                        type="audio/mpeg">
+                            </audio>
+                        </div>
+                    {% endif %}
+                    <ul class="nav nav-tabs">
+                        {% if self.comments_for_lesson %}
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#comments_for_lesson" role="tab"
+                                   aria-controls="body">
+                                    Комментарии к уроку
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if self.body %}
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#body" role="tab" aria-controls="body">
+                                    Диалог урока
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if self.dictionary %}
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#dictionary" role="tab"
+                                   aria-controls="body">
+                                    Словарик
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if self.summary %}
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#resume" role="tab" aria-controls="body">
+                                    Конспект
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if self.repetition_material %}
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#revision" role="tab"
+                                   aria-controls="body">
+                                    Материал для повторения
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% for child_value in self.other_tabs %}
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#{{ child_value.value.href }}" role="tab"
+                                   aria-controls="{{ child_value.value.href }}">{{ child_value.value.title }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
 
+                    <div class="tab-content">
+                        {% assign pane_class "tab-pane" %}
+                        {% if self.comments_for_lesson %}
+                            <div id="comments_for_lesson" class="{{ pane_class }}"
+                                 role="tabpanel">{{ self.comments_for_lesson }}</div>
+                            {% assign pane_class "tab-pane" %}
+                        {% endif %}
+                        {% if self.body %}
+                            <div id="body" class="{{ pane_class }}" role="tabpanel">{{ self.body }}</div>
+                            {% assign pane_class "tab-pane" %}
+                        {% endif %}
+                        {% if self.dictionary %}
+                            <div id="dictionary" class="{{ pane_class }}" role="tabpanel">{{ self.dictionary }}</div>
+                            {% assign pane_class "tab-pane" %}
+                        {% endif %}
+                        {% if self.summary %}
+                            <div id="resume" class="{{ pane_class }}" role="tabpanel">
+                                <div>
+                                    <iframe width="100%" height="640" frameborder="0"
+                                            src="http://docs.google.com/gview?url=https://files.le-francais.ru{{ self.summary }}&embedded=true"></iframe>
+                                </div>
+                            </div>
+                            {% assign pane_class "tab-pane" %}
+                        {% endif %}
+                        {% if self.repetition_material %}
+                            <div id="revision" class="{{ pane_class }}" role="tabpanel">
+                                <div>
+                                    <iframe width="100%" height="640" frameborder="0"
+                                            src="http://docs.google.com/gview?url=https://files.le-francais.ru{{ self.repetition_material }}&embedded=true"></iframe>
+                                </div>
+                            </div>
+                            {% assign pane_class "tab_pane" %}
+                        {% endif %}
+                        {% for child_value in self.other_tabs %}
+                            <div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
+                                {{ child_value.value.body }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="row controls text-center ">
+                    {% assign prev self.get_prev_sibling %}
+                    {% assign next self.get_next_sibling %}
+                    {% if prev.content_type.name == 'lesson page' %}
+                        <a class="pull-left btn btn-default" href="{{ self.get_prev_sibling.get_url }}"> Предыдущий
+                            урок </a>
+                    {% endif %}
 
+                    {% if next.content_type.name == 'lesson page' %}
+                        <a class="pull-right btn btn-default" href="{{ self.get_next_sibling.get_url }}"> Следующий
+                            урок </a>
+                    {% endif %}
 
+                </div>
 
-
-
-
-
-
-
-
-
-										{% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}"
-								        type="audio/mpeg">
-							</audio>
-						</div>
-					{% endif %}
-					<ul class="nav nav-tabs">
-						{% if self.comments_for_lesson %}
-							<li class="nav-item">
-								<a class="nav-link" data-toggle="tab" href="#comments_for_lesson" role="tab"
-								   aria-controls="body">
-									Комментарии к уроку
-								</a>
-							</li>
-						{% endif %}
-						{% if self.body %}
-							<li class="nav-item">
-								<a class="nav-link" data-toggle="tab" href="#body" role="tab" aria-controls="body">
-									Диалог урока
-								</a>
-							</li>
-						{% endif %}
-						{% if self.dictionary %}
-							<li class="nav-item">
-								<a class="nav-link" data-toggle="tab" href="#dictionary" role="tab"
-								   aria-controls="body">
-									Словарик
-								</a>
-							</li>
-						{% endif %}
-						{% if self.summary %}
-							<li class="nav-item">
-								<a class="nav-link" data-toggle="tab" href="#resume" role="tab" aria-controls="body">
-									Конспект
-								</a>
-							</li>
-						{% endif %}
-						{% if self.repetition_material %}
-							<li class="nav-item">
-								<a class="nav-link" data-toggle="tab" href="#revision" role="tab"
-								   aria-controls="body">
-									Материал для повторения
-								</a>
-							</li>
-						{% endif %}
-						{% for child_value in self.other_tabs %}
-							<li class="nav-item">
-								<a class="nav-link" data-toggle="tab" href="#{{ child_value.value.href }}" role="tab"
-								   aria-controls="{{ child_value.value.href }}">{{ child_value.value.title }}</a>
-							</li>
-						{% endfor %}
-					</ul>
-
-					<div class="tab-content">
-						{% assign pane_class "tab-pane" %}
-						{% if self.comments_for_lesson %}
-							<div id="comments_for_lesson" class="{{ pane_class }}"
-							     role="tabpanel">{{ self.comments_for_lesson }}</div>
-							{% assign pane_class "tab-pane" %}
-						{% endif %}
-						{% if self.body %}
-							<div id="body" class="{{ pane_class }}" role="tabpanel">{{ self.body }}</div>
-							{% assign pane_class "tab-pane" %}
-						{% endif %}
-						{% if self.dictionary %}
-							<div id="dictionary" class="{{ pane_class }}" role="tabpanel">{{ self.dictionary }}</div>
-							{% assign pane_class "tab-pane" %}
-						{% endif %}
-						{% if self.summary %}
-							<div id="resume" class="{{ pane_class }}" role="tabpanel">
-								<div>
-									<object data="//files.le-francais.ru{{ self.summary }}" type="application/pdf"
-									        class="tabpanel_pdf">
-										alt : <a href="//files.le-francais.ru{{ self.summary }}">summary.pdf</a>
-									</object>
-								</div>
-							</div>
-							{% assign pane_class "tab-pane" %}
-						{% endif %}
-						{% if self.repetition_material %}
-							<div id="revision" class="{{ pane_class }}" role="tabpanel">
-								<div>
-									<object data="//files.le-francais.ru{{ self.repetition_material }}"
-									        type="application/pdf" class="tabpanel_pdf">
-										alt : <a href="//files.le-francais.ru{{ self.repetition_material }}">repetition_material.pdf</a>
-									</object>
-								</div>
-							</div>
-							{% assign pane_class "tab_pane" %}
-						{% endif %}
-						{% for child_value in self.other_tabs %}
-							<div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
-								{{ child_value.value.body }}
-							</div>
-						{% endfor %}
-					</div>
-				</div>
-				<div class="row controls text-center ">
-					{% assign prev self.get_prev_sibling %}
-					{% assign next self.get_next_sibling %}
-					{% if prev.content_type.name == 'lesson page' %}
-						<a class="pull-left btn btn-default" href="{{ self.get_prev_sibling.get_url }}"> Предыдущий
-							урок </a>
-					{% endif %}
-
-					{% if next.content_type.name == 'lesson page' %}
-						<a class="pull-right btn btn-default" href="{{ self.get_next_sibling.get_url }}"> Следующий
-							урок </a>
-					{% endif %}
-
-				</div>
-
-				{% if self.has_own_topic %}
-					<div class="row" style="margin: auto">{% block extra_head_content %}
-						<link rel="stylesheet" type="text/css" href="{% static 'css/forum.css' %}">
-					{% endblock %}
-						<div class="block-forum">
-							<div class="topic" id="topic">
-								<h1>Вопросы и комментарии к уроку.</h1>
-								<h6>Не стесняйтесь задавать вопросы и комментировать. </h6>
-								<div class="posts">
-									{% with self.topic.head as post %}
-										<div class="first_post">{% include "related_post.html" %}</div>
-									{% endwith %}
-									<div class="text-left">Последний комментарий к уроку.</div>
-									{% if self.topic.last_post.id == topic.head.id %}
-										{% with self.topic.last_post as post %}
-											{% if not post == self.topic.head %}
-												<div class="last_post">{% include "related_post.html" %}</div>
-											{% endif %}
-										{% endwith %}
-									{% else %}
-										<br>
-										<div class="text-left">Пока нет. Станьте первым! :)</div>
-										<br>
-									{% endif %}
-								</div>
-								<a class="btn btn-primary" href="{{ self.topic.get_absolute_url }}" target="_blank">Добавте свой комментарий</a>
-							</div>
-						</div>
-					</div>
-				{% endif %}
-			</div>
-		</div>
-	</div>
+                {% if self.has_own_topic %}
+                    <div class="row">
+                        {% block extra_head_content %}
+                            <link rel="stylesheet" type="text/css" href="{% static 'css/forum.css' %}">
+                        {% endblock %}
+                        <div class="block-forum">
+                            <div class="topic" id="topic" style="padding: 0px">
+                                <h1>Вопросы и комментарии к уроку.</h1>
+                                <h6>Не стесняйтесь задавать вопросы и комментировать. </h6>
+                                <div class="posts">
+                                    {% with self.topic.head as post %}
+                                        <div class="first_post">{% include "related_post.html" %}</div>
+                                    {% endwith %}
+                                    <div class="text-left">Последний комментарий к уроку.</div>
+                                    {% if self.topic.last_post.id != topic.head.id %}
+                                        {% with self.topic.last_post as post %}
+                                            {% if not post == self.topic.head %}
+                                                <div class="last_post">{% include "related_post.html" %}</div>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% else %}
+                                        <br>
+                                        <div class="text-left">Пока нет. Станьте первым! :)</div>
+                                        <br>
+                                    {% endif %}
+                                </div>
+                                <a class="btn btn-primary" href="{{ self.topic.get_absolute_url }}" target="_blank">Добавте
+                                    свой комментарий</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 {% endblock %}
