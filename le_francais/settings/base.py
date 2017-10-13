@@ -26,35 +26,44 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 # Application definition
 
 INSTALLED_APPS = [
-    'home',
-    'search',
+	'home',
+	'search',
 	'old_site',
 
-    'wagtail.wagtailforms',
-    'wagtail.wagtailredirects',
-    'wagtail.wagtailembeds',
-    'wagtail.wagtailsites',
-    'wagtail.wagtailusers',
-    'wagtail.wagtailsnippets',
-    'wagtail.wagtaildocs',
-    'wagtail.wagtailimages',
-    'wagtail.wagtailsearch',
-    'wagtail.wagtailadmin',
-    'wagtail.wagtailcore',
+	'wagtail.wagtailforms',
+	'wagtail.wagtailredirects',
+	'wagtail.wagtailembeds',
+	'wagtail.wagtailsites',
+	'wagtail.wagtailusers',
+	'wagtail.wagtailsnippets',
+	'wagtail.wagtaildocs',
+	'wagtail.wagtailimages',
+	'wagtail.wagtailsearch',
+	'wagtail.wagtailadmin',
+	'wagtail.wagtailcore',
 
-    'modelcluster',
-    'taggit',
+	'modelcluster',
+	'taggit',
 	'robots',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.sites',
+	'django.contrib.admin',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
+	'django.contrib.sites',
 	'django.contrib.sitemaps',
-    'bootstrapform',
+	'bootstrapform',
 	'django.core.mail',
+
+	'allauth',
+	'allauth.account',
+
+	'allauth.socialaccount',
+	'allauth.socialaccount.providers.google',
+	'allauth.socialaccount.providers.vk',
+	'allauth.socialaccount.providers.facebook',
+	'allauth.socialaccount.providers.mailru',
 
 	'custom_user',
 	'pybb',
@@ -65,10 +74,8 @@ INSTALLED_APPS = [
 	'pure_pagination',
 	'sorl.thumbnail',
 	'captcha',
-	'registration',
 	'crispy_forms',
 
-	'social_django',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -85,7 +92,7 @@ MIDDLEWARE_CLASSES = [
 	'wagtail.wagtailredirects.middleware.RedirectMiddleware',
 
 	'pybb.middleware.PybbMiddleware',
-	'social_django.middleware.SocialAuthExceptionMiddleware',
+	# 'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'le_francais.urls'
@@ -106,8 +113,8 @@ TEMPLATES = [
 				'django.contrib.messages.context_processors.messages',
 
 				'pybb.context_processors.processor',
-				'social_django.context_processors.backends',
-				'social_django.context_processors.login_redirect',
+				# 'social_django.context_processors.backends',
+				# 'social_django.context_processors.login_redirect',
 			],
 		},
 	},
@@ -119,10 +126,10 @@ WSGI_APPLICATION = 'le_francais.wsgi.application'
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'mydatabase',
-    }
+	'default': {
+		'ENGINE': 'django.db.backends.sqlite3',
+		'NAME': 'mydatabase',
+	}
 }
 
 db_from_env = dj_database_url.config(conn_max_age=500)
@@ -132,18 +139,18 @@ DATABASES['default'].update(db_from_env)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 20971520
 FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520
 
-
 # A list of authentication backend classes to use when attempting to authenticate a user.
 AUTH_USER_MODEL = 'custom_user.User'
 
 AUTHENTICATION_BACKENDS = (
-	'social_core.backends.google.GoogleOAuth2',
-	'social_core.backends.vk.VKOAuth2',
-	'social_core.backends.yandex.YandexOAuth2',
-	'social_core.backends.mailru.MailruOAuth2',
-	'social_core.backends.facebook.FacebookOAuth2',
+	# 'social_core.backends.google.GoogleOAuth2',
+	# 'social_core.backends.vk.VKOAuth2',
+	# 'social_core.backends.yandex.YandexOAuth2',
+	# 'social_core.backends.mailru.MailruOAuth2',
+	# 'social_core.backends.facebook.FacebookOAuth2',
 
 	'django.contrib.auth.backends.ModelBackend',
+	'allauth.account.auth_backends.AuthenticationBackend',
 )
 
 # Internationalization
@@ -174,12 +181,11 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/accounts/login'
 
 LOGIN_REDIRECT_URL = '/'
 
 LOGOUT_REDIRECT_URL = '/login/'
-
 
 # Robots settings
 
@@ -188,16 +194,19 @@ ROBOTS_USE_HOST = False
 
 # PyBBM settings
 
+PYBB_FORUM_PAGE_SIZE = 60
+PYBB_TOPIC_PAGE_SIZE = 30
 PYBB_MARKUP_ENGINES_PATHS = {
 	'custom_markdown': 'forum.markup_engines.CustomMarkdownParser'
 }
 PYBB_MARKUP = 'custom_markdown'
 PYBB_TEMPLATE = 'forum.html'
 PYBB_NICE_URL = False
+
 # disable pybb smiles
 PYBB_SMILES = dict()
 # disable auto subscribe
-PYBB_DEFAULT_AUTOSUBSCRIBE = False
+PYBB_DEFAULT_AUTOSUBSCRIBE = True
 PYBB_DEFAULT_TITLE = 'Forum'
 PYBB_PERMISSION_HANDLER = 'forum.permissions.CustomPermissionHandler'
 
@@ -224,9 +233,46 @@ ALLOWED_HOSTS = [
 	'192.168.0.27'
 ]
 
-# Django-registration settings
+# Allauth settings
 
-ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window;
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
+SOCIALACCOUNT_PROVIDERS = {
+	'facebook': {
+		'METHOD': 'oauth2',
+		'SCOPE': ['email', 'public_profile'],
+		'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+		'INIT_PARAMS': {'cookie': True},
+		'FIELDS': [
+			'id',
+			'email',
+			'name',
+			'first_name',
+			'last_name',
+			'verified',
+			'locale',
+			'timezone',
+			'link',
+			'gender',
+			'updated_time',
+		],
+		'EXCHANGE_TOKEN': True,
+		'LOCALE_FUNC': lambda request: 'en_US',
+		'VERIFIED_EMAIL': False,
+		'VERSION': 'v2.5',
+	},
+	'google': {
+		'SCOPE': [
+			'profile',
+			'email',
+		],
+		'AUTH_PARAMS': {
+			'access_type': 'online',
+		}
+	}
+}
 
 # Social-Auth settings
 
