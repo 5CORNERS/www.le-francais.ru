@@ -19,7 +19,6 @@ class CustomMarkdownParser(MarkdownParser):
 				'pymdownx.tasklist',
 				'pymdownx.details',
 				'pymdownx.superfences',
-				'pymdownx.details',
 			],
 			safe_mode='escape',
 		)
