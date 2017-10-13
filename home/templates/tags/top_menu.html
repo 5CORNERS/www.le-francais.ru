@@ -69,7 +69,7 @@
 							<li class="divider"></li>
 
 							<li><a>
-								<form action="{% url 'auth_logout' %}?next={{ request.path }}"
+								<form action="{% url 'account_logout' %}?next={{ request.path }}"
 								      method="post">{% csrf_token %}
 									<button class="btn btn-logout">{% trans "Logout" %}</button>
 								</form>
@@ -80,15 +80,15 @@
 				{% else %}
 
 					<li class="dropdown">
-						<a href="{% url 'auth_login' %}?next={{ request.path }}" class="dropdown-toggle"
+						<a href="{% url 'account_login' %}?next={{ request.path }}" class="dropdown-toggle"
 						   data-toggle="dropdown">
 							Войти
 							<b class="caret"></b>
 						</a>
 						<ul class="dropdown-menu">
-							<li><a href="{% url 'auth_login' %}?next={{ request.path }}">{% trans "Login" %}</a></li>
+							<li><a href="{% url 'account_login' %}?next={{ request.path }}">{% trans "Login" %}</a></li>
 							<li>
-								<a href="{% url 'registration_register' %}?next={{ request.path }}">{% trans "Registration" %}</a>
+								<a href="{% url 'account_signup' %}?next={{ request.path }}">{% trans "Registration" %}</a>
 							</li>
 						</ul>
 					</li>
