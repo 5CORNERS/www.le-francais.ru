@@ -92,13 +92,13 @@
             {% include "pybb/avatar.html" with profile=post.user.pybb_profile %}
             <div>
                 {% trans "Topics" %}:
-                <a href="{% url 'user_topics' post.user %}">
+                <a href="{% url 'user_topics' post.user.username %}">
                     {{ post.user.topic_set.count }}
                 </a>
             </div>
             <div>
                 {% trans "Posts" %}:
-                <a href="{% url 'user_posts' post.user %}">
+                <a href="{% url 'user_posts' post.user.username %}">
                     {{ post_user_profile.post_count }}
                 </a>
             </div>

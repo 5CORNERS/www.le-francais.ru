@@ -1,7 +1,7 @@
 {% extends 'pybb/base.html' %}
 {% load pybb_tags i18n %}
 
-{% block title %}{{ target }} {% trans "topics" %}{% endblock title %}
+{% block title %}{{ target.username }} {% trans "topics" %}{% endblock title %}
 
 
 {% block breadcrumb %}
