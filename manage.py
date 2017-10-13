@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 sys.tracebacklimit = 30000
 
+sys.tracebacklimit = 30000
 if __name__ == "__main__":
 	os.environ.setdefault("DJANGO_SETTINGS_MODULE", "le_francais.settings.dev")
 
