@@ -1,9 +1,23 @@
 {% load wagtailcore_tags %}
+{% load site_tags static %}
 
 <ol class="breadcrumb">
     {% for breadcrumb_page in breadcrumb_pages %}
+
+        {% if breadcrumb_page.specific.menu_title %}
+            {% assign title breadcrumb_page.specific.menu_title %}
+        {% else %}
+            {% assign title breadcrumb_page.title %}
+        {% endif %}
+
         <li class="breadcrumb-item {% if calling_page.url == breadcrumb_page.url %}active{% endif %}">
-            <a href="{% pageurl breadcrumb_page %}">{{ breadcrumb_page.title }}</a>
+            {% if breadcrumb_page.specific.is_selectable %}
+                <a href="{% pageurl breadcrumb_page %}">{{ title }}</a>
+            {% else %}
+                {{ title }}
+            {% endif %}
         </li>
+
     {% endfor %}
 </ol>
+
