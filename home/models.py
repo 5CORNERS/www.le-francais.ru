@@ -35,9 +35,13 @@ def get_nav_root(page: Page) -> Page:
 
 
 class IndexPage(Page):
+    is_selectable = BooleanField(default=True)
     content_panels = Page.content_panels + [
         InlinePanel('related_pages', label="Related pages"),
         InlinePanel('related_reviews', label="Related reviews"),
+    ]
+    settings_panels = Page.settings_panels + [
+        FieldPanel('is_selectable')
     ]
 
 
