@@ -47,14 +47,17 @@ def authorized(request):
 
 def get_navigation_object_from_page(page: Page, current_page_id: int) -> dict:
 	page_object = {
-		"text": page.title,
+		"text": str(page.title),
 		"nodes": [],
 		"href": page.get_url(),
 		"state": {}
 	}
 	if isinstance(page.specific, PageWithSidebar) or isinstance(page.specific, LessonPage):
-		if page.specific.menu_title != '':
-			page_object["text"] = page.specific.menu_title
+		menu_title = page.specific.menu_title
+		if not isinstance(menu_title, str):
+			menu_title = menu_title.decode()
+		if menu_title != '':
+			page_object["text"] = menu_title
 		if not page.specific.is_selectable:
 			page_object["selectable"] = False
 	if page.id == current_page_id:

@@ -462,3 +462,16 @@ td.forum-last-post, td.topic-last-post {
         background: url("/static/images/chevron-left.png");
     }
 }
+
+
+@media (max-width: 992px) {
+    ._content {
+        margin-top: 50px;
+    }
+}
+
+@media (max-width: 768px) {
+    ._content {
+        margin-top: 0;
+    }
+}
