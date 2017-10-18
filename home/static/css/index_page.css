@@ -60,6 +60,18 @@ a.page-reference:hover .page-reference_title {
 
 }
 
+@media (max-width: 992px) {
+    ._content {
+        margin-top: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    ._content {
+        margin-top: 0;
+    }
+}
+
 .page-reference_text {
     margin-top: 30px;
     font-size: 14px;
