@@ -423,7 +423,7 @@ td.forum-last-post, td.topic-last-post {
 
 @media (max-width: 768px) {
     .sidebar-wrapper {
-        position: absolute;
+        position: fixed;
         display: none;
     }
 
