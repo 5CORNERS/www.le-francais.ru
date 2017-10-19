@@ -16,10 +16,4 @@ venv
 media
 node_modules/
 /old_site/templates/*
-home/static/components/bootstrap-treeview/
-home/static/components/bootstrap/
-home/static/components/jquery/
-home/static/css/css_adapter.py
-pandoc-1.19.2.1-windows.msi
 forum/dat
-home/migrations/0003_indexreviewsreferences.py
