@@ -7,8 +7,13 @@ body {
     flex-direction: column;
 }
 
-image {
+.footer {
+    margin-top: 20px;
+}
+
+img {
     max-width: 100%;
+    height: auto;
 }
 
 iframe {
@@ -421,7 +426,7 @@ td.forum-last-post, td.topic-last-post {
     display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
     .sidebar-wrapper {
         position: fixed;
         display: none;
@@ -470,7 +475,7 @@ td.forum-last-post, td.topic-last-post {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
     ._content {
         margin-top: 0;
     }

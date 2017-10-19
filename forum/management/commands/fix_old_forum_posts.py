@@ -2,7 +2,9 @@ import re
 
 import pypandoc
 from django.core.management import BaseCommand
-from pybb.models import Category
+from pybb.models import Category, Post
+
+from custom_user.models import User
 
 NAME2CODE_POINT = {
 	r'AElig': 0x00c6,  # latin capital letter AE = latin capital ligature AE, U+00C6 ISOlat1
@@ -369,25 +371,154 @@ UNICODE_ESCAPE = {
 	'\\u045a': 'њ',
 }
 
+EMAIL_REGEX = r'([a-zA-Z0-9_.+-]+\@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)'
+
+LINE_WITH_EMAIL_REGEX = r'(^[^\n\r]*' + EMAIL_REGEX + r'[^\n\r]*)'
+
+USERNAME_FROM_LINE = r'((\s|пользователь)([А-яA-Za-z0-9_\s])+(?=(\s<{0,1}[a-zA-Z0-9_.+-]+\@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+>{0,1})))'
+
+
+class Table:
+	post_lines_table = {}
+	users_table = {}
+
+	def __init__(self, category):
+		for forum in category.forums.all():
+			for topic in forum.topics.all():
+				for post in topic.posts.all():
+					self.build_table(post)
+
+	def build_table(self, post):
+		post_row = []
+		for match in re.finditer(LINE_WITH_EMAIL_REGEX, post.body, flags=re.M):
+			line_start, line_end = int(match.start()), int(match.end())
+			line = post.body[line_start:line_end]
+			email, email_start, email_end = get_substring(EMAIL_REGEX, line)
+			raw_username = ''
+			try:
+				raw_username = re.search(USERNAME_FROM_LINE, line, flags=re.M | re.I).group(1)
+				username = raw_username.replace('пользователь', '').replace(' от', '').strip()
+			except:
+				username = ''
+
+			self.add_user(username, email)
+
+			line_row = {'line': line, 'line_start': line_start, 'line_end': line_end, 'email': email,
+			            'email_start': email_start, 'email_end': email_end, 'username': username,
+			            'raw_username': raw_username}
+
+			post_row.append(line_row)
+		if post_row != []:
+			self.post_lines_table[str(post.id)] = post_row
+
+	def add_user(self, username, email):
+		if username == '':
+			try:
+				username = User.objects.get(email=email).username
+			except:
+				pass
+		if email in self.users_table.keys():
+			if self.users_table[email][0] != '':
+				self.users_table[email][0] = username
+				self.users_table[email][1] += 1
+		else:
+			self.users_table[email] = [str(), int()]
+			self.users_table[email][0] = username
+			self.users_table[email][1] = 0
+
+	def email_handler(self):
+		for id, post_row in self.post_lines_table.items():
+			for line_row in post_row:
+				email = line_row['email']
+				if self.users_table[line_row['email']][0] == '':  # Проверяем наличие username в сводной таблице пользователей
+					line_row['email'] = hide_email(line_row['email'])  # Если нет скрываем email точками
+				else:
+					line_row['email'] = self.users_table[line_row['email']][0]  # Если есть заменяем email на username из таблицы
+
+				if line_row['username'] == '':  # Проверяем наличее username в строке
+					line_row['line'] = line_row['line'][:line_row['email_start']] + line_row['email'] \
+					                   + line_row['line'][line_row['email_end']:]  # Если нет -- смело пишем новый "email"
+				else:
+					line_row['line'] = line_row['line'][:line_row['email_start']] \
+					                   + line_row['line'][line_row['email_end']:]  # Если есть -- вырезаем email
+
+				if not bool(re.search(r'^.*\s>.+$', line_row['line'])):  # Проверяем на шевроны в начале строки
+					# Если их нет
+					if not bool(re.search(r'^\?\?\?.+$', line_row['line'])):  # Проверяем на ???
+						line_row['line'] = '\n???- \"' + line_row['line'] + '\"\n'  # Если нет добавляем ???
+
+	def save_to_post(self):
+		for id, post_row in self.post_lines_table.items():
+			for line_row in reversed(post_row):
+				line_start = line_row['line_start']
+				line_end = line_row['line_end']
+				post = Post.objects.get(id=id)
+				post.body = post.body[:line_start] + line_row['line'] + post.body[line_end:]
+				post.body = re.sub(r'\<\>', '', post.body)
+
 
 class Command(BaseCommand):
 	def handle(self, *args, **options):
 		category = Category.objects.get(name="Old")
-		for forum in category.forums.all():
-			for topic in forum.topics.all():
-				for post in topic.posts.all():
-					print('\nCategory: %s\nForum: %s\nTopic: %s\nPost: %s' % (
-						category.name, forum.name, topic.id, post.id))
-					fix_post(post)
-					print(str(post.body))
+		# table = Table(category)
+		# print('Table has been commpleted')
+		# table.email_handler()
+		# table.save_to_post()
+		print_all_links(category)
+		# find_wrong_details(category)
+
+
+def get_substring(pattern, string):
+	match_object = re.search(pattern, string)
+	substring_start, substring_end = int(match_object.start()), int(match_object.end())
+	substring = match_object.group(1)
+	return substring, substring_start, substring_end
+
+def find_wrong_details(category):
+	pattern = r'(^(le|sur)\s.+?\n{0,1}.*?(écrit|йcrit)\s:)'
+	for forum in category.forums.all():
+		for topic in forum.topics.all():
+			for post in topic.posts.all():
+				post_rows = []
+				for match in re.finditer(pattern, post.body, flags=re.I|re.M):
+					line_start, line_end = int(match.start()), int(match.end())
+					line = post.body[line_start:line_end]
+					line = '???- "' + re.sub(r'\:$', '. . .', line) + '\"'
+					post_row = (line_start, line_end, line)
+					post_rows.append(post_row)
+				if post_rows != []:
+					for line in reversed(post_rows):
+						post.body = post.body[:line[0]] + line[2] + post.body[line[1]:]
+						post.save()
+
+def print_all_links(category):
+	for forum in category.forums.all():
+		for topic in forum.topics.all():
+			print('http://192.168.0.27:8000/forum/topic/' + str(
+					topic.id) + '\t' + topic.name + '\t' + topic.forum.category.name +'\t' + str(topic.post_count))
+
+
+def hide_email(email):
+	username, username_start, username_end = get_substring(r'([a-zA-Z0-9_.+-]+(?=\@))', email)
+	if bool(re.search(r'\.\.\.', username)):
+		return email
+	new_username = ''
+	if len(username) > 3:
+		for i in range(len(username)):
+			if i >= 3:
+				new_username += '#'
+			else:
+				new_username += username[i]
+		return re.sub('\#+', '...', new_username) + email[username_end:]
+	else:
+		return '...' + email[username_end:]
 
 
 def fix_post(post):
 	post.body = text_decode(post.body)
-	# post.body = hide_emails(post.body)
-	post.body = spoiler_bloquote(post.body)
+	# post.body = spoiler_bloquote(post.body)
 	post.body = del_phrases(post.body)
-	print("Post fixed")
+	pass
 
 
 def text_decode(text):
@@ -428,17 +559,8 @@ def is_html(text):
 	return True if re.search(r'<(div|/div|a|b|p|i|blockquote)>', text) else False
 
 
-def hide_emails(text):
-	regex = re.compile(r"(<*[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+>*)")
-	emails = regex.findall(text)
-	for email in emails:
-		email = re.sub(r"(?<=\<)(.+(?=\@))", "[hidden]", email)
-		text = re.sub(regex, email, text, 1)
-	return text
-
-
-def spoiler_bloquote(text: str):
-	head_raw = r'((le\s[\s\S]+?(écrit|йcrit):$)|(on\s[\s\S]+?wrote:$)|((понедельник|вторник|среда|четверг|пятница|суббота|воскресенье)[\s\S]+?написал:$)|(El\s[\s\S]+?escribió:$))'
+def spoiler_bloquote(text):
+	head_raw = r'(^(((le|sur)\s.*?\n{0,1}.*?(écrit|йcrit)\s:$)|(on\s.*?\n{0,1}.*?wrote:$)|((([0-9]{2}\s(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря))|понедельник|вторник|среда|четверг|пятница|суббота|воскресенье).*?\n{0,1}.*?написал:$)|(El\s.*?\n{0,1}.*?escribió:$)|(201[0-7].*?\n{0,1}.*?(<*[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+>*):{0,1}$)))'
 	for head in re.finditer(
 			head_raw,
 			text, flags=(re.M | re.I)
@@ -446,6 +568,8 @@ def spoiler_bloquote(text: str):
 		s = int(head.start())
 		e = int(head.end())
 		text = text[:s] + text[s:e].replace('\n', ' ') + text[e:]
+		text = text[:s] + text[s:e].replace('<', '') + text[e:]
+		text = text[:s] + text[s:e].replace('>', '') + text[e:]
 	text = re.sub(
 		head_raw,
 		'\n' + r'???- "\1"',
@@ -459,6 +583,7 @@ def del_phrases(text: str):
 	opt_out_regex = r'''\n<http.+?(opt_out|optout)>\.{0,1}'''
 	text = re.sub(regex, "", text, flags=re.M)
 	text = re.sub(opt_out_regex, "", text)
+	print(re.findall(regex, text, flags=re.I | re.M))
 	return text
 
 
@@ -467,3 +592,47 @@ def escape_special_characters(text):
 		char = chr(NAME2CODE_POINT[name])
 		text = re.sub(r'\&' + name + r'\;', char, text)
 	return text
+
+
+def print_details_head(text, id):
+	regex = re.compile(
+		r"(^(((le|sur)\s.*?\n{0,1}.*?(écrit|йcrit):$)|(on\s.*?\n{0,1}.*?wrote:$)|((([0-9]{2}\s(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря))|понедельник|вторник|среда|четверг|пятница|суббота|воскресенье).*?\n{0,1}.*?написал:$)|(El\s.*?\n{0,1}.*?escribió:$)|(201[0-7].*?\n{0,1}.*?(<*[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+>*):{0,1}$)))",
+		flags=re.M | re.I)
+	for head in re.finditer(regex, text):
+		if head:
+			print(str(id) + '\t' + head.group(0))
+
+
+def rewrite_details_head(text):
+	heads = re.finditer(r'^\?\?\?.*$', text, flags=re.M)
+	for head in heads:
+		s = int(head.start())
+		e = int(head.end())
+		new_head = text[s:e]
+		new_head = re.sub(r'\sпользователь', '', new_head, flags=re.I)
+		new_head = re.sub(r'\:\"', '\"', new_head)
+		new_head = re.sub(r'\"$', ''' . . . "''', new_head)
+		if re.findall(r'(((\s|,)[^\,\n\r\t]+?)(?=(\s+<*[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+>*)))', new_head,
+		              flags=re.I):
+			new_head = re.sub(r'(\s(<*[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+>*))', '', new_head, flags=re.I)
+		text = text[:s] + new_head + text[e:]
+	return text
+
+
+def details_head_email_handler(text):
+	heads_regex = re.finditer(r'^\?\?\?.*$', text, flags=re.M)
+	for head in heads_regex:
+		s = int(head.start())
+		e = int(head.end())
+		new_head = text[s:e]
+		email_regex = r"([a-zA-Z0-9_.+-]+\@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]{2,3})"
+		for email in re.finditer(email_regex, new_head):
+			s = int(email.start())
+			e = int(email.end())
+			new_email = new_head[s:e]
+			try:
+				user = User.objects.get(email=new_email)
+				print(user.username + '\t')
+			except:
+				print("Couldn't find user\t")
+				continue

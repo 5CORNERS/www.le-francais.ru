@@ -41,7 +41,7 @@ class User(AbstractUser):
 		help_text='Your forum nickname (can be changed later)',
 		unique=True,
 		error_messages={
-			'unique': _("A user with that nickname already exists."),
+			'unique': _("Пользователь с таким именем уже зарегестрирован."),
 		},
 	)
 	objects = CustomUserManager()
@@ -53,3 +53,6 @@ class User(AbstractUser):
 		Sends an email to this User.
 		"""
 		send_mail(subject, message, from_email, [self.email], **kwargs)
+
+	def nick_name(self):
+		return self.username
