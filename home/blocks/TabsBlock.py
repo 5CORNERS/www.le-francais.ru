@@ -4,6 +4,8 @@ from wagtail.wagtailcore.blocks.stream_block import StreamBlock
 from wagtail.wagtailimages.blocks import ImageChooserBlock
 
 from home.blocks.AudioBlock import AudioBlock
+from home.blocks.DocumentViewerBlock import DocumentViewerBlock
+from home.blocks.VideoPlayer import VideoPlayerBlock
 
 
 class TabsBlock(blocks.ListBlock):
@@ -20,8 +22,10 @@ class TabBlock(blocks.StructBlock):
     body = StreamBlock([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
+        ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
-        ('audio', AudioBlock())
+        ('audio', AudioBlock()),
+        ('video', VideoPlayerBlock()),
     ])
 
     # class Meta:

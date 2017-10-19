@@ -1,0 +1,5 @@
+<div>
+    <video controls {% if self.poster %} poster="{{ self.poster }}" {% endif %} width="100%">
+        <source src="{{ self.source }}" type="video/mp4" width="100%">
+    </video>
+</div>

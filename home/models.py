@@ -14,6 +14,8 @@ from wagtail.wagtailimages.blocks import ImageChooserBlock
 
 from home.blocks.AudioBlock import AudioBlock
 from home.blocks.TabsBlock import TabsBlock, TabBlock
+from home.blocks.DocumentViewerBlock import DocumentViewerBlock
+from home.blocks.VideoPlayer import VideoPlayerBlock
 
 
 def is_nav_root(page: Page) -> bool:
@@ -84,7 +86,8 @@ class DefaultPage(Page):
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
         ('html', RawHTMLBlock()),
-        ('audio', AudioBlock())
+        ('audio', AudioBlock()),
+        ('video', VideoPlayerBlock()),
     ])
 
 
@@ -104,8 +107,10 @@ class PageWithSidebar(Page):
     body = StreamField([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
+        ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
+        ('video', VideoPlayerBlock()),
         ('tabs', TabsBlock()),
         ('translations', ListBlock(StructBlock([
             ('word', RichTextBlock(required=True)),
@@ -147,20 +152,26 @@ class LessonPage(Page):
     comments_for_lesson = StreamField([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
+        ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
-        ('audio', AudioBlock())
+        ('audio', AudioBlock()),
+        ('video', VideoPlayerBlock()),
     ], null=True, blank=True)
     body = StreamField([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
+        ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
-        ('audio', AudioBlock())
+        ('audio', AudioBlock()),
+        ('video', VideoPlayerBlock()),
     ])
     dictionary = StreamField([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
+        ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
+        ('video', VideoPlayerBlock()),
         ('translations', ListBlock(StructBlock([
             ('word', RichTextBlock(required=True)),
             ('translation', RichTextBlock(required=True))
@@ -206,9 +217,9 @@ LessonPage.settings_panels = LessonPage.settings_panels + [
     MultiFieldPanel(
         [
             FieldPanel('has_own_topic', widget=CheckboxInput),
-            # FieldPanel('topic', widget=TopicForm),
+            FieldPanel('topic'),
         ],
         heading='Topic',
-        classname='collapsible collapsed'
+        classname='collapsible'
     )
 ]
