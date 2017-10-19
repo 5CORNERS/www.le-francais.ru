@@ -44,7 +44,7 @@
             {% endif %}
 
             {% if user.is_subscribed %}
-                <a class="btn btn-default" href="{% url 'pybb:delete_subscription' topic.id %}?from_topic">{% trans "Unsubscribe" %}</a>
+                <a class="btn btn-default" href="{% url 'pybb:delete_subscription' topic.id %}?from_topic">Больше не получать уведомления о новых постах в этой теме</a>
             {% elif user|pybb_may_subscribe_topic:topic %}
                 <a class="btn btn-default" href="{% url 'pybb:add_subscription' topic.id %}">{% trans "Subscribe" %}</a>
             {% endif %}
@@ -99,14 +99,14 @@
                 {% endif %}
 
                 {% if user.is_subscribed %}
-                    <a class="btn btn-default" href="{% url 'pybb:delete_subscription' topic.id %}?from_topic">{% trans "Unsubscribe" %}</a>
+                    <a class="btn btn-default" href="{% url 'pybb:delete_subscription' topic.id %}?from_topic">Больше не получать уведомления о новых постах в этой теме</a>
                 {% elif user|pybb_may_subscribe_topic:topic %}
                     <a class="btn btn-default" href="{% url 'pybb:add_subscription' topic.id %}">{% trans "Subscribe" %}</a>
                 {% endif %}
             </div>
         {% endif %}
 
-        {% if user.is_authenticated or PYBB_ENABLE_ANONYMOUS_POST %}
+        <div id="create_post">{% if user.is_authenticated or PYBB_ENABLE_ANONYMOUS_POST %}
             {% pybb_get_profile user=user as user_profile %}
 
             {% if not user_profile.is_banned %}
@@ -116,7 +116,7 @@
             {% endif %}
         {% else %}
             {% include 'pybb/_need_to_login_message.html' %}
-        {% endif %}
+        {% endif %}</div>
 
         {% if user.is_staff %}
             <div class="subscriber-list">

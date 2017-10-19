@@ -1,0 +1,11 @@
+<ul>
+    {% for object in object_list %}
+        <li>
+            <a href="
+                    {% if to_end %}{{ object.last_post.get_absolute_url }}
+                    {% else %}{{ object.get_absolute_url }}{% endif %}">
+                {{ object }} ({{ object.post_count }})
+            </a>
+        </li>
+    {% endfor %}
+</ul>

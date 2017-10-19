@@ -1,15 +1,39 @@
 {% extends 'pybb/base.html' %}
 {% load i18n %}
+{% load forum_tags %}
 
 {% block title %}{{ PYBB_DEFAULT_TITLE }}{% endblock title %}
 
 {% block breadcrumb %}
-    {% with extra_crumb=_("Index") %}
+    {% with extra_crumb=_("Список форумов") %}
         {% include "pybb/breadcrumb.html" %}
     {% endwith %}
 {% endblock %}
 
 {% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12 block" style="overflow: auto; height: 366px">
+                        <h6>{% trans "Последние сообщения" %}</h6>
+                        {% last_topics %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12 block" style="overflow: auto; height: 366px">
+                        <h6>{% trans "Самое обсуждаемое" %}</h6>
+                        {% top_topics %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="btn-group top-page-controls">
         <a href="{% url 'pybb:topic_latest' %}"
            class="btn btn-default">
