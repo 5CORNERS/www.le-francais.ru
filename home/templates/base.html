@@ -63,22 +63,11 @@
             integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
             crossorigin="anonymous"></script>
 
-    <script src="https://use.fontawesome.com/706b330c41.js"></script>
+    <script src="{% static 'js/706b330c41.js' %}"></script>
 
     <script src="{% static 'lib/audio/audioplayer.js' %}"></script>
     <link rel="stylesheet" href="{% static 'lib/audio/audioplayer.css' %}">
 
-    <script>
-        $(document).ready(function () {
-            $('.markdown-block .sqs-block-content h2').addClass('ui-closed').css('cursor', 'pointer');
-            $(".markdown-block .sqs-block-content h2").nextUntil("h2").slideToggle();
-            $(".markdown-block .sqs-block-content h2").click(function () {
-
-                $(this).nextUntil("h2").slideToggle();
-                $(this).toggleClass('ui-closed ui-open');
-            });
-        });
-    </script>
 
     {# Global stylesheets #}
     <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.css' %}">
@@ -95,12 +84,12 @@
 </head>
 
 <body class="{% block body_class %}{% endblock %}" data-spy="scroll" data-target="#myScrollspy" data-offset="15">
-<!— Google Tag Manager (noscript) —>
+<!-- Google Tag Manager (noscript) -->
 <noscript>
     <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WC2Q4XT"
             height="0" width="0" style="display:none;visibility:hidden"></iframe>
 </noscript>
-<!— End Google Tag Manager (noscript) —>
+<!-- End Google Tag Manager (noscript) -->
 {% wagtailuserbar %}
 
 {% block menu %}
@@ -125,7 +114,7 @@
                         <a href="/contact">Об авторах</a>
                     </li>
                     <li>
-                        <a href="/forum">Форум</a>
+                        <a href="/qui-est-la">Кто&nbsp;здесь?!&nbsp;&#169;</a>
                     </li>
                     <li>
                         <a href="/ bourse-de-l-emploi">Биржа&nbsp;труда</a>

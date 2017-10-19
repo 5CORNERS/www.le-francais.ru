@@ -134,7 +134,8 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div class="row controls text-center ">
+            <hr>
+                <div class="row controls text-center">
                     {% assign prev self.get_prev_sibling %}
                     {% assign next self.get_next_sibling %}
                     {% if prev.content_type.name == 'lesson page' %}
@@ -148,7 +149,6 @@
                     {% endif %}
 
                 </div>
-
                 {% if self.has_own_topic %}
                     <div class="row">
                         {% block extra_head_content %}
@@ -162,8 +162,8 @@
                                     {% with self.topic.head as post %}
                                         <div class="first_post">{% include "related_post.html" %}</div>
                                     {% endwith %}
-                                    <div class="text-left">Последний комментарий к уроку.</div>
-                                    {% if self.topic.last_post.id != topic.head.id %}
+                                    {% if self.topic.last_post.id != self.topic.head.id %}
+                                        <div class="text-left">Последний комментарий к уроку.</div>
                                         {% with self.topic.last_post as post %}
                                             {% if not post == self.topic.head %}
                                                 <div class="last_post">{% include "related_post.html" %}</div>
@@ -171,11 +171,11 @@
                                         {% endwith %}
                                     {% else %}
                                         <br>
-                                        <div class="text-left">Пока нет. Станьте первым! :)</div>
+                                        <div class="text-left"> Последний коммментарий к уроку... Еще нет — будьте первым, кто его напишет!</div>
                                         <br>
                                     {% endif %}
                                 </div>
-                                <a class="btn btn-primary" href="{{ self.topic.get_absolute_url }}" target="_blank">Добавте
+                                <a class="btn btn-primary" href="{{ self.topic.get_absolute_url }}#create_post" target="_blank">Добавте
                                     свой комментарий</a>
                             </div>
                         </div>
