@@ -33,6 +33,7 @@ urlpatterns = [
 	url(r'^api/', include(api_urls)),
 
 	url(r'^accounts/', include('allauth.urls')),
+	url(r'^accounts/username/change', view=ProfileEditView.as_view ,name='account_change_username'),
 
 	url(r'^captcha/', include('captcha.urls')),
 
