@@ -13,7 +13,7 @@ venv
 /temp1.html
 /html_files/
 
-media
+
 node_modules/
-/old_site/templates/*
+
 forum/dat
