@@ -1,6 +1,0 @@
-{% load i18n %}
-{% trans "Activate account at" %} le-francais.ru:
-
-https://192.168.0.27:8000{% url 'registration_activate' activation_key %}
-
-{% blocktrans %}Link is valid for {{ expiration_days }} days.{% endblocktrans %}
