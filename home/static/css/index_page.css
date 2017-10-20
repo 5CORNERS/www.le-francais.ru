@@ -66,13 +66,19 @@ a.page-reference:hover .page-reference_title {
     color: #666c7d;
 }
 
-.title .words{
-    display: inline-block;
-    float: left;
+.cat-logo{
+    position: relative;
+    top: 50px;
 }
-.title .logo-l{
-    display: inline-block;
+
+@media (max-width: 1199px) {
+    .cat-logo{
+        top:90px;
+    }
 }
-.title .logo-s{
-    float: right;
+
+@media (max-width: 991px) {
+    .cat-logo{
+        display: none;
+    }
 }
