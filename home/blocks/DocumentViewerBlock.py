@@ -5,5 +5,5 @@ class DocumentViewerBlock(blocks.StructBlock):
     url = URLBlock()
 
     class Meta:
-        template = 'blocks/document_viewer.html'
+        template = 'blocks/document.html'
         icon = 'doc-full'

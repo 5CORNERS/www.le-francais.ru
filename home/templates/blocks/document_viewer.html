@@ -1,3 +1,6 @@
+{% load static %}
+
+
 <iframe width="100%" height="640" frameborder="0"
-        src="//docs.google.com/gview?url={{ self.url }}&amp;embedded=true"></iframe>
+        src="{% static "components/pdfjs/web/viewer.html" %}?file=https://cors.io/?{{ document_url }}"></iframe>
 

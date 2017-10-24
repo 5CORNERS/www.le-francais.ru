@@ -467,21 +467,28 @@ td.forum-last-post, td.topic-last-post {
         background: url("/static/images/chevron-left.png");
     }
 }
-
-.navbar-brand-logo{
+.navbar-brand-text{
+    font-size: 14px;
+}
+.navbar-brand-home {
     display: none;
     margin-left: 10%;
     margin-right: 10%;
 }
 
+.navbar-brand-home:hover {
+    color: #fff;
+}
+
 @media (max-width: 992px) {
     /*._content {*/
-        /*margin-top: 50px;*/
+    /*margin-top: 50px;*/
     /*}*/
-    .navbar-brand-logo{
+    .navbar-brand-home {
         display: inline;
     }
-    .navbar-brand{
+
+    .navbar-brand-text {
         display: none;
     }
 }
@@ -490,10 +497,14 @@ td.forum-last-post, td.topic-last-post {
     ._content {
         margin-top: 0;
     }
-    .navbar-brand{
-        display: inline;
-    }
-    .navbar-brand-logo{
+
+    .navbar-brand-home {
         display: none;
+        margin-left: 10%;
+        margin-right: 10%;
+    }
+    .navbar-brand-text{
+        font-size: 18px;
+        display: inline;
     }
 }
