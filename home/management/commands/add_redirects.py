@@ -8,8 +8,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.create_redirects()
-        # self.make_permanent()
-        self.fix_redirects()
+        self.make_permanent()
+        # self.fix_redirects()
 
     def create_redirects(self):
         for page in LessonPage.objects.all():
@@ -17,8 +17,10 @@ class Command(BaseCommand):
 
     def make_permanent(self):
         for redirect in Redirect.objects.all():
-            redirect.is_permanent = True
-            redirect.save()
+            if redirect.is_permanent == False:
+                print(redirect)
+                redirect.is_permanent = True
+                redirect.save()
 
     def fix_redirects(self):
         for redirect in Redirect.objects.all():

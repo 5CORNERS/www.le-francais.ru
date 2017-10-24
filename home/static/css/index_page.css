@@ -4,22 +4,18 @@
 }
 
 .caption {
-    font-size: 18px;
-    font-weight: bold;
     margin-top: 30px;
+    font-weight: bold;
+    font-size: 18px;
 }
 
 .subcaption {
-    font-size: 14px;
     margin-top: 30px;
     color: #666c7d;
+    font-size: 14px;
 }
 
-.too_many_letters {
-    font-size: 14px;
-    margin-top: 30px;
-    color: #282b36;
-}
+
 
 .page-references {
     display: flex;
@@ -54,31 +50,53 @@ a.page-reference:hover .page-reference_title {
 
 @media (max-width: 576px) {
     .page-reference {
-        width: 100%;
         margin: 10px 0;
+        width: 100%;
     }
 
 }
 
 .page-reference_text {
     margin-top: 30px;
-    font-size: 14px;
     color: #666c7d;
+    font-size: 14px;
 }
 
 .cat-logo{
     position: relative;
-    top: 50px;
+    max-width: 120%;
+    top: -5px;
+    left: 50px;
+    margin: -70px;
+}
+
+.too_many_letters {
+    margin-top: 30px;
+    color: #282b36;
+    font-size: 14px;
 }
 
 @media (max-width: 1199px) {
     .cat-logo{
-        top:90px;
+        top:50px;
+    }
+    .too_many_letters{
     }
 }
 
 @media (max-width: 991px) {
     .cat-logo{
+        top: 50px;
+    }
+    .too_many_letters{
+    }
+}
+@media (max-width: 576px) {
+    .cat-logo-collapse{
         display: none;
+
+    }
+    .text_description{
+        width: 100%;
     }
 }
