@@ -15,8 +15,6 @@
     font-size: 14px;
 }
 
-
-
 .page-references {
     display: flex;
     flex-wrap: wrap;
@@ -62,7 +60,7 @@ a.page-reference:hover .page-reference_title {
     font-size: 14px;
 }
 
-.cat-logo{
+.cat-logo {
     position: relative;
     max-width: 120%;
     top: -5px;
@@ -76,27 +74,42 @@ a.page-reference:hover .page-reference_title {
     font-size: 14px;
 }
 
+.cat-logo-mini {
+    position: relative;
+    z-index: 2;
+    float: right;
+    margin-bottom: -47px;
+    display: none;
+}
+
 @media (max-width: 1199px) {
-    .cat-logo{
-        top:50px;
+    .cat-logo {
+        top: 50px;
     }
-    .too_many_letters{
+
+    .too_many_letters {
     }
 }
 
 @media (max-width: 991px) {
-    .cat-logo{
+    .cat-logo {
         top: 50px;
     }
-    .too_many_letters{
+
+    .too_many_letters {
     }
 }
-@media (max-width: 576px) {
-    .cat-logo-collapse{
-        display: none;
 
+@media (max-width: 576px) {
+    .cat-logo-collapse {
+        display: none;
     }
-    .text_description{
+
+    .cat-logo-mini {
+        display: inline
+    }
+
+    .text_description {
         width: 100%;
     }
 }
