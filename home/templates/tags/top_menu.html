@@ -1,4 +1,4 @@
-{% load i18n wagtailcore_tags %}
+{% load i18n wagtailcore_tags static %}
 
 <nav class="navbar navbar-inverse navbar-fixed-top">
 	<div class="container">
@@ -10,30 +10,16 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
+            <a class="navbar-brand-logo" href="/"><img src="{% static 'images/hat-logo.png' %}"></a>
 			<a class="navbar-brand" href="/">Le-Francais.ru</a>
 		</div>
 
 		<div class="collapse navbar-collapse" id="navbar">
 			<ul class="nav navbar-nav">
-				{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
-				{#                    <a href="/lecons">Уроки французского</a>#}
-				{#                </li>#}
-				{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
-				{#                    <a href="/lecons_a1">Уроки французского A1</a>#}
-				{#                </li>#}
-				{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
-				{#                    <a href="/lecons_b2">Уроки французского B2</a>#}
-				{#                </li>#}
 				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
 					<a style="color: rgb(170,170,170)" onmouseover="this.style.color='white'"
 					   onmouseout="this.style.color='rgb(170,170,170)'" href="/forum">Форум</a>
 				</li>
-				{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
-				{#                    <a href="/aller_en_france_de_russie">Из России во Францию</a>#}
-				{#                </li>#}
-				{#                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">#}
-				{#                    <a href="/oh-la-la">Oh-la-la!</a>#}
-				{#                </li>#}
 				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
 					<a href="/changements">Что происходит?</a>
 				</li>

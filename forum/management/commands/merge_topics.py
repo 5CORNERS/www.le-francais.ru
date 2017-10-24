@@ -6,6 +6,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('from', type=int, nargs='+')
         parser.add_argument('to', type=int, nargs='+')
+        parser.add_argument('-k', action='store_true', dest='k', default=False, help='Do not change firs post create_date')
 
     def handle(self, *args, **options):
         id_from = options['from'][0]
@@ -22,9 +23,10 @@ class Command(BaseCommand):
         confirm = input("\nDo you want to transfer all posts from topic " + str(id_from) + ' to topic ' + str(id_to) + '\nY/N: ')
 
         if confirm == 'Y' or confirm == 'y':
-            first_topic = to_topic.head
-            first_topic.created = datetime(2011, 1 , 1)
-            first_topic.save()
+            if not options['k']:
+                first_post = to_topic.head
+                first_post.created = datetime(2011, 1 , 1)
+                first_post.save()
             for post in from_topic.posts.all():
                 post.topic = to_topic
                 post.save()

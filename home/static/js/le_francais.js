@@ -2,6 +2,10 @@ function getNavRootId() {
   return $('meta[name="nav-root-id"]').attr("data-value")
 }
 
+function resizeIframe(obj) {
+            obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+        }
+
 function getPageId() {
   return $('meta[name="page-id"]').attr("data-value")
 }

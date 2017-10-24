@@ -105,50 +105,6 @@
 {% block extra_js %}
     {# Override this in templates to add extra javascript #}
 {% endblock %}
-<footer class="footer">
-    <nav class="navbar navbar-inverse">
-        <div class="container">
-            <div class="row text-left">
-                <ul class="hr">
-                    <li>
-                        <a href="/contact">Об авторах</a>
-                    </li>
-                    <li>
-                        <a href="/qui-est-la">Кто&nbsp;здесь?!&nbsp;&#169;</a>
-                    </li>
-                    <li>
-                        <a href="/ bourse-de-l-emploi">Биржа&nbsp;труда</a>
-                    </li>
-                    <li>
-                        <a href="/old_site/index.html">Старая версия сайта</a>
-                    </li>
-                    <li>
-                        <a href="/terms_of_use">Условия спользования</a></li>
-                    <li><a href="//vk.com/le_francais_ru" class="btn btn-social-icon btn-sm btn-vk"
-                           target="_blank"><span
-                            class="fa fa-vk"></span></a>
-                    </li>
-                    <li><a href="//www.facebook.com/groups/lefrancais.ru/"
-                           class="btn btn-social-icon btn-sm btn-facebook" target="_blank">
-                        <span class="fa fa-facebook"></span></a>
-                    </li>
-                    <li>
-                        <a href="//plus.google.com/+Le-francaisRu" class="btn btn-social-icon btn-sm btn-google"
-                           target="_blank">
-                            <span class="fa fa-google-plus"></span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="//twitter.com/le_francais_ru" class="btn btn-social-icon btn-sm btn-twitter"
-                           target="_blank">
-                            <span class="fa fa-twitter"></span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    </div>
-</footer>
+{% include 'tags/footer.html' %}
 </body>
 </html>
