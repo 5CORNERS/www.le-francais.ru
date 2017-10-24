@@ -42,6 +42,8 @@
                         <div class="block-audio">
                             <audio data-downloadable>
                                 <source src="
+
+
                                         {% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}"
                                         type="audio/mpeg">
                             </audio>
@@ -112,8 +114,9 @@
                         {% if self.summary %}
                             <div id="resume" class="{{ pane_class }}" role="tabpanel">
                                 <div>
-                                    <iframe width="100%" height="640" frameborder="0"
-                                            src="//docs.google.com/gview?url=https://files.le-francais.ru{{ self.summary }}&embedded=true"></iframe>
+                                    {% with "https://files.le-francais.ru"|add:self.summary as document_url %}
+                                        {% include 'blocks/document_viewer.html' %}
+                                    {% endwith %}
                                 </div>
                             </div>
                             {% assign pane_class "tab-pane" %}
@@ -121,8 +124,9 @@
                         {% if self.repetition_material %}
                             <div id="revision" class="{{ pane_class }}" role="tabpanel">
                                 <div>
-                                    <iframe width="100%" height="640" frameborder="0"
-                                            src="//docs.google.com/gview?url=https://files.le-francais.ru{{ self.repetition_material }}&embedded=true"></iframe>
+                                    {% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
+                                        {% include 'blocks/document_viewer.html' %}
+                                    {% endwith %}
                                 </div>
                             </div>
                             {% assign pane_class "tab_pane" %}
@@ -134,7 +138,7 @@
                         {% endfor %}
                     </div>
                 </div>
-            <hr>
+                <hr>
                 <div class="row controls text-center">
                     {% assign prev self.get_prev_sibling %}
                     {% assign next self.get_next_sibling %}
@@ -171,11 +175,14 @@
                                         {% endwith %}
                                     {% else %}
                                         <br>
-                                        <div class="text-left"> Последний коммментарий к уроку... Еще нет — будьте первым, кто его напишет!</div>
+                                        <div class="text-left"> Последний коммментарий к уроку... Еще нет — будьте
+                                            первым, кто его напишет!
+                                        </div>
                                         <br>
                                     {% endif %}
                                 </div>
-                                <a class="btn btn-primary" href="{{ self.topic.get_absolute_url }}#create_post" target="_blank">Добавьте
+                                <a class="btn btn-primary" href="{{ self.topic.get_absolute_url }}#create_post"
+                                   target="_blank">Добавьте
                                     свой комментарий</a>
                             </div>
                         </div>
