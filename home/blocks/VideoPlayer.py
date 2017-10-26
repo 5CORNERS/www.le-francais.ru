@@ -1,9 +1,9 @@
 from wagtail.wagtailcore import blocks
-from wagtail.wagtailcore.blocks.field_block import URLBlock
+from wagtail.wagtailcore.blocks.field_block import URLBlock, CharBlock
 
 class VideoPlayerBlock(blocks.StructBlock):
-    source = URLBlock()
-    poster = URLBlock(required=False)
+    source = CharBlock()
+    poster = CharBlock(required=False)
 
     class Meta:
         template='blocks/video_player.html'

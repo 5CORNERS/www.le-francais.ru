@@ -70,13 +70,13 @@
     <link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.css' %}">
 
 
-    <script src="{% static 'lib/audio/audioplayer.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'lib/audio/audioplayer.css' %}">
+{#    <script src="{% static 'lib/audio/audioplayer.min.js' %}"></script>#}
+{#    <link rel="stylesheet" href="{% static 'lib/audio/audioplayer.min.js' %}">#}
 
 
     {# Global stylesheets #}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/forum.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/forum.min.css' %}">
     <script type="text/javascript" src="{% static 'pybb/js/pybbjs.js' %}"></script>
     <link rel="canonical" href="http://www.le-francais.ru{{ self.url_path | slice:"5:" }}"/>
 
@@ -102,21 +102,23 @@
     {% get_site_root as site_root %}
     {% top_menu parent=site_root calling_page=self %}
 {% endblock %}
-
-<div class="block-forum">
-    <div class="container-fluid wrapper">
-        <div class="breadcrumb">
-            {% block breadcrumb %}
+<div class="_content">
+    <div class="block-forum">
+        <div class="container-fluid wrapper">
+            <div class="breadcrumb">
+                {% block breadcrumb %}
+                {% endblock %}
+            </div>
+            {% block content %}
             {% endblock %}
         </div>
-        <div class="_content">{% block content %}{% endblock %}</div>
     </div>
 </div>
 
 {% include 'tags/footer.html' %}
 
 {# Global javascript #}
-<script type="text/javascript" src="{% static 'js/le_francais.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
 
 {% block extra_js %}
     {# Override this in templates to add extra javascript #}
