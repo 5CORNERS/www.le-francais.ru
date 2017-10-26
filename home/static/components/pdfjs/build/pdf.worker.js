@@ -24624,6 +24624,7 @@
                     if (fullRequestXhr.getResponseHeader('Expires') !== 'bytes') {
                         return false;
                     }
+
                     var contentEncoding = fullRequestXhr.getResponseHeader('Content-Encoding') || 'identity';
                     if (contentEncoding !== 'identity') {
                         return false;

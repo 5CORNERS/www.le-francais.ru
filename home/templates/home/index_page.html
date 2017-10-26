@@ -2,7 +2,7 @@
 {% load static site_tags %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/index_page.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/index_page.min.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -26,7 +26,7 @@
                             наименьшими трудозатратами и получать от этого удовольствие. Важен будет не только (и не
                             столько)
                             результат, но и процесс. И все это безвозмездно, то есть даром (понимай:&nbsp;бесплатно).
-                            <img class="cat-logo-mini" src="{% static 'images/hat-logo.png' %}">
+
                         </div>
                     </div>
                     <div class="col-xs-3 cat-logo-collapse">
@@ -37,6 +37,7 @@
         </div>
         <div class="row">
             <div class="col-md-9">
+            <img class="cat-logo-mini" src="{% static 'images/hat-logo.png' %}">
                 <div class="page-references">
                     {% for reference in self.related_pages.all %}
                         <a class="page-reference" href="{{ reference.referenced_page.url }}">
@@ -63,6 +64,7 @@
                         однажды и доступных теперь
                         всем
                         вам. Вот крохотный пример того, что вас ждет :):</p>
+                    <script src="{% static 'lib/audio/audioplayer.min.js' %}"></script>
                     <div class="block-audio">
                         <audio>
                             <source src="//files.le-francais.ru/vocabulaire/aguiche/teaser-17.mp3" type="audio/mpeg">

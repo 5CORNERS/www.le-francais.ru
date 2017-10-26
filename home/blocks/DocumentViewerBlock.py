@@ -1,8 +1,8 @@
 from wagtail.wagtailcore import blocks
-from wagtail.wagtailcore.blocks.field_block import URLBlock
+from wagtail.wagtailcore.blocks.field_block import URLBlock, CharBlock
 
 class DocumentViewerBlock(blocks.StructBlock):
-    url = URLBlock()
+    url = CharBlock()
 
     class Meta:
         template = 'blocks/document.html'

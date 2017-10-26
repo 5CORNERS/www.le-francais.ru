@@ -2255,6 +2255,7 @@
             });
         }
 
+
         var webViewerOpenFileViaURL;
         webViewerOpenFileViaURL = function webViewerOpenFileViaURL(file) {
             if (file && file.lastIndexOf('file:', 0) === 0) {

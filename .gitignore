@@ -12,6 +12,7 @@ venv
 /package-lock.json
 /temp1.html
 /html_files/
+*/__pycache__
 
 
 node_modules/

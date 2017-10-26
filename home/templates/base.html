@@ -48,30 +48,38 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-    <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
+    <script async src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
 
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
-          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+    <script async src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"
+            integrity="sha384-wZYSjmsSfbryFT0ATOqakhJaeHuVquCLHVSbg8WRWxp/3u9FIg9mUizOCT/YYmWY"
             crossorigin="anonymous"></script>
 
-    <script src="{% static 'js/706b330c41.js' %}"></script>
-
-    <script src="{% static 'lib/audio/audioplayer.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'lib/audio/audioplayer.css' %}">
 
 
-    {# Global stylesheets #}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.css' %}">
+    {% block css %}
+
+            <link rel="stylesheet" href="{% static 'lib/audio/audioplayer.min.css' %}">
+
+            {# Global stylesheets #}
+            <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
+            <link rel="stylesheet" type="text/css"
+                  href="{% static 'components/bootstrap-social/bootstrap-social.min.css' %}">
+
+            <link rel="stylesheet" href="{% static 'components/font-awesome-4.7.0/css/font-awesome.min.css' %}">
+
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="{% static 'components/bootstrap/dist/css/bootstrap.min.css' %}"
+              integrity="sha384-Y0kPF6EmVSRfbve8EUZl3zkRFNx1fejPZLMTRKbSQzjE8M6pkR+w0N9KYydVL0FB" crossorigin="anonymous">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="{% static 'components/bootstrap/dist/css/bootstrap-theme.min.css' %}"
+              integrity="sha384-TjzKoozTvuHZ4MMv9wJ3fXn9ekMg1UNQzGzQqu2D0HgR3tMjk6DoZ8bLsvX60ylm" crossorigin="anonymous">
+    {% endblock %}
+
+
     <link rel="canonical" href="http://www.le-francais.ru{{ self.url_path | slice:"5:" }}"/>
 
     {% block extra_css %}
@@ -100,7 +108,7 @@
     {% block content %}{% endblock %}
 </div>
 {# Global javascript #}
-<script type="text/javascript" src="{% static 'js/le_francais.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
 
 {% block extra_js %}
     {# Override this in templates to add extra javascript #}
