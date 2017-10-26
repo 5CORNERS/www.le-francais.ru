@@ -1,1 +1,3 @@
-{% include 'blocks/document_viewer.html' with document_url = self.url %}
+{% with self.url as document_url %}
+{% include 'blocks/document_viewer.html' %}
+{% endwith %}

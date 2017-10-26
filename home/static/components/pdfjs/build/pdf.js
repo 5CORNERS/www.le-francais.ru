@@ -2328,7 +2328,7 @@
                 var dynamicLoaderSupported = typeof requirejs !== 'undefined' && requirejs.load;
                 fakeWorkerFilesLoader = useRequireEnsure ? function (callback) {
                     require.ensure([], function () {
-                        var worker = require('./pdf.worker.js');
+                        var worker = require('./pdf.worker.min.js');
                         callback(worker.WorkerMessageHandler);
                     });
                 } : dynamicLoaderSupported ? function (callback) {
@@ -8412,6 +8412,7 @@
                             if (input.length % 4 === 1) {
                                 throw new Error('bad atob input');
                             }
+                            
                             for (var bc = 0, bs, buffer, idx = 0, output = ''; buffer = input.charAt(idx++); ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer, bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0) {
                                 buffer = digits.indexOf(buffer);
                             }

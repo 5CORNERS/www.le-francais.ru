@@ -11,7 +11,7 @@ function show_tab(tab) {
 
 function brother_tabs() {
     show_tab($('.tab-pane.active'));
-    $('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
+    $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
         tab = $('#' + $(e.target).attr('href').substr(1));
         show_tab(tab);
     });
@@ -32,7 +32,7 @@ function brother_submit() {
                         on_mail_activation();
                     }
                 }
-    //        window.location.reload();
+                //        window.location.reload();
             }
         });
     })
