@@ -140,6 +140,11 @@ body {
     padding-left: 0;
 }
 
+.row ._padding{
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
 .treeview .list-group {
     margin-bottom: 0;
 }
