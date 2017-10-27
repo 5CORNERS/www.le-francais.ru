@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'whitenoise.runserver_nostatic',
+    # 'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.sitemaps',
@@ -85,6 +85,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE_CLASSES = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -92,12 +94,12 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
+
 
     'wagtail.wagtailcore.middleware.SiteMiddleware',
     'wagtail.wagtailredirects.middleware.RedirectMiddleware',
 
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+
 
     'pybb.middleware.PybbMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
@@ -232,6 +234,15 @@ POSTMAN_AUTO_MODERATE_AS = True
 POSTMAN_NAME_USER_AS = 'username'
 POSTMAN_SHOW_USER_AS = 'username'
 POSTMAN_DISALLOW_ANONYMOUS = True
+
+DEFAULT_FROM_EMAIL = 'no_reply@files.le-francais.ru'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', "localhost")
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', "")
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', "")
+EMAIL_USE_TLS =True if (os.environ.get('EMAIL_USE_TLS', False)) == 'True' else False
+EMAIL_USE_SSL =True if (os.environ.get('EMAIL_USE_TLS', False)) == 'True' else False
+
 
 # Wagtail settings
 
