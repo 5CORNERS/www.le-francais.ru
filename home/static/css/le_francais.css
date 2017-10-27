@@ -140,7 +140,7 @@ body {
     padding-left: 0;
 }
 
-.row ._padding{
+.row .padding{
     padding-right: 15px;
     padding-left: 15px;
 }
