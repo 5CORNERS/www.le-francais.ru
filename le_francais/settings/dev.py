@@ -7,7 +7,7 @@ DEBUG = True
 COMPRESS_ENABLED = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY','8_83ey7rv$u_@t79klk$mp%#l)sol#uq2(@zj(@*$7o^3dpy21')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 ADMINS = [('semyon', 'semyon@atamas.com')]
 
