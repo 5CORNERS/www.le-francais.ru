@@ -51,7 +51,7 @@
     <meta name="description" content=""/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-    <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
+    <script async src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
 
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -116,7 +116,7 @@
 {% include 'tags/footer.html' %}
 
 {# Global javascript #}
-<script type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
+<script defer type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
 
 {% block extra_js %}
     {# Override this in templates to add extra javascript #}
