@@ -26,6 +26,9 @@
 				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
 					<a href="/collecte">Сами мы не местные...</a>
 				</li>
+                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">
+                    <a href="/faq">FAQ</a>
+                </li>
 
 				{% if request.user.is_authenticated %}
 					<li class="dropdown">
