@@ -78,7 +78,7 @@ INSTALLED_APPS = [
     'forum_messages',
     'profiles',
     'pure_pagination',
-    'sorl.thumbnail',
+    # 'sorl.thumbnail',
     'captcha',
     'crispy_forms',
 
