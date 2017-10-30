@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.views.generic import TemplateView
 from pybb.views import ProfileEditView
 # from registration.backends.default.views import RegistrationView
 from wagtail.wagtailadmin import urls as wagtailadmin_urls
@@ -19,6 +20,8 @@ from search import views as search_views
 urlpatterns = [
 	# url(r'^sitemap\.xml$', sitemap,{'sitemaps':sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 	url(r'^robots\.txt$', include('robots.urls')),
+
+	url(r'loaderio-48b67d660cd89b42c2c95de0e8c29618/', TemplateView.as_view(template_name='loaderio-48b67d660cd89b42c2c95de0e8c29618.txt', content_type="text/plain")),
 
 	url(r'^django-admin/', include(admin.site.urls)),
 	# url(r'^login/$', auth_views.login, name='login'),
