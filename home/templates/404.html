@@ -3,7 +3,32 @@
 {% block body_class %}template-404{% endblock %}
 
 {% block content %}
-    <h1>Page not found</h1>
-
-    <h2>Sorry, this page could not be found.</h2>
+    <div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-6">
+                    <div class="media">
+                        <a href="#" class="pull-left"><img src="/static/images/hat-logo.png" class="media-object" /></a>
+                        <div class="media-body">
+                            <h1>Ошибка 404.</h1>
+                            <h4 class="media-heading">
+                                Упс! А такой странички нет :(
+                            </h4>
+                            <p>Вы полагаете, должна была быть? Возможно, это косяк. <a href="/forum/forum/30/">Сообщите нам</a>, пожалуйста, об этой проблеме.</p>
+                            <div class="media">
+                                <div class="media-body">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
