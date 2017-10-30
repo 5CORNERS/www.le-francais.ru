@@ -18,6 +18,10 @@ social-auth-app-django
 markdown
 urllib3
 pymdown-extensions
+
+django-storages
+boto3
+
 django-simple-captcha
 django-bootstrap-form
 django-postman==3.5.1
