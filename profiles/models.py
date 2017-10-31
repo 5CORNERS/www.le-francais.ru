@@ -36,3 +36,6 @@ class Profile(PybbProfile):
 
     def get_absolute_url(self):
         return reverse('pybb:user', kwargs={'username': self.user.username})
+
+    def get_display_name(self):
+        return self.user.username
