@@ -4,31 +4,35 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.utils.translation import ugettext as _
 from pybb.forms import EditProfileForm
 
-
 from profiles.models import Profile
+from custom_user.models import User
 
 
 class CaptchaTestForm(forms.Form):
-    captcha = CaptchaField()
+	captcha = CaptchaField()
 
 
-
+class ChangeUsername(forms.ModelForm):
+	new_username = forms.CharField(label=_('New username'))
+	class Meta:
+		model = User
+		fields = ('new_username',)
 
 
 class AuthenticationFormCaptcha(AuthenticationForm):
-    captcha = CaptchaField(label=_('Captcha'))
+	captcha = CaptchaField(label=_('Captcha'))
 
 
 class AORProfileForm(EditProfileForm):
-    class Meta:
-        model = Profile
-        fields = ('autosubscribe', 'signature', 'show_signatures', 'time_zone',
-                  'language', 'avatar',)
+	class Meta:
+		model = Profile
+		fields = ('autosubscribe', 'signature', 'show_signatures', 'time_zone',
+		          'language', 'avatar',)
 
-    signature = forms.CharField(widget=forms.Textarea, label=_('Signature'),
-                                required=False)
-    # time_zone = forms.ChoiceField()
+	signature = forms.CharField(widget=forms.Textarea, label=_('Signature'),
+	                            required=False)
+	# time_zone = forms.ChoiceField()
 
 
 class SearchForm(forms.Form):
-    q = forms.CharField()
+	q = forms.CharField()
