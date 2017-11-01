@@ -1,17 +1,16 @@
-from django.shortcuts import render
-from django.contrib.auth import login
-from django.http import HttpResponse
-from django.contrib.auth.forms import AuthenticationForm
-from registration.forms import *
 import json
-
 import threading
 from datetime import datetime, timedelta
 
 import httplib2
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
+from django.shortcuts import render
 from django.views import generic
 from oauth2client.client import OAuth2WebServerFlow
 from pure_pagination import Paginator, PaginationMixin
@@ -24,11 +23,29 @@ from wagtail.wagtailcore.models import Page
 
 from home.models import PageWithSidebar, LessonPage
 from home.src.site_import import import_content
+from .forms import ChangeUsername
 
 flow = OAuth2WebServerFlow(client_id='499129759772-bqrp9ha0vfibn6t76fdgdmd87khnn2e0.apps.googleusercontent.com',
                            client_secret='CRTqrmLi-116OMgpFOnYS6wH',
                            scope='https://www.googleapis.com/auth/drive',
                            redirect_uri='http://localhost:8000/import/authorized')
+
+
+@login_required
+def change_username(request):
+	template_name = 'account/change_username.html'
+	if request.method == 'POST':
+		form = ChangeUsername(request.POST)
+		if form.is_valid():
+			user = request.user
+			username = user.normalize_username(request.POST['new_username'])
+			user.username = username
+			user.save()
+			return HttpResponseRedirect('/forum/profile/edit')
+		else:
+			return render(request, template_name, {'form': form})
+	form = ChangeUsername()
+	return render(request, template_name, {'form': form})
 
 
 def authorize(request):
@@ -180,28 +197,26 @@ def move_post_processing(request):
 	return redirect(first_moved_post.get_absolute_url())
 
 
-
-
 def ajax_login(request):
-    form = AuthenticationForm()
-    if request.method == 'POST':
-        form = AuthenticationForm(None, request.POST)
-        if form.is_valid():
-            login(request, form.get_user())
-            return HttpResponse(json.dumps({'success': 'ok'})
-                , mimetype='application/json')
-    return render(request, 'templates/ajax_login.html', {'form': form})
+	form = AuthenticationForm()
+	if request.method == 'POST':
+		form = AuthenticationForm(None, request.POST)
+		if form.is_valid():
+			login(request, form.get_user())
+			return HttpResponse(json.dumps({'success': 'ok'})
+			                    , mimetype='application/json')
+	return render(request, 'templates/ajax_login.html', {'form': form})
 
 
 def ajax_registration(request):
-    form = RegistrationForm()
-    if request.method == 'POST':
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            return HttpResponse(json.dumps({'success': 'ok', 'mail_activation': True})
-                , mimetype='application/json')
-    return render(request, 'templates/ajax_registration.html', {'form': form})
+	form = RegistrationForm()
+	if request.method == 'POST':
+		form = RegistrationForm(request.POST)
+		if form.is_valid():
+			return HttpResponse(json.dumps({'success': 'ok', 'mail_activation': True})
+			                    , mimetype='application/json')
+	return render(request, 'templates/ajax_registration.html', {'form': form})
 
 
 def socialauth_success(request):
-    return render(request, 'templates/socialauth_success.html', {})
+	return render(request, 'templates/socialauth_success.html', {})
