@@ -9,6 +9,7 @@ from pybb.views import ProfileEditView
 from wagtail.wagtailadmin import urls as wagtailadmin_urls
 from wagtail.wagtailcore import urls as wagtail_urls
 from wagtail.wagtaildocs import urls as wagtaildocs_urls
+from home.views import change_username
 
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
@@ -35,7 +36,7 @@ urlpatterns = [
 	url(r'^api/', include(api_urls)),
 
 	url(r'^accounts/', include('allauth.urls')),
-	url(r'^accounts/username/change', view=ProfileEditView.as_view, name='account_change_username'),
+	url(r'^accounts/username/change', view=change_username, name='account_change_username'),
 
 	url(r'^captcha/', include('captcha.urls')),
 

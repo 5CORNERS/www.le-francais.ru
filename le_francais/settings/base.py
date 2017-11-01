@@ -235,6 +235,9 @@ PYBB_MARKUP_ENGINES_PATHS = {
     'custom_markdown': 'forum.markup_engines.CustomMarkdownParser'
 }
 PYBB_MARKUP = 'custom_markdown'
+PYBB_BODY_CLEANERS = []
+PYBB_BODY_VALIDATOR = None
+
 PYBB_TEMPLATE = 'forum.html'
 PYBB_NICE_URL = False
 
