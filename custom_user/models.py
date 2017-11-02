@@ -48,6 +48,9 @@ class User(AbstractUser):
 	USERNAME_FIELD = 'email'
 	REQUIRED_FIELDS = ['username']
 
+	def __str__(self):
+		return self.username
+
 	def email_user(self, subject, message, from_email=None, **kwargs):
 		"""
 		Sends an email to this User.
@@ -55,4 +58,7 @@ class User(AbstractUser):
 		send_mail(subject, message, from_email, [self.email], **kwargs)
 
 	def nick_name(self):
+		return self.username
+
+	def get_username(self):
 		return self.username
