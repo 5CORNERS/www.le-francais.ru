@@ -2,7 +2,7 @@
 {% load static site_tags %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/index_page.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/index_page.min.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -37,7 +37,7 @@
         </div>
         <div class="row">
             <div class="col-md-9">
-            <img class="cat-logo-mini" src="{% static 'images/hat-logo.png' %}">
+                <img class="cat-logo-mini" src="{% static 'images/hat-logo.png' %}">
                 <div class="page-references">
                     {% for reference in self.related_pages.all %}
                         <a class="page-reference" href="{{ reference.referenced_page.url }}">
@@ -93,11 +93,11 @@
         </div>
         <div class="row">
             <div class="col-md-9">
-                <div class="page-references">
-                    {% for reference in self.related_reviews.all %}
-                        <a class="page-reference" href="{{ reference.referenced_review.url }}">
-                            <h4 class="page-reference_title">{{ reference.review_title }}</h4>
-                            <div class="page-reference_text">{{ reference.review_subtitle }}</div>
+                <div class="page-reviews">
+                    {% for review in self.reviews.all %}
+                        <a class="page-review" href="
+                                {% if review.url %}{{ review.url }}{% else %}{{ review.url }}{% endif %}">
+                            <div class="page-review_text">{% if review.text %}{{ review.text }}{% endif %}</div>
                         </a>
                     {% endfor %}
                 </div>
