@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load bootstrap %}
 {% block content %}
     <form class="change_username" method="POST" action="{% url 'account_change_username' %}">
         {% csrf_token %}
@@ -6,7 +7,7 @@
             {% for field in form %}
                 {% for error in field.errors %}
                     <div class="alert alert-error">
-                        <strong>{{ error|escape }}</strong>
+                        <strong>{{ error|bootstrap }}</strong>
                     </div>
                 {% endfor %}
             {% endfor %}

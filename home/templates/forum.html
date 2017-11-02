@@ -67,8 +67,8 @@
     <link rel="stylesheet" href="{% static 'components/font-awesome-4.7.0/css/font-awesome.min.css' %}">
 
 
-{#    <script src="{% static 'lib/audio/audioplayer.min.js' %}"></script>#}
-{#    <link rel="stylesheet" href="{% static 'lib/audio/audioplayer.min.js' %}">#}
+    <script async src="{% static 'lib/audio/audioplayer.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/audio/audioplayer.min.js' %}">
 
 
     {# Global stylesheets #}
@@ -76,6 +76,9 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/forum.min.css' %}">
     <script async type="text/javascript" src="{% static 'pybb/js/pybbjs.js' %}"></script>
     <link rel="canonical" href="http://www.le-francais.ru{{ self.url_path | slice:"5:" }}"/>
+    {% block extra_js %}
+
+    {% endblock %}
 
     {% block extra_css %}
         {# Override this in templates to add extra stylesheets #}
