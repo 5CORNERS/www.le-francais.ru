@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.db.models import CharField, SmallIntegerField, OneToOneField, BooleanField, SET_NULL, ForeignKey
+from django.db.models import CharField, SmallIntegerField, OneToOneField, BooleanField, SET_NULL, ForeignKey, URLField
 from django.db.models.fields import TextField
 from django.forms import CheckboxInput
 from modelcluster.fields import ParentalKey
@@ -40,7 +40,7 @@ class IndexPage(Page):
     is_selectable = BooleanField(default=True)
     content_panels = Page.content_panels + [
         InlinePanel('related_pages', label="Related pages"),
-        InlinePanel('related_reviews', label="Related reviews"),
+        InlinePanel('reviews', label="Reviews"),
     ]
     settings_panels = Page.settings_panels + [
         FieldPanel('is_selectable')
@@ -61,21 +61,13 @@ class IndexPageReferences(Orderable):
     ]
 
 
-class IndexReviewsReferences(Orderable):
-    page = ParentalKey(IndexPage, related_name='related_reviews')
-    referenced_review = ForeignKey(
-        'wagtailcore.Page',
-        null=True,
-        blank=True,
-        on_delete=SET_NULL,
-        related_name='+'
-    )
-    review_title = CharField(null=True,blank=True, max_length=255)
-    review_subtitle = CharField(null=True,blank=True, max_length=1024)
+class IndexReviews(Orderable):
+    page = ParentalKey(IndexPage, related_name='reviews')
+    url = URLField(null=True, blank=True)
+    text = CharField(null=True,blank=True, max_length=1024)
     panels = [
-        PageChooserPanel('referenced_review'),
-        FieldPanel('review_title'),
-        FieldPanel('review_subtitle')
+        FieldPanel('url'),
+        FieldPanel('text'),
     ]
 
 class DefaultPage(Page):
