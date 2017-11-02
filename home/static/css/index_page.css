@@ -140,12 +140,6 @@ a.page-review:hover {
 
 @media (max-width: 768px) {
     .page-review {
-        width: 44%;
-    }
-}
-
-@media (max-width: 576px) {
-    .page-review {
         margin: 10px 0;
         width: 100%;
     }
@@ -154,7 +148,7 @@ a.page-review:hover {
 
 .page-review_text {
     margin-top: 0px;
-    color: #36394b;
+    color: #495869;
     font-size: 16px;
 }
 
