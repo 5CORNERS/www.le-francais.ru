@@ -51,7 +51,10 @@
     <meta name="description" content=""/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-    <script async src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script async src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
 
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -59,11 +62,9 @@
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
 
-    <!-- Latest compiled and minified JavaScript -->
-    <script defer src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
 
-    <link rel="stylesheet" href="{% static 'components/font-awesome-4.7.0/css/font-awesome.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.css' %}">
+    <link rel="stylesheet" href="{% static 'components/font-awesome-4.7.0/css/font-awesome.min.css' %}">
 
 
 {#    <script src="{% static 'lib/audio/audioplayer.min.js' %}"></script>#}
@@ -73,7 +74,7 @@
     {# Global stylesheets #}
     <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/forum.min.css' %}">
-    <script type="text/javascript" src="{% static 'pybb/js/pybbjs.js' %}"></script>
+    <script async type="text/javascript" src="{% static 'pybb/js/pybbjs.js' %}"></script>
     <link rel="canonical" href="http://www.le-francais.ru{{ self.url_path | slice:"5:" }}"/>
 
     {% block extra_css %}

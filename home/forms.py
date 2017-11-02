@@ -13,10 +13,11 @@ class CaptchaTestForm(forms.Form):
 
 
 class ChangeUsername(forms.ModelForm):
-	new_username = forms.CharField(label=_('New username'))
+	username = forms.CharField(label=_('New username'))
+
 	class Meta:
 		model = User
-		fields = ('new_username',)
+		fields = ('username',)
 
 
 class AuthenticationFormCaptcha(AuthenticationForm):

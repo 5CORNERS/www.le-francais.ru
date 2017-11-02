@@ -38,7 +38,7 @@ def change_username(request):
 		form = ChangeUsername(request.POST)
 		if form.is_valid():
 			user = request.user
-			username = user.normalize_username(request.POST['new_username'])
+			username = user.normalize_username(request.POST['username'])
 			user.username = username
 			user.save()
 			return HttpResponseRedirect('/forum/profile/edit')
