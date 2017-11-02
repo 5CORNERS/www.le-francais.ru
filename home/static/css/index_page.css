@@ -114,3 +114,63 @@ a.page-reference:hover .page-reference_title {
         width: 100%;
     }
 }
+
+.page-reviews {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
+.page-review {
+    padding: 3px;
+}
+
+a.page-review:focus,
+a.page-review:hover {
+    text-decoration: none;
+}
+
+.page-review {
+    width: 27%;
+    margin-top: 10px;
+    margin-right: 6%;
+    margin-bottom: 10px;
+    min-height: 150px;
+}
+
+@media (max-width: 768px) {
+    .page-review {
+        width: 44%;
+    }
+}
+
+@media (max-width: 576px) {
+    .page-review {
+        margin: 10px 0;
+        width: 100%;
+    }
+
+}
+
+.page-review_text {
+    margin-top: 0px;
+    color: #36394b;
+    font-size: 16px;
+}
+
+.page-review_text:before {
+    color: #bbb;
+    content: "\201C"; /* Непечатаемый символ слева */
+    font-size: 3em;
+    line-height: 0.1em;
+    margin-right: 0.2em;
+    vertical-align: -.4em;
+}
+
+.page-review_text:after {
+    color: #bbb;
+    content: "\201D"; /* Непечатаемый символ справа */
+    font-size: 3em;
+    line-height: 0.1em;
+    vertical-align: -.45em;
+}

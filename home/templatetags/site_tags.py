@@ -1,6 +1,15 @@
+import random
 from django import template
+from home.models import IndexReviews
 
 register = template.Library()
+
+
+@register.inclusion_tag('tags/random_reviews.html')
+def random_review(count=3,*args, **kwargs):
+    qs = IndexReviews.objects.order_by('?')
+    qs = qs[:count]
+    return dict(object_list=qs)
 
 
 @register.assignment_tag(takes_context=True)
