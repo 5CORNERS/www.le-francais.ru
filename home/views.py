@@ -39,6 +39,7 @@ def change_username(request):
 		if form.is_valid():
 			user = request.user
 			username = user.normalize_username(request.POST['username'])
+			user.used_usernames.append({'username':user.username, 'change_datetime':datetime.utcnow()})
 			user.username = username
 			user.save()
 			return HttpResponseRedirect('/forum/profile/edit')

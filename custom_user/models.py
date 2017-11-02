@@ -44,6 +44,12 @@ class User(AbstractUser):
 			'unique': _("Пользователь с таким именем уже зарегестрирован."),
 		},
 	)
+
+	from django.core.serializers.json import DjangoJSONEncoder
+	from django.contrib.postgres.fields import JSONField
+
+	used_usernames = JSONField(encoder=DjangoJSONEncoder, default=list)
+
 	objects = CustomUserManager()
 	USERNAME_FIELD = 'email'
 	REQUIRED_FIELDS = ['username']
@@ -62,3 +68,12 @@ class User(AbstractUser):
 
 	def get_username(self):
 		return self.username
+
+
+from django.db import models
+
+
+class UsedUsernames(models.Model):
+	user = models.ForeignKey('User', on_delete=models.CASCADE)
+	used_username = models.CharField(max_length=32)
+	change_datetime = models.DateTimeField()
