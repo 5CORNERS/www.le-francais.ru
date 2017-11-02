@@ -65,11 +65,9 @@ class IndexReviews(Orderable):
     page = ParentalKey(IndexPage, related_name='reviews')
     url = URLField(null=True, blank=True)
     text = CharField(null=True,blank=True, max_length=1024)
-    signature = CharField(null=True, blank=True, max_length=1024)
     panels = [
         FieldPanel('url'),
         FieldPanel('text'),
-        FieldPanel('signature')
     ]
 
 class DefaultPage(Page):
