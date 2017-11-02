@@ -67,7 +67,7 @@ class IndexReviews(Orderable):
     text = CharField(null=True,blank=True, max_length=1024)
     panels = [
         FieldPanel('url'),
-        FieldPanel('text'),
+        FieldPanel('text', TextField),
     ]
 
 class DefaultPage(Page):
