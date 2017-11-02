@@ -1,9 +1,13 @@
 {% extends 'pybb/base.html' %}
-{% load i18n pybb_tags %}
+{% load i18n pybb_tags static %}
 
 {% block title %}{% trans "Profile editing" %}{% endblock title %}
 
 {% block content %}
+    <script type="text/javascript" src="{% static 'js/jquery.are-you-sure.min.js' %}"></script>
+    <script>
+        $('form').areYouSure({'message': 'Your profile details are not saved!'});
+    </script>
     <div class="row">
         <div class="col-md-4">
             {% include "pybb/avatar.html" %}
@@ -18,8 +22,12 @@
             <form action="" method="post" enctype="multipart/form-data"
                   class="profile-edit">
                 {% include "pybb/form.html" %}
-                <div>Выбрать варианты подписок на push-уведомления о выходе новых статей, обзоров, уроков или просто новостей (в любых сочетаниях)</div>
-                <div>Il faut bien que je supporte deux ou trois chenilles si je veux connaître les papillons (Antoine de Saint-Exupéry, Le Petit Prince)</div>
+                <div>Выбрать варианты подписок на push-уведомления о выходе новых статей, обзоров, уроков или просто
+                    новостей (в любых сочетаниях)
+                </div>
+                <div>Il faut bien que je supporte deux ou trois chenilles si je veux connaître les papillons (Antoine de
+                    Saint-Exupéry, Le Petit Prince)
+                </div>
                 <div>Управляйте своими подписками!</div>
                 <div class="p4s-button"></div>
                 <div class="form-actions">
@@ -31,21 +39,21 @@
         </div>
     </div>
     {% if user.subscriptions.all %}
-      <div class="row">
-        <div class="col-md-12">
-            <h1>{% trans "Subscriptions on topics" %}</h1>
-            <ul>
-                {% for sub in user.subscriptions.all %}
-                    <li>
-                        {% pybb_link sub %}
-                        &mdash;
-                        <strong>
-                            <a href="{% url 'pybb:delete_subscription' sub.id %}">{% trans "delete" %}</a>
-                        </strong>
-                    </li>
-                {% endfor %}
-            </ul>
+        <div class="row">
+            <div class="col-md-12">
+                <h1>{% trans "Subscriptions on topics" %}</h1>
+                <ul>
+                    {% for sub in user.subscriptions.all %}
+                        <li>
+                            {% pybb_link sub %}
+                            &mdash;
+                            <strong>
+                                <a href="{% url 'pybb:delete_subscription' sub.id %}">{% trans "delete" %}</a>
+                            </strong>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
-      </div>
     {% endif %}
 {% endblock content %}
