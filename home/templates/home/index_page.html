@@ -94,12 +94,7 @@
         <div class="row">
             <div class="col-md-9">
                 <div class="page-reviews">
-                    {% for review in self.reviews.all %}
-                        <a class="page-review" href="
-                                {% if review.url %}{{ review.url }}{% else %}{{ review.url }}{% endif %}">
-                            <div class="page-review_text">{% if review.text %}{{ review.text }}{% endif %}</div>
-                        </a>
-                    {% endfor %}
+                    {% random_review %}
                 </div>
             </div>
         </div>

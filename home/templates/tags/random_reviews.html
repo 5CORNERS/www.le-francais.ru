@@ -1,0 +1,5 @@
+{% for review in object_list %}
+    <a class="page-review" href='{{ review.url }}'>
+    <div class="page-review_text">&nbsp;{{ review.text }}&nbsp;</div>
+    </a>
+{% endfor %}
