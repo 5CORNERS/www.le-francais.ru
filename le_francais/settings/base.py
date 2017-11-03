@@ -260,8 +260,8 @@ EMAIL_HOST = os.environ.get('EMAIL_HOST', "localhost")
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', "")
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', "")
-EMAIL_USE_TLS =True if (os.environ.get('EMAIL_USE_TLS', False)) == 'True' else False
-EMAIL_USE_SSL =True if (os.environ.get('EMAIL_USE_TLS', False)) == 'True' else False
+EMAIL_USE_TLS =os.environ.get('EMAIL_USE_TLS', False)
+EMAIL_USE_SSL =os.environ.get('EMAIL_USE_TLS', False)
 
 
 # Wagtail settings
@@ -270,14 +270,13 @@ WAGTAIL_SITE_NAME = "le_francais"
 
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
-BASE_URL = '192.168.0.27:8000'
+BASE_URL = '192.168.0.27:80'
 
 ALLOWED_HOSTS = [
     '94.188.74.123',
     'hidden-refuge-27954.herokuapp.com',
     'www.le-francais.ru',
     'le-francais.ru',
-    'hidden-refuge-27954.herokuapp.com',
     'localhost',
     'fe61337f.ngrok.io',
     '192.168.0.27',
