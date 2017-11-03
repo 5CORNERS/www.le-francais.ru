@@ -6,6 +6,7 @@ from wagtail.wagtailimages.blocks import ImageChooserBlock
 from home.blocks.AudioBlock import AudioBlock
 from home.blocks.DocumentViewerBlock import DocumentViewerBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
+from home.blocks.TopicBlock import TopicBlock
 
 
 class TabsBlock(blocks.ListBlock):
@@ -26,6 +27,7 @@ class TabBlock(blocks.StructBlock):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
+        ('topic', TopicBlock())
     ])
 
     # class Meta:
