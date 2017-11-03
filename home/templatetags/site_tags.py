@@ -6,10 +6,17 @@ register = template.Library()
 
 
 @register.inclusion_tag('tags/random_reviews.html')
-def random_review(count=3,*args, **kwargs):
+def random_review(count=3):
     qs = IndexReviews.objects.order_by('?')
     qs = qs[:count]
     return dict(object_list=qs)
+
+
+@register.inclusion_tag('tags/topic_block.html')
+def topic_block(topic_id):
+    from pybb.models import Topic
+    topic = Topic.objects.get(id=topic_id)
+    return dict(topic=topic)
 
 
 @register.assignment_tag(takes_context=True)
