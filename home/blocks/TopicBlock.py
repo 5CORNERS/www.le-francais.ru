@@ -6,5 +6,5 @@ class TopicBlock(blocks.StructBlock):
 	topic_id = IntegerBlock()
 
 	class Meta:
-		template = 'blocks/topic_block'
+		template = 'blocks/topic_block.html'
 		icon = 'group'
