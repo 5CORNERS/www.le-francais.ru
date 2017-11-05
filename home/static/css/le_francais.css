@@ -447,11 +447,11 @@ td.forum-last-post, td.topic-last-post {
     }
 
     .sidebar-collapse-button {
+        display: initial;
         position: absolute;
         top: 70px;
         left: 0;
         z-index: 1000;
-        display: initial;
         padding: 5px;
         border: 1px solid #eee;
         border-left: none;
