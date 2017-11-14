@@ -9,11 +9,13 @@ from ._private import set_block
 
 class Command(BaseCommand):
 	def handle(self, *args, **options):
-		fix_mixed_content_pages(PageWithSidebar)
+		fix_mixed_content_pages(LessonPage)
 		# fix_iframe_errors()
 
 def fix_mixed_content_pages(PageModel):
 	for page in PageModel.objects.all():
+		if not page.lesson_number in {1,2,10}:
+			continue
 		for tab in (
 				page.body,
 				# page.comments_for_lesson,
