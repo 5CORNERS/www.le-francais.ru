@@ -170,3 +170,10 @@ a.page-review:hover {
     float: right;
     top: .45em;
 }
+
+.lyrical_digression_h{
+    text-align: center;
+    font-size: medium;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
