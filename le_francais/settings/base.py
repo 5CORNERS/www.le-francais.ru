@@ -273,14 +273,11 @@ WAGTAIL_SITE_NAME = "le_francais"
 BASE_URL = '192.168.0.27:80'
 
 ALLOWED_HOSTS = [
-    '94.188.74.123',
     'hidden-refuge-27954.herokuapp.com',
     'www.le-francais.ru',
     'le-francais.ru',
     'localhost',
-    'fe61337f.ngrok.io',
     '192.168.0.27',
-    ''
 ]
 
 # Allauth settings
