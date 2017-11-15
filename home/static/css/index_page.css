@@ -173,7 +173,9 @@ a.page-review:hover {
 
 .lyrical_digression_h{
     text-align: center;
-    font-size: medium;
+    font-size: 18px;
     margin-top: 1em;
     margin-bottom: 1em;
+    font-weight: bold;
+    font-style: italic;
 }
