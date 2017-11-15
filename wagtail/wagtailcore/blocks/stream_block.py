@@ -236,7 +236,7 @@ class BaseStreamBlock(Block):
 
     def render_basic(self, value, context=None):
         return format_html_join(
-            '\n', '{0}',
+            '\n', '<div class="block-{1}">{0}</div>',
             [
                 (child.render(context=context), child.block_type)
                 for child in value
