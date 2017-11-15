@@ -1,5 +1,6 @@
+{% load site_tags %}
 {% for review in object_list %}
-    <a class="page-review" href='{{ review.url }}'>
-    <div class="page-review_text">{{ review.text }}</div>
+    <a class="page-review" href='{{ review.url }}'{% if review.external %}target="_blank" rel="nofollow"{% endif %}>
+        <div class="page-review_text">{{ review.text }}</div>
     </a>
 {% endfor %}
