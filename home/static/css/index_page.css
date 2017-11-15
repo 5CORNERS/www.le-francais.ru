@@ -74,6 +74,11 @@ a.page-reference:hover .page-reference_title {
     font-size: 14px;
 }
 
+.home_comments {
+    color: #282b36;
+    font-size: 14px;
+}
+
 .cat-logo-mini {
     position: relative;
     z-index: 2;
@@ -150,6 +155,10 @@ a.page-review:hover {
     margin-top: 0px;
     color: #495869;
     font-size: 16px;
+}
+
+.page-review_text:hover{
+    color: #232937;
 }
 
 .page-review_text:before {
