@@ -151,7 +151,7 @@
 .btn-mailru:active,.btn-mailru.active,.open>.dropdown-toggle.btn-mailru{background-image:none}
 .btn-mailru.disabled,.btn-mailru[disabled],fieldset[disabled] .btn-mailru,.btn-mailru.disabled:hover,.btn-mailru[disabled]:hover,fieldset[disabled] .btn-mailru:hover,.btn-mailru.disabled:focus,.btn-mailru[disabled]:focus,fieldset[disabled] .btn-mailru:focus,.btn-mailru.disabled.focus,.btn-mailru[disabled].focus,fieldset[disabled] .btn-mailru.focus,.btn-mailru.disabled:active,.btn-mailru[disabled]:active,fieldset[disabled] .btn-mailru:active,.btn-mailru.disabled.active,.btn-mailru[disabled].active,fieldset[disabled] .btn-mailru.active{background-color:#168de2;border-color:rgba(0,0,0,0.2)}
 .btn-mailru .badge{color:#168de2;background-color:#fff}
-.btn-yandex{color:#fff;background-color:#ffdb4d;border-color:rgba(0,0,0,0.2)}.btn-yandex:focus,.btn-yandex.focus{color:#fff;background-color:#ffd70a;border-color:rgba(0,0,0,0.2)}
+.btn-yandex{color:#333;background-color:#ffdb4d;border-color:rgba(0,0,0,0.2)}.btn-yandex:focus,.btn-yandex.focus{color:#fff;background-color:#ffd70a;border-color:rgba(0,0,0,0.2)}
 .btn-yandex:hover{color:#000;background-color:#ffd70a;border-color:rgba(0,0,0,0.2)}
 .btn-yandex:active,.btn-yandex.active,.open>.dropdown-toggle.btn-yandex{color:#000;background-color:#ffd70a;border-color:rgba(0,0,0,0.2)}.btn-yandex:active:hover,.btn-yandex.active:hover,.open>.dropdown-toggle.btn-yandex:hover,.btn-yandex:active:focus,.btn-yandex.active:focus,.open>.dropdown-toggle.btn-yandex:focus,.btn-yandex:active.focus,.btn-yandex.active.focus,.open>.dropdown-toggle.btn-yandex.focus{color:#000;background-color:#23345a;border-color:rgba(0,0,0,0.2)}
 .btn-yandex:active,.btn-yandex.active,.open>.dropdown-toggle.btn-yandex{background-image:none}
