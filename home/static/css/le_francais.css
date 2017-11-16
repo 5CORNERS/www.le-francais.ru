@@ -516,3 +516,7 @@ td.forum-last-post, td.topic-last-post {
         display: inline;
     }
 }
+
+.change-username-form{
+    margin-top: 50px;
+}
