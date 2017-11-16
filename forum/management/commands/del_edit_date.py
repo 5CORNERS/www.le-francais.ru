@@ -10,11 +10,13 @@ class Command(BaseCommand):
             if post.updated != None:
                 post.updated = None
                 post.save()
-        print()
-        user = User.objects.get(username='Французский язык с удовольствием')
-        for post in Post.objects.filter(user=user):
-            print (str(post.id)+ '\t' + str(post.created))
-            if post.created > datetime(2017,9,21):
-                post.created = datetime(2011,1,1)
-                post.save()
+
+        # print()
+        # user = User.objects.get(username='Французский язык с удовольствием')
+        # for post in Post.objects.filter(user=user):
+        #     print (str(post.id)+ '\t' + str(post.created))
+        #     if post.created > datetime(2017,9,21):
+        #         post.created = datetime(2011,1,1)
+        #         post.save()
+
 
