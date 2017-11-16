@@ -22,36 +22,41 @@
                     </div>
                     <div class="row text-xs-center">
                         <div class="col-lg-4 col-sm-6">
-                            <input type="button" class="btn btn-google btn-block" style="margin-bottom:10px"
-                                   value="Google+"
-                                   onclick="window.location.href='{% url "social:begin" "google-oauth2" %}'"/>
+                            <a class="btn btn-google btn-block" href="{% url "social:begin" "google-oauth2" %}"
+                               style="margin-bottom:10px">
+                                Google+
+                            </a>
                         </div>
                         <div class="col-lg-4 col-sm-6">
-                            <input type="button" class="btn btn-vk btn-block" style="margin-bottom:10px"
-                                   value="ВКонтакте"
-                                   onclick="window.location.href='{% url "social:begin" "vk-oauth2" %}'"/>
+                            <a class="btn btn-vk btn-block" style="margin-bottom:10px"
+                               href="{% url "social:begin" "vk-oauth2" %}">
+                                ВКонтакте
+                            </a>
                         </div>
                         <div class="col-lg-4 col-sm-6">
-                            <input type="button" class="btn btn-facebook btn-block" style="margin-bottom:10px"
-                                   value="Facebook"
-                                   onclick="window.location.href='{% url "social:begin" "facebook" %}'"/>
+                            <a class="btn btn-facebook btn-block" style="margin-bottom:10px"
+                               href="{% url "social:begin" "facebook" %}">
+                                Facebook
+                            </a>
                         </div>
                         <div class="col-lg-4 col-sm-6">
-                            <input type="button" class="btn btn-mailru btn-block" style="margin-bottom:10px" value="Mail.ru"
-                                   onclick="window.location.href='{% url "social:begin" "mailru-oauth2" %}'"
-                            />
+                            <a class="btn btn-mailru btn-block" style="margin-bottom:10px"
+                               href="{% url "social:begin" "mailru-oauth2" %}">
+                                Mail.ru
+                            </a>
                         </div>
                         <div class="col-lg-4 col-sm-6">
-                            <input type="button" class="btn btn-odnoklassniki btn-block" style="margin-bottom:10px" value="Одноклассники"
-                                   onclick="window.location.href='{% url "social:begin" "odnoklassniki-oauth2" %}'"
-                            />
+                            <a class="btn btn-odnoklassniki btn-block" style="margin-bottom:10px"
+                               href="{% url "social:begin" "odnoklassniki-oauth2" %}">
+                                Одноклассники
+                            </a>
                         </div>
                         <div class="col-lg-4 col-sm-6">
-                            <input type="button" class="btn btn-yandex btn-block" style="margin-bottom:10px; " value="Яндекс"
-                                   onclick="window.location.href='{% url "social:begin" "yandex-oauth2" %}'"
-                            />
+                            <a class="btn btn-yandex btn-block" style="margin-bottom:10px; "
+                               href="{% url "social:begin" "yandex-oauth2" %}">
+                                Яндекс
+                            </a>
                         </div>
-
                     </div>
                     <hr class="hidden-lg">
                 </div>
@@ -71,7 +76,7 @@
                                 {% endfor %}
                             {% endfor %}
                             {% for error in form.non_field_errors %}
-                                <div class="alert alert-error" >
+                                <div class="alert alert-error">
                                     <strong>{{ error|escape }}</strong>
                                 </div>
                             {% endfor %}
