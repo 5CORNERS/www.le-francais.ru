@@ -3,7 +3,8 @@ import threading
 from datetime import datetime, timedelta
 
 import httplib2
-from django.contrib.auth import login
+from django.conf import settings
+from django.contrib.auth import login, REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import PermissionDenied
@@ -12,6 +13,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.views import generic
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
 from oauth2client.client import OAuth2WebServerFlow
 from pure_pagination import Paginator, PaginationMixin
 from pybb import defaults
@@ -19,16 +22,31 @@ from pybb.forms import PostForm
 from pybb.models import Post, Topic
 from pybb.permissions import perms
 from pybb.views import AddPostView, EditPostView, TopicView
-from wagtail.wagtailcore.models import Page
+from social_core.utils import setting_name
+from social_django.utils import psa
+from social_django.views import _do_login
 
 from home.models import PageWithSidebar, LessonPage
 from home.src.site_import import import_content
+from wagtail.wagtailcore.models import Page
 from .forms import ChangeUsername
 
 flow = OAuth2WebServerFlow(client_id='499129759772-bqrp9ha0vfibn6t76fdgdmd87khnn2e0.apps.googleusercontent.com',
                            client_secret='CRTqrmLi-116OMgpFOnYS6wH',
                            scope='https://www.googleapis.com/auth/drive',
                            redirect_uri='http://localhost:8000/import/authorized')
+from social_core.actions import do_complete
+
+NAMESPACE = getattr(settings, setting_name('URL_NAMESPACE'), None) or 'social'
+
+
+@never_cache
+@csrf_exempt
+@psa('{0}:complete'.format(NAMESPACE))
+def complete(request, backend, *args, **kwargs):
+	"""Authentication complete view"""
+	return do_complete(request.backend, _do_login, request.user,
+	                   redirect_name=REDIRECT_FIELD_NAME, *args, **kwargs)
 
 
 @login_required
@@ -39,7 +57,7 @@ def change_username(request):
 		if form.is_valid():
 			user = request.user
 			username = user.normalize_username(request.POST['username'])
-			user.used_usernames.append({'username':user.username, 'change_datetime':datetime.utcnow()})
+			user.used_usernames.append({'username': user.username, 'change_datetime': datetime.utcnow()})
 			user.username = username
 			user.save()
 			return HttpResponseRedirect('/forum/profile/edit')
