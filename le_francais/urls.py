@@ -5,28 +5,25 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic import TemplateView
 from pybb.views import ProfileEditView
-# from registration.backends.default.views import RegistrationView
-from wagtail.wagtailadmin import urls as wagtailadmin_urls
-from wagtail.wagtailcore import urls as wagtail_urls
-from wagtail.wagtaildocs import urls as wagtaildocs_urls
-from home.views import change_username
 
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
 from home.urls import site_import_urls, api_urls
-from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing
+from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing, complete
+from home.views import change_username
 from profiles.views import UserTopics, UserPosts
 from search import views as search_views
+# from registration.backends.default.views import RegistrationView
+from wagtail.wagtailadmin import urls as wagtailadmin_urls
+from wagtail.wagtailcore import urls as wagtail_urls
+from wagtail.wagtaildocs import urls as wagtaildocs_urls
 
 urlpatterns = [
 	# url(r'^sitemap\.xml$', sitemap,{'sitemaps':sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 	url(r'^robots\.txt$', include('robots.urls')),
 
-	url(r'loaderio-48b67d660cd89b42c2c95de0e8c29618/', TemplateView.as_view(template_name='loaderio-48b67d660cd89b42c2c95de0e8c29618.txt', content_type="text/plain")),
-
 	url(r'^django-admin/', include(admin.site.urls)),
-	# url(r'^login/$', auth_views.login, name='login'),
-	# url(r'^logout/$', auth_views.logout, name='logout'),
+
 	url(r'^admin/', include(wagtailadmin_urls)),
 	url(r'^documents/', include(wagtaildocs_urls)),
 
@@ -42,9 +39,9 @@ urlpatterns = [
 
 	url(r'^forum/profile/edit/$', ProfileEditView.as_view(form_class=AORProfileForm), name='pybb:edit_profile'),
 	url(r'^forum/users/(?P<username>[^/]+)/topics/$', UserTopics.as_view(),
-		name='user_topics'),
+	    name='user_topics'),
 	url(r'^forum/users/(?P<username>[^/]+)/posts/$', UserPosts.as_view(),
-		name='user_posts'),
+	    name='user_posts'),
 
 	url(r'^forum/topic/(?P<pk>\d+)/$', AorTopicView.as_view(), name='topic'),
 	url(r'^forum/topic/(?P<pk>\d+)/move/$', MovePostView.as_view(), name='move_post'),
@@ -57,8 +54,9 @@ urlpatterns = [
 	url(r'^messages/', include('forum_messages.urls')),
 
 	url(r'^old_site/', include('old_site.urls')),
-
+	url(r'^complete/(?P<backend>[^/]+){0}$', complete, name='complete'),
 	url(r'^', include('social_django.urls', namespace='social')),
+	url(r'^new-users-redirect-url/', TemplateView.as_view(template_name='account/change_username_new_user.html')),
 	url(r'^', include(wagtail_urls)),
 
 ]

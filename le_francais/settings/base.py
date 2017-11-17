@@ -139,6 +139,10 @@ WSGI_APPLICATION = 'le_francais.wsgi.application'
 
 SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT") == "True"
 
+SECURE_REDIRECT_EXEMPT = [
+    '^(?!.*accounts).*$',
+]
+
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
@@ -220,10 +224,6 @@ MEDIA_URL = '/media/'
 
 LOGIN_URL = '/accounts/login'
 
-LOGIN_REDIRECT_URL = '/'
-
-LOGOUT_REDIRECT_URL = '/login/'
-
 # Robots settings
 
 ROBOTS_USE_SITEMAP = False
@@ -295,7 +295,7 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = False
 # Social-Auth settings
 
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
+SOCIAL_AUTH_NEW_USER_REDIRECT = 'new-users-redirect-url/'
 SOCIAL_AUTH_PIPELINE = (
     # Get the information we can about the user and return it in a simple
     # format to create the user instance later. On some cases the details are
