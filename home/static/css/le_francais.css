@@ -10,7 +10,8 @@ body {
 .footer {
     margin-top: 20px;
 }
-.footer .navbar{
+
+.footer .navbar {
     margin-bottom: 0;
 }
 
@@ -140,7 +141,7 @@ body {
     padding-left: 0;
 }
 
-.row .padding{
+.row .padding {
     padding-right: 15px;
     padding-left: 15px;
 }
@@ -443,7 +444,9 @@ td.forum-last-post, td.topic-last-post {
     .sidebar-wrapper.active {
         z-index: 1000;
         display: initial;
-        width: 80%;
+        position: relative;
+        width: 100%;
+        padding-right: 20%;
     }
 
     .sidebar-collapse-button {
@@ -475,9 +478,11 @@ td.forum-last-post, td.topic-last-post {
         background: url("/static/images/chevron-left.png");
     }
 }
-.navbar-brand-text{
+
+.navbar-brand-text {
     font-size: 14px;
 }
+
 .navbar-brand-home {
     display: none;
     margin-left: 10%;
@@ -511,12 +516,13 @@ td.forum-last-post, td.topic-last-post {
         margin-left: 10%;
         margin-right: 10%;
     }
-    .navbar-brand-text{
+
+    .navbar-brand-text {
         font-size: 18px;
         display: inline;
     }
 }
 
-.change-username-form{
+.change-username-form {
     margin-top: 50px;
 }
