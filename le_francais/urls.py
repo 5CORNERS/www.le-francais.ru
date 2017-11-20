@@ -20,7 +20,7 @@ from wagtail.wagtaildocs import urls as wagtaildocs_urls
 
 urlpatterns = [
 	# url(r'^sitemap\.xml$', sitemap,{'sitemaps':sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
-	url(r'^robots\.txt$', include('robots.urls')),
+	url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
 
 	url(r'^django-admin/', include(admin.site.urls)),
 
