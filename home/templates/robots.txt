@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /lecons/bibliotheque/resumes/
+Disallow: /lecons/futur/
+Disallow: /old_site/
+Disallow: /accounts/
+
+Host: https://www.le-francais.ru
