@@ -9,18 +9,21 @@
                     {% for field in form %}
                         {% for error in field.errors %}
                             <div class="alert alert-error">
-                                <strong>{{ error|bootstrap }}</strong>
+                                <strong>{{ error }}</strong>
                             </div>
                         {% endfor %}
                     {% endfor %}
                 {% endif %}
                 <div class="form-group change-username-form">
-                    <input class="form-control form-control-lg" placeholder="Имя на форуме" id="username" maxlength="32"
+                    <input class="form-control form-control-lg" placeholder="Задайте имя на форуме" id="username" maxlength="32"
                            type="text" name="username" required>
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary">OK</button>
                 </div>
+                {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                {% endif %}
             </form>
         </div>
     </div>

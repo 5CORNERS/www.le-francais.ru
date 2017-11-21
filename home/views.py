@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import httplib2
 from django.conf import settings
-from django.contrib.auth import login, REDIRECT_FIELD_NAME
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import PermissionDenied
@@ -13,8 +13,6 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.views import generic
-from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import csrf_exempt
 from oauth2client.client import OAuth2WebServerFlow
 from pure_pagination import Paginator, PaginationMixin
 from pybb import defaults
@@ -23,8 +21,6 @@ from pybb.models import Post, Topic
 from pybb.permissions import perms
 from pybb.views import AddPostView, EditPostView, TopicView
 from social_core.utils import setting_name
-from social_django.utils import psa
-from social_django.views import _do_login
 
 from home.models import PageWithSidebar, LessonPage
 from home.src.site_import import import_content
@@ -35,23 +31,16 @@ flow = OAuth2WebServerFlow(client_id='499129759772-bqrp9ha0vfibn6t76fdgdmd87khnn
                            client_secret='CRTqrmLi-116OMgpFOnYS6wH',
                            scope='https://www.googleapis.com/auth/drive',
                            redirect_uri='http://localhost:8000/import/authorized')
-from social_core.actions import do_complete
 
 NAMESPACE = getattr(settings, setting_name('URL_NAMESPACE'), None) or 'social'
 
 
-@never_cache
-@csrf_exempt
-@psa('{0}:complete'.format(NAMESPACE))
-def complete(request, backend, *args, **kwargs):
-	"""Authentication complete view"""
-	return do_complete(request.backend, _do_login, request.user,
-	                   redirect_name=REDIRECT_FIELD_NAME, *args, **kwargs)
-
-
 @login_required
 def change_username(request):
-	template_name = 'account/change_username.html'
+	if request.path == '/accounts/username/change_new/':
+		template_name = 'account/change_username_new.html'
+	else:
+		template_name = 'account/change_username.html'
 	if request.method == 'POST':
 		form = ChangeUsername(request.POST)
 		if form.is_valid():
@@ -60,12 +49,19 @@ def change_username(request):
 			user.used_usernames.append({'username': user.username, 'change_datetime': datetime.utcnow()})
 			user.username = username
 			user.save()
-			return HttpResponseRedirect('/forum/profile/edit')
+			if 'next' in request.POST:
+				redirect_url = request.POST['next']
+			else:
+				redirect_url = 'forum/profile/edit/'
+			return HttpResponseRedirect(redirect_url)
 		else:
 			return render(request, template_name, {'form': form})
 	form = ChangeUsername()
-	return render(request, template_name, {'form': form})
-
+	redirect_field_value = None
+	redirect_field_name = 'next'
+	if 'next' in request.GET:
+		redirect_field_value = request.GET['next']
+	return render(request, template_name, {'form': form,'redirect_field_value':redirect_field_value, 'redirect_field_name':redirect_field_name})
 
 def authorize(request):
 	return redirect(flow.step1_get_authorize_url())
