@@ -5,11 +5,12 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic import TemplateView
 from pybb.views import ProfileEditView
+from social_core.utils import setting_name
 
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
 from home.urls import site_import_urls, api_urls
-from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing, complete
+from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing
 from home.views import change_username
 from profiles.views import UserTopics, UserPosts
 from search import views as search_views
@@ -18,6 +19,7 @@ from wagtail.wagtailadmin import urls as wagtailadmin_urls
 from wagtail.wagtailcore import urls as wagtail_urls
 from wagtail.wagtaildocs import urls as wagtaildocs_urls
 
+extra = getattr(settings, setting_name('TRAILING_SLASH'), True) and '/' or ''
 urlpatterns = [
 	url(r'^fsg6e3a9.txt',TemplateView.as_view(template_name='fsg6e3a9.txt', content_type='text/plain')),
 	# url(r'^sitemap\.xml$', sitemap,{'sitemaps':sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
@@ -34,7 +36,8 @@ urlpatterns = [
 	url(r'^api/', include(api_urls)),
 
 	url(r'^accounts/', include('allauth.urls')),
-	url(r'^accounts/username/change', view=change_username, name='account_change_username'),
+	url(r'^accounts/username/change/$', change_username, name='account_change_username'),
+	url(r'^accounts/username/change_new/$', change_username, name='account_change_username'),
 
 	url(r'^captcha/', include('captcha.urls')),
 
@@ -55,9 +58,8 @@ urlpatterns = [
 	url(r'^messages/', include('forum_messages.urls')),
 
 	url(r'^old_site/', include('old_site.urls')),
-	url(r'^complete/(?P<backend>[^/]+){0}$', complete, name='complete'),
-	url(r'^', include('social_django.urls', namespace='social')),
-	url(r'^new-users-redirect-url/', TemplateView.as_view(template_name='account/change_username_new_user.html')),
+	url(r'^', include('social_django.urls'.format(extra), namespace='social')),
+	url(r'^new-users-redirect-url/', TemplateView.as_view(template_name='account/change_username_new.html')),
 	url(r'^', include(wagtail_urls)),
 
 ]
