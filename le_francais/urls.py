@@ -19,6 +19,7 @@ from wagtail.wagtailcore import urls as wagtail_urls
 from wagtail.wagtaildocs import urls as wagtaildocs_urls
 
 urlpatterns = [
+	url(r'^fsg6e3a9.txt',TemplateView.as_view(template_name='fsg6e3a9.txt', content_type='text/plain')),
 	# url(r'^sitemap\.xml$', sitemap,{'sitemaps':sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 	url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
 
