@@ -140,7 +140,7 @@ WSGI_APPLICATION = 'le_francais.wsgi.application'
 SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT") == "True"
 
 SECURE_REDIRECT_EXEMPT = [
-    '^(?!.*accounts).*$',
+    # '^(?!.*accounts).*$',
 ]
 
 # Database
@@ -148,8 +148,12 @@ SECURE_REDIRECT_EXEMPT = [
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'mydatabase',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': '123',
+        'HOST': '127.0.0.1',
+        'PORT':'5432'
     }
 }
 
@@ -227,7 +231,7 @@ LOGIN_URL = '/accounts/login'
 # Robots settings
 
 ROBOTS_USE_SITEMAP = False
-ROBOTS_USE_HOST = False
+ROBOTS_USE_HOST = True
 
 # PyBBM settings
 
@@ -279,6 +283,7 @@ ALLOWED_HOSTS = [
     'www.le-francais.ru',
     'le-francais.ru',
     'localhost',
+    '127.0.0.1',
     '192.168.0.27',
 ]
 
@@ -293,7 +298,7 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = False
 
 
 # Social-Auth settings
-
+NEW_USER_REDIRECT_URL = '/accounts/username/change_new'
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 SOCIAL_AUTH_NEW_USER_REDIRECT = 'new-users-redirect-url/'
 SOCIAL_AUTH_PIPELINE = (
