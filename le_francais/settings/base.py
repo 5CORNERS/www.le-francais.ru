@@ -75,6 +75,7 @@ INSTALLED_APPS = [
 
     'custom_user',
     'pybb',
+    'mailer',
     'postman',
     'forum',
     'forum_messages',
@@ -261,6 +262,7 @@ POSTMAN_NAME_USER_AS = 'username'
 POSTMAN_SHOW_USER_AS = 'username'
 POSTMAN_DISALLOW_ANONYMOUS = True
 
+EMAIL_BACKEND = "mailer.backend.DbBackend"
 DEFAULT_FROM_EMAIL = 'no_reply@files.le-francais.ru'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', "localhost")
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
