@@ -16,6 +16,7 @@ from home.blocks.AudioBlock import AudioBlock
 from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.DocumentViewerBlock import DocumentViewerBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
+from home.blocks.TopicBlock import TopicBlock
 
 
 def is_nav_root(page: Page) -> bool:

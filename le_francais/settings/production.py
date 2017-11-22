@@ -9,7 +9,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # Django Email settings
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 try:
 	from .local import *
