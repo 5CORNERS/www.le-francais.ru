@@ -17,6 +17,7 @@ social-auth-app-django
 markdown
 urllib3
 pymdown-extensions
+django-mailer
 
 django-storages
 boto3

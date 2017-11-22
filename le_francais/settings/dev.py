@@ -11,8 +11,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 ADMINS = [('semyon', 'semyon@atamas.com')]
 
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
 try:
