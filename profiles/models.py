@@ -30,6 +30,9 @@ class Profile(PybbProfile):
     def __unicode__(self):
         return self.user.username
 
+    def __str__(self):
+        return self.user.username
+
     class Meta(object):
         verbose_name = _('Profile')
         verbose_name_plural = _('Profiles')
