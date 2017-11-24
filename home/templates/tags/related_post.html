@@ -1,0 +1,79 @@
+{% load i18n pybb_tags staticfiles %}
+
+{% pybb_get_profile post.user as post_user_profile %}
+{% pybb_get_profile request.user as request_user_profile %}
+
+<table class="table table-bordered post post-row
+       {% if post.on_moderation %}on-moderation{% endif %}"
+       id="post-{{ post.id }}"
+       >
+    <thead>
+    <tr>
+        <td class="post-author">
+            <a href="{% url 'pybb:user' post.user.username %}">
+                <span class="post-username">{{ post.user.username }}</span>
+            </a>
+        </td>
+        <td class="post-date">
+            <a class="permalink" href="{{ post.get_absolute_url }}">#</a>
+            {% if request_user_profile.date_show_type == 1 %}{{ post.created }}{% else %}{{ post.created|timesince }} {% trans "ago" %}{% endif %}
+            {% if post.updated %}
+                ({% trans "edited" %}
+                {% if request_user_profile.date_show_type == 1 %}
+                    {{ post.updated }})
+                {% else %}
+                    {{ post.updated|timesince }} {% trans "ago" %})
+                {% endif %}
+            {% endif %}
+            {% if user.is_superuser %}
+                {% trans "from" %} {{ post.user_ip }}
+            {% endif %}
+        </td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td class="post-info">
+            {% include "pybb/avatar.html" with profile=post.user.pybb_profile %}
+            <div>
+                {% trans "Topics" %}:
+                <a href="{% url 'user_topics' post.user.username %}">
+                    {{ post.user.topic_set.count }}
+                </a>
+            </div>
+            <div>
+                {% trans "Posts" %}:
+                <a href="{% url 'user_posts' post.user.username %}">
+                    {{ post_user_profile.post_count }}
+                </a>
+            </div>
+            <div>
+                {% trans "Member since" %}: {{ post.user.date_joined|date:'d E Y' }}
+            </div>
+            {% if not post.user.is_active %}
+                <div class="label label-warning">{% trans 'blocked' %}</div>
+            {% endif %}
+        </td>
+        <td class="post-content">
+            {{ post.body_html|safe }}
+            {% if not user.is_authenticated or request_user_profile.show_signatures %}
+                {% if post_user_profile.signature %}
+                    <div class="post-signature">
+                        {{ post_user_profile.signature_html|safe }}
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <div class="post-related">
+                <div class='attachments'>
+                    {% for attachment in post.attachments.all %}
+                        <a href="{{ attachment.file.url }}">
+                          <img src="{% static 'pybb/img/attachment.png' %}"> {{ attachment.size_display }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>

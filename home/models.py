@@ -16,7 +16,7 @@ from home.blocks.AudioBlock import AudioBlock
 from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.DocumentViewerBlock import DocumentViewerBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
-from home.blocks.TopicBlock import TopicBlock
+from home.blocks.ForumBlocks import TopicBlock, PostBlock
 
 
 def is_nav_root(page: Page) -> bool:
@@ -111,7 +111,8 @@ class PageWithSidebar(Page):
             ('word', RichTextBlock(required=True)),
             ('translation', RichTextBlock(required=True))
         ]), template="blocks/transcriptions.html")
-         )
+         ),
+        ('post', PostBlock())
     ])
 
     def get_nav_root(self) -> Page:
@@ -151,6 +152,7 @@ class LessonPage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
+        ('post', PostBlock())
     ], null=True, blank=True)
     body = StreamField([
         ('paragraph', RichTextBlock()),
@@ -159,6 +161,7 @@ class LessonPage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
+        ('post', PostBlock())
     ])
     dictionary = StreamField([
         ('paragraph', RichTextBlock()),
@@ -171,6 +174,7 @@ class LessonPage(Page):
             ('word', RichTextBlock(required=True)),
             ('translation', RichTextBlock(required=True))
         ]), template="blocks/transcriptions.html")),
+        ('post', PostBlock())
     ], null=True, blank=True)
     other_tabs = StreamField([('tab', TabBlock())])
 
