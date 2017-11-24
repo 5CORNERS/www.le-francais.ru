@@ -102,6 +102,7 @@
     {% top_menu parent=site_root calling_page=self %}
 {% endblock %}
 <div class="_content">
+    {% block main %}{% endblock %}
     {% block content %}{% endblock %}
 </div>
 
