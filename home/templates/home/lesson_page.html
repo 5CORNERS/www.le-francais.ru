@@ -164,13 +164,13 @@
                                 <h6>Не стесняйтесь задавать вопросы и комментировать. </h6>
                                 <div class="posts">
                                     {% with self.topic.head as post %}
-                                        <div class="first_post">{% include "related_post.html" %}</div>
+                                        <div class="first_post">{% include "tags/related_post.html" %}</div>
                                     {% endwith %}
                                     {% if self.topic.last_post.id != self.topic.head.id %}
                                         <div class="text-left">Последний комментарий к уроку.</div>
                                         {% with self.topic.last_post as post %}
                                             {% if not post == self.topic.head %}
-                                                <div class="last_post">{% include "related_post.html" %}</div>
+                                                <div class="last_post">{% include "tags/related_post.html" %}</div>
                                             {% endif %}
                                         {% endwith %}
                                     {% else %}

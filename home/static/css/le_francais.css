@@ -15,6 +15,10 @@ body {
     margin-bottom: 0;
 }
 
+.navbar {
+    z-index: 1000;
+}
+
 img {
     max-width: 100%;
     height: auto;
@@ -186,6 +190,12 @@ body {
     .sidebar-nav .navbar ul {
         flex-direction: column;
     }
+}
+
+.breadcrumb>li+li:before {
+    padding: 0 5px;
+    color: #ccc;
+    content: ">\00a0";
 }
 
 .transcription-list {
