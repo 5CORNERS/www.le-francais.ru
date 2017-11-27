@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    # 'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.sitemaps',
@@ -72,7 +71,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.mailru',
     'allauth.socialaccount.providers.odnoklassniki',
-    # 'custom_user.providers.yandex',
 
     'custom_user',
     'pybb',
@@ -82,7 +80,6 @@ INSTALLED_APPS = [
     'forum_messages',
     'profiles',
     'pure_pagination',
-    # 'sorl.thumbnail',
     'captcha',
     'crispy_forms',
 
