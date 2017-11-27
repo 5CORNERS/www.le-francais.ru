@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.views.generic import TemplateView
 from pybb.views import ProfileEditView
 from social_core.utils import setting_name
@@ -18,12 +19,15 @@ from search import views as search_views
 from wagtail.wagtailadmin import urls as wagtailadmin_urls
 from wagtail.wagtailcore import urls as wagtail_urls
 from wagtail.wagtaildocs import urls as wagtaildocs_urls
+from wagtail.contrib.wagtailsitemaps.views import sitemap
 
 extra = getattr(settings, setting_name('TRAILING_SLASH'), True) and '/' or ''
 urlpatterns = [
 	url(r'^fsg6e3a9.txt',TemplateView.as_view(template_name='fsg6e3a9.txt', content_type='text/plain')),
 	# url(r'^sitemap\.xml$', sitemap,{'sitemaps':sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 	url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+    
+	url('^sitemap\.xml$', sitemap),
 
 	url(r'^django-admin/', include(admin.site.urls)),
 
