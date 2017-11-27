@@ -1,7 +1,7 @@
 {% extends "./base.html" %}
 {% load i18n postman_tags pagination_tags pybb_tags %}
 
-{% block content %}
+{% block postman_content %}
     <div id="postman">
         <h1>{% block pm_folder_title %}{% endblock %}</h1>
         {% autopaginate pm_messages %}
@@ -89,4 +89,4 @@
         {% endif %}
         {% block pm_footer_info %}{% endblock %}
     </div>
-{% endblock content %}
+{% endblock postman_content %}

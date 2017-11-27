@@ -9,7 +9,7 @@
     {{ form.media.js }}
 {% endblock %}
 
-{% block content %}
+{% block postman_content %}
 <div id="postman">
 <h1>{% if pm_messages|length > 1 %}{% trans "Conversation" %}{% else %}{% trans "Message" %}{% endif %}</h1>
 
@@ -37,7 +37,7 @@
         <tbody>
             <tr>
                 <td class="post-info">
-                    {% include "pybb/avatar.html" with profile=message.sender.profile %}
+                    {% include "pybb/avatar.html" with profile=sender_profile %}
                     <div>
                         {% trans "Member since" %}: {{ message.sender.date_joined|date:'d E Y' }}
                     </div>
