@@ -9,8 +9,6 @@ from dotenv import load_dotenv
 sys.tracebacklimit = 30000
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "le_francais.settings.production")
-
     from django.core.management import execute_from_command_line
 
     dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
