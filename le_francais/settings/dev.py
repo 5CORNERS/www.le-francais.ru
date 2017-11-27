@@ -11,9 +11,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 ADMINS = [('semyon', 'semyon@atamas.com')]
 
-
-
 try:
-    from .local import *
+	from .local import *
 except ImportError:
-    pass
+	pass
