@@ -101,11 +101,8 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-
     'wagtail.wagtailcore.middleware.SiteMiddleware',
     'wagtail.wagtailredirects.middleware.RedirectMiddleware',
-
-
 
     'pybb.middleware.PybbMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
@@ -139,6 +136,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'le_francais.wsgi.application'
 
+SECRET_KEY = os.environ.get('SECRET_KEY')
+
 SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT") == "True"
 
 SECURE_REDIRECT_EXEMPT = [
@@ -155,7 +154,7 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': '123',
         'HOST': '127.0.0.1',
-        'PORT':'5432'
+        'PORT': '5432'
     }
 }
 
@@ -191,7 +190,7 @@ USE_L10N = False
 USE_TZ = True
 SITE_ID = 1
 
-LOCALE_PATHS = [os.path.join(BASE_DIR,'forum_messages','locale')]
+LOCALE_PATHS = [os.path.join(BASE_DIR, 'forum_messages', 'locale')]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
@@ -265,13 +264,15 @@ POSTMAN_DISALLOW_ANONYMOUS = True
 
 EMAIL_BACKEND = "mailer.backend.DbBackend"
 DEFAULT_FROM_EMAIL = 'no_reply@files.le-francais.ru'
-EMAIL_HOST = os.environ.get('EMAIL_HOST', "localhost")
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', "")
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', "")
-EMAIL_USE_TLS =os.environ.get('EMAIL_USE_TLS') == 'True'
-EMAIL_USE_SSL =os.environ.get('EMAIL_USE_SSL') == 'True'
 
+email_config = dj_email_url.config()
+
+EMAIL_HOST = os.environ.get('EMAIL_HOST', email_config['EMAIL_HOST'])
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', email_config['EMAIL_PORT']))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', email_config['EMAIL_HOST_USER'])
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', email_config['EMAIL_HOST_PASSWORD'])
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', email_config['EMAIL_USE_TLS']) == 'True'
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', email_config['EMAIL_USE_SSL']) == 'True'
 
 # Wagtail settings
 
@@ -298,7 +299,6 @@ ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_SESSION_REMEMBER = True
 
 SOCIALACCOUNT_EMAIL_VERIFICATION = False
-
 
 # Social-Auth settings
 NEW_USER_REDIRECT_URL = '/accounts/username/change_new'

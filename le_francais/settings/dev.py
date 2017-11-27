@@ -6,11 +6,6 @@ from .base import *
 DEBUG = True
 COMPRESS_ENABLED = True
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
-
-ADMINS = [('semyon', 'semyon@atamas.com')]
-
 try:
 	from .local import *
 except ImportError:
