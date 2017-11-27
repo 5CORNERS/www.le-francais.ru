@@ -5,8 +5,6 @@ from .base import *
 DEBUG = False
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
-
 # Django Email settings
 
 

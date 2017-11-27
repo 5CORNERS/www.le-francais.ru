@@ -1841,13 +1841,13 @@
           float_none: 'No'
         },
         de: {
-          title_insert: 'Bild einfügen',
+          title_insert: 'Bild einfugen',
           title_properties: 'Bildeigenschaften',
-          insert: 'Einfügen',
-          chage_image: 'Bild ändern:',
+          insert: 'Einfugen',
+          chage_image: 'Bild andern:',
           source: 'URL',
           width: 'Breite',
-          height: 'Höhe',
+          height: 'Hohe',
           alt: 'Alt Text',
           padding: 'Padding',
           'float': 'Float',
