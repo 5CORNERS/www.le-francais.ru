@@ -8,3 +8,10 @@ class TopicBlock(blocks.StructBlock):
 	class Meta:
 		template = 'blocks/topic_block.html'
 		icon = 'group'
+
+class PostBlock(blocks.StructBlock):
+	post_id = IntegerBlock()
+
+	class Meta:
+		template = 'blocks/post_block.html'
+		icon = 'group'
