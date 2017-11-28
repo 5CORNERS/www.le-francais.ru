@@ -6,3 +6,5 @@ Disallow: /accounts/
 Disallow: /forum/users/
 
 Host: https://www.le-francais.ru
+
+sitemap: https://www.le-francais.ru/sitemap.xml

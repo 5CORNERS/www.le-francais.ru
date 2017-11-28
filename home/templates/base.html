@@ -9,18 +9,21 @@
 <!--[if gt IE 8]><!-->
 <html class="no-js"> <!--<![endif]-->
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-13217782-1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-
-        gtag('js', new Date());
-
-        gtag('config', 'UA-13217782-1');
-    </script>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({
+            'gtm.start':
+                new Date().getTime(), event: 'gtm.js'
+        });
+        var f = d.getElementsByTagName(s)[0],
+            j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+        j.async = true;
+        j.src =
+            'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+        f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'dataLayer', 'GTM-WC2Q4XT');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <title>
@@ -89,12 +92,12 @@
 </head>
 
 <body class="{% block body_class %}{% endblock %}" data-spy="scroll" data-target="#myScrollspy" data-offset="15">
-{#<!-- Google Tag Manager (noscript) -->#}
-{#<noscript>#}
-{#    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WC2Q4XT"#}
-{#            height="0" width="0" style="display:none;visibility:hidden"></iframe>#}
-{#</noscript>#}
-{#<!-- End Google Tag Manager (noscript) -->#}
+<!-- Google Tag Manager (noscript) -->
+<noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WC2Q4XT"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+<!-- End Google Tag Manager (noscript) -->
 {% wagtailuserbar %}
 
 {% block menu %}
@@ -107,7 +110,7 @@
 
 {# Global javascript #}
 <script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
-<script type='text/javascript' async defer src='https://le-francais.push4site.com/sdk'></script>
+{#<script type='text/javascript' async defer src='https://le-francais.push4site.com/sdk'></script>#}
 
 {% block extra_js %}
     {# Override this in templates to add extra javascript #}
