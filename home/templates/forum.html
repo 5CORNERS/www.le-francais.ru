@@ -10,22 +10,26 @@
 <!--[if gt IE 8]><!-->
 <html class="no-js"> <!--<![endif]-->
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-13217782-1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-
-        gtag('js', new Date());
-
-        gtag('config', 'UA-13217782-1');
-    </script>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({
+            'gtm.start':
+                new Date().getTime(), event: 'gtm.js'
+        });
+        var f = d.getElementsByTagName(s)[0],
+            j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+        j.async = true;
+        j.src =
+            'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+        f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'dataLayer', 'GTM-WC2Q4XT');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
-    <title>{% block title %}Французский язык - {% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>
+    <title>{% block title %}Французский язык - {% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}
+    {% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>
     <link rel="icon" href="{% static 'favicon/favicon.ico' %}">
     <link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicon/apple-icon-57x57.png' %}">
     <link rel="apple-touch-icon" sizes="60x60" href="{% static 'favicon/apple-icon-60x60.png' %}">
@@ -110,7 +114,7 @@
 
 {# Global javascript #}
 <script defer type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
-<script type='text/javascript' async defer src='https://le-francais.push4site.com/sdk'></script>
+{#<script type='text/javascript' async defer src='https://le-francais.push4site.com/sdk'></script>#}
 
 {% block extra_js %}
     {# Override this in templates to add extra javascript #}
