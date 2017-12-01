@@ -29,6 +29,7 @@ iframe {
 }
 
 ._content {
+    font-family: Verdana, sans-serif;
     flex: 1 0 auto;
 }
 
@@ -136,7 +137,7 @@ body {
 
 @media (min-width: 768px) {
     .main {
-        padding: 50px 60px 40px;
+        padding: 40px 30px 40px;
     }
 }
 
@@ -224,13 +225,6 @@ body {
     margin-bottom: 1em;
 }
 
-.category, .forum, .topic, .post-form, .mark-all {
-    margin-right: auto;
-    margin-left: auto;
-    padding-right: 15px;
-    padding-left: 15px;
-    max-width: 1230px;
-}
 
 .category h1 {
     border-radius: 5px;

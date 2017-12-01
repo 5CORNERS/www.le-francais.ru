@@ -19,6 +19,9 @@
         {% for post in post_list %}
             {% cycle 'odd' 'even' as rowcolors silent %}
             {% include "pybb/post_template.html" %}
+            {% ifequal post post_list.0 %}{% include "ads/topic_top.html" %}{% endifequal %}
+            {% ifequal post post_list.9 %}{% include "ads/topic_middle.html" %}{% endifequal %}
+            {% ifequal post post_list.20 %}{% include "ads/topic_bottom.html" %}{% endifequal %}
         {% endfor %}
     </div>
     <div>&nbsp;</div>
