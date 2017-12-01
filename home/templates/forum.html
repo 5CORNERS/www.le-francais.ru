@@ -87,7 +87,7 @@
 <body class="{% block body_class %}{% endblock %}" data-spy="scroll" data-target="#myScrollspy" data-offset="15">
 <!-- Google Tag Manager (noscript) -->
 <noscript>
-    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WC2Q4XT"
+ <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WC2Q4XT"
             height="0" width="0" style="display:none;visibility:hidden"></iframe>
 </noscript>
 <!-- End Google Tag Manager (noscript) -->
@@ -99,13 +99,16 @@
 {% endblock %}
 <div class="_content">
     <div class="block-forum">
-        <div class="container-fluid wrapper">
-            <div class="breadcrumb">
-                {% block breadcrumb %}
-                {% endblock %}
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xs-12 col-sm-9 col-sm-offset-1 col-lg-7 col-lg-offset-2">
+                    <div class="breadcrumb">
+                        {% block breadcrumb %}
+                        {% endblock %}
+                    </div>
+                    {% block content %}
+                    {% endblock %}</div>
             </div>
-            {% block content %}
-            {% endblock %}
         </div>
     </div>
 </div>

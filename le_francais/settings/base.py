@@ -234,7 +234,7 @@ ROBOTS_USE_HOST = True
 # PyBBM settings
 
 PYBB_FORUM_PAGE_SIZE = 60
-PYBB_TOPIC_PAGE_SIZE = 30
+PYBB_TOPIC_PAGE_SIZE = 20
 PYBB_MARKUP_ENGINES_PATHS = {
     'custom_markdown': 'forum.markup_engines.CustomMarkdownParser'
 }

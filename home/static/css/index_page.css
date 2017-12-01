@@ -63,7 +63,7 @@ a.page-reference:hover .page-reference_title {
 .cat-logo {
     position: relative;
     max-width: 120%;
-    top: -5px;
+    top: 20px;
     left: 50px;
     margin: -70px;
 }
@@ -90,7 +90,7 @@ a.page-reference:hover .page-reference_title {
 
 @media (max-width: 1199px) {
     .cat-logo {
-        top: 50px;
+        top: 76px;
     }
 
     .too_many_letters {
@@ -99,7 +99,7 @@ a.page-reference:hover .page-reference_title {
 
 @media (max-width: 991px) {
     .cat-logo {
-        top: 50px;
+        top: 72px;
     }
 
     .too_many_letters {
@@ -157,13 +157,14 @@ a.page-review:hover {
     font-size: 16px;
 }
 
-.page-review_text:hover{
+.page-review_text:hover {
     color: #232937;
 }
 
 .page-review_text:before {
     color: #bbb;
     content: "\201C"; /* Непечатаемый символ слева */
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 4em;
     line-height: 0.1em;
     margin-right: 0.2em;
@@ -174,13 +175,14 @@ a.page-review:hover {
     color: #bbb;
     position: relative;
     content: "\201D"; /* Непечатаемый символ справа */
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 4em;
     line-height: 0.1em;
     float: right;
     top: .45em;
 }
 
-.lyrical_digression_h{
+.lyrical_digression_h {
     text-align: center;
     font-size: 18px;
     margin-top: 1em;
