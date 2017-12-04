@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load site_tags %}
+{% load wagtailcore_tags %}
 {% load static site_tags %}
 
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}
@@ -100,15 +101,15 @@
                         {% assign pane_class "tab-pane" %}
                         {% if self.comments_for_lesson %}
                             <div id="comments_for_lesson" class="{{ pane_class }}"
-                                 role="tabpanel">{{ self.comments_for_lesson }}</div>
+                                 role="tabpanel">{% unwrap self.comments_for_lesson %}</div>
                             {% assign pane_class "tab-pane" %}
                         {% endif %}
                         {% if self.body %}
-                            <div id="body" class="{{ pane_class }}" role="tabpanel">{{ self.body }}</div>
+                            <div id="body" class="{{ pane_class }}" role="tabpanel">{% unwrap self.body %}</div>
                             {% assign pane_class "tab-pane" %}
                         {% endif %}
                         {% if self.dictionary %}
-                            <div id="dictionary" class="{{ pane_class }}" role="tabpanel">{{ self.dictionary }}</div>
+                            <div id="dictionary" class="{{ pane_class }}" role="tabpanel">{% unwrap self.dictionary %}</div>
                             {% assign pane_class "tab-pane" %}
                         {% endif %}
                         {% if self.summary %}
@@ -133,7 +134,7 @@
                         {% endif %}
                         {% for child_value in self.other_tabs %}
                             <div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
-                                {{ child_value.value.body }}
+                                {% unwrap child_value.value.body %}
                             </div>
                         {% endfor %}
                     </div>
