@@ -46,7 +46,7 @@ urlpatterns = [
     url(r'^accounts/username/change/$', change_username, name='account_change_username'),
     url(r'^accounts/username/change_new/$', change_username, name='account_change_username'),
 
-    url(r'^captcha/', include('captcha.urls')),
+    url(r'^comments/', include('django_comments_xtd.urls')),
 
     url(r'^forum/profile/edit/$', ProfileEditView.as_view(form_class=AORProfileForm), name='pybb:edit_profile'),
     url(r'^forum/users/(?P<username>[^/]+)/topics/$', UserTopics.as_view(),

@@ -1,0 +1,12 @@
+{% load pybb_tags %}
+{% if profile.avatar %}
+    {% if 'sorl.thumbnail'|check_app_installed %}
+        {% include 'pybb/_sorl_thumbnail_avatar.html' %}
+    {% elif 'easy_thumbnails'|check_app_installed %}
+        {% include 'pybb/_easy_thumbnail_avatar.html' %}
+    {% else %}
+        <img src="{{ profile.avatar.url }}" alt="{{ profile.user.username }} avatar" width="{{ PYBB_AVATAR_WIDTH }}" height="{{ PYBB_AVATAR_HEIGHT }}" style="max-width: {{ PYBB_AVATAR_WIDTH }}px;"/>
+    {% endif %}
+{% else %}
+    <img src="{{ PYBB_DEFAULT_AVATAR_URL }}" alt="default avatar" width="{{ PYBB_AVATAR_WIDTH }}" height="{{ PYBB_AVATAR_HEIGHT }}" style="max-width: {{ PYBB_AVATAR_WIDTH }}px;"/>
+{% endif %}

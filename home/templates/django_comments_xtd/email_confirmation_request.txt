@@ -1,0 +1,21 @@
+{% load i18n %}
+{{ comment.user_name }},
+
+{% blocktrans %}You or someone in behalf of you have requested to post a comment to the following URL.{% endblocktrans %}
+
+URL:  http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}
+
+--- {% blocktrans %}Comment:{% endblocktrans %} ---
+{{ comment.comment }}
+----------------
+
+{% blocktrans %}If you do not wish to post the comment, please ignore this message or report an incident to {{ contact|safe }}. Otherwise click on the link below to confirm the comment.{% endblocktrans %}
+
+http://{{ site.domain }}{{ confirmation_url }}
+
+{% blocktrans %}If clicking does not work, you can also copy and paste the address into your browser's address window.{% endblocktrans %}
+{% blocktrans %}Thanks for your comment!{% endblocktrans %}
+
+--
+{% blocktrans %}Kind regards{% endblocktrans %},
+{{ site }}

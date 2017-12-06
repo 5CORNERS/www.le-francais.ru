@@ -534,3 +534,8 @@ td.forum-last-post, td.topic-last-post {
 .top-buffer {
     margin-top: 20px;
 }
+
+.media-heading{
+    font-size: 11px;
+    color: #777;
+}
