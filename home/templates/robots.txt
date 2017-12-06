@@ -5,6 +5,7 @@ Disallow: /old_site/
 Disallow: /accounts/
 Disallow: /forum/post/
 Disallow: /forum/users/
+Disallow: /comments
 
 Host: https://www.le-francais.ru
 

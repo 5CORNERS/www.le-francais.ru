@@ -82,7 +82,8 @@ INSTALLED_APPS = [
     'pure_pagination',
     'captcha',
     'crispy_forms',
-
+    'django_comments_xtd',
+    'django_comments',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -187,7 +188,10 @@ USE_L10N = False
 USE_TZ = True
 SITE_ID = 1
 
-LOCALE_PATHS = [os.path.join(BASE_DIR, 'forum_messages', 'locale')]
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'forum_messages', 'locale'),
+    os.path.join(BASE_DIR, 'home', 'locale')
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
@@ -376,3 +380,13 @@ SOCIAL_AUTH_ODNOKLASSNIKI_OAUTH2_KEY = os.environ.get('SOCIAL_AUTH_ODNOKLASSNIKI
 SOCIAL_AUTH_ODNOKLASSNIKI_OAUTH2_SECRET = os.environ.get('SOCIAL_AUTH_ODNOKLASSNIKI_OAUTH2_SECRET')
 SOCIAL_AUTH_ODNOKLASSNIKI_OAUTH2_PUBLIC_NAME = os.environ.get('SOCIAL_AUTH_ODNOKLASSNIKI_OAUTH2_PUBLIC_NAME')
 
+COMMENTS_APP = 'django_comments_xtd'
+COMMENTS_XTD_MAX_THREAD_LEVEL = 999
+COMMENTS_XTD_CONFIRM_EMAIL = True
+COMMENTS_XTD_APP_MODEL_OPTIONS = {
+    'default': {
+        'allow_flagging': True,
+        'allow_feedback': True,
+        'show_feedback': True,
+    }
+}

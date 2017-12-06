@@ -1,0 +1,228 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-06 16:22+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: .\forms.py:23
+msgid "Notify me about follow-up comments"
+msgstr "Уведомлять меня об ответах"
+
+#: .\forms.py:38
+msgid "Name"
+msgstr "Имя"
+
+#: .\forms.py:39
+msgid "name"
+msgstr "имя"
+
+#: .\forms.py:42
+msgid "Mail"
+msgstr "E-mail"
+
+#: .\forms.py:42
+msgid "Required for comment verification"
+msgstr "Требуется для подтверждения комментария"
+
+#: .\forms.py:43
+msgid "mail address"
+msgstr "адрес электронной почты"
+
+#: .\forms.py:46
+msgid "Link"
+msgstr "Ссылка"
+
+#: .\forms.py:48
+msgid "url your name links to (optional)"
+msgstr "url-ссылка на ваше имя (необязательно)"
+
+#: .\forms.py:51 .\templates\home\article_page.html:53
+msgid "Your comment"
+msgstr "Напишите комментарий"
+
+#: .\templates\comments\form.html:67
+msgid "send"
+msgstr "отправить"
+
+#: .\templates\comments\form.html:68
+msgid "preview"
+msgstr "предв. просмотр"
+
+#: .\templates\comments\preview.html:5 .\templates\comments\preview.html:9
+msgid "Preview your comment"
+msgstr "Предварительный просмотр комментария"
+
+#: .\templates\comments\preview.html:11
+msgid "Preview your comment for:"
+msgstr "Предварительный просмотр комментария:"
+
+#: .\templates\comments\preview.html:22
+msgid "Empty comment."
+msgstr "Пустой комментарий."
+
+#: .\templates\django_comments_xtd\comment_tree.html:15
+msgid "moderator"
+msgstr "модератор"
+
+#: .\templates\django_comments_xtd\comment_tree.html:15
+msgid "comment permalink"
+msgstr "ссылка на комметнарий"
+
+#: .\templates\django_comments_xtd\comment_tree.html:19
+msgid "comment flagged"
+msgstr "комментарий помечен для модерации"
+
+#: .\templates\django_comments_xtd\comment_tree.html:22
+msgid "flag comment"
+msgstr "пожаловаться на этот комментарий"
+
+#: .\templates\django_comments_xtd\comment_tree.html:25
+msgid "remove comment"
+msgstr "удалить комментарий"
+
+#: .\templates\django_comments_xtd\comment_tree.html:27
+#, python-format
+msgid "A user has flagged this comment as inappropriate."
+msgid_plural "%(counter)s users have flagged this comment as inappropriate."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\templates\django_comments_xtd\comment_tree.html:34
+msgid "This comment has been removed."
+msgstr "Комментарий удален"
+
+#: .\templates\django_comments_xtd\comment_tree.html:43
+msgid "Reply"
+msgstr "Ответить"
+
+#: .\templates\django_comments_xtd\email_confirmation_request.html:4
+msgid ""
+"You or someone in behalf of you have requested to post a comment into this "
+"page:"
+msgstr "Вы или кто-то от Вашего имени написал комментарий на этой странице:"
+
+#: .\templates\django_comments_xtd\email_confirmation_request.html:8
+#: .\templates\django_comments_xtd\email_followup_comment.html:9
+msgid "The comment:"
+msgstr "Текст комментария:"
+
+#: .\templates\django_comments_xtd\email_confirmation_request.html:12
+#, python-format
+msgid ""
+"If you do not wish to post the comment, please ignore this message or report "
+"an incident to %(contact)s. Otherwise click on the link below to confirm the "
+"comment."
+msgstr ""
+"Если Вы не желаете оставлять этот комментарий, просим Вас проигнорировать "
+"это сообщение или сообщить о произошедшем на %(contact)s. В противном случае "
+"нажмите на ссылку ниже чтобы подтвердить комментарий."
+
+#: .\templates\django_comments_xtd\email_confirmation_request.html:16
+#: .\templates\django_comments_xtd\email_confirmation_request.txt:16
+msgid ""
+"If clicking does not work, you can also copy and paste the address into your "
+"browser's address window."
+msgstr ""
+"Если ссылка не работает, вы можете скопировать и вставить url-адрес в поле "
+"url-адреса вашего браузера."
+
+#: .\templates\django_comments_xtd\email_confirmation_request.html:18
+#: .\templates\django_comments_xtd\email_confirmation_request.txt:17
+msgid "Thanks for your comment!"
+msgstr "Спасибо за Ваш комментарий!"
+
+#: .\templates\django_comments_xtd\email_confirmation_request.html:20
+#: .\templates\django_comments_xtd\email_confirmation_request.txt:20
+#: .\templates\django_comments_xtd\email_followup_comment.html:15
+#: .\templates\django_comments_xtd\email_followup_comment.txt:20
+msgid "Kind regards"
+msgstr "С уважением"
+
+#: .\templates\django_comments_xtd\email_confirmation_request.txt:4
+msgid ""
+"You or someone in behalf of you have requested to post a comment to the "
+"following URL."
+msgstr ""
+"Вы или кто-то от Вашего имени написал комментарий на следующей странице."
+
+#: .\templates\django_comments_xtd\email_confirmation_request.txt:8
+msgid "Comment:"
+msgstr "Текст комментария:"
+
+#: .\templates\django_comments_xtd\email_confirmation_request.txt:12
+#, python-format
+msgid ""
+"If you do not wish to post the comment, please ignore this message or report "
+"an incident to %(contact|safe)s. Otherwise click on the link below to "
+"confirm the comment."
+msgstr ""
+"Если Вы не хотите оставлять комментарий, просим Вас проигнорировать это "
+"сообщение или сообщить о произошедшем на %(contact|safe)s. В противном "
+"случае нажмите на ссылку ниже чтобы подтвердить комментарий."
+
+#: .\templates\django_comments_xtd\email_followup_comment.html:4
+#: .\templates\django_comments_xtd\email_followup_comment.txt:4
+msgid "There is a new comment following up yours."
+msgstr "Появился ответ на ваш комментарий"
+
+#: .\templates\django_comments_xtd\email_followup_comment.html:6
+msgid "Sent by:"
+msgstr "Автор:"
+
+#: .\templates\django_comments_xtd\email_followup_comment.html:13
+msgid "Click"
+msgstr "Нажмите"
+
+#: .\templates\django_comments_xtd\email_followup_comment.html:13
+msgid ""
+"to mute the comments thread. You will no longer receive follow-up "
+"notifications."
+msgstr "чтобы отписаться. Вы больше не будете получать уведомления об ответах."
+
+#: .\templates\django_comments_xtd\email_followup_comment.txt:6
+#, python-format
+msgid "Post: %(content_object.title)s"
+msgstr "Страница: %(content_object.title)s"
+
+#: .\templates\django_comments_xtd\email_followup_comment.txt:8
+#, python-format
+msgid ""
+"Sent by: %(comment.name)s, %(comment.submit_date|date:\"SHORT_DATE_FORMAT\")s"
+msgstr ""
+"Автор: %(comment.name)s, %(comment.submit_date|date:\"SHORT_DATE_FORMAT\")s"
+
+#: .\templates\django_comments_xtd\email_followup_comment.txt:10
+msgid "--- Comment: ---"
+msgstr "--- Текст комментария: ---"
+
+#: .\templates\django_comments_xtd\email_followup_comment.txt:15
+msgid ""
+"Click on the following link to mute the comments thread. You will no longer "
+"receive follow-up notifications:"
+msgstr ""
+"Нажмите на следующую ссылку чтобы отписаться. Вы больше не будете получать "
+"уведомления об ответах."
+
+#: .\templates\django_comments_xtd\reply.html:6
+msgid "Comment reply"
+msgstr "Ответ на комментарий"
+
+#: .\templates\django_comments_xtd\reply.html:13
+msgid "Reply to comment"
+msgstr "Ответить на комментарий"

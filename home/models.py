@@ -13,10 +13,10 @@ from wagtail.wagtailcore.models import Page, Orderable
 from wagtail.wagtailimages.blocks import ImageChooserBlock
 
 from home.blocks.AudioBlock import AudioBlock
-from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.DocumentViewerBlock import DocumentViewerBlock
+from home.blocks.ForumBlocks import PostBlock
+from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
-from home.blocks.ForumBlocks import TopicBlock, PostBlock
 
 
 def is_nav_root(page: Page) -> bool:
@@ -65,13 +65,14 @@ class IndexPageReferences(Orderable):
 class IndexReviews(Orderable):
     page = ParentalKey(IndexPage, related_name='reviews')
     url = URLField(null=True, blank=True)
-    text = CharField(null=True,blank=True, max_length=1024)
+    text = CharField(null=True, blank=True, max_length=1024)
     external = BooleanField(default=False)
     panels = [
         FieldPanel('url'),
         FieldPanel('text', TextField),
         FieldPanel('external')
     ]
+
 
 class DefaultPage(Page):
     # Used to build a reference on main page
@@ -222,3 +223,42 @@ LessonPage.settings_panels = LessonPage.settings_panels + [
         classname='collapsible'
     )
 ]
+
+
+class ArticlePage(Page):
+    allow_comments = BooleanField('allow comments', default=True)
+    menu_title = TextField(blank=True)
+    is_nav_root = BooleanField(default=False)
+    is_selectable = BooleanField(default=True)
+    reference_title = TextField(null=True, blank=True)
+    subtitle = TextField(null=True, blank=True)
+    body = StreamField([
+        ('paragraph', RichTextBlock()),
+        ('image', ImageChooserBlock()),
+        ('document', DocumentViewerBlock()),
+        ('html', RawHTMLBlock()),
+        ('audio', AudioBlock()),
+        ('video', VideoPlayerBlock()),
+    ])
+
+    def get_absolute_url(self):
+        return self.full_url
+
+    def get_nav_root(self) -> Page:
+        return get_nav_root(self)
+
+
+ArticlePage.content_panels = ArticlePage.content_panels + [
+    FieldPanel('reference_title'),
+    FieldPanel('subtitle'),
+    StreamFieldPanel('body'),
+]
+ArticlePage.promote_panels = ArticlePage.promote_panels + [
+    FieldPanel('menu_title')
+]
+ArticlePage.settings_panels = ArticlePage.settings_panels + [
+    FieldPanel('allow_comments'),
+    FieldPanel('is_nav_root'),
+    FieldPanel('is_selectable'),
+]
+

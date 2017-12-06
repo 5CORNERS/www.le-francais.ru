@@ -69,6 +69,9 @@ class User(AbstractUser):
 	def get_username(self):
 		return self.username
 
+	def get_full_name(self):
+		return self.username
+
 
 from django.db import models
 
