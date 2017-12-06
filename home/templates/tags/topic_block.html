@@ -1,4 +1,5 @@
 {% load pybb_tags i18n staticfiles %}
+{% load site_tags %}
 
 <div class="topic">
     <h1>{{ topic.name }}</h1>
@@ -59,7 +60,7 @@
         </div>
     {% endif %}
 
-    <div id="create_post">{% if user.is_authenticated or PYBB_ENABLE_ANONYMOUS_POST %}
+    <div id="create_post">{% if request.user.is_authenticated or PYBB_ENABLE_ANONYMOUS_POST %}
         {% pybb_get_profile user=user as user_profile %}
 
         {% if not user_profile.is_banned %}

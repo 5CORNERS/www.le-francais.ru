@@ -1,4 +1,5 @@
 {% load i18n wagtailcore_tags static %}
+{% load postman_tags %}
 
 <nav class="navbar navbar-inverse navbar-fixed-top">
 	<div class="container">
@@ -30,20 +31,15 @@
                     <a href="/faq">FAQ</a>
                 </li>
 
-				{% if request.user.is_authenticated %}
+				{% if request.user.is_authenticated %}{% postman_unread as unread_count %}
 					<li class="dropdown" style="cursor: pointer" >
-						<a class="dropdown-toggle"
-						   data-toggle="dropdown">
-							{{ request.user.username }}
-							<b class="caret"></b>
-						</a>
+                        <a class="dropdown-toggle" data-toggle="dropdown">{{ request.user.username }} {% if unread_count%}<i class="fa fa-envelope" aria-hidden="true" style="color: inherit;"></i>{% endif %}<b class="caret"></b></a>
 						<ul class="dropdown-menu">
 							<li><a href="{{ request.user.profile.get_absolute_url }}">{% trans "Profile" %}</a></li>
 							<li><a href="{% url 'pybb:edit_profile' %}">{% trans 'Settings' %}</a></li>
 							<li>
 								<a href="{% url 'postman:inbox' %}">
-									{% trans 'Messages' %}
-									{% if postman_unread_count %}({{ postman_unread_count }}){% endif %}
+									{% trans 'Messages' %}{% if unread_count %} <strong>({{ unread_count }})</strong>{% endif %}
 								</a>
 							</li>
 							{% if request.user.is_staff %}

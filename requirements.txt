@@ -20,6 +20,7 @@ markdown
 urllib3
 pymdown-extensions
 django-mailer
+django-comments-xtd
 
 django-storages
 boto3

@@ -1,14 +1,14 @@
 from django import template
 from pybb.models import Topic, Post
-
+from pybb.forms import PostForm
 from home.models import IndexReviews
 
 register = template.Library()
 
 
-@register.inclusion_tag("tags/unwrap.html")
-def unwrap(blocks):
-    return dict(blocks=blocks)
+@register.inclusion_tag("tags/unwrap.html", takes_context=True)
+def unwrap(context,blocks):
+    return dict(blocks=blocks, context=context)
 
 
 @register.inclusion_tag('tags/random_reviews.html')
@@ -18,8 +18,9 @@ def random_review(count=3):
     return dict(object_list=qs)
 
 
-@register.inclusion_tag('tags/topic_block.html')
-def topic_block(topic_id, request):
+@register.inclusion_tag('tags/topic_block.html', takes_context=True)
+def topic_block(context, topic_id):
+    request = context.dicts[1]['context']['request']
     topic = Topic.objects.get(id=topic_id)
     queryset = Post.objects.filter(topic=topic)
     queryset.order_by('created')
@@ -28,7 +29,9 @@ def topic_block(topic_id, request):
             'paginator': None,
             'page_obj': None,
             'is_paginated': False,
-            'object_list': queryset}
+            'post_list': queryset,
+            'request': request
+            }
 
 
 @register.inclusion_tag('tags/related_post.html')
@@ -67,6 +70,7 @@ def top_menu(context, parent, calling_page=None):
         'menuitems': menuitems,
         # required by the pageurl tag that we want to use within this template
         'request': context['request'],
+        'user': context['user']
     }
 
 
