@@ -75,6 +75,7 @@ class IndexReviews(Orderable):
 
 
 class DefaultPage(Page):
+    show_in_sitemap = BooleanField(default=True)
     # Used to build a reference on main page
     reference_title = TextField(null=True, blank=True)
     subtitle = TextField(null=True, blank=True)
@@ -92,9 +93,13 @@ DefaultPage.content_panels = Page.content_panels + [
     FieldPanel('subtitle'),
     StreamFieldPanel('body'),
 ]
+DefaultPage.promote_panels = DefaultPage.promote_panels + [
+    FieldPanel('show_in_sitemap')
+]
 
 
 class PageWithSidebar(Page):
+    show_in_sitemap = BooleanField(default=True)
     reference_title = TextField(null=True, blank=True)
     subtitle = TextField(null=True, blank=True)
     menu_title = TextField(blank=True)
@@ -127,7 +132,8 @@ PageWithSidebar.content_panels = Page.content_panels + [
 ]
 
 PageWithSidebar.promote_panels = PageWithSidebar.promote_panels + [
-    FieldPanel('menu_title')
+    FieldPanel('menu_title'),
+    FieldPanel('show_in_sitemap')
 ]
 
 PageWithSidebar.settings_panels = PageWithSidebar.settings_panels + [
@@ -137,6 +143,7 @@ PageWithSidebar.settings_panels = PageWithSidebar.settings_panels + [
 
 
 class LessonPage(Page):
+    show_in_sitemap = BooleanField(default=True)
     menu_title = TextField(blank=True)
     is_nav_root = BooleanField(default=False)
     is_selectable = BooleanField(default=True)
@@ -207,7 +214,8 @@ LessonPage.content_panels = Page.content_panels + [
 ]
 
 LessonPage.promote_panels = LessonPage.promote_panels + [
-    FieldPanel('menu_title')
+    FieldPanel('menu_title'),
+    FieldPanel('show_in_sitemap')
 ]
 
 LessonPage.settings_panels = LessonPage.settings_panels + [
@@ -226,6 +234,7 @@ LessonPage.settings_panels = LessonPage.settings_panels + [
 
 
 class ArticlePage(Page):
+    show_in_sitemap = BooleanField(default=True)
     allow_comments = BooleanField('allow comments', default=True)
     menu_title = TextField(blank=True)
     is_nav_root = BooleanField(default=False)
