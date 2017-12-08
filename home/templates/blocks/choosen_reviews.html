@@ -59,6 +59,7 @@
 {% for review in obj_list %}
     <a class="page-review" href='{{ review.url }}' {% if review.external %}target="_blank" rel="nofollow"{% endif %}>
         <div class="page-review_text">{{ review.text }}</div>
+        <hr>
     </a>
 {% endfor %}
 
