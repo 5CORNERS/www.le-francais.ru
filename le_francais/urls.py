@@ -12,10 +12,9 @@ from forum.sitemap_generator import ForumSitemap, TopicSitemap
 from home.forms import AORProfileForm
 from home.urls import site_import_urls, api_urls
 from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing
-from home.views import change_username
+from home.views import change_username, LeFrancaisWagtailSitemap as WagtailSitemap
 from profiles.views import UserTopics, UserPosts
 from search import views as search_views
-from wagtail.contrib.wagtailsitemaps.sitemap_generator import Sitemap as WagtaiSitemap
 from wagtail.contrib.wagtailsitemaps.views import sitemap
 # from registration.backends.default.views import RegistrationView
 from wagtail.wagtailadmin import urls as wagtailadmin_urls
@@ -29,7 +28,7 @@ urlpatterns = [
     url('^sitemap\.xml$', sitemap, {'sitemaps': {
         'forum': ForumSitemap,
         'topic': TopicSitemap,
-        'wagtail': WagtaiSitemap
+        'wagtail': WagtailSitemap
     }}),
 
     url(r'^django-admin/', include(admin.site.urls)),
