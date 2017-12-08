@@ -17,6 +17,7 @@ from home.blocks.DocumentViewerBlock import DocumentViewerBlock
 from home.blocks.ForumBlocks import PostBlock
 from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
+from home.blocks.Reviews import ChoosenReviews
 
 
 def is_nav_root(page: Page) -> bool:
@@ -118,7 +119,8 @@ class PageWithSidebar(Page):
             ('translation', RichTextBlock(required=True))
         ]), template="blocks/transcriptions.html")
          ),
-        ('post', PostBlock())
+        ('post', PostBlock()),
+        ('choosen_reviews', ChoosenReviews())
     ])
 
     def get_nav_root(self) -> Page:
