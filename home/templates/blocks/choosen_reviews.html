@@ -1,0 +1,64 @@
+{% load site_tags %}
+{% block extra_head %}
+    <style>
+        .page-review {
+            padding: 3px;
+        }
+
+        a.page-review:focus,
+        a.page-review:hover {
+            text-decoration: none;
+        }
+
+        .page-review {
+            width: 27%;
+            margin-top: 10px;
+            margin-right: 6%;
+            margin-bottom: 10px;
+            min-height: 70px;
+        }
+
+        .page-review {
+            margin: 10px 0;
+            width: 100%;
+        }
+
+        .page-review_text {
+            margin-top: 0px;
+            color: #495869;
+            font-size: 16px;
+        }
+
+        .page-review_text:hover {
+            color: #232937;
+        }
+
+        .page-review_text:before {
+            color: #bbb;
+            content: "\201C"; /* Непечатаемый символ слева */
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 4em;
+            line-height: 0.1em;
+            margin-right: 0.2em;
+            vertical-align: -.4em;
+        }
+
+        .page-review_text:after {
+            color: #bbb;
+            position: relative;
+            content: "\201D"; /* Непечатаемый символ справа */
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 4em;
+            line-height: 0.1em;
+            float: right;
+            top: .45em;
+        }
+    </style>
+{% endblock %}
+{% get_reviews as obj_list %}
+{% for review in obj_list %}
+    <a class="page-review" href='{{ review.url }}' {% if review.external %}target="_blank" rel="nofollow"{% endif %}>
+        <div class="page-review_text">{{ review.text }}</div>
+    </a>
+{% endfor %}
+

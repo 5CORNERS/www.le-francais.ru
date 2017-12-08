@@ -5,6 +5,10 @@ from home.models import IndexReviews
 
 register = template.Library()
 
+@register.assignment_tag()
+def get_reviews():
+    return IndexReviews.objects.all()
+
 
 @register.inclusion_tag("tags/unwrap.html", takes_context=True)
 def unwrap(context,blocks):
