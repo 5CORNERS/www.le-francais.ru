@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'django_comments_xtd',
     'django_comments',
+    'le_nombres',
 ]
 
 MIDDLEWARE_CLASSES = [
