@@ -195,8 +195,12 @@ body {
 
 .breadcrumb > li + li:before {
     padding: 0 5px;
-    color: #ccc;
+    color: #707070;
     content: ">\00a0";
+}
+
+.breadcrumb > li {
+    color: #337ab7;
 }
 
 .transcription-list {
