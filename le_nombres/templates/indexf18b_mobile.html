@@ -1,77 +1,11 @@
 {% load static %}
-{% load site_tags %}
 <!DOCTYPE html>
 <html>
 <head>
-    {% if flavour == "full" %}
-        <!--startDefaultVersion-->
+    <link rel="stylesheet" href="{% static 'css/imnorm_new9d.min.css' %}" type="text/css"/>
+    <script src="{% static 'js/ip2mobilehtml5m.min.js' %}"></script>
+    <link href="{% static 'css/mobile3.min.css' %}" rel="stylesheet" type="text/css"/>
 
-        <link rel="stylesheet" href="{% static 'css/imnorm_new9d.min.css' %}" type="text/css"/>
-        <script src="{% static 'js/ip2html5o.min.js' %}"></script>
-
-        <style>
-
-            .pictorial {
-                font-size: 160%;
-                margin: 20px;
-                color: #0000ff;
-                display: inline-block;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
-            }
-
-            .pictorial:hover {
-                -webkit-transform: scale(1.05);
-                -moz-transform: scale(1.05);
-                transform: scale(1.05);
-                text-shadow: 2px 2px 1px rgba(0, 0, 0, 0.2);
-
-            }
-
-            .body {
-                text-align: center;
-            }
-
-            #nav ul {
-                max-width: 750px;
-            }
-        </style>
-
-        <!--endDefaultVersion-->
-    {% else %}
-        <!--startMobileVersion-->
-        <link rel="stylesheet" href="{% static 'css/imnorm_new9d.min.css' %}" type="text/css"/>
-        <script src="{% static 'js/ip2mobilehtml5m.min.js' %}"></script>
-        <link href="{% static 'css/mobile3.min.css' %}" rel="stylesheet" type="text/css"/>
-        <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no'/>
-
-        <style>
-
-            .pictorial {
-                font-size: 160%;
-                padding: 10px 2px;
-                /*padding:20px;
-                margin: 4px;*/
-                color: #0000ff;
-                display: inline-block;
-            }
-
-            .pictorial:hover {
-                -webkit-transform: scale(1.05);
-                -moz-transform: scale(1.05);
-                transform: scale(1.05);
-            }
-
-            .body {
-                text-align: center;
-            }
-
-            #nav ul {
-                max-width: 750px;
-            }
-        </style>
-
-        <!--endMobileVersion-->
-    {% endif %}
 
     <script>
         var language = "fr";
@@ -116,14 +50,16 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="content-language" content="ru"/>
 
+
+
     <link href="{% static 'css/new_tabs4.min.css' %}" rel="stylesheet" type="text/css"/>
     <meta name="description"
           content="&#x41d;&#x430;&#x432;&#x435;&#x434;&#x438;&#x442;&#x435; &#x43a;&#x443;&#x440;&#x441;&#x43e;&#x440; &#x43d;&#x430; &#x43d;&#x43e;&#x43c;&#x435;&#x440;, &#x447;&#x442;&#x43e;&#x431;&#x44b; &#x443;&#x441;&#x43b;&#x44b;&#x448;&#x430;&#x442;&#x44c; &#x43f;&#x440;&#x43e;&#x438;&#x437;&#x43d;&#x43e;&#x448;&#x435;&#x43d;&#x438;&#x435; &#x432;&#x441;&#x43b;&#x443;&#x445;, &#x437;&#x430;&#x442;&#x435;&#x43c; &#x43f;&#x440;&#x43e;&#x432;&#x435;&#x440;&#x44c;&#x442;&#x435; &#x441;&#x435;&#x431;&#x44f;  &#x43f;&#x443;&#x442;&#x435;&#x43c; &#x430;&#x43a;&#x442;&#x438;&#x432;&#x430;&#x446;&#x438;&#x438; &quot;&#x440;&#x435;&#x436;&#x438;&#x43c; &#x432;&#x438;&#x43a;&#x442;&#x43e;&#x440;&#x438;&#x43d;&#x44b;&quot;."/>
     <script type="application/ld+json">{"@context": "http://schema.org",
-"@type": "BreadcrumbList", 
+"@type": "BreadcrumbList",
 "itemListElement": [{"@type": "ListItem" , "position": 1, "item": {"@id": "http://www.languageguide.org/ru/","name": "Languageguide.org"}}, {"@type": "ListItem" , "position": 2, "item": {"@id": "http://www.languageguide.org/%D1%84%D1%80%D0%B0%D0%BD%D1%86%D1%83%D0%B7%D1%81%D0%BA%D0%B8%D0%B9/","name": "&#x444;&#x440;&#x430;&#x43d;&#x446;&#x443;&#x437;&#x441;&#x43a;&#x438;&#x439;"}}, {"@type": "ListItem" , "position": 3, "item": {"@id": "http://www.languageguide.org/%D1%84%D1%80%D0%B0%D0%BD%D1%86%D1%83%D0%B7%D1%81%D0%BA%D0%B8%D0%B9/%D1%81%D0%BB%D0%BE%D0%B2%D0%B0%D1%80%D1%8C/","name": "Словарь"}}]}
-
     </script>
+
 
 
 </head>
@@ -136,8 +72,7 @@
                 style="z-index:20"></object>
     </div>
     <div style="position:absolute;left:44px;" id="site-title">
-        <a href="http://www.languageguide.org/ru/" id="siteLogo">LanguageGuide<span
-                style="color:#EEEEEE; font-size:90%">.org</span></a> &bull;
+        <a href="http://www.languageguide.org/ru/" id="siteLogo">LanguageGuide<span style="color:#EEEEEE; font-size:90%">.org</span></a> &bull;
         <a href="http://www.languageguide.org/французский/словарь/" style="color:white;text-decoration:none">&#x444;&#x440;&#x430;&#x43d;&#x446;&#x443;&#x437;&#x441;&#x43a;&#x438;&#x439;&#x441;&#x43b;&#x43e;&#x432;&#x430;&#x440;&#x44c;</a>
     </div>
     <div class="optionsButton" id="optionsButton" style="position:absolute; top:1px; right:0"
@@ -156,27 +91,7 @@ les nombres</a></span>
         &#x430;&#x443;&#x434;&#x438;&#x440;&#x43e;&#x432;&#x430;&#x43d;&#x438;&#x44f;
     </button>
 
-    {% if flavour == "full" %}
-        <!--startDefaultVersion-->
 
-        <audio id="player" autoplay>
-            <source src="{% static 'snd/numbers.m4a' %}"/>
-            <source src="{% static 'snd/numbers.ogg' %}" type="audio/ogg"/>
-            Whoops, we thought your browser supported HTML5 audio and it doesn't. <a
-                href="http://www.languageguide.org/user/report.jsp">Click here</a> to report the issue.
-        </audio>
-
-        <!--endDefaultVersion-->
-    {% else %}
-        <!--startMobileVersion-->
-
-        <audio id="player" autoplay="true">
-            <source src="{% static 'snd/numbers.m4a' %}" type="audio/mp4">
-        </audio>
-        <button class="centered" onclick="launch()" id="launch_button">Begin!</button>
-        <div id="modalPage"></div>
-        <!--endMobileVersion-->
-    {% endif %}
 
 </div>
 
