@@ -21,6 +21,7 @@ urllib3
 pymdown-extensions
 django-mailer
 django-comments-xtd
+django-mobile
 
 django-storages
 boto3

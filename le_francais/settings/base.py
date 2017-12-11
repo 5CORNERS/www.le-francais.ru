@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     'django_comments_xtd',
     'django_comments',
     'le_nombres',
+    'django_mobile',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -105,6 +106,8 @@ MIDDLEWARE_CLASSES = [
 
     'pybb.middleware.PybbMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
+    'home.middleware.MobileTabletDetectionMiddleware',
+    'django_mobile.middleware.SetFlavourMiddleware',
 ]
 
 ROOT_URLCONF = 'le_francais.urls'
@@ -116,7 +119,7 @@ TEMPLATES = [
             os.path.join(PROJECT_DIR, 'templates'),
             'forum_messages/templates'
         ],
-        'APP_DIRS': True,
+        # 'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -128,10 +131,18 @@ TEMPLATES = [
                 'pybb.context_processors.processor',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
+                'django_mobile.context_processors.flavour',
             ],
-        },
-    },
+            'loaders': (
+                'django_mobile.loader.Loader',
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            )
+        }
+    }
 ]
+
+TEMPLATE_LOADERS = TEMPLATES[0]['OPTIONS']['loaders']
 
 WSGI_APPLICATION = 'le_francais.wsgi.application'
 
@@ -391,3 +402,5 @@ COMMENTS_XTD_APP_MODEL_OPTIONS = {
         'show_feedback': True,
     }
 }
+
+FLAVOURS = ('full', 'mobile', 'tablet')
