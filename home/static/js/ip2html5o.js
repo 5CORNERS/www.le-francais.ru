@@ -550,7 +550,6 @@ function init() {
     createUserDiv();
     pointManager = new PointManager;
     // loadUserInfo()
-    stopPlayingTitle()
 }
 
 function setSvgSize() {
