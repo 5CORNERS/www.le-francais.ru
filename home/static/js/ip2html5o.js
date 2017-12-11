@@ -669,7 +669,7 @@ function createArrayIndexArray() {
     return c
 }
 
-var quizInited = !1, supportshtml5Audio, soundRoot = "static/snd/";
+var quizInited = !1, supportshtml5Audio, soundRoot = "/static/snd/";
 
 function initQuizMode() {
     createAudioElement("quiz_audio");
