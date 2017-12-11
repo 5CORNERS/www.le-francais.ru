@@ -5,6 +5,22 @@
 
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 
+{% block extra_head %}
+    <script async='async' src='https://www.googletagservices.com/tag/js/gpt.js'></script>
+    <script>
+        var googletag = googletag || {};
+        googletag.cmd = googletag.cmd || [];
+    </script>
+
+    <script>
+        googletag.cmd.push(function () {
+            googletag.defineSlot('/21671132665/LF_FR_LS_RST_300_A1', [[300, 600], [300, 100], [300, 250]], 'div-gpt-ad-1512997067399-0').addService(googletag.pubads());
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+        });
+    </script>
+{% endblock %}
+
 {% block body_class %}template-homepage{% endblock %}
 
 {% block extra_js %}
@@ -42,6 +58,7 @@
                         <div class="block-audio">
                             <audio data-downloadable>
                                 <source src="
+
 
 
                                         {% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}"
@@ -108,7 +125,8 @@
                             {% assign pane_class "tab-pane" %}
                         {% endif %}
                         {% if self.dictionary %}
-                            <div id="dictionary" class="{{ pane_class }}" role="tabpanel">{% unwrap self.dictionary %}</div>
+                            <div id="dictionary" class="{{ pane_class }}"
+                                 role="tabpanel">{% unwrap self.dictionary %}</div>
                             {% assign pane_class "tab-pane" %}
                         {% endif %}
                         {% if self.summary %}
