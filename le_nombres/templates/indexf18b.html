@@ -3,38 +3,36 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <style>
+
+        .pictorial {
+            font-size: 160%;
+            padding: 10px 2px;
+            /*padding:20px;
+            margin: 4px;*/
+            color: #0000ff;
+            display: inline-block;
+        }
+
+        .pictorial:hover {
+            -webkit-transform: scale(1.05);
+            -moz-transform: scale(1.05);
+            transform: scale(1.05);
+        }
+
+        .body {
+            text-align: center;
+        }
+
+        #nav ul {
+            max-width: 750px;
+        }
+    </style>
     {% if flavour == "full" %}
         <!--startDefaultVersion-->
 
         <link rel="stylesheet" href="{% static 'css/imnorm_new9d.min.css' %}" type="text/css"/>
         <script src="{% static 'js/ip2html5o.min.js' %}"></script>
-
-        <style>
-
-            .pictorial {
-                font-size: 160%;
-                margin: 20px;
-                color: #0000ff;
-                display: inline-block;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
-            }
-
-            .pictorial:hover {
-                -webkit-transform: scale(1.05);
-                -moz-transform: scale(1.05);
-                transform: scale(1.05);
-                text-shadow: 2px 2px 1px rgba(0, 0, 0, 0.2);
-
-            }
-
-            .body {
-                text-align: center;
-            }
-
-            #nav ul {
-                max-width: 750px;
-            }
-        </style>
 
         <!--endDefaultVersion-->
     {% else %}
@@ -43,32 +41,6 @@
         <script src="{% static 'js/ip2mobilehtml5m.min.js' %}"></script>
         <link href="{% static 'css/mobile3.min.css' %}" rel="stylesheet" type="text/css"/>
         <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no'/>
-
-        <style>
-
-            .pictorial {
-                font-size: 160%;
-                padding: 10px 2px;
-                /*padding:20px;
-                margin: 4px;*/
-                color: #0000ff;
-                display: inline-block;
-            }
-
-            .pictorial:hover {
-                -webkit-transform: scale(1.05);
-                -moz-transform: scale(1.05);
-                transform: scale(1.05);
-            }
-
-            .body {
-                text-align: center;
-            }
-
-            #nav ul {
-                max-width: 750px;
-            }
-        </style>
 
         <!--endMobileVersion-->
     {% endif %}
@@ -122,6 +94,7 @@
     <script type="application/ld+json">{"@context": "http://schema.org",
 "@type": "BreadcrumbList", 
 "itemListElement": [{"@type": "ListItem" , "position": 1, "item": {"@id": "http://www.languageguide.org/ru/","name": "Languageguide.org"}}, {"@type": "ListItem" , "position": 2, "item": {"@id": "http://www.languageguide.org/%D1%84%D1%80%D0%B0%D0%BD%D1%86%D1%83%D0%B7%D1%81%D0%BA%D0%B8%D0%B9/","name": "&#x444;&#x440;&#x430;&#x43d;&#x446;&#x443;&#x437;&#x441;&#x43a;&#x438;&#x439;"}}, {"@type": "ListItem" , "position": 3, "item": {"@id": "http://www.languageguide.org/%D1%84%D1%80%D0%B0%D0%BD%D1%86%D1%83%D0%B7%D1%81%D0%BA%D0%B8%D0%B9/%D1%81%D0%BB%D0%BE%D0%B2%D0%B0%D1%80%D1%8C/","name": "Словарь"}}]}
+
 
     </script>
 
