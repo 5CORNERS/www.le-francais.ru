@@ -21,8 +21,8 @@ from pybb.models import Post, Topic
 from pybb.permissions import perms
 from pybb.views import AddPostView, EditPostView, TopicView
 from social_core.utils import setting_name
-from wagtail.wagtailcore.models import Page
 from wagtail.contrib.wagtailsitemaps.sitemap_generator import Sitemap as WagtailSitemap
+from wagtail.wagtailcore.models import Page
 
 from home.models import PageWithSidebar, LessonPage, ArticlePage
 from home.src.site_import import import_content
@@ -35,18 +35,19 @@ flow = OAuth2WebServerFlow(client_id='499129759772-bqrp9ha0vfibn6t76fdgdmd87khnn
 
 NAMESPACE = getattr(settings, setting_name('URL_NAMESPACE'), None) or 'social'
 
+
 class LeFrancaisWagtailSitemap(WagtailSitemap):
     def items(self):
         return (
             self.site
-            .root_page
-            .get_descendants(inclusive=True)
-            .live()
-            .public()
-            .order_by('path'))\
-            .exclide(defaultpage__show_in_sitemap=False)\
-            .exclude(articlepage__show_in_sitemap=False)\
-            .exclude(pagewithsidebar__show_in_sitemap=False)\
+                .root_page
+                .get_descendants(inclusive=True)
+                .live()
+                .public()
+                .order_by('path')) \
+            .exclude(defaultpage__show_in_sitemap=False) \
+            .exclude(articlepage__show_in_sitemap=False) \
+            .exclude(pagewithsidebar__show_in_sitemap=False) \
             .exclude(lessonpage__show_in_sitemap=False)
 
 
@@ -101,7 +102,8 @@ def get_navigation_object_from_page(page: Page, current_page_id: int) -> dict:
         "href": page.get_url(),
         "state": {}
     }
-    if isinstance(page.specific, PageWithSidebar) or isinstance(page.specific, LessonPage) or isinstance(page.specific, ArticlePage):
+    if isinstance(page.specific, PageWithSidebar) or isinstance(page.specific, LessonPage) or isinstance(page.specific,
+                                                                                                         ArticlePage):
         menu_title = page.specific.menu_title
         if not isinstance(menu_title, str):
             menu_title = menu_title.decode()
