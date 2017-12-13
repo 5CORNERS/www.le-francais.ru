@@ -54,6 +54,10 @@ td {
     padding-top: 70px;
 }
 
+.main > h1 {
+    margin: 20px 0px;
+}
+
 ul.hr {
     margin: 0; /* Обнуляем значение отступов */
     padding: 8px; /* Значение полей */
@@ -228,7 +232,6 @@ body {
 .nav.nav-tabs {
     margin-bottom: 1em;
 }
-
 
 .category h1 {
     border-radius: 5px;
@@ -539,7 +542,11 @@ td.forum-last-post, td.topic-last-post {
     margin-top: 20px;
 }
 
-.media-heading{
+.media-heading {
     font-size: 11px;
     color: #777;
+}
+
+.comment {
+    margin-top: 1em;
 }
