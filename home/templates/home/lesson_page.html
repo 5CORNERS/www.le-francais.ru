@@ -24,6 +24,8 @@
 
 {% block body_class %}template-homepage{% endblock %}
 
+{% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
+
 {% block extra_js %}
     <script async type="text/javascript"
             src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
