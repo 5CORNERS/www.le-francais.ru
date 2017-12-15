@@ -14,11 +14,13 @@
 
     <script>
         googletag.cmd.push(function () {
-            googletag.defineSlot('/21671132665/LF_FR_LS_RST_300_A1', [300, 600], 'div-gpt-ad-1513338898370-0').addService(googletag.pubads());
+            googletag.defineSlot('/21671132665/LF_FR_LS_RST_300_A1', [[300, 250], [300, 600]], 'div-gpt-ad-1513340986147-0').addService(googletag.pubads());
             googletag.pubads().enableSingleRequest();
+            googletag.pubads().collapseEmptyDivs();
             googletag.enableServices();
         });
-    </script>{% endblock %}
+    </script>
+{% endblock %}
 
 {% block body_class %}template-homepage{% endblock %}
 
@@ -206,12 +208,11 @@
                     </div>
                 {% endif %}
             </div>
-            <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
-                <!-- /21671132665/LF_FR_LS_RST_300_A1 -->
-                <div id='div-gpt-ad-1513338898370-0' style='height:600px; width:300px;'>
+            <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right"><!-- /21671132665/LF_FR_LS_RST_300_A1 -->
+                <div id='div-gpt-ad-1513340986147-0'>
                     <script>
                         googletag.cmd.push(function () {
-                            googletag.display('div-gpt-ad-1513338898370-0');
+                            googletag.display('div-gpt-ad-1513340986147-0');
                         });
                     </script>
                 </div>
