@@ -26,9 +26,7 @@
     <!-- End Google Tag Manager -->
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <title>
-        {% block title %}{% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}{% endif %}{% endblock %}
-        {% block title_suffix %}{% endblock %}</title>
+    <title>{% block title %}{% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>
 
     <link rel="icon" href="{% static 'favicon/favicon.ico' %}">
     <link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicon/apple-icon-57x57.png' %}">
@@ -45,7 +43,7 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="{% static 'favicon/ms-icon-144x144.png' %}">
     <meta name="theme-color" content="#ffffff">
-    <meta name="description" content=""/>
+    <meta name="description" content="{% block description %}{% endblock %}"/>
 
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
