@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.sitemaps',
+    'django.contrib.postgres',
     'bootstrapform',
     'django.core.mail',
 
@@ -86,6 +87,7 @@ INSTALLED_APPS = [
     'django_comments',
     'le_nombres',
     'django_mobile',
+    'conjugation',
 ]
 
 MIDDLEWARE_CLASSES = [
