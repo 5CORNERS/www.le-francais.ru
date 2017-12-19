@@ -152,9 +152,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT") == "True"
 
-SECURE_REDIRECT_EXEMPT = [
-    '^(?!.*accounts).*$',
-]
+# Redirect only /accounts/*
+# SECURE_REDIRECT_EXEMPT = [
+#     '^(?!.*accounts).*$',
+# ]
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
