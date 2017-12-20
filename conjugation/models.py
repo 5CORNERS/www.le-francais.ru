@@ -7,11 +7,11 @@ class Template(models.Model):
     infinitive = HStoreField()
     indicative = HStoreField()
     conditional = HStoreField()
-    subjunctiv = HStoreField()
+    subjunctive = HStoreField()
     imperative = HStoreField()
     participle = HStoreField()
 
 class Verb(models.Model):
     infinitive = models.CharField(max_length=100)
     template = models.ForeignKey(Template)
-    aspirated_h = models.BooleanField(default=False)
+    aspirate_h = models.BooleanField(default=False)
