@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.db.models import CharField, SmallIntegerField, OneToOneField, BooleanField, SET_NULL, ForeignKey, URLField, Model
+from django.db.models import CharField, SmallIntegerField, OneToOneField, BooleanField, SET_NULL, ForeignKey, URLField, \
+    Model
 from django.db.models.fields import TextField
 from django.forms import CheckboxInput
 from modelcluster.fields import ParentalKey
@@ -16,10 +17,24 @@ from wagtail.wagtailsnippets.models import register_snippet
 from home.blocks.AudioBlock import AudioBlock
 from home.blocks.DocumentViewerBlock import DocumentViewerBlock
 from home.blocks.ForumBlocks import PostBlock
+from home.blocks.Reviews import ChoosenReviews
 from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
-from home.blocks.Reviews import ChoosenReviews
-# from home.blocks.AdvertismentBlocks import AdvertisementInline
+
+
+@register_snippet
+class AdvertisementSnippet(Model):
+    name = CharField(max_length=100, unique=True)
+    header = TextField(max_length=1000, blank=True)
+    body = TextField(max_length=1000, blank=True)
+
+    panels = [
+        FieldPanel('name'),
+        FieldPanel('header', RawHTMLBlock()),
+        FieldPanel('body', RawHTMLBlock())
+    ]
+
+from home.blocks.AdvertisementBlocks import AdvertisementInline
 
 
 def is_nav_root(page: Page) -> bool:
@@ -172,7 +187,7 @@ class LessonPage(Page):
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('post', PostBlock()),
-        # ('advertisement', AdvertisementInline())
+        ('advertisement', AdvertisementInline()),
     ])
     dictionary = StreamField([
         ('paragraph', RichTextBlock()),
@@ -271,15 +286,3 @@ ArticlePage.settings_panels = ArticlePage.settings_panels + [
     FieldPanel('is_nav_root'),
     FieldPanel('is_selectable'),
 ]
-
-@register_snippet
-class AdvertisementSnippet(Model):
-    name = CharField(max_length=100, unique=True)
-    header = TextField(max_length=1000, blank=True)
-    body = TextField(max_length=1000, blank=True)
-
-    panels= [
-        FieldPanel('name'),
-        FieldPanel('header', RawHTMLBlock()),
-        FieldPanel('body', RawHTMLBlock())
-    ]
