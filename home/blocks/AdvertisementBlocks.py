@@ -6,3 +6,6 @@ from home.models import AdvertisementSnippet
 
 class AdvertisementInline(StructBlock):
     advertisement = SnippetChooserBlock(AdvertisementSnippet)
+
+    class Meta:
+        icon = 'snippet'
