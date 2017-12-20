@@ -19,6 +19,7 @@ from home.blocks.ForumBlocks import PostBlock
 from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
 from home.blocks.Reviews import ChoosenReviews
+# from home.blocks.AdvertismentBlocks import AdvertisementInline
 
 
 def is_nav_root(page: Page) -> bool:
@@ -133,12 +134,10 @@ PageWithSidebar.content_panels = Page.content_panels + [
     FieldPanel('subtitle'),
     StreamFieldPanel('body'),
 ]
-
 PageWithSidebar.promote_panels = PageWithSidebar.promote_panels + [
     FieldPanel('menu_title'),
     FieldPanel('show_in_sitemap')
 ]
-
 PageWithSidebar.settings_panels = PageWithSidebar.settings_panels + [
     FieldPanel('is_nav_root'),
     FieldPanel('is_selectable'),
@@ -172,7 +171,8 @@ class LessonPage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
-        ('post', PostBlock())
+        ('post', PostBlock()),
+        # ('advertisement', AdvertisementInline())
     ])
     dictionary = StreamField([
         ('paragraph', RichTextBlock()),
@@ -215,12 +215,10 @@ LessonPage.content_panels = Page.content_panels + [
     FieldPanel('repetition_material'),
     StreamFieldPanel('other_tabs')
 ]
-
 LessonPage.promote_panels = LessonPage.promote_panels + [
     FieldPanel('menu_title'),
     FieldPanel('show_in_sitemap')
 ]
-
 LessonPage.settings_panels = LessonPage.settings_panels + [
     FieldPanel('lesson_number'),
     FieldPanel('is_nav_root'),
@@ -275,13 +273,13 @@ ArticlePage.settings_panels = ArticlePage.settings_panels + [
 ]
 
 @register_snippet
-class AdBlock(Model):
+class AdvertisementSnippet(Model):
     name = CharField(max_length=100, unique=True)
     header = TextField(max_length=1000, blank=True)
     body = TextField(max_length=1000, blank=True)
 
     panels= [
         FieldPanel('name'),
-        FieldPanel('header'),
-        FieldPanel('body')
+        FieldPanel('header', RawHTMLBlock()),
+        FieldPanel('body', RawHTMLBlock())
     ]
