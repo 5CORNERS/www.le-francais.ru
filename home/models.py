@@ -277,8 +277,8 @@ ArticlePage.settings_panels = ArticlePage.settings_panels + [
 @register_snippet
 class AdBlock(Model):
     name = CharField(max_length=100, unique=True)
-    header = CharField(max_length=1000, blank=True)
-    body = CharField(max_length=1000, blank=True)
+    header = TextField(max_length=1000, blank=True)
+    body = TextField(max_length=1000, blank=True)
 
     panels= [
         FieldPanel('name'),
