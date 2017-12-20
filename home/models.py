@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.db.models import CharField, SmallIntegerField, OneToOneField, BooleanField, SET_NULL, ForeignKey, URLField
+from django.db.models import CharField, SmallIntegerField, OneToOneField, BooleanField, SET_NULL, ForeignKey, URLField, Model
 from django.db.models.fields import TextField
 from django.forms import CheckboxInput
 from modelcluster.fields import ParentalKey
@@ -11,6 +11,7 @@ from wagtail.wagtailcore.blocks import RichTextBlock, RawHTMLBlock, ListBlock, S
 from wagtail.wagtailcore.fields import StreamField
 from wagtail.wagtailcore.models import Page, Orderable
 from wagtail.wagtailimages.blocks import ImageChooserBlock
+from wagtail.wagtailsnippets.models import register_snippet
 
 from home.blocks.AudioBlock import AudioBlock
 from home.blocks.DocumentViewerBlock import DocumentViewerBlock
@@ -273,3 +274,14 @@ ArticlePage.settings_panels = ArticlePage.settings_panels + [
     FieldPanel('is_selectable'),
 ]
 
+@register_snippet
+class AdBlock(Model):
+    name = CharField(max_length=100, unique=True)
+    header = CharField(max_length=1000, blank=True)
+    body = CharField(max_length=1000, blank=True)
+
+    panels= [
+        FieldPanel('name'),
+        FieldPanel('header'),
+        FieldPanel('body')
+    ]
