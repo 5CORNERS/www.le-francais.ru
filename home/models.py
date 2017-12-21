@@ -23,7 +23,7 @@ from home.blocks.VideoPlayer import VideoPlayerBlock
 
 
 @register_snippet
-class InlineAdvertisementSnippet(Model):
+class AdvertisementSnippet(Model):
     name = CharField(max_length=100, unique=True)
     header = TextField(max_length=1000, blank=True)
     body = TextField(max_length=1000, blank=True)
@@ -41,16 +41,19 @@ class InlineAdvertisementSnippet(Model):
 from home.blocks.AdvertisementBlocks import AdvertisementInline
 
 @register_snippet
-class SidebarAdvertisementSnippet(Model):
+class PlacementAdvertisementSnippet(Model):
     PAGE_CHOICES = (
-        ('lesson_page', 'Lesson Page'),
-        ('page_with_sidebar', 'Page with Sidebar'),
-        ('article_page', 'Article Page'),
-        ('index_page', 'Title Page'),
+        ('lesson_page', 'Lesson Page Sidebar'),
+        ('lesson_page_bottom', 'Lesson Page Bottom'),
+        ('page_with_sidebar', '\"Page with sidebar\" Sidebar'),
+        ('page_with_sidebar_bottom', '\"Page with Sidebar\" Bottom'),
+        ('article_page', 'Article Page Sidebar'),
+        ('article_page_bottom', 'Article Page Bottom'),
+        ('index_page', 'Title Page Sidebar'),
         ('none', 'None')
     )
     name =  CharField(max_length=100, unique=True, blank=False)
-    page_type = CharField(max_length=100, choices=PAGE_CHOICES, default='none')
+    placements = CharField(max_length=100, choices=PAGE_CHOICES, default='none')
     head = StreamField([
         ('html', RawHTMLBlock()),
     ], blank=True)
