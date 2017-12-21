@@ -195,7 +195,7 @@
                                         <div class="first_post">{% include "tags/related_post.html" %}</div>
                                     {% endwith %}
                                     {% if self.topic.last_post.id != self.topic.head.id %}
-                                        <div class="text-left">Последний комментарий к уроку.</div>
+                                        <div class="text-left" style="margin: 1em 0">Последний комментарий к уроку. <a href="{{ self.topic.last_post.get_absolute_url }}">Посмотреть все.</a> </div>
                                         {% with self.topic.last_post as post %}
                                             {% if not post == self.topic.head %}
                                                 <div class="last_post">{% include "tags/related_post.html" %}</div>
