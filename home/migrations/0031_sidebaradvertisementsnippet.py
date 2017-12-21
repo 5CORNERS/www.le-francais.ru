@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100, unique=True)),
-                ('body', wagtail.wagtailcore.fields.StreamField((('advertisement', wagtail.wagtailcore.blocks.StructBlock((('advertisement', wagtail.wagtailsnippets.blocks.SnippetChooserBlock(home.models.InlineAdvertisementSnippet)),))), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock())))),
+                ('body', wagtail.wagtailcore.fields.StreamField((('advertisement', wagtail.wagtailcore.blocks.StructBlock((('advertisement', wagtail.wagtailsnippets.blocks.SnippetChooserBlock(home.models.AdvertisementSnippet)),))), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock())))),
             ],
         ),
     ]

@@ -19,6 +19,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='sidebaradvertisementsnippet',
             name='body',
-            field=wagtail.wagtailcore.fields.StreamField((('advertisement', wagtail.wagtailcore.blocks.StructBlock((('advertisement', wagtail.wagtailsnippets.blocks.SnippetChooserBlock(home.models.InlineAdvertisementSnippet)),))), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock())), blank=True),
+            field=wagtail.wagtailcore.fields.StreamField((('advertisement', wagtail.wagtailcore.blocks.StructBlock((('advertisement', wagtail.wagtailsnippets.blocks.SnippetChooserBlock(home.models.AdvertisementSnippet)),))), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock())), blank=True),
         ),
     ]

@@ -2,7 +2,7 @@ from django import template
 from pybb.models import Topic, Post
 
 from home.models import IndexReviews
-from home.models import SidebarAdvertisementSnippet
+from home.models import PlacementAdvertisementSnippet
 
 register = template.Library()
 
@@ -10,7 +10,7 @@ register = template.Library()
 @register.assignment_tag()
 def sidebar_adverisement_body(page_type):
     try:
-        return SidebarAdvertisementSnippet.objects.filter(page_type=page_type)[0].body
+        return PlacementAdvertisementSnippet.objects.filter(page_type=page_type)[0].body
     except:
         return None
 
@@ -18,7 +18,7 @@ def sidebar_adverisement_body(page_type):
 @register.assignment_tag()
 def sidebar_adverisement_head(page_type):
     try:
-        return SidebarAdvertisementSnippet.objects.filter(page_type=page_type)[0].head
+        return PlacementAdvertisementSnippet.objects.filter(page_type=page_type)[0].head
     except:
         return None
 
