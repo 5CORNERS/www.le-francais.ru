@@ -51,6 +51,9 @@ class SidebarAdvertisementSnippet(Model):
     )
     name =  CharField(max_length=100, unique=True, blank=False)
     page_type = CharField(max_length=100, choices=PAGE_CHOICES, default='none')
+    head = StreamField([
+        ('html', RawHTMLBlock()),
+    ], blank=True)
     body = StreamField([
         ('advertisement', AdvertisementInline()),
         ('html', RawHTMLBlock()),
@@ -59,6 +62,7 @@ class SidebarAdvertisementSnippet(Model):
     panels = [
         FieldPanel('name'),
         FieldPanel('page_type'),
+        StreamFieldPanel('head'),
         StreamFieldPanel('body'),
     ]
 

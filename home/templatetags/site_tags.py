@@ -10,11 +10,18 @@ register = template.Library()
 @register.assignment_tag()
 def sidebar_adverisement_body(page_type):
     try:
-        snippet = SidebarAdvertisementSnippet.objects.filter(page_type=page_type)[0]
+        return SidebarAdvertisementSnippet.objects.filter(page_type=page_type)[0].body
     except:
         return None
-    body = snippet.body
-    return body
+
+
+@register.assignment_tag()
+def sidebar_adverisement_head(page_type):
+    try:
+        return SidebarAdvertisementSnippet.objects.filter(page_type=page_type)[0].head
+    except:
+        return None
+
 
 @register.inclusion_tag("tags/advertisement.html", takes_context=True)
 def advertisement_inline(context, name, header, body):
