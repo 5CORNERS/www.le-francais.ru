@@ -18,8 +18,12 @@
 {% endblock %}
 
 {% block extra_head %}
-    {% sidebar_adverisement_body 'page_with_sidebar' as sidebar_advert %}
-    {% for block in sidebar_advert %}
+    {% sidebar_adverisement_head 'page_with_sidebar' as sidebar_advert_head %}
+    {% for block in sidebar_advert_head %}
+        {% include_block block %}
+    {% endfor %}
+    {% sidebar_adverisement_body 'page_with_sidebar' as sidebar_advert_body %}
+    {% for block in sidebar_advert_body %}
         {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header | safe}}{% endif %}
     {% endfor %}
     {% for block in page.body %}
@@ -46,8 +50,8 @@
                 {% endfor %}
             </div>
             <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
-                {% sidebar_adverisement_body 'page_with_sidebar' as sidebar_advert %}
-                {% for block in sidebar_advert %}
+                {% sidebar_adverisement_body 'page_with_sidebar' as sidebar_advert_body %}
+                {% for block in sidebar_advert_body %}
                     {% include_block block %}
                 {% endfor %}
             </div>
