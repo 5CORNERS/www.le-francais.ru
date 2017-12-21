@@ -23,18 +23,47 @@ from home.blocks.VideoPlayer import VideoPlayerBlock
 
 
 @register_snippet
-class AdvertisementSnippet(Model):
+class InlineAdvertisementSnippet(Model):
     name = CharField(max_length=100, unique=True)
     header = TextField(max_length=1000, blank=True)
     body = TextField(max_length=1000, blank=True)
 
     panels = [
         FieldPanel('name'),
-        FieldPanel('header', RawHTMLBlock()),
-        FieldPanel('body', RawHTMLBlock())
+        FieldPanel('header'),
+        FieldPanel('body'),
     ]
 
+    def __str__(self):
+        return self.name
+
+
 from home.blocks.AdvertisementBlocks import AdvertisementInline
+
+@register_snippet
+class SidebarAdvertisementSnippet(Model):
+    PAGE_CHOICES = (
+        ('lesson_page', 'Lesson Page'),
+        ('page_with_sidebar', 'Page with Sidebar'),
+        ('article_page', 'Article Page'),
+        ('index_page', 'Title Page'),
+        ('none', 'None')
+    )
+    name =  CharField(max_length=100, unique=True, blank=False)
+    page_type = CharField(max_length=100, choices=PAGE_CHOICES, default='none')
+    body = StreamField([
+        ('advertisement', AdvertisementInline()),
+        ('html', RawHTMLBlock()),
+    ], blank=True)
+
+    panels = [
+        FieldPanel('name'),
+        FieldPanel('page_type'),
+        StreamFieldPanel('body'),
+    ]
+
+    def __str__(self):
+        return self.name
 
 
 def is_nav_root(page: Page) -> bool:
@@ -124,6 +153,7 @@ class PageWithSidebar(Page):
     is_nav_root = BooleanField(default=False)
     is_selectable = BooleanField(default=True)
     body = StreamField([
+        ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
@@ -171,6 +201,7 @@ class LessonPage(Page):
     repetition_material = CharField(max_length=100, null=True, blank=True)
     audio_material = CharField(max_length=100, null=True, blank=True)
     comments_for_lesson = StreamField([
+        ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
@@ -180,6 +211,7 @@ class LessonPage(Page):
         ('post', PostBlock())
     ], null=True, blank=True)
     body = StreamField([
+        ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
@@ -187,9 +219,9 @@ class LessonPage(Page):
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('post', PostBlock()),
-        ('advertisement', AdvertisementInline()),
     ])
     dictionary = StreamField([
+        ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
@@ -258,6 +290,7 @@ class ArticlePage(Page):
     reference_title = TextField(null=True, blank=True)
     subtitle = TextField(null=True, blank=True)
     body = StreamField([
+        ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
