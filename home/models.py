@@ -64,7 +64,7 @@ class PlacementAdvertisementSnippet(Model):
 
     panels = [
         FieldPanel('name'),
-        FieldPanel('page_type'),
+        FieldPanel('placement'),
         StreamFieldPanel('head'),
         StreamFieldPanel('body'),
     ]
