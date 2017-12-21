@@ -1,9 +1,30 @@
 from django import template
 from pybb.models import Topic, Post
-from pybb.forms import PostForm
+
 from home.models import IndexReviews
+from home.models import SidebarAdvertisementSnippet
 
 register = template.Library()
+
+
+@register.assignment_tag()
+def sidebar_adverisement_body(page_type):
+    try:
+        snippet = SidebarAdvertisementSnippet.objects.filter(page_type=page_type)[0]
+    except:
+        return None
+    body = snippet.body
+    return body
+
+@register.inclusion_tag("tags/advertisement.html", takes_context=True)
+def advertisement_inline(context, name, header, body):
+    dict={
+        'name':name,
+        'header':header,
+        'body':body,
+    }
+    return dict
+
 
 @register.assignment_tag()
 def get_reviews():
@@ -11,7 +32,7 @@ def get_reviews():
 
 
 @register.inclusion_tag("tags/unwrap.html", takes_context=True)
-def unwrap(context,blocks):
+def unwrap(context, blocks):
     return dict(blocks=blocks, context=context)
 
 

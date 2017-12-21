@@ -6,20 +6,26 @@
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 
 {% block extra_head %}
-    <script async='async' src='https://www.googletagservices.com/tag/js/gpt.js'></script>
-    <script>
-        var googletag = googletag || {};
-        googletag.cmd = googletag.cmd || [];
-    </script>
-
-    <script>
-        googletag.cmd.push(function () {
-            googletag.defineSlot('/21671132665/LF_FR_LS_RST_300_A1', [[300, 250], [300, 600]], 'div-gpt-ad-1513340986147-0').addService(googletag.pubads());
-            googletag.pubads().enableSingleRequest();
-            googletag.pubads().collapseEmptyDivs();
-            googletag.enableServices();
-        });
-    </script>
+    {% sidebar_adverisement_body 'lesson_page' as sidebar_advert %}
+    {% for block in sidebar_advert %}
+        {% if block.block_type == 'advertisement' %}
+            {{ block.value.advertisement.header | safe}}
+        {% endif %}
+    {% endfor %}
+    {% for block in page.body %}
+        {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header }}{% endif %}
+    {% endfor %}
+    {% for block in page.comments_for_lesson %}
+        {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header }}{% endif %}
+    {% endfor %}
+    {% for block in page.dictionary %}
+        {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header }}{% endif %}
+    {% endfor %}
+    {% for child_value in page.other_tabs %}
+        {% for block in child_value.value.body %}
+            {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header }}{% endif %}
+        {% endfor %}
+    {% endfor %}
 {% endblock %}
 
 {% block body_class %}template-homepage{% endblock %}
@@ -60,12 +66,7 @@
                     {% if self.audio_material != 'None' %}
                         <div class="block-audio">
                             <audio data-downloadable>
-                                <source src="
-
-
-
-                                        {% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}"
-                                        type="audio/mpeg">
+                                <source src="{% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}"type="audio/mpeg">
                             </audio>
                         </div>
                     {% endif %}
@@ -119,17 +120,21 @@
                     <div class="tab-content">
                         {% assign pane_class "tab-pane" %}
                         {% if self.comments_for_lesson %}
-                            <div id="comments_for_lesson" class="{{ pane_class }}"
-                                 role="tabpanel">{% unwrap self.comments_for_lesson %}</div>
+                            <div id="comments_for_lesson" class="{{ pane_class }}"role="tabpanel">
+                                {% for block in self.comments_for_lesson %}{% include_block block %}{% endfor %}
+                            </div>
                             {% assign pane_class "tab-pane" %}
                         {% endif %}
                         {% if self.body %}
-                            <div id="body" class="{{ pane_class }}" role="tabpanel">{% unwrap self.body %}</div>
+                            <div id="body" class="{{ pane_class }}" role="tabpanel">
+                                {% for block in self.body %}{% include_block block %}{% endfor %}
+                            </div>
                             {% assign pane_class "tab-pane" %}
                         {% endif %}
                         {% if self.dictionary %}
-                            <div id="dictionary" class="{{ pane_class }}"
-                                 role="tabpanel">{% unwrap self.dictionary %}</div>
+                            <div id="dictionary" class="{{ pane_class }}"role="tabpanel">
+                                {% for block in self.dictionary %}{% include_block block %}{% endfor %}
+                            </div>
                             {% assign pane_class "tab-pane" %}
                         {% endif %}
                         {% if self.summary %}
@@ -154,7 +159,7 @@
                         {% endif %}
                         {% for child_value in self.other_tabs %}
                             <div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
-                                {% unwrap child_value.value.body %}
+                                {% for block in child_value.value.body %}{% include_block block %}{% endfor %}
                             </div>
                         {% endfor %}
                     </div>
@@ -210,14 +215,11 @@
                     </div>
                 {% endif %}
             </div>
-            <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right"><!-- /21671132665/LF_FR_LS_RST_300_A1 -->
-                <div id='div-gpt-ad-1513340986147-0'>
-                    <script>
-                        googletag.cmd.push(function () {
-                            googletag.display('div-gpt-ad-1513340986147-0');
-                        });
-                    </script>
-                </div>
+            <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
+                {% sidebar_adverisement_body 'lesson_page' as sidebar_advert %}
+                {% for block in sidebar_advert %}
+                    {% include_block block %}
+                {% endfor %}
             </div>
         </div>
     </div>

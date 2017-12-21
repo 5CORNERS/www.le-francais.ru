@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load comments %}
 {% load comments_xtd %}
-{% load static site_tags %}
+{% load static site_tags wagtailcore_tags %}
 
 {% block body_class %}template-homepage{% endblock %}
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
@@ -18,6 +18,18 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
+{% endblock %}
+
+{% block extra_head %}
+    {% sidebar_adverisement_body 'article_page' as sidebar_advert %}
+    {% for block in sidebar_advert %}
+        {% if block.block_type == 'advertisement' %}
+            {{ block.value.advertisement.header | safe}}
+        {% endif %}
+    {% endfor %}
+    {% for block in page.body %}
+        {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header | safe}}{% endif %}
+    {% endfor %}
 {% endblock %}
 
 {% block meta %}
@@ -39,7 +51,9 @@
             <div class="col-sm-9 col-lg-6 main">
                 {% breadcrumb calling_page=self %}
                 <h1>{{ page.title }}</h1>
-                {{ page.body | safe }}
+                {% for block in page.body %}
+                    {% include_block block %}
+                {% endfor %}
                 <div class="comments">
                     {% get_comment_count for page as comment_count %}
                     {% if comment_count %}
@@ -56,6 +70,12 @@
                         </div>
                     {% endif %}
                 </div>
+            </div>
+        <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
+                {% sidebar_adverisement_body 'article_page' as sidebar_advert %}
+                {% for block in sidebar_advert %}
+                    {% include_block block %}
+                {% endfor %}
             </div>
         </div>
     </div>

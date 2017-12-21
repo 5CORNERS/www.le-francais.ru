@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static site_tags %}
+{% load static site_tags wagtailcore_tags %}
 
 {% block body_class %}template-homepage{% endblock %}
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
@@ -17,6 +17,16 @@
     <meta name="page-id" data-value="{{ self.id }}">
 {% endblock %}
 
+{% block extra_head %}
+    {% sidebar_adverisement_body 'page_with_sidebar' as sidebar_advert %}
+    {% for block in sidebar_advert %}
+        {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header | safe}}{% endif %}
+    {% endfor %}
+    {% for block in page.body %}
+        {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header | safe}}{% endif %}
+    {% endfor %}
+{% endblock %}
+
 {% block content %}
     <div class="container-fluid">
         <div class="row">
@@ -31,7 +41,15 @@
             <div class="col-12 col-sm-9 col-lg-6 col-xlg-6 main">
                 {% breadcrumb calling_page=self %}
                 <h1>{{ page.title }}</h1>
-                {{ page.body | safe }}
+                {% for block in page.body %}
+                    {% include_block block %}
+                {% endfor %}
+            </div>
+            <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
+                {% sidebar_adverisement_body 'page_with_sidebar' as sidebar_advert %}
+                {% for block in sidebar_advert %}
+                    {% include_block block %}
+                {% endfor %}
             </div>
         </div>
     </div>
