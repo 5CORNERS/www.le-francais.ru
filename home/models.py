@@ -23,7 +23,7 @@ from home.blocks.VideoPlayer import VideoPlayerBlock
 
 
 @register_snippet
-class AdvertisementSnippet(Model):
+class InlineAdvertisementSnippet(Model):
     name = CharField(max_length=100, unique=True)
     header = TextField(max_length=1000, blank=True)
     body = TextField(max_length=1000, blank=True)
@@ -41,19 +41,35 @@ class AdvertisementSnippet(Model):
 from home.blocks.AdvertisementBlocks import AdvertisementInline
 
 @register_snippet
-class PlacementAdvertisementSnippet(Model):
+class PageLayoutAdvertisementSnippet(Model):
     PAGE_CHOICES = (
-        ('lesson_page', 'Lesson Page Sidebar'),
-        ('lesson_page_bottom', 'Lesson Page Bottom'),
-        ('page_with_sidebar', '\"Page with sidebar\" Sidebar'),
-        ('page_with_sidebar_bottom', '\"Page with Sidebar\" Bottom'),
-        ('article_page', 'Article Page Sidebar'),
-        ('article_page_bottom', 'Article Page Bottom'),
-        ('index_page', 'Title Page Sidebar'),
+        ('lesson_page', 'Lesson Page'),
+        ('page_with_sidebar', '\"Page with sidebar\"'),
+        ('article_page', 'Article Page'),
+        ('index_page', 'Title Page'),
         ('none', 'None')
     )
+    PLACEMENT_CHOICES = (
+        ('sidebar', 'Sidebar'),
+        # ('body_top', 'Body Top'),
+        ('body_bottom', 'Body Bottom'),
+        ('none', 'None'),
+        # ('comments_for_lesson_top', 'Comments for Lesson Top'),
+        ('comments_for_lesson_bottom', 'Comments for Lesson Bottom'),
+        # ('dictionary_top', 'Dictionary Top'),
+        ('dictionary_bottom', 'Dictionary Bottom'),
+        ('resume_top', 'Resume Top'),
+        ('resume_bottom', 'Resume Bottom'),
+        ('revision_top', 'Revision Top'),
+        ('revision_bottom', 'Revision Bottom'),
+        ('index_page_sidebar_top', 'Title Page Sidebar Top'),
+        ('index_page_sidebar_middle', 'Title Page Sidebar Middle'),
+        ('index_page_sidebar_bottom', 'Title Page Sidebar Bottom'),
+
+    )
     name =  CharField(max_length=100, unique=True, blank=False)
-    placements = CharField(max_length=100, choices=PAGE_CHOICES, default='none')
+    page_type = CharField(max_length=100, choices=PAGE_CHOICES , default='none')
+    placement = CharField(max_length=100, choices=PLACEMENT_CHOICES, default='none')
     head = StreamField([
         ('html', RawHTMLBlock()),
     ], blank=True)
@@ -61,10 +77,12 @@ class PlacementAdvertisementSnippet(Model):
         ('advertisement', AdvertisementInline()),
         ('html', RawHTMLBlock()),
     ], blank=True)
-
+    live = BooleanField(default=True)
     panels = [
         FieldPanel('name'),
+        FieldPanel('page_type'),
         FieldPanel('placement'),
+        FieldPanel('live'),
         StreamFieldPanel('head'),
         StreamFieldPanel('body'),
     ]
