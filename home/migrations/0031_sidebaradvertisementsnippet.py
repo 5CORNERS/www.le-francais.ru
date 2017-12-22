@@ -12,7 +12,7 @@ import wagtail.wagtailsnippets.blocks
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('home', '0030_auto_20171221_1359'),
+        ('home', '0029_auto_20171221_1354'),
     ]
 
     operations = [
@@ -21,7 +21,6 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100, unique=True)),
-                ('body', wagtail.wagtailcore.fields.StreamField((('advertisement', wagtail.wagtailcore.blocks.StructBlock((('advertisement', wagtail.wagtailsnippets.blocks.SnippetChooserBlock(home.models.AdvertisementSnippet)),))), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock())))),
             ],
         ),
     ]

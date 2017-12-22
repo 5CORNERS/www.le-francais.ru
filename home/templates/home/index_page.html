@@ -2,7 +2,7 @@
 {% load static site_tags %}
 
 {% block extra_head %}
-
+    {% advert_head page %}
 {% endblock %}
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
 {% block extra_css %}
@@ -16,8 +16,6 @@
                 <h1>Французский язык как удовольствие</h1>
             </div>
         </div>
-
-
         <div class="col-md-9">
             <div class="row">
                 <div class="row">
@@ -51,11 +49,11 @@
                     {% endfor %}
                 </div>
             </div>
+            <div class="col-md-3">
+                {% page_advert_body 'index_page_sidebar_top' %}
+            </div>
         </div>
         <div class="row">
-            {#			<div class="col-md-3">#}
-            {#				<div class="caption">Some review-block caption</div>#}
-            {#			</div>#}
             <div class="col-md-9">
                 <div class="too_many_letters">
                     <p>Я сознательно <b>не</b> пишу "изучить французский язык". "Изучить" — понятие более широкое. Здесь
@@ -112,6 +110,9 @@
                 </div>
                 <hr>
             </div>
+            <div class="col-md-3">
+                {% page_advert_body 'index_page_sidebar_middle' %}
+            </div>
         </div>
         <div class="row">
             <div class="col-md-9 home_comments">
@@ -151,6 +152,9 @@
                     <a href="//www.facebook.com/groups/lefrancais.ru/" class="btn btn-social btn-sm btn-facebook"><span
                             class="fa fa-facebook"></span>...а то вот ещё есть</a>
                 </p>
+            </div>
+            <div class="col-md-3">
+                {% page_advert_body 'index_page_sidebar_bottom' %}
             </div>
         </div>
     </div>

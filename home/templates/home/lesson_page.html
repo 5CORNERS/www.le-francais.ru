@@ -6,28 +6,7 @@
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 
 {% block extra_head %}
-    {% sidebar_adverisement_head 'lesson_page' as sidebar_advert_head %}
-    {% for block in sidebar_advert_head %}{% include_block block %}{% endfor %}
-    {% sidebar_adverisement_body 'lesson_page' as sidebar_advert_body %}
-    {% for block in sidebar_advert_body %}
-        {% if block.block_type == 'advertisement' %}
-            {{ block.value.advertisement.header | safe}}
-        {% endif %}
-    {% endfor %}
-    {% for block in page.body %}
-        {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header }}{% endif %}
-    {% endfor %}
-    {% for block in page.comments_for_lesson %}
-        {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header }}{% endif %}
-    {% endfor %}
-    {% for block in page.dictionary %}
-        {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header }}{% endif %}
-    {% endfor %}
-    {% for child_value in page.other_tabs %}
-        {% for block in child_value.value.body %}
-            {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header }}{% endif %}
-        {% endfor %}
-    {% endfor %}
+    {% advert_head page %}
 {% endblock %}
 
 {% block body_class %}template-homepage{% endblock %}
@@ -124,27 +103,32 @@
                         {% if self.comments_for_lesson %}
                             <div id="comments_for_lesson" class="{{ pane_class }}"role="tabpanel">
                                 {% for block in self.comments_for_lesson %}{% include_block block %}{% endfor %}
+                                {% page_advert_body 'comments_for_lesson_bottom' %}
                             </div>
                             {% assign pane_class "tab-pane" %}
                         {% endif %}
                         {% if self.body %}
                             <div id="body" class="{{ pane_class }}" role="tabpanel">
                                 {% for block in self.body %}{% include_block block %}{% endfor %}
+                                {% page_advert_body 'body_bottom' %}
                             </div>
                             {% assign pane_class "tab-pane" %}
                         {% endif %}
                         {% if self.dictionary %}
                             <div id="dictionary" class="{{ pane_class }}"role="tabpanel">
                                 {% for block in self.dictionary %}{% include_block block %}{% endfor %}
+                                {% page_advert_body 'dictionary_bottom' %}
                             </div>
                             {% assign pane_class "tab-pane" %}
                         {% endif %}
                         {% if self.summary %}
                             <div id="resume" class="{{ pane_class }}" role="tabpanel">
                                 <div>
+                                {% page_advert_body 'resume_top' %}
                                     {% with "https://files.le-francais.ru"|add:self.summary as document_url %}
                                         {% include 'blocks/document_viewer.html' %}
                                     {% endwith %}
+                                {% page_advert_body 'resume_bottom' %}
                                 </div>
                             </div>
                             {% assign pane_class "tab-pane" %}
@@ -152,9 +136,11 @@
                         {% if self.repetition_material %}
                             <div id="revision" class="{{ pane_class }}" role="tabpanel">
                                 <div>
+                                {% page_advert_body 'revision_top' %}
                                     {% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
                                         {% include 'blocks/document_viewer.html' %}
                                     {% endwith %}
+                                {% page_advert_body 'revision_body' %}
                                 </div>
                             </div>
                             {% assign pane_class "tab_pane" %}
@@ -218,11 +204,7 @@
                 {% endif %}
             </div>
             <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
-            {% sidebar_adverisement_body 'lesson_page' as sidebar_advert_body %}
-                {% for block in sidebar_advert_body %}
-                    {% include_block block %}
-                {% endfor %}
-            </div>
+            {% page_advert_body 'sidebar' %}
         </div>
     </div>
 {% endblock %}
