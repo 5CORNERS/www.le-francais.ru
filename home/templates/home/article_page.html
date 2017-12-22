@@ -21,17 +21,7 @@
 {% endblock %}
 
 {% block extra_head %}
-    {% sidebar_adverisement_head 'article_page' as sidebar_advert_head %}
-    {% for block in sidebar_advert_head %}{% include_block block %}{% endfor %}
-    {% sidebar_adverisement_body 'article_page' as sidebar_advert_body %}
-    {% for block in sidebar_advert_body %}
-        {% if block.block_type == 'advertisement' %}
-            {{ block.value.advertisement.header | safe}}
-        {% endif %}
-    {% endfor %}
-    {% for block in page.body %}
-        {% if block.block_type == 'advertisement' %}{{ block.value.advertisement.header | safe}}{% endif %}
-    {% endfor %}
+    {% advert_head page %}
 {% endblock %}
 
 {% block meta %}
@@ -53,9 +43,8 @@
             <div class="col-sm-9 col-lg-6 main">
                 {% breadcrumb calling_page=self %}
                 <h1>{{ page.title }}</h1>
-                {% for block in page.body %}
-                    {% include_block block %}
-                {% endfor %}
+                {% for block in page.body %}{% include_block block %}{% endfor %}
+                {% page_advert_body 'body_bottom' %}
                 <div class="comments">
                     {% get_comment_count for page as comment_count %}
                     {% if comment_count %}
@@ -73,11 +62,8 @@
                     {% endif %}
                 </div>
             </div>
-        <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
-                {% sidebar_adverisement_body 'article_page' as sidebar_advert_body %}
-                {% for block in sidebar_advert_body %}
-                    {% include_block block %}
-                {% endfor %}
+            <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
+                {% page_advert_body 'sidebar' %}
             </div>
         </div>
     </div>

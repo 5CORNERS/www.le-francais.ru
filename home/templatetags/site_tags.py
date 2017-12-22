@@ -2,33 +2,70 @@ from django import template
 from pybb.models import Topic, Post
 
 from home.models import IndexReviews
-from home.models import PlacementAdvertisementSnippet
+from home.models import PageLayoutAdvertisementSnippet
 
 register = template.Library()
 
 
-@register.assignment_tag()
-def sidebar_adverisement_body(page_type):
+@register.inclusion_tag('tags/advert_body.html', takes_context=True)
+def page_advert_body(context, placement):
+    page_type = context.template_name.split('/')[1].split('.')[0]
     try:
-        return PlacementAdvertisementSnippet.objects.filter(placement=page_type)[0].body
+        return dict(
+            body=PageLayoutAdvertisementSnippet.objects\
+                .filter(placement=placement, page_type=page_type)\
+                .exclude(live=False)[0].body
+        )
     except:
-        return None
+        return dict(body=None)
+
+
+@register.inclusion_tag('tags/advert_head.html', takes_context=True)
+def advert_head(context, page):
+    block_list = []
+    page_type = context.template_name.split('/')[1].split('.')[0]
+
+    if page_type == 'lesson_page':
+        elements = [page.body, page.comments_for_lesson, page.dictionary]
+        block_list = search_advertisement_heads(elements, block_list)
+        for child_value in page.other_tabs:
+            for block in child_value.value['body']:
+                if block.block_type == 'advertisement':
+                    block_list.append(block.value['advertisement'].header)
+
+    elif page_type == 'page_with_sidebar' or page_type == 'article_page':
+        block_list = search_advertisement_heads([page.body], block_list)
+
+    for layout_advert in PageLayoutAdvertisementSnippet.objects.filter(page_type=page_type).exclude(
+            placement='none').exclude(live=False):
+        for block in layout_advert.head:
+            block_list.append(block.value)
+        block_list = search_advertisement_heads([layout_advert.body], block_list)
+    return dict(block_list=block_list)
+
+
+def search_advertisement_heads(page_elements: list, list):
+    for element in page_elements:
+        for block in element:
+            if block.block_type == 'advertisement':
+                list.append(block.value['advertisement'].header)
+    return list
 
 
 @register.assignment_tag()
-def sidebar_adverisement_head(page_type):
+def sidebar_adverisement_head(placement):
     try:
-        return PlacementAdvertisementSnippet.objects.filter(placement=page_type)[0].head
+        return PageLayoutAdvertisementSnippet.objects.filter(placement=placement)[0].head
     except:
         return None
 
 
 @register.inclusion_tag("tags/advertisement.html", takes_context=True)
 def advertisement_inline(context, name, header, body):
-    dict={
-        'name':name,
-        'header':header,
-        'body':body,
+    dict = {
+        'name': name,
+        'header': header,
+        'body': body,
     }
     return dict
 
