@@ -1,3 +1,13 @@
+.advert_top{
+    margin-top: 273px;
+}
+
+@media (max-width: 1199px) {
+    .advert_top{
+        margin-top: 359px;
+    }
+}
+
 .page-reference {
     padding: 20px;
     border: 1px solid black;
