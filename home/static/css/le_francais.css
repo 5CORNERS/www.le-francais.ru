@@ -2,9 +2,26 @@ html, body {
     height: 100%;
 }
 
-body {
-    display: flex;
-    flex-direction: column;
+.main_row {
+    display: table;
+}
+
+.main {
+    float: none;
+    display: table-cell;
+    vertical-align: top;
+}
+
+.sidebar-right {
+    float: none;
+    display: table-cell;
+    vertical-align: top;
+}
+
+.sidebar-wrapper{
+    float: none;
+    display: table-cell;
+    vertical-align: top;
 }
 
 .footer {
@@ -551,7 +568,9 @@ td.forum-last-post, td.topic-last-post {
     margin-top: 1em;
 }
 
-.sidebar-right{
-    padding: 40px 0; !important;
-    margin: 0; !important;
+.sidebar-right {
+    padding: 40px 0;
+!important;
+    margin: 0;
+!important;
 }

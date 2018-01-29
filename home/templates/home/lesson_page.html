@@ -32,7 +32,7 @@
 
     {% assign url request.build_absolute_uri %}
     <div class="container-fluid">
-        <div class="row">
+        <div class="row main_row">
             <div class="sidebar-wrapper col-xs-3 _no-padding">
                 <div id="sidebar"></div>
             </div>
@@ -204,7 +204,7 @@
                 {% endif %}
             </div>
             <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
-            {% page_advert_body 'sidebar' %}
-        </div>
+                {% page_advert_body 'sidebar' %}
+            </div>
     </div>
 {% endblock %}
