@@ -18,7 +18,7 @@ html, body {
     vertical-align: top;
 }
 
-.sidebar-wrapper{
+.sidebar-wrapper {
     float: none;
     display: table-cell;
     vertical-align: top;
@@ -573,4 +573,10 @@ td.forum-last-post, td.topic-last-post {
 !important;
     margin: 0;
 !important;
+}
+
+.advert_bottom {
+    position: absolute;
+    bottom: 0px;
+    padding: 0 0 40px;
 }
