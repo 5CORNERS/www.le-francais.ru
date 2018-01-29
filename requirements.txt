@@ -6,7 +6,7 @@ xmltodict==0.10.2
 Django==1.11
 django-robots
 gunicorn==19.6.0
-psycopg2==2.6.2
+psycopg2==2.7.3.2
 python-dotenv
 whitenoise==3.3.0
 sorl-thumbnail==12.4a1
