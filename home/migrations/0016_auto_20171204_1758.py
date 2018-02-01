@@ -13,7 +13,6 @@ import wagtail.wagtailimages.blocks
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wagtailcore', '0041_remove_page_draft_title'),
         ('home', '0015_auto_20171115_1324'),
     ]
 
