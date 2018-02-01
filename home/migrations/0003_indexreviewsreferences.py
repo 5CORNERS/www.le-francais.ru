@@ -10,7 +10,6 @@ import modelcluster.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wagtailcore', '0041_remove_page_draft_title'),
         ('home', '0002_lessonpage_topic'),
     ]
 
