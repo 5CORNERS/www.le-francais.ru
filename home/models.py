@@ -25,8 +25,9 @@ from home.blocks.VideoPlayer import VideoPlayerBlock
 @register_snippet
 class InlineAdvertisementSnippet(Model):
     name = CharField(max_length=100, unique=True)
-    header = TextField(max_length=1000, blank=True)
-    body = TextField(max_length=1000, blank=True)
+    header = TextField(max_length=10000, blank=True)
+    body = TextField(max_length=5000, blank=True)
+    body_mobile = TextField(max_length=5000, blank=True)
 
     panels = [
         FieldPanel('name'),
@@ -51,12 +52,9 @@ class PageLayoutAdvertisementSnippet(Model):
     )
     PLACEMENT_CHOICES = (
         ('sidebar', 'Sidebar'),
-        # ('body_top', 'Body Top'),
         ('body_bottom', 'Body Bottom'),
         ('none', 'None'),
-        # ('comments_for_lesson_top', 'Comments for Lesson Top'),
         ('comments_for_lesson_bottom', 'Comments for Lesson Bottom'),
-        # ('dictionary_top', 'Dictionary Top'),
         ('dictionary_bottom', 'Dictionary Bottom'),
         ('resume_top', 'Resume Top'),
         ('resume_bottom', 'Resume Bottom'),
@@ -65,7 +63,6 @@ class PageLayoutAdvertisementSnippet(Model):
         ('index_page_sidebar_top', 'Title Page Sidebar Top'),
         ('index_page_sidebar_middle', 'Title Page Sidebar Middle'),
         ('index_page_sidebar_bottom', 'Title Page Sidebar Bottom'),
-
     )
     name =  CharField(max_length=100, unique=True, blank=False)
     page_type = CharField(max_length=100, choices=PAGE_CHOICES , default='none')
