@@ -33,6 +33,7 @@ class InlineAdvertisementSnippet(Model):
         FieldPanel('name'),
         FieldPanel('header'),
         FieldPanel('body'),
+        FieldPanel('body_mobile')
     ]
 
     def __str__(self):

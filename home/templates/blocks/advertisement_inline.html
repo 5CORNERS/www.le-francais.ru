@@ -1,3 +1,8 @@
 {% if block.value.disable == False %}
-{{ block.value.advertisement.body | safe}}
+    <div class="hidden-lg">
+    {{ block.value.advertisement.body | safe}}
+    </div>
+    <div class="hidden-xs hidden-sm hidden-md">
+    {{ block.vakue.adverisement.body_mobile | safe }}
+    </div>
 {% endif %}
