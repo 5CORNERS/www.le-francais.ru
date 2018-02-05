@@ -1,8 +1,1 @@
-{% if block.value.disable == False %}
-    <div class="hidden-lg">
-    {{ block.value.advertisement.body | safe}}
-    </div>
-    <div class="hidden-xs hidden-sm hidden-md">
-    {{ block.vakue.adverisement.body_mobile | safe }}
-    </div>
-{% endif %}
+{% if block.value.disable == False %}{% if flavour != "mobile" %}{{ block.value.advertisement.body | safe }}{% else %}{{ block.value.advertisement.body_mobile | safe }}{% endif %}{% endif %}
