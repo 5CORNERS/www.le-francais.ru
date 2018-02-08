@@ -21,6 +21,16 @@ from home.blocks.Reviews import ChoosenReviews
 from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
 
+PAGE_CHOICES = (
+    ('lesson_a1', 'Lesson A1'),
+    ('lesson_a2', 'Lesson A2'),
+    ('lesson_b2', 'Lesson_B2'),
+    ('lesson_page', 'Lesson Page'),
+    ('page_with_sidebar', '\"Page with sidebar\"'),
+    ('article_page', 'Article Page'),
+    ('index_page', 'Title Page'),
+    ('none', 'None')
+)
 
 @register_snippet
 class InlineAdvertisementSnippet(Model):
@@ -44,13 +54,7 @@ from home.blocks.AdvertisementBlocks import AdvertisementInline
 
 @register_snippet
 class PageLayoutAdvertisementSnippet(Model):
-    PAGE_CHOICES = (
-        ('lesson_page', 'Lesson Page'),
-        ('page_with_sidebar', '\"Page with sidebar\"'),
-        ('article_page', 'Article Page'),
-        ('index_page', 'Title Page'),
-        ('none', 'None')
-    )
+
     PLACEMENT_CHOICES = (
         ('sidebar', 'Sidebar'),
         ('body_bottom', 'Body Bottom'),
@@ -169,6 +173,7 @@ DefaultPage.promote_panels = DefaultPage.promote_panels + [
 
 
 class PageWithSidebar(Page):
+    page_type = CharField(max_length=100,choices=PAGE_CHOICES,default='none')
     show_in_sitemap = BooleanField(default=True)
     reference_title = TextField(null=True, blank=True)
     subtitle = TextField(null=True, blank=True)
@@ -207,12 +212,14 @@ PageWithSidebar.promote_panels = PageWithSidebar.promote_panels + [
     FieldPanel('show_in_sitemap')
 ]
 PageWithSidebar.settings_panels = PageWithSidebar.settings_panels + [
+    FieldPanel('page_type'),
     FieldPanel('is_nav_root'),
     FieldPanel('is_selectable'),
 ]
 
 
 class LessonPage(Page):
+    page_type = CharField(max_length=100,choices=PAGE_CHOICES,default='none')
     show_in_sitemap = BooleanField(default=True)
     menu_title = TextField(blank=True)
     is_nav_root = BooleanField(default=False)
@@ -291,6 +298,7 @@ LessonPage.promote_panels = LessonPage.promote_panels + [
 ]
 LessonPage.settings_panels = LessonPage.settings_panels + [
     FieldPanel('lesson_number'),
+    FieldPanel('page_type'),
     FieldPanel('is_nav_root'),
     FieldPanel('is_selectable'),
     MultiFieldPanel(
