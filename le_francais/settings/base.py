@@ -296,7 +296,7 @@ WAGTAIL_SITE_NAME = "le_francais"
 
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
-BASE_URL = '192.168.0.27:80'
+BASE_URL = 'www.le-francais.ru'
 
 ALLOWED_HOSTS = [
     'hidden-refuge-27954.herokuapp.com',
