@@ -307,6 +307,8 @@ ALLOWED_HOSTS = [
     '192.168.0.27',
 ]
 
+X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS','SAMEORIGIN')
+
 # Allauth settings
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
