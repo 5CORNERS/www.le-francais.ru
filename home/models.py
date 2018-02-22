@@ -44,12 +44,14 @@ PLACEMENT_CHOICES = (
 @register_snippet
 class InlineAdvertisementSnippet(Model):
     name = CharField(max_length=100, unique=True)
+    # id = CharField(max_length=100, unique=True)
     header = TextField(max_length=10000, blank=True)
     body = TextField(max_length=5000, blank=True)
     body_mobile = TextField(max_length=5000, blank=True)
 
     panels = [
         FieldPanel('name'),
+        # FieldPanel('id'),
         FieldPanel('header'),
         FieldPanel('body'),
         FieldPanel('body_mobile')
