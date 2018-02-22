@@ -44,7 +44,7 @@
                 {% breadcrumb calling_page=self %}
                 <h1>{{ page.title }}</h1>
                 {% for block in page.body %}{% include_block block %}{% endfor %}
-                {% page_advert_body 'body_bottom' %}
+                {% page_advert_body 'body_bottom' page.page_type %}
                 <div class="comments">
                     {% get_comment_count for page as comment_count %}
                     {% if comment_count %}
@@ -63,7 +63,7 @@
                 </div>
             </div>
             <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
-                {% page_advert_body 'sidebar' %}
+                {% page_advert_body 'sidebar' page.page_type %}
             </div>
         </div>
     </div>
