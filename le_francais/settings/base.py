@@ -109,6 +109,7 @@ MIDDLEWARE_CLASSES = [
     'pybb.middleware.PybbMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'home.middleware.MobileTabletDetectionMiddleware',
+    'home.middleware.CanonicalDomainMiddleware',
     'django_mobile.middleware.SetFlavourMiddleware',
 ]
 
