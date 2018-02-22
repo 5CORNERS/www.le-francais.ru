@@ -31,6 +31,15 @@ PAGE_CHOICES = (
     ('index_page', 'Title Page'),
     ('none', 'None')
 )
+PLACEMENT_CHOICES = (
+    ('sidebar', 'Sidebar'),
+    ('none', 'None'),
+    ('resume_top', 'Resume Top'),
+    ('resume_bottom', 'Resume Bottom'),
+    ('revision_top', 'Revision Top'),
+    ('revision_bottom', 'Revision Bottom'),
+)
+
 
 @register_snippet
 class InlineAdvertisementSnippet(Model):
@@ -54,21 +63,6 @@ from home.blocks.AdvertisementBlocks import AdvertisementInline
 
 @register_snippet
 class PageLayoutAdvertisementSnippet(Model):
-
-    PLACEMENT_CHOICES = (
-        ('sidebar', 'Sidebar'),
-        ('body_bottom', 'Body Bottom'),
-        ('none', 'None'),
-        ('comments_for_lesson_bottom', 'Comments for Lesson Bottom'),
-        ('dictionary_bottom', 'Dictionary Bottom'),
-        ('resume_top', 'Resume Top'),
-        ('resume_bottom', 'Resume Bottom'),
-        ('revision_top', 'Revision Top'),
-        ('revision_bottom', 'Revision Bottom'),
-        ('index_page_sidebar_top', 'Title Page Sidebar Top'),
-        ('index_page_sidebar_middle', 'Title Page Sidebar Middle'),
-        ('index_page_sidebar_bottom', 'Title Page Sidebar Bottom'),
-    )
     name =  CharField(max_length=100, unique=True, blank=False)
     page_type = CharField(max_length=100, choices=PAGE_CHOICES , default='none')
     placement = CharField(max_length=100, choices=PLACEMENT_CHOICES, default='none')
@@ -112,6 +106,7 @@ def get_nav_root(page: Page) -> Page:
 
 
 class IndexPage(Page):
+    page_type = CharField(max_length=100,choices=PAGE_CHOICES,default='index_page')
     is_selectable = BooleanField(default=True)
     content_panels = Page.content_panels + [
         InlinePanel('related_pages', label="Related pages"),
@@ -313,6 +308,7 @@ LessonPage.settings_panels = LessonPage.settings_panels + [
 
 
 class ArticlePage(Page):
+    page_type = CharField(max_length=100, choices=PAGE_CHOICES, default='article_page')
     show_in_sitemap = BooleanField(default=True)
     allow_comments = BooleanField('allow comments', default=True)
     menu_title = TextField(blank=True)
@@ -349,4 +345,5 @@ ArticlePage.settings_panels = ArticlePage.settings_panels + [
     FieldPanel('allow_comments'),
     FieldPanel('is_nav_root'),
     FieldPanel('is_selectable'),
+    FieldPanel('page_type')
 ]

@@ -8,9 +8,11 @@ register = template.Library()
 
 
 @register.inclusion_tag('tags/advert_body.html', takes_context=True)
-def page_advert_body(context, placement):
-    page_type = context.template_name.split('/')[1].split('.')[0]
+def page_advert_body(context, placement, page_type):
     try:
+        test = dict(body=PageLayoutAdvertisementSnippet.objects\
+                .filter(placement=placement, page_type=page_type)\
+                .exclude(live=False)[0].body)
         return dict(
             body=PageLayoutAdvertisementSnippet.objects\
                 .filter(placement=placement, page_type=page_type)\
@@ -23,9 +25,8 @@ def page_advert_body(context, placement):
 @register.inclusion_tag('tags/advert_head.html', takes_context=True)
 def advert_head(context, page):
     block_list = []
-    page_type = context.template_name.split('/')[1].split('.')[0]
 
-    if page_type == 'lesson_page':
+    if page.page_type == 'lesson_page':
         elements = [page.body, page.comments_for_lesson, page.dictionary]
         block_list = search_advertisement_heads(elements, block_list)
         for child_value in page.other_tabs:
@@ -33,10 +34,10 @@ def advert_head(context, page):
                 if block.block_type == 'advertisement':
                     block_list.append(block.value['advertisement'].header)
 
-    elif page_type == 'page_with_sidebar' or page_type == 'article_page':
+    elif page.page_type == 'page_with_sidebar' or page.page_type == 'article_page':
         block_list = search_advertisement_heads([page.body], block_list)
 
-    for layout_advert in PageLayoutAdvertisementSnippet.objects.filter(page_type=page_type).exclude(
+    for layout_advert in PageLayoutAdvertisementSnippet.objects.filter(page_type=page.page_type).exclude(
             placement='none').exclude(live=False):
         for block in layout_advert.head:
             block_list.append(block.value)
