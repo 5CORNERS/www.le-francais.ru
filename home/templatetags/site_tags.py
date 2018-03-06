@@ -2,7 +2,7 @@ from django import template
 from pybb.models import Topic, Post
 
 from home.models import IndexReviews
-from home.models import PageLayoutAdvertisementSnippet
+from home.models import PageLayoutAdvertisementSnippet, LessonPage
 
 register = template.Library()
 
@@ -26,7 +26,7 @@ def page_advert_body(context, placement, page_type):
 def advert_head(context, page):
     block_list = []
 
-    if page.page_type == 'lesson_page':
+    if isinstance(page, LessonPage):
         elements = [page.body, page.comments_for_lesson, page.dictionary]
         block_list = search_advertisement_heads(elements, block_list)
         for child_value in page.other_tabs:
