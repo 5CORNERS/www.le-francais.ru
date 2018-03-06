@@ -30,25 +30,25 @@ def create_redirect(url_out, to, is_permanent=True):
     return new_redirect
 
 
-def set_block(i, new_block, stream):
-    if isinstance(new_block, stream.StreamChild):
-        if stream.is_lazy:
+def set_block(i, new_block, stream_value):
+    if isinstance(new_block, stream_value.StreamChild):
+        if stream_value.is_lazy:
             data_item = {'type': new_block.block_type, 'value': new_block.value}
         else:
             data_item = (new_block.block_type, new_block.value)
-        stream.stream_data[i] = data_item
-        stream._bound_blocks[i] = new_block
+        stream_value.stream_data[i] = data_item
+        stream_value._bound_blocks[i] = new_block
         return
 
-def del_block(i, stream):
-    stream.stream_data.pop(i)
-    stream._bound_blocks.pop(i)
+def del_block(i, stream_value):
+    stream_value.stream_data.pop(i)
+    stream_value._bound_blocks.pop(i)
 
-def merge_blocks(i1, i2, stream):
-    block1 = stream.__getitem__(i1)
-    block2 = stream.__getitem__(i2)
+def merge_blocks(i1, i2, stream_value):
+    block1 = stream_value.__getitem__(i1)
+    block2 = stream_value.__getitem__(i2)
     new_value = block1.value + block2.value
     block1.value = new_value
-    set_block(i1, block1, stream)
-    del_block(i2, stream)
-    return stream
+    set_block(i1, block1, stream_value)
+    del_block(i2, stream_value)
+    return stream_value
