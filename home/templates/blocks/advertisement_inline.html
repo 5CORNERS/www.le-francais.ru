@@ -1,1 +1,1 @@
-{% if block.value.disable == False %}{% if flavour != "mobile" %}{{ block.value.advertisement.body | safe }}{% else %}{{ block.value.advertisement.body_mobile | safe }}{% endif %}{% endif %}
+{% if block.value.disable == False %}{% if flavour == 'full'%}<div class="inline-ads">{% else %}<div class="inline-ads inline-ads-mobile">{% endif %}{{ block.value.advertisement.body | safe }}</div>{% endif %}
