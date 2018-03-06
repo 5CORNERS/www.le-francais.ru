@@ -587,8 +587,9 @@ td.forum-last-post, td.topic-last-post {
 }
 
 .inline-ads {
-    margin: 1em;
+    margin: 1em 0em;
 }
 
 .inline-ads-mobile {
+    text-align: center;
 }
