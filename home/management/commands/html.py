@@ -108,8 +108,10 @@ class Command(BaseCommand):
                 doc = doc + '\n<!--BLOCK_HTML_' + num + '-->\n' + block.value
             elif block.block_type == 'paragraph':
                 doc = doc + '\n<!--BLOCK_PRGF_' + num + '-->\n'
-            else:
+            elif block.block_type == 'audio':
                 doc = doc + '\n<!--BLOCK_AUDI_' + num + '-->\n'
+            elif block.block_type == 'advertisement':
+                doc = doc + '\n<!--BLOCK_SNPT_' + num + '-->\n'
         doc = doc + '\n<!--TAB_BODY_END--><br><a name="tab_body_end"/><br>\n'
         return doc
 
