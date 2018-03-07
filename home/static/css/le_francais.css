@@ -2,6 +2,11 @@ html, body {
     height: 100%;
 }
 
+hr{
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
 body {
     display: flex;
     flex-direction: column;
@@ -592,4 +597,10 @@ td.forum-last-post, td.topic-last-post {
 
 .inline-ads-mobile {
     text-align: center;
+}
+
+.alignleft {
+    display: inline;
+    float: left;
+    margin-right: 1em;
 }
