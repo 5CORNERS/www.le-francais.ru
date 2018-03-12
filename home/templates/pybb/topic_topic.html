@@ -8,9 +8,18 @@
 
     <script>
       googletag.cmd.push(function() {
-        googletag.defineSlot('/21671132665/lf_fr_topic_inl_01', [[728, 90], [250, 250], [336, 280], [180, 150], [200, 200], [300, 250], [468, 60], [125, 125]], 'div-gpt-ad-1520856365174-0').addService(googletag.pubads());
-        googletag.defineSlot('/21671132665/lf_fr_topic_ina_02', [[728, 90], [250, 250], [336, 280], [180, 150], [200, 200], [300, 250], [468, 60], [125, 125]], 'div-gpt-ad-1520856365174-1').addService(googletag.pubads());
-        googletag.defineSlot('/21671132665/lf_fr_topic_ina_03', [[728, 90], [250, 250], [336, 280], [180, 150], [200, 200], [300, 250], [468, 60], [125, 125]], 'div-gpt-ad-1520856365174-2').addService(googletag.pubads());
+        var mapping = googletag.sizeMapping().
+            addSize([1040, 0], [728, 90]).
+            addSize([527, 0], [468, 60]).
+            addSize([395, 0], [336, 280]).
+            addSize([359, 0], [300, 250]).
+            addSize([309, 0], [250, 250]).
+            addSize([259, 0], [200, 200]).
+            addSize([239, 0], [180, 150]).
+            addSize([184, 0], [125, 125]).build();
+        googletag.defineSlot('/21671132665/lf_fr_topic_inl_01', [[728, 90], [250, 250], [336, 280], [180, 150], [200, 200], [300, 250], [468, 60], [125, 125]], 'div-gpt-ad-1520856365174-0').defineSizeMapping(mapping).addService(googletag.pubads());
+        googletag.defineSlot('/21671132665/lf_fr_topic_ina_02', [[728, 90], [250, 250], [336, 280], [180, 150], [200, 200], [300, 250], [468, 60], [125, 125]], 'div-gpt-ad-1520856365174-1').defineSizeMapping(mapping).addService(googletag.pubads());
+        googletag.defineSlot('/21671132665/lf_fr_topic_ina_03', [[728, 90], [250, 250], [336, 280], [180, 150], [200, 200], [300, 250], [468, 60], [125, 125]], 'div-gpt-ad-1520856365174-2').defineSizeMapping(mapping).addService(googletag.pubads());
         googletag.pubads().enableSingleRequest();
         googletag.pubads().collapseEmptyDivs();
         googletag.enableServices();
