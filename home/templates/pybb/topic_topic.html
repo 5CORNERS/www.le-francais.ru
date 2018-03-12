@@ -1,4 +1,22 @@
-{% load pybb_tags i18n staticfiles %}
+{% load pybb_tags i18n staticfiles site_tags %}
+{% block extra_head %}
+    <script async='async' src='https://www.googletagservices.com/tag/js/gpt.js'></script>
+    <script>
+      var googletag = googletag || {};
+      googletag.cmd = googletag.cmd || [];
+    </script>
+
+    <script>
+      googletag.cmd.push(function() {
+        googletag.defineSlot('/21671132665/lf_fr_topic_inl_01', [[728, 90], [250, 250], [336, 280], [180, 150], [200, 200], [300, 250], [468, 60], [125, 125]], 'div-gpt-ad-1520856365174-0').addService(googletag.pubads());
+        googletag.defineSlot('/21671132665/lf_fr_topic_ina_02', [[728, 90], [250, 250], [336, 280], [180, 150], [200, 200], [300, 250], [468, 60], [125, 125]], 'div-gpt-ad-1520856365174-1').addService(googletag.pubads());
+        googletag.defineSlot('/21671132665/lf_fr_topic_ina_03', [[728, 90], [250, 250], [336, 280], [180, 150], [200, 200], [300, 250], [468, 60], [125, 125]], 'div-gpt-ad-1520856365174-2').addService(googletag.pubads());
+        googletag.pubads().enableSingleRequest();
+        googletag.pubads().collapseEmptyDivs();
+        googletag.enableServices();
+      });
+    </script>
+{% endblock %}
 
 <div class="topic">
     <h1>{{ topic.name }}</h1>
@@ -22,6 +40,8 @@
             {% ifequal post post_list.0 %}{% include "ads/topic_top.html" %}{% endifequal %}
             {% ifequal post post_list.9 %}{% include "ads/topic_middle.html" %}{% endifequal %}
             {% ifequal post post_list.19 %}{% include "ads/topic_bottom.html" %}{% endifequal %}
+{#            TODO forum advertisement#}
+{#            {% forum_advert forloop.counter0 post_list.count %}#}
         {% endfor %}
     </div>
     <div>&nbsp;</div>
