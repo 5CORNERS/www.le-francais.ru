@@ -592,6 +592,7 @@ td.forum-last-post, td.topic-last-post {
 }
 
 .inline-ads {
+    text-align: center;
     margin: 1em 0em;
 }
 
