@@ -1,3 +1,5 @@
 {% with self.url as document_url %}
-{% include 'blocks/document_viewer.html' %}
+{% load static %}
+<iframe width="100%" height="640" frameborder="0"
+        src="{% static "components/pdfjs/web/viewer.html" %}?file={{ self.url }}{% if self.page %}#page={{ self.page }}{% endif %}"></iframe>
 {% endwith %}
