@@ -37,11 +37,10 @@
         {% for post in post_list %}
             {% cycle 'odd' 'even' as rowcolors silent %}
             {% include "pybb/post_template.html" %}
-            {% ifequal post post_list.0 %}{% include "ads/topic_top.html" %}{% endifequal %}
-            {% ifequal post post_list.9 %}{% include "ads/topic_middle.html" %}{% endifequal %}
-            {% ifequal post post_list.19 %}{% include "ads/topic_bottom.html" %}{% endifequal %}
-{#            TODO forum advertisement#}
-{#            {% forum_advert forloop.counter0 post_list.count %}#}
+{#            {% ifequal post post_list.0 %}{% include "ads/topic_top.html" %}{% endifequal %}#}
+{#            {% ifequal post post_list.9 %}{% include "ads/topic_middle.html" %}{% endifequal %}#}
+{#            {% ifequal post post_list.19 %}{% include "ads/topic_bottom.html" %}{% endifequal %}#}
+            {% forum_advert forloop.counter0 post_list.count %}
         {% endfor %}
     </div>
     <div>&nbsp;</div>
