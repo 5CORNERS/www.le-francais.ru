@@ -7,6 +7,18 @@ from home.models import PageLayoutAdvertisementSnippet, LessonPage
 register = template.Library()
 
 
+@register.inclusion_tag('ads/topic_advert.html')
+def forum_advert(counter, length):
+    if counter == 0:
+        return {'advert_type':'top','counter':counter,'length':length}
+    if counter == length-1 and length >= 5:
+        return {'advert_type':'bottom','counter':counter,'length':length}
+    if counter == length//2 and length >=10:
+        return {'advert_type':'middle','counter':counter,'length':length}
+    return  {'counter':counter,'length':length}
+
+
+
 @register.inclusion_tag('tags/advert_body.html', takes_context=True)
 def page_advert_body(context, placement, page_type):
     try:
