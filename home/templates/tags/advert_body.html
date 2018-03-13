@@ -1,4 +1,12 @@
 {% load wagtailcore_tags %}
 {% for block in body %}
-     {% include_block block %}
+    {% include_block block %}
 {% endfor %}
+{% if placement == 'sidebar' %}
+    <script>
+        h=$('body > div._content > div > div > div.hidden-xs.hidden-sm.hidden-md.col-lg-3.sidebar-right').height();
+        if (h<1200){
+            $('body > div._content > div > div > div.hidden-xs.hidden-sm.hidden-md.col-lg-3.sidebar-right > div.advert_bottom').hide()
+        }
+    </script>
+{% endif %}
