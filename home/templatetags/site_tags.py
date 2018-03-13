@@ -28,7 +28,8 @@ def page_advert_body(context, placement, page_type):
         return dict(
             body=PageLayoutAdvertisementSnippet.objects\
                 .filter(placement=placement, page_type=page_type)\
-                .exclude(live=False)[0].body
+                .exclude(live=False)[0].body,
+            placement=placement
         )
     except:
         return dict(body=None)
