@@ -2,10 +2,10 @@ import xmltodict
 
 
 def get_dicts():
-    verbs_xml = open(file='C:\\Users\\ilia.dumov\\PycharmProjects\\www.le-francais.ru\\conjugation\\data\\verbs-fr.xml',
+    verbs_xml = open(file='conjugation\\data\\verbs-fr.xml',
                      mode='rb')
     conjugation_xml = open(
-        file='C:\\Users\\ilia.dumov\\PycharmProjects\\www.le-francais.ru\\conjugation\\data\\conjugation-fr.xml',
+        file='conjugation\\data\\conjugation-fr.xml',
         mode='rb')
 
     verbs_dict = xmltodict.parse(verbs_xml,dict_constructor=dict)
