@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load i18n site_tags %}
+<div class="container-fluid">
+    {% for mood in table.moods %}
+        <div class="row MoodName">
+            <div class="col-xs-12">
+                <div class="{{ mood.class }}"><h2>{{ mood.name }}</h2></div>
+            </div>
+        </div>
+        <div class="row MoodTenses">
+            {% for tense in mood.tenses %}
+                <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                    <div id="{{ tense.id }}" class="TenseName">{{ tense.name }}</div>
+                    <p>
+                        {% for person in tense.persons %}
+                            {{ person.part_0 }}<b>{{ person.part_1 }}</b>
+                        {% endfor %}
+                    </p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
