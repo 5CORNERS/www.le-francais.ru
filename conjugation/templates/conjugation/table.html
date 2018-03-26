@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_head %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <style>
+        .ui-autocomplete-loading {
+            background: white url("{% static 'images/ui-anim_basic_16x16.gif' %}") right center no-repeat;
+        }
+    </style>
+{% endblock %}
+{% block extra_js %}
+    <script>
+        {% comment %}$(function () {
+            $("#verb").autocomplete({
+                source: "/conjugation/verbs_autocomplete/",
+                minLength: 2
+            });
+        });{% endcomment %}
+        $("#verb")["autocomplete"]({
+            source: "/conjugation/verbs_autocomplete/",
+            minLength: 1,
+            focus: function (a, b) {
+                $("#verb")["val"](b["item"]["verbe"]);
+                return false;
+            },
+            select: function (a, b) {
+                if (b["item"]) $("#verb")["val"](b["item"]["verbe"]);
+                $("#recherche")["submit"]();
+            }
+        })["data"]("ui-autocomplete")["_renderItem"] = function (a, b) {
+            return $("<li>")["data"]("ui-autocomplete-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
+        };
+    </script>
+{% endblock %}
+{% block content %}
+    {% load i18n site_tags %}
+    <div class="container-fluid">
+        <div class="row">
+            <form id="verb_form">
+                <label for="verb">Verb:</label>
+                <input type="text" id="verb" size="50">
+                <input type="submit" class="btn" value="Проспрягать" onclick="{% url 'conjugation' %}+$('#verb')">
+            </form>
+        </div>
+        {% for mood in table.moods %}
+            <div class="row MoodName">
+                <div class="col-xs-12">
+                    <div class="{% comment %}{{ mood.class }}{% endcomment %}"><h2>{{ mood.name }}</h2></div>
+                </div>
+            </div>
+            <div class="row MoodTenses">
+                {% for tense in mood.tenses %}
+                    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                        <div id="{% comment %}{{ tense.id }}{% endcomment %}" class="TenseName">
+                            <h3>{{ tense.name }}</h3></div>
+                        <p>
+                            {% for person in tense.persons %}
+                                {{ person.part_0 }}{{ person.part_1 }}<b>{{ person.part_2 }}</b>{{ person.part_3 }}<br>
+                            {% endfor %}
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
