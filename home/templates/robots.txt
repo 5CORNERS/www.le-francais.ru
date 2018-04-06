@@ -6,6 +6,7 @@ Disallow: /accounts/
 Disallow: /forum/post/
 Disallow: /forum/users/
 Disallow: /comments
+Disallow: /conjugation/
 
 Host: https://www.le-francais.ru
 
