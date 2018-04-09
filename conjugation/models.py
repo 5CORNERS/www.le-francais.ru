@@ -7,6 +7,7 @@ from unidecode import unidecode
 class Template(models.Model):
     name = models.CharField(max_length=200)
     data = JSONField(default={})
+    new_data = JSONField(default={})
     no_red_end = models.BooleanField(default=False)
 
     def infinitive_ending(self):
