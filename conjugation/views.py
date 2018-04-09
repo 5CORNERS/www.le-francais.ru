@@ -68,8 +68,8 @@ VERB_IMPERATIVE_PRESENT_II_P = '+imperative_imperative-present_2+'
 VERB_PRESENT_PARTICIPLE = '+participle_present-participle_0+'
 
 VERB_PAST_PARTICIPLE_S_M = '+participle_past-participle_0+'
-VERB_PAST_PARTICIPLE_P_M = '+participle_past-participle_1+'
 VERB_PAST_PARTICIPLE_S_F = '+participle_past-participle_2+'
+VERB_PAST_PARTICIPLE_P_M = '+participle_past-participle_1+'
 VERB_PAST_PARTICIPLE_P_F = '+participle_past-participle_3+'
 
 FORMULAS = {
@@ -782,15 +782,15 @@ class Tense:
 class Person:
     RED_ENDINGS = {
         'infinitive_infinitive-present': [
-            ['er']
+            ['er', 'ir', 'ïr', 're']
         ],
         'indicative_present': [
-            ['e', 's'],
-            ['es', 's'],
+            ['e', 's', 'x'],
+            ['es', 's', 'x'],
             ['e', 't', 'd'],
             ['ons'],
             ['ez', 'es'],
-            ['ent'],
+            ['ent', 'ont'],
         ],
         'indicative_imperfect': [
             ['ais'],
@@ -809,12 +809,12 @@ class Person:
             ['ont'],
         ],
         'indicative_simple-past': [
-            ['ai', 'is', 'us'],
-            ['as', 'is', 'us'],
-            ['a', 'it', 'ut'],
-            ['âmes', 'imes', 'ûmes'],
-            ['âtes', 'îtes', 'ûtes'],
-            ['aient'],
+            ['ai', 'is', 'ïs', 'us', 'ûs', 'ins'],
+            ['as', 'is', 'ïs', 'us', 'ûs', 'ins'],
+            ['a', 'it', 'ït', 'ut', 'ût', 'int'],
+            ['âmes', 'îmes', 'ïmes', 'ûmes', 'înmes'],
+            ['âtes', 'îtes', 'ïtes', 'ûtes', 'întes'],
+            ['èrent', 'irent', 'ïrent', 'urent', 'ûrent', 'inrent'],
         ],
         'conditional_present': [
             ['ais'],
@@ -833,15 +833,15 @@ class Person:
             ['ent'],
         ],
         'subjunctive_imperfect': [
-            ['asse', 'isse', 'usse'],
-            ['asses', 'isses', 'usses'],
-            ['ât', 'ît', 'ût'],
-            ['assions', 'issions', 'ussions'],
-            ['assiez', 'issiez', 'ussiez'],
-            ['assent', 'issent', 'ussent'],
+            ['se'],
+            ['ses'],
+            ['t'],
+            ['sions'],
+            ['siez'],
+            ['sent'],
         ],
         'imperative_imperative-present': [
-            ['e', 'is', 's'],
+            ['e', 'is', 's', 'x'],
             ['issons', 'ons', ],
             ['issez', 'ez', 'es', ],
         ],
@@ -849,10 +849,10 @@ class Person:
             ['ant'],
         ],
         'participle_past-participle': [
-            ['é', 'i', 'ï', 'it', 'is', 'u', 'û'],
-            ['és', 'is', 'ïs', 'it', 'us', 'ûs'],
-            ['ée', 'ise', 'ïse', 'ite', 'ue', 'ûe'],
-            ['ées', 'ises', 'ïses', 'ites', 'ue', 'ûe'],
+            ['é', 'i', 'ï', 'it', 'is', 'u', 'û', 't', 'os', 'us'],
+            ['és', 'is', 'ïs', 'it', 'us', 'ûs', 'ts', 'os'],
+            ['ée', 'ie', 'ïe', 'ite', 'ise', 'ue', 'ûe', 'te', 'ose', 'use'],
+            ['ées', 'ies', 'ïes', 'ites', 'ises', 'ues', 'ûes', 'tes', 'oses', 'uses'],
         ]
     }
     VOWELS = ['a', 'e', 'i', 'o', 'u', 'y']
@@ -865,14 +865,20 @@ class Person:
         self.person_name = person_name
         self.formula = self.get_formula()
         verb_start = self.v.main_part()
-        verb_middle, verb_end = self.get_end()
-        self.part_1 = verb_start + verb_middle
-        self.part_2 = verb_end
-        self.part_0 = self.formula.split('+')[0]
-        try:
-            self.part_3 = self.formula.split('+')[2]
-        except:
+        verb_middle, verb_end = self.get_ends()
+        if verb_middle == None and verb_end == None:
+            self.part_0 = '-'
+            self.part_1 = ''
+            self.part_2 = ''
             self.part_3 = ''
+        else:
+            self.part_1 = verb_start + verb_middle
+            self.part_2 = verb_end
+            self.part_0 = self.formula.split('+')[0]
+            try:
+                self.part_3 = self.formula.split('+')[2]
+            except:
+                self.part_3 = ''
 
     def get_formula(self):
         if self.t.name[0] != ':':
@@ -907,10 +913,12 @@ class Person:
         elif self.person_name.split('_')[3] == 'F':
             return 'female'
 
-    def get_end(self):
+    def get_ends(self):
         verb_t = self.formula.split('+')[1]
         mood_t, tense_t, n = verb_t.split('_')
         end = self.t.data[mood_t][tense_t]['p'][int(n)]['i']
+        if end==None:
+            return None, None
         if self.t.no_red_end:
             return '', end
         middle, red_end = self.get_red_end(n, end, mood_t, tense_t)
@@ -926,5 +934,5 @@ class Person:
                 continue
             else:
                 if end.endswith(red_end):
-                    return end.rstrip(red_end), red_end
+                    return end.rsplit(red_end)[0], red_end
         return '', end
