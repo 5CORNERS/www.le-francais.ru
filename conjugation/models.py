@@ -3,6 +3,7 @@ from django.contrib.postgres.fields import JSONField
 from unidecode import unidecode
 
 
+
 # Create your models here.
 class Template(models.Model):
     name = models.CharField(max_length=200)
@@ -29,7 +30,7 @@ class Verb(models.Model):
         return self.infinitive
 
     def main_part(self):
-        return self.infinitive.rstrip(self.template.infinitive_ending())
+        return self.infinitive.rsplit(self.template.infinitive_ending(),1)[0]
 
     def get_infinitive_no_accents(self):
         return unidecode(self.infinitive)

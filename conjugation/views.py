@@ -771,7 +771,7 @@ class Tense:
         persons = []
         tense_dict = FORMULAS[self.mood_name][self.tense_name]
         for person_name in tense_dict[1].keys():
-            person = Person(self.v, self.t, self.mood_name, self.tense_name, person_name)
+            person = Person(self.v, self.mood_name, self.tense_name, person_name)
             persons.append(person)
         return persons
 
@@ -855,30 +855,39 @@ class Person:
             ['ées', 'ies', 'ïes', 'ites', 'ises', 'ues', 'ûes', 'tes', 'oses', 'uses'],
         ]
     }
-    VOWELS = ['a', 'e', 'i', 'o', 'u', 'y']
+    VOWELS = ['a', 'e', 'i', 'o', 'u', 'y', 'â', 'ê', 'è', 'é', 'ô', 'œ', 'î', 'ê','î', 'ï', 'à', 'ä', 'ë', 'ö', 'û','ì']
 
-    def __init__(self, v: V, t: T, mood_name: str, tense_name: str, person_name: str):
+    def __init__(self, v: V,mood_name: str, tense_name: str, person_name: str, t=None):
         self.v = v
-        self.t = t
+        if t == None or not isinstance(t, T):
+            self.t = v.template
+        else:
+            self.t = t
         self.mood_name = mood_name
         self.tense_name = tense_name
         self.person_name = person_name
         self.formula = self.get_formula()
-        verb_start = self.v.main_part()
-        verb_middle, verb_end = self.get_ends()
-        if verb_middle == None and verb_end == None:
+        if self.formula == None:
             self.part_0 = '-'
             self.part_1 = ''
             self.part_2 = ''
             self.part_3 = ''
         else:
-            self.part_1 = verb_start + verb_middle
-            self.part_2 = verb_end
-            self.part_0 = self.formula.split('+')[0]
-            try:
-                self.part_3 = self.formula.split('+')[2]
-            except:
+            verb_start = self.v.main_part()
+            verb_middle, verb_end = self.get_ends()
+            if verb_middle == None and verb_end == None:
+                self.part_0 = '-'
+                self.part_1 = ''
+                self.part_2 = ''
                 self.part_3 = ''
+            else:
+                self.part_1 = verb_start + verb_middle
+                self.part_2 = verb_end
+                self.part_0 = self.formula.split('+')[0]
+                try:
+                    self.part_3 = self.formula.split('+')[2]
+                except:
+                    self.part_3 = ''
 
     def get_formula(self):
         if self.t.name[0] != ':':
@@ -889,6 +898,8 @@ class Person:
         else:
             path = FORMULAS[self.mood_name][self.tense_name][1][self.person_name][0].split('+')[1].split('_')
             verb = self.t.data[path[0]][path[1]]['p'][int(path[2])]['i']
+            if verb == None:
+                return None
             if verb[0] in self.VOWELS:
                 num = -1
             else:
@@ -928,11 +939,14 @@ class Person:
         return self.person_name
 
     def get_red_end(self, n, end, mood_name, tense_name):
+        if isinstance(end, list):
+            end = end[0]
         end_len = end.__len__()
         for red_end in self.RED_ENDINGS[mood_name + '_' + tense_name][int(n)]:
             if end_len < red_end.__len__():
                 continue
             else:
                 if end.endswith(red_end):
-                    return end.rsplit(red_end)[0], red_end
+                    middle = end.rsplit(red_end,1)[0]
+                    return middle, red_end
         return '', end
