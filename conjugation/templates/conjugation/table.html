@@ -4,6 +4,19 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 {% endblock %}
 {% block extra_css %}
+    <style>
+        .MoodTenses i {
+            font-style: normal;
+            color: #337ab7;
+            font-weight: bold;
+        {#            font-weight: bold#}
+        }
+
+        .MoodTenses b {
+            color: #d83131;
+            font-weight: bold
+        }
+    </style>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <style>
         .ui-autocomplete-loading {
@@ -34,21 +47,36 @@
             return $("<li>")["data"]("ui-autocomplete-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
         };
     </script>
+    <script>
+        function get_url() {
+           location.href='{% url 'conjugation'%}'+$("#verb");
+        }
+    </script>
 {% endblock %}
+
 {% block content %}
     {% load i18n site_tags %}
     <div class="container-fluid">
         <div class="row">
-            <form id="verb_form">
+            <form id="verb_form" action="">
                 <label for="verb">Verb:</label>
                 <input type="text" id="verb" size="50">
-                <input type="submit" class="btn" value="Проспрягать" onclick="{% url 'conjugation' %}+$('#verb')">
+                <input type="submit" class="btn" value="Проспрягать" onclick="get_url()">
             </form>
         </div>
+        {% if forms_count > 1 %}
+            <div class="row">
+                <ul class="nav nav-pills">
+                    {% for i in forms_range %}
+                        <li {% if i == 1 %}class="active"{% endif %}><a data-toggle="pill" href=".form{{ forloop.counter0 }}">Вариант {{ i }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
         {% for mood in table.moods %}
             <div class="row MoodName">
                 <div class="col-xs-12">
-                    <div class="{% comment %}{{ mood.class }}{% endcomment %}"><h2>{{ mood.name }}</h2></div>
+                    <div class="{% comment %}{{ mood.class }}{% endcomment %}"><h2>{{ mood.name | safe}}</h2></div>
                 </div>
             </div>
             <div class="row MoodTenses">
@@ -56,11 +84,7 @@
                     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
                         <div id="{% comment %}{{ tense.id }}{% endcomment %}" class="TenseName">
                             <h3>{{ tense.name }}</h3></div>
-                        <p>
-                            {% for person in tense.persons %}
-                                {{ person.part_0 }}{{ person.part_1 }}<b>{{ person.part_2 }}</b>{{ person.part_3 }}<br>
-                            {% endfor %}
-                        </p>
+                        <p>{% for person in tense.persons %}{{ person.part_0 }}{% if person.more_than_one %}{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}{% else %}{{ person.forms.0 | safe}}{% endif %}{{ person.part_2 }}<br>{% endfor %}</p>
                     </div>
                 {% endfor %}
             </div>
