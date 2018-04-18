@@ -5,6 +5,17 @@
 {% endblock %}
 {% block extra_css %}
     <style>
+        .row {
+            margin-bottom: 0.5em;
+        }
+
+{#        .row-eq-height {#}
+{#            display: -webkit-box;#}
+{#            display: -webkit-flex;#}
+{#            display: -ms-flexbox;#}
+{#            display: flex;#}
+{#        }#}
+
         .MoodTenses i {
             font-style: normal;
             color: #337ab7;
@@ -15,6 +26,22 @@
         .MoodTenses b {
             color: #d83131;
             font-weight: bold
+        }
+
+        .tab-content > .active {
+            display: inline;
+        }
+
+        .MoodTenses .block {
+            border-color: #ddd;
+        }
+
+        .MoodTenses .block {
+            margin: 0 0 20px 0;
+            padding: 10px;
+            border-width: 1px;
+            border-style: solid;
+            border-radius: 4px;
         }
     </style>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -32,62 +59,80 @@
                 minLength: 2
             });
         });{% endcomment %}
-        $("#verb")["autocomplete"]({
-            source: "/conjugation/verbs_autocomplete/",
+        $("#search-verb")["autocomplete"]({
+            source: "{% url 'conjugation:autocomplete' %}",
             minLength: 1,
-            focus: function (a, b) {
-                $("#verb")["val"](b["item"]["verbe"]);
+            focus: function (event, ui) {
+                $("#search-verb").val(ui.item["verb"]);
                 return false;
             },
-            select: function (a, b) {
-                if (b["item"]) $("#verb")["val"](b["item"]["verbe"]);
-                $("#recherche")["submit"]();
+            select: function (event, ui) {
+                event.preventDefault();
+                $("#search-verb").val(ui.item['verb']);
+                $('#search').submit();
+                return false;
             }
         })["data"]("ui-autocomplete")["_renderItem"] = function (a, b) {
-            return $("<li>")["data"]("ui-autocomplete-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
+            return $("<li>")["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
         };
-    </script>
-    <script>
-        function get_url() {
-           location.href='{% url 'conjugation'%}'+$("#verb");
-        }
     </script>
 {% endblock %}
 
 {% block content %}
     {% load i18n site_tags %}
     <div class="container-fluid">
+    <div class="row main_row">
+    <div class="col-sm-12 col-md-9 main">
         <div class="row">
-            <form id="verb_form" action="">
-                <label for="verb">Verb:</label>
-                <input type="text" id="verb" size="50">
-                <input type="submit" class="btn" value="Проспрягать" onclick="get_url()">
-            </form>
+            <div class="col-xs-12">
+                <form id="search" action="{% url 'conjugation:search' %}" , method="post">
+                    <div class="input-group input-group-lg">
+                        <input name="verb" type="text" id="search-verb" size="30" class="form-control">
+                        <div class="input-group-btn input-group-btn-lg">
+                            <input name="submit" type="submit" id="search-submit" class="btn" value="Спрягнуть">
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
         {% if forms_count > 1 %}
             <div class="row">
-                <ul class="nav nav-pills">
-                    {% for i in forms_range %}
-                        <li {% if i == 1 %}class="active"{% endif %}><a data-toggle="pill" href=".form{{ forloop.counter0 }}">Вариант {{ i }}</a></li>
-                    {% endfor %}
-                </ul>
+                <div class="col-xs-12">
+
+                    <ul class="nav nav-pills">
+                        {% for i in forms_range %}
+                            <li {% if i == 1 %}class="active"{% endif %}><a data-toggle="pill" href=".form{{ forloop.counter0 }}">Вариант {{ i }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         {% endif %}
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="btn-group">
+                    {% if not v.feminin %}<a type="button" class="btn btn-primary" href="">feminin</a>{% endif %}
+                    {% if v.reflexive %}<a type="button" class="btn btn-primary">{% if not reflexive %}{{ v.reflexive }}{% else %}{{ v.infinitive }}{% endif %}</a>{% endif %}
+                </div>
+            </div>
+        </div>
         {% for mood in table.moods %}
             <div class="row MoodName">
                 <div class="col-xs-12">
                     <div class="{% comment %}{{ mood.class }}{% endcomment %}"><h2>{{ mood.name | safe}}</h2></div>
                 </div>
             </div>
-            <div class="row MoodTenses">
+            <div class="MoodTenses">
                 {% for tense in mood.tenses %}
-                    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 tense block">
                         <div id="{% comment %}{{ tense.id }}{% endcomment %}" class="TenseName">
                             <h3>{{ tense.name }}</h3></div>
-                        <p>{% for person in tense.persons %}{{ person.part_0 }}{% if person.more_than_one %}{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}{% else %}{{ person.forms.0 | safe}}{% endif %}{{ person.part_2 }}<br>{% endfor %}</p>
+                        <p>{% for person in tense.persons %}{{ person.part_0 }}{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe}}{% endif %}{{ person.part_2 }}<br>{% endfor %}</p>
                     </div>
                 {% endfor %}
             </div>
         {% endfor %}
+    </div>
+    <div class="hidden-xs hidden-sm col-md-3 sidebar-right"></div>
+    </div>
     </div>
 {% endblock %}
