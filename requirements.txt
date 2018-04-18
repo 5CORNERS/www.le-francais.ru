@@ -23,6 +23,8 @@ django-mailer
 django-comments-xtd
 django-mobile
 
+django-cron
+
 django-storages
 boto3
 
