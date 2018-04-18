@@ -63,7 +63,7 @@ urlpatterns = [
 
     url(r'^messages/', include('forum_messages.urls')),
     
-    url(r'^conjugation/', include('conjugation.urls')),
+    url(r'^conjugation/', include('conjugation.urls',namespace='conjugation')),
 
     url(r'^old_site/', include('old_site.urls')),
     url(r'^le_nombres/', include('le_nombres.urls')),

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField
 from unidecode import unidecode
+from django.urls import reverse
 
 VOWELS_LIST = ['a','ê','é','h','e','â','i','o','ô','u','w','y','œ',]
 
@@ -45,6 +46,18 @@ class Verb(models.Model):
 
     def get_infinitive_no_accents(self):
         return unidecode(self.infinitive)
+
+    def url(self):
+        return reverse('conjugation:verb', kwargs=dict(femenin=None, verb=self.infinitive_no_accents, se=None))
+
+    def feminin_url(self):
+        return reverse('conjugation:verb', kwargs=dict(femenin='feminin_',verb=self.infinitive_no_accents,se=None))
+
+    def se_url(self):
+        return reverse('conjugation:verb', kwargs=dict(femenin=None, verb=self.infinitive_no_accents, se='se_'))
+
+    def feminin_se_url(self):
+        return reverse('conjugation:verb', kwargs=dict(femenin='feminin_', verb=self.infinitive_no_accents, se='se_'))
 
     def infnitive_first_letter_is_vowel(self):
         return True if self.infinitive[0] in VOWELS_LIST else False
