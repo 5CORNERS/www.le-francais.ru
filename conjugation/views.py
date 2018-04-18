@@ -1,29 +1,43 @@
-from django.http import Http404, JsonResponse
-from django.shortcuts import render
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 from unidecode import unidecode
 
 from conjugation.models import Verb as V
 from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE
 
 
-def get_table(request, verb=None):
+@csrf_exempt
+def search(request):
+    search_string = request.POST.get('verb')
+    return redirect(reverse('conjugation:verb', kwargs={'verb': search_string}))
 
-    if request.GET.get('feminin', 'false')=='true':
+
+def get_table(request, se, feminin, verb=None):
+
+    verb_no_accent = unidecode(verb)
+    v = V.objects.get(infinitive_no_accents=verb_no_accent)
+
+    if feminin:
+        feminin = True
         gender = -1
     else:
+        feminin = False
         gender = 0
-    if request.GET.get('prononimal','false')=='true':
+
+    if se or v.reflexive_only:
         reflexive = True
     else:
         reflexive = False
 
-    verb_no_accent = unidecode(verb)
-    v = V.objects.get(infinitive_no_accents=verb_no_accent)
+    if v.reflexive:
+        pass
+
     v.construct_conjugations()
     table = Table(v, gender, reflexive)
     template_name = 'conjugation/table.html'
-    return render(request, template_name, {'table': table, 'forms_count': v.template.forms_count, 'forms_range':list(range(1, v.template.forms_count + 1))})
+    return render(request, template_name, {'v':v, 'reflexive':reflexive,'feminin':feminin, 'table': table, 'forms_count': v.template.forms_count, 'forms_range': list(range(1, v.template.forms_count + 1))})
 
 
 def switch_keyboard_layout(s: str):
@@ -59,12 +73,12 @@ def get_autocomplete_list(request):
         html = verb.infinitive[0:pos_start] + '<b>' + verb.infinitive[pos_start:pos_end] + '</b>' + verb.infinitive[
                                                                                                     pos_end:]
         autocomplete_list.append(
-            dict(url=reverse('conjugation_verb', args=[verb.infinitive_no_accents]), verbe=verb.infinitive, html=html))
+            dict(url=reverse('conjugation:verb', args=[verb.infinitive_no_accents]), verb=verb.infinitive, html=html))
     return JsonResponse(autocomplete_list, safe=False)
 
 
 class Table:
-    def __init__(self, v: V, gender:int, reflexive:bool):
+    def __init__(self, v: V, gender: int, reflexive: bool):
         self.v = v
         self.t = v.template
         self.moods = self.get_moods_list(gender, reflexive)
@@ -81,13 +95,13 @@ class Table:
 
 
 class Mood:
-    def __init__(self, v, mood_name, gender:int, reflexive:bool):
+    def __init__(self, v, mood_name, gender: int, reflexive: bool):
         self.name = TEMPLATE_NAME[mood_name]
         self.v = v
         self.mood_name = mood_name
         self.tenses = self.get_tenses_list(gender, reflexive)
 
-    def get_tenses_list(self,gender, reflexive):
+    def get_tenses_list(self, gender, reflexive):
         tenses = []
         mood_dict = FORMULAS[self.mood_name]
         for tense_name in mood_dict.keys():
@@ -100,7 +114,7 @@ class Mood:
 
 
 class Tense:
-    def __init__(self, v: V, moode_name, tense_name, gender:int, reflexive:bool):
+    def __init__(self, v: V, moode_name, tense_name, gender: int, reflexive: bool):
         self.name = TEMPLATE_NAME[tense_name]
         self.v = v
         self.tense_name = tense_name
@@ -111,7 +125,7 @@ class Tense:
         persons = []
         tense_dict = FORMULAS[self.mood_name][self.tense_name]
         for person_name in tense_dict[1].keys():
-            person = Person(self.v, self.mood_name, self.tense_name, person_name,gender,reflexive)
+            person = Person(self.v, self.mood_name, self.tense_name, person_name, gender, reflexive)
             persons.append(person)
         return persons
 
@@ -119,13 +133,10 @@ class Tense:
         return self.tense_name
 
 
-
-
-
 class Person:
-    VOWELS = ['a', 'e', 'i', 'o', 'u', 'y', 'â', 'ê', 'è', 'é', 'ô', 'œ', 'î', 'ê','î', 'ï', 'à', 'ä', 'ë', 'ö', 'û','ì']
+    VOWELS = ['a', 'e', 'i', 'o', 'u', 'y', 'â', 'ê', 'è', 'é', 'ô', 'œ', 'î', 'ê', 'î', 'ï', 'à', 'ä', 'ë', 'ö', 'û', 'ì']
 
-    def __init__(self, v: V,mood_name: str, tense_name: str, person_name: str, gender:int, reflexive:bool):
+    def __init__(self, v: V, mood_name: str, tense_name: str, person_name: str, gender: int, reflexive: bool):
         self.v = v
         self.mood_name = mood_name
         self.tense_name = tense_name
@@ -133,7 +144,7 @@ class Person:
 
         pronoun = -1 if v.infnitive_first_letter_is_vowel() else 0
         maison = 1 if self.v.maison else 2
-        self.part_0, self.forms, self.part_2 = self.get_parts(maison, 0 ,gender, pronoun, reflexive)
+        self.part_0, self.forms, self.part_2 = self.get_parts(maison, 0, gender, pronoun, reflexive)
         if not isinstance(self.forms, list):
             self.forms = [self.forms]
 
@@ -143,17 +154,16 @@ class Person:
         else:
             return False
 
-    def get_parts(self, maison,switch, gender, pronoun, reflexive):
+    def get_parts(self, maison, switch, gender, pronoun, reflexive):
         if not reflexive:
             parts = FORMULAS[self.mood_name][self.tense_name][maison][self.person_name][switch]
         else:
             parts = FORMULAS_PASSIVE[self.mood_name][self.tense_name][maison][self.person_name][switch]
         path_to_conjugation = parts[1][gender]
         if path_to_conjugation == None:
-            return '-','',''
+            return '-', '', ''
         verb_forms = self.v.conjugations[path_to_conjugation[0]][path_to_conjugation[1]][int(path_to_conjugation[2])]
         return parts[0][gender][pronoun], verb_forms, parts[2][gender][pronoun]
 
     def __str__(self):
         return self.person_name
-
