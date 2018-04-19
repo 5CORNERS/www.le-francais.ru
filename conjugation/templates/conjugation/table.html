@@ -5,6 +5,16 @@
 {% endblock %}
 {% block extra_css %}
     <style>
+        .col-fixed-210{
+            width: 210px;
+            position: fixed;
+            height: 100%;
+            z-index: 1;
+        }
+        .col-offset-210{
+            padding-left: 225px;
+            z-index: 0;
+        }
         .row {
             margin-bottom: 0.5em;
         }
@@ -101,13 +111,17 @@
         </div>
 
         <div class="row">
-            <div class="col-xs-12">
+            <div class="col-fixed-210">
                 <ul class="nav nav-pills">
                     {% if forms_count > 1 %}
                     {% for i in forms_range %}
                     <li {% if i == 1 %}class="active"{% endif %}><a data-toggle="pill" href=".form{{ forloop.counter0 }}">Вариант {{ i }}</a></li>
                     {% endfor %}
                     {% endif %}
+                </ul>
+            </div>
+            <div class="col-xs-12 col-offset-210">
+                <ul class="nav nav-pills">
                     <li class="nav-item{% if feminin %} active{% endif %}"><a class="nav-link" href="{% option_url 'gender' %}">feminin</a></li>
                     <li class="nav-item{% if not v.reflexive %} disabled{% endif %}{% if reflexive %} active{% endif %}"><a class="nav-link" href="{% option_url 'se' %}">{{ v.reflexive }}</a></li>
                 </ul>
