@@ -446,3 +446,10 @@ TEMPLATE_NAME = {
     'gerund': 'Gérondif',
     'participle': 'Participe'
 }
+
+SHORT_LIST = {
+    'indicatif':['simple-past',''],
+    'subjonctif':[],
+    'conditionnel':[],
+    'imperatif':[],
+}
