@@ -138,6 +138,9 @@ TEMPLATES = [
                 'social_django.context_processors.login_redirect',
                 'django_mobile.context_processors.flavour',
             ],
+            'libraries':{
+                'conjugation_tags':'conjugation.templatetags.conjugation_tags',
+            },
             'loaders': (
                 'django_mobile.loader.Loader',
                 'django.template.loaders.filesystem.Loader',
