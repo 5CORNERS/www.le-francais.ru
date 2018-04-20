@@ -6,13 +6,25 @@
 {% block extra_css %}
     <style>
         .col-fixed-210{
-            width: 210px;
-            height: 100%;
+            height: 40px;
+            width: 230px;
             position: absolute;
+            padding-left: 15px;
             z-index: 1;
         }
         .col-offset-210{
-            padding-left: 225px;
+            padding-left: 245px;
+            z-index: 0;
+        }
+        .col-fixed-315{
+            height: 40px;
+            width: 335px;
+            position: absolute;
+            padding-left: 15px;
+            z-index: 1;
+        }
+        .col-offset-315{
+            padding-left: 350px;
             z-index: 0;
         }
         .row {
@@ -52,9 +64,6 @@
             border-width: 1px;
             border-style: solid;
             border-radius: 4px;
-        }
-        .person {
-            font-size: 0.9em;
         }
     </style>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -111,16 +120,16 @@
         </div>
 
         <div class="row">
-            <div class="col-fixed-210">
+            {% if forms_count > 1%}
+            <div class="{% if forms_count == 2 %}col-fixed-210{% elif forms_count == 3 %}col-fixed-315{% endif %}">
                 <ul class="nav nav-pills">
-                    {% if forms_count > 1 %}
                     {% for i in forms_range %}
                     <li {% if i == 1 %}class="active"{% endif %}><a data-toggle="pill" href=".form{{ forloop.counter0 }}">Вариант {{ i }}</a></li>
                     {% endfor %}
-                    {% endif %}
                 </ul>
             </div>
-            <div class="col-xs-12 col-offset-210">
+            {% endif %}
+            <div class="col-xs-12 {% if forms_count == 2 %} col-offset-210{% elif forms_count == 3 %} col-offset-315{% else %}{% endif %}">
                 <ul class="nav nav-pills">
                     <li class="nav-item{% if feminin %} active{% endif %}"><a class="nav-link" href="{% option_url 'gender' %}">feminin</a></li>
                     <li class="nav-item{% if not v.reflexive %} disabled{% endif %}{% if reflexive %} active{% endif %}"><a class="nav-link" href="{% option_url 'se' %}">{{ v.reflexive }}</a></li>
