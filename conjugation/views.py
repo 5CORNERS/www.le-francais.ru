@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, Http404
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from unidecode import unidecode
@@ -11,13 +11,21 @@ from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE
 @csrf_exempt
 def search(request):
     search_string = request.POST.get('verb')
+    # verb(request, se=False, feminin=False, verb=search_string)
     return redirect(reverse('conjugation:verb', kwargs={'verb': search_string}))
 
 
-def get_table(request, se, feminin, verb=None):
+def index(request):
+    return render(request, 'conjugation/index.html')
+
+
+def verb(request, se, feminin, verb):
 
     verb_no_accent = unidecode(verb)
-    v = V.objects.get(infinitive_no_accents=verb_no_accent)
+    try:
+        v = V.objects.get(infinitive_no_accents=verb_no_accent)
+    except V.DoesNotExist:
+        return render(request,'conjugation/verb_not_found.html', {'search_string':verb_no_accent})
 
     if feminin:
         feminin = True
@@ -128,6 +136,9 @@ class Tense:
             person = Person(self.v, self.mood_name, self.tense_name, person_name, gender, reflexive)
             persons.append(person)
         return persons
+
+    def is_in_short_list(self):
+        pass
 
     def __str__(self):
         return self.tense_name
