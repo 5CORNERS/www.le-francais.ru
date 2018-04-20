@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static conjugation_tags%}
+{% block extra_head %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+{% endblock %}
+{% block extra_css %}
+    <style>
+        .col-fixed-210{
+            width: 210px;
+            height: 100%;
+            position: absolute;
+            z-index: 1;
+        }
+        .col-offset-210{
+            padding-left: 225px;
+            z-index: 0;
+        }
+        .row {
+            margin-bottom: 0.5em;
+        }
+
+{#        .row-eq-height {#}
+{#            display: -webkit-box;#}
+{#            display: -webkit-flex;#}
+{#            display: -ms-flexbox;#}
+{#            display: flex;#}
+{#        }#}
+
+        .tenses i {
+            font-style: normal;
+            color: #337ab7;
+            font-weight: bold;
+        {#            font-weight: bold#}
+        }
+
+        .tenses b {
+            color: #d83131;
+            font-weight: bold
+        }
+
+        .tab-content > .active {
+            display: inline;
+        }
+
+        .tenses .block {
+            border-color: #ddd;
+        }
+
+        .tenses .block {
+            margin: 0 0 20px 0;
+            padding: 10px;
+            border-width: 1px;
+            border-style: solid;
+            border-radius: 4px;
+        }
+        .person {
+            font-size: 0.9em;
+        }
+    </style>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <style>
+        .ui-autocomplete-loading {
+            background: white url("{% static 'images/ui-anim_basic_16x16.gif' %}") right center no-repeat;
+        }
+    </style>
+{% endblock %}
+{% block extra_js %}
+    <script>
+        {% comment %}$(function () {
+            $("#verb").autocomplete({
+                source: "/conjugation/verbs_autocomplete/",
+                minLength: 2
+            });
+        });{% endcomment %}
+        $("#search-verb")["autocomplete"]({
+            source: "{% url 'conjugation:autocomplete' %}",
+            minLength: 1,
+            focus: function (event, ui) {
+                $("#search-verb").val(ui.item["verb"]);
+                return false;
+            },
+            select: function (event, ui) {
+                event.preventDefault();
+                $("#search-verb").val(ui.item['verb']);
+                $('#search').submit();
+                return false;
+            }
+        })["data"]("ui-autocomplete")["_renderItem"] = function (a, b) {
+            return $("<li>")["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
+        };
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+    <div class="row main_row">
+    <div class="col-sm-12 col-md-9 main">
+        <div class="row">
+            <div class="col-xs-12">
+                <form id="search" action="{% url 'conjugation:search' %}" , method="post">
+                    <div class="input-group input-group-lg">
+                        <input name="verb" type="text" id="search-verb" size="30" class="form-control">
+                        <div class="input-group-btn input-group-btn-lg">
+                            <input name="submit" type="submit" id="search-submit" class="btn" value="Спрягнуть">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                Can't find verb {{ search_string }}
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+{% endblock %}
