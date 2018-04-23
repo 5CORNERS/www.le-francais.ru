@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from unidecode import unidecode
 
 from conjugation.models import Verb as V
-from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE
+from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE, SHORT_LIST
 
 
 @csrf_exempt
@@ -138,7 +138,7 @@ class Tense:
         return persons
 
     def is_in_short_list(self):
-        pass
+        return True if self.tense_name in SHORT_LIST[self.mood_name] else False
 
     def __str__(self):
         return self.tense_name
