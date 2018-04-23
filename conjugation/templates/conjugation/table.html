@@ -5,6 +5,16 @@
 {% endblock %}
 {% block extra_css %}
     <style>
+        .noselect {
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none;
+            /* Non-prefixed version, currently
+                                             supported by Chrome and Opera */
+        }
         .col-fixed-210{
             height: 40px;
             width: 230px;
@@ -90,13 +100,27 @@
             },
             select: function (event, ui) {
                 event.preventDefault();
-                $("#search-verb").val(ui.item['verb']);
-                $('#search').submit();
-                return false;
+                window.location.href = ui.item['url'];
             }
         })["data"]("ui-autocomplete")["_renderItem"] = function (a, b) {
             return $("<li>")["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
         };
+
+        function see_less() {
+            $.each($(".in_short_list"), function (i, v) {
+                v.style.display = "none";
+            });
+            $("#more_tab").removeClass("active");
+            $("#less_tab").addClass("active")
+        }
+
+        function see_more() {
+            $.each($(".in_short_list"), function (i, v) {
+                v.style.display = "block";
+            });
+            $("#more_tab").addClass("active");
+            $("#less_tab").removeClass("active");
+        }
     </script>
 {% endblock %}
 
@@ -108,9 +132,9 @@
 
         <div class="row">
             <div class="col-xs-12">
-                <form id="search" action="{% url 'conjugation:search' %}" , method="post">
+                <form id="search" action="{% url 'conjugation:search' %}", method="post">
                     <div class="input-group input-group-lg">
-                        <input name="verb" type="text" id="search-verb" size="30" class="form-control">
+                        <input name="verb" type="text" id="search-verb" size="30" class="form-control" value="{{ v.infinitive }}">
                         <div class="input-group-btn input-group-btn-lg">
                             <input name="submit" type="submit" id="search-submit" class="btn" value="Спрягнуть">
                         </div>
@@ -118,7 +142,6 @@
                 </form>
             </div>
         </div>
-
         <div class="row">
             {% if forms_count > 1%}
             <div class="{% if forms_count == 2 %}col-fixed-210{% elif forms_count == 3 %}col-fixed-315{% endif %}">
@@ -130,13 +153,22 @@
             </div>
             {% endif %}
             <div class="col-xs-12 {% if forms_count == 2 %} col-offset-210{% elif forms_count == 3 %} col-offset-315{% else %}{% endif %}">
-                <ul class="nav nav-pills">
-                    <li class="nav-item{% if feminin %} active{% endif %}"><a class="nav-link" href="{% option_url 'gender' %}">feminin</a></li>
-                    <li class="nav-item{% if not v.reflexive %} disabled{% endif %}{% if reflexive %} active{% endif %}"><a class="nav-link" href="{% option_url 'se' %}">{{ v.reflexive }}</a></li>
-                </ul>
+                <div class="btn">
+                    <a class="btn btn-primary" href="{% option_url 'gender' %}">{% if not feminin%}В женском роде{% else %}В мужском роде{% endif %}</a>
+                    {% if v.reflexive%}<a class="btn btn-primary" href="{% option_url 'se' %}">{% if not reflexive%}В возвратной форма{% else %}В невозвратной форма{% endif %}</a>{% endif %}
+                </div>
             </div>
         </div>
-
+        <div class="row">
+            <ul class="nav nav-tabs">
+                <li class="nav-item active" id="less_tab">
+                    <a class="nav-link noselect" onclick="see_less()">Сокращенная версия</a>
+                </li>
+                <li class="nav-item" id="more_tab" >
+                    <a class="nav-link noselect" onclick="see_more()">Полная версия</a>
+                </li>
+            </ul>
+        </div>
         {% for mood in table.moods %}
         <div class="mood">
             <div class="row mood_name">
@@ -146,7 +178,7 @@
             </div>
             <div class="tenses">
             {% for tense in mood.tenses %}
-                <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 tense block">
+                <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
                     <div id="{% comment %}{{ tense.id }}{% endcomment %}" class="tense_name"><h3>{{ tense.name }}</h3></div>
                     <p class="person">{% for person in tense.persons %}{{ person.part_0 }}{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 }}<br>{% endfor %}</p>
                 </div>

@@ -81,9 +81,7 @@
             },
             select: function (event, ui) {
                 event.preventDefault();
-                $("#search-verb").val(ui.item['verb']);
-                $('#search').submit();
-                return false;
+                window.location.href = ui.item['url'];
             }
         })["data"]("ui-autocomplete")["_renderItem"] = function (a, b) {
             return $("<li>")["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);

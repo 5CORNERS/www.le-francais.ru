@@ -448,8 +448,11 @@ TEMPLATE_NAME = {
 }
 
 SHORT_LIST = {
-    'indicatif':['simple-past',''],
-    'subjonctif':[],
-    'conditionnel':[],
-    'imperatif':[],
+    'indicative':['simple-past','antérieur-past'],
+    'subjunctive':['imperfect','pluperfect'],
+    'conditional':['past-second'],
+    'imperative':['past'],
+    'gerund':[],
+    'infinitif':[],
+    'participle':[],
 }
