@@ -19,3 +19,6 @@ node_modules/
 
 forum/dat
 *.dump
+conjugation/data/Lists of Exclutions and Inclutions.csv
+conjugation/data/List d'emploi.csv
+conjugation/data/Emploi IDX.csv
