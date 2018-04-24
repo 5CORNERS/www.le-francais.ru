@@ -4,21 +4,19 @@ db.sqlite3
 Procfile.local
 venv
 *.pyc
-/src/
 /temp.html
 /temp2.html
 /avatar.jpg
-/npm-debug.log
+/.log
 /package-lock.json
 /temp1.html
 /html_files/
 */__pycache__
+src
+scripts
 
-
+media
 node_modules/
 
 forum/dat
-*.dump
-conjugation/data/Lists of Exclutions and Inclutions.csv
-conjugation/data/List d'emploi.csv
-conjugation/data/Emploi IDX.csv
+conjugation/data
