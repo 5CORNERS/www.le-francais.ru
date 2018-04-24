@@ -30,6 +30,7 @@ class Verb(models.Model):
     maison = models.BooleanField(default=False)
     reflexive_only = models.BooleanField(default=False)
     reflexive = models.CharField(max_length=100, default='')
+    reflexive_no_accents = models.CharField(max_length=100, default='')
 
     masculin_only = models.BooleanField(default=False)
     has_passive = models.BooleanField(default=False)
