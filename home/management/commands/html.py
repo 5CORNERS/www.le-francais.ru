@@ -198,3 +198,7 @@ class Command(BaseCommand):
 
     def unsortable(self, sortable_file_name: str):
         return 'lecon-' + str(int(sortable_file_name.split('-')[1].split('.')[0])) + '.html'
+
+def read_file_2(file):
+    blocks = {'comments_for_lesson': [], 'body': [], 'dictionary':[]}
+
