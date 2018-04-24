@@ -4,7 +4,7 @@ import pandas as pd
 
 FILE = 'forum/dat/testimonials.csv'
 
-class Command(BaseCommand)
+class Command(BaseCommand):
 	def handle(self, *args, **options):
 		with open(FILE) as f:
 			df = pd.read_csv(f)
@@ -14,6 +14,3 @@ class Command(BaseCommand)
 			new_dict = {"text":table['Text'][i], "signature":table["Signature"][i], "url":table["Url"][i]}
 		for review in new_dict:
 			print(new_dict )
-
-
-
