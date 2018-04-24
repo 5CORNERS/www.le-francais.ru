@@ -5,9 +5,9 @@ from conjugation.views import Person
 import re
 
 RED_ENDINGS = {
-    'infinitive_infinitive-present': [
-        ['er', 'ir', 'ïr', 're']
-    ],
+    # 'infinitive_infinitive-present': [
+    #     ['er', 'ir', 'ïr', 're']
+    # ],
     'indicative_present': [
         ['e', 's', 'x'],
         ['es', 's', 'x'],
