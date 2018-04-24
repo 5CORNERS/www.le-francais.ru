@@ -29,7 +29,6 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 INSTALLED_APPS = [
     'home',
     'search',
-    'old_site',
     'django_cron',
 
     'wagtail.wagtailforms',
