@@ -81,3 +81,14 @@ class Verb(models.Model):
                     else:
                         self.conjugations[mood][tense][person] =self.main_part() + endings
 
+
+class ReflexiveVerb(models.Model):
+    infinitive = models.CharField(max_length=100)
+    infinitive_no_accents = models.CharField(max_length=100)
+    deffective = models.BooleanField(default=False)
+    impersonal = models.BooleanField(default=False)
+
+    @classmethod
+    def create_no_accents(cls):
+        from unidecode import unidecode
+        cls.infinitive_no_accents = unidecode(cls.infinitive)
