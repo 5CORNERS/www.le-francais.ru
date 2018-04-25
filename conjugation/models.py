@@ -88,7 +88,5 @@ class ReflexiveVerb(models.Model):
     deffective = models.BooleanField(default=False)
     impersonal = models.BooleanField(default=False)
 
-    @classmethod
-    def create_no_accents(cls):
-        from unidecode import unidecode
-        cls.infinitive_no_accents = unidecode(cls.infinitive)
+    def create_no_accents(self):
+        self.infinitive_no_accents = unidecode(self.infinitive)
