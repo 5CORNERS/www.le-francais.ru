@@ -5,6 +5,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for v in V.objects.all():
             if v.reflexive:
-                reflexive_verb = RV.objects.get_or_create(infinitive=v.reflexive)
+                reflexive_verb = RV.objects.create(infinitive=v.reflexive)
                 reflexive_verb.create_no_accents()
                 reflexive_verb.save()
