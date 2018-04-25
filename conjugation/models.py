@@ -30,12 +30,10 @@ class Verb(models.Model):
     maison = models.BooleanField(default=False)
     reflexive_only = models.BooleanField(default=False)
     reflexive = models.CharField(max_length=100, default='')
-    reflexive_no_accents = models.CharField(max_length=100, default='')
 
     masculin_only = models.BooleanField(default=False)
     has_passive = models.BooleanField(default=False)
     has_second_form = models.BooleanField(default=False)
-    has_reflexive = models.BooleanField(default=False)
     has_s_en = models.BooleanField(default=False)
 
 
@@ -83,6 +81,7 @@ class Verb(models.Model):
 
 
 class ReflexiveVerb(models.Model):
+    verb = models.OneToOneField(Verb, on_delete=models.CASCADE, primary_key=True)
     infinitive = models.CharField(max_length=100)
     infinitive_no_accents = models.CharField(max_length=100)
     deffective = models.BooleanField(default=False)
