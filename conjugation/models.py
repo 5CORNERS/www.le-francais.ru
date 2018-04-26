@@ -39,6 +39,29 @@ class Verb(models.Model):
     has_second_form = models.BooleanField(default=False)
     has_s_en = models.BooleanField(default=False)
 
+    s_en = models.BooleanField(default=False)
+    can_passive = models.BooleanField(default=False)
+    can_feminin = models.BooleanField(default=False)
+    can_reflexive = models.BooleanField(default=False)
+    is_second_form = models.BooleanField(default=False)
+    is_frequent = models.BooleanField(default=False)
+    is_transitive = models.BooleanField(default=False)
+    is_intransitive = models.BooleanField(default=False)
+    is_pronominal = models.BooleanField(default=False)
+    belgium = models.BooleanField(default=False)
+    africa = models.BooleanField(default=False)
+    conjugated_with_avoir = models.BooleanField(default=False)
+    conjugated_with_etre = models.BooleanField(default=False)
+    is_defective = models.BooleanField(default=False)
+    is_impersonal = models.BooleanField(default=False)
+    book = models.BooleanField(default=False)
+    is_rare = models.BooleanField(default=False)
+    is_archaique = models.BooleanField(default=False)
+    is_slang = models.BooleanField(default=False)
+
+    group_no = models.IntegerField(default=1)
+    regle_id = models.IntegerField(default=200)
+
 
     def __str__(self):
         return self.infinitive
