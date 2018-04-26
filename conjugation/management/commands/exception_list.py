@@ -117,15 +117,15 @@ def fill_other_parametres():
         africa = return_true_false(dict["Afrique"][i])
         conjugated_with_avoir = return_true_false(dict["AVOIR"][i])
         conjugated_with_etre = return_true_false(dict["ÊTRE"][i])
-        is_defective = return_true_false(dict["DEFECTIVE"])
-        is_impersonal = return_true_false(dict["IMPERSONNEL"])
+        is_defective = return_true_false(dict["DEFECTIVE"][i])
+        is_impersonal = return_true_false(dict["IMPERSONNEL"][i])
         book = return_true_false(dict["книжный"][i])
-        is_rare = return_true_false(dict["редкоупотребимый"])
-        is_archaique = return_true_false(dict["устаревший"])
+        is_rare = return_true_false(dict["редкоупотребимый"][i])
+        is_archaique = return_true_false(dict["устаревший"][i])
         is_slang = return_true_false(dict["слэнг"][i])
-        group_no = dict["GROUP No"]
+        group_no = dict["GROUP No"][i]
 
-        regle_id = dict["Règle IDX"]
+        regle_id = dict["Règle IDX"][i]
 
         v.s_en = s_en
         v.can_passive = can_passive
