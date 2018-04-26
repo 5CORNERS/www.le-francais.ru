@@ -1,6 +1,6 @@
 from django.core.management import BaseCommand
 
-from conjugation.models import Verb as V, ReflexiveVerb  as RV
+from conjugation.models import Verb as V, ReflexiveVerb as RV
 
 
 class Command(BaseCommand):
