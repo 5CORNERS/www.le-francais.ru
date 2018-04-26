@@ -1,7 +1,7 @@
-from django.db import models
 from django.contrib.postgres.fields import JSONField
-from unidecode import unidecode
+from django.db import models
 from django.urls import reverse
+from unidecode import unidecode
 
 VOWELS_LIST = ['a','ê','é','h','e','â','i','o','ô','u','w','y','œ',]
 
@@ -28,8 +28,11 @@ class Verb(models.Model):
     template = models.ForeignKey(Template)
     aspirate_h = models.BooleanField(default=False)
     maison = models.BooleanField(default=False)
+
     reflexive_only = models.BooleanField(default=False)
-    reflexive = models.CharField(max_length=100, default='')
+
+    is_deffective = models.BooleanField(default=False)
+    deffective = models.ForeignKey('DeffectivePattern', null=True, on_delete=models.SET_NULL)
 
     masculin_only = models.BooleanField(default=False)
     has_passive = models.BooleanField(default=False)
@@ -84,8 +87,35 @@ class ReflexiveVerb(models.Model):
     verb = models.OneToOneField(Verb, on_delete=models.CASCADE, primary_key=True)
     infinitive = models.CharField(max_length=100)
     infinitive_no_accents = models.CharField(max_length=100)
-    deffective = models.BooleanField(default=False)
-    impersonal = models.BooleanField(default=False)
+
+    is_deffective = models.BooleanField(default=False)
+    deffective = models.ForeignKey('DeffectivePattern', null=True, on_delete=models.SET_NULL)
+
+    is_impersonal = models.BooleanField(default=False)
 
     def create_no_accents(self):
         self.infinitive_no_accents = unidecode(self.infinitive)
+
+
+class DeffectivePattern(models.Model):
+    indicative_compose_past = models.BooleanField(default=False)
+    indicative_anterieur_past = models.BooleanField(default=False)
+    indicative_pluperfect = models.BooleanField(default=False)
+    indicative_anterieur_future = models.BooleanField(default=False)
+    subjunctive_past = models.BooleanField(default=False)
+    subjunctive_pluperfect = models.BooleanField(default=False)
+    conditional_past_first = models.BooleanField(default=False)
+    conditional_past_second = models.BooleanField(default=False)
+    imperative_past = models.BooleanField(default=False)
+    infinitive_past = models.BooleanField(default=False)
+    gerund_past = models.BooleanField(default=False)
+
+    def has_mood_tense(self, mood_name, tense_name):
+        mood_tense = unidecode(mood_name+'_'+tense_name.replace('-','_'))
+        try:
+            if self.__getattribute__(mood_tense):
+                return True
+            else:
+                return False
+        except:
+            return False

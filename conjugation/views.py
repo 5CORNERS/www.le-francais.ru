@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.shortcuts import render, redirect, Http404
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from unidecode import unidecode
@@ -39,9 +39,6 @@ def verb(request, se, feminin, verb):
     else:
         reflexive = False
 
-    if v.reflexive:
-        pass
-
     v.construct_conjugations()
     table = Table(v, gender, reflexive)
     template_name = 'conjugation/table.html'
@@ -61,8 +58,11 @@ def get_autocomplete_list(request):
     _term = request.GET['term']
     term = unidecode(_term)
 
-    q_startswith = V.objects.filter(
-        infinitive_no_accents__startswith=term)  ##.order_by(Length('infinitive').asc())[:list_len]
+    if term[:2] == 'se' or term[:2] == "se'":
+        q_startswith = V.objects.filter(reflexive_no_accents__startswith=term)
+    else:
+        q_startswith = V.objects.filter(
+            infinitive_no_accents__startswith=term)
 
     if q_startswith.__len__() == 0:
         term = switch_keyboard_layout(_term)
@@ -73,15 +73,23 @@ def get_autocomplete_list(request):
         q = list(q_startswith) + list(q_contains)
     else:
         q = q_startswith
+
     autocomplete_list = []
     term_len = term.__len__()
-    for verb in q[0:list_len]:
-        pos_start = verb.infinitive_no_accents.find(term)
+    for v in q[0:list_len]:
+        pos_start = v.infinitive_no_accents.find(term)
         pos_end = pos_start + term_len
-        html = verb.infinitive[0:pos_start] + '<b>' + verb.infinitive[pos_start:pos_end] + '</b>' + verb.infinitive[
-                                                                                                    pos_end:]
+
+        if v.reflexive_only:
+            infinitive = v.reflexive
+        else:
+            infinitive = v.infinitive
+
+        html = infinitive[0:pos_start] + '<b>' + infinitive[pos_start:pos_end] + '</b>' + infinitive[pos_end:]
+
+
         autocomplete_list.append(
-            dict(url=reverse('conjugation:verb', args=[verb.infinitive_no_accents]), verb=verb.infinitive, html=html))
+            dict(url=reverse('conjugation:verb', args=[v.infinitive_no_accents]), verb=infinitive, html=html))
     return JsonResponse(autocomplete_list, safe=False)
 
 
@@ -127,13 +135,28 @@ class Tense:
         self.v = v
         self.tense_name = tense_name
         self.mood_name = moode_name
-        self.persons = self.get_persons_list(gender, reflexive)
+        self.gender = gender
+        self.reflexive = reflexive
+        self.persons = self.get_persons_list()
 
-    def get_persons_list(self, gender, reflexive):
+    def get_persons_list(self):
+
+        if self.reflexive:
+            rv = self.v.reflexiveverb
+            if rv.is_deffective:
+                deffective_patterns = rv.deffective
+                if deffective_patterns.has_mood_tense(self.mood_name, self.tense_name):
+                    return self.get_empty_persons_list()
+        else:
+            if self.v.is_deffective:
+                deffective_patterns = self.v.deffective
+                if deffective_patterns.has_mood_tense(self.mood_name, self.tense_name):
+                    return self.get_empty_persons_list()
+
         persons = []
         tense_dict = FORMULAS[self.mood_name][self.tense_name]
         for person_name in tense_dict[1].keys():
-            person = Person(self.v, self.mood_name, self.tense_name, person_name, gender, reflexive)
+            person = Person(self.v, self.mood_name, self.tense_name, person_name, self.gender, self.reflexive)
             persons.append(person)
         return persons
 
@@ -143,11 +166,19 @@ class Tense:
     def __str__(self):
         return self.tense_name
 
+    def get_empty_persons_list(self):
+        persons = []
+        tense_dict = FORMULAS[self.mood_name][self.tense_name]
+        for person_name in tense_dict[1].keys():
+            person = Person(self.v, self.mood_name, self.tense_name, person_name, self.gender, self.reflexive, empty=True)
+            persons.append(person)
+        return persons
+
 
 class Person:
     VOWELS = ['a', 'e', 'i', 'o', 'u', 'y', 'â', 'ê', 'è', 'é', 'ô', 'œ', 'î', 'ê', 'î', 'ï', 'à', 'ä', 'ë', 'ö', 'û', 'ì']
 
-    def __init__(self, v: V, mood_name: str, tense_name: str, person_name: str, gender: int, reflexive: bool):
+    def __init__(self, v: V, mood_name: str, tense_name: str, person_name: str, gender: int, reflexive: bool, empty=False):
         self.v = v
         self.mood_name = mood_name
         self.tense_name = tense_name
@@ -155,7 +186,10 @@ class Person:
 
         pronoun = -1 if v.infnitive_first_letter_is_vowel() else 0
         maison = 1 if self.v.maison else 2
-        self.part_0, self.forms, self.part_2 = self.get_parts(maison, 0, gender, pronoun, reflexive)
+        if empty:
+            self.part_0, self.forms, self.part_2 = '-','',''
+        else:
+            self.part_0, self.forms, self.part_2 = self.get_parts(maison, 0, gender, pronoun, reflexive)
         if not isinstance(self.forms, list):
             self.forms = [self.forms]
 
@@ -174,6 +208,8 @@ class Person:
         if path_to_conjugation == None:
             return '-', '', ''
         verb_forms = self.v.conjugations[path_to_conjugation[0]][path_to_conjugation[1]][int(path_to_conjugation[2])]
+        if verb_forms == None:
+            return '-', '', ''    
         return parts[0][gender][pronoun], verb_forms, parts[2][gender][pronoun]
 
     def __str__(self):
