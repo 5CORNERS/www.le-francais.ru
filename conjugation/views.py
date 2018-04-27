@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from unidecode import unidecode
 
-from conjugation.models import Verb as V
+from conjugation.models import Verb as V, ReflexiveVerb as RV
 from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE, SHORT_LIST
 
 
@@ -19,7 +19,7 @@ def index(request):
     return render(request, 'conjugation/index.html')
 
 
-def verb(request, se, feminin, verb):
+def verb(request, se, feminin, verb, homonym):
 
     verb_no_accent = unidecode(verb)
     try:
@@ -34,8 +34,10 @@ def verb(request, se, feminin, verb):
         feminin = False
         gender = 0
 
-    if se or v.reflexive_only:
+    if se:
         reflexive = True
+    elif v.reflexive_only:
+        return redirect(v.reflexiveverb.url())
     else:
         reflexive = False
 
@@ -58,18 +60,18 @@ def get_autocomplete_list(request):
     _term = request.GET['term']
     term = unidecode(_term)
 
-    if term[:2] == 'se' or term[:2] == "se'":
-        q_startswith = V.objects.filter(reflexive_no_accents__startswith=term)
+    if term[:2] == 'se' or term[:2] == "s'":
+        C = RV
     else:
-        q_startswith = V.objects.filter(
-            infinitive_no_accents__startswith=term)
+        C = V
+    q_startswith = C.objects.filter(infinitive_no_accents__startswith=term)
 
     if q_startswith.__len__() == 0:
         term = switch_keyboard_layout(_term)
-        q_startswith = V.objects.filter(infinitive_no_accents__startswith=term)
+        q_startswith = C.objects.filter(infinitive_no_accents__startswith=term)
 
     if q_startswith.__len__() < list_len:
-        q_contains = V.objects.filter(infinitive_no_accents__contains=term).difference(q_startswith)
+        q_contains = C.objects.filter(infinitive_no_accents__contains=term).difference(q_startswith)
         q = list(q_startswith) + list(q_contains)
     else:
         q = q_startswith
@@ -77,19 +79,15 @@ def get_autocomplete_list(request):
     autocomplete_list = []
     term_len = term.__len__()
     for v in q[0:list_len]:
+        if not isinstance(v, RV) and v.reflexive_only:
+            v = v.reflexiveverb
         pos_start = v.infinitive_no_accents.find(term)
         pos_end = pos_start + term_len
-
-        if v.reflexive_only:
-            infinitive = v.reflexive
-        else:
-            infinitive = v.infinitive
-
-        html = infinitive[0:pos_start] + '<b>' + infinitive[pos_start:pos_end] + '</b>' + infinitive[pos_end:]
+        html = v.infinitive[0:pos_start] + '<b>' + v.infinitive[pos_start:pos_end] + '</b>' + v.infinitive[pos_end:]
 
 
         autocomplete_list.append(
-            dict(url=reverse('conjugation:verb', args=[v.infinitive_no_accents]), verb=infinitive, html=html))
+            dict(url=v.url(), verb=v.infinitive, html=html))
     return JsonResponse(autocomplete_list, safe=False)
 
 
