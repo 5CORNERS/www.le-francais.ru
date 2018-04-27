@@ -62,6 +62,8 @@ class Verb(models.Model):
     group_no = models.IntegerField(default=1)
     regle_id = models.IntegerField(default=200)
 
+    def url(self):
+        return reverse('conjugation:verb', kwargs=dict(verb=self.infinitive_no_accents))
 
     def __str__(self):
         return self.infinitive
@@ -71,9 +73,6 @@ class Verb(models.Model):
 
     def get_infinitive_no_accents(self):
         return unidecode(self.infinitive)
-
-    def url(self):
-        return reverse('conjugation:verb', kwargs=dict(femenin=None, verb=self.infinitive_no_accents, se=None))
 
     def feminin_url(self):
         return reverse('conjugation:verb', kwargs=dict(femenin='feminin_',verb=self.infinitive_no_accents,se=None))
@@ -106,6 +105,8 @@ class Verb(models.Model):
                         self.conjugations[mood][tense][person] =self.main_part() + endings
 
 
+
+
 class ReflexiveVerb(models.Model):
     verb = models.OneToOneField(Verb, on_delete=models.CASCADE, primary_key=True)
     infinitive = models.CharField(max_length=100)
@@ -118,6 +119,9 @@ class ReflexiveVerb(models.Model):
 
     def create_no_accents(self):
         self.infinitive_no_accents = unidecode(self.infinitive)
+
+    def url(self):
+        return reverse('conjugation:verb', kwargs=dict(se='se_',verb=self.verb.infinitive_no_accents))
 
 
 class DeffectivePattern(models.Model):
@@ -142,3 +146,7 @@ class DeffectivePattern(models.Model):
                 return False
         except:
             return False
+
+class Regle(models.Model):
+    text_rus = models.CharField(max_length=3000, default='')
+    text_fr = models.CharField(max_length=3000, default='')
