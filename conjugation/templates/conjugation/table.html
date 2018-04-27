@@ -180,7 +180,7 @@
             {% for tense in mood.tenses %}
                 <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
                     <div id="{% comment %}{{ tense.id }}{% endcomment %}" class="tense_name"><h3>{{ tense.name }}</h3></div>
-                    <p class="person">{% for person in tense.persons %}{{ person.part_0 }}{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 }}<br>{% endfor %}</p>
+                    <p class="person">{% for person in tense.persons %}{{ person.part_0 | safe }}{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
                 </div>
             {% endfor %}
             </div>
