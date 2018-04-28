@@ -3,11 +3,14 @@ from django.db import models
 from django.urls import reverse
 from unidecode import unidecode
 
-VOWELS_LIST = ['a','ê','é','h','e','â','i','o','ô','u','w','y','œ',]
+VOWELS_LIST = ['a', 'ê', 'é', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
 
 
+class Regle(models.Model):
+    text_rus = models.CharField(max_length=3000, default='')
+    text_fr = models.CharField(max_length=3000, default='')
 
-# Create your models here.
+
 class Template(models.Model):
     name = models.CharField(max_length=200)
     data = JSONField(default={})
@@ -21,6 +24,7 @@ class Template(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Verb(models.Model):
     infinitive = models.CharField(max_length=100)
@@ -60,7 +64,9 @@ class Verb(models.Model):
     is_slang = models.BooleanField(default=False)
 
     group_no = models.IntegerField(default=1)
-    regle_id = models.IntegerField(default=200)
+    id_regle = models.IntegerField(default=200)
+
+    regle = models.ForeignKey(Regle, on_delete=models.SET_NULL, blank=True, null=True)
 
     def url(self):
         return reverse('conjugation:verb', kwargs=dict(verb=self.infinitive_no_accents))
@@ -69,13 +75,13 @@ class Verb(models.Model):
         return self.infinitive
 
     def main_part(self):
-        return self.infinitive.rsplit(self.template.infinitive_ending(),1)[0]
+        return self.infinitive.rsplit(self.template.infinitive_ending(), 1)[0]
 
     def get_infinitive_no_accents(self):
         return unidecode(self.infinitive)
 
     def feminin_url(self):
-        return reverse('conjugation:verb', kwargs=dict(femenin='feminin_',verb=self.infinitive_no_accents,se=None))
+        return reverse('conjugation:verb', kwargs=dict(femenin='feminin_', verb=self.infinitive_no_accents, se=None))
 
     def se_url(self):
         return reverse('conjugation:verb', kwargs=dict(femenin=None, verb=self.infinitive_no_accents, se='se_'))
@@ -91,7 +97,7 @@ class Verb(models.Model):
         for mood in self.template.new_data.keys():
             self.conjugations[mood] = {}
             for tense in self.template.new_data[mood].keys():
-                self.conjugations[mood][tense] = [None]*6
+                self.conjugations[mood][tense] = [None] * 6
                 for person, i in enumerate(self.template.new_data[mood][tense]['p']):
                     endings = self.template.new_data[mood][tense]['p'][person]['i']
                     if endings == None:
@@ -99,12 +105,10 @@ class Verb(models.Model):
                     elif isinstance(endings, list):
                         forms = []
                         for ending in endings:
-                            forms.append(self.main_part()+ending)
+                            forms.append(self.main_part() + ending)
                         self.conjugations[mood][tense][person] = forms
                     else:
-                        self.conjugations[mood][tense][person] =self.main_part() + endings
-
-
+                        self.conjugations[mood][tense][person] = self.main_part() + endings
 
 
 class ReflexiveVerb(models.Model):
@@ -121,7 +125,7 @@ class ReflexiveVerb(models.Model):
         self.infinitive_no_accents = unidecode(self.infinitive)
 
     def url(self):
-        return reverse('conjugation:verb', kwargs=dict(se='se_',verb=self.verb.infinitive_no_accents))
+        return reverse('conjugation:verb', kwargs=dict(se='se_', verb=self.verb.infinitive_no_accents))
 
 
 class DeffectivePattern(models.Model):
@@ -138,7 +142,7 @@ class DeffectivePattern(models.Model):
     gerund_past = models.BooleanField(default=False)
 
     def has_mood_tense(self, mood_name, tense_name):
-        mood_tense = unidecode(mood_name+'_'+tense_name.replace('-','_'))
+        mood_tense = unidecode(mood_name + '_' + tense_name.replace('-', '_'))
         try:
             if self.__getattribute__(mood_tense):
                 return True
@@ -146,7 +150,3 @@ class DeffectivePattern(models.Model):
                 return False
         except:
             return False
-
-class Regle(models.Model):
-    text_rus = models.CharField(max_length=3000, default='')
-    text_fr = models.CharField(max_length=3000, default='')
