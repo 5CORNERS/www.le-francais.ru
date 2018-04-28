@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from pandas import read_csv
 from unidecode import unidecode
 
-from conjugation.models import DeffectivePattern, Verb as V, ReflexiveVerb as RV
+from conjugation.models import DeffectivePattern, Verb as V, ReflexiveVerb as RV, Regle
 
 
 def fill_deffectives():
@@ -149,12 +149,39 @@ def fill_other_parametres():
         v.is_archaique = is_archaique
         v.is_slang = is_slang
         v.group_no = group_no
-        v.regle_id = regle_id
+        v.regle = Regle.objects.get(id=regle_id)
 
         v.save()
+
+
+def fill_regles():
+    file_path = 'conjugation/data/Règles IDX.csv'
+    table = read_csv(open(file_path,encoding='utf-8'))
+    dict = table.to_dict()
+
+    for i in range(len(dict['REGLE'])):
+        print(i)
+        regle, created = Regle.objects.get_or_create(id=dict['ID'][i])
+        if created:
+            regle.text_fr = dict["REGLE"][i]
+            regle.save()
+
+
+def translate_regles():
+    file_path = 'conjugation/data/regle_translations.csv'
+    table = read_csv(open(file_path, encoding='utf-8'))
+    dict = table.to_dict()
+
+    for i in range(len(dict['IDX'])):
+        print(i)
+        regle = Regle.objects.get(id=dict['IDX'][i])
+        regle.text_rus = dict['TRANSLATION'][i]
+        regle.save()
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # fill_deffectives()
+        fill_regles()
+        translate_regles()
         fill_other_parametres()
