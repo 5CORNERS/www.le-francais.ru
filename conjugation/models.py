@@ -68,6 +68,34 @@ class Verb(models.Model):
 
     regle = models.ForeignKey(Regle, on_delete=models.SET_NULL, blank=True, null=True)
 
+    def employs(self):
+        s = ""
+        s += '<b>' + self.infinitive + "</b> — "
+        s += 'дефективный ' if self.is_defective else ''
+        s += 'дефективный безличный ' if self.is_impersonal else ''
+        s += '«книжный» (редко употребляемый в устной речи) ' if self.book else ''
+        s += 'глагол <b>'+ str(self.group_no) +'-й группы</b>, '
+        s += 'с h придыхательной в первой букве, ' if self.aspirate_h else ''
+        s += 'частоупотребимый, ' if self.is_frequent else ''
+        s += 'непереходный, ' if self.is_intransitive and not self.is_transitive else ''
+        s += 'переходный, ' if self.is_transitive and not self.is_intransitive else ''
+        s += 'может быть как переходным, так и непереходным, ' if self.is_intransitive and self.is_transitive else ''
+        s += 'в составных временах спрягается со вспомогательным глаголом <b>avoir</b>, ' if self.conjugated_with_avoir and not self.conjugated_with_etre else ''
+        s += 'в составных временах спрягается со вспомогательным глаголом <b>être</b>, ' if self.conjugated_with_etre and not self.conjugated_with_avoir else ''
+        s += 'в составных временах спрягается как со вспомогательным глаголом <b>être</b>, так и с глаголом <b>avoir</b> — в зависимости от наличия прямого дополнения, ' if self.conjugated_with_avoir and self.conjugated_with_etre else ''
+        s += 'имеет возвратную форму, ' if not self.reflexive_only and self.is_pronominal else ''
+        s += 'существует только в возвратной форме, ' if self.reflexive_only else ''
+        # s += 'имеет локальное хождение в Квебеке, ' if self.canada else ''
+        s += 'имеет локальное хождение в Бельгии, ' if self.belgium else ''
+        s += 'имеет локальное хождение в африканских странах, ' if self.africa else ''
+        s += 'крайне редко употребим, ' if self.is_rare else ''
+        s += 'устаревший, ' if self.is_archaique else ''
+        s += 'используется, как слэнг, ' if self.is_slang else ''
+        s = s[:-2]+'.'
+        return s
+
+
+
     def url(self):
         return reverse('conjugation:verb', kwargs=dict(verb=self.infinitive_no_accents))
 

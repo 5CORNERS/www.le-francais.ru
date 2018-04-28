@@ -76,7 +76,7 @@ def fill_deffectives():
 
 
 def return_true_false(param):
-    if param==True or param==1:
+    if param==True or param=='1' or param==1:
         return True
     elif isinstance(param, str):
         if param.lower()=='true':
@@ -182,6 +182,6 @@ def translate_regles():
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # fill_deffectives()
-        fill_regles()
-        translate_regles()
+        # fill_regles()
+        # translate_regles()
         fill_other_parametres()
