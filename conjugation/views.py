@@ -27,6 +27,8 @@ def verb(request, se, feminin, verb, homonym):
     except V.DoesNotExist:
         return render(request,'conjugation/verb_not_found.html', {'search_string':verb_no_accent})
 
+
+
     if feminin:
         feminin = True
         gender = -1
@@ -34,12 +36,14 @@ def verb(request, se, feminin, verb, homonym):
         feminin = False
         gender = 0
 
-    if se:
-        reflexive = True
-    elif v.reflexive_only:
+
+    if v.reflexive_only and not se:
         return redirect(v.reflexiveverb.url())
-    else:
-        reflexive = False
+    if not v.can_reflexive and se:
+        return redirect(v.url())
+
+    reflexive = v.can_reflexive and se
+
 
     v.construct_conjugations()
     table = Table(v, gender, reflexive)
@@ -60,7 +64,7 @@ def get_autocomplete_list(request):
     _term = request.GET['term']
     term = unidecode(_term)
 
-    if term[:2] == 'se' or term[:2] == "s'":
+    if term[:3] == 'se ' or term[:2] == "s'":
         C = RV
     else:
         C = V
