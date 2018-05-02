@@ -187,11 +187,11 @@ class Person:
         self.person_name = person_name
 
         pronoun = -1 if v.infnitive_first_letter_is_vowel() else 0
-        maison = 1 if self.v.maison else 2
+        etre = 2 if not self.v.conjugated_with_avoir and self.v.conjugated_with_etre else 1
         if empty:
             self.part_0, self.forms, self.part_2 = '-','',''
         else:
-            self.part_0, self.forms, self.part_2 = self.get_parts(maison, 0, gender, pronoun, reflexive)
+            self.part_0, self.forms, self.part_2 = self.get_parts(etre, 0, gender, pronoun, reflexive)
         if not isinstance(self.forms, list):
             self.forms = [self.forms]
 
