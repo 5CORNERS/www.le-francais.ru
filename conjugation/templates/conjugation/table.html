@@ -1,4 +1,8 @@
 {% extends 'base.html' %}
+
+{% block title %}{% endblock %}
+{% block description %}{% endblock %}
+
 {% load static conjugation_tags%}
 {% block extra_head %}
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -207,12 +211,12 @@
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row emploi">
                     <div class="col-xs-12">
-                        <h3>Коротко о главном</h3>{{ v.employs | safe }}
+                        <h3 style="margin-top: 6px">Коротко о главном</h3><p>{{ v.employs | safe }}</p>
                     </div>
                 </div>
                 <div class="row regle">
                     <div class="col-xs-12">
-                        {% if v.regle%}<h3>Особенности спряжения</h3>{{ v.regle.text_rus | safe }}{% endif %}
+                        {% if v.regle%}<h3>Особенности спряжения</h3><p>{{ v.regle.text_rus | safe }}</p>{% endif %}
                     </div>
                 </div>
             </div>
@@ -238,6 +242,7 @@
 
                 </div>
             </div>
+            </div>
         </div>
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-6">
@@ -246,14 +251,14 @@
                         <div><h2>{{ table.moods.2.name | safe }}</h2></div>
                     </div>
                 </div>
-                <div class="row tenses">
-                    {% for tense in table.moods.2.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h3>{{ tense.name }}</h3></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
-                        </div>
-                    {% endfor %}
-                </div>
+            <div class="row tenses">
+                {% for tense in table.moods.2.tenses %}
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
+                        <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
+                        <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
+                    </div>
+                {% endfor %}
+            </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
