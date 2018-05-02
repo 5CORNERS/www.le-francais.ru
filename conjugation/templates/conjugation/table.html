@@ -198,7 +198,7 @@
                 <div class="row tenses">
                     {% for tense in table.moods.0.tenses %}
                         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h3>{{ tense.name }}</h3></div>
+                            <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
                             <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
                         </div>
                     {% endfor %}
@@ -223,15 +223,15 @@
                     <div class="col-xs-12">
                         <div><h2>{{ table.moods.1.name | safe }}</h2></div>
                     </div>
-                </div>
-                <div class="row tenses">
-                    {% for tense in table.moods.1.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h3>{{ tense.name }}</h3></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
-                        </div>
-                    {% endfor %}
-                </div>
+            </div>
+            <div class="row tenses">
+                {% for tense in table.moods.1.tenses %}
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
+                        <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
+                        <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
+                    </div>
+                {% endfor %}
+        </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
@@ -268,14 +268,14 @@
                         <div><h2>{{ table.moods.3.name | safe }}</h2></div>
                     </div>
                 </div>
-                <div class="row tenses">
-                    {% for tense in table.moods.3.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h3>{{ tense.name }}</h3></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
-                        </div>
-                    {% endfor %}
-                </div>
+            <div class="row tenses">
+                {% for tense in table.moods.3.tenses %}
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
+                        <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
+                        <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
+                    </div>
+                {% endfor %}
+            </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
@@ -290,14 +290,14 @@
                         <div><h2>{{ table.moods.4.name | safe }}</h2></div>
                     </div>
                 </div>
-                <div class="row tenses">
-                    {% for tense in table.moods.4.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h3>{{ tense.name }}</h3></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
-                        </div>
-                    {% endfor %}
-                </div>
+            <div class="row tenses">
+                {% for tense in table.moods.4.tenses %}
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
+                        <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
+                        <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
+                    </div>
+                {% endfor %}
+            </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
@@ -312,14 +312,14 @@
                         <div><h2>{{ table.moods.5.name | safe }}</h2></div>
                     </div>
                 </div>
-                <div class="row tenses">
-                    {% for tense in table.moods.5.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h3>{{ tense.name }}</h3></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
-                        </div>
-                    {% endfor %}
-                </div>
+            <div class="row tenses">
+                {% for tense in table.moods.5.tenses %}
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
+                        <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
+                        <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
+                    </div>
+                {% endfor %}
+            </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
@@ -334,14 +334,14 @@
                         <div><h2>{{ table.moods.6.name | safe }}</h2></div>
                     </div>
                 </div>
-                <div class="row tenses">
-                    {% for tense in table.moods.6.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h3>{{ tense.name }}</h3></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
-                        </div>
-                    {% endfor %}
-                </div>
+            <div class="row tenses">
+                {% for tense in table.moods.6.tenses %}
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
+                        <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
+                        <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
+                    </div>
+                {% endfor %}
+            </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
