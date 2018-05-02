@@ -210,20 +210,20 @@ FORMULAS = {
     'subjunctive': {
         'present': {
             1: {
-                'person_I_S': (((("je ", "j'",),), (VERB_SUBJUNCTIVE_PRESENT_1,), (("",),),),),
-                'person_II_S': (((("tu ",),), (VERB_SUBJUNCTIVE_PRESENT_2,), (("",),),),),
-                'person_III_S': (((("il ",), ("elle ",),), (VERB_SUBJUNCTIVE_PRESENT_3,), (("",),),),),
-                'person_I_P': (((("nous ",),), (VERB_SUBJUNCTIVE_PRESENT_4,), (("",),),),),
-                'person_II_P': (((("vous ",),), (VERB_SUBJUNCTIVE_PRESENT_5,), (("",),),),),
-                'person_III_P': (((("ils ",), ("elles ",),), (VERB_SUBJUNCTIVE_PRESENT_6,), (("",),),),),
+                'person_I_S': (((("que je ", "que j'",),), (VERB_SUBJUNCTIVE_PRESENT_1,), (("",),),),),
+                'person_II_S': (((("que tu ",),), (VERB_SUBJUNCTIVE_PRESENT_2,), (("",),),),),
+                'person_III_S': (((("qu'il ",), ("qu'elle ",),), (VERB_SUBJUNCTIVE_PRESENT_3,), (("",),),),),
+                'person_I_P': (((("que nous ",),), (VERB_SUBJUNCTIVE_PRESENT_4,), (("",),),),),
+                'person_II_P': (((("que vous ",),), (VERB_SUBJUNCTIVE_PRESENT_5,), (("",),),),),
+                'person_III_P': (((("qu'ils ",), ("qu'elles ",),), (VERB_SUBJUNCTIVE_PRESENT_6,), (("",),),),),
             },
             2: {
-                'person_I_S': (((("je ", "j'",),), (VERB_SUBJUNCTIVE_PRESENT_1,), (("",),),),),
-                'person_II_S': (((("tu ",),), (VERB_SUBJUNCTIVE_PRESENT_2,), (("",),),),),
-                'person_III_S': (((("il ",), ("elle ",),), (VERB_SUBJUNCTIVE_PRESENT_3,), (("",),),),),
-                'person_I_P': (((("nous ",),), (VERB_SUBJUNCTIVE_PRESENT_4,), (("",),),),),
-                'person_II_P': (((("vous ",),), (VERB_SUBJUNCTIVE_PRESENT_5,), (("",),),),),
-                'person_III_P': (((("ils ",), ("elles ",),), (VERB_SUBJUNCTIVE_PRESENT_6,), (("",),),),),
+                'person_I_S': (((("que je ", "que j'",),), (VERB_SUBJUNCTIVE_PRESENT_1,), (("",),),),),
+                'person_II_S': (((("que tu ",),), (VERB_SUBJUNCTIVE_PRESENT_2,), (("",),),),),
+                'person_III_S': (((("qu'il ",), ("qu'elle ",),), (VERB_SUBJUNCTIVE_PRESENT_3,), (("",),),),),
+                'person_I_P': (((("que nous ",),), (VERB_SUBJUNCTIVE_PRESENT_4,), (("",),),),),
+                'person_II_P': (((("que vous ",),), (VERB_SUBJUNCTIVE_PRESENT_5,), (("",),),),),
+                'person_III_P': (((("qu'ils ",), ("qu'elles ",),), (VERB_SUBJUNCTIVE_PRESENT_6,), (("",),),),),
             },
         },
         'past': {
