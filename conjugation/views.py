@@ -25,7 +25,52 @@ def search(request):
 
 
 def index(request):
-    return render(request, 'conjugation/index.html')
+    FREQUENT_URLS = [
+        '''<a href="/conjugaison/etre">être</a>''',
+        '''<a href="/conjugaison/avoir">avoir</a>''',
+        '''<a href="/conjugaison/faire">faire</a>''',
+        '''<a href="/conjugaison/dire">dire</a>''',
+        '''<a href="/conjugaison/pouvoir">pouvoir</a>''',
+        '''<a href="/conjugaison/aller">aller</a>''',
+        '''<a href="/conjugaison/voir">voir</a>''',
+        '''<a href="/conjugaison/vouloir">vouloir</a>''',
+        '''<a href="/conjugaison/venir">venir</a>''',
+        '''<a href="/conjugaison/devoir">devoir</a>''',
+        '''<a href="/conjugaison/prendre">prendre</a>''',
+        '''<a href="/conjugaison/trouver">trouver</a>''',
+        '''<a href="/conjugaison/donner">donner</a>''',
+        '''<a href="/conjugaison/falloir">falloir</a>''',
+        '''<a href="/conjugaison/parler">parler</a>''',
+        '''<a href="/conjugaison/mettre">mettre</a>''',
+        '''<a href="/conjugaison/savoir">savoir</a>''',
+        '''<a href="/conjugaison/passer">passer</a>''',
+        '''<a href="/conjugaison/regarder">regarder</a>''',
+        '''<a href="/conjugaison/aimer">aimer</a>''',
+        '''<a href="/conjugaison/croire">croire</a>''',
+        '''<a href="/conjugaison/demander">demander</a>''',
+        '''<a href="/conjugaison/rester">rester</a>''',
+        '''<a href="/conjugaison/repondre">répondre</a>''',
+        '''<a href="/conjugaison/entendre">entendre</a>''',
+        '''<a href="/conjugaison/penser">penser</a>''',
+        '''<a href="/conjugaison/arriver">arriver</a>''',
+        '''<a href="/conjugaison/connaitre">connaître</a>''',
+        '''<a href="/conjugaison/devenir">devenir</a>''',
+        '''<a href="/conjugaison/sentir">sentir</a>''',
+        '''<a href="/conjugaison/sembler">sembler</a>''',
+        '''<a href="/conjugaison/tenir">tenir</a>''',
+        '''<a href="/conjugaison/comprendre">comprendre</a>''',
+        '''<a href="/conjugaison/rendre">rendre</a>''',
+        '''<a href="/conjugaison/attendre">attendre</a>''',
+        '''<a href="/conjugaison/sortir">sortir</a>''',
+        '''<a href="/conjugaison/vivre">vivre</a>''',
+        '''<a href="/conjugaison/reprendre">reprendre</a>''',
+        '''<a href="/conjugaison/entrer">entrer</a>''',
+        '''<a href="/conjugaison/porter">porter</a>''',
+        '''<a href="/conjugaison/chercher">chercher</a>''',
+        '''<a href="/conjugaison/revenir">revenir</a>''',
+        '''<a href="/conjugaison/appeler">appeler</a>''',
+    ]
+    return render(request, 'conjugation/index.html', dict(frequent_urls=FREQUENT_URLS))
 
 
 def verb(request, se, feminin, verb, homonym):
