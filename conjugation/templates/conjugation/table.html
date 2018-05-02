@@ -177,6 +177,7 @@
                         <div class="btn">
                             {% if v.can_feminin%}<a class="btn btn-primary" href="{% option_url 'gender' %}">{% if not feminin%}В женском роде{% else %}В мужском роде{% endif %}</a>{% endif %}
                             {% if v.reflexive%}<a class="btn btn-primary" href="{% option_url 'se' %}">{% if not reflexive%}В возвратной форма{% else %}В невозвратной форма{% endif %}</a>{% endif %}
+                            {% if v.reflexiveverb%}<a class="btn btn-primary" href="{% option_url 'se' %}">{% if not reflexive%}В возвратной форме{% else %}В невозвратной форме{% endif %}</a>{% endif %}
                         </div>
                     </div>
                 </div>
