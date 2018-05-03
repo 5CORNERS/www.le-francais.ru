@@ -68,6 +68,8 @@ class Verb(models.Model):
 
     regle = models.ForeignKey(Regle, on_delete=models.SET_NULL, blank=True, null=True)
 
+    audio_url = models.URLField(default=None, null=True)
+
     def employs(self):
         s = ""
         s += '<b>' + self.infinitive + "</b> — "
