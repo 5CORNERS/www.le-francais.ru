@@ -2,8 +2,14 @@
 	AUTHOR: Osvaldas Valutis, www.osvaldas.info
 */
 
+;$(document).ready(function () {
 
-;(function ($, window, document, undefined) {
+    $('audio').audioPlayer();
+
+});
+
+
+(function ($, window, document, undefined) {
   var isTouch = 'ontouchstart' in window,
     eStart = isTouch ? 'touchstart' : 'mousedown',
     eMove = isTouch ? 'touchmove' : 'mousemove',
