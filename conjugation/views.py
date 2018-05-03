@@ -232,7 +232,7 @@ class Tense:
 
 
 class Person:
-    VOWELS = ['a', 'e', 'i', 'o', 'u', 'y', 'â', 'ê', 'è', 'é', 'ô', 'œ', 'î', 'ê', 'î', 'ï', 'à', 'ä', 'ë', 'ö', 'û', 'ì']
+    VOWELS_LIST = ['a', 'ê', 'é', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
 
     def __init__(self, v: V, mood_name: str, tense_name: str, person_name: str, gender: int, reflexive: bool, empty=False):
         self.v = v
@@ -265,7 +265,13 @@ class Person:
             return '-', '', ''
         verb_forms = self.v.conjugations[path_to_conjugation[0]][path_to_conjugation[1]][int(path_to_conjugation[2])]
         if verb_forms == None:
-            return '-', '', ''    
+            return '-', '', ''
+
+        if isinstance(verb_forms, list):
+            pronoun = -1 if verb_forms[0][0] in self.VOWELS_LIST else 0
+        else:
+            pronoun = -1 if verb_forms[0] in self.VOWELS_LIST else 0
+
         return parts[0][gender][pronoun], verb_forms, parts[2][gender][pronoun]
 
     def __str__(self):
