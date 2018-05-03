@@ -96,7 +96,8 @@ class Verb(models.Model):
         s = s[:-2]+'.'
         return s
 
-
+    def get_absolute_url(self):
+        return reverse('conjugation:verb', kwargs=dict(verb=self.infinitive_no_accents))
 
     def url(self):
         return reverse('conjugation:verb', kwargs=dict(verb=self.infinitive_no_accents))
@@ -155,6 +156,9 @@ class ReflexiveVerb(models.Model):
         self.infinitive_no_accents = unidecode(self.infinitive)
 
     def url(self):
+        return reverse('conjugation:verb', kwargs=dict(se='se_', verb=self.verb.infinitive_no_accents))
+
+    def get_absolute_url(self):
         return reverse('conjugation:verb', kwargs=dict(se='se_', verb=self.verb.infinitive_no_accents))
 
 
