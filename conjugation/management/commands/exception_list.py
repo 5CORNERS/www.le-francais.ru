@@ -97,9 +97,10 @@ def fill_other_parametres():
             continue
         print(dict["VERB"][i], end='')
         try:
-            v = V.objects.get(infinitive=dict['VERB'][i])
+            v, created = V.objects.get_or_create(infinitive=dict['VERB'][i])
         except:
             print('\t'+"can't find this verb")
+            continue
         print("\tfounded")
         s_en = return_true_false(dict["S'EN"][i])
         can_passive = return_true_false(dict["CAN BE PASSIVE"][i])
@@ -151,6 +152,14 @@ def fill_other_parametres():
         v.group_no = group_no
         v.regle = Regle.objects.get(id=regle_id)
 
+        if created:
+            v.infinitive_no_accents = v.get_infinitive_no_accents()
+            if v.can_reflexive or v.reflexive_only:
+                reflexive_infinitive = "se " + v.infinitive if v.infnitive_first_letter_is_vowel() else "s'" + v.infinitive
+                rv, created = RV.objects.get_or_create(infinitive=reflexive_infinitive, verb=v)
+                rv.create_no_accents()
+                rv.save()
+
         v.save()
 
 
@@ -181,7 +190,7 @@ def translate_regles():
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        fill_deffectives()
+        # fill_deffectives()
         # fill_regles()
         # translate_regles()
-        # fill_other_parametres()
+        fill_other_parametres()
