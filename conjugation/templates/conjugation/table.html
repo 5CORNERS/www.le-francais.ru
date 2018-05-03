@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
+{% load static conjugation_tags%}
+{% load site_tags %}
 
 {% block title %}{% endblock %}
 {% block description %}{% endblock %}
 
-{% load static conjugation_tags%}
+
 {% block extra_head %}
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% conjugation_advertisement_head "conjugation_verb" "sidebar"%}
 {% endblock %}
 {% block extra_css %}
     <style>
@@ -92,6 +95,10 @@
         }
     </style>
 {% endblock %}
+{% block js %}
+    <script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
+    <script async src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+{% endblock %}
 {% block extra_js %}
     <script>
         {% comment %}$(function () {
@@ -130,6 +137,28 @@
             $("#more_tab").addClass("active");
             $("#less_tab").removeClass("active");
         }
+
+        var audio = $("#audio")[0];
+        audio.addEventListener("ended", toggleIcon);
+        var playPauseIcon = $("#playPauseIcon")[0];
+        function toggleIcon() {
+            if(playPauseIcon.className == "fa fa-pause-circle"){
+                playPauseIcon.className = ("fa fa-play-circle");
+            }
+            else {
+                playPauseIcon.className = ("fa fa-pause-circle");
+            }
+        }
+        function togglePlay() {
+            if (audio.paused){
+                toggleIcon();
+                return audio.play();
+            }
+            else {
+                toggleIcon();
+                return audio.pause();
+            }
+        }
     </script>
 {% endblock %}
 
@@ -141,7 +170,7 @@
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
                     <div class="col-xs-12">
-                        <h1 style="margin-bottom: 25px">Спряжение глагола {{ v.infinitive }}</h1>
+                        <h1 style="margin-bottom: 25px">Спряжение глагола {{ v.infinitive }}</h1>{% if v.audio_url%}<audio id="audio" src="{{ v.audio_url }}" preload="auto"></audio>{% endif %}
                     </div>
                 </div>
                 <div class="row">
@@ -160,10 +189,10 @@
                     <div class="col-xs-12">
                         <ul class="nav nav-tabs">
                             <li class="nav-item active" id="less_tab">
-                                <a class="nav-link noselect" onclick="see_less()">Сокращенная версия</a>
+                                <a style="cursor: pointer" class="nav-link noselect" onclick="see_less()">Сокращенная версия</a>
                             </li>
                             <li class="nav-item" id="more_tab" >
-                                <a class="nav-link noselect" onclick="see_more()">Полная версия</a>
+                                <a style="cursor: pointer" class="nav-link noselect" onclick="see_more()">Полная версия</a>
                             </li>
                         </ul>
                     </div>
@@ -193,7 +222,7 @@
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
-
+                    {% conjugation_advertisement_body "conjugation_verb" "sidebar"%}
                 </div>
             </div>
         </div>
@@ -203,27 +232,11 @@
                 <div class="row tenses">
                     {% for tense in table.moods.0.tenses %}
                         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
+                            <div class="tense_name"><h4>{{ tense.name.upper }}{% if v.audio_url%} {% if forloop.counter0 == 0 %}<a style="cursor: pointer" onclick="togglePlay()"><span data-toggle="tooltip" data-placement="top" title="Послушать" id="playPauseIcon" class="fa fa-play-circle" aria-hidden="true"></span></a>{% endif %}{% endif %}</h4></div>
                             <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
                         </div>
                     {% endfor %}
                 </div>
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-6">
-                <div class="row emploi">
-                    <div class="col-xs-12">
-                        <h3 style="margin-top: 6px">Коротко о главном</h3><p>{{ v.employs | safe }}</p>
-                    </div>
-                </div>
-                <div class="row regle">
-                    <div class="col-xs-12">
-                        {% if v.regle%}<h3>Особенности спряжения</h3><p>{{ v.regle.text_rus | safe }}</p>{% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row mood_name">
                         <div class="col-xs-12">
                             <div><h2>{{ table.moods.1.name | safe }}</h2></div>
@@ -304,7 +317,17 @@
                 </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6">
-                <div class="row">
+                <div class="row emploi">
+                    <div class="col-xs-12">
+                        <h3 style="margin-top: 6px">Коротко о главном</h3><p>{{ v.employs | safe }}</p>
+                    </div>
+                </div>
+                <div class="row regle">
+                    <div class="col-xs-12">
+                        {% if v.regle%}<h3>Особенности спряжения</h3><p>{{ v.regle.text_rus | safe }}</p>{% endif %}
+                    </div>
+                </div>
+                <div class="row novichkam">
                     <div class="col-sm-12">
                     <h2>Новичкам</h2>
                     <p>Глядя на внушительный список времен, в которых спрягаются французские глаголы, загрустит любой новичок. Я поспешу таких успокоить: вам показали то, что ваша неокрепшая психика не должна была увидеть. :) Мы-то, взрослые, знаем, что реальначя жизнь несоизмеримо проще: среднестатистический современный француз в беглой речи использует <b>всего три времени</b>: настоящее, прошедшее (событийное) и будущее. Причем, последнее с легостью заменяется на удивительный по простоте образования глагольный оборот с использованием спряжениея одного единственного глагола «идти» в настоящем времени и инфинитива смыслового глагола.</p>
