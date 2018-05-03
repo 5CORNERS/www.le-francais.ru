@@ -52,8 +52,7 @@
 
 
     <!-- Latest compiled and minified JavaScript -->
-    <script async src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
-    <script async src="{% static 'lib/audio/audioplayer.min.js' %}"></script>
+
 
 
 
@@ -108,9 +107,11 @@
 </div>
 
 {# Global javascript #}
+{% block js %}
 <script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
-{#<script type='text/javascript' async defer src='https://le-francais.push4site.com/sdk'></script>#}
-
+<script async src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+<script async src="{% static 'lib/audio/audioplayer.min.js' %}"></script>
+{% endblock %}
 {% block extra_js %}
     {# Override this in templates to add extra javascript #}
 {% endblock %}
