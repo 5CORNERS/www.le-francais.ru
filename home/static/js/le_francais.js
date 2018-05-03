@@ -71,7 +71,6 @@ $(document).ready(function () {
         });
     }
 
-    $('audio').audioPlayer();
 
     // Javascript to enable link to tab
     var hash = document.location.hash;
