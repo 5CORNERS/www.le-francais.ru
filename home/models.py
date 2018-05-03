@@ -29,6 +29,8 @@ PAGE_CHOICES = (
     ('page_with_sidebar', '\"Page with sidebar\"'),
     ('article_page', 'Article Page'),
     ('index_page', 'Title Page'),
+    ('conjugation_index', 'Conjugation Title'),
+    ('conjugation_verb', 'Conjugation Verb'),
     ('none', 'None')
 )
 PLACEMENT_CHOICES = (
