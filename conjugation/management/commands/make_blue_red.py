@@ -51,9 +51,9 @@ RED_ENDINGS = {
     'subjunctive_present': [
         ['e'],
         ['es'],
-        ['e'],
-        ['ions'],
-        ['iez'],
+        ['e', 't'],
+        ['ions','yons'],
+        ['iez', 'yez'],
         ['ent'],
     ],
     'subjunctive_imperfect': [
@@ -169,7 +169,7 @@ def print_list_imperative():
 
 def import_table():
     import pandas as pd
-    csv = open('sheet.csv', 'r', encoding='utf-8')
+    csv = open('conjugation/data/Table de colorisation.csv', 'r', encoding='utf-8')
     table = pd.read_csv(csv)
     verb_table = []
     for i in range(len(table.to_dict()['verb'])):
