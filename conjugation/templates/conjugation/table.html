@@ -8,7 +8,8 @@
 
 {% block extra_head %}
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    {% conjugation_advertisement_head "conjugation_verb" "sidebar"%}
+    {% conjugation_advertisement_head "lf_fr_conj_rsb_01"%}
+    {% conjugation_advertisement_head "lf_fr_conj_rsb_02"%}
 {% endblock %}
 {% block extra_css %}
     <style>
@@ -166,7 +167,7 @@
     {% load i18n site_tags %}
     <div class="container">
 
-        <div class="row" style="margin-top: 10px">
+        <div class="row first_row">
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
                     <div class="col-xs-12">
@@ -214,7 +215,7 @@
                 </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6">
-                {% conjugation_advertisement_body "conjugation_verb" "sidebar"%}
+                {% conjugation_advertisement_body "lf_fr_conj_rsb_01"%}
             </div>
         </div>
 
@@ -325,6 +326,11 @@
                     <p>Таким образом, все знания сводятся к двум временам, которые надолго позволят вам абстрагироваться от всей прочей парадигмы спряжения и излагать практически ллюбую вашу мысль без искажения смысла.</p>
                     <p>И еще одна хорошая новость: второе из этих двух времен — составное, а это значит, что не надо учить шесть форм глагола во всех лицах и числах — достаточно знать его причастие, которое у 90% глаголов звучит так же, каr кинфинитив. Это французский язык: снаружи кажется ужасно сложно и запутано, а капнешь — все уже упростили до нас.</p>
                 </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        {% conjugation_advertisement_body "lf_fr_conj_rsb_02"%}
+                    </div>
                 </div>
             </div>
         </div>

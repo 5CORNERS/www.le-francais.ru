@@ -605,3 +605,7 @@ td.forum-last-post, td.topic-last-post {
     float: left;
     margin-right: 1em;
 }
+
+.first_row {
+    padding-top: 30px;
+}

@@ -70,6 +70,7 @@ class PageLayoutAdvertisementSnippet(Model):
     name =  CharField(max_length=100, unique=True, blank=False)
     page_type = CharField(max_length=100, choices=PAGE_CHOICES , default='none')
     placement = CharField(max_length=100, choices=PLACEMENT_CHOICES, default='none')
+    code = CharField(max_length=30, blank=True, default='')
     head = StreamField([
         ('html', RawHTMLBlock()),
     ], blank=True)
@@ -80,6 +81,7 @@ class PageLayoutAdvertisementSnippet(Model):
     live = BooleanField(default=True)
     panels = [
         FieldPanel('name'),
+        FieldPanel('code'),
         FieldPanel('page_type'),
         FieldPanel('placement'),
         FieldPanel('live'),
