@@ -95,14 +95,7 @@
     <div class="col-sm-12 col-md-9 main">
         <div class="row">
             <div class="col-xs-12">
-                <form id="search" action="{% url 'conjugation:search' %}" , method="post">
-                    <div class="input-group input-group-lg">
-                        <input name="verb" type="text" id="search-verb" size="30" class="form-control">
-                        <div class="input-group-btn input-group-btn-lg">
-                            <input name="submit" type="submit" id="search-submit" class="btn btn-primary" value="Спрягнуть">
-                        </div>
-                    </div>
-                </form>
+                {% include 'conjugation/verb_form.html' %}
             </div>
         </div>
         <div class="row">
