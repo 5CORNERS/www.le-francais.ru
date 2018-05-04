@@ -106,6 +106,14 @@ def fill_other_parametres():
         can_passive = return_true_false(dict["CAN BE PASSIVE"][i])
         can_feminin = return_true_false(dict["CAN BE FEMININ"][i])
         reflexive_only = return_true_false(dict["PRONOMINAL ONLY"][i])
+        is_impersonal = return_true_false(dict["IMPERSONNEL"][i])
+        book = return_true_false(dict["книжный"][i])
+        is_rare = return_true_false(dict["редкоупотребимый"][i])
+        is_archaique = return_true_false(dict["устаревший"][i])
+        is_slang = return_true_false(dict["слэнг"][i])
+        group_no = dict["GROUP No"][i]
+
+        regle_id = dict["Règle IDX"][i]
         can_reflexive = return_true_false(dict["CAN BE PRONOMINAL"][i])
         is_second_form = return_true_false(dict["HAVE 2 FORMS OF CONJOUGATION"][i])
 
@@ -119,14 +127,6 @@ def fill_other_parametres():
         conjugated_with_avoir = return_true_false(dict["AVOIR"][i])
         conjugated_with_etre = return_true_false(dict["ÊTRE"][i])
         is_defective = return_true_false(dict["DEFECTIVE"][i])
-        is_impersonal = return_true_false(dict["IMPERSONNEL"][i])
-        book = return_true_false(dict["книжный"][i])
-        is_rare = return_true_false(dict["редкоупотребимый"][i])
-        is_archaique = return_true_false(dict["устаревший"][i])
-        is_slang = return_true_false(dict["слэнг"][i])
-        group_no = dict["GROUP No"][i]
-
-        regle_id = dict["Règle IDX"][i]
 
         v.s_en = s_en
         v.can_passive = can_passive
