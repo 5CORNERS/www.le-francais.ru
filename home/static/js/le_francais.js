@@ -172,3 +172,7 @@ $(document).ready(function () {
     })();
 
 }());
+
+function forceLower(strInput) {
+    strInput.value = strInput.value.toLowerCase();
+}
