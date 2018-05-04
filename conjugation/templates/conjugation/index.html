@@ -7,6 +7,7 @@
 {% load static conjugation_tags %}
 {% block extra_head %}
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% conjugation_advertisement_head 'lf_fr_conjindex_rsb_01' %}
 {% endblock %}
 {% block extra_css %}
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -59,8 +60,8 @@
 
 {% block content %}
     <div class="container-fluid">
-        <div class="row main_row">
-            <div class="col-sm-8 col-md-8 col-lg-8 main">
+        <div class="row first_row">
+            <div class="col-sm-8 col-md-8 col-lg-8">
                 <div class="row">
                     <div class="col-xs-12">
                         <h1>Спряжение французских глаголов</h1>
@@ -83,6 +84,13 @@
                     <div class="col-xs-12">
                         <div class="row" style="display: flex; flex-wrap: wrap">
                             <div class="col-xs-12 col-sm-6 col-md-4 block">
+                                <div class="block-head"><h4>7000+ французских глаголов</h4></div>
+                                <div class="block-text">Помимо их спряжения, мы даем им характеристики — насколько глагол частоупотребим, переходный он или нет, с каким вспомогательным глаголом спрягается в составных временах, какой он
+                                    группы,
+                                    может ли иметь возвратную форму; также отмечены дефективные, безличные, книжные или устаревшие глаголы, а также имеющие локальное хождение в отдельных франкоговорящих регионах.
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-4 block">
                                 <div class="block-head"><h4>Умная строка поиска</h4></div>
                                 <div class="block-text">Не заморачивайтесь диакритическими знаками и даже (sic!) <b>раскладкой клавиатуры</b> при вводе глагола. Пара секунд — и мы найдем для вас целый список глаголов, содержащих
                                     указанные буквы. Выбирайте!
@@ -95,13 +103,6 @@
                             <div class="col-xs-12 col-sm-6 col-md-4 block">
                                 <div class="block-head"><h4>Выделение РЕАЛЬНЫХ окончаний</h4></div>
                                 <div class="block-text">Мы подкрашиваем <b>реальные окончания глаголов</b>, а не его изменяемую часть из шаблонов спряжения, как это делают все остальные спрягалки — так вы скорее запомните все формы глаголов, потому что в этих окончаниях есть закономерность, и мы вам ее показываем.</div>
-                            </div>
-                            <div class="col-xs-12 col-sm-6 col-md-4 block">
-                                <div class="block-head"><h4>7000+ французских глаголов</h4></div>
-                                <div class="block-text">Помимо их спряжения, мы даем им характеристики — насколько глагол частоупотребим, переходный он или нет, с каким вспомогательным глаголом спрягается в составных временах, какой он
-                                    группы,
-                                    может ли иметь возвратную форму; также отмечены дефективные, безличные, книжные или устаревшие глаголы, а также имеющие локальное хождение в отдельных франкоговорящих регионах.
-                                </div>
                             </div>
                             <div class="col-xs-12 col-sm-6 col-md-4 block">
                                 <div class="block-head"><h4>Сокращенный список «некнижных» времен</h4></div>
@@ -138,8 +139,8 @@
                     </div>
                 </div>
             </div>
-            <div class="hidden-xs col-sm-4 col-md-4 col-lg-4">
-                <div class="row"></div>
+            <div class="hidden-xs col-sm-4 col-md-4 col-lg-4" style="padding: 0;">
+                {% conjugation_advertisement_body 'lf_fr_conjindex_rsb_01' %}
             </div>
         </div>
     </div>
