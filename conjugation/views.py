@@ -115,7 +115,7 @@ def switch_keyboard_layout(s: str):
 
 def get_autocomplete_list(request):
     list_len = 50
-    _term = request.GET['term']
+    _term = request.GET['term'].lower()
     term = unidecode(_term)
 
     if term[:3] == 'se ' or term[:2] == "s'":
