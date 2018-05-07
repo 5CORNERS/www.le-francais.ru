@@ -131,6 +131,7 @@ a.page-reference:hover .page-reference_title {
 }
 
 .page-reviews {
+    padding-left: 20px;
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
@@ -184,7 +185,6 @@ a.page-review:hover {
 
 .page-review_text:after {
      color: #bbb;
-    /* position: relative; */
     content: "\201D";
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     font-size: 4em;
