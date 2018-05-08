@@ -2,17 +2,21 @@
 {% load static conjugation_tags%}
 {% load site_tags %}
 
-{% block title %}{% endblock %}
-{% block description %}{% endblock %}
+{% block title %}Спряжение глагола {{ v.infinitive }} во французском языке.{% endblock %}
+{% block description %}Спряжение глагола {{ v.infinitive }} во всех наклонениях и временах с описанием особенностей его спряжения и вариантами употребления — в самом крутом в рунете онлайн спрягателе французских глаголов. {% if v.audio_url %}Можно даже услышать, как он спрягается.{% endif %}{% endblock %}
 
 
 {% block extra_head %}
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="{% static "components/jquery-ui-1.12.1.custom/jquery-ui.min.js" %}"></script>
+    <link rel="stylesheet" href="{% static "components/jquery-ui-1.12.1.custom/jquery-ui.min.css" %}">
     {% conjugation_advertisement_head "lf_fr_conj_rsb_01"%}
     {% conjugation_advertisement_head "lf_fr_conj_rsb_02"%}
 {% endblock %}
 {% block extra_css %}
     <style>
+        h4 {
+            line-height: 1.42857143;
+        }
         .noselect {
             -webkit-touch-callout: none; /* iOS Safari */
             -webkit-user-select: none; /* Safari */
@@ -89,7 +93,6 @@
 {#            border-radius: 4px;#}
 {#        }#}
     </style>
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <style>
         .ui-autocomplete-loading {
             background: white url("{% static 'images/ui-anim_basic_16x16.gif' %}") right center no-repeat;
@@ -160,6 +163,14 @@
                 return audio.pause();
             }
         }
+
+        $(document).ready(function () {
+            setTimeout(function () {
+                var blue_arrow = $("#blue_arrow")[0];
+                blue_arrow.style.display="none";
+            }, 5000)
+        });
+
     </script>
 {% endblock %}
 
@@ -224,7 +235,7 @@
                 <div class="row tenses">
                     {% for tense in table.moods.0.tenses %}
                         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h4>{{ tense.name.upper }}{% if v.audio_url%} {% if forloop.counter0 == 0 %}<a style="cursor: pointer" onclick="togglePlay()"><span data-toggle="tooltip" data-placement="top" title="Послушать" id="playPauseIcon" class="fa fa-play-circle" aria-hidden="true"></span></a>{% endif %}{% endif %}</h4></div>
+                            <div class="tense_name"><h4>{{ tense.name.upper }}{% if v.audio_url%} {% if forloop.counter0 == 0 %}<a style="cursor: pointer; margin: -2px 0;" onclick="togglePlay()"><span style="height: 19px" data-toggle="tooltip" data-placement="top" title="Послушать" id="playPauseIcon" class="fa fa-play-circle" aria-hidden="true"></span></a><img id="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}">{% endif %}{% endif %}</h4></div>
                             <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
                         </div>
                     {% endfor %}
