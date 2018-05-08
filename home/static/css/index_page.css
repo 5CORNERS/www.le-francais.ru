@@ -131,7 +131,6 @@ a.page-reference:hover .page-reference_title {
 }
 
 .page-reviews {
-    padding-left: 20px;
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
