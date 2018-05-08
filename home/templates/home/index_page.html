@@ -14,9 +14,9 @@
         <div class="row main_row">
             <div class="col-md-9 main">
                 <div class="row title">
-                    <h1>Французский язык как удовольствие</h1>
+                    <div class="col-xs-12"><h1>Французский язык как удовольствие</h1></div>
                 </div>
-                <div class="row">
+                <div class="row"><div class="col-xs-12">
                     <div class="row">
                         <div class="caption col-md-12">Этот сайт поможет вам научиться говорить по-французски. Точка.
                         </div>
@@ -35,8 +35,8 @@
                             <img class="cat-logo" src="{% static 'images/cat_logo.png' %}">
                         </div>
                     </div>
-                </div>
-                <div class="row">
+                </div></div>
+                <div class="row"><div class="col-xs-12">
                     <img class="cat-logo-mini" src="{% static 'images/hat-logo.png' %}">
                     <div class="page-references">
                         {% for reference in self.related_pages.all %}
@@ -46,9 +46,9 @@
                             </a>
                         {% endfor %}
                     </div>
-                </div>
+                </div></div>
                 <div class="row">
-                    <div class="too_many_letters">
+                    <div class="col-xs-12"><div class="too_many_letters">
                         <p>Я сознательно <b>не</b> пишу "изучить французский язык". "Изучить" — понятие более широкое.
                             Здесь
                             же
@@ -93,9 +93,9 @@
 
                         <p>Одним словом, ребята, получился классный аудио-самоучитель французского языка для начинающих,
                             поверьте.</p>
-                    </div>
+                    </div></div>
                 </div>
-                <div class="row">
+                <div class="row"><div class="col-xs-12">
                     <hr>
                     <div class="page-reviews">
                         {% random_review %}
@@ -107,8 +107,8 @@
                         <a style="float: right" href="/reussites/">Истории успеха</a>
                     </div>
                     <hr>
-                </div>
-                <div class="row home_comments">
+                </div></div>
+                <div class="row home_comments"><div class="col-xs-12">
                     <p>
                         Всё это звучит, как сказка, но я это на себе опробовал — ведь я в этих уроках такой же ученик,
                         как и
@@ -158,7 +158,7 @@
                            class="btn btn-social btn-sm btn-facebook"><span
                                 class="fa fa-facebook"></span>...а то вот ещё есть</a>
                     </p>
-                </div>
+                </div></div>
             </div>
             <div class="hidden-xs hidden-sm col-md-3 sidebar-right">
                 {% page_advert_body 'sidebar' page.page_type %}
