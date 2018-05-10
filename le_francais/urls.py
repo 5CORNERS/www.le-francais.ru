@@ -31,7 +31,7 @@ urlpatterns = [
         'forum': ForumSitemap,
         'topic': TopicSitemap,
         'wagtail': WagtailSitemap,
-        # 'conjugation': ConjugationSitemap,
+        'conjugation': ConjugationSitemap,
     }}),
 
     url(r'^django-admin/', include(admin.site.urls)),
@@ -66,7 +66,7 @@ urlpatterns = [
 
     url(r'^messages/', include('forum_messages.urls')),
     
-    url(r'^conjugation/', include('conjugation.urls',namespace='conjugation')),
+    url(r'^conjugaison/', include('conjugation.urls',namespace='conjugation')),
 
     url(r'^le_nombres/', include('le_nombres.urls')),
     url(r'^', include('social_django.urls'.format(extra), namespace='social')),

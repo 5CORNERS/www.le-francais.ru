@@ -46,7 +46,7 @@
                     <h1>{{ page.title }}</h1>
                     {% if self.audio_material != 'None' %}
                         <div class="block-audio">
-                            <audio data-downloadable>
+                            <audio data-downloadable number="{{ self.lesson_number }}">
                                 <source src="{% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}"type="audio/mpeg">
                             </audio>
                         </div>
