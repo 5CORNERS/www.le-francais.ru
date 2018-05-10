@@ -7,8 +7,8 @@ VOWELS_LIST = ['a', 'ê', 'é', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', '
 
 
 class Regle(models.Model):
-    text_rus = models.CharField(max_length=3000, default='')
-    text_fr = models.CharField(max_length=3000, default='')
+    text_rus = models.CharField(max_length=100000, default='')
+    text_fr = models.CharField(max_length=100000, default='')
 
 
 class Template(models.Model):

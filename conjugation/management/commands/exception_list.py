@@ -192,5 +192,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # fill_deffectives()
         # fill_regles()
-        # translate_regles()
-        fill_other_parametres()
+        translate_regles()
+        # fill_other_parametres()
