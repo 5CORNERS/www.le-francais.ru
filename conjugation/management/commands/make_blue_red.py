@@ -169,7 +169,7 @@ def print_list_imperative():
 
 def import_table():
     import pandas as pd
-    csv = open('conjugation/data/Table de colorisation.csv', 'r', encoding='utf-8')
+    csv = open('conjugation/data/new_color.csv', 'r', encoding='utf-8')
     table = pd.read_csv(csv)
     verb_table = []
     for i in range(len(table.to_dict()['verb'])):
@@ -186,11 +186,11 @@ def import_table():
     return verb_table
 
 
-def real_pos(str:str,main_part_len):
+def real_pos(str:str, v):
     positions_in_str = str.split(',')
     positions = []
     for pos in positions_in_str:
-        pos = int(pos) - main_part_len - 1
+        pos = int(pos) - 1
         positions.append(pos)
     return positions
 
@@ -217,7 +217,7 @@ def make_blue(table):
             if table_positions == None or table_positions == '0':
                 # print()
                 continue
-            positions = real_pos(table_positions, len(v.main_part()))
+            positions = real_pos(table_positions, v)
             t_endings = get_ending(v.template.data[MOOD_TENSE[0]][MOOD_TENSE[1]]['p'][PERSONS_MAPPING[person]]['i'])
             if isinstance(t_endings, list):
                 v.template.new_data[MOOD_TENSE[0]][MOOD_TENSE[1]]['p'][PERSONS_MAPPING[person]]['i'] = []
