@@ -10,7 +10,7 @@ from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE, SHORT_LIST
 
 @csrf_exempt
 def search(request):
-    search_string = request.POST.get('verb')
+    search_string = unidecode(request.POST.get('verb'))
     if search_string[:2] == "s'" or search_string[:3] == "se ":
         try:
             re_verb=RV.objects.get(infinitive_no_accents=search_string)
