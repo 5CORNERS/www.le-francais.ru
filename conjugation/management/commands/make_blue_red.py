@@ -169,12 +169,12 @@ def print_list_imperative():
 
 def import_table():
     import pandas as pd
-    csv = open('conjugation/data/new_color.csv', 'r', encoding='utf-8')
+    csv = open('conjugation/data/Fixed Color.csv', 'r', encoding='utf-8')
     table = pd.read_csv(csv)
     verb_table = []
-    for i in range(len(table.to_dict()['verb'])):
+    for i in range(len(table.to_dict()['VERB'])):
         verb_row = {
-            'verb': table['verb'][i],
+            'verb': table['VERB'][i],
             11: table['11'][i],
             12: table['12'][i],
             13: table['13'][i],
