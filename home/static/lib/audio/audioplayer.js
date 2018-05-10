@@ -86,9 +86,13 @@
         thePlayer.append('<div class="' + cssClass.time + ' ' + cssClass.timeCurrent + '"></div><div class="' + cssClass.bar + '"><div class="' + cssClass.barLoaded + '"></div><div class="' + cssClass.barPlayed + '"></div></div><div class="' + cssClass.time + ' ' + cssClass.timeDuration + '"></div><div class="' + cssClass.volume + '"><div class="' + cssClass.volumeButton + '" title="' + params.strVolume + '"><a href="#">' + params.strVolume + '</a></div><div class="' + cssClass.volumeAdjust + '"><div><div></div></div></div></div>');
 
         var downloadable = $(theAudio).attr('data-downloadable');
+        var lesson_number = $(theAudio).attr('number');
         if (typeof downloadable !== typeof undefined && downloadable !== false) {
           var source = $(theAudio).find('source').attr('src');
           thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="' + source + '" class="' + cssClass.downloadButton + ' glyphicon glyphicon-download"></a></div>');
+          $(theAudio).attr('id', 'lesson-audio');
+          $(theAudio).attr('number', lesson_number);
+
         }
         else {
         }
