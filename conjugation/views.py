@@ -98,7 +98,7 @@ def verb(request, se, feminin, verb, homonym):
 
     reflexive = v.can_reflexive and se
 
-
+    v.count += 1
     v.construct_conjugations()
     table = Table(v, gender, reflexive)
     template_name = 'conjugation/table.html'

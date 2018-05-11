@@ -27,6 +27,7 @@ class Template(models.Model):
 
 
 class Verb(models.Model):
+    count = models.IntegerField(default=0)
     infinitive = models.CharField(max_length=100)
     infinitive_no_accents = models.CharField(max_length=100, default='')
     template = models.ForeignKey(Template)
