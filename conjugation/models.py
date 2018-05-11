@@ -3,7 +3,7 @@ from django.db import models
 from django.urls import reverse
 from unidecode import unidecode
 
-VOWELS_LIST = ['a', 'ê', 'é', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
+VOWELS_LIST = ['a', 'ê', 'é', 'è', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
 
 
 class Regle(models.Model):
