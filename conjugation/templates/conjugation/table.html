@@ -215,7 +215,7 @@
                     <div class="col-xs-12 {% if forms_count == 2 %} col-offset-210{% elif forms_count == 3 %} col-offset-315{% else %}{% endif %}">
                         <div class="btn">
                             {% if v.can_feminin%}<a class="btn btn-primary" href="{% option_url 'gender' %}">{% if not feminin%}В женском роде{% else %}В мужском роде{% endif %}</a>{% endif %}
-                            {% if v.reflexiveverb%}<a class="btn btn-primary" href="{% option_url 'se' %}">{% if not reflexive%}В возвратной форме{% else %}В невозвратной форме{% endif %}</a>{% endif %}
+                            {% if v.can_reflexive%}<a class="btn btn-primary" href="{% option_url 'se' %}">{% if not reflexive%}В возвратной форме{% else %}В невозвратной форме{% endif %}</a>{% endif %}
                         </div>
                     </div>
                 </div>

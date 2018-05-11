@@ -90,11 +90,11 @@ def verb(request, se, feminin, verb, homonym):
         feminin = False
         gender = 0
 
-
     if v.reflexive_only and not se:
         return redirect(v.reflexiveverb.url())
-    if not v.can_reflexive and se:
+    if not (v.reflexive_only or v.can_reflexive) and se:
         return redirect(v.url())
+
 
     reflexive = v.can_reflexive and se
 
