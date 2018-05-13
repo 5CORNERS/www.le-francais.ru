@@ -493,14 +493,14 @@ FORMULAS_PASSIVE = {
                 'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_SIMPLE_PAST_3, VERB_SIMPLE_PAST_3,), (("",),),),),
                 'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_SIMPLE_PAST_4, VERB_SIMPLE_PAST_4,), (("",),),),),
                 'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_SIMPLE_PAST_5, VERB_SIMPLE_PAST_5,), (("",),),),),
-                'person_III_P': (((("ils se ", "ils s'",), ("elles s'", "elles s'",),), (VERB_SIMPLE_PAST_6, VERB_SIMPLE_PAST_6,), (("",),),),)},
+                'person_III_P': (((("ils se ", "ils s'",), ("elles se ", "elles s'",),), (VERB_SIMPLE_PAST_6, VERB_SIMPLE_PAST_6,), (("",),),),)},
             2: {
                 'person_I_S': (((("je me ", "je m'",), ("je me ", "je me ",),), (VERB_SIMPLE_PAST_1, VERB_SIMPLE_PAST_1,), (("",),),),),
                 'person_II_S': (((("tu te ", "tu t'",), ("tu te ", "tu te ",),), (VERB_SIMPLE_PAST_2, VERB_SIMPLE_PAST_2,), (("",),),),),
                 'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_SIMPLE_PAST_3, VERB_SIMPLE_PAST_3,), (("",),),),),
                 'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_SIMPLE_PAST_4, VERB_SIMPLE_PAST_4,), (("",),),),),
                 'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_SIMPLE_PAST_5, VERB_SIMPLE_PAST_5,), (("",),),),),
-                'person_III_P': (((("ils se ", "ils s'",), ("elles s'", "elles s'",),), (VERB_SIMPLE_PAST_6, VERB_SIMPLE_PAST_6,), (("",),),),)}},
+                'person_III_P': (((("ils se ", "ils s'",), ("elles se ", "elles s'",),), (VERB_SIMPLE_PAST_6, VERB_SIMPLE_PAST_6,), (("",),),),)}},
         'antérieur-past': {
             1: {
                 'person_I_S': (((("je me <i>fus</i> ", "je me <i>fus</i> ",), ("je me <i>fus</i> ", "je me <i>fus</i> ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
@@ -523,14 +523,14 @@ FORMULAS_PASSIVE = {
                 'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_FUTURE_3, VERB_FUTURE_3,), (("",),),),),
                 'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_FUTURE_4, VERB_FUTURE_4,), (("",),),),),
                 'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_FUTURE_5, VERB_FUTURE_5,), (("",),),),),
-                'person_III_P': (((("ils se ", "ils s'",), ("elles s'", "elles s'",),), (VERB_FUTURE_6, VERB_FUTURE_6,), (("",),),),)},
+                'person_III_P': (((("ils se ", "ils s'",), ("elles se ", "elles s'",),), (VERB_FUTURE_6, VERB_FUTURE_6,), (("",),),),)},
             2: {
                 'person_I_S': (((("je me ", "je m'",), ("je me ", "je me ",),), (VERB_FUTURE_1, VERB_FUTURE_1,), (("",),),),),
                 'person_II_S': (((("tu te ", "tu t'",), ("tu te ", "tu te ",),), (VERB_FUTURE_2, VERB_FUTURE_2,), (("",),),),),
                 'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_FUTURE_3, VERB_FUTURE_3,), (("",),),),),
                 'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_FUTURE_4, VERB_FUTURE_4,), (("",),),),),
                 'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_FUTURE_5, VERB_FUTURE_5,), (("",),),),),
-                'person_III_P': (((("ils se ", "ils s'",), ("elles s'", "elles s'",),), (VERB_FUTURE_6, VERB_FUTURE_6,), (("",),),),)}},
+                'person_III_P': (((("ils se ", "ils s'",), ("elles se ", "elles s'",),), (VERB_FUTURE_6, VERB_FUTURE_6,), (("",),),),)}},
         'antérieur-future': {
             1: {
                 'person_I_S': (((("je me <i>serai</i> ", "je me <i>serai</i> ",), ("je me <i>serai</i> ", "je me <i>serai</i> ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
@@ -608,19 +608,21 @@ FORMULAS_PASSIVE = {
                 'person_II_P': (((("que vous vous fussiez ", "que vous vous fussiez ",), ("que vous vous fussiez ", "que vous vous fussiez ",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
                 'person_III_P': (((("qu'ils se fussent ", "qu'ils se fussent ",), ("qu'elles se fussent ", "qu'elles se fussent ",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),)}}},
     'conditional': {
-        'present': {1: {'person_I_S': (((("je me ", "je m'",), ("je me ", "je me ",),), (VERB_CONDITIONAL_PRESENT_1, VERB_CONDITIONAL_PRESENT_1,), (("",),),),),
-                        'person_II_S': (((("tu te ", "tu t'",), ("tu te ", "tu te ",),), (VERB_CONDITIONAL_PRESENT_2, VERB_CONDITIONAL_PRESENT_2,), (("",),),),),
-                        'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_CONDITIONAL_PRESENT_3, VERB_CONDITIONAL_PRESENT_3,), (("",),),),),
-                        'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_CONDITIONAL_PRESENT_4, VERB_CONDITIONAL_PRESENT_4,), (("",),),),),
-                        'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_CONDITIONAL_PRESENT_5, VERB_CONDITIONAL_PRESENT_5,), (("",),),),),
-                        'person_III_P': (((("ils se ", "ils s'",), ("elles s'", "elles s'",),), (VERB_CONDITIONAL_PRESENT_6, VERB_CONDITIONAL_PRESENT_6,), (("",),),),)},
-                    2: {
-                        'person_I_S': (((("je me ", "je m'",), ("je me ", "je me ",),), (VERB_CONDITIONAL_PRESENT_1, VERB_CONDITIONAL_PRESENT_1,), (("",),),),),
-                        'person_II_S': (((("tu te ", "tu t'",), ("tu te ", "tu te ",),), (VERB_CONDITIONAL_PRESENT_2, VERB_CONDITIONAL_PRESENT_2,), (("",),),),),
-                        'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_CONDITIONAL_PRESENT_3, VERB_CONDITIONAL_PRESENT_3,), (("",),),),),
-                        'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_CONDITIONAL_PRESENT_4, VERB_CONDITIONAL_PRESENT_4,), (("",),),),),
-                        'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_CONDITIONAL_PRESENT_5, VERB_CONDITIONAL_PRESENT_5,), (("",),),),),
-                        'person_III_P': (((("ils se ", "ils s'",), ("elles s'", "elles s'",),), (VERB_CONDITIONAL_PRESENT_6, VERB_CONDITIONAL_PRESENT_6,), (("",),),),)}},
+        'present': {
+            1: {
+                'person_I_S': (((("je me ", "je m'",), ("je me ", "je me ",),), (VERB_CONDITIONAL_PRESENT_1, VERB_CONDITIONAL_PRESENT_1,), (("",),),),),
+                'person_II_S': (((("tu te ", "tu t'",), ("tu te ", "tu te ",),), (VERB_CONDITIONAL_PRESENT_2, VERB_CONDITIONAL_PRESENT_2,), (("",),),),),
+                'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_CONDITIONAL_PRESENT_3, VERB_CONDITIONAL_PRESENT_3,), (("",),),),),
+                'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_CONDITIONAL_PRESENT_4, VERB_CONDITIONAL_PRESENT_4,), (("",),),),),
+                'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_CONDITIONAL_PRESENT_5, VERB_CONDITIONAL_PRESENT_5,), (("",),),),),
+                'person_III_P': (((("ils se ", "ils s'",), ("elles se ", "elles s'",),), (VERB_CONDITIONAL_PRESENT_6, VERB_CONDITIONAL_PRESENT_6,), (("",),),),)},
+            2: {
+                'person_I_S': (((("je me ", "je m'",), ("je me ", "je me ",),), (VERB_CONDITIONAL_PRESENT_1, VERB_CONDITIONAL_PRESENT_1,), (("",),),),),
+                'person_II_S': (((("tu te ", "tu t'",), ("tu te ", "tu te ",),), (VERB_CONDITIONAL_PRESENT_2, VERB_CONDITIONAL_PRESENT_2,), (("",),),),),
+                'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_CONDITIONAL_PRESENT_3, VERB_CONDITIONAL_PRESENT_3,), (("",),),),),
+                'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_CONDITIONAL_PRESENT_4, VERB_CONDITIONAL_PRESENT_4,), (("",),),),),
+                'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_CONDITIONAL_PRESENT_5, VERB_CONDITIONAL_PRESENT_5,), (("",),),),),
+                'person_III_P': (((("ils se ", "ils s'",), ("elles se ", "elles s'",),), (VERB_CONDITIONAL_PRESENT_6, VERB_CONDITIONAL_PRESENT_6,), (("",),),),)}},
         'past-first': {
             1: {
                 'person_I_S': (((("je me serais ", "je me serais ",), ("je me serais ", "je me serais ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
@@ -763,14 +765,14 @@ FORMULAS_PASSIVE_X = {
                 'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_SIMPLE_PAST_3, VERB_SIMPLE_PAST_3,), (("",),),),),
                 'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_SIMPLE_PAST_4, VERB_SIMPLE_PAST_4,), (("",),),),),
                 'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_SIMPLE_PAST_5, VERB_SIMPLE_PAST_5,), (("",),),),),
-                'person_III_P': (((("ils se ", "ils s'",), ("elles s'", "elles s'",),), (VERB_SIMPLE_PAST_6, VERB_SIMPLE_PAST_6,), (("",),),),)},
+                'person_III_P': (((("ils se ", "ils s'",), ("elles se ", "elles s'",),), (VERB_SIMPLE_PAST_6, VERB_SIMPLE_PAST_6,), (("",),),),)},
             2: {
                 'person_I_S': (((("je me ", "je m'",), ("je me ", "je me ",),), (VERB_SIMPLE_PAST_1, VERB_SIMPLE_PAST_1,), (("",),),),),
                 'person_II_S': (((("tu te ", "tu t'",), ("tu te ", "tu te ",),), (VERB_SIMPLE_PAST_2, VERB_SIMPLE_PAST_2,), (("",),),),),
                 'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_SIMPLE_PAST_3, VERB_SIMPLE_PAST_3,), (("",),),),),
                 'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_SIMPLE_PAST_4, VERB_SIMPLE_PAST_4,), (("",),),),),
                 'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_SIMPLE_PAST_5, VERB_SIMPLE_PAST_5,), (("",),),),),
-                'person_III_P': (((("ils se ", "ils s'",), ("elles s'", "elles s'",),), (VERB_SIMPLE_PAST_6, VERB_SIMPLE_PAST_6,), (("",),),),)}},
+                'person_III_P': (((("ils se ", "ils s'",), ("elles se ", "elles s'",),), (VERB_SIMPLE_PAST_6, VERB_SIMPLE_PAST_6,), (("",),),),)}},
         'antérieur-past': {
             1: {
                 'person_I_S': (((("je me <i>fus</i> ", "je me <i>fus</i> ",), ("je me <i>fus</i> ", "je me <i>fus</i> ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
@@ -793,14 +795,14 @@ FORMULAS_PASSIVE_X = {
                 'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_FUTURE_3, VERB_FUTURE_3,), (("",),),),),
                 'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_FUTURE_4, VERB_FUTURE_4,), (("",),),),),
                 'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_FUTURE_5, VERB_FUTURE_5,), (("",),),),),
-                'person_III_P': (((("ils se ", "ils s'",), ("elles s'", "elles s'",),), (VERB_FUTURE_6, VERB_FUTURE_6,), (("",),),),)},
+                'person_III_P': (((("ils se ", "ils s'",), ("elles se ", "elles s'",),), (VERB_FUTURE_6, VERB_FUTURE_6,), (("",),),),)},
             2: {
                 'person_I_S': (((("je me ", "je m'",), ("je me ", "je me ",),), (VERB_FUTURE_1, VERB_FUTURE_1,), (("",),),),),
                 'person_II_S': (((("tu te ", "tu t'",), ("tu te ", "tu te ",),), (VERB_FUTURE_2, VERB_FUTURE_2,), (("",),),),),
                 'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_FUTURE_3, VERB_FUTURE_3,), (("",),),),),
                 'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_FUTURE_4, VERB_FUTURE_4,), (("",),),),),
                 'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_FUTURE_5, VERB_FUTURE_5,), (("",),),),),
-                'person_III_P': (((("ils se ", "ils s'",), ("elles s'", "elles s'",),), (VERB_FUTURE_6, VERB_FUTURE_6,), (("",),),),)}},
+                'person_III_P': (((("ils se ", "ils s'",), ("elles se ", "elles s'",),), (VERB_FUTURE_6, VERB_FUTURE_6,), (("",),),),)}},
         'antérieur-future': {
             1: {
                 'person_I_S': (((("je me <i>serai</i> ", "je me <i>serai</i> ",), ("je me <i>serai</i> ", "je me <i>serai</i> ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
@@ -883,14 +885,14 @@ FORMULAS_PASSIVE_X = {
                         'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_CONDITIONAL_PRESENT_3, VERB_CONDITIONAL_PRESENT_3,), (("",),),),),
                         'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_CONDITIONAL_PRESENT_4, VERB_CONDITIONAL_PRESENT_4,), (("",),),),),
                         'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_CONDITIONAL_PRESENT_5, VERB_CONDITIONAL_PRESENT_5,), (("",),),),),
-                        'person_III_P': (((("ils se ", "ils s'",), ("elles s'", "elles s'",),), (VERB_CONDITIONAL_PRESENT_6, VERB_CONDITIONAL_PRESENT_6,), (("",),),),)},
+                        'person_III_P': (((("ils se ", "ils s'",), ("elles se ", "elles s'",),), (VERB_CONDITIONAL_PRESENT_6, VERB_CONDITIONAL_PRESENT_6,), (("",),),),)},
                     2: {
                         'person_I_S': (((("je me ", "je m'",), ("je me ", "je me ",),), (VERB_CONDITIONAL_PRESENT_1, VERB_CONDITIONAL_PRESENT_1,), (("",),),),),
                         'person_II_S': (((("tu te ", "tu t'",), ("tu te ", "tu te ",),), (VERB_CONDITIONAL_PRESENT_2, VERB_CONDITIONAL_PRESENT_2,), (("",),),),),
                         'person_III_S': (((("il se ", "il s'",), ("elle s'", "elle s'",),), (VERB_CONDITIONAL_PRESENT_3, VERB_CONDITIONAL_PRESENT_3,), (("",),),),),
                         'person_I_P': (((("nous nous ", "nous nous ",), ("nous nous ", "nous nous ",),), (VERB_CONDITIONAL_PRESENT_4, VERB_CONDITIONAL_PRESENT_4,), (("",),),),),
                         'person_II_P': (((("vous vous ", "vous vous ",), ("vous vous ", "vous vous ",),), (VERB_CONDITIONAL_PRESENT_5, VERB_CONDITIONAL_PRESENT_5,), (("",),),),),
-                        'person_III_P': (((("ils se ", "ils s'",), ("elles s'", "elles s'",),), (VERB_CONDITIONAL_PRESENT_6, VERB_CONDITIONAL_PRESENT_6,), (("",),),),)}},
+                        'person_III_P': (((("ils se ", "ils s'",), ("elles se ", "elles s'",),), (VERB_CONDITIONAL_PRESENT_6, VERB_CONDITIONAL_PRESENT_6,), (("",),),),)}},
         'past-first': {
             1: {
                 'person_I_S': (((("je me serais ", "je me serais ",), ("je me serais ", "je me serais ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
