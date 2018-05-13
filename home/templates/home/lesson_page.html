@@ -152,6 +152,16 @@
                         {% endfor %}
                     </div>
                 </div>
+
+                {% if self.lesson_number > 5 %}<div class="row">
+                    <div class="col-xs-12">
+                        <div class="panel panel-success">
+                            <div class="panel-heading">
+                                Пожалуйста, <a href="/collecte/">поддержите наш проект</a>, чтобы мы могли делать всякие разные клёвые фишки для вас и помогать вам еще лучше и быстрее изучать французский язык!
+                            </div>
+                        </div>
+                    </div>
+                </div>{% endif %}
                 <hr>
                 <div class="row controls text-center">
                     {% assign prev self.get_prev_sibling %}
