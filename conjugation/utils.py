@@ -551,17 +551,17 @@ FORMULAS_PASSIVE = {
             1: {
                 'person_I_S': (((("que je me ", "que je m'",), ("que je me ", "que je me ",),), (VERB_SUBJUNCTIVE_PRESENT_1, VERB_SUBJUNCTIVE_PRESENT_1,), (("",),),),),
                 'person_II_S': (((("que tu te ", "que tu t'",), ("que tu te ", "que tu te ",),), (VERB_SUBJUNCTIVE_PRESENT_2, VERB_SUBJUNCTIVE_PRESENT_2,), (("",),),),),
-                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle s'", "qu'elle s'",),), (VERB_SUBJUNCTIVE_PRESENT_3, VERB_SUBJUNCTIVE_PRESENT_3,), (("",),),),),
+                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle se ", "qu'elle s'",),), (VERB_SUBJUNCTIVE_PRESENT_3, VERB_SUBJUNCTIVE_PRESENT_3,), (("",),),),),
                 'person_I_P': (((("que nous nous ", "que nous nous ",), ("que nous nous ", "que nous nous ",),), (VERB_SUBJUNCTIVE_PRESENT_4, VERB_SUBJUNCTIVE_PRESENT_4,), (("",),),),),
                 'person_II_P': (((("que vous vous ", "que vous vous ",), ("que vous vous ", "que vous vous ",),), (VERB_SUBJUNCTIVE_PRESENT_5, VERB_SUBJUNCTIVE_PRESENT_5,), (("",),),),),
-                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles s'", "qu'elles s'",),), (VERB_SUBJUNCTIVE_PRESENT_6, VERB_SUBJUNCTIVE_PRESENT_6,), (("",),),),)},
+                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles se ", "qu'elles s'",),), (VERB_SUBJUNCTIVE_PRESENT_6, VERB_SUBJUNCTIVE_PRESENT_6,), (("",),),),)},
             2: {
                 'person_I_S': (((("que je me ", "que je m'",), ("que je me ", "que je me ",),), (VERB_SUBJUNCTIVE_PRESENT_1, VERB_SUBJUNCTIVE_PRESENT_1,), (("",),),),),
                 'person_II_S': (((("que tu te ", "que tu t'",), ("que tu te ", "que tu te ",),), (VERB_SUBJUNCTIVE_PRESENT_2, VERB_SUBJUNCTIVE_PRESENT_2,), (("",),),),),
-                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle s'", "qu'elle s'",),), (VERB_SUBJUNCTIVE_PRESENT_3, VERB_SUBJUNCTIVE_PRESENT_3,), (("",),),),),
+                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle se ", "qu'elle s'",),), (VERB_SUBJUNCTIVE_PRESENT_3, VERB_SUBJUNCTIVE_PRESENT_3,), (("",),),),),
                 'person_I_P': (((("que nous nous ", "que nous nous ",), ("que nous nous ", "que nous nous ",),), (VERB_SUBJUNCTIVE_PRESENT_4, VERB_SUBJUNCTIVE_PRESENT_4,), (("",),),),),
                 'person_II_P': (((("que vous vous ", "que vous vous ",), ("que vous vous ", "que vous vous ",),), (VERB_SUBJUNCTIVE_PRESENT_5, VERB_SUBJUNCTIVE_PRESENT_5,), (("",),),),),
-                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles s'", "qu'elles s'",),), (VERB_SUBJUNCTIVE_PRESENT_6, VERB_SUBJUNCTIVE_PRESENT_6,), (("",),),),)}},
+                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles se ", "qu'elles s'",),), (VERB_SUBJUNCTIVE_PRESENT_6, VERB_SUBJUNCTIVE_PRESENT_6,), (("",),),),)}},
         'past': {
             1: {
                 'person_I_S': (((("que je me sois ", "que je me sois ",), ("que je me sois ", "que je me sois ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
@@ -581,17 +581,17 @@ FORMULAS_PASSIVE = {
             1: {
                 'person_I_S': (((("que je me ", "que je m'",), ("que je me ", "que je me ",),), (VERB_SUBJUNCTIVE_IMPERFECT_1, VERB_SUBJUNCTIVE_IMPERFECT_1,), (("",),),),),
                 'person_II_S': (((("que tu te ", "que tu t'",), ("que tu te ", "que tu te ",),), (VERB_SUBJUNCTIVE_IMPERFECT_2, VERB_SUBJUNCTIVE_IMPERFECT_2,), (("",),),),),
-                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle s'", "qu'elle s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_3, VERB_SUBJUNCTIVE_IMPERFECT_3,), (("",),),),),
+                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle se ", "qu'elle s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_3, VERB_SUBJUNCTIVE_IMPERFECT_3,), (("",),),),),
                 'person_I_P': (((("que nous nous ", "que nous nous ",), ("que nous nous ", "que nous nous ",),), (VERB_SUBJUNCTIVE_IMPERFECT_4, VERB_SUBJUNCTIVE_IMPERFECT_4,), (("",),),),),
                 'person_II_P': (((("que vous vous ", "que vous vous ",), ("que vous vous ", "que vous vous ",),), (VERB_SUBJUNCTIVE_IMPERFECT_5, VERB_SUBJUNCTIVE_IMPERFECT_5,), (("",),),),),
-                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles s'", "qu'elles s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_6, VERB_SUBJUNCTIVE_IMPERFECT_6,), (("",),),),)},
+                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles se ", "qu'elles s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_6, VERB_SUBJUNCTIVE_IMPERFECT_6,), (("",),),),)},
             2: {
                 'person_I_S': (((("que je me ", "que je m'",), ("que je me ", "que je me ",),), (VERB_SUBJUNCTIVE_IMPERFECT_1, VERB_SUBJUNCTIVE_IMPERFECT_1,), (("",),),),),
                 'person_II_S': (((("que tu te ", "que tu t'",), ("que tu te ", "que tu te ",),), (VERB_SUBJUNCTIVE_IMPERFECT_2, VERB_SUBJUNCTIVE_IMPERFECT_2,), (("",),),),),
-                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle s'", "qu'elle s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_3, VERB_SUBJUNCTIVE_IMPERFECT_3,), (("",),),),),
+                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle se ", "qu'elle s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_3, VERB_SUBJUNCTIVE_IMPERFECT_3,), (("",),),),),
                 'person_I_P': (((("que nous nous ", "que nous nous ",), ("que nous nous ", "que nous nous ",),), (VERB_SUBJUNCTIVE_IMPERFECT_4, VERB_SUBJUNCTIVE_IMPERFECT_4,), (("",),),),),
                 'person_II_P': (((("que vous vous ", "que vous vous ",), ("que vous vous ", "que vous vous ",),), (VERB_SUBJUNCTIVE_IMPERFECT_5, VERB_SUBJUNCTIVE_IMPERFECT_5,), (("",),),),),
-                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles s'", "qu'elles s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_6, VERB_SUBJUNCTIVE_IMPERFECT_6,), (("",),),),)}},
+                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles se ", "qu'elles s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_6, VERB_SUBJUNCTIVE_IMPERFECT_6,), (("",),),),)}},
         'pluperfect': {
             1: {
                 'person_I_S': (((("que je me fusse ", "que je me fusse ",), ("que je me fusse ", "que je me fusse ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
@@ -823,17 +823,17 @@ FORMULAS_PASSIVE_X = {
             1: {
                 'person_I_S': (((("que je me ", "que je m'",), ("que je me ", "que je me ",),), (VERB_SUBJUNCTIVE_PRESENT_1, VERB_SUBJUNCTIVE_PRESENT_1,), (("",),),),),
                 'person_II_S': (((("que tu te ", "que tu t'",), ("que tu te ", "que tu te ",),), (VERB_SUBJUNCTIVE_PRESENT_2, VERB_SUBJUNCTIVE_PRESENT_2,), (("",),),),),
-                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle s'", "qu'elle s'",),), (VERB_SUBJUNCTIVE_PRESENT_3, VERB_SUBJUNCTIVE_PRESENT_3,), (("",),),),),
+                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle se ", "qu'elle s'",),), (VERB_SUBJUNCTIVE_PRESENT_3, VERB_SUBJUNCTIVE_PRESENT_3,), (("",),),),),
                 'person_I_P': (((("que nous nous ", "que nous nous ",), ("que nous nous ", "que nous nous ",),), (VERB_SUBJUNCTIVE_PRESENT_4, VERB_SUBJUNCTIVE_PRESENT_4,), (("",),),),),
                 'person_II_P': (((("que vous vous ", "que vous vous ",), ("que vous vous ", "que vous vous ",),), (VERB_SUBJUNCTIVE_PRESENT_5, VERB_SUBJUNCTIVE_PRESENT_5,), (("",),),),),
-                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles s'", "qu'elles s'",),), (VERB_SUBJUNCTIVE_PRESENT_6, VERB_SUBJUNCTIVE_PRESENT_6,), (("",),),),)},
+                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles se ", "qu'elles s'",),), (VERB_SUBJUNCTIVE_PRESENT_6, VERB_SUBJUNCTIVE_PRESENT_6,), (("",),),),)},
             2: {
                 'person_I_S': (((("que je me ", "que je m'",), ("que je me ", "que je me ",),), (VERB_SUBJUNCTIVE_PRESENT_1, VERB_SUBJUNCTIVE_PRESENT_1,), (("",),),),),
                 'person_II_S': (((("que tu te ", "que tu t'",), ("que tu te ", "que tu te ",),), (VERB_SUBJUNCTIVE_PRESENT_2, VERB_SUBJUNCTIVE_PRESENT_2,), (("",),),),),
-                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle s'", "qu'elle s'",),), (VERB_SUBJUNCTIVE_PRESENT_3, VERB_SUBJUNCTIVE_PRESENT_3,), (("",),),),),
+                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle se ", "qu'elle s'",),), (VERB_SUBJUNCTIVE_PRESENT_3, VERB_SUBJUNCTIVE_PRESENT_3,), (("",),),),),
                 'person_I_P': (((("que nous nous ", "que nous nous ",), ("que nous nous ", "que nous nous ",),), (VERB_SUBJUNCTIVE_PRESENT_4, VERB_SUBJUNCTIVE_PRESENT_4,), (("",),),),),
                 'person_II_P': (((("que vous vous ", "que vous vous ",), ("que vous vous ", "que vous vous ",),), (VERB_SUBJUNCTIVE_PRESENT_5, VERB_SUBJUNCTIVE_PRESENT_5,), (("",),),),),
-                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles s'", "qu'elles s'",),), (VERB_SUBJUNCTIVE_PRESENT_6, VERB_SUBJUNCTIVE_PRESENT_6,), (("",),),),)}},
+                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles se ", "qu'elles s'",),), (VERB_SUBJUNCTIVE_PRESENT_6, VERB_SUBJUNCTIVE_PRESENT_6,), (("",),),),)}},
         'past': {
             1: {
                 'person_I_S': (((("que je me sois ", "que je me sois ",), ("que je me sois ", "que je me sois ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
@@ -853,17 +853,17 @@ FORMULAS_PASSIVE_X = {
             1: {
                 'person_I_S': (((("que je me ", "que je m'",), ("que je me ", "que je me ",),), (VERB_SUBJUNCTIVE_IMPERFECT_1, VERB_SUBJUNCTIVE_IMPERFECT_1,), (("",),),),),
                 'person_II_S': (((("que tu te ", "que tu t'",), ("que tu te ", "que tu te ",),), (VERB_SUBJUNCTIVE_IMPERFECT_2, VERB_SUBJUNCTIVE_IMPERFECT_2,), (("",),),),),
-                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle s'", "qu'elle s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_3, VERB_SUBJUNCTIVE_IMPERFECT_3,), (("",),),),),
+                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle se '", "qu'elle s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_3, VERB_SUBJUNCTIVE_IMPERFECT_3,), (("",),),),),
                 'person_I_P': (((("que nous nous ", "que nous nous ",), ("que nous nous ", "que nous nous ",),), (VERB_SUBJUNCTIVE_IMPERFECT_4, VERB_SUBJUNCTIVE_IMPERFECT_4,), (("",),),),),
                 'person_II_P': (((("que vous vous ", "que vous vous ",), ("que vous vous ", "que vous vous ",),), (VERB_SUBJUNCTIVE_IMPERFECT_5, VERB_SUBJUNCTIVE_IMPERFECT_5,), (("",),),),),
-                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles s'", "qu'elles s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_6, VERB_SUBJUNCTIVE_IMPERFECT_6,), (("",),),),)},
+                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles se ", "qu'elles s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_6, VERB_SUBJUNCTIVE_IMPERFECT_6,), (("",),),),)},
             2: {
                 'person_I_S': (((("que je me ", "que je m'",), ("que je me ", "que je me ",),), (VERB_SUBJUNCTIVE_IMPERFECT_1, VERB_SUBJUNCTIVE_IMPERFECT_1,), (("",),),),),
                 'person_II_S': (((("que tu te ", "que tu t'",), ("que tu te ", "que tu te ",),), (VERB_SUBJUNCTIVE_IMPERFECT_2, VERB_SUBJUNCTIVE_IMPERFECT_2,), (("",),),),),
-                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle s'", "qu'elle s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_3, VERB_SUBJUNCTIVE_IMPERFECT_3,), (("",),),),),
+                'person_III_S': (((("qu'il se ", "qu'il s'",), ("qu'elle se ", "qu'elle s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_3, VERB_SUBJUNCTIVE_IMPERFECT_3,), (("",),),),),
                 'person_I_P': (((("que nous nous ", "que nous nous ",), ("que nous nous ", "que nous nous ",),), (VERB_SUBJUNCTIVE_IMPERFECT_4, VERB_SUBJUNCTIVE_IMPERFECT_4,), (("",),),),),
                 'person_II_P': (((("que vous vous ", "que vous vous ",), ("que vous vous ", "que vous vous ",),), (VERB_SUBJUNCTIVE_IMPERFECT_5, VERB_SUBJUNCTIVE_IMPERFECT_5,), (("",),),),),
-                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles s'", "qu'elles s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_6, VERB_SUBJUNCTIVE_IMPERFECT_6,), (("",),),),)}},
+                'person_III_P': (((("qu'ils se ", "qu'ils s'",), ("qu'elles se ", "qu'elles s'",),), (VERB_SUBJUNCTIVE_IMPERFECT_6, VERB_SUBJUNCTIVE_IMPERFECT_6,), (("",),),),)}},
         'pluperfect': {
             1: {
                 'person_I_S': (((("que je me fusse ", "que je me fusse ",), ("que je me fusse ", "que je me fusse ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
