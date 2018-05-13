@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from unidecode import unidecode
 
 from conjugation.models import Verb as V, ReflexiveVerb as RV
-from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE, SHORT_LIST
+from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE, SHORT_LIST, FORMULAS_PASSIVE_X
 
 
 @csrf_exempt
@@ -263,7 +263,28 @@ class Person:
         if not reflexive:
             parts = FORMULAS[self.mood_name][self.tense_name][maison][self.person_name][switch]
         else:
-            parts = FORMULAS_PASSIVE[self.mood_name][self.tense_name][maison][self.person_name][switch]
+            if self.v.infinitive in [
+            "plaire",
+            "complaire",
+            "déplaire",
+            "rire",
+            "convenir",
+            "nuire",
+            "mentir",
+            "ressembler",
+            "sourire",
+            "suffire",
+            "survivre",
+            "acheter",
+            "succéder",
+            "téléphoner",
+            "parler",
+            "demander",
+            "ntre-nuire",
+            ]:
+                parts = FORMULAS_PASSIVE_X[self.mood_name][self.tense_name][maison][self.person_name][switch]
+            else:
+                parts = FORMULAS_PASSIVE[self.mood_name][self.tense_name][maison][self.person_name][switch]
         path_to_conjugation = parts[1][gender]
         if path_to_conjugation == None:
             return '-', '', ''
