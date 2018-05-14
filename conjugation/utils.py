@@ -358,9 +358,9 @@ FORMULAS = {
                 'person_II_P': (((("ayez ",),), (VERB_PAST_PARTICIPLE_P_M,), (("",),),),),
             },
             2: {
-                'person_II_S': (((("sois ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
-                'person_I_P': (((("souons ",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
-                'person_II_P': (((("soyez ",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
+                'person_II_S': (((("sois ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
+                'person_I_P': (((("souons ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
+                'person_II_P': (((("soyez ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
             },
         },
     },
