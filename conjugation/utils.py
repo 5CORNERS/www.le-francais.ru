@@ -354,8 +354,8 @@ FORMULAS = {
         'past': {
             1: {
                 'person_II_S': (((("aie ",),), (VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
-                'person_I_P': (((("ayons ",),), (VERB_PAST_PARTICIPLE_P_M,), (("",),),),),
-                'person_II_P': (((("ayez ",),), (VERB_PAST_PARTICIPLE_P_M,), (("",),),),),
+                'person_I_P': (((("ayons ",),), (VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
+                'person_II_P': (((("ayez ",),), (VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
             },
             2: {
                 'person_II_S': (((("sois ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
