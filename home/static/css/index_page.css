@@ -1,9 +1,9 @@
-.advert_top{
+.advert_top {
     margin-top: 273px;
 }
 
 @media (max-width: 1199px) {
-    .advert_top{
+    .advert_top {
         margin-top: 359px;
     }
 }
@@ -92,7 +92,7 @@ a.page-reference:hover .page-reference_title {
 .cat-logo-mini {
     position: relative;
     z-index: 2;
-    top: -20px;
+    top: -5px;
     float: right;
     margin-bottom: -47px;
     display: none;
@@ -100,7 +100,7 @@ a.page-reference:hover .page-reference_title {
 
 @media (max-width: 1199px) {
     .cat-logo {
-        top: 76px;
+        top: 120px;
     }
 
     .too_many_letters {
@@ -109,7 +109,7 @@ a.page-reference:hover .page-reference_title {
 
 @media (max-width: 991px) {
     .cat-logo {
-        top: 72px;
+        top: 85px;
     }
 
     .too_many_letters {
@@ -174,7 +174,7 @@ a.page-review:hover {
 .page-review_text:before {
     color: #bbb;
     content: "\201C";
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 4em;
     line-height: .1em;
     margin-right: .2em;
@@ -183,9 +183,9 @@ a.page-review:hover {
 }
 
 .page-review_text:after {
-     color: #bbb;
+    color: #bbb;
     content: "\201D";
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 4em;
     line-height: .1em;
     float: right;
@@ -200,4 +200,39 @@ a.page-review:hover {
     margin-bottom: 1em;
     font-weight: bold;
     font-style: italic;
+}
+
+@media (min-height: 1200px) {
+
+    .col-offset-336 {
+        padding-right: 336px;
+        z-index: 0;
+    }
+
+    .col-fixed-336 {
+        width: 336px;
+        position: absolute;
+        margin-left: -336px;
+        z-index: 1;
+    }
+}
+
+@media (min-width: 992px) {
+    .col-offset-336 {
+        padding-right: 300px;
+        z-index: 0;
+    }
+
+    .col-fixed-336 {
+        width: 300px;
+        position: absolute;
+        margin-left: -300px;
+        z-index: 1;
+    }
+}
+
+@media (max-width: 992px) {
+    .col-fixed-336 {
+        padding-right: inherit;
+    }
 }
