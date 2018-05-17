@@ -2,8 +2,8 @@
 {% load static conjugation_tags%}
 {% load site_tags %}
 
-{% block title %}Спряжение глагола {{ v.infinitive }} во французском языке.{% endblock %}
-{% block description %}Спряжение глагола {{ v.infinitive }} во всех наклонениях и временах с описанием особенностей его спряжения и вариантами употребления — в самом крутом в рунете онлайн спрягателе французских глаголов. {% if v.audio_url %}Можно даже услышать, как он спрягается.{% endif %}{% endblock %}
+{% block title %}Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% end if %} во французском языке.{% endblock %}
+{% block description %}Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% end if %} во всех наклонениях и временах с описанием особенностей его спряжения и вариантами употребления — в самом крутом в рунете онлайн спрягателе французских глаголов. {% if v.audio_url %}Можно даже услышать, как он спрягается.{% endif %}{% endblock %}
 
 
 {% block extra_head %}
@@ -182,7 +182,7 @@
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
                     <div class="col-xs-12">
-                        <h1 style="margin-bottom: 25px">Спряжение глагола {{ v.infinitive }}</h1>{% if v.audio_url%}<audio id="audio" src="{{ v.audio_url }}" preload="auto"></audio>{% endif %}
+                        <h1 style="margin-bottom: 25px">Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% end if %}</h1>{% if v.audio_url%}<audio id="audio" src="{{ v.audio_url }}" preload="auto"></audio>{% endif %}
                     </div>
                 </div>
                 <div class="row">
