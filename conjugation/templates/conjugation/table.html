@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="{% static "components/jquery-ui-1.12.1.custom/jquery-ui.min.css" %}">
     {% conjugation_advertisement_head "lf_fr_conj_rsb_01"%}
     {% conjugation_advertisement_head "lf_fr_conj_rsb_02"%}
+    {% conjugation_advertisement_head "lf_fr_conj_mob_01"%}
+
 {% endblock %}
 {% block extra_css %}
     <style>
@@ -181,6 +183,11 @@
         <div class="row first_row">
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
+                    {% if flavour == 'mobile' %}
+                        <div class="col-xs-12">
+                            {% conjugation_advertisement_body "lf_fr_conj_mob_01"%}
+                        </div>
+                    {% endif %}
                     <div class="col-xs-12">
                         {% include 'conjugation/verb_form.html' %}
                     </div>
@@ -233,7 +240,9 @@
                 </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6" style="text-align: center">
+                {% if flavour == 'desktop' %}
                 {% conjugation_advertisement_body "lf_fr_conj_rsb_01"%}
+                {% endif %}
             </div>
         </div>
 
@@ -333,6 +342,11 @@
                     </div>
                 </div>
                 <div id="regle" class="row regle">
+                    <div class="col-xs-12" style="text-align: center">
+                        {% if flavour == 'mobile' %}
+                        {% conjugation_advertisement_body "lf_fr_conj_mob_02"%}
+                    {% endif %}
+                    </div>
                     <div class="col-xs-12">
                         {% if v.regle%}<h3>Особенности спряжения глагола {{ v.infinitive }}</h3><p>{{ v.regle.text_rus | safe }}</p>{% endif %}
                     </div>
