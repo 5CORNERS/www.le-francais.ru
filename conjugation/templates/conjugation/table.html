@@ -190,6 +190,13 @@
                         <h1 style="margin-bottom: 25px">Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %}</h1>{% if v.audio_url and not reflexive%}<audio id="audio" src="{{ v.audio_url }}" preload="auto"></audio>{% endif %}
                     </div>
                 </div>
+                {% if flavour == "mobile" %}
+                <div class="row">
+                    <div class="col-xs-12">
+                        Читайте об особенностях спряжения {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} в <a href="#regle">конце страницы</a>.
+                    </div>
+                </div>
+                {% endif %}
                 <div class="row">
                     <div class="col-xs-12">
                         <ul class="nav nav-tabs">
@@ -326,6 +333,7 @@
                     </div>
                 </div>
                 <div class="row regle">
+                <div id="regle" class="row regle">
                     <div class="col-xs-12">
                         {% if v.regle%}<h3>Особенности спряжения глагола {{ v.infinitive }}</h3><p>{{ v.regle.text_rus | safe }}</p>{% endif %}
                     </div>
