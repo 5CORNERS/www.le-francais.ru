@@ -182,12 +182,12 @@
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
                     <div class="col-xs-12">
-                        <h1 style="margin-bottom: 25px">Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %}</h1>{% if v.audio_url%}<audio id="audio" src="{{ v.audio_url }}" preload="auto"></audio>{% endif %}
+                        {% include 'conjugation/verb_form.html' %}
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-xs-12">
-                        {% include 'conjugation/verb_form.html' %}
+                        <h1 style="margin-bottom: 25px">Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %}</h1>{% if v.audio_url and not reflexive%}<audio id="audio" src="{{ v.audio_url }}" preload="auto"></audio>{% endif %}
                     </div>
                 </div>
                 <div class="row">
