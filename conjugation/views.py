@@ -19,12 +19,12 @@ def search(request):
             re_verb=RV.objects.get(infinitive_no_accents=search_string)
         except:
             return render(request,'conjugation/verb_not_found.html', {'search_string':search_string})
-        return redirect(re_verb.url())
+        return redirect(re_verb.get_absolute_url())
     try:
         verb = V.objects.get(infinitive_no_accents=search_string)
     except:
         return render(request,'conjugation/verb_not_found.html', {'search_string':search_string})
-    return redirect(verb.url())
+    return redirect(verb.get_absolute_url())
 
 
 def index(request):
@@ -94,9 +94,12 @@ def verb(request, se, feminin, verb, homonym):
         gender = 0
 
     if v.reflexive_only and not se:
-        return redirect(v.reflexiveverb.url())
+        return redirect(v.reflexiveverb.get_absolute_url())
     if not (v.reflexive_only or v.can_reflexive) and se:
-        return redirect(v.url())
+        return redirect(v.get_absolute_url())
+
+    if (se=="se_" and v.reflexiveverb.is_short()) or (se=="s_" and not v.reflexiveverb.is_short()):
+        return redirect(v.reflexiveverb.get_absolute_url())
 
 
     reflexive = v.can_reflexive and se
@@ -149,7 +152,7 @@ def get_autocomplete_list(request):
 
 
         autocomplete_list.append(
-            dict(url=v.url(), verb=v.infinitive, html=html))
+            dict(url=v.get_absolute_url(), verb=v.infinitive, html=html))
     return JsonResponse(autocomplete_list, safe=False)
 
 
