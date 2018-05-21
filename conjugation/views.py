@@ -293,9 +293,9 @@ class Person:
             return '-', '', ''
 
         if isinstance(verb_forms, list):
-            pronoun = -1 if verb_forms[0][0] in self.VOWELS_LIST else 0
+            pronoun = -1 if verb_forms[0][0] in self.VOWELS_LIST and not self.v.aspirate_h else 0
         else:
-            pronoun = -1 if verb_forms[0] in self.VOWELS_LIST else 0
+            pronoun = -1 if verb_forms[0] in self.VOWELS_LIST and not self.v.aspirate_h else 0
 
         return parts[0][gender][pronoun], verb_forms, parts[2][gender][pronoun]
 
