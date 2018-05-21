@@ -94,6 +94,7 @@ class Verb(models.Model):
         s += 'крайне редко употребим, ' if self.is_rare else ''
         s += 'устаревший, ' if self.is_archaique else ''
         s += 'используется, как слэнг, ' if self.is_slang else ''
+        s += 'начинается с h придыхательного, ' if self.aspirate_h else ''
         s = s[:-2]+'.'
         return s
 
