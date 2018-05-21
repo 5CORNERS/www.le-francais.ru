@@ -101,7 +101,7 @@ class Verb(models.Model):
         return reverse('conjugation:verb', kwargs=dict(verb=self.infinitive_no_accents))
 
     def url(self):
-        return reverse('conjugation:verb', kwargs=dict(verb=self.infinitive_no_accents))
+        return self.get_absolute_url()
 
     def __str__(self):
         return self.infinitive
@@ -153,14 +153,24 @@ class ReflexiveVerb(models.Model):
 
     is_impersonal = models.BooleanField(default=False)
 
+    def is_short(self):
+        if self.verb.infnitive_first_letter_is_vowel():
+            return True
+        else:
+            return False
+
     def create_no_accents(self):
         self.infinitive_no_accents = unidecode(self.infinitive)
 
     def url(self):
-        return reverse('conjugation:verb', kwargs=dict(se='se_', verb=self.verb.infinitive_no_accents))
+        return self.get_absolute_url()
 
     def get_absolute_url(self):
-        return reverse('conjugation:verb', kwargs=dict(se='se_', verb=self.verb.infinitive_no_accents))
+        if self.is_short():
+            particule = "s_"
+        else:
+            particule = "se_"
+        return reverse('conjugation:verb', kwargs=dict(se=particule, verb=self.verb.infinitive_no_accents))
 
     def rename(self):
         self.infinitive = "s'" + self.verb.infinitive if self.verb.infnitive_first_letter_is_vowel() and not self.verb.aspirate_h else "se " + self.verb.infinitive
