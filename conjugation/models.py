@@ -122,7 +122,7 @@ class Verb(models.Model):
         return reverse('conjugation:verb', kwargs=dict(femenin='feminin_', verb=self.infinitive_no_accents, se='se_'))
 
     def infnitive_first_letter_is_vowel(self):
-        return True if self.infinitive[0] in VOWELS_LIST else False
+        return True if self.infinitive[0] in VOWELS_LIST and not self.aspirate_h else False
 
     def construct_conjugations(self):
         self.conjugations = {}
@@ -161,6 +161,11 @@ class ReflexiveVerb(models.Model):
 
     def get_absolute_url(self):
         return reverse('conjugation:verb', kwargs=dict(se='se_', verb=self.verb.infinitive_no_accents))
+
+    def rename(self):
+        self.infinitive = "s'" + self.verb.infinitive if self.verb.infnitive_first_letter_is_vowel() and not self.verb.aspirate_h else "se " + self.verb.infinitive
+        self.create_no_accents()
+        self.save()
 
 
 class DeffectivePattern(models.Model):
