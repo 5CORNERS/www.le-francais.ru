@@ -15,11 +15,11 @@ from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicVi
 from home.views import change_username, LeFrancaisWagtailSitemap as WagtailSitemap
 from profiles.views import UserTopics, UserPosts
 from search import views as search_views
-from wagtail.contrib.wagtailsitemaps.views import sitemap
+from wagtail.contrib.sitemaps.views import sitemap
 # from registration.backends.default.views import RegistrationView
-from wagtail.wagtailadmin import urls as wagtailadmin_urls
-from wagtail.wagtailcore import urls as wagtail_urls
-from wagtail.wagtaildocs import urls as wagtaildocs_urls
+from wagtail.admin import urls as wagtailadmin_urls
+from wagtail.core import urls as wagtail_urls
+from wagtail.documents import urls as wagtaildocs_urls
 
 from conjugation.sitemap import ConjugationSitemap
 

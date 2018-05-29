@@ -1,6 +1,6 @@
 from django.core.management import BaseCommand, CommandError
 
-from wagtail.wagtailcore.models import Page
+from wagtail.core.models import Page
 
 class Command(BaseCommand):
     def add_arguments(self, parser):

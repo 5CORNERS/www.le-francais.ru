@@ -1,6 +1,6 @@
-from wagtail.wagtailcore.models import Page
-from wagtail.wagtailredirects.models import Redirect
-from wagtail.wagtailcore.blocks.stream_block import StreamValue
+from wagtail.core.models import Page
+from wagtail.contrib.redirects.models import Redirect
+from wagtail.core.blocks.stream_block import StreamValue
 
 
 def import_table(fp, split_by='	'):

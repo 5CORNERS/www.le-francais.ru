@@ -1,5 +1,5 @@
-from wagtail.wagtailcore import blocks
-from wagtail.wagtailcore.blocks.field_block import URLBlock, BooleanBlock, CharBlock
+from wagtail.core import blocks
+from wagtail.core.blocks.field_block import URLBlock, BooleanBlock, CharBlock
 
 
 class AudioBlock(blocks.StructBlock):

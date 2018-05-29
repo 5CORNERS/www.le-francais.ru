@@ -1,6 +1,6 @@
-from wagtail.wagtailcore.blocks import StructBlock
-from wagtail.wagtailsnippets.blocks import SnippetChooserBlock
-from wagtail.wagtailcore.blocks import BooleanBlock
+from wagtail.core.blocks import StructBlock
+from wagtail.snippets.blocks import SnippetChooserBlock
+from wagtail.core.blocks import BooleanBlock
 
 from home.models import InlineAdvertisementSnippet
 

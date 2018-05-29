@@ -12,7 +12,7 @@ import xmltodict
 from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
-from wagtail.wagtailcore.models import Page, Site
+from wagtail.core.models import Page, Site
 
 from home.models import DefaultPage, LessonPage, PageWithSidebar
 

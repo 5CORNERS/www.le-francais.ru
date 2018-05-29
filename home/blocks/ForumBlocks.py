@@ -1,5 +1,5 @@
-from wagtail.wagtailcore import blocks
-from wagtail.wagtailcore.blocks.field_block import IntegerBlock
+from wagtail.core import blocks
+from wagtail.core.blocks.field_block import IntegerBlock
 
 
 class TopicBlock(blocks.StructBlock):
