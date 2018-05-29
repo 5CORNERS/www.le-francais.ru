@@ -20,7 +20,7 @@ def get_snippet_name(value, page_type):
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('arg', type=str, nargs='+')
+        parser.add_argument('arg', type=int, nargs='+')
         pass
     def handle(self, *args, **options):
         for page in LessonPage.objects.all():
