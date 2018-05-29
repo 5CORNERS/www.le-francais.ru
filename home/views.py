@@ -21,8 +21,8 @@ from pybb.models import Post, Topic
 from pybb.permissions import perms
 from pybb.views import AddPostView, EditPostView, TopicView
 from social_core.utils import setting_name
-from wagtail.contrib.wagtailsitemaps.sitemap_generator import Sitemap as WagtailSitemap
-from wagtail.wagtailcore.models import Page
+from wagtail.contrib.sitemaps.sitemap_generator import Sitemap as WagtailSitemap
+from wagtail.core.models import Page
 
 from home.models import PageWithSidebar, LessonPage, ArticlePage
 from home.src.site_import import import_content

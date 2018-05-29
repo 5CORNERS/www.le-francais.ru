@@ -6,13 +6,13 @@ from django.db.models.fields import TextField
 from django.forms import CheckboxInput
 from modelcluster.fields import ParentalKey
 from pybb.models import Topic, Forum, Category
-from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel, FieldPanel, MultiFieldPanel, PageChooserPanel, \
+from wagtail.admin.edit_handlers import StreamFieldPanel, FieldPanel, MultiFieldPanel, PageChooserPanel, \
     InlinePanel
-from wagtail.wagtailcore.blocks import RichTextBlock, RawHTMLBlock, ListBlock, StructBlock
-from wagtail.wagtailcore.fields import StreamField
-from wagtail.wagtailcore.models import Page, Orderable
-from wagtail.wagtailimages.blocks import ImageChooserBlock
-from wagtail.wagtailsnippets.models import register_snippet
+from wagtail.core.blocks import RichTextBlock, RawHTMLBlock, ListBlock, StructBlock
+from wagtail.core.fields import StreamField
+from wagtail.core.models import Page, Orderable
+from wagtail.images.blocks import ImageChooserBlock
+from wagtail.snippets.models import register_snippet
 
 from home.blocks.AudioBlock import AudioBlock
 from home.blocks.DocumentViewerBlock import DocumentViewerBlock

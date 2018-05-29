@@ -1,7 +1,7 @@
-from wagtail.wagtailcore import blocks
-from wagtail.wagtailcore.blocks.field_block import RichTextBlock, RawHTMLBlock, CharBlock
-from wagtail.wagtailcore.blocks.stream_block import StreamBlock
-from wagtail.wagtailimages.blocks import ImageChooserBlock
+from wagtail.core import blocks
+from wagtail.core.blocks.field_block import RichTextBlock, RawHTMLBlock, CharBlock
+from wagtail.core.blocks.stream_block import StreamBlock
+from wagtail.images.blocks import ImageChooserBlock
 
 from home.blocks.AudioBlock import AudioBlock
 from home.blocks.DocumentViewerBlock import DocumentViewerBlock

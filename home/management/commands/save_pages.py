@@ -1,7 +1,7 @@
 from django.core.management import BaseCommand
 
 from home.models import LessonPage
-from wagtail.wagtailcore.models import PageRevision
+from wagtail.core.models import PageRevision
 from django.contrib.auth.models import User
 
 
