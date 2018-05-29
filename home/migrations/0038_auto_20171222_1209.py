@@ -4,9 +4,9 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import home.blocks.TabsBlock
-import wagtail.wagtailcore.blocks
-import wagtail.wagtailcore.fields
-import wagtail.wagtailimages.blocks
+import wagtail.core.blocks
+import wagtail.core.fields
+import wagtail.images.blocks
 
 
 class Migration(migrations.Migration):
@@ -29,26 +29,26 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='articlepage',
             name='body',
-            field=wagtail.wagtailcore.fields.StreamField((('paragraph', wagtail.wagtailcore.blocks.RichTextBlock()), ('image', wagtail.wagtailimages.blocks.ImageChooserBlock()), ('document', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.CharBlock()),))), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock()), ('audio', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.CharBlock()), ('downloadable', wagtail.wagtailcore.blocks.BooleanBlock(required=False))))), ('video', wagtail.wagtailcore.blocks.StructBlock((('source', wagtail.wagtailcore.blocks.CharBlock()), ('poster', wagtail.wagtailcore.blocks.CharBlock(required=False))))))),
+            field=wagtail.core.fields.StreamField((('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('document', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.CharBlock()),))), ('html', wagtail.core.blocks.RawHTMLBlock()), ('audio', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.CharBlock()), ('downloadable', wagtail.core.blocks.BooleanBlock(required=False))))), ('video', wagtail.core.blocks.StructBlock((('source', wagtail.core.blocks.CharBlock()), ('poster', wagtail.core.blocks.CharBlock(required=False))))))),
         ),
         migrations.AlterField(
             model_name='lessonpage',
             name='body',
-            field=wagtail.wagtailcore.fields.StreamField((('paragraph', wagtail.wagtailcore.blocks.RichTextBlock()), ('image', wagtail.wagtailimages.blocks.ImageChooserBlock()), ('document', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.CharBlock()),))), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock()), ('audio', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.CharBlock()), ('downloadable', wagtail.wagtailcore.blocks.BooleanBlock(required=False))))), ('video', wagtail.wagtailcore.blocks.StructBlock((('source', wagtail.wagtailcore.blocks.CharBlock()), ('poster', wagtail.wagtailcore.blocks.CharBlock(required=False))))), ('post', wagtail.wagtailcore.blocks.StructBlock((('post_id', wagtail.wagtailcore.blocks.IntegerBlock()),))))),
+            field=wagtail.core.fields.StreamField((('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('document', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.CharBlock()),))), ('html', wagtail.core.blocks.RawHTMLBlock()), ('audio', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.CharBlock()), ('downloadable', wagtail.core.blocks.BooleanBlock(required=False))))), ('video', wagtail.core.blocks.StructBlock((('source', wagtail.core.blocks.CharBlock()), ('poster', wagtail.core.blocks.CharBlock(required=False))))), ('post', wagtail.core.blocks.StructBlock((('post_id', wagtail.core.blocks.IntegerBlock()),))))),
         ),
         migrations.AlterField(
             model_name='lessonpage',
             name='dictionary',
-            field=wagtail.wagtailcore.fields.StreamField((('paragraph', wagtail.wagtailcore.blocks.RichTextBlock()), ('image', wagtail.wagtailimages.blocks.ImageChooserBlock()), ('document', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.CharBlock()),))), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock()), ('audio', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.CharBlock()), ('downloadable', wagtail.wagtailcore.blocks.BooleanBlock(required=False))))), ('video', wagtail.wagtailcore.blocks.StructBlock((('source', wagtail.wagtailcore.blocks.CharBlock()), ('poster', wagtail.wagtailcore.blocks.CharBlock(required=False))))), ('translations', wagtail.wagtailcore.blocks.ListBlock(wagtail.wagtailcore.blocks.StructBlock((('word', wagtail.wagtailcore.blocks.RichTextBlock(required=True)), ('translation', wagtail.wagtailcore.blocks.RichTextBlock(required=True)))), template='blocks/transcriptions.html')), ('post', wagtail.wagtailcore.blocks.StructBlock((('post_id', wagtail.wagtailcore.blocks.IntegerBlock()),)))), blank=True, null=True),
+            field=wagtail.core.fields.StreamField((('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('document', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.CharBlock()),))), ('html', wagtail.core.blocks.RawHTMLBlock()), ('audio', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.CharBlock()), ('downloadable', wagtail.core.blocks.BooleanBlock(required=False))))), ('video', wagtail.core.blocks.StructBlock((('source', wagtail.core.blocks.CharBlock()), ('poster', wagtail.core.blocks.CharBlock(required=False))))), ('translations', wagtail.core.blocks.ListBlock(wagtail.core.blocks.StructBlock((('word', wagtail.core.blocks.RichTextBlock(required=True)), ('translation', wagtail.core.blocks.RichTextBlock(required=True)))), template='blocks/transcriptions.html')), ('post', wagtail.core.blocks.StructBlock((('post_id', wagtail.core.blocks.IntegerBlock()),)))), blank=True, null=True),
         ),
         migrations.AlterField(
             model_name='pagewithsidebar',
             name='body',
-            field=wagtail.wagtailcore.fields.StreamField((('paragraph', wagtail.wagtailcore.blocks.RichTextBlock()), ('image', wagtail.wagtailimages.blocks.ImageChooserBlock()), ('document', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.CharBlock()),))), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock()), ('audio', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.CharBlock()), ('downloadable', wagtail.wagtailcore.blocks.BooleanBlock(required=False))))), ('video', wagtail.wagtailcore.blocks.StructBlock((('source', wagtail.wagtailcore.blocks.CharBlock()), ('poster', wagtail.wagtailcore.blocks.CharBlock(required=False))))), ('tabs', home.blocks.TabsBlock.TabsBlock()), ('translations', wagtail.wagtailcore.blocks.ListBlock(wagtail.wagtailcore.blocks.StructBlock((('word', wagtail.wagtailcore.blocks.RichTextBlock(required=True)), ('translation', wagtail.wagtailcore.blocks.RichTextBlock(required=True)))), template='blocks/transcriptions.html')), ('post', wagtail.wagtailcore.blocks.StructBlock((('post_id', wagtail.wagtailcore.blocks.IntegerBlock()),))), ('choosen_reviews', wagtail.wagtailcore.blocks.StructBlock(())))),
+            field=wagtail.core.fields.StreamField((('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('document', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.CharBlock()),))), ('html', wagtail.core.blocks.RawHTMLBlock()), ('audio', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.CharBlock()), ('downloadable', wagtail.core.blocks.BooleanBlock(required=False))))), ('video', wagtail.core.blocks.StructBlock((('source', wagtail.core.blocks.CharBlock()), ('poster', wagtail.core.blocks.CharBlock(required=False))))), ('tabs', home.blocks.TabsBlock.TabsBlock()), ('translations', wagtail.core.blocks.ListBlock(wagtail.core.blocks.StructBlock((('word', wagtail.core.blocks.RichTextBlock(required=True)), ('translation', wagtail.core.blocks.RichTextBlock(required=True)))), template='blocks/transcriptions.html')), ('post', wagtail.core.blocks.StructBlock((('post_id', wagtail.core.blocks.IntegerBlock()),))), ('choosen_reviews', wagtail.core.blocks.StructBlock(())))),
         ),
         migrations.AlterField(
             model_name='placementadvertisementsnippet',
             name='body',
-            field=wagtail.wagtailcore.fields.StreamField((('html', wagtail.wagtailcore.blocks.RawHTMLBlock()),), blank=True),
+            field=wagtail.core.fields.StreamField((('html', wagtail.core.blocks.RawHTMLBlock()),), blank=True),
         ),
     ]

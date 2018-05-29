@@ -1,7 +1,7 @@
 from django.core.management import BaseCommand
 from home.models import LessonPage
 from ._private import create_redirect
-from wagtail.wagtailredirects.models import Redirect
+from wagtail.contrib.redirects.models import Redirect
 
 
 class Command(BaseCommand):

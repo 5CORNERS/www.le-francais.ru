@@ -6,9 +6,9 @@ from django.db import migrations, models
 import django.db.models.deletion
 import home.blocks.TabsBlock
 import modelcluster.fields
-import wagtail.wagtailcore.blocks
-import wagtail.wagtailcore.fields
-import wagtail.wagtailimages.blocks
+import wagtail.core.blocks
+import wagtail.core.fields
+import wagtail.images.blocks
 
 
 class Migration(migrations.Migration):
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('page_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='wagtailcore.Page')),
                 ('reference_title', models.TextField(blank=True, null=True)),
                 ('subtitle', models.TextField(blank=True, null=True)),
-                ('body', wagtail.wagtailcore.fields.StreamField((('paragraph', wagtail.wagtailcore.blocks.RichTextBlock()), ('image', wagtail.wagtailimages.blocks.ImageChooserBlock()), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock()), ('audio', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.URLBlock()), ('downloadable', wagtail.wagtailcore.blocks.BooleanBlock(required=False)))))))),
+                ('body', wagtail.core.fields.StreamField((('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('html', wagtail.core.blocks.RawHTMLBlock()), ('audio', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.URLBlock()), ('downloadable', wagtail.core.blocks.BooleanBlock(required=False)))))))),
             ],
             options={
                 'abstract': False,
@@ -68,10 +68,10 @@ class Migration(migrations.Migration):
                 ('summary', models.CharField(blank=True, max_length=100, null=True)),
                 ('repetition_material', models.CharField(blank=True, max_length=100, null=True)),
                 ('audio_material', models.CharField(blank=True, max_length=100, null=True)),
-                ('comments_for_lesson', wagtail.wagtailcore.fields.StreamField((('paragraph', wagtail.wagtailcore.blocks.RichTextBlock()), ('image', wagtail.wagtailimages.blocks.ImageChooserBlock()), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock()), ('audio', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.URLBlock()), ('downloadable', wagtail.wagtailcore.blocks.BooleanBlock(required=False)))))), blank=True, null=True)),
-                ('body', wagtail.wagtailcore.fields.StreamField((('paragraph', wagtail.wagtailcore.blocks.RichTextBlock()), ('image', wagtail.wagtailimages.blocks.ImageChooserBlock()), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock()), ('audio', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.URLBlock()), ('downloadable', wagtail.wagtailcore.blocks.BooleanBlock(required=False)))))))),
-                ('dictionary', wagtail.wagtailcore.fields.StreamField((('paragraph', wagtail.wagtailcore.blocks.RichTextBlock()), ('image', wagtail.wagtailimages.blocks.ImageChooserBlock()), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock()), ('audio', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.URLBlock()), ('downloadable', wagtail.wagtailcore.blocks.BooleanBlock(required=False))))), ('translations', wagtail.wagtailcore.blocks.ListBlock(wagtail.wagtailcore.blocks.StructBlock((('word', wagtail.wagtailcore.blocks.RichTextBlock(required=True)), ('translation', wagtail.wagtailcore.blocks.RichTextBlock(required=True)))), template='blocks/transcriptions.html'))), blank=True, null=True)),
-                ('other_tabs', wagtail.wagtailcore.fields.StreamField((('tab', wagtail.wagtailcore.blocks.StructBlock((('title', wagtail.wagtailcore.blocks.CharBlock(required=True)), ('href', wagtail.wagtailcore.blocks.CharBlock(required=True)), ('body', wagtail.wagtailcore.blocks.StreamBlock((('paragraph', wagtail.wagtailcore.blocks.RichTextBlock()), ('image', wagtail.wagtailimages.blocks.ImageChooserBlock()), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock()), ('audio', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.URLBlock()), ('downloadable', wagtail.wagtailcore.blocks.BooleanBlock(required=False))))))))))),))),
+                ('comments_for_lesson', wagtail.core.fields.StreamField((('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('html', wagtail.core.blocks.RawHTMLBlock()), ('audio', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.URLBlock()), ('downloadable', wagtail.core.blocks.BooleanBlock(required=False)))))), blank=True, null=True)),
+                ('body', wagtail.core.fields.StreamField((('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('html', wagtail.core.blocks.RawHTMLBlock()), ('audio', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.URLBlock()), ('downloadable', wagtail.core.blocks.BooleanBlock(required=False)))))))),
+                ('dictionary', wagtail.core.fields.StreamField((('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('html', wagtail.core.blocks.RawHTMLBlock()), ('audio', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.URLBlock()), ('downloadable', wagtail.core.blocks.BooleanBlock(required=False))))), ('translations', wagtail.core.blocks.ListBlock(wagtail.core.blocks.StructBlock((('word', wagtail.core.blocks.RichTextBlock(required=True)), ('translation', wagtail.core.blocks.RichTextBlock(required=True)))), template='blocks/transcriptions.html'))), blank=True, null=True)),
+                ('other_tabs', wagtail.core.fields.StreamField((('tab', wagtail.core.blocks.StructBlock((('title', wagtail.core.blocks.CharBlock(required=True)), ('href', wagtail.core.blocks.CharBlock(required=True)), ('body', wagtail.core.blocks.StreamBlock((('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('html', wagtail.core.blocks.RawHTMLBlock()), ('audio', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.URLBlock()), ('downloadable', wagtail.core.blocks.BooleanBlock(required=False))))))))))),))),
                 ('has_own_topic', models.BooleanField(default=False)),
             ],
             options={
@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
                 ('menu_title', models.TextField(blank=True)),
                 ('is_nav_root', models.BooleanField(default=False)),
                 ('is_selectable', models.BooleanField(default=True)),
-                ('body', wagtail.wagtailcore.fields.StreamField((('paragraph', wagtail.wagtailcore.blocks.RichTextBlock()), ('image', wagtail.wagtailimages.blocks.ImageChooserBlock()), ('html', wagtail.wagtailcore.blocks.RawHTMLBlock()), ('audio', wagtail.wagtailcore.blocks.StructBlock((('url', wagtail.wagtailcore.blocks.URLBlock()), ('downloadable', wagtail.wagtailcore.blocks.BooleanBlock(required=False))))), ('tabs', home.blocks.TabsBlock.TabsBlock()), ('translations', wagtail.wagtailcore.blocks.ListBlock(wagtail.wagtailcore.blocks.StructBlock((('word', wagtail.wagtailcore.blocks.RichTextBlock(required=True)), ('translation', wagtail.wagtailcore.blocks.RichTextBlock(required=True)))), template='blocks/transcriptions.html'))))),
+                ('body', wagtail.core.fields.StreamField((('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('html', wagtail.core.blocks.RawHTMLBlock()), ('audio', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.URLBlock()), ('downloadable', wagtail.core.blocks.BooleanBlock(required=False))))), ('tabs', home.blocks.TabsBlock.TabsBlock()), ('translations', wagtail.core.blocks.ListBlock(wagtail.core.blocks.StructBlock((('word', wagtail.core.blocks.RichTextBlock(required=True)), ('translation', wagtail.core.blocks.RichTextBlock(required=True)))), template='blocks/transcriptions.html'))))),
             ],
             options={
                 'abstract': False,
