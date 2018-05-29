@@ -160,7 +160,7 @@ class DefaultPage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
-    ])
+    ], blank=True)
 
 
 DefaultPage.content_panels = Page.content_panels + [
@@ -197,7 +197,7 @@ class PageWithSidebar(Page):
          ),
         ('post', PostBlock()),
         ('choosen_reviews', ChoosenReviews())
-    ])
+    ], blank=True)
 
     def get_nav_root(self) -> Page:
         return get_nav_root(self)
@@ -250,7 +250,7 @@ class LessonPage(Page):
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('post', PostBlock()),
-    ])
+    ], blank=True)
     dictionary = StreamField([
         ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
@@ -330,7 +330,7 @@ class ArticlePage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
-    ])
+    ], blank=True)
 
     def get_absolute_url(self):
         return self.full_url
