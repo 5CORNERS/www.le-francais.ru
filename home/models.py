@@ -265,7 +265,7 @@ class LessonPage(Page):
         ]), template="blocks/transcriptions.html")),
         ('post', PostBlock())
     ], null=True, blank=True)
-    other_tabs = StreamField([('tab', TabBlock())])
+    other_tabs = StreamField([('tab', TabBlock())], blank=True)
 
     def get_lesson_number(self):
         return self.slug.split("lecon-", 1)[1]
