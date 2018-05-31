@@ -88,6 +88,7 @@ def return_true_false(param):
 
 
 def fill_other_parametres():
+    error_verbs = []
     file_path = "conjugation/data/Full verb list.csv"
     table = read_csv(open(file_path,encoding='utf-8'))
     dict = table.to_dict()
@@ -99,9 +100,9 @@ def fill_other_parametres():
         try:
             v, created = V.objects.get_or_create(infinitive=dict['VERB'][i])
         except:
-            print('\t'+"can't find this verb")
+            error_verbs.append(dict["VERB"][i])
             continue
-        print("\tfounded")
+        # print("\tfounded")
         s_en = return_true_false(dict["S'EN"][i])
         can_passive = return_true_false(dict["CAN BE PASSIVE"][i])
         can_feminin = return_true_false(dict["CAN BE FEMININ"][i])
@@ -161,8 +162,10 @@ def fill_other_parametres():
                 rv, created = RV.objects.get_or_create(infinitive=reflexive_infinitive, verb=v)
                 rv.create_no_accents()
                 rv.save()
-
         v.save()
+    print("This verb cause error:")
+    for error_verb in error_verbs:
+        print(error_verb)
 
 
 def fill_regles():
