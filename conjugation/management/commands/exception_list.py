@@ -112,6 +112,7 @@ def fill_other_parametres():
         is_archaique = return_true_false(dict["устаревший"][i])
         is_slang = return_true_false(dict["слэнг"][i])
         group_no = dict["GROUP No"][i]
+        group_str = str(dict["GROUP No"][i])
 
         regle_id = dict["Règle IDX"][i]
         can_reflexive = return_true_false(dict["CAN BE PRONOMINAL"][i])
@@ -149,7 +150,8 @@ def fill_other_parametres():
         v.is_rare = is_rare
         v.is_archaique = is_archaique
         v.is_slang = is_slang
-        v.group_no = group_no
+        # v.group_no = group_no
+        v.group_str = group_str
         v.regle = Regle.objects.get(id=regle_id)
 
         if created:
@@ -183,14 +185,14 @@ def translate_regles():
 
     for i in range(len(dict['IDX'])):
         print(i)
-        regle = Regle.objects.get(id=dict['IDX'][i])
+        regle, created = Regle.objects.get_or_create(id=dict['IDX'][i])
         regle.text_rus = dict['TRANSLATION'][i]
         regle.save()
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        fill_deffectives()
+        # fill_deffectives()
         # fill_regles()
-        # translate_regles()
-        # fill_other_parametres()
+        translate_regles()
+        fill_other_parametres()
