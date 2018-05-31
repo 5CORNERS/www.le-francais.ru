@@ -65,6 +65,7 @@ class Verb(models.Model):
     is_slang = models.BooleanField(default=False)
 
     group_no = models.IntegerField(default=1)
+    group_str = models.CharField(default="", max_length=256)
     id_regle = models.IntegerField(default=200)
 
     regle = models.ForeignKey(Regle, on_delete=models.SET_NULL, blank=True, null=True)
