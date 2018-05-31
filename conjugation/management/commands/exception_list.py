@@ -186,7 +186,7 @@ def translate_regles():
     for i in range(len(dict['IDX'])):
         print(i)
         regle, created = Regle.objects.get_or_create(id=dict['IDX'][i])
-        regle.text_rus = dict['TRANSLATION'][i]
+        regle.text_rus = '<p>' + re.sub('\n\n', '</p><p>', dict['TRANSLATION'][i]) + '</p>'
         regle.save()
 
 
@@ -194,5 +194,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # fill_deffectives()
         # fill_regles()
-        translate_regles()
+        # translate_regles()
         fill_other_parametres()
