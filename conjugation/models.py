@@ -144,6 +144,11 @@ class Verb(models.Model):
                         self.conjugations[mood][tense][person] = forms
                     else:
                         self.conjugations[mood][tense][person] = self.main_part() + endings
+        if self.pp_invariable:
+            for i in range(1,3):
+                self.conjugations['participle']['past'][i] = self.conjugations['participle']['past'][0]
+
+
 
 
 class ReflexiveVerb(models.Model):
