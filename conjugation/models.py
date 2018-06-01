@@ -37,8 +37,9 @@ class Verb(models.Model):
     reflexive_only = models.BooleanField(default=False)
 
     is_defective = models.BooleanField(default=False)
-
     deffective = models.ForeignKey('DeffectivePattern', null=True, on_delete=models.SET_NULL)
+
+    pp_invariable = models.BooleanField(default=False)
 
     masculin_only = models.BooleanField(default=False)
     has_passive = models.BooleanField(default=False)
