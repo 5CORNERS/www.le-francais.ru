@@ -95,13 +95,12 @@ def fill_other_parametres():
     for i in range(len(dict['VERB'])):
         if i == 0:
             continue
-        print(dict["VERB"][i], end='')
         try:
             v, created = V.objects.get_or_create(infinitive=dict['VERB'][i])
         except:
             error_verbs.append(dict["VERB"][i])
             continue
-        # print("\tfounded")
+        print(dict["VERB"][i])
         s_en = return_true_false(dict["S'EN"][i])
         can_passive = return_true_false(dict["CAN BE PASSIVE"][i])
         can_feminin = return_true_false(dict["CAN BE FEMININ"][i])
