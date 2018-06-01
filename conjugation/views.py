@@ -203,22 +203,9 @@ class Tense:
         self.persons = self.get_persons_list()
 
     def get_persons_list(self):
-
-        if self.reflexive:
-            rv = self.v.reflexiveverb
-            if rv.is_deffective:
-                deffective_patterns = rv.deffective
-                if deffective_patterns.has_mood_tense(self.mood_name, self.tense_name):
-                    return self.get_empty_persons_list()
-        else:
-            if self.v.is_defective:
-                deffective_patterns = self.v.deffective
-                try:
-                    if deffective_patterns.has_mood_tense(self.mood_name, self.tense_name):
-                        return self.get_empty_persons_list()
-                except:
-                    pass
-
+        if self.v.deffective:
+            if self.v.deffective.has_mood_tense(self.mood_name, self.tense_name):
+                return self.get_empty_persons_list()
         persons = []
         tense_dict = FORMULAS[self.mood_name][self.tense_name]
         for person_name in tense_dict[1].keys():
