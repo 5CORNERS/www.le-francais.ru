@@ -36,7 +36,8 @@ class Verb(models.Model):
 
     reflexive_only = models.BooleanField(default=False)
 
-    is_deffective = models.BooleanField(default=False)
+    is_defective = models.BooleanField(default=False)
+
     deffective = models.ForeignKey('DeffectivePattern', null=True, on_delete=models.SET_NULL)
 
     masculin_only = models.BooleanField(default=False)
@@ -57,7 +58,6 @@ class Verb(models.Model):
     africa = models.BooleanField(default=False)
     conjugated_with_avoir = models.BooleanField(default=False)
     conjugated_with_etre = models.BooleanField(default=False)
-    is_defective = models.BooleanField(default=False)
     is_impersonal = models.BooleanField(default=False)
     book = models.BooleanField(default=False)
     is_rare = models.BooleanField(default=False)

@@ -211,7 +211,7 @@ class Tense:
                 if deffective_patterns.has_mood_tense(self.mood_name, self.tense_name):
                     return self.get_empty_persons_list()
         else:
-            if self.v.is_deffective:
+            if self.v.is_defective:
                 deffective_patterns = self.v.deffective
                 if deffective_patterns.has_mood_tense(self.mood_name, self.tense_name):
                     return self.get_empty_persons_list()
