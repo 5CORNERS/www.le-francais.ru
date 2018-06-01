@@ -97,6 +97,7 @@ class Verb(models.Model):
         s += 'устаревший, ' if self.is_archaique else ''
         s += 'используется, как слэнг, ' if self.is_slang else ''
         s += 'начинается с h придыхательного, ' if self.aspirate_h else ''
+        s += 'причастие прошедшего времени <span style="color:#f28b1a"><b>(sic!)</b></span> остается неизменным в женском роде и во множественном числе, ' if self.pp_invariable else ''
         s = s[:-2]+'.'
         return s
 
