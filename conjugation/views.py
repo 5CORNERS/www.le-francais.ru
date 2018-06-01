@@ -249,7 +249,9 @@ class Person:
 
         pronoun = -1 if v.infnitive_first_letter_is_vowel() else 0
         etre = 2 if not self.v.conjugated_with_avoir and self.v.conjugated_with_etre else 1
-        if empty:
+        if self.v.is_impersonal and self.person_name!="person_III_S":
+            self.part_0, self.forms, self.part_2 = '-', '', ''
+        elif empty:
             self.part_0, self.forms, self.part_2 = '-','',''
         else:
             self.part_0, self.forms, self.part_2 = self.get_parts(etre, 0, gender, pronoun, reflexive)
