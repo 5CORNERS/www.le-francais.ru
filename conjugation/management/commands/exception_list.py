@@ -57,7 +57,6 @@ def fill_deffectives():
                                                                      imperative_past=imperative_past,
                                                                      infinitive_past=infinitive_past,
                                                                      gerund_past=gerund_past)
-
         print(verb)
         try:
             v = V.objects.get(infinitive=verb)
@@ -130,6 +129,8 @@ def fill_other_parametres():
         conjugated_with_etre = return_true_false(dict["ÊTRE"][i])
         is_defective = return_true_false(dict["DEFECTIVE"][i])
 
+        pp_invariable = return_true_false(dict["PP iNVARIABLE"][i])
+
         v.s_en = s_en
         v.can_passive = can_passive
         v.can_feminin = can_feminin
@@ -154,6 +155,7 @@ def fill_other_parametres():
         # v.group_no = group_no
         v.group_str = group_str
         v.regle = Regle.objects.get(id=regle_id)
+        v.pp_invariable = pp_invariable
 
         if created:
             v.infinitive_no_accents = v.get_infinitive_no_accents()
