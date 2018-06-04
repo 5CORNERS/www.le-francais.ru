@@ -10,16 +10,19 @@ from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE, SHORT_LIST, FORMUL
 
 @csrf_exempt
 def search(request):
+
     try:
-        search_string = unidecode(request.POST.get('verb'))
+        search_string = unidecode(switch_keyboard_layout(str(request.POST.get('verb')).strip(' ').lower()))
     except:
         return redirect(reverse('conjugation:index'))
+
     if search_string[:2] == "s'" or search_string[:3] == "se ":
         try:
             re_verb=RV.objects.get(infinitive_no_accents=search_string)
         except:
             return render(request,'conjugation/verb_not_found.html', {'search_string':search_string})
         return redirect(re_verb.get_absolute_url())
+
     try:
         verb = V.objects.get(infinitive_no_accents=search_string)
     except:
