@@ -10,16 +10,19 @@ from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE, SHORT_LIST, FORMUL
 
 @csrf_exempt
 def search(request):
+
     try:
-        search_string = unidecode(request.POST.get('verb'))
+        search_string = unidecode(switch_keyboard_layout(str(request.POST.get('verb')).strip(' ').lower()))
     except:
         return redirect(reverse('conjugation:index'))
+
     if search_string[:2] == "s'" or search_string[:3] == "se ":
         try:
             re_verb=RV.objects.get(infinitive_no_accents=search_string)
         except:
             return render(request,'conjugation/verb_not_found.html', {'search_string':search_string})
         return redirect(re_verb.get_absolute_url())
+
     try:
         verb = V.objects.get(infinitive_no_accents=search_string)
     except:
@@ -203,19 +206,9 @@ class Tense:
         self.persons = self.get_persons_list()
 
     def get_persons_list(self):
-
-        if self.reflexive:
-            rv = self.v.reflexiveverb
-            if rv.is_deffective:
-                deffective_patterns = rv.deffective
-                if deffective_patterns.has_mood_tense(self.mood_name, self.tense_name):
-                    return self.get_empty_persons_list()
-        else:
-            if self.v.is_deffective:
-                deffective_patterns = self.v.deffective
-                if deffective_patterns.has_mood_tense(self.mood_name, self.tense_name):
-                    return self.get_empty_persons_list()
-
+        if self.v.deffective:
+            if self.v.deffective.has_mood_tense(self.mood_name, self.tense_name):
+                return self.get_empty_persons_list()
         persons = []
         tense_dict = FORMULAS[self.mood_name][self.tense_name]
         for person_name in tense_dict[1].keys():
@@ -249,7 +242,9 @@ class Person:
 
         pronoun = -1 if v.infnitive_first_letter_is_vowel() else 0
         etre = 2 if not self.v.conjugated_with_avoir and self.v.conjugated_with_etre else 1
-        if empty:
+        if self.v.is_impersonal and self.person_name!="person_III_S":
+            self.part_0, self.forms, self.part_2 = '-', '', ''
+        elif empty:
             self.part_0, self.forms, self.part_2 = '-','',''
         else:
             self.part_0, self.forms, self.part_2 = self.get_parts(etre, 0, gender, pronoun, reflexive)

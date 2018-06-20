@@ -57,7 +57,6 @@ def fill_deffectives():
                                                                      imperative_past=imperative_past,
                                                                      infinitive_past=infinitive_past,
                                                                      gerund_past=gerund_past)
-
         print(verb)
         try:
             v = V.objects.get(infinitive=verb)
@@ -96,13 +95,12 @@ def fill_other_parametres():
     for i in range(len(dict['VERB'])):
         if i == 0:
             continue
-        print(dict["VERB"][i], end='')
         try:
             v, created = V.objects.get_or_create(infinitive=dict['VERB'][i])
         except:
             error_verbs.append(dict["VERB"][i])
             continue
-        # print("\tfounded")
+        print(dict["VERB"][i])
         s_en = return_true_false(dict["S'EN"][i])
         can_passive = return_true_false(dict["CAN BE PASSIVE"][i])
         can_feminin = return_true_false(dict["CAN BE FEMININ"][i])
@@ -130,6 +128,8 @@ def fill_other_parametres():
         conjugated_with_etre = return_true_false(dict["ÊTRE"][i])
         is_defective = return_true_false(dict["DEFECTIVE"][i])
 
+        pp_invariable = return_true_false(dict["PP iNVARIABLE"][i])
+
         v.s_en = s_en
         v.can_passive = can_passive
         v.can_feminin = can_feminin
@@ -154,6 +154,7 @@ def fill_other_parametres():
         # v.group_no = group_no
         v.group_str = group_str
         v.regle = Regle.objects.get(id=regle_id)
+        v.pp_invariable = pp_invariable
 
         if created:
             v.infinitive_no_accents = v.get_infinitive_no_accents()
