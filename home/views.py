@@ -174,7 +174,7 @@ class MovePostView(TopicView):
         data = super(MovePostView, self).get_context_data()
         data['is_move'] = True
         # FIXME move to settings
-        MOVE_POST_TIMEDELTA = 60
+        MOVE_POST_TIMEDELTA = 180
         since = datetime.today() - timedelta(days=MOVE_POST_TIMEDELTA)
         topic_qs = Topic.objects.filter(updated__gt=since)
         topic_qs = perms.filter_topics(self.request.user, topic_qs)
