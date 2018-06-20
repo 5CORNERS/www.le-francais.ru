@@ -36,8 +36,10 @@ class Verb(models.Model):
 
     reflexive_only = models.BooleanField(default=False)
 
-    is_deffective = models.BooleanField(default=False)
+    is_defective = models.BooleanField(default=False)
     deffective = models.ForeignKey('DeffectivePattern', null=True, on_delete=models.SET_NULL)
+
+    pp_invariable = models.BooleanField(default=False)
 
     masculin_only = models.BooleanField(default=False)
     has_passive = models.BooleanField(default=False)
@@ -57,7 +59,6 @@ class Verb(models.Model):
     africa = models.BooleanField(default=False)
     conjugated_with_avoir = models.BooleanField(default=False)
     conjugated_with_etre = models.BooleanField(default=False)
-    is_defective = models.BooleanField(default=False)
     is_impersonal = models.BooleanField(default=False)
     book = models.BooleanField(default=False)
     is_rare = models.BooleanField(default=False)
@@ -96,6 +97,7 @@ class Verb(models.Model):
         s += 'устаревший, ' if self.is_archaique else ''
         s += 'используется, как слэнг, ' if self.is_slang else ''
         s += 'начинается с h придыхательного, ' if self.aspirate_h else ''
+        s += 'причастие прошедшего времени <span style="color:#f28b1a"><b>(sic!)</b></span> остается неизменным в женском роде и во множественном числе, ' if self.pp_invariable else ''
         s = s[:-2]+'.'
         return s
 
@@ -143,6 +145,11 @@ class Verb(models.Model):
                         self.conjugations[mood][tense][person] = forms
                     else:
                         self.conjugations[mood][tense][person] = self.main_part() + endings
+        if self.pp_invariable:
+            for i in range(1,3):
+                self.conjugations['participle']['past-participle'][i] = self.conjugations['participle']['past-participle'][0]
+
+
 
 
 class ReflexiveVerb(models.Model):
