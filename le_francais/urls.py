@@ -70,6 +70,7 @@ urlpatterns = [
 
     url(r'^le_nombres/', include('le_nombres.urls')),
     url(r'^', include('social_django.urls'.format(extra), namespace='social')),
+    url(r'', include('user_sessions.urls', 'user_sessions')),
     url(r'^new-users-redirect-url/', TemplateView.as_view(template_name='account/change_username_new.html')),
     url(r'^', include(wagtail_urls)),
 
