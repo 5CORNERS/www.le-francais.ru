@@ -6283,9 +6283,9 @@ body {
 }
 
 .block-forum blockquote {
-    margin: 0 10px;
+    margin: 0 10px 10px;
     padding: 10px;
-    
+
     border-left: 3px solid #dbd8ba;
     border-radius: 3px
 }
