@@ -281,6 +281,11 @@ class LessonPage(Page):
     def get_nav_root(self) -> Page:
         return get_nav_root(self)
 
+    class Meta:
+        permissions = (
+            ('listen_lesson', 'Can listen lesson'),
+        )
+
 
 LessonPage.content_panels = Page.content_panels + [
     FieldPanel('reference_title'),
