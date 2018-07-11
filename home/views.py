@@ -143,10 +143,22 @@ def get_nav_data(request):
 def listen_request(request):
     lesson_number = request.POST['number']
     session_key = request.POST['key']
-    # session = Session.objects.get(key=session_key)
-    # user = User.objects.get(id=session.get_decoded()['user_id'])
 
-    return HttpResponse("false")
+    if request.POST.__contains__('disabled'):
+        return HttpResponse('true')
+
+    try:
+        session = Session.objects.get(session_key=session_key)
+        lesson = LessonPage.objects.get(lesson_number=lesson_number)
+    except:
+        return HttpResponse('false')
+
+    user = session.user
+
+    if user.has_perm('listen_lesson', lesson) and datetime.now() - session.last_activity < timedelta(days=7):
+        return HttpResponse('true')
+    else:
+        return HttpResponse('false')
 
 
 class Search(PaginationMixin, generic.ListView):
