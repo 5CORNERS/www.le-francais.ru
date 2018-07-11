@@ -118,6 +118,7 @@ MIDDLEWARE_CLASSES = [
 ]
 
 SESSION_ENGINE = 'user_sessions.backends.db'
+SESSION_SAVE_EVERY_REQUEST = True
 
 ROOT_URLCONF = 'le_francais.urls'
 
