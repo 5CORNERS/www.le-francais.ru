@@ -346,3 +346,9 @@ a.audioplayer-download-button {
     text-align: center;
     width: 100%;
 }
+
+.navbar-header .audioplayer {
+    position: absolute;
+    right: 58px;
+    top: 9px;
+}
