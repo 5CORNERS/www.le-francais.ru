@@ -11,5 +11,6 @@ site_import_urls = [
 ]
 
 api_urls = [
-    url(r'^nav/$', views.get_nav_data)
+    url(r'^nav/$', views.get_nav_data),
+    url(r'^listen/$', views.listen_request),
 ]

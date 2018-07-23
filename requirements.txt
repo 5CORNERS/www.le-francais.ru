@@ -22,8 +22,9 @@ pymdown-extensions
 django-mailer
 django-comments-xtd
 django-mobile
-
+django-user-sessions
 django-cron
+django-guardian
 
 django-storages
 boto3

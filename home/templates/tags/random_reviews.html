@@ -1,6 +1,6 @@
 {% load site_tags static%}
 {% for review in object_list %}
-    <a class="page-review" href='{{ review.url }}'{% if review.external %}target="_blank" rel="nofollow"{% endif %}>
+    <a class="page-review" href='{% if review.url %}{{ review.url }}{% endif %}' {% if review.external %}target="_blank" rel="nofollow"{% endif %}>
         <div class="page-review_text">
             <p style="overflow: auto"><img class="size-full wp-image-1568 alignleft" src="{% static 'images/5-stars-rating.png' %}" alt="" width="97" height="20"></p>
             <p>{{ review.text }}</p>

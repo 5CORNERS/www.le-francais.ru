@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    # 'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'bootstrapform',
     'django.core.mail',
+
+    'user_sessions',
 
     'storages',
 
@@ -88,6 +90,7 @@ INSTALLED_APPS = [
     'le_nombres',
     'django_mobile',
     'conjugation',
+    'guardian',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -95,7 +98,8 @@ MIDDLEWARE_CLASSES = [
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.contrib.sessions.middleware.SessionMiddleware',
+    'user_sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -112,6 +116,9 @@ MIDDLEWARE_CLASSES = [
     'home.middleware.CanonicalDomainMiddleware',
     'django_mobile.middleware.SetFlavourMiddleware',
 ]
+
+SESSION_ENGINE = 'user_sessions.backends.db'
+SESSION_SAVE_EVERY_REQUEST = True
 
 ROOT_URLCONF = 'le_francais.urls'
 
@@ -195,6 +202,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.odnoklassniki.OdnoklassnikiOAuth2',
 
     'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
