@@ -191,6 +191,7 @@
 					var lesson_number = $(theAudio).attr('number');
 					if ((typeof lesson_number !== typeof undefined) && (lesson_number !== false)) {
 						localStorage.removeItem('lecon-' + lesson_number);
+						$menuPlayer.removeClass(cssClass.playing);
 					}
 				});
 
