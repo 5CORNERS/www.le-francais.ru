@@ -13,6 +13,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.views import generic
+from django.views.decorators.csrf import csrf_exempt
 from oauth2client.client import OAuth2WebServerFlow
 from pure_pagination import Paginator, PaginationMixin
 from pybb import defaults
@@ -21,9 +22,11 @@ from pybb.models import Post, Topic
 from pybb.permissions import perms
 from pybb.views import AddPostView, EditPostView, TopicView
 from social_core.utils import setting_name
+from user_sessions.models import Session
 from wagtail.contrib.sitemaps.sitemap_generator import Sitemap as WagtailSitemap
 from wagtail.core.models import Page
 
+from custom_user.models import User
 from home.models import PageWithSidebar, LessonPage, ArticlePage
 from home.src.site_import import import_content
 from .forms import ChangeUsername
@@ -134,6 +137,28 @@ def get_nav_data(request):
     else:
         nav_items = get_navigation_object_from_page(Page.objects.get(id=root_id), page_id)["nodes"]
     return HttpResponse(content=json.dumps(nav_items))
+
+
+@csrf_exempt
+def listen_request(request):
+    lesson_number = request.POST['number']
+    session_key = request.POST['key']
+
+    if request.POST.__contains__('disabled'):
+        return HttpResponse('true')
+
+    try:
+        session = Session.objects.get(session_key=session_key)
+        lesson = LessonPage.objects.get(lesson_number=lesson_number)
+    except:
+        return HttpResponse('false')
+
+    user = session.user
+
+    if user.has_perm('listen_lesson', lesson) and datetime.now() - session.last_activity < timedelta(days=7):
+        return HttpResponse('true')
+    else:
+        return HttpResponse('false')
 
 
 class Search(PaginationMixin, generic.ListView):

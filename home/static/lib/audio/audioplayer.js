@@ -31,7 +31,7 @@
 	},
 	canPlayType = function (file) {
 		var audioElement = document.createElement('audio');
-
+		return true;
 		return !!( audioElement.canPlayType &&
 					audioElement.canPlayType('audio/' + file.split('.')
 															.pop()
