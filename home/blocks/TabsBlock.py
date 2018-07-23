@@ -1,5 +1,5 @@
 from wagtail.core import blocks
-from wagtail.core.blocks.field_block import RichTextBlock, RawHTMLBlock, CharBlock
+from wagtail.core.blocks.field_block import RichTextBlock, RawHTMLBlock, CharBlock, BooleanBlock
 from wagtail.core.blocks.stream_block import StreamBlock
 from wagtail.images.blocks import ImageChooserBlock
 
@@ -18,6 +18,7 @@ class TabsBlock(blocks.ListBlock):
 
 
 class TabBlock(blocks.StructBlock):
+    invisible = BooleanBlock(required=False)
     title = CharBlock(required=True)
     href = CharBlock(required=True)
     body = StreamBlock([
