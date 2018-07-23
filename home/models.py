@@ -231,6 +231,9 @@ class LessonPage(Page):
     summary = CharField(max_length=100, null=True, blank=True)
     repetition_material = CharField(max_length=100, null=True, blank=True)
     audio_material = CharField(max_length=100, null=True, blank=True)
+
+    invisible_dictionary = BooleanField(default=False)
+
     comments_for_lesson = StreamField([
         ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
@@ -241,6 +244,7 @@ class LessonPage(Page):
         ('video', VideoPlayerBlock()),
         ('post', PostBlock())
     ], null=True, blank=True)
+
     body = StreamField([
         ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
@@ -251,6 +255,7 @@ class LessonPage(Page):
         ('video', VideoPlayerBlock()),
         ('post', PostBlock()),
     ], blank=True)
+
     dictionary = StreamField([
         ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
@@ -265,6 +270,7 @@ class LessonPage(Page):
         ]), template="blocks/transcriptions.html")),
         ('post', PostBlock())
     ], null=True, blank=True)
+
     other_tabs = StreamField([('tab', TabBlock())], blank=True)
 
     def get_lesson_number(self):
@@ -293,6 +299,7 @@ LessonPage.content_panels = Page.content_panels + [
     FieldPanel('audio_material'),
     StreamFieldPanel('comments_for_lesson'),
     StreamFieldPanel('body'),
+    FieldPanel('invisible_dictionary'),
     StreamFieldPanel('dictionary'),
     FieldPanel('summary'),
     FieldPanel('repetition_material'),
