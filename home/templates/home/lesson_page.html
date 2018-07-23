@@ -68,12 +68,14 @@
                             </li>
                         {% endif %}
                         {% if self.dictionary %}
-                            <li class="nav-item">
-                                <a class="nav-link" data-toggle="tab" href="#dictionary" role="tab"
-                                   aria-controls="body">
-                                    Словарик
-                                </a>
-                            </li>
+                            {% if not self.invisible_dictionary or user.is_superuser %}
+                                <li class="nav-item">
+                                    <a class="nav-link" data-toggle="tab" href="#dictionary" role="tab"
+                                       aria-controls="body">
+                                        <font {% if self.invisible_dictionary and user.is_superuser %}color="green"{% endif %}>Словарик</font>
+                                    </a>
+                                </li>
+                            {% endif %}
                         {% endif %}
                         {% if self.summary %}
                             <li class="nav-item">
@@ -91,10 +93,12 @@
                             </li>
                         {% endif %}
                         {% for child_value in self.other_tabs %}
-                            <li class="nav-item">
-                                <a class="nav-link" data-toggle="tab" href="#{{ child_value.value.href }}" role="tab"
-                                   aria-controls="{{ child_value.value.href }}">{{ child_value.value.title }}</a>
-                            </li>
+                            {% if not child_value.value.invisible or user.is_superuser %}
+                                <li class="nav-item">
+                                    <a class="nav-link" data-toggle="tab" href="#{{ child_value.value.href }}" role="tab"
+                                       aria-controls="{{ child_value.value.href }}"><span {% if child_value.value.invisible and user.is_superuser %}color="green" {% endif %}>{{ child_value.value.title }}</span></a>
+                                </li>
+                            {% endif %}
                         {% endfor %}
                     </ul>
 
