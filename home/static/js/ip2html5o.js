@@ -100,8 +100,9 @@ function getName(b) {
 function clickOccurred(b, c) {
     var d = getId(b);
     if (quiz) guess(b, d); else if (showMenu) {
-        c = getTextToDisplay(d, !0, c);
-        c = '<ul><li><a href="javascript:saveItem()">' + saveToAccount + "<br/> " + c + keyPressInfo + "</a></li></ul>";
+		playAndShow(b);
+		c = getTextToDisplay(d, !0, c);
+        c = '<ul><li>' + c + keyPressInfo + '</li></ul>';
         var e = document.getElementById("context_menu");
         e.innerHTML = c;
         e.style.visibility = "visible";
