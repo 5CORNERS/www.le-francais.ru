@@ -232,8 +232,6 @@ class LessonPage(Page):
     repetition_material = CharField(max_length=100, null=True, blank=True)
     audio_material = CharField(max_length=100, null=True, blank=True)
 
-    invisible_dictionary = BooleanField(default=False)
-
     comments_for_lesson = StreamField([
         ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
@@ -258,6 +256,20 @@ class LessonPage(Page):
 
     dictionary = StreamField([
         ('advertisement', AdvertisementInline()),
+        ('paragraph', RichTextBlock()),
+        ('image', ImageChooserBlock()),
+        ('document', DocumentViewerBlock()),
+        ('html', RawHTMLBlock()),
+        ('audio', AudioBlock()),
+        ('video', VideoPlayerBlock()),
+        ('translations', ListBlock(StructBlock([
+            ('word', RichTextBlock(required=True)),
+            ('translation', RichTextBlock(required=True))
+        ]), template="blocks/transcriptions.html")),
+        ('post', PostBlock())
+    ], null=True, blank=True)
+
+    mail_archive = StreamField([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
@@ -299,10 +311,10 @@ LessonPage.content_panels = Page.content_panels + [
     FieldPanel('audio_material'),
     StreamFieldPanel('comments_for_lesson'),
     StreamFieldPanel('body'),
-    FieldPanel('invisible_dictionary'),
     StreamFieldPanel('dictionary'),
     FieldPanel('summary'),
     FieldPanel('repetition_material'),
+    FieldPanel('mail_archive'),
     StreamFieldPanel('other_tabs')
 ]
 LessonPage.promote_panels = LessonPage.promote_panels + [

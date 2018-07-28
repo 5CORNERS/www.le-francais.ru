@@ -68,14 +68,12 @@
                             </li>
                         {% endif %}
                         {% if self.dictionary %}
-                            {% if not self.invisible_dictionary or user.is_superuser %}
                                 <li class="nav-item">
                                     <a class="nav-link" data-toggle="tab" href="#dictionary" role="tab"
                                        aria-controls="body">
-                                        <font {% if self.invisible_dictionary and user.is_superuser %}color="green"{% endif %}>Словарик</font>
+                                        Словарик
                                     </a>
                                 </li>
-                            {% endif %}
                         {% endif %}
                         {% if self.summary %}
                             <li class="nav-item">
@@ -91,6 +89,14 @@
                                     Материал для повторения
                                 </a>
                             </li>
+                        {% endif %}
+                        {% if self.mail_archive %}
+                            {% if user.is_superuser%}<li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#mail-archive" role="tab"
+                                   aria-controls="body">
+                                    Материал для повторения
+                                </a>
+                            </li>{% endif %}
                         {% endif %}
                         {% for child_value in self.other_tabs %}
                             {% if not child_value.value.invisible or user.is_superuser %}
@@ -148,6 +154,16 @@
                                 </div>
                             </div>
                             {% assign pane_class "tab_pane" %}
+                        {% endif %}
+                        {% if self.mail_archive %}
+                            {% if user.is_superuser %}
+                                <div id="mail-archive" class="{{ pane_class }}" role="tabpanel">
+                                    <div>
+                                        {% for block in self.mail_archive %}{% include block %}{% endfor %}
+                                    </div>
+                                </div>
+                                {% assign pane_class "tab_pane" %}
+                            {% endif %}
                         {% endif %}
                         {% for child_value in self.other_tabs %}
                             <div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
