@@ -26,6 +26,8 @@ django-user-sessions
 django-cron
 django-guardian
 
+APScheduler==3.0.0
+
 django-storages
 boto3
 
