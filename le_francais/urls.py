@@ -29,12 +29,12 @@ urlpatterns = [
 
     url('^sitemap\.xml$', TemplateView.as_view(template_name='sitemap.xml', content_type='application/xml')),
 
-    # url('^sitemap\.xml$', sitemap, {'sitemaps': {
-    #     'forum': ForumSitemap,
-    #     'topic': TopicSitemap,
-    #     'wagtail': WagtailSitemap,
-    #     'conjugation': ConjugationSitemap,
-    # }}),
+    url('^update_sitemap\.xml$', sitemap, {'sitemaps': {
+        'forum': ForumSitemap,
+        'topic': TopicSitemap,
+        'wagtail': WagtailSitemap,
+        'conjugation': ConjugationSitemap,
+    }}),
 
     url(r'^django-admin/', include(admin.site.urls)),
 
