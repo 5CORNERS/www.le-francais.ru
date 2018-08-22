@@ -265,6 +265,8 @@ ROBOTS_USE_HOST = True
 
 # PyBBM settings
 
+PYBB_USE_DJANGO_MAILER = True
+
 PYBB_FORUM_PAGE_SIZE = 60
 PYBB_TOPIC_PAGE_SIZE = 20
 PYBB_MARKUP_ENGINES_PATHS = {
@@ -291,7 +293,7 @@ POSTMAN_NAME_USER_AS = 'username'
 POSTMAN_SHOW_USER_AS = 'username'
 POSTMAN_DISALLOW_ANONYMOUS = True
 
-EMAIL_BACKEND = "mailer.backend.DbBackend"
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 DEFAULT_FROM_EMAIL = 'no_reply@files.le-francais.ru'
 
 email_config = dj_email_url.config()
