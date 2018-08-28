@@ -1,5 +1,6 @@
 from django.conf.urls import url
 from . import views
+from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
     url(r'^login/$', views.ajax_login, name='login')
@@ -17,5 +18,5 @@ api_urls = [
 
 payment_urls = [
     url(r'^$', views.PaymentsView.as_view(), name='payments'),
-    url(r'^wallet_one/$', views.PaymentsView.as_view(), name='wmi_notification')
+    url(r'^wallet_one/$', csrf_exempt(views.PaymentsView.as_view()), name='wmi_notification')
 ]
