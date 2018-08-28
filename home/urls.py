@@ -17,6 +17,6 @@ api_urls = [
 ]
 
 payment_urls = [
-    url(r'^wallet_one/$', csrf_exempt(views.PaymentsView.as_view()), name='wmi_notification'),
-    url(r'^$', views.PaymentsView.as_view(), name='payments'),
+    url('^wallet_one/$', csrf_exempt(views.PaymentsView.as_view()), name='wmi_notification'),
+    url('^', views.PaymentsView.as_view(), name='payments'),
 ]
