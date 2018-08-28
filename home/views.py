@@ -26,6 +26,7 @@ from social_core.utils import setting_name
 from user_sessions.models import Session
 from wagtail.contrib.sitemaps.sitemap_generator import Sitemap as WagtailSitemap
 from wagtail.core.models import Page
+from django.urls import reverse
 
 from home.models import PageWithSidebar, LessonPage, ArticlePage
 from home.src.site_import import import_content
@@ -189,6 +190,9 @@ from .utils import get_signature
 
 
 class WlletOneNotifications(View):
+
+    def get(self, request):
+        self.print_answer("Retry", "Must be POST")
 
     def post(self, request):
         if not 'WMI_SIGNATURE' in request.POST:
