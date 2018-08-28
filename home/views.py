@@ -12,7 +12,8 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.shortcuts import render
-from django.views import generic
+from django.utils.decorators import method_decorator
+from django.views import generic, View
 from django.views.decorators.csrf import csrf_exempt
 from oauth2client.client import OAuth2WebServerFlow
 from pure_pagination import Paginator, PaginationMixin
@@ -26,7 +27,6 @@ from user_sessions.models import Session
 from wagtail.contrib.sitemaps.sitemap_generator import Sitemap as WagtailSitemap
 from wagtail.core.models import Page
 
-from custom_user.models import User
 from home.models import PageWithSidebar, LessonPage, ArticlePage
 from home.src.site_import import import_content
 from .forms import ChangeUsername
@@ -160,6 +160,72 @@ def listen_request(request):
     else:
         return HttpResponse('false')
 
+from .models import Payment
+
+
+class PaymentsView(View):
+    base_template = 'payments/base_payments.html'
+    success_template = 'payments/success.html'
+    fail_template = 'payments/fail.html'
+    proceed_template = 'payments/payments_proceed.html'
+
+    @method_decorator(login_required)
+    def get(self, request, *args, **kwargs):
+        if 'success' in request.GET:
+            return render(request, self.success_template)
+        if 'fail' in request.GET:
+            return render(request, self.fail_template)
+        return render(request, self.base_template)
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        if 'cup_amount' in request.POST:
+            payment = Payment.objects.create(user=request.user, cups_amount=int(request.POST['cup_amount'][0]))
+            return render(request, self.proceed_template, context={'payment': payment})
+
+
+from urllib.parse import urlencode
+from .utils import get_signature
+
+
+class WlletOneNotifications(View):
+    @method_decorator(csrf_exempt)
+    def post(self, request):
+        if not 'WMI_SIGNATURE' in request.POST:
+            self.print_answer('Retry', "Отсутствует параметр WMI_SIGNATURE")
+        if not 'WMI_PAYMENT_NO' in request.POST:
+            self.print_answer('Retry', "Отсутствует параметр WMI_PAYMENT_NO")
+        if not 'WMI_ORDER_STATE' in request.POST:
+            self.print_answer('Retry', "Отсутствует параметр WMI_ORDER_STATE")
+
+        signature = get_signature(self.get_params(request.POST))
+
+        payment = Payment.objects.get(id=request.POST["WMI_PAYMENT_NO"][0])
+
+        if signature == request.POST["WMI_SIGNATURE"][0]:
+            if request.POST["WMI_ORDER_STATE"][0] == "ACCEPTED":
+                payment.status = 1
+                payment.save()
+                self.print_answer("Ok", "Заказ #" + request.POST["WMI_PAYMENT_NO"][0] + " оплачен!")
+            else:
+                payment.status = 3
+                payment.save()
+                self.print_answer("Retry", "Неверное состояние " + request.POST["WMI_ORDER_STATE"][0])
+        else:
+            payment.status = 2
+            payment.save()
+            self.print_answer("Retry", "Неверная подпись " + request.POST["WMI_SIGNATURE"][0])
+
+    def print_answer(self, result, description):
+        return HttpResponse('WMI_RESULT=' + urlencode(result) + '&' + 'WMI_DESCRIPTION=' + urlencode(description))
+
+    def get_params(self, post):
+        params = []
+        for key, value in post:
+            if not key == "WMI_SIGNATURE":
+                params.append((key, value))
+        return params
+
 
 class Search(PaginationMixin, generic.ListView):
     template_name = 'search/search.html'
@@ -199,7 +265,7 @@ class MovePostView(TopicView):
         data = super(MovePostView, self).get_context_data()
         data['is_move'] = True
         # FIXME move to settings
-        MOVE_POST_TIMEDELTA = 180
+        MOVE_POST_TIMEDELTA = 60
         since = datetime.today() - timedelta(days=MOVE_POST_TIMEDELTA)
         topic_qs = Topic.objects.filter(updated__gt=since)
         topic_qs = perms.filter_topics(self.request.user, topic_qs)
