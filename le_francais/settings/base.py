@@ -305,6 +305,11 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', email_config['EMAIL_
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', email_config['EMAIL_USE_TLS']) == 'True'
 EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', email_config['EMAIL_USE_SSL']) == 'True'
 
+# WalletOne settings
+
+WALLET_ONE_MERCHANT_ID = os.environ.get('WALLET_ONE_MERCHANT_ID')
+WALLET_ONE_SECRET_KEY = os.environ.get('WALLET_ONE_SECRET_KEY')
+
 # Wagtail settings
 
 WAGTAIL_SITE_NAME = "le_francais"
