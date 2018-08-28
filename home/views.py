@@ -189,7 +189,7 @@ from .utils import get_signature
 
 
 class WlletOneNotifications(View):
-    @method_decorator(csrf_exempt)
+
     def post(self, request):
         if not 'WMI_SIGNATURE' in request.POST:
             self.print_answer('Retry', "Отсутствует параметр WMI_SIGNATURE")
