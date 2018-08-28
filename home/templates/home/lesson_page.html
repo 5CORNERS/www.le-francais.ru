@@ -109,7 +109,7 @@
                     </ul>
 
                     <div class="tab-content">
-                        {% assign pane_class "tab-pane" %}
+                        {% assign pane_class "tab-pane active" %}
                         {% if self.comments_for_lesson %}
                             <div id="comments_for_lesson" class="{{ pane_class }}"role="tabpanel">
                                 {% for block in self.comments_for_lesson %}{% include_block block %}{% endfor %}
