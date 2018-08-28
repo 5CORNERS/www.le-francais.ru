@@ -4,7 +4,53 @@ from pybb.models import Topic, Post
 from home.models import IndexReviews
 from home.models import PageLayoutAdvertisementSnippet, LessonPage
 
+from home.utils import get_signature
+from django.conf import settings
+
 register = template.Library()
+
+@register.inclusion_tag('tags/payment_form.html', takes_context=True)
+def payment_form(context, payment):
+    merchant_id = settings.WALLET_ONE_MERCHANT_ID
+
+    if payment.cups_amount == 1:
+        payment_amount = 68
+    elif payment.cups_amount == 5:
+        payment_amount = 300
+    elif payment.cups_amount == 10:
+        payment_amount = 500
+    elif payment.cups_amount == 20:
+        payment_amount = 800
+    elif payment.cups_amount == 50:
+        payment_amount = 1700
+
+    currency_id = u'643' ## Russian rubles
+    payment_no = payment.id
+    description = "www.le-francais.ru -- Покупка " + str(payment.cups_amount) + " «чашек кофе»."
+    success_url = "https://www.le-francais.ru/payments?success"
+    fail_url = "https://www.le-francais.ru/payments?fail"
+    expired_date = payment.expired_date().isoformat()
+    customer_email = payment.user.email
+
+    params = [
+        ('WMI_MERCHANT_ID', merchant_id),
+        ('WMI_PAYMENT_AMOUNT',payment_amount),
+        ('WMI_CURRENCY_ID', currency_id),
+        ('WMI_PAYMENT_NO', payment_no),
+        ('WMI_DESCRIPTION', description),
+        ('WMI_SUCCESS_URL', success_url),
+        ('WMI_FAIL_URL', fail_url),
+        ('WMI_EXPIRED_DATE', expired_date),
+        ('WMI_CUSTOMER_EMAIL', customer_email),
+    ]
+
+    signature = get_signature(params)
+    params.append(('WMI_SIGNATURE', signature))
+
+    return {'params':params}
+
+
+
 
 
 @register.inclusion_tag('ads/topic_advert.html')

@@ -1,8 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.db.models import CharField, SmallIntegerField, OneToOneField, BooleanField, SET_NULL, ForeignKey, URLField, \
+from django.db.models import CharField, SmallIntegerField, OneToOneField, IntegerField, BooleanField, SET_NULL, ForeignKey, URLField, \
     Model
-from django.db.models.fields import TextField
+from django.db.models.fields import TextField, DateTimeField
 from django.forms import CheckboxInput
 from modelcluster.fields import ParentalKey
 from pybb.models import Topic, Forum, Category
@@ -377,3 +377,15 @@ ArticlePage.settings_panels = ArticlePage.settings_panels + [
     FieldPanel('is_selectable'),
     FieldPanel('page_type')
 ]
+
+
+import datetime
+
+class Payment(Model):
+    cups_amount = IntegerField()
+    user = ForeignKey('custom_user.User', related_name='payments')
+    datetime = DateTimeField(auto_now=True)
+    status = IntegerField(default=0)
+
+    def expired_date(self):
+        return self.datetime + datetime.timedelta(weeks=3)
