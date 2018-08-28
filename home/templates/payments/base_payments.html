@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}{% endblock %}
+{% block description %}{% endblock %}
+{% block extra_css %}{% endblock %}
+{% block extra_js %}{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <p class="h1">Заголовок</p>
+                <div class="row">
+                    <div class="col-sm-6 col-md-2 col-md-offset-1">
+                        <div class="thumbnail">
+                            <img src="http://paint-net.ru/img4/40298.jpg">
+                            <div class="caption">
+                                <h3>Текст 1</h3>
+                                <p>текст текст текст текст текст текст</p>
+                                <form method="post" action="{% url 'payments' %}">{% csrf_token %}
+                                    <button type="submit" name="cup_amount" value="1" class="btn btn-primary" role="button">Выбрать</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-2">
+                        <div class="thumbnail">
+                            <img src="http://paint-net.ru/img4/40298.jpg">
+                            <div class="caption">
+                                <h3>Текст 5</h3>
+                                <p>текст текст текст текст текст текст</p>
+                                <form method="post" action="{% url 'payments' %}">{% csrf_token %}
+                                    <button type="submit" name="cup_amount" value="5" class="btn btn-primary" role="button">Выбрать</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 col-md-2">
+                        <div class="thumbnail">
+                            <img src="http://paint-net.ru/img4/40298.jpg">
+                            <div class="caption">
+                                <h3>Текст 10</h3>
+                                <p>текст текст текст текст текст текст</p>
+                                <form method="post" action="{% url 'payments' %}">{% csrf_token %}
+                                    <button type="submit" name="cup_amount" value="10" class="btn btn-primary" role="button">Выбрать</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 col-md-2">
+                        <div class="thumbnail">
+                            <img src="http://paint-net.ru/img4/40298.jpg">
+                            <div class="caption">
+                                <h3>Текст 20</h3>
+                                <p>текст текст текст текст текст текст</p>
+                                <form method="post" action="{% url 'payments' %}">{% csrf_token %}
+                                    <button type="submit" name="cup_amount" value="20" class="btn btn-primary" role="button">Выбрать</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 col-md-2">
+                        <div class="thumbnail">
+                            <img src="http://paint-net.ru/img4/40298.jpg">
+                            <div class="caption">
+                                <h3>Текст 50</h3>
+                                <p>текст текст текст текст текст текст</p>
+                                <form method="post" action="{% url 'payments' %}">{% csrf_token %}
+                                    <button type="submit" name="cup_amount" value="50" class="btn btn-primary" role="button">Выбрать</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% block payment_details %}{% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

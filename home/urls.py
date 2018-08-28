@@ -14,3 +14,8 @@ api_urls = [
     url(r'^nav/$', views.get_nav_data),
     url(r'^listen/$', views.listen_request),
 ]
+
+payment_urls = [
+    url(r'^$', views.PaymentsView.as_view(), name='payments'),
+    url(r'^wallet_one/$', views.PaymentsView.as_view(), name='wmi_notification')
+]

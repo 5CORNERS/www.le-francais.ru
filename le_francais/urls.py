@@ -10,7 +10,7 @@ from social_core.utils import setting_name
 from forum.sitemap_generator import ForumSitemap, TopicSitemap
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
-from home.urls import site_import_urls, api_urls
+from home.urls import site_import_urls, api_urls, payment_urls
 from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing
 from home.views import change_username, LeFrancaisWagtailSitemap as WagtailSitemap
 from profiles.views import UserTopics, UserPosts
@@ -45,6 +45,8 @@ urlpatterns = [
 
     url(r'^import/', include(site_import_urls)),
     url(r'^api/', include(api_urls)),
+
+    url(r'^payments/', include(payment_urls)),
 
     url(r'^accounts/', include('allauth.urls')),
     url(r'^accounts/username/change/$', change_username, name='account_change_username'),
