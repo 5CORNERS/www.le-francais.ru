@@ -7,6 +7,7 @@ Disallow: /forum/post/
 Disallow: /forum/users/
 Disallow: /comments
 Disallow: /conjugation/
+Disallow: /payments/
 
 Host: https://www.le-francais.ru
 
