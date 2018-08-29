@@ -161,8 +161,10 @@ def listen_request(request):
         return HttpResponse('false')
 
 from .models import Payment
+from django.contrib.admin.views.decorators import staff_member_required
 
 
+@method_decorator(staff_member_required, name='dispatch')
 class PaymentsView(View):
     base_template = 'payments/base_payments.html'
     success_template = 'payments/success.html'
