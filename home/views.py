@@ -209,7 +209,7 @@ class WlletOneNotifications(View):
         payment = Payment.objects.get(id=str(request.POST["WMI_PAYMENT_NO"]))
 
         if signature == request.POST["WMI_SIGNATURE"]:
-            if request.POST["WMI_ORDER_STATE"] == "ACCEPTED":
+            if request.POST["WMI_ORDER_STATE"].upper() == "ACCEPTED":
                 payment.status = 1
                 payment.save()
                 return self.answer("Ok", "Заказ #" + request.POST["WMI_PAYMENT_NO"] + " оплачен!")
