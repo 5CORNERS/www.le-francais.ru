@@ -26,7 +26,6 @@ from social_core.utils import setting_name
 from user_sessions.models import Session
 from wagtail.contrib.sitemaps.sitemap_generator import Sitemap as WagtailSitemap
 from wagtail.core.models import Page
-from django.urls import reverse
 
 from home.models import PageWithSidebar, LessonPage, ArticlePage
 from home.src.site_import import import_content
@@ -188,10 +187,14 @@ class PaymentsView(View):
 from urllib.parse import quote
 from .utils import get_signature
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class WlletOneNotifications(View):
 
-    def get(self, request):
+    def dispatch(self, request, *args, **kwargs):
+        print(0)
+        return super(WlletOneNotifications, self).dispatch(request, *args, **kwargs)
+
+    def get(self):
         return self.answer("Retry", "Must be POST")
 
     def post(self, request):
@@ -204,21 +207,21 @@ class WlletOneNotifications(View):
 
         signature = get_signature(self.get_params(request.POST))
 
-        payment = Payment.objects.get(id=request.POST["WMI_PAYMENT_NO"][0])
+        payment = Payment.objects.get(id=str(request.POST["WMI_PAYMENT_NO"]))
 
-        if signature == request.POST["WMI_SIGNATURE"][0]:
-            if request.POST["WMI_ORDER_STATE"][0] == "ACCEPTED":
+        if signature == request.POST["WMI_SIGNATURE"]:
+            if request.POST["WMI_ORDER_STATE"] == "ACCEPTED":
                 payment.status = 1
                 payment.save()
-                return self.answer("Ok", "Заказ #" + request.POST["WMI_PAYMENT_NO"][0] + " оплачен!")
+                return self.answer("Ok", "Заказ #" + request.POST["WMI_PAYMENT_NO"] + " оплачен!")
             else:
                 payment.status = 3
                 payment.save()
-                return self.answer("Retry", "Неверное состояние " + request.POST["WMI_ORDER_STATE"][0])
+                return self.answer("Retry", "Неверное состояние " + request.POST["WMI_ORDER_STATE"])
         else:
             payment.status = 2
             payment.save()
-            return self.answer("Retry", "Неверная подпись " + request.POST["WMI_SIGNATURE"][0])
+            return self.answer("Retry", "Неверная подпись " + request.POST["WMI_SIGNATURE"])
 
     def answer(self, result, description):
         response = HttpResponse('WMI_RESULT=' + result + '&' + 'WMI_DESCRIPTION=' + quote(description), content_type="text/plain")
@@ -226,7 +229,7 @@ class WlletOneNotifications(View):
 
     def get_params(self, post):
         params = []
-        for key, value in post:
+        for key, value in post.items():
             if not key == "WMI_SIGNATURE":
                 params.append((key, value))
         return params
