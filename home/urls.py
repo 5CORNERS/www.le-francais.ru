@@ -17,6 +17,6 @@ api_urls = [
 ]
 
 payment_urls = [
-    url('^wallet_one/$', csrf_exempt(views.WlletOneNotifications.as_view()), name='wmi_notification'),
+    url('^wallet_one/$', views.WlletOneNotifications.as_view(), name='wmi_notification'),
     url('^', views.PaymentsView.as_view(), name='payments'),
 ]

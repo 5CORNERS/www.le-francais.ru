@@ -25,6 +25,7 @@ django-mobile
 django-user-sessions
 django-cron
 django-guardian
+django-braces
 
 APScheduler==3.0.0
 
