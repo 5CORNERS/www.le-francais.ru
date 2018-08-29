@@ -185,22 +185,22 @@ class PaymentsView(View):
             return render(request, self.proceed_template, context={'payment': payment})
 
 
-from urllib.parse import urlencode
+from urllib.parse import quote
 from .utils import get_signature
 
 
 class WlletOneNotifications(View):
 
     def get(self, request):
-        self.print_answer("Retry", "Must be POST")
+        return self.answer("Retry", "Must be POST")
 
     def post(self, request):
         if not 'WMI_SIGNATURE' in request.POST:
-            self.print_answer('Retry', "Отсутствует параметр WMI_SIGNATURE")
+            return self.answer('Retry', "Отсутствует параметр WMI_SIGNATURE")
         if not 'WMI_PAYMENT_NO' in request.POST:
-            self.print_answer('Retry', "Отсутствует параметр WMI_PAYMENT_NO")
+            return self.answer('Retry', "Отсутствует параметр WMI_PAYMENT_NO")
         if not 'WMI_ORDER_STATE' in request.POST:
-            self.print_answer('Retry', "Отсутствует параметр WMI_ORDER_STATE")
+            return self.answer('Retry', "Отсутствует параметр WMI_ORDER_STATE")
 
         signature = get_signature(self.get_params(request.POST))
 
@@ -210,18 +210,19 @@ class WlletOneNotifications(View):
             if request.POST["WMI_ORDER_STATE"][0] == "ACCEPTED":
                 payment.status = 1
                 payment.save()
-                self.print_answer("Ok", "Заказ #" + request.POST["WMI_PAYMENT_NO"][0] + " оплачен!")
+                return self.answer("Ok", "Заказ #" + request.POST["WMI_PAYMENT_NO"][0] + " оплачен!")
             else:
                 payment.status = 3
                 payment.save()
-                self.print_answer("Retry", "Неверное состояние " + request.POST["WMI_ORDER_STATE"][0])
+                return self.answer("Retry", "Неверное состояние " + request.POST["WMI_ORDER_STATE"][0])
         else:
             payment.status = 2
             payment.save()
-            self.print_answer("Retry", "Неверная подпись " + request.POST["WMI_SIGNATURE"][0])
+            return self.answer("Retry", "Неверная подпись " + request.POST["WMI_SIGNATURE"][0])
 
-    def print_answer(self, result, description):
-        return HttpResponse('WMI_RESULT=' + urlencode(result) + '&' + 'WMI_DESCRIPTION=' + urlencode(description))
+    def answer(self, result, description):
+        response = HttpResponse('WMI_RESULT=' + result + '&' + 'WMI_DESCRIPTION=' + quote(description), content_type="text/plain")
+        return response
 
     def get_params(self, post):
         params = []
