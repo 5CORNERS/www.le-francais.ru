@@ -191,7 +191,6 @@ from .utils import get_signature
 class WlletOneNotifications(View):
 
     def dispatch(self, request, *args, **kwargs):
-        print(0)
         return super(WlletOneNotifications, self).dispatch(request, *args, **kwargs)
 
     def get(self):
@@ -205,7 +204,7 @@ class WlletOneNotifications(View):
         if not 'WMI_ORDER_STATE' in request.POST:
             return self.answer('Retry', "Отсутствует параметр WMI_ORDER_STATE")
 
-        signature = get_signature(self.get_params(request.POST))
+        signature = get_signature(self.get_params(request.POST)).decode('utf-8')
 
         payment = Payment.objects.get(id=str(request.POST["WMI_PAYMENT_NO"]))
 
