@@ -212,8 +212,8 @@ class WlletOneNotifications(View):
 
         if signature == request.POST["WMI_SIGNATURE"]:
             if request.POST["WMI_ORDER_STATE"].upper() == "ACCEPTED":
-                payment.status = 1
-                payment.save()
+                if not payment.status == 1:
+                    payment.activate_payment()
                 return self.answer("Ok", "Заказ #" + request.POST["WMI_PAYMENT_NO"] + " оплачен!")
             else:
                 payment.status = 3
