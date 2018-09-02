@@ -71,7 +71,7 @@ def change_username(request):
             if 'next' in request.POST:
                 redirect_url = request.POST['next']
             else:
-                redirect_url = 'forum/profile/edit/'
+                redirect_url = '/forum/profile/edit/'
             return HttpResponseRedirect(redirect_url)
         else:
             return render(request, template_name, {'form': form})
