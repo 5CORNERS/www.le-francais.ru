@@ -384,8 +384,18 @@ import datetime
 class Payment(Model):
     cups_amount = IntegerField()
     user = ForeignKey('custom_user.User', related_name='payments')
-    datetime = DateTimeField(auto_now=True)
+    datetime_create = DateTimeField(auto_now_add=True)
+    datetime_update = DateTimeField(auto_now=True)
     status = IntegerField(default=0)
 
+    def activate_payment(self):
+        self.user.activate_payment(self)
+        self.status = 1
+        self.save()
+
     def expired_date(self):
-        return self.datetime + datetime.timedelta(weeks=3)
+        return self.datetime_create + datetime.timedelta(weeks=3)
+
+
+    def __str__(self):
+        pass

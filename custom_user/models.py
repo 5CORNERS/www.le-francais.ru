@@ -50,6 +50,16 @@ class User(AbstractUser):
 
 	used_usernames = JSONField(encoder=DjangoJSONEncoder, default=list)
 
+	must_pay = models.BooleanField(default=False)
+
+	cup_amount = models.IntegerField(default=0)
+
+	payed_lessons = models.ManyToManyField('home.LessonPage', through='home.UserLesson', related_name='paid_users')
+
+	def activate_payment(self, payment):
+		self.cup_amount =+ payment.cups_amount
+		self.save()
+
 	objects = CustomUserManager()
 	USERNAME_FIELD = 'email'
 	REQUIRED_FIELDS = ['username']
