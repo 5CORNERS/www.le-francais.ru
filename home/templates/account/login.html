@@ -20,44 +20,7 @@
                         если она
                         привязана к почтовому ящику на gmail, — и вам будут доступны все ваши прежние посты.
                     </div>
-                    <div class="row text-xs-center">
-                        <div class="col-lg-4 col-sm-6">
-                            <a class="btn btn-google btn-block" href="{% url "social:begin" "google-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}"
-                               style="margin-bottom:10px">
-                                Google+
-                            </a>
-                        </div>
-                        <div class="col-lg-4 col-sm-6">
-                            <a class="btn btn-vk btn-block" style="margin-bottom:10px"
-                               href="{% url "social:begin" "vk-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
-                                ВКонтакте
-                            </a>
-                        </div>
-                        <div class="col-lg-4 col-sm-6">
-                            <a class="btn btn-facebook btn-block" style="margin-bottom:10px"
-                               href="{% url "social:begin" "facebook" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
-                                Facebook
-                            </a>
-                        </div>
-                        <div class="col-lg-4 col-sm-6">
-                            <a class="btn btn-mailru btn-block" style="margin-bottom:10px"
-                               href="{% url "social:begin" "mailru-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
-                                Mail.ru
-                            </a>
-                        </div>
-                        <div class="col-lg-4 col-sm-6">
-                            <a class="btn btn-odnoklassniki btn-block" style="margin-bottom:10px"
-                               href="{% url "social:begin" "odnoklassniki-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
-                                Одноклассники
-                            </a>
-                        </div>
-                        <div class="col-lg-4 col-sm-6">
-                            <a class="btn btn-yandex btn-block" style="margin-bottom:10px; "
-                               href="{% url "social:begin" "yandex-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
-                                Яндекс
-                            </a>
-                        </div>
-                    </div>
+                    {% include 'account/oauth-buttons.html' %}
                     <hr class="hidden-lg">
                 </div>
                 <div class="col-lg-12">
