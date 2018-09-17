@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from . import views
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import TemplateView
 
 urlpatterns = [
     url(r'^login/$', views.ajax_login, name='login')
@@ -19,4 +20,8 @@ api_urls = [
 payment_urls = [
     url('^wallet_one/$', views.WlletOneNotifications.as_view(), name='wmi_notification'),
     url('^', views.PaymentsView.as_view(), name='payments'),
+]
+
+coffee_urls = [
+    url('^', views.GiveMeACoffee.as_view(), name='give_me_a_coffee'),
 ]
