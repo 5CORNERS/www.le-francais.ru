@@ -21,44 +21,7 @@
                     Чтобы войти в него, авторизуйтесь с вашей учетной записью Google — она точно у вас есть (иначе
                     бы вы не могли писать на старый форум).
                 </div>
-                <div class="row text-xs-center">
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="btn btn-google btn-block" href="{% url "social:begin" "google-oauth2" %}"
-                           style="margin-bottom:10px">
-                            Google+
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="btn btn-vk btn-block" style="margin-bottom:10px"
-                           href="{% url "social:begin" "vk-oauth2" %}">
-                            ВКонтакте
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="btn btn-facebook btn-block" style="margin-bottom:10px"
-                           href="{% url "social:begin" "facebook" %}">
-                            Facebook
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="btn btn-mailru btn-block" style="margin-bottom:10px"
-                           href="{% url "social:begin" "mailru-oauth2" %}">
-                            Mail.ru
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="btn btn-odnoklassniki btn-block" style="margin-bottom:10px"
-                           href="{% url "social:begin" "odnoklassniki-oauth2" %}">
-                            Одноклассники
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-sm-6">
-                        <a class="btn btn-yandex btn-block" style="margin-bottom:10px; "
-                           href="{% url "social:begin" "yandex-oauth2" %}">
-                            Яндекс
-                        </a>
-                    </div>
-                </div>
+                {% include 'account/oauth-buttons.html' %}
                 <div class="col-lg-12">
                     <div style="margin-bottom:10px">
                         Если у вас нет аккаунтов в социальных сетях, зарегистрируйтесь с помощью этой формы:
