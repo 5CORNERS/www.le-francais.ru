@@ -58,14 +58,11 @@
 
 							<li class="divider"></li>
 
-							<li><a>
-								<form action="{% url 'account_logout' %}?next={{ request.path }}"
-								      method="post">{% csrf_token %}
-									<button class="btn btn-logout">{% trans "Logout" %}</button>
-								</form>
-							</a></li>
-						</ul>
-					</li>
+              <li>
+                <a href="{% url 'account_logout' %}?next={{ request.path }}">{% trans "Logout" %}</a>
+              </li>
+            </ul>
+          </li>
 
 				{% else %}
 
