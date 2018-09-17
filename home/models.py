@@ -299,6 +299,16 @@ class LessonPage(Page):
     def get_nav_root(self) -> Page:
         return get_nav_root(self)
 
+    def __str__(self):
+        return "LessonPage "+str(self.lesson_number)
+
+    def add_lesson_to_user(self, user):
+        ul = UserLesson(user=user, lesson=self)
+        # ul.save()
+        user.cup_amount -= 1
+        user.save()
+        return user.cup_amount
+
     class Meta:
         permissions = (
             ('listen_lesson', 'Can listen lesson'),
@@ -363,6 +373,7 @@ class ArticlePage(Page):
         return get_nav_root(self)
 
 
+
 ArticlePage.content_panels = ArticlePage.content_panels + [
     FieldPanel('reference_title'),
     FieldPanel('subtitle'),
@@ -378,6 +389,13 @@ ArticlePage.settings_panels = ArticlePage.settings_panels + [
     FieldPanel('page_type')
 ]
 
+class UserLesson(Model):
+    user = ForeignKey('custom_user.User', related_name='payment')
+    lesson = ForeignKey('home.LessonPage', related_name='payment')
+    date = DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.user) + str(self.lesson)
 
 import datetime
 
@@ -393,9 +411,11 @@ class Payment(Model):
         self.status = 1
         self.save()
 
+
     def expired_date(self):
         return self.datetime_create + datetime.timedelta(weeks=3)
 
 
     def __str__(self):
-        pass
+        return 'Payment '+str(self.id)
+

@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
@@ -60,6 +60,7 @@ def change_username(request):
         template_name = 'account/change_username_new.html'
     else:
         template_name = 'account/change_username.html'
+
     if request.method == 'POST':
         form = ChangeUsername(request.POST)
         if form.is_valid():
@@ -75,6 +76,7 @@ def change_username(request):
             return HttpResponseRedirect(redirect_url)
         else:
             return render(request, template_name, {'form': form})
+
     form = ChangeUsername()
     redirect_field_value = None
     redirect_field_name = 'next'
@@ -144,24 +146,54 @@ def listen_request(request):
     lesson_number = request.POST['number']
     session_key = request.POST['key']
 
-    if request.POST.__contains__('disabled'):
-        return HttpResponse('true')
-
     try:
         session = Session.objects.get(session_key=session_key)
         lesson = LessonPage.objects.get(lesson_number=lesson_number)
     except:
         return HttpResponse('false')
 
-    user = session.user
-
-    if user.has_perm('listen_lesson', lesson) and datetime.now() - session.last_activity < timedelta(days=7):
-        return HttpResponse('true')
+    if not session.user==None and session.user.must_pay:
+        if lesson in session.user.payed_lessons:
+            return HttpResponse('true')
+        else:
+            return HttpResponse('false')
     else:
-        return HttpResponse('false')
+        return HttpResponse('true')
+
 
 from .models import Payment
 from django.contrib.admin.views.decorators import staff_member_required
+
+class GiveMeACoffee(View):
+    def post(self, request, *args, **kwargs):
+        lesson_page = LessonPage.objects.get(lesson_number=request.POST['lesson_number'])
+        if request.user.is_authenticated():
+            if request.user.cup_amount >= 1:
+                try:
+                    cup_amount = lesson_page.add_lesson_to_user(request.user)
+                    data = dict(result=True, description=message(cup_amount))
+                except BaseException as e:
+                    data = dict(result=False, description="Failed to do something: " + str(e))
+            else:
+                data = dict(result=False, description="Чтобы чем-то угощать, надо это что-то иметь :)")
+        else:
+            data=dict(result=False, description="Not authenticated")
+        return JsonResponse(data)
+
+    def get(self, request, *args, **kwargs):
+        pass
+
+def message(n, form1='чашечка', form2='чашечки', form5='чашечек'):
+    n10 = n%10
+    n100 = n%100
+    if n == 0:
+        return 'У Вас не осталось {0} :('.format(form5)
+    elif n10 == 1 and n100 != 11:
+        return 'У вас есть ещё {0} {1}'.format(str(n), form1)
+    elif n10 in [2, 3, 4] and n100 not in [12, 13, 14]:
+        return 'У вас есть ещё {0} {1}'.format(str(n), form2)
+    else:
+        return 'У вас есть ещё {0} {1}'.format(str(n), form5)
 
 
 @method_decorator(staff_member_required, name='dispatch')
@@ -177,12 +209,19 @@ class PaymentsView(View):
             return render(request, self.success_template)
         if 'fail' in request.GET:
             return render(request, self.fail_template)
-        return render(request, self.base_template)
+        data = dict(cards=[
+            ("1 чашечка", "images/coffee_1.png", '''По цене стаканчика кофе в McDonalds''', 68),
+            ("5 чашечек", "images/coffee_5.png", '''По цене 59₽ за чашечку''', 295),
+            ("10 чашечек", "images/coffee_10.png", '''По цене 49₽ за чашечку''', 490),
+            ("20 чашечек", "images/coffee_20.png", '''По цене 39₽ за чашечку''', 780),
+            ("50 чашечек", "images/coffee_50.png", '''По цене 34₽ за чашечку. Этого хватит примерно на год.''', 1690),
+        ])
+        return render(request, self.base_template, data)
 
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         if 'cup_amount' in request.POST:
-            payment = Payment.objects.create(user=request.user, cups_amount=int(request.POST['cup_amount'][0]))
+            payment = Payment.objects.create(user=request.user, cups_amount=int(request.POST['cup_amount']))
             return render(request, self.proceed_template, context={'payment': payment})
 
 

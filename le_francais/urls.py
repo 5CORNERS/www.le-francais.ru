@@ -10,7 +10,7 @@ from social_core.utils import setting_name
 from forum.sitemap_generator import ForumSitemap, TopicSitemap
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
-from home.urls import site_import_urls, api_urls, payment_urls
+from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls
 from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing
 from home.views import change_username, LeFrancaisWagtailSitemap as WagtailSitemap
 from profiles.views import UserTopics, UserPosts
@@ -48,6 +48,8 @@ urlpatterns = [
 
     url(r'^payments/', include(payment_urls)),
 
+    url(r'^coffee/', include(coffee_urls)),
+
     url(r'^accounts/', include('allauth.urls')),
     url(r'^accounts/username/change/$', change_username, name='account_change_username'),
     url(r'^accounts/username/change_new/$', change_username, name='account_change_username'),
@@ -69,7 +71,7 @@ urlpatterns = [
     url(r'^forum/', include('pybb.urls', namespace='pybb')),
 
     url(r'^messages/', include('forum_messages.urls')),
-    
+
     url(r'^conjugaison/', include('conjugation.urls',namespace='conjugation')),
 
     url(r'^le_nombres/', include('le_nombres.urls')),
@@ -77,6 +79,7 @@ urlpatterns = [
     url(r'', include('user_sessions.urls', 'user_sessions')),
     url(r'^new-users-redirect-url/', TemplateView.as_view(template_name='account/change_username_new.html')),
     url(r'^', include(wagtail_urls)),
+
 
 ]
 
