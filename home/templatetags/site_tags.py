@@ -16,13 +16,13 @@ def payment_form(context, payment):
     if payment.cups_amount == 1:
         payment_amount = 68
     elif payment.cups_amount == 5:
-        payment_amount = 300
+        payment_amount = 295
     elif payment.cups_amount == 10:
-        payment_amount = 500
+        payment_amount = 490
     elif payment.cups_amount == 20:
-        payment_amount = 800
+        payment_amount = 780
     elif payment.cups_amount == 50:
-        payment_amount = 1700
+        payment_amount = 1690
 
     currency_id = u'643' ## Russian rubles
     payment_no = payment.id
@@ -245,3 +245,7 @@ def do_assign(parser, token):
 
 
 register.tag('assign', do_assign)
+
+register.assignment_tag()
+
+
