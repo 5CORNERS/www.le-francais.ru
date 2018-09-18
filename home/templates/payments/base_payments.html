@@ -25,7 +25,10 @@
       <div class="col-md-12">
         <p class="h1">Заголовок</p>
         <div class="row equal">
-
+        <form action="https://www.le-francais.ru/payments/" method="post">
+          {% csrf_token %}
+          <button type="submit" role="button" name="cup_amount" value="5"></button>
+        </form>
           {% for card in cards %}
             <div class="col-md-3">
               <div class="card card-select" data-cardSelect>
