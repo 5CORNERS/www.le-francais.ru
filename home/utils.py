@@ -25,14 +25,14 @@ def get_signature(params, secret_key=settings.WALLET_ONE_SECRET_KEY):
     md5_string = md5(str_buff).digest()
     return (binascii.b2a_base64(md5_string)[:-1])
 
-def message_left(n, form1='чашечка', form2='чашечки', form5='чашечек'):
+def message_left(n, form1='С‡Р°С€РµС‡РєР°', form2='С‡Р°С€РµС‡РєРё', form5='С‡Р°С€РµС‡РµРє'):
     n10 = n%10
     n100 = n%100
     if n == 0:
-        return 'У Вас не осталось {0} :('.format(form5)
+        return 'РЈ Р’Р°СЃ РЅРµ РѕСЃС‚Р°Р»РѕСЃСЊ {0} :('.format(form5)
     elif n10 == 1 and n100 != 11:
-        return 'У вас есть ещё {0} {1}'.format(str(n), form1)
+        return 'РЈ РІР°СЃ РµСЃС‚СЊ РµС‰С‘ {0} {1}'.format(str(n), form1)
     elif n10 in [2, 3, 4] and n100 not in [12, 13, 14]:
-        return 'У вас есть ещё {0} {1}'.format(str(n), form2)
+        return 'РЈ РІР°СЃ РµСЃС‚СЊ РµС‰С‘ {0} {1}'.format(str(n), form2)
     else:
-        return 'У вас есть ещё {0} {1}'.format(str(n), form5)
+        return 'РЈ РІР°СЃ РµСЃС‚СЊ РµС‰С‘ {0} {1}'.format(str(n), form5)
