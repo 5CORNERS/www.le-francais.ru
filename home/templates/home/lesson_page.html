@@ -16,6 +16,15 @@
 {% block extra_js %}
     <script async type="text/javascript"
             src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
+    {% if request.GET.modal_open %}
+        {% with modal_id=request.GET.modal_open %}
+            <script>
+              $(document).ready(function () {
+                $('#{{ modal_id }}').modal('show')
+              });
+            </script>
+        {% endwith %}
+    {% endif %}
 {% endblock %}
 
 {% block extra_css %}
@@ -46,9 +55,34 @@
                     <h1>{{ page.title }}</h1>
                     {% if self.audio_material != 'None' %}
                         <div class="block-audio">
-                            <audio data-downloadable number="{{ self.lesson_number }}">
-                                <source src="{% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}"type="audio/mpeg">
-                            </audio>
+
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <audio data-downloadable number="{{ self.lesson_number }}">
+                                        <source src="{% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}" type="audio/mpeg">
+                                    </audio>
+                                </div>
+                                {% if request.user.is_staff %}
+                                    <div class="col-md-4">
+                                        <input type="hidden" name="next" value="{{ request.path }}">
+                                        <!-- button trigger by-me-a-coffee-modals -->
+                                        <div class="coffee-button btn-group btn-group-xs">
+                                            <button class="btn btn-default"><img style="height: 2.5em" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}"></button>
+                                            <button
+                                                    {% if user.is_authenticated and user.has_cofee %}
+                                                        data-toggle="modal" data-target="#buy-me-a-coffee-modal"
+                                                    {% elif user.is_authenticated and not user.has_coffee %}
+                                                        onclick="location.href='{% url 'payments' %}?next={% url 'check_amount' %}?next={{ request.path }}'"
+                                                    {% elif not user.is_authenticated %}
+                                                        data-toggle="modal" data-target="#buy-me-a-coffee-modal"
+                                                    {% endif %}
+                                                        class="btn btn-default " style="line-height: 1.3">Вам ведь понравился урок?<br>Угостите меня кофейком!
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+
                         </div>
                     {% endif %}
                     <ul class="nav nav-tabs">
@@ -68,12 +102,12 @@
                             </li>
                         {% endif %}
                         {% if self.dictionary %}
-                                <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#dictionary" role="tab"
-                                       aria-controls="body">
-                                        Словарик
-                                    </a>
-                                </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#dictionary" role="tab"
+                                   aria-controls="body">
+                                    Словарик
+                                </a>
+                            </li>
                         {% endif %}
                         {% if self.summary %}
                             <li class="nav-item">
@@ -91,12 +125,13 @@
                             </li>
                         {% endif %}
                         {% if self.mail_archive %}
-                            {% if user.is_superuser%}<li class="nav-item">
-                                <a class="nav-link" data-toggle="tab" href="#mail-archive" role="tab"
-                                   aria-controls="body">
-                                    Материал для повторения
-                                </a>
-                            </li>{% endif %}
+                            {% if user.is_superuser %}
+                                <li class="nav-item">
+                                    <a class="nav-link" data-toggle="tab" href="#mail-archive" role="tab"
+                                       aria-controls="body">
+                                        Материал для повторения
+                                    </a>
+                                </li>{% endif %}
                         {% endif %}
                         {% for child_value in self.other_tabs %}
                             {% if not child_value.value.invisible or user.is_superuser %}
@@ -111,7 +146,7 @@
                     <div class="tab-content">
                         {% assign pane_class "tab-pane active" %}
                         {% if self.comments_for_lesson %}
-                            <div id="comments_for_lesson" class="{{ pane_class }}"role="tabpanel">
+                            <div id="comments_for_lesson" class="{{ pane_class }}" role="tabpanel">
                                 {% for block in self.comments_for_lesson %}{% include_block block %}{% endfor %}
                                 {% page_advert_body 'comments_for_lesson_bottom' page.page_type %}
                             </div>
@@ -125,7 +160,7 @@
                             {% assign pane_class "tab-pane" %}
                         {% endif %}
                         {% if self.dictionary %}
-                            <div id="dictionary" class="{{ pane_class }}"role="tabpanel">
+                            <div id="dictionary" class="{{ pane_class }}" role="tabpanel">
                                 {% for block in self.dictionary %}{% include_block block %}{% endfor %}
                                 {% page_advert_body 'dictionary_bottom' page.page_type %}
                             </div>
@@ -134,11 +169,11 @@
                         {% if self.summary %}
                             <div id="resume" class="{{ pane_class }}" role="tabpanel">
                                 <div>
-                                {% page_advert_body 'resume_top' page.page_type %}
+                                    {% page_advert_body 'resume_top' page.page_type %}
                                     {% with "https://files.le-francais.ru"|add:self.summary as document_url %}
                                         {% include 'blocks/document_viewer.html' %}
                                     {% endwith %}
-                                {% page_advert_body 'resume_bottom' page.page_type %}
+                                    {% page_advert_body 'resume_bottom' page.page_type %}
                                 </div>
                             </div>
                             {% assign pane_class "tab-pane" %}
@@ -146,11 +181,11 @@
                         {% if self.repetition_material %}
                             <div id="revision" class="{{ pane_class }}" role="tabpanel">
                                 <div>
-                                {% page_advert_body 'revision_top' page.page_type %}
+                                    {% page_advert_body 'revision_top' page.page_type %}
                                     {% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
                                         {% include 'blocks/document_viewer.html' %}
                                     {% endwith %}
-                                {% page_advert_body 'revision_body' page.page_type %}
+                                    {% page_advert_body 'revision_body' page.page_type %}
                                 </div>
                             </div>
                             {% assign pane_class "tab_pane" %}
@@ -173,15 +208,16 @@
                     </div>
                 </div>
 
-                {% if self.lesson_number > 5 %}<div class="row">
-                    <div class="col-xs-12">
-                        <div class="panel panel-success">
-                            <div class="panel-heading">
-                                Пожалуйста, <a href="/collecte/">поддержите наш проект</a>, чтобы мы могли делать всякие разные клёвые фишки для вас и помогать вам еще лучше и быстрее изучать французский язык!
+                {% if self.lesson_number > 5 %}
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="panel panel-success">
+                                <div class="panel-heading">
+                                    Пожалуйста, <a href="/collecte/">поддержите наш проект</a>, чтобы мы могли делать всякие разные клёвые фишки для вас и помогать вам еще лучше и быстрее изучать французский язык!
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>{% endif %}
+                    </div>{% endif %}
                 <hr>
                 <div class="row controls text-center">
                     {% assign prev self.get_prev_sibling %}
@@ -211,7 +247,7 @@
                                         <div class="first_post">{% include "tags/related_post.html" %}</div>
                                     {% endwith %}
                                     {% if self.topic.last_post.id != self.topic.head.id %}
-                                        <div class="text-left" style="margin: 1em 0">Последний комментарий к уроку. <a href="{{ self.topic.last_post.get_absolute_url }}">Посмотреть все.</a> </div>
+                                        <div class="text-left" style="margin: 1em 0">Последний комментарий к уроку. <a href="{{ self.topic.last_post.get_absolute_url }}">Посмотреть все.</a></div>
                                         {% with self.topic.last_post as post %}
                                             {% if not post == self.topic.head %}
                                                 <div class="last_post">{% include "tags/related_post.html" %}</div>
@@ -235,6 +271,109 @@
             </div>
             <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
                 {% page_advert_body 'sidebar' page.page_type %}
+            </div>
+        </div>
+    </div>
+    <!-- by-me-a-coffee-modals -->
+    {% assign next "/coffee/check/?next="|add:request.path %}
+    <div class="modal" id="buy-me-a-coffee-modal" tabindex="-1" role="dialog" aria-labelledby="buyMeACoffeeLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" style="text-align: center">Спасибо за Ваше решение!</h4>
+                </div>
+                {% if user.is_authenticated %}
+                    {% if user.has_coffee %}
+                        <div class="modal-body" style="text-align: center">
+                            <p>Ура! Вы угощаете нас стаканчиком кофе за этот урок.</p>
+                            <p>Все правильно?</p>
+                        </div>
+                        <div class="modal-footer" style="text-align: center">
+                            <button type="button" class="btn btn-primary" id="by-me-a-coffee-proceed" data-dismiss="modal">OUI !</button>
+                            <script>
+                              $('#by-me-a-coffee-proceed').click(function () {
+                                $.ajax({
+                                  type: "POST",
+                                  url: "{% url 'give_me_a_coffee' %}",
+                                  data: {
+                                    'lesson_number': {{ self.lesson_number }},
+                                    'user_email': "{{ request.user }}",
+                                    'csrfmiddlewaretoken': "{{ csrf_token }}"
+                                  },
+                                  datatype: "json",
+                                  success: function (response) {
+                                    if (response.result) {
+                                      $('#give-me-a-coffee-success-message').html(response.description)
+                                    }
+                                    else {
+                                      $('#give-me-a-coffee-success-message').html(response.description)
+                                    }
+                                  },
+                                  error: function (response, error) {
+                                    $('#give-me-a-coffee-success-message').html(error)
+                                  },
+                                });
+                                $('#by-me-a-coffee-complete-modal').modal('show');
+                              })
+                            </script>
+                        </div>
+                    {% else %}
+
+                    {% endif %}
+                {% else %}
+                    <div class="modal-body">
+                        <p>Смотрите, дальше все очень просто. У Вас же есть аккаунт в какой-нибудь социальной сети — там, VK, ОК, FB, Ya, G+ и т.п.? Вы можете зайти на сайт, как их пользователь — это делается
+                            в два клика. Да, так надо — нельзя анонимно угощать кофе, ясно?.</p>
+                        <!-- Social OAuth Buttons -->
+                        {% include 'account/oauth-buttons.html' with next=next %}
+                        <!-- LogIn Form -->
+
+                        {% include 'account/login_form.html' with redirect_field_value=next redirect_field_name="next" %}
+                        <p>Ежели такого аккаунта у Вас нет, не беда — создадим здесь свой. Плевое дело!<br><a href="{% url 'account_signup' %}?next={{ next }}">Зарегистрироваться</a></p>
+
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="by-me-a-coffee-complete-modal" tabindex="-1" role="dialog" aria-labelledby="buyMeACoffeeCompleteLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header"><h4>Спасибо за вашу поддержку</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p id="give-me-a-coffee-success-message"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% comment %}<div class="modal" id="by-me-a-coffee-payment-success-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header"><h4>Спасибо за вашу поддержку</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+      </div>
+    </div>
+  </div>{% endcomment %}
+    <div class="modal" id="by-me-a-coffee-payment-fail-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header"><h4>Ошибка</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p>Что-то пошло не так.</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="{% url 'payments' %}" type="button" class="btn btn-primary">Повторить</a>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">В другой раз</button>
+                </div>
             </div>
         </div>
     </div>

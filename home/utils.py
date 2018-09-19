@@ -23,4 +23,16 @@ def get_signature(params, secret_key=settings.WALLET_ONE_SECRET_KEY):
     str_buff += secret_key.encode('1251')
 
     md5_string = md5(str_buff).digest()
-    return binascii.b2a_base64(md5_string)[:-1]
+    return (binascii.b2a_base64(md5_string)[:-1])
+
+def message_left(n, form1='чашечка', form2='чашечки', form5='чашечек'):
+    n10 = n%10
+    n100 = n%100
+    if n == 0:
+        return 'У Вас не осталось {0} :('.format(form5)
+    elif n10 == 1 and n100 != 11:
+        return 'У вас есть ещё {0} {1}'.format(str(n), form1)
+    elif n10 in [2, 3, 4] and n100 not in [12, 13, 14]:
+        return 'У вас есть ещё {0} {1}'.format(str(n), form2)
+    else:
+        return 'У вас есть ещё {0} {1}'.format(str(n), form5)
