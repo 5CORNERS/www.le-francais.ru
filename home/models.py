@@ -435,7 +435,7 @@ class Payment(Model):
 
         currency_id = u'643'  ## Russian rubles
         payment_no = self.id
-        description = "www.le-francais.ru -- Покупка " + str(self.cups_amount) + " «чашек кофе»."
+        description = "www.le-francais.ru -- РџРѕРєСѓРїРєР° " + str(self.cups_amount) + " В«С‡Р°С€РµРє РєРѕС„РµВ»."
         expired_date = self.expired_date().isoformat()
         customer_email = self.user.email
 
