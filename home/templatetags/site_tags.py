@@ -10,7 +10,7 @@ from django.conf import settings
 register = template.Library()
 
 @register.inclusion_tag('tags/payment_form.html', takes_context=True)
-def payment_form(context, payment):
+def payment_params(context, payment):
     merchant_id = settings.WALLET_ONE_MERCHANT_ID
 
     if payment.cups_amount == 1:
