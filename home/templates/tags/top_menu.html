@@ -56,13 +56,13 @@
 								</li>
 							{% endif %}
 
-							<li class="divider"></li>
+              <li class="divider"></li>
 
               <li>
                 <a href="{% url 'account_logout' %}?next={{ request.path }}">{% trans "Logout" %}</a>
               </li>
             </ul>
-          </li>
+					</li>
 
 				{% else %}
 
