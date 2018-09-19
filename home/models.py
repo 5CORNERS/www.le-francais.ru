@@ -1,5 +1,5 @@
 from __future__ import absolute_import, unicode_literals
-
+from django.conf import settings
 from django.db.models import CharField, SmallIntegerField, OneToOneField, IntegerField, BooleanField, SET_NULL, ForeignKey, URLField, \
     Model
 from django.db.models.fields import TextField, DateTimeField
@@ -419,3 +419,39 @@ class Payment(Model):
     def __str__(self):
         return 'Payment '+str(self.id)
 
+    def get_params(self, success_url="https://www.le-francais.ru/payments?success", fail_url="https://www.le-francais.ru/payments?fail"):
+        merchant_id = settings.WALLET_ONE_MERCHANT_ID
+
+        if self.cups_amount == 1:
+            payment_amount = 68
+        elif self.cups_amount == 5:
+            payment_amount = 295
+        elif self.cups_amount == 10:
+            payment_amount = 490
+        elif self.cups_amount == 20:
+            payment_amount = 780
+        elif self.cups_amount == 50:
+            payment_amount = 1690
+
+        currency_id = u'643'  ## Russian rubles
+        payment_no = self.id
+        description = "www.le-francais.ru -- Покупка " + str(self.cups_amount) + " «чашек кофе»."
+        expired_date = self.expired_date().isoformat()
+        customer_email = self.user.email
+
+        params = [
+            ('WMI_MERCHANT_ID', merchant_id),
+            ('WMI_PAYMENT_AMOUNT', payment_amount),
+            ('WMI_CURRENCY_ID', currency_id),
+            ('WMI_PAYMENT_NO', payment_no),
+            ('WMI_DESCRIPTION', description),
+            ('WMI_SUCCESS_URL', success_url),
+            ('WMI_FAIL_URL', fail_url),
+            ('WMI_EXPIRED_DATE', expired_date),
+            ('WMI_CUSTOMER_EMAIL', customer_email),
+        ]
+        from .utils import get_signature
+        signature = get_signature(params).decode('utf-8')
+        params.append(('WMI_SIGNATURE', signature))
+
+        return {'params': params}
