@@ -64,6 +64,12 @@ class User(AbstractUser):
 	USERNAME_FIELD = 'email'
 	REQUIRED_FIELDS = ['username']
 
+	def has_coffee(self):
+		if self.cup_amount > 0:
+			return True
+		else:
+			return False
+
 	def __str__(self):
 		return self.username
 
