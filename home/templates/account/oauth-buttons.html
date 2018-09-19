@@ -27,7 +27,7 @@
     </div>
     <div class="col-lg-4 col-sm-6">
         <a class="btn btn-odnoklassniki btn-block" style="margin-bottom:10px"
-           href="{% url "social:begin" "odnoklassniki-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" disabled="disabled">
+           {% comment %}href="{% url "social:begin" "odnoklassniki-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}"{% endcomment %} disabled="disabled">
             {% comment %}<img style="margin-right:5px; height: 1em" src="{% static 'images/ok_logo_48x82.png' %}">{% endcomment %}Одноклассники
         </a>
     </div>
