@@ -163,6 +163,7 @@ def listen_request(request):
 
 from .models import Payment
 from django.contrib.admin.views.decorators import staff_member_required
+from .utils import message_left
 
 class GiveMeACoffee(View):
     def post(self, request, *args, **kwargs):
@@ -171,29 +172,29 @@ class GiveMeACoffee(View):
             if request.user.cup_amount >= 1:
                 try:
                     cup_amount = lesson_page.add_lesson_to_user(request.user)
-                    data = dict(result=True, description=message(cup_amount))
+                    data = dict(result=True, description=message_left(cup_amount))
                 except BaseException as e:
                     data = dict(result=False, description="Failed to do something: " + str(e))
             else:
                 data = dict(result=False, description="Чтобы чем-то угощать, надо это что-то иметь :)")
         else:
-            data=dict(result=False, description="Not authenticated")
+            data = dict(result=False, description="Not authenticated")
         return JsonResponse(data)
 
     def get(self, request, *args, **kwargs):
         pass
 
-def message(n, form1='чашечка', form2='чашечки', form5='чашечек'):
-    n10 = n%10
-    n100 = n%100
-    if n == 0:
-        return 'У Вас не осталось {0} :('.format(form5)
-    elif n10 == 1 and n100 != 11:
-        return 'У вас есть ещё {0} {1}'.format(str(n), form1)
-    elif n10 in [2, 3, 4] and n100 not in [12, 13, 14]:
-        return 'У вас есть ещё {0} {1}'.format(str(n), form2)
-    else:
-        return 'У вас есть ещё {0} {1}'.format(str(n), form5)
+
+from django.urls import reverse
+
+
+@login_required
+def coffee_amount_check(request):
+    if 'next' in request.GET:
+        if request.user.has_coffee():
+            return HttpResponseRedirect(request.GET['next'] + "?modal_open=buy-me-a-coffee-modal")
+        else:
+            return HttpResponseRedirect(reverse('payments') + "?next=" + request.GET['next'])
 
 
 @method_decorator(staff_member_required, name='dispatch')
@@ -210,11 +211,11 @@ class PaymentsView(View):
         if 'fail' in request.GET:
             return render(request, self.fail_template)
         data = dict(cards=[
-            ("1 чашечка", "images/coffee_1.png", '''По цене стаканчика кофе в McDonalds''', 68),
-            ("5 чашечек", "images/coffee_5.png", '''По цене 59₽ за чашечку''', 295),
-            ("10 чашечек", "images/coffee_10.png", '''По цене 49₽ за чашечку''', 490),
-            ("20 чашечек", "images/coffee_20.png", '''По цене 39₽ за чашечку''', 780),
-            ("50 чашечек", "images/coffee_50.png", '''По цене 34₽ за чашечку. Этого хватит примерно на год.''', 1690),
+            ("1 чашечка", "images/coffee_1.png", '''По цене стаканчика кофе в McDonalds''', 68, 1),
+            ("5 чашечек", "images/coffee_5.png", '''59₽ за чашечку''', 295, 5),
+            ("10 чашечек", "images/coffee_10.png", '''49₽ за чашечку''', 490, 10),
+            ("20 чашечек", "images/coffee_20.png", '''39₽ за чашечку''', 780, 20),
+            ("50 чашечек", "images/coffee_50.png", '''34₽ за чашечку — хватит на год.''', 1690, 50),
         ])
         return render(request, self.base_template, data)
 
@@ -222,7 +223,13 @@ class PaymentsView(View):
     def post(self, request, *args, **kwargs):
         if 'cup_amount' in request.POST:
             payment = Payment.objects.create(user=request.user, cups_amount=int(request.POST['cup_amount']))
-            return render(request, self.proceed_template, context={'payment': payment})
+            if "success_url" in request.POST and "fail_url" in request.POST:
+                params = payment.get_params(
+                    success_url=request.scheme + "://" + request.META['HTTP_HOST'] + request.POST['success_url'],
+                    fail_url=request.scheme + "://" + request.META['HTTP_HOST'] + request.POST['fail_url'])
+            else:
+                params = payment.get_params()
+            return JsonResponse(params, safe=True)
 
 
 from urllib.parse import quote

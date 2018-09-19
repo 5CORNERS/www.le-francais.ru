@@ -2,38 +2,38 @@
 {% if request.GET.next %}{% endif %}
 <div class="row text-xs-center">
     <div class="col-lg-4 col-sm-6">
-        <a class="btn btn-google btn-block" href="{% url "social:begin" "google-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}"
+        <a class="btn btn-google btn-block" href="{% url "social:begin" "google-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}"
            style="margin-bottom:10px">
             Google
         </a>
     </div>
     <div class="col-lg-4 col-sm-6">
         <a class="btn btn-vk btn-block" style="margin-bottom:10px"
-           href="{% url "social:begin" "vk-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+           href="{% url "social:begin" "vk-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}">
             ВКонтакте
         </a>
     </div>
     <div class="col-lg-4 col-sm-6">
         <a class="btn btn-facebook btn-block" style="margin-bottom:10px"
-           href="{% url "social:begin" "facebook" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+           href="{% url "social:begin" "facebook" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}">
             Facebook
         </a>
     </div>
     <div class="col-lg-4 col-sm-6">
         <a class="btn btn-mailru btn-block" style="margin-bottom:10px"
-           href="{% url "social:begin" "mailru-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+           href="{% url "social:begin" "mailru-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}">
             Mail.ru
         </a>
     </div>
     <div class="col-lg-4 col-sm-6">
         <a class="btn btn-odnoklassniki btn-block" style="margin-bottom:10px"
-           href="{% url "social:begin" "odnoklassniki-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+           href="{% url "social:begin" "odnoklassniki-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}">
             <img style="margin-right:5px; height: 1em" src="{% static 'images/ok_logo_48x82.png' %}">Одноклассники
         </a>
     </div>
     <div class="col-lg-4 col-sm-6">
         <a class="btn btn-yandex btn-block" style="margin-bottom:10px; "
-           href="{% url "social:begin" "yandex-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+           href="{% url "social:begin" "yandex-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}">
             Яндекс
         </a>
     </div>

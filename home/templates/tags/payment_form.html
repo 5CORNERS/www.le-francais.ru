@@ -1,6 +1,3 @@
-<form class="form-group" method="post" action="https://wl.walletone.com/checkout/checkout/Index">
-    {% for param in params %}
-        <input hidden name="{{ param.0 }}" value="{{ param.1 }}">
-    {% endfor %}
-    <button type="submit" class="btn btn-lg btn-primary" role="button">Оплатить</button>
-</form>
+{% for param in params %}
+    <input hidden name="{{ param.0 }}" value="{{ param.1 }}">
+{% endfor %}
