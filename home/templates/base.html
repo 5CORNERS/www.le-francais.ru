@@ -49,6 +49,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
     <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
 
 
     <!-- Latest compiled and minified JavaScript -->
@@ -109,7 +110,6 @@
 {# Global javascript #}
 {% block js %}
 <script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
-<script async src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
 <script async src="{% static 'lib/audio/audioplayer.min.js' %}"></script>
 {% endblock %}
 {% block extra_js %}
