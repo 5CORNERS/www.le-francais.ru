@@ -100,9 +100,9 @@
                                                 <div id="coffee-button-text" class="coffee-button-text">Вам ведь понравился урок?<br>Угостите меня кофейком!</div>
                                             </button>
                                         {% else %}
-                                            <button class="coffee-button btn btn-success btn-xs" disabled="disabled" id="coffee-button">
+                                            <button class="coffee-button btn btn-default btn-xs" disabled="disabled" id="coffee-button">
                                                 <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}">
-                                                <div id="coffee-button-text" class="coffee-button-text">Success<br>Success</div>
+                                                <div id="coffee-button-text" class="coffee-button-text">Вы уже угощали меня<br>за этот урок :)</div>
                                             </button>
                                         {% endif %}
                                     </div>
@@ -321,7 +321,7 @@
                                 function getSuccessButton() {
                                   $('#coffee-button').removeClass('btn-default').addClass('btn-success').addClass('btn-disable').attr("onclick", '').attr('data-toggle', '');
                                   $('#coffee-button-image').attr('src', "{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}");
-                                  $('#coffee-button-text').html('Success<br>Success');
+                                  $('#coffee-button-text').html('Вы уже угощали меня<br>за этот урок :)');
                                 }
                               $('#by-me-a-coffee-proceed').click(function () {
                                 $.ajax({
