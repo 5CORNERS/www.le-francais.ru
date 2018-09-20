@@ -304,7 +304,7 @@ class LessonPage(Page):
 
     def add_lesson_to_user(self, user):
         ul = UserLesson(user=user, lesson=self)
-        # ul.save()
+        ul.save()
         user.cup_amount -= 1
         user.save()
         return user.cup_amount
