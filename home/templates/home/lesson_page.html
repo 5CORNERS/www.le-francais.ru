@@ -81,7 +81,7 @@
                                         <source src="{% if self.audio_material %}{{ self.audio_material }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}" type="audio/mpeg">
                                     </audio>
                                 </div>
-                                {% if request.user.is_staff %}
+                                {% if request.user.is_staff or request.GET.coffee_button_test %}
                                     <div class="col-md-4">
                                         <input type="hidden" name="next" value="{{ request.path }}">
                                         <!-- button trigger by-me-a-coffee-modals -->
