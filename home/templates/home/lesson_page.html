@@ -85,7 +85,8 @@
                                     <div class="col-md-4">
                                         <input type="hidden" name="next" value="{{ request.path }}">
                                         <!-- button trigger by-me-a-coffee-modals -->
-                                        {% if not self in user.payed_lessons %}
+                                        {% check_user_lesson request.user self as userlesson %}
+                                        {% if not userlesson %}
                                             <button class="coffee-button btn btn-default btn-xs" id="coffee-button"
                                                     {% if user.is_authenticated and user.has_coffee %}
                                                     data-toggle="modal" data-target="#buy-me-a-coffee-modal"
@@ -99,7 +100,7 @@
                                                 <div id="coffee-button-text" class="coffee-button-text">Вам ведь понравился урок?<br>Угостите меня кофейком!</div>
                                             </button>
                                         {% else %}
-                                            <button class="coffee-button btn btn-success btn-xs" id="coffee-button">
+                                            <button class="coffee-button btn btn-success btn-xs" disabled="disabled" id="coffee-button">
                                                 <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}">
                                                 <div id="coffee-button-text" class="coffee-button-text">Success<br>Success</div>
                                             </button>
