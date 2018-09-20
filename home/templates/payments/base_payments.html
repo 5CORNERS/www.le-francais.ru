@@ -5,161 +5,207 @@
 {% block description %}{% endblock %}
 
 {% block extra_css %}
-  <style>
-    .col-xs-5ths,
-    .col-sm-5ths,
-    .col-md-5ths,
-    .col-lg-5ths {
-      position: relative;
-      min-height: 1px;
-      padding-right: 15px;
-      padding-left: 15px;
-    }
+    <style>
+        .col-xs-5ths,
+        .col-sm-5ths,
+        .col-md-5ths,
+        .col-lg-5ths {
+            position: relative;
+            min-height: 1px;
+            padding-right: 15px;
+            padding-left: 15px;
+        }
 
-    .col-xs-5ths {
-      width: 20%;
-      float: left;
-    }
+        .col-xs-5ths {
+            width: 20%;
+            float: left;
+        }
 
-    @media (min-width: 768px) {
-      .col-sm-5ths {
-        width: 20%;
-        float: left;
-      }
-    }
+        @media (min-width: 768px) {
+            .col-sm-5ths {
+                width: 20%;
+                float: left;
+            }
+        }
 
-    @media (min-width: 992px) {
-      .col-md-5ths {
-        width: 20%;
-        float: left;
-      }
-    }
+        @media (min-width: 992px) {
+            .col-md-5ths {
+                width: 20%;
+                float: left;
+            }
+        }
 
-    @media (min-width: 1200px) {
-      .col-lg-5ths {
-        width: 20%;
-        float: left;
-      }
-    }
-  </style>
-  <style>
-    .card-description {
-      height: 5em;
-    }
+        @media (min-width: 1200px) {
+            .col-lg-5ths {
+                width: 20%;
+                float: left;
+            }
+        }
+    </style>
+    <style>
+        .card-description {
+            height: 5em;
+        }
 
-    .card {
-      margin-bottom: 20px;
-      padding: 5px 5px 5px;
-      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
-      background-color: #f6f6f6;
-    }
+        .card {
+            margin-bottom: 20px;
+            padding: 5px 5px 5px;
+            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+            background-color: #f6f6f6;
+        }
 
-    .card-image-container {
-      text-align: center;
-    }
+        .card-image-container {
+            text-align: center;
+        }
 
-    .card-image {
-      margin: 5px;
-    }
+        .card-image {
+            margin: 5px;
+        }
 
-    .card-header {
-      font-size: 18px;
-      background-color: #438bc9;
-      color: #FFFFFF;
-      padding: 10px 20px;
-    }
+        .card-header {
+            font-size: 18px;
+            background-color: #438bc9;
+            color: #FFFFFF;
+            padding: 10px 20px;
+        }
 
-    .card-description {
-      padding: 5px 8px;
-      display: flex;
-      align-items: center;
-    }
+        .card-description {
+            padding: 5px 8px;
+            display: flex;
+            align-items: center;
+        }
 
-    .card-price {
-      font-size: 20px;
-      text-align: center;
-      padding: 20px;
-      background-color: #eee;
-    }
+        .card-price {
+            font-size: 20px;
+            text-align: center;
+            padding: 20px;
+            background-color: #eee;
+        }
 
-    .card:hover {
-      box-shadow: 4px 8px 12px 0 rgba(0, 0, 0, 0.2)
-    }
+        .card:hover {
+            box-shadow: 4px 8px 12px 0 rgba(0, 0, 0, 0.2)
+        }
 
-    .h1 {
-      text-align: center;
-    }
+        .h1 {
+            text-align: center;
+        }
 
-    .subcaption {
-      text-align: center;
-      font-size: 15.6px;
-      margin: 0 0 20px;
-    }
-  </style>
-  {#  <link rel="stylesheet" href="{% static 'components/card-select/card-select.css' %}">#}
+        .subcaption {
+            text-align: center;
+            font-size: 15.6px;
+            margin: 0 0 20px;
+        }
+    </style>
+    {#  <link rel="stylesheet" href="{% static 'components/card-select/card-select.css' %}">#}
 {% endblock %}
 {% block extra_js %}
-  <script>
-    function submitToWalletOne(cup_amount) {
-      $.ajax({
-        url: "{% url 'payments' %}",
-        type: "POST",
-        data: {
-          {% if "next" in request.GET %}
-            success_url:"{{ request.GET.next }}?modal_open=buy-me-a-coffee-modal",
-            fail_url: "{{ request.GET.next }}?modal_open=by-me-a-coffee-payment-fail-modal",
-          {% endif %}
-          cup_amount: cup_amount,
-          csrfmiddlewaretoken: "{{ csrf_token }}"
-        },
-        datatype: "json",
-        success: function (response) {
-          let form = $("<form/>",
-            {action: 'https://wl.walletone.com/checkout/checkout/Index', method:'POST'}
-          );
-          for (let i in response.params){
-            form.append(
-              $("<input>",{name:response.params[i][0], value:response.params[i][1]})
-            )
+    <script>
+      function submitToWalletOne(cup_amount) {
+        $.ajax({
+          url: "{% url 'payments' %}",
+          type: "POST",
+          data: {
+            {% if "next" in request.GET %}
+              success_url: "{{ request.GET.next }}?modal_open=buy-me-a-coffee-modal",
+              fail_url: "{{ request.GET.next }}?modal_open=by-me-a-coffee-payment-fail-modal",
+            {% endif %}
+            cup_amount: cup_amount,
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+          },
+          datatype: "json",
+          success: function (response) {
+            let form = $("<form/>",
+              {action: 'https://wl.walletone.com/checkout/checkout/Index', method: 'POST'}
+            );
+            for (let i in response.params) {
+              form.append(
+                $("<input>", {name: response.params[i][0], value: response.params[i][1]})
+              )
+            }
+            $("body").append(form);
+            form.submit()
           }
-          $("body").append(form);
-          form.submit()
-        }
-      })
-    }
-  </script>
+        })
+      }
+    </script>
+    {% if 'success' in request.GET %}
+        <script>
+          $(document).ready(function () {
+            $('#success-payment-modal').modal('show')
+          })
+        </script>
+    {% elif 'fail' in request.GET %}
+        <script>
+          $(document).ready(function () {
+            $('#fail-payment-modal').modal('show')
+          })
+        </script>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <p class="h1">Запаситесь кофейком!</p>
-        <p class="subcaption">{% comment %}Чтобы чем-то угощать, надо это что-то иметь :){% endcomment %}Чтобы угощать много раз.</p>
-        <div class="row equal">
-          {% for card in cards %}
-            <div class="col-xs-6 col-sm-6 col-md-4 col-lg-5ths">
-              <div class="card card-select" data-cardSelect>
-                <div class="card-container">
-                  <div class="card-header">{{ card.0 }}</div>
-                  <div class="card-image-container"><img class="card-image" src="{% static card.1 %}"></div>
-                  <div class="card-price">{{ card.3 }} ₽</div>
-                  <div class="card-description">
-                    <div class="card-description-text">{{ card.2 }}</div>
-                  </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <p class="h1">Запаситесь кофейком!</p>
+                <p class="subcaption">{% comment %}Чтобы чем-то угощать, надо это что-то иметь :){% endcomment %}Чтобы угощать много раз.</p>
+                <div class="row equal">
+                    {% for card in cards %}
+                        <div class="col-xs-6 col-sm-6 col-md-4 col-lg-5ths">
+                            <div class="card card-select" data-cardSelect>
+                                <div class="card-container">
+                                    <div class="card-header">{{ card.0 }}</div>
+                                    <div class="card-image-container"><img class="card-image" src="{% static card.1 %}"></div>
+                                    <div class="card-price">{{ card.3 }} ₽</div>
+                                    <div class="card-description">
+                                        <div class="card-description-text">{{ card.2 }}</div>
+                                    </div>
+                                </div>
+                                <button type="submit" role="button" onclick="submitToWalletOne({{ card.4 }})" class="btn btn-primary btn-block">Беру!</button>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
-                <button type="submit" role="button" onclick="submitToWalletOne({{ card.4 }})" class="btn btn-primary btn-block">Беру!</button>
-              </div>
             </div>
-          {% endfor %}
-
         </div>
-      </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-warning">Правда, поддержите нас! Без вашей поддержки нам по-настоящему худо. :(</div>
+            </div>
+        </div>
     </div>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="alert alert-warning">Правда, поддержите нас! Без вашей поддержки нам по-настоящему худо. :(</div>
-      </div>
+    {% if 'success' in request.GET %}
+    <div class="modal" id="success-payment-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p>Спасибо! Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
+                    <p>Теперь Вы можете благодарить нас за наш труд чашечками кофе :)</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
+{% elif "fail" in request.GET %}
+    <div class="modal" id="fail-payment-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">Ошибка!<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p>Что-то пошло не так.</p>
+                    <p>:(</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
 {% endblock %}
