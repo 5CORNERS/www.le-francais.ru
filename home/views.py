@@ -206,10 +206,6 @@ class PaymentsView(View):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-        if 'success' in request.GET:
-            return render(request, self.success_template)
-        if 'fail' in request.GET:
-            return render(request, self.fail_template)
         data = dict(cards=[
             ("1 чашечка", "images/coffee_1.png", '''По цене стаканчика кофе в McDonalds''', 68, 1),
             ("5 чашечек", "images/coffee_5.png", '''59₽ за чашечку''', 295, 5),
