@@ -12,10 +12,11 @@ register = template.Library()
 
 @register.assignment_tag()
 def check_user_lesson(user:User, lesson:LessonPage):
-    if lesson in user.payed_lessons.all():
-        return True
-    else:
+    if not user.is_authenticated:
         return False
+    elif lesson in user.payed_lessons.all():
+        return True
+    return False
 
 @register.inclusion_tag('tags/payment_form.html', takes_context=True)
 def payment_params(context, payment):
