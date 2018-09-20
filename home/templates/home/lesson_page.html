@@ -2,7 +2,7 @@
 {% load site_tags %}
 {% load wagtailcore_tags %}
 {% load static site_tags %}
-
+{% check_user_lesson request.user self as userlesson %}
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 
 {% block extra_head %}
@@ -16,7 +16,7 @@
 {% block extra_js %}
     <script async type="text/javascript"
             src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
-    {% if request.GET.modal_open %}
+    {% if request.GET.modal_open and not userlesson %}
         {% with modal_id=request.GET.modal_open %}
             <script>
               $(document).ready(function () {
@@ -85,7 +85,6 @@
                                     <div class="col-md-4">
                                         <input type="hidden" name="next" value="{{ request.path }}">
                                         <!-- button trigger by-me-a-coffee-modals -->
-                                        {% check_user_lesson request.user self as userlesson %}
                                         {% if not userlesson %}
                                             <button class="coffee-button btn btn-default btn-xs" id="coffee-button"
                                                     {% if user.is_authenticated and user.has_coffee %}
