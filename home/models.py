@@ -398,13 +398,14 @@ class UserLesson(Model):
         return str(self.user) + str(self.lesson)
 
 import datetime
-
+from .utils import message
 class Payment(Model):
     cups_amount = IntegerField()
     user = ForeignKey('custom_user.User', related_name='payments')
     datetime_create = DateTimeField(auto_now_add=True)
     datetime_update = DateTimeField(auto_now=True)
     status = IntegerField(default=0)
+
 
     def activate_payment(self):
         self.user.activate_payment(self)
@@ -435,7 +436,7 @@ class Payment(Model):
 
         currency_id = u'643'  ## Russian rubles
         payment_no = self.id
-        description = "www.le-francais.ru -- Покупка " + str(self.cups_amount) + " «чашек кофе»."
+        description = "www.le-francais.ru -- Покупка " + message(self.cups_amount, 'чашечки', 'чашечек','чашечек' ) + "кофе."
         expired_date = self.expired_date().isoformat()
         customer_email = self.user.email
 

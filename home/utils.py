@@ -36,3 +36,13 @@ def message_left(n, form1='чашечка', form2='чашечки', form5='ча�
         return 'У вас есть ещё {0} {1}'.format(str(n), form2)
     else:
         return 'У вас есть ещё {0} {1}'.format(str(n), form5)
+
+def message(n, form1=' чашечка', form2=' чашечки', form5=' чашечек'):
+    n10 = n % 10
+    n100 = n % 100
+    if n10 == 1 and n100 != 11:
+        return '{0} {1}'.format(str(n), form1)
+    elif n10 in [2, 3, 4] and n100 not in [12, 13, 14]:
+        return '{0} {1}'.format(str(n), form2)
+    else:
+        return '{0} {1}'.format(str(n), form5)

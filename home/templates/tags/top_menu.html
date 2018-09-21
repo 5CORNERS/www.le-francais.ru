@@ -43,14 +43,17 @@
 					<li class="dropdown" style="cursor: pointer" >
                         <a class="dropdown-toggle" data-toggle="dropdown">{{ request.user.username }} {% if unread_count%}<i class="fa fa-envelope" aria-hidden="true" style="color: inherit;"></i>{% endif %}<b class="caret"></b></a>
 						<ul class="dropdown-menu">
-							<li><a href="{{ request.user.profile.get_absolute_url }}">{% trans "Profile" %}</a></li>
-							<li><a href="{% url 'pybb:edit_profile' %}">{% trans 'Settings' %}</a></li>
+                            {% if user.pybb_profile.post_count > 0 %}
+                                <li><a href="{{ request.user.profile.get_absolute_url }}">Активность на форуме{# TODO l18n Forum activity #}</a></li>
+                            {% endif %}
+							<li><a href="{% url 'pybb:edit_profile' %}">Учетная запись{# TODO l18n #}</a></li>
 							<li>
 								<a href="{% url 'postman:inbox' %}">
-									{% trans 'Messages' %}{% if unread_count %} <strong>({{ unread_count }})</strong>{% endif %}
+									Личные сообщения{# TODO l18n #}{% if unread_count %} <strong>({{ unread_count }})</strong>{% endif %}
 								</a>
 							</li>
 							{% if request.user.is_staff %}
+                                <li><a href="{% url 'payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">Пополнить запасы</a> </li>
 								<li class="divider"></li>
 								<li class="{{ menu_admin }}"><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a>
 								</li>
@@ -59,7 +62,7 @@
               <li class="divider"></li>
 
               <li>
-                <a href="{% url 'account_logout' %}?next={{ request.path }}">{% trans "Logout" %}</a>
+                <a href="{% url 'account_logout' %}?next={{ request.path }}">Выйти{# TODO l18n #}</a>
               </li>
             </ul>
 					</li>
@@ -75,7 +78,7 @@
 						<ul class="dropdown-menu">
 							<li><a href="{% url 'account_login' %}?next={{ request.path }}">{% trans "Login" %}</a></li>
 							<li>
-								<a href="{% url 'account_signup' %}?next={{ request.path }}">{% trans "Registration" %}</a>
+								<a href="{% url 'account_signup' %}?next={{ request.path }}">Регистрация{# TODO l18n #}</a>
 							</li>
 						</ul>
 					</li>
