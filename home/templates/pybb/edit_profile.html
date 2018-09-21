@@ -6,16 +6,16 @@
 {% block content %}
     <script type="text/javascript" src="{% static 'js/jquery.are-you-sure.min.js' %}"></script>
     <script>
-        $('form').areYouSure({'message': 'Your profile details are not saved!'});
+        $('form').areYouSure({'message': 'Изменения будут потеряны!'});
     </script>
     <div class="row">
         <div class="col-md-4">
             {% include "pybb/avatar.html" %}
             <p>
-                <a href="{% url 'account_change_password' %}">{% trans "Change the password" %}</a>
+                <a href="{% url 'account_change_password' %}">Изменить пароль{# TODO l18n #}</a>
             </p>
             <p>
-                <a href="{% url 'account_change_username' %}">{% trans "Change the username" %}</a>
+                <a href="{% url 'account_change_username' %}">Изменить ник на форуме</a>
             </p>
         </div>
         <div class="col-md-8">
@@ -41,7 +41,7 @@
     {% if user.subscriptions.all %}
         <div class="row">
             <div class="col-md-12">
-                <h1>{% trans "Subscriptions on topics" %}</h1>
+                <h1>Мои подписки{# TODO l18n #}{#{% trans "Subscriptions on topics" %}#}</h1>
                 <ul>
                     {% for sub in user.subscriptions.all %}
                         <li>

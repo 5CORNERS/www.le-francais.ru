@@ -92,7 +92,7 @@
 
         .subcaption {
             text-align: center;
-            font-size: 15.6px;
+            font-size: 22px;
             margin: 0 0 20px;
         }
     </style>
@@ -106,8 +106,8 @@
           type: "POST",
           data: {
             {% if "next" in request.GET %}
-              success_url: "{{ request.GET.next }}?modal_open=buy-me-a-coffee-modal",
-              fail_url: "{{ request.GET.next }}?modal_open=by-me-a-coffee-payment-fail-modal",
+              success_url: "{{ request.GET.next }}?modal_open={{ request.GET.success_modal }}&payment_success=true",
+              fail_url: "{{ request.GET.next }}?modal_open={{ request.GET.fail_modal }}&payment_fail=true",
             {% endif %}
             cup_amount: cup_amount,
             csrfmiddlewaretoken: "{{ csrf_token }}"
@@ -128,37 +128,24 @@
         })
       }
     </script>
-    {% if 'success' in request.GET %}
-        <script>
-          $(document).ready(function () {
-            $('#success-payment-modal').modal('show')
-          })
-        </script>
-    {% elif 'fail' in request.GET %}
-        <script>
-          $(document).ready(function () {
-            $('#fail-payment-modal').modal('show')
-          })
-        </script>
-    {% endif %}
 {% endblock %}
 
 {% block content %}
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <p class="h1">Запаситесь кофейком!</p>
-                <p class="subcaption">{% comment %}Чтобы чем-то угощать, надо это что-то иметь :){% endcomment %}Чтобы угощать много раз.</p>
+                <p class="h1" style="margin-top: 20px">Запаситесь кофейком!</p>
+                <p class="subcaption" style="margin-bottom: 20px">{% comment %}Чтобы чем-то угощать, надо это что-то иметь :){% endcomment %}Чтобы угощать много раз.</p>
                 <div class="row equal">
                     {% for card in cards %}
                         <div class="col-xs-6 col-sm-6 col-md-4 col-lg-5ths">
                             <div class="card card-select" data-cardSelect>
                                 <div class="card-container">
-                                    <div class="card-header">{{ card.0 }}</div>
+                                    <div class="card-header">{{ card.0 | safe}}</div>
                                     <div class="card-image-container"><img class="card-image" src="{% static card.1 %}"></div>
-                                    <div class="card-price">{{ card.3 }} ₽</div>
+                                    <div class="card-price">{{ card.3 | safe}} ₽</div>
                                     <div class="card-description">
-                                        <div class="card-description-text">{{ card.2 }}</div>
+                                        <div class="card-description-text">{{ card.2 | safe}}</div>
                                     </div>
                                 </div>
                                 <button type="submit" role="button" onclick="submitToWalletOne({{ card.4 }})" class="btn btn-primary btn-block">Беру!</button>
@@ -170,42 +157,8 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-                <div class="alert alert-warning">Правда, поддержите нас! Без вашей поддержки нам по-настоящему худо. :(</div>
+                <div class="alert alert-warning">Правда, поддержите нас! Без вашей поддержки нам по-настоящему трудно. :(</div>
             </div>
         </div>
     </div>
-    {% if 'success' in request.GET %}
-    <div class="modal" id="success-payment-modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                </div>
-                <div class="modal-body">
-                    <p>Спасибо! Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
-                    <p>Теперь Вы можете благодарить нас за наш труд чашечками кофе :)</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-                </div>
-            </div>
-        </div>
-    </div>
-{% elif "fail" in request.GET %}
-    <div class="modal" id="fail-payment-modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">Ошибка!<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                </div>
-                <div class="modal-body">
-                    <p>Что-то пошло не так.</p>
-                    <p>:(</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-                </div>
-            </div>
-        </div>
-    </div>
-{% endif %}
 {% endblock %}

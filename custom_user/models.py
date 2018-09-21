@@ -57,7 +57,7 @@ class User(AbstractUser):
 	payed_lessons = models.ManyToManyField('home.LessonPage', through='home.UserLesson', related_name='paid_users')
 
 	def activate_payment(self, payment):
-		self.cup_amount =+ payment.cups_amount
+		self.cup_amount = self.cup_amount + payment.cups_amount
 		self.save()
 
 	objects = CustomUserManager()
@@ -96,3 +96,4 @@ class UsedUsernames(models.Model):
 	user = models.ForeignKey('User', on_delete=models.CASCADE)
 	used_username = models.CharField(max_length=32)
 	change_datetime = models.DateTimeField()
+
