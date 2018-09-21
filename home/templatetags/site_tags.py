@@ -59,8 +59,16 @@ def payment_params(context, payment):
     return {'params':params}
 
 
-
-
+@register.assignment_tag()
+def message(n, form1, form2, form5):
+    n10 = n % 10
+    n100 = n % 100
+    if n10 == 1 and n100 != 11:
+        return '{0} {1}'.format(str(n), form1)
+    elif n10 in [2, 3, 4] and n100 not in [12, 13, 14]:
+        return '{0} {1}'.format(str(n), form2)
+    else:
+        return '{0} {1}'.format(str(n), form5)
 
 @register.inclusion_tag('ads/topic_advert.html')
 def forum_advert(counter, length):
