@@ -152,7 +152,7 @@ def listen_request(request):
     except:
         return HttpResponse('false')
 
-    if not session.user==None and session.user.must_pay:
+    if not session.user == None and session.user.must_pay:
         if lesson in session.user.payed_lessons:
             return HttpResponse('true')
         else:
@@ -164,6 +164,7 @@ def listen_request(request):
 from .models import Payment
 from django.contrib.admin.views.decorators import staff_member_required
 from .utils import message_left
+
 
 class GiveMeACoffee(View):
     def post(self, request, *args, **kwargs):
@@ -194,7 +195,7 @@ def coffee_amount_check(request):
         if request.user.has_coffee():
             return HttpResponseRedirect(request.GET['next'] + "?modal_open=buy-me-a-coffee-modal")
         else:
-            return HttpResponseRedirect(reverse('payments') + "?next=" + request.GET['next'])
+            return HttpResponseRedirect(reverse('payments') + "?next=" + request.GET['next'] + "&success_modal=buy-me-a-coffee-modal&fail_modal=by-me-a-coffee-payment-fail-modal")
 
 
 @method_decorator(staff_member_required, name='dispatch')
@@ -207,11 +208,11 @@ class PaymentsView(View):
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         data = dict(cards=[
-            ("1 чашечка", "images/coffee_1.png", '''По цене стаканчика кофе в McDonalds''', 68, 1),
-            ("5 чашечек", "images/coffee_5.png", '''59₽ за чашечку''', 295, 5),
-            ("10 чашечек", "images/coffee_10.png", '''49₽ за чашечку''', 490, 10),
-            ("20 чашечек", "images/coffee_20.png", '''39₽ за чашечку''', 780, 20),
-            ("50 чашечек", "images/coffee_50.png", '''34₽ за чашечку — хватит на год.''', 1690, 50),
+            ("1 чашечка", "images/coffee_1.png", '''По цене стаканчика кофе в <b>McDonalds</b>''', 68, 1),
+            ("5 чашечек", "images/coffee_5.png", '''<b>59</b> ₽ за чашечку''', 295, 5),
+            ("10 чашечек", "images/coffee_10.png", '''<b>49</b> ₽ за чашечку''', 490, 10),
+            ("20 чашечек", "images/coffee_20.png", '''<b>39</b> ₽ за чашечку''', 780, 20),
+            ("50 чашечек", "images/coffee_50.png", '''<b style="color:#ed1c24">34</b> ₽ за чашечку — хватит, чтобы угощать целый год.''', 1690, 50),
         ])
         return render(request, self.base_template, data)
 
@@ -231,9 +232,9 @@ class PaymentsView(View):
 from urllib.parse import quote
 from .utils import get_signature
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class WlletOneNotifications(View):
-
     def dispatch(self, request, *args, **kwargs):
         return super(WlletOneNotifications, self).dispatch(request, *args, **kwargs)
 

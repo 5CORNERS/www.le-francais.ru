@@ -45,36 +45,24 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="{% static 'favicon/ms-icon-144x144.png' %}">
     <meta name="theme-color" content="#ffffff">
-    <meta name="description" content=""/>
+    <meta name="description" content="{% block description %}{% endblock %}"/>
+
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
     <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
-
-    <!-- Latest compiled and minified JavaScript -->
-    <script async src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
-
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
-
-
-    <link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.css' %}">
-    <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fontawesome-all.css' %}">
-    <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fa-regular.css' %}">
-
-    <script async src="{% static 'lib/audio/audioplayer.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'lib/audio/audioplayer.min.css' %}">
+    <script src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
 
 
     {# Global stylesheets #}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/forum.min.css' %}">
-    <script async type="text/javascript" src="{% static 'pybb/js/pybbjs.js' %}"></script>
-
-    <link rel="canonical" href="https://www.le-francais.ru{{ self.url_path | slice:"5:" }}"/>
-
+    {% block css %}
+        <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fontawesome-all.css' %}">
+        <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fa-regular.css' %}">
+        <link rel="stylesheet" href="{% static 'components/bootstrap/dist/css/bootstrap.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/forum.min.css' %}">
+        <link rel="canonical" href="https://www.le-francais.ru{{ self.url_path | slice:"5:" }}"/>
+    {% endblock %}
     {% block extra_css %}
         {# Override this in templates to add extra stylesheets #}
     {% endblock %}
@@ -114,9 +102,62 @@
 </div>
 
 {% include 'tags/footer.html' %}
-
+{% block payment_modals %}
+    {% if 'payment_success' in request.GET %}
+        <div class="modal" id="success-payment-modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4>Спасибо за Ваше решение нас поддержать!</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
+                        <p>Теперь Вы можете благодарить нас за наш труд чашечками кофе :)</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% elif "payment_fail" in request.GET %}
+        <div class="modal" id="fail-payment-modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">Ошибка!
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Что-то пошло не так.</p>
+                        <p>:(</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
 {# Global javascript #}
-<script defer type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
+{% block js %}
+    <script async type="text/javascript" src="{% static 'pybb/js/pybbjs.js' %}"></script>
+    <script defer type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
+    {% if 'payment_success' in request.GET %}
+        <script>
+          $(document).ready(function () {
+            $('#success-payment-modal').modal('show')
+          })
+        </script>
+    {% elif 'payment_fail' in request.GET %}
+        <script>
+          $(document).ready(function () {
+            $('#fail-payment-modal').modal('show')
+          })
+        </script>
+    {% endif %}
+{% endblock %}
 {#<script type='text/javascript' async defer src='https://le-francais.push4site.com/sdk'></script>#}
 
 {% block extra_js %}
