@@ -1,12 +1,33 @@
 {% extends 'pybb/base.html' %}
-{% load i18n pybb_tags static %}
+{% load i18n pybb_tags static site_tags %}
 
 {% block title %}{% trans "Profile editing" %}{% endblock title %}
+{% block extra_css %}
+    <style>
+        .coffee-button {
 
+            display: flex !important;
+            align-items: center !important;
+            margin-bottom: 1rem !important;
+            margin-top: 0.5rem !important;
+        }
+
+        .coffee-button-image {
+            margin-right: 5px !important;
+            display: block !important;
+            height: 2.5em !important
+        }
+
+        .coffee-button-text {
+            border-left: 1px solid #ccc !important;
+            padding-left: 5px !important;
+        }
+    </style>
+{% endblock %}
 {% block content %}
     <script type="text/javascript" src="{% static 'js/jquery.are-you-sure.min.js' %}"></script>
     <script>
-        $('form').areYouSure({'message': 'Изменения будут потеряны!'});
+      $('form').areYouSure({'message': 'Изменения будут потеряны!'});
     </script>
     <div class="row">
         <div class="col-md-4">
@@ -17,6 +38,15 @@
             <p>
                 <a href="{% url 'account_change_username' %}">Изменить ник на форуме</a>
             </p>
+            {% if user.is_staff %}{# TODO release coffee #}<p>
+                {% message user.cup_amount 'чашечка' 'чашечки' 'чашечек' as message %}
+                {% if user.has_coffee %}У вас еще {{ message }} в загашнике.{% else %}У вас совсем нет чашечек кофе в запасе. Как же вы будете угощать?!{% endif %}
+            </p>
+            <button class="coffee-button btn btn-default btn-xs" id="coffee-button"
+                    onclick="location.href='{% url 'payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal'">
+                <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">
+                <div id="coffee-button-text" class="coffee-button-text">Пополнить запасы</div>
+            </button>{% endif %}
         </div>
         <div class="col-md-8">
             <form action="" method="post" enctype="multipart/form-data"

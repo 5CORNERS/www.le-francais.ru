@@ -52,7 +52,7 @@
 									Личные сообщения{# TODO l18n #}{% if unread_count %} <strong>({{ unread_count }})</strong>{% endif %}
 								</a>
 							</li>
-							{% if request.user.is_staff %}
+							{% if request.user.is_staff %}{# TODO release coffee #}
                                 <li><a href="{% url 'payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">Пополнить запасы</a> </li>
 								<li class="divider"></li>
 								<li class="{{ menu_admin }}"><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a>
