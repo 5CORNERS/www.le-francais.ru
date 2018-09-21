@@ -2,7 +2,6 @@
 {% load site_tags %}
 {% load wagtailcore_tags %}
 {% load static site_tags %}
-{% check_user_lesson request.user self as userlesson %}
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 
 {% block extra_head %}
@@ -16,6 +15,45 @@
 {% block extra_js %}
     <script async type="text/javascript"
             src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
+    <script>
+      function getSuccessButton() {
+        $('#coffee-button').removeClass('btn-default').addClass('btn-success').attr('disabled', 'disabled').attr("onclick", '').attr('data-toggle', '');
+        $('#coffee-button-image').attr('src', "{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}");
+        $('#coffee-button-text').html('Вы уже угощали меня<br>за этот урок :)');
+      }
+
+      function playCoffeeSound() {
+        let coffeeAudio = new Audio('{% static 'snd/coffee.mp3' %}');
+        coffeeAudio.play();
+      }
+
+      function giveMeCoffee() {
+        $.ajax({
+          type: "POST",
+          url: "{% url 'give_me_a_coffee' %}",
+          data: {
+            'lesson_number': {{ self.lesson_number }},
+            'user_email': "{{ request.user }}",
+            'csrfmiddlewaretoken': "{{ csrf_token }}"
+          },
+          datatype: "json",
+          success: function (response) {
+            if (response.result) {
+              $('#give-me-a-coffee-success-message').html(response.description);
+              getSuccessButton()
+              playCoffeeSound()
+            }
+            else {
+              $('#give-me-a-coffee-success-message').html(response.description)
+            }
+          },
+          error: function (response, error) {
+            $('#give-me-a-coffee-success-message').html(error)
+          },
+        });
+        $('#by-me-a-coffee-complete-modal').modal('show');
+      }
+    </script>
     {% if request.GET.modal_open and not userlesson %}
         {% with modal_id=request.GET.modal_open %}
             <script>
@@ -86,6 +124,7 @@
                                     <div class="col-md-4">
                                         <input type="hidden" name="next" value="{{ request.path }}">
                                         <!-- button trigger by-me-a-coffee-modals -->
+                                        {% check_user_lesson request.user self as userlesson %}
                                         {% if not userlesson %}
                                             <button class="coffee-button btn btn-default btn-xs" id="coffee-button"
                                                     {% if user.is_authenticated and user.has_coffee %}
@@ -316,39 +355,7 @@
                             <p>Все так?</p>
                         </div>
                         <div class="modal-footer" style="text-align: center">
-                            <button type="button" class="btn btn-primary" id="by-me-a-coffee-proceed" data-dismiss="modal">OUI !</button>
-                            <script>
-                                function getSuccessButton() {
-                                  $('#coffee-button').removeClass('btn-default').addClass('btn-success').addClass('btn-disable').attr("onclick", '').attr('data-toggle', '');
-                                  $('#coffee-button-image').attr('src', "{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}");
-                                  $('#coffee-button-text').html('Вы уже угощали меня<br>за этот урок :)');
-                                }
-                              $('#by-me-a-coffee-proceed').click(function () {
-                                $.ajax({
-                                  type: "POST",
-                                  url: "{% url 'give_me_a_coffee' %}",
-                                  data: {
-                                    'lesson_number': {{ self.lesson_number }},
-                                    'user_email': "{{ request.user }}",
-                                    'csrfmiddlewaretoken': "{{ csrf_token }}"
-                                  },
-                                  datatype: "json",
-                                  success: function (response) {
-                                    if (response.result) {
-                                      $('#give-me-a-coffee-success-message').html(response.description);
-                                      getSuccessButton()
-                                    }
-                                    else {
-                                      $('#give-me-a-coffee-success-message').html(response.description)
-                                    }
-                                  },
-                                  error: function (response, error) {
-                                    $('#give-me-a-coffee-success-message').html(error)
-                                  },
-                                });
-                                $('#by-me-a-coffee-complete-modal').modal('show');
-                              })
-                            </script>
+                            <button type="button" class="btn btn-primary" onclick="giveMeCoffee()" id="by-me-a-coffee-proceed" data-dismiss="modal">OUI !</button>
                         </div>
                     {% else %}
 
