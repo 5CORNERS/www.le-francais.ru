@@ -28,6 +28,7 @@
       }
 
       function giveMeCoffee() {
+        playCoffeeSound();
         $.ajax({
           type: "POST",
           url: "{% url 'give_me_a_coffee' %}",
@@ -40,8 +41,7 @@
           success: function (response) {
             if (response.result) {
               $('#give-me-a-coffee-success-message').html(response.description);
-              getSuccessButton()
-              playCoffeeSound()
+              getSuccessButton();
             }
             else {
               $('#give-me-a-coffee-success-message').html(response.description)
