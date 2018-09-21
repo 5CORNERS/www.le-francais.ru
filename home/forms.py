@@ -91,8 +91,8 @@ class AuthenticationFormCaptcha(AuthenticationForm):
 class AORProfileForm(EditProfileForm):
     class Meta:
         model = Profile
-        fields = ('autosubscribe', 'signature', 'show_signatures', 'time_zone',
-                  'language', 'avatar',)
+        fields = ('avatar', 'autosubscribe', 'signature', 'show_signatures', 'time_zone',
+                  'language',)
 
     signature = forms.CharField(widget=forms.Textarea, label=_('Signature'),
                                 required=False)
