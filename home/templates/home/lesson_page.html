@@ -17,9 +17,23 @@
             src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
     <script>
       function getSuccessButton() {
-        $('#coffee-button').removeClass('btn-default').addClass('btn-success').attr('disabled', 'disabled').attr("onclick", '').attr('data-toggle', '');
-        $('#coffee-button-image').attr('src', "{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}");
-        $('#coffee-button-text').html('Вы уже угощали меня<br>за этот урок :)');
+        let new_button = $(
+          "<button" +
+          " class='coffee-button btn btn-success btn-xs'" +
+          " disabled='disabled'" +
+          " id='coffee-button'" +
+          ">" +
+          "<img" +
+          " id='coffee-button-image'" +
+          " class='coffee-button-image'" +
+          " src='{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}'>" +
+          "<div" +
+          " id='coffee-button-text'" +
+          " class='coffee-button-text'>" +
+          "Вы уже угощали меня<br>за этот урок :)" +
+          "</div>" +
+          "</button>");
+        $("#coffee-button").replaceWith(new_button);
       }
 
       function playCoffeeSound() {
@@ -69,14 +83,13 @@
     <link rel="stylesheet" href="{% static 'css/lesson.css' %}">
     <link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
     <style>
-        .coffee-button {
-
+        #coffee-button {
+            cursor: pointer;
             display: flex;
             align-items: center;
             margin-bottom: 1rem;
             margin-top: 0.5rem;
         }
-
         .coffee-button-image {
             margin-right: 5px;
             display: block;
@@ -87,6 +100,7 @@
             border-left: 1px solid #ccc;
             padding-left: 5px;
         }
+
     </style>
 {% endblock %}
 
@@ -126,18 +140,25 @@
                                         <!-- button trigger by-me-a-coffee-modals -->
                                         {% check_user_lesson request.user self as userlesson %}
                                         {% if not userlesson %}
-                                            <button class="coffee-button btn btn-default btn-xs" id="coffee-button"
+                                            <img class="" id="coffee-button"
                                                     {% if user.is_authenticated and user.has_coffee %}
-                                                    data-toggle="modal" data-target="#buy-me-a-coffee-modal"
+                                                 data-toggle="modal"
+                                                 data-target="#buy-me-a-coffee-modal"
                                                     {% elif user.is_authenticated and not user.has_coffee %}
-                                                    onclick="location.href='{% url 'check_amount' %}?next={{ request.path }}'"
+                                                 onclick="location.href='{% url 'check_amount' %}?next={{ request.path }}';"
                                                     {% elif not user.is_authenticated %}
-                                                    data-toggle="modal" data-target="#buy-me-a-coffee-modal"
+                                                 data-toggle="modal"
+                                                 data-target="#buy-me-a-coffee-modal"
                                                     {% endif %}
+                                                 src="{% static "images/buttons/button-default-min.png" %}"
+                                                 onmousedown="$('#coffee-button').attr('src', '{% static 'images/buttons/button-active-min.png' %}')"
+                                                 onfocus="$('#coffee-button').attr('src', '{% static 'images/buttons/button-focus-min.png' %}')"
+                                                 onmouseover="$('#coffee-button').attr('src', '{% static 'images/buttons/button-hover-min.png' %}')"
+                                                 onmouseout="$('#coffee-button').attr('src', '{% static 'images/buttons/button-default-min.png' %}')"
                                             >
-                                                <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">
-                                                <div id="coffee-button-text" class="coffee-button-text">Вам ведь понравился урок?<br>Угостите меня кофейком!</div>
-                                            </button>
+
+{#                                                <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">#}
+{#                                                <div id="coffee-button-text" class="coffee-button-text">Вам ведь понравился урок?<br>Угостите меня кофейком!</div>#}
                                         {% else %}
                                             <button class="coffee-button btn btn-default btn-xs" disabled="disabled" id="coffee-button">
                                                 <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}">
