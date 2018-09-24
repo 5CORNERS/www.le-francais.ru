@@ -9,6 +9,10 @@ from django.conf import settings
 
 register = template.Library()
 
+@register.assignment_tag(takes_context=True)
+def get_full_path(context):
+    request = context['request']
+    return request.build_absolute_uri().split('?')[0]
 
 @register.assignment_tag()
 def check_user_lesson(user:User, lesson:LessonPage):
