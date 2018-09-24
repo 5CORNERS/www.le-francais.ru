@@ -208,11 +208,11 @@ class PaymentsView(View):
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         data = dict(cards=[
-            {'title': "1 чашечка", 'image': "images/coffee_1.png", 'description': '''По цене стаканчика кофе в <b>McDonalds</b>''', 'price1': "68", 'cups_amount': 1, 'price2': None},
-            {'title': "5 чашечек", 'image': "images/coffee_5.png", 'description': None, 'price1': "по 59", 'cups_amount': 5, 'price2': 295},
-            {'title': "10 чашечек", 'image': "images/coffee_10.png", 'description': None, 'price1': "по 49", 'cups_amount': 10, 'price2': 490},
-            {'title': "20 чашечек", 'image': "images/coffee_20.png", 'description': None, 'price1': "по 39", 'cups_amount': 20, 'price2': 780},
-            {'title': "50 чашечек", 'image': "images/coffee_50.png", 'description': '''Хватит, чтобы угощать целый год.''', 'price1': "по 34", 'cups_amount': 50, 'price2': 1690},
+            {'title': "1 чашечка", 'image': "images/coffee_1.png", 'description': None, 'price1': "По цене стаканчика кофе в <b>McDonalds</b>", 'cups_amount': 1, 'price2': 68},
+            {'title': "5 чашечек", 'image': "images/coffee_5.png", 'description': None, 'price1': "по 59 ₽", 'cups_amount': 5, 'price2': 295},
+            {'title': "10 чашечек", 'image': "images/coffee_10.png", 'description': None, 'price1': "по 49 ₽", 'cups_amount': 10, 'price2': 490},
+            {'title': "20 чашечек", 'image': "images/coffee_20.png", 'description': None, 'price1': "по 39 ₽", 'cups_amount': 20, 'price2': 780},
+            {'title': "50 чашечек", 'image': "images/coffee_50.png", 'description': '''Хватит, чтобы угощать целый год.''', 'price1': "по 34 ₽", 'cups_amount': 50, 'price2': 1690},
         ])
         return render(request, self.base_template, data)
 
