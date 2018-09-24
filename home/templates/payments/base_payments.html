@@ -83,7 +83,7 @@
             background-color: #eee;
         }
 
-        .card-fullprice{
+        .card-fullprice {
             font-size: 16px;
             text-align: center;
             padding: 20px;
@@ -148,12 +148,20 @@
                         <div class="col-xs-6 col-sm-6 col-md-4 col-lg-5ths">
                             <div class="card card-select" data-cardSelect>
                                 <div class="card-container">
-                                    <div class="card-header">{{ card.title | safe}}</div>
+                                    <div class="card-header">{{ card.title | safe }}</div>
+                                    {% if forloop.first %}
+                                        <div class="card-description" style="padding-left: 12px">
+                                            <div class="card-description-text">
+                                                {{ card.price1 | safe }}
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="card-price">{{ card.price1 | safe }}</div>
+                                    {% endif %}
                                     <div class="card-image-container"><img class="card-image" src="{% static card.image %}"></div>
-                                    <div class="card-price">{{ card.price1 | safe}} ₽</div>
                                     <div class="card-fullprice">{% if card.price2 %}{{ card.price2 | safe }} ₽{% else %}&nbsp;{% endif %}</div>
                                     <div class="card-description">
-                                        <div class="card-description-text">{% if card.description %}{{ card.description | safe}}{% endif %}</div>
+                                        <div class="card-description-text">{% if card.description %}{{ card.description | safe }}{% endif %}</div>
                                     </div>
                                 </div>
                                 <button type="submit" role="button" onclick="submitToWalletOne({{ card.cups_amount }})" class="btn btn-primary btn-block">Беру!</button>
