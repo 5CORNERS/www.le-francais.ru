@@ -73,6 +73,7 @@
             padding: 5px 8px;
             display: flex;
             align-items: center;
+            background-color: #eee;
         }
 
         .card-price {
@@ -80,6 +81,12 @@
             text-align: center;
             padding: 20px;
             background-color: #eee;
+        }
+
+        .card-fullprice{
+            font-size: 16px;
+            text-align: center;
+            padding: 20px;
         }
 
         .card:hover {
@@ -135,20 +142,21 @@
         <div class="row">
             <div class="col-md-12">
                 <p class="h1" style="margin-top: 20px">Запаситесь кофейком!</p>
-                <p class="subcaption" style="margin-bottom: 20px">{% comment %}Чтобы чем-то угощать, надо это что-то иметь :){% endcomment %}Чтобы угощать много раз.</p>
+                <p class="subcaption" style="margin-bottom: 20px">{% comment %}Чтобы чем-то угощать, надо это что-то иметь :){% endcomment %}Чтобы угощать много раз без хлопот.</p>
                 <div class="row equal">
                     {% for card in cards %}
                         <div class="col-xs-6 col-sm-6 col-md-4 col-lg-5ths">
                             <div class="card card-select" data-cardSelect>
                                 <div class="card-container">
-                                    <div class="card-header">{{ card.0 | safe}}</div>
-                                    <div class="card-image-container"><img class="card-image" src="{% static card.1 %}"></div>
-                                    <div class="card-price">{{ card.3 | safe}} ₽</div>
+                                    <div class="card-header">{{ card.title | safe}}</div>
+                                    <div class="card-image-container"><img class="card-image" src="{% static card.image %}"></div>
+                                    <div class="card-price">{{ card.price1 | safe}} ₽</div>
+                                    <div class="card-fullprice">{% if card.price2 %}{{ card.price2 | safe }} ₽{% else %}&nbsp;{% endif %}</div>
                                     <div class="card-description">
-                                        <div class="card-description-text">{{ card.2 | safe}}</div>
+                                        <div class="card-description-text">{% if card.description %}{{ card.description | safe}}{% endif %}</div>
                                     </div>
                                 </div>
-                                <button type="submit" role="button" onclick="submitToWalletOne({{ card.4 }})" class="btn btn-primary btn-block">Беру!</button>
+                                <button type="submit" role="button" onclick="submitToWalletOne({{ card.cups_amount }})" class="btn btn-primary btn-block">Беру!</button>
                             </div>
                         </div>
                     {% endfor %}
