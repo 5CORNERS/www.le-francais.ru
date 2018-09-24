@@ -344,12 +344,13 @@
     <div class="modal" id="buy-me-a-coffee-modal" tabindex="-1" role="dialog" aria-labelledby="buyMeACoffeeLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" style="text-align: center">Ура!</h4>
-                </div>
+
                 {% if user.is_authenticated %}
                     {% if user.has_coffee %}
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" style="text-align: center">Ура!</h4>
+                        </div>
                         <div class="modal-body" style="text-align: center">
                             <p>Вы угощаете нас стаканчиком кофе за этот урок.</p>
                             <p>Все так?</p>
@@ -361,16 +362,18 @@
 
                     {% endif %}
                 {% else %}
-                    <div class="modal-body">
-                        <p>Смотрите, дальше все очень просто. У Вас же есть аккаунт в какой-нибудь социальной сети — там, VK, ОК, FB, Ya, G+ и т.п.? Вы можете зайти на сайт, как их пользователь — это делается
-                            в два клика. Да, так надо — нельзя анонимно угощать кофе, ясно?.</p>
-                        <!-- Social OAuth Buttons -->
-                        {% include 'account/oauth-buttons.html' with next=next %}
-                        <!-- LogIn Form -->
-
-                        {% include 'account/login_form.html' with redirect_field_value=next redirect_field_name="next" %}
-                        <p>Ежели такого аккаунта у Вас нет, не беда — создадим здесь свой. Плевое дело!<br><a href="{% url 'account_signup' %}?next={{ next }}">Зарегистрироваться</a></p>
-
+                    <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" style="text-align: center">Спасибо вам огромное за готовность нас поддержать!</h4>
+                        </div>
+                    <div class="modal-body" style="padding-left:25px; padding-right:25px ">
+                        <p>Чтобы продолжить, вам надо авторизоваться на сайте.</p>
+                        <p style="margin-bottom: 20px">Самое простое — это зайти, как пользователь одной из социальных сетей. В этом случае авторизация произойдет в пару кликов — просто нажмите на одну из цветных кнопок.</p>
+                        <!-- Social OAuth Buttons -->{% include 'account/oauth-buttons.html' with next=next %}
+                        <hr style="border-top: 2px solid #eee;">
+                        <p>Если вы уже зарегистрированы на сайте, зайдите, используя свой адрес e-mail и пароль.</p>
+                        <!-- LogIn Form -->{% include 'account/login_form.html' with redirect_field_value=next redirect_field_name="next" %}
+                        <p>Если вас нет в Сетях и вы еще не регистрировались на сайте,<br><a href="{% url 'account_signup' %}?next={{ next }}">давайте вам создадим новый аккаунт.</a></p>
                     </div>
                 {% endif %}
             </div>
@@ -385,6 +388,7 @@
                 <div class="modal-body">
                     <p style="text-align: center">Мы вам очень признательны.</p>
                     <p style="text-align: center" id="give-me-a-coffee-success-message">Считаем оставшиеся чашечки...</p>
+                    <p style="text-align: center">Просмотреть свой остаток и пополнить запас вы можете в настройках учётной записи.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
