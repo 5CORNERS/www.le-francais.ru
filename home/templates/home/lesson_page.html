@@ -54,7 +54,7 @@
           datatype: "json",
           success: function (response) {
             if (response.result) {
-              $('#give-me-a-coffee-success-message').html(response.description + " Ждём вас снова :)");
+              $('#give-me-a-coffee-success-message').html(response.description);
               getSuccessButton();
             }
             else {
@@ -404,12 +404,11 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 style="text-align: center">Спасибо за вашу поддержку!</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 style="text-align: center">Мы вам очень признательны.</h4>
                 </div>
                 <div class="modal-body">
-                    <p style="text-align: center">Мы вам очень признательны.</p>
-                    <p style="text-align: center" id="give-me-a-coffee-success-message">Считаем оставшиеся чашечки...</p>
-                    <p style="text-align: center">Просмотреть свой остаток и пополнить запас вы можете в настройках учётной записи.</p>
+                    <p id="give-me-a-coffee-success-message">Считаем оставшиеся чашечки...</p>
+                    <p>Просмотреть свой остаток и пополнить запас вы можете в настройках учётной записи.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
