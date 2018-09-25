@@ -174,15 +174,15 @@ class GiveMeACoffee(View):
                 if request.user.cup_amount >= 1:
                     try:
                         cup_amount = lesson_page.add_lesson_to_user(request.user)
-                        data = dict(result=True, description=message_left(cup_amount))
+                        data = dict(result="SUCCESS", description=message_left(cup_amount))
                     except BaseException as e:
-                        data = dict(result=False, description="Failed to do something: " + str(e))
+                        data = dict(result="ERROR", description="Failed to do something: " + str(e))
                 else:
-                    data = dict(result=False, description="У Вас закончились чашки :(")
+                    data = dict(result="ZERO_CUPS", description="У Вас закончились чашки :(")
             else:
-                data = dict(result=False, description='Вы уже угощали меня за этот урок :)')
+                data = dict(result="ALREADY", description='Вы уже угощали меня за этот урок :)')
         else:
-            data = dict(result=False, description="Not authenticated")
+            data = dict(result="NOT_AUTH", description="Not authenticated")
         return JsonResponse(data)
 
     def get(self, request, *args, **kwargs):
