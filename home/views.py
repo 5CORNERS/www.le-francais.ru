@@ -178,7 +178,7 @@ class GiveMeACoffee(View):
                     except BaseException as e:
                         data = dict(result=False, description="Failed to do something: " + str(e))
                 else:
-                    data = dict(result=False, description="Чтобы чем-то угощать, надо это что-то иметь :)")
+                    data = dict(result=False, description="У Вас закончились чашки :(")
             else:
                 data = dict(result=False, description='Вы уже угощали меня за этот урок :)')
         else:
@@ -198,9 +198,9 @@ def get_coffee_amount(request):
 def coffee_amount_check(request):
     if 'next' in request.GET:
         if request.user.has_coffee():
-            return HttpResponseRedirect(request.GET['next'] + "?modal_open=buy-me-a-coffee-modal")
+            return HttpResponseRedirect(request.GET['next'] + "?modal_open=give-me-a-coffee-modal")
         else:
-            return HttpResponseRedirect(reverse('payments') + "?next=" + request.GET['next'] + "&success_modal=buy-me-a-coffee-modal&fail_modal=by-me-a-coffee-payment-fail-modal")
+            return HttpResponseRedirect(reverse('payments') + "?next=" + request.GET['next'] + "&success_modal=give-me-a-coffee-modal&fail_modal=give-me-a-coffee-payment-fail-modal")
 
 
 @method_decorator(staff_member_required, name='dispatch')
