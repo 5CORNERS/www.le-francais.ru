@@ -24,5 +24,6 @@ payment_urls = [
 
 coffee_urls = [
     url('^check/$', views.coffee_amount_check, name='check_amount'),
+    url('^get_amount/$', views.get_coffee_amount, name='get_amount'),
     url('^', views.GiveMeACoffee.as_view(), name='give_me_a_coffee'),
 ]

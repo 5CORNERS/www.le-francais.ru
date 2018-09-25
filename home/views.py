@@ -191,6 +191,8 @@ class GiveMeACoffee(View):
 
 from django.urls import reverse
 
+def get_coffee_amount(request):
+    return JsonResponse(dict(coffee_amount=request.user.cup_amount))
 
 @login_required
 def coffee_amount_check(request):
