@@ -42,7 +42,6 @@
       }
 
       function giveMeCoffee() {
-        playCoffeeSound();
         $.ajax({
           type: "POST",
           url: "{% url 'give_me_a_coffee' %}",
@@ -53,24 +52,30 @@
           },
           datatype: "json",
           success: function (response) {
-            if (response.result) {
+            if (response.result === 'SUCCESS') {
+              playCoffeeSound();
               $('#give-me-a-coffee-success-message').html(response.description);
               $('#give-me-a-coffee-complete-modal').modal('show');
               getSuccessButton();
             }
+            else if(response.result === 'ALREADY'){
+              $('#give-me-a-coffee-fail-message').html(response.description);
+              $('#give-me-a-coffee-fail-modal').modal('show');
+              getSuccessButton();
+            }
             else {
-              $('#give-me-a-coffee-fail-message').html(response.description)
+              $('#give-me-a-coffee-fail-message').html(response.description);
               $('#give-me-a-coffee-fail-modal').modal('show');
             }
           },
           error: function (response, error) {
-            $('#give-me-a-coffee-fail-message').html(error)
+            $('#give-me-a-coffee-fail-message').html(error);
             $('#give-me-a-coffee-fail-modal').modal('show');
           },
         });
       }
     </script>
-    {% if request.GET.modal_open and not userlesson %}
+    {% if request.GET.modal_open %}
         {% with modal_id=request.GET.modal_open %}
             <script>
               $(document).ready(function () {
@@ -436,15 +441,25 @@
             </div>
         </div>
     </div>
-    {% comment %}<div class="modal" id="by-me-a-coffee-payment-success-modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header"><h4>Спасибо за вашу поддержку</h4>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    {% block payment_modals %}
+        <div class="modal" id="give-me-a-coffee-payment-success-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4>Спасибо за Ваше решение нас поддержать!</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
+                    <p>Вы угощаете нас стаканчиком кофе за этот урок.</p>
+                    <p>Всё так?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="giveMeCoffee()" id="by-me-a-coffee-proceed" data-dismiss="modal">OUI !</button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>{% endcomment %}
     <div class="modal" id="give-me-a-coffee-payment-fail-modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -463,4 +478,5 @@
             </div>
         </div>
     </div>
+    {% endblock %}
 {% endblock %}
