@@ -103,7 +103,7 @@
 
 {% include 'tags/footer.html' %}
 {% block payment_modals %}
-    {% if 'payment_success' in request.GET %}
+    {% if 'payment_success' in request.GET and request.GET.modal_open == 'success-payment-modal' %}
         <div class="modal" id="success-payment-modal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -121,7 +121,7 @@
                 </div>
             </div>
         </div>
-    {% elif "payment_fail" in request.GET %}
+    {% elif "payment_fail" in request.GET  and request.GET.modal_open == 'fail-payment-modal' %}
         <div class="modal" id="fail-payment-modal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -144,19 +144,21 @@
 {% block js %}
     <script async type="text/javascript" src="{% static 'pybb/js/pybbjs.js' %}"></script>
     <script defer type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
-    {% if 'payment_success' in request.GET %}
-        <script>
-          $(document).ready(function () {
-            $('#success-payment-modal').modal('show')
-          })
-        </script>
-    {% elif 'payment_fail' in request.GET %}
-        <script>
-          $(document).ready(function () {
-            $('#fail-payment-modal').modal('show')
-          })
-        </script>
-    {% endif %}
+    {% if 'payment_success' in request.GET and request.GET.modal_open == 'success-payment-modal' %}
+    <script>
+      $(document).ready(function () {
+        $('#success-payment-modal').modal('show');
+        history.pushState({}, title='',url="{{ full_path }}");
+      })
+    </script>
+{% elif 'payment_fail' in request.GET and request.GET.modal_open == 'fail-payment-modal' %}
+    <script>
+      $(document).ready(function () {
+        $('#fail-payment-modal').modal('show')
+        history.pushState(url="{{ full_path }}");
+      })
+    </script>
+{% endif %}
 {% endblock %}
 {#<script type='text/javascript' async defer src='https://le-francais.push4site.com/sdk'></script>#}
 
