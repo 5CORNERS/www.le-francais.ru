@@ -55,24 +55,26 @@
           success: function (response) {
             if (response.result) {
               $('#give-me-a-coffee-success-message').html(response.description);
+              $('#give-me-a-coffee-complete-modal').modal('show');
               getSuccessButton();
             }
             else {
-              $('#give-me-a-coffee-success-message').html(response.description)
+              $('#give-me-a-coffee-fail-message').html(response.description)
+              $('#give-me-a-coffee-fail-modal').modal('show');
             }
           },
           error: function (response, error) {
-            $('#give-me-a-coffee-success-message').html(error)
+            $('#give-me-a-coffee-fail-message').html(error)
+            $('#give-me-a-coffee-fail-modal').modal('show');
           },
         });
-        $('#by-me-a-coffee-complete-modal').modal('show');
       }
     </script>
     {% if request.GET.modal_open and not userlesson %}
         {% with modal_id=request.GET.modal_open %}
             <script>
               $(document).ready(function () {
-                $('#{{ modal_id }}').modal('show')
+                $('#{{ modal_id }}').modal('show');
               });
             </script>
         {% endwith %}
@@ -90,6 +92,7 @@
             margin-bottom: 1rem;
             margin-top: 0.5rem;
         }
+
         .coffee-button-image {
             margin-right: 5px;
             display: block;
@@ -141,14 +144,14 @@
                                         {% check_user_lesson request.user self as userlesson %}
                                         {% if not userlesson %}
                                             <img class="" id="coffee-button"
-                                                    {% if user.is_authenticated and user.has_coffee %}
+                                                    {% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
                                                  data-toggle="modal"
-                                                 data-target="#buy-me-a-coffee-modal"
+                                                 data-target="#give-me-a-coffee-modal"
                                                     {% elif user.is_authenticated and not user.has_coffee %}
                                                  onclick="location.href='{% url 'check_amount' %}?next={{ request.path }}';"
                                                     {% elif not user.is_authenticated %}
                                                  data-toggle="modal"
-                                                 data-target="#buy-me-a-coffee-modal"
+                                                 data-target="#give-me-a-coffee-modal"
                                                     {% endif %}
                                                  src="{% static "images/buttons/button-default-min.png" %}"
                                                  onmousedown="$('#coffee-button').attr('src', '{% static 'images/buttons/button-active-min.png' %}')"
@@ -157,8 +160,8 @@
                                                  onmouseout="$('#coffee-button').attr('src', '{% static 'images/buttons/button-default-min.png' %}')"
                                             >
 
-{#                                                <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">#}
-{#                                                <div id="coffee-button-text" class="coffee-button-text">Вам ведь понравился урок?<br>Угостите меня кофейком!</div>#}
+                                            {#                                                <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">#}
+                                            {#                                                <div id="coffee-button-text" class="coffee-button-text">Вам ведь понравился урок?<br>Угостите меня кофейком!</div>#}
                                         {% else %}
                                             <button class="coffee-button btn btn-default btn-xs" disabled="disabled" id="coffee-button">
                                                 <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}">
@@ -362,12 +365,12 @@
     </div>
     <!-- by-me-a-coffee-modals -->
     {% assign next "/coffee/check/?next="|add:request.path %}
-    <div class="modal" id="buy-me-a-coffee-modal" tabindex="-1" role="dialog" aria-labelledby="buyMeACoffeeLabel">
+    <div class="modal" id="give-me-a-coffee-modal" tabindex="-1" role="dialog" aria-labelledby="giveMeACoffeeLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
 
                 {% if user.is_authenticated %}
-                    {% if user.has_coffee %}
+                    {% if user.has_coffee or 'payment_success' in request.GET %}
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             <h4 class="modal-title" style="text-align: center">Ура!</h4>
@@ -384,9 +387,9 @@
                     {% endif %}
                 {% else %}
                     <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" style="text-align: center">Спасибо вам огромное за готовность нас поддержать!</h4>
-                        </div>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" style="text-align: center">Спасибо вам огромное за готовность нас поддержать!</h4>
+                    </div>
                     <div class="modal-body" style="padding-left:25px; padding-right:25px ">
                         <p>Чтобы продолжить, вам надо авторизоваться на сайте.</p>
                         <p style="margin-bottom: 20px">Самое простое — это зайти, как пользователь одной из социальных сетей. В этом случае авторизация произойдет в пару кликов — просто нажмите на одну из цветных кнопок.</p>
@@ -400,15 +403,32 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="by-me-a-coffee-complete-modal" tabindex="-1" role="dialog" aria-labelledby="buyMeACoffeeCompleteLabel">
+    <div class="modal fade" id="give-me-a-coffee-complete-modal" tabindex="-1" role="dialog" aria-labelledby="giveMeACoffeeCompleteLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 style="text-align: center">Мы вам очень признательны.</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 style="text-align: center">Мы вам очень признательны.</h4>
                 </div>
                 <div class="modal-body">
                     <p id="give-me-a-coffee-success-message">Считаем оставшиеся чашечки...</p>
                     <p>Просмотреть свой остаток и пополнить запас вы можете в настройках учётной записи.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="give-me-a-coffee-fail-modal" tabindex="-1" role="dialog" aria-labelledby="giveMeACoffeeCompleteLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 style="text-align: center">Что-то пошло не так!</h4>
+                </div>
+                <div class="modal-body">
+                    <p id="give-me-a-coffee-fail-message"></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
@@ -425,11 +445,12 @@
       </div>
     </div>
   </div>{% endcomment %}
-    <div class="modal" id="by-me-a-coffee-payment-fail-modal" tabindex="-1" role="dialog">
+    <div class="modal" id="give-me-a-coffee-payment-fail-modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4>Ошибка</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4>Ошибка</h4>
                 </div>
                 <div class="modal-body">
                     <p>Что-то пошло не так.</p>

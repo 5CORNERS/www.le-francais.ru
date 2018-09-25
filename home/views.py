@@ -170,14 +170,17 @@ class GiveMeACoffee(View):
     def post(self, request, *args, **kwargs):
         lesson_page = LessonPage.objects.get(lesson_number=request.POST['lesson_number'])
         if request.user.is_authenticated():
-            if request.user.cup_amount >= 1:
-                try:
-                    cup_amount = lesson_page.add_lesson_to_user(request.user)
-                    data = dict(result=True, description=message_left(cup_amount))
-                except BaseException as e:
-                    data = dict(result=False, description="Failed to do something: " + str(e))
+            if not lesson_page in request.user.payed_lessons.all():
+                if request.user.cup_amount >= 1:
+                    try:
+                        cup_amount = lesson_page.add_lesson_to_user(request.user)
+                        data = dict(result=True, description=message_left(cup_amount))
+                    except BaseException as e:
+                        data = dict(result=False, description="Failed to do something: " + str(e))
+                else:
+                    data = dict(result=False, description="Чтобы чем-то угощать, надо это что-то иметь :)")
             else:
-                data = dict(result=False, description="Чтобы чем-то угощать, надо это что-то иметь :)")
+                data = dict(result=False, description='Вы уже угощали меня за этот урок :)')
         else:
             data = dict(result=False, description="Not authenticated")
         return JsonResponse(data)
