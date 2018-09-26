@@ -74,6 +74,41 @@
           },
         });
       }
+
+      function showWaitFailureMessage(){
+        $('#ten-seconds-loading-img').hide();
+        $('.ten-s-fail').each(function () {
+          $(this).show()
+        })
+      }
+      function showWiatSuccessMessage() {
+        $('#ten-seconds-loading-img').hide();
+        $('.ten-s-success').each(function () {
+          $(this).show()
+        })
+      }
+      function tenSecondsCheck() {
+        let timesRun = 0;
+        let success;
+        let checkEverySec = setInterval(function () {
+          if (timesRun === 10){
+            clearInterval(checkEverySec);
+            showWaitFailureMessage()
+          }
+          $.ajax({
+            type:"POST",
+            url:"{% url 'get_amount' %}",
+            datatype:"json",
+            success:function (response) {
+              if (response.coffee_amount > 0){
+                clearInterval(checkEverySec);
+                showWaitSuccessMessage();
+              }
+            }
+          });
+          timesRun += 1;
+        }, 1000)
+      }
     </script>
     {% if request.GET.modal_open %}
         {% with modal_id=request.GET.modal_open %}
@@ -385,7 +420,7 @@
                             <p>Все так?</p>
                         </div>
                         <div class="modal-footer" style="text-align: center">
-                            <button type="button" class="btn btn-primary" onclick="giveMeCoffee()" id="by-me-a-coffee-proceed" data-dismiss="modal">OUI !</button>
+                            <button type="button" class="btn btn-primary" onclick="giveMeCoffee()" id="give-me-a-coffee-proceed" data-dismiss="modal">OUI !</button>
                         </div>
                     {% else %}
 
@@ -450,12 +485,31 @@
                     <h4>Спасибо за Ваше решение нас поддержать!</h4>
                 </div>
                 <div class="modal-body">
-                    <p>Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
-                    <p>Вы угощаете нас стаканчиком кофе за этот урок.</p>
-                    <p>Всё так?</p>
+                    {% if not user.has_coffee %}
+                        <img id="ten-seconds-loading-img" src="{% static 'images/loading_icon.gif' %}">
+                        <div class="ten-s-success" id="ten-seconds-success-message" style="display: none;">
+                        <p>Спасибо за Ваше решение нас поддержать! Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
+                        <p>Вы угощаете нас стаканчиком кофе за этот урок.</p>
+                        <p>Все так?</p>
+                        </div>
+                        <div class="ten-s-fail" id="ten-seconds-failure-message" style="display: none;">
+                        <p>Сервис по приему платежей до сих пор не прислал нам подтверждение о платеже.</p>
+                        <p>Обычно он это делает в течение секунды. Мы подождали еще десять -- тишина.  :(</p>
+                        <p><b>Ваш платеж в любом случае не пропадет</b> -- просто мы о нем пока еще не получили уведомления. Попробуйте нажать здесь «OK», затем перегрузить страницу и попробовать снова -- все должно получиться.</p>
+                        <p>Это будет чем-то из ряда вон, но если, паче чаяния, ничего не получится, пожалуйста, свяжитесь со мной -- мои контакты есть в разделе <a href="/contact/">Об авторах</a>.</p>
+                        </div>
+                        <script>
+                            tenSecondsCheck()
+                        </script>
+                    {% else %}
+                        <p>Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
+                        <p>Вы угощаете нас стаканчиком кофе за этот урок.</p>
+                        <p>Всё так?</p>
+                    {% endif %}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="giveMeCoffee()" id="by-me-a-coffee-proceed" data-dismiss="modal">OUI !</button>
+                    <button type="button" class="btn btn-primary ten-s-success" onclick="giveMeCoffee()" id="give-me-a-coffee-after-payment-proceed" data-dismiss="modal" style="display: none">OUI !</button>
+                    <button type="button" class="btn btn-primary ten-s-fail" id="ten-seconds-failure-dismiss-button" data-dismiss="modal" style="display: none">Закрыть</button>
                 </div>
             </div>
         </div>
