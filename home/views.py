@@ -200,7 +200,7 @@ def coffee_amount_check(request):
         if request.user.has_coffee():
             return HttpResponseRedirect(request.GET['next'] + "?modal_open=give-me-a-coffee-modal")
         else:
-            return HttpResponseRedirect(reverse('payments') + "?next=" + request.GET['next'] + "&success_modal=give-me-a-coffee-modal&fail_modal=give-me-a-coffee-payment-fail-modal")
+            return HttpResponseRedirect(reverse('payments') + "?next=" + request.GET['next'] + "&success_modal=give-me-a-coffee-payment-success-modal&fail_modal=give-me-a-coffee-payment-fail-modal")
 
 
 @method_decorator(staff_member_required, name='dispatch')
