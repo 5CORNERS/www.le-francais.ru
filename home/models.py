@@ -439,20 +439,21 @@ class Payment(Model):
         description = "www.le-francais.ru -- Покупка " + message(self.cups_amount, 'чашечки', 'чашечек', 'чашечек' ) + " кофе."
         expired_date = self.expired_date().isoformat()
         customer_email = self.user.email
+        success_url = success_url + "&payment_amount={0}".format(str(payment_amount))
 
         params = [
-            ('WMI_MERCHANT_ID', merchant_id),
-            ('WMI_PAYMENT_AMOUNT', payment_amount),
-            ('WMI_CURRENCY_ID', currency_id),
-            ('WMI_PAYMENT_NO', payment_no),
-            ('WMI_DESCRIPTION', description),
-            ('WMI_SUCCESS_URL', success_url),
-            ('WMI_FAIL_URL', fail_url),
-            ('WMI_EXPIRED_DATE', expired_date),
-            ('WMI_CUSTOMER_EMAIL', customer_email),
+            ('WMI_MERCHANT_ID', merchant_id, 'merchant_id'),
+            ('WMI_PAYMENT_AMOUNT', payment_amount, 'payment_amount'),
+            ('WMI_CURRENCY_ID', currency_id,'currency_id'),
+            ('WMI_PAYMENT_NO', payment_no, 'payment_no'),
+            ('WMI_DESCRIPTION', description, 'description'),
+            ('WMI_SUCCESS_URL', success_url, 'success_url'),
+            ('WMI_FAIL_URL', fail_url, 'fail_url'),
+            ('WMI_EXPIRED_DATE', expired_date, 'expired_date'),
+            ('WMI_CUSTOMER_EMAIL', customer_email, 'customer_email'),
         ]
         from .utils import get_signature
         signature = get_signature(params).decode('utf-8')
-        params.append(('WMI_SIGNATURE', signature))
+        params.append(('WMI_SIGNATURE', signature, 'signature'))
 
         return {'params': params}
