@@ -13,8 +13,12 @@ def get_signature(params, secret_key=settings.WALLET_ONE_SECRET_KEY):
     icase_key = lambda s: str(s).lower()
 
     lists_by_keys = defaultdict(list)
-    for key, value, id in params:
-        lists_by_keys[key].append(value)
+    if params[0].length == 3:
+        for key, value, id in params:
+            lists_by_keys[key].append(value)
+    else:
+        for key, value in params:
+            lists_by_keys[key].append(value)
 
     str_buff = b''
     for key in sorted(lists_by_keys, key=icase_key):
