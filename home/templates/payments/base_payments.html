@@ -126,7 +126,7 @@
             );
             for (let i in response.params) {
               form.append(
-                $("<input>", {name: response.params[i][0], value: response.params[i][1]})
+                $("<input>", {name: response.params[i][0], value: response.params[i][1], id:response.params[i][2]})
               )
             }
             $("body").append(form);
