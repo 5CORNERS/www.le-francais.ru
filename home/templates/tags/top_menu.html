@@ -43,10 +43,10 @@
 					<li class="dropdown" style="cursor: pointer" >
                         <a class="dropdown-toggle" data-toggle="dropdown">{{ request.user.username }} {% if unread_count%}<i class="fa fa-envelope" aria-hidden="true" style="color: inherit;"></i>{% endif %}<b class="caret"></b></a>
 						<ul class="dropdown-menu">
+                            <li><a href="{% url 'pybb:edit_profile' %}">Настройки профиля{# TODO l18n #}</a></li>
                             {% if user.pybb_profile.post_count > 0 %}
-                                <li><a href="{{ request.user.profile.get_absolute_url }}">Активность на форуме{# TODO l18n Forum activity #}</a></li>
+                                <li><a href="{{ request.user.profile.get_absolute_url }}">Мои посты{# TODO l18n Forum activity #}</a></li>
                             {% endif %}
-							<li><a href="{% url 'pybb:edit_profile' %}">Учетная запись{# TODO l18n #}</a></li>
 							<li>
 								<a href="{% url 'postman:inbox' %}">
 									Личные сообщения{# TODO l18n #}{% if unread_count %} <strong>({{ unread_count }})</strong>{% endif %}
