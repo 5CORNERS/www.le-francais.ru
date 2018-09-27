@@ -459,6 +459,7 @@ class Payment(Model):
             self.e_product_price = 34
 
         self.e_transaction_total = payment_amount
+        self.save()
         currency_id = u'643'  ## Russian rubles
         payment_no = self.id
         description = "www.le-francais.ru -- Покупка " + message(self.cups_amount, 'чашечки', 'чашечек', 'чашечек' ) + " кофе."
