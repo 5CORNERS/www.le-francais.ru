@@ -487,11 +487,12 @@
 
                           function tenSecondsCheck() {
                             window.dataLayer = window.dataLayer || [];
-                            dataLayer.push({'event':'paymentWONotification'});
+                            dataLayer.push({'event':'paymentWONotificationWHope'});
                             let timesRun = 0;
                             let success;
                             let checkEverySec = setInterval(function () {
                               if (timesRun === 5) {
+                                dataLayer.push({'event':'paymentWONotification'});
                                 clearInterval(checkEverySec);
                                 showWaitFailureMessage()
                               }
