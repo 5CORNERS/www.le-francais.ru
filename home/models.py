@@ -406,6 +406,18 @@ class Payment(Model):
     datetime_update = DateTimeField(auto_now=True)
     status = IntegerField(default=0)
 
+    e_transaction_total = IntegerField(null=True, default=None)
+
+    e_product_sku = CharField(max_length=20, null=True, default=None)
+    e_product_name = CharField(max_length=50, null=True, default=None)
+    e_product_price = IntegerField(null=True, default=None)
+
+    def e_product_category(self):
+        return "Donation"
+
+    def e_product_quantity(self):
+        return self.cups_amount
+
 
     def activate_payment(self):
         self.user.activate_payment(self)
@@ -425,21 +437,32 @@ class Payment(Model):
 
         if self.cups_amount == 1:
             payment_amount = 68
+            self.e_product_sku = 'C01'
+            self.e_product_price = 68
         elif self.cups_amount == 5:
             payment_amount = 295
+            self.e_product_sku = 'C05'
+            self.e_product_price = 59
         elif self.cups_amount == 10:
             payment_amount = 490
+            self.e_product_sku = 'C10'
+            self.e_product_price = 49
         elif self.cups_amount == 20:
             payment_amount = 780
+            self.e_product_sku = 'C20'
+            self.e_product_price = 39
         elif self.cups_amount == 50:
             payment_amount = 1690
+            self.e_product_sku = 'C50'
+            self.e_product_price = 34
 
+        self.e_transaction_total = payment_amount
         currency_id = u'643'  ## Russian rubles
         payment_no = self.id
         description = "www.le-francais.ru -- Покупка " + message(self.cups_amount, 'чашечки', 'чашечек', 'чашечек' ) + " кофе."
         expired_date = self.expired_date().isoformat()
         customer_email = self.user.email
-        success_url = success_url + "&payment_amount={0}".format(str(payment_amount))
+        success_url = success_url + "&payment_amount={0}&payment_id={1}".format(str(payment_amount),str(self.id))
 
         params = [
             ('WMI_MERCHANT_ID', merchant_id, 'merchant_id'),
