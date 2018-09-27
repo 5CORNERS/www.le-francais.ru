@@ -2,7 +2,7 @@ from django import template
 from pybb.models import Topic, Post
 from custom_user.models import User
 from home.models import IndexReviews
-from home.models import PageLayoutAdvertisementSnippet, LessonPage
+from home.models import PageLayoutAdvertisementSnippet, LessonPage, Payment
 
 from home.utils import get_signature
 from django.conf import settings
@@ -21,6 +21,10 @@ def check_user_lesson(user:User, lesson:LessonPage):
     elif lesson in user.payed_lessons.all():
         return True
     return False
+
+@register.assignment_tag()
+def get_payment_by_id(id:str):
+    return Payment.objects.get(id=id)
 
 @register.inclusion_tag('tags/payment_form.html', takes_context=True)
 def payment_params(context, payment):
