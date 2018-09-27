@@ -409,8 +409,10 @@ class Payment(Model):
     e_transaction_total = IntegerField(null=True, default=None)
 
     e_product_sku = CharField(max_length=20, null=True, default=None)
-    e_product_name = CharField(max_length=50, null=True, default=None)
     e_product_price = IntegerField(null=True, default=None)
+
+    def e_product_name(self):
+        return "Coffee Cup"
 
     def e_product_category(self):
         return "Donation"
