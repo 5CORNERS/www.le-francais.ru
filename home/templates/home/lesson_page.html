@@ -486,6 +486,8 @@
                           }
 
                           function tenSecondsCheck() {
+                            window.dataLayer = window.dataLayer || [];
+                            dataLayer.push({'event':'paymentWONotification'});
                             let timesRun = 0;
                             let success;
                             let checkEverySec = setInterval(function () {
