@@ -474,7 +474,7 @@
                             })
                           }
 
-                          function showWiatSuccessMessage() {
+                          function showWaitSuccessMessage() {
                             $('#ten-seconds-loading-img').hide();
                             $('.ten-s-success').each(function () {
                               $(this).show()
@@ -513,8 +513,8 @@
                         <p>Всё так?</p>
                     {% endif %}
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary ten-s-success coffee-proceed" onclick="giveMeCoffee()" id="give-me-a-coffee-after-payment-proceed" data-dismiss="modal" {% if not user.has_coffee %}style="display: none"{% endif %}>OUI !</button>
+                <div class="modal-footer" style="text-align: center">
+                    <button type="button" class="btn btn-primary ten-s-success coffee-proceed" onclick="giveMeCoffee()" id="give-me-a-coffee-after-payment-proceed" data-dismiss="modal"{% if not user.has_coffee %} style="display: none"{% endif %}>OUI !</button>
                     <button type="button" class="btn btn-primary ten-s-fail" id="ten-seconds-failure-dismiss-button" data-dismiss="modal" style="display: none">Закрыть</button>
                 </div>
             </div>
