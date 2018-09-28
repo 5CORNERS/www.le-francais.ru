@@ -221,7 +221,7 @@
                     <div class="{% if forms_count == 2 %}col-fixed-210{% elif forms_count == 3 %}col-fixed-315{% endif %}">
                         <ul class="nav nav-pills">
                             {% for i in forms_range %}
-                            <li {% if i == 1 %}class="active"{% endif %}><a data-toggle="pill" href=".form{{ forloop.counter0 }}">Вариант {{ i }}</a></li>
+                            <li style="cursor: pointer" {% if i == 1 %}class="active"{% endif %}><a data-toggle="pill" data-target=".form{{ forloop.counter0 }}">Вариант {{ i }}</a></li>
                             {% endfor %}
                         </ul>
                     </div>
