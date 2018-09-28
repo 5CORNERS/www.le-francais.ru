@@ -27,14 +27,14 @@ extra = getattr(settings, setting_name('TRAILING_SLASH'), True) and '/' or ''
 urlpatterns = [
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
 
-    url('^sitemap\.xml$', TemplateView.as_view(template_name='sitemap.xml', content_type='application/xml')),
-
     url('^update_sitemap\.xml$', sitemap, {'sitemaps': {
         'forum': ForumSitemap,
         'topic': TopicSitemap,
         'wagtail': WagtailSitemap,
         'conjugation': ConjugationSitemap,
     }}),
+
+    url('^sitemap\.xml$', TemplateView.as_view(template_name='sitemap.xml', content_type='application/xml')),
 
     url(r'^django-admin/', include(admin.site.urls)),
 
