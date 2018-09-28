@@ -455,7 +455,7 @@
                     <h4>Спасибо за Ваше решение нас поддержать!</h4>
                 </div>
                 <div class="modal-body">
-                    {% if not user.has_coffee %}
+                    {% if not user.has_coffee and request.GET.modal_open == 'give-me-a-coffee-payment-success-modal' %}
                         <img id="ten-seconds-loading-img" style="width:100%;" src="{% static 'images/loading_icon.gif' %}">
                         <div class="ten-s-success" id="ten-seconds-success-message" style="display: none;">
                         <p>Спасибо за Ваше решение нас поддержать! Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
