@@ -203,7 +203,6 @@ def coffee_amount_check(request):
             return HttpResponseRedirect(reverse('payments') + "?next=" + request.GET['next'] + "&success_modal=give-me-a-coffee-payment-success-modal&fail_modal=give-me-a-coffee-payment-fail-modal")
 
 
-@method_decorator(staff_member_required, name='dispatch')
 class PaymentsView(View):
     base_template = 'payments/base_payments.html'
     success_template = 'payments/success.html'
