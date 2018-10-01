@@ -401,3 +401,6 @@ def ajax_registration(request):
 
 def socialauth_success(request):
     return render(request, 'templates/socialauth_success.html', {})
+
+def favicon(request):
+    return HttpResponseRedirect(settings.STATIC_URL+'favicon/favicon.ico')

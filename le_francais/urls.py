@@ -6,26 +6,27 @@ from django.contrib import admin
 from django.views.generic import TemplateView
 from pybb.views import ProfileEditView
 from social_core.utils import setting_name
-
-from forum.sitemap_generator import ForumSitemap, TopicSitemap
-# from custom_user.forms import MyCustomUserForm
-from home.forms import AORProfileForm
-from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls
-from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing
-from home.views import change_username, LeFrancaisWagtailSitemap as WagtailSitemap
-from profiles.views import UserTopics, UserPosts
-from search import views as search_views
-from wagtail.contrib.sitemaps.views import sitemap
 # from registration.backends.default.views import RegistrationView
 from wagtail.admin import urls as wagtailadmin_urls
+from wagtail.contrib.sitemaps.views import sitemap
 from wagtail.core import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
 from conjugation.sitemap import ConjugationSitemap
+from forum.sitemap_generator import ForumSitemap, TopicSitemap
+# from custom_user.forms import MyCustomUserForm
+from home.forms import AORProfileForm
+from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls
+from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing, favicon
+from home.views import change_username, LeFrancaisWagtailSitemap as WagtailSitemap
+from profiles.views import UserTopics, UserPosts
+from search import views as search_views
 
 extra = getattr(settings, setting_name('TRAILING_SLASH'), True) and '/' or ''
 urlpatterns = [
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+
+    url(r'^favicon\.ico$', favicon),
 
     url('^update_sitemap\.xml$', sitemap, {'sitemaps': {
         'forum': ForumSitemap,
@@ -34,7 +35,7 @@ urlpatterns = [
         'conjugation': ConjugationSitemap,
     }}),
 
-    url('^sitemap\.xml$', TemplateView.as_view(template_name='sitemap.xml', content_type='application/xml')),
+    url('^sitemap\.xml$', TemplateView.as_view(template_name='static_sitemap.xml', content_type='application/xml')),
 
     url(r'^django-admin/', include(admin.site.urls)),
 
@@ -72,14 +73,13 @@ urlpatterns = [
 
     url(r'^messages/', include('forum_messages.urls')),
 
-    url(r'^conjugaison/', include('conjugation.urls',namespace='conjugation')),
+    url(r'^conjugaison/', include('conjugation.urls', namespace='conjugation')),
 
     url(r'^le_nombres/', include('le_nombres.urls')),
     url(r'^', include('social_django.urls'.format(extra), namespace='social')),
     url(r'', include('user_sessions.urls', 'user_sessions')),
     url(r'^new-users-redirect-url/', TemplateView.as_view(template_name='account/change_username_new.html')),
     url(r'^', include(wagtail_urls)),
-
 
 ]
 
