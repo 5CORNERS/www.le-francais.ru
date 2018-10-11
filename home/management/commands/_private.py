@@ -42,7 +42,7 @@ def set_block(i, new_block, stream_value):
 
 def del_block(i, stream_value):
     stream_value.stream_data.pop(i)
-    stream_value._bound_blocks.pop(i)
+    # stream_value._bound_blocks.pop(i)
 
 def merge_blocks(i1, i2, stream_value):
     block1 = stream_value.__getitem__(i1)
