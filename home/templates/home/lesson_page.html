@@ -224,13 +224,20 @@
                             </li>
                         {% endif %}
                         {% if self.mail_archive %}
-                            {% if user.is_superuser %}
+                            {% if user.is_authenticated %}
                                 <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#mail-archive" role="tab"
+                                    <a class="nav-link" data-target="" href="#mail-archive" role="tab"
                                        aria-controls="body">
                                         Доп информация
                                     </a>
-                                </li>{% endif %}
+                                </li>
+                            {% else %}
+                                <li class="nav-item">
+                                    <a style="cursor: pointer" class="nav-link" data-toggle="modal" data-target="#default-login-required-modal">
+                                        Доп информация
+                                    </a>
+                                </li>
+                            {% endif %}
                         {% endif %}
                         {% for child_value in self.other_tabs %}
                             {% if not child_value.value.invisible or user.is_superuser %}
@@ -292,7 +299,7 @@
                         {% if self.mail_archive %}
                             {% if user.is_superuser %}
                                 <div id="mail-archive" class="{{ pane_class }}" role="tabpanel">
-                                    <h3>Дополнительная информация из почтовой рассылки</h3>
+                                    <h3>Дополнительная информация из&nbsp;почтовой рассылки</h3>
                                     <div>
                                         {% for block in self.mail_archive %}{% include block %}{% endfor %}
                                     </div>
@@ -447,6 +454,26 @@
             </div>
         </div>
     </div>
+    {% if self.mail_archive and not user.is_authenticated %}
+        <div class="modal" id="default-login-required-modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+                    <div class="modal-body">
+                        <div class="modal-body" style="padding-left:25px; padding-right:25px ">
+                        <p>Чтобы увидеть содержимое, вам надо авторизоваться на сайте.</p>
+                        <p style="margin-bottom: 20px">Самое простое — это зайти, как пользователь одной из социальных сетей. В этом случае авторизация произойдет в пару кликов — просто нажмите на одну из цветных кнопок.</p>
+                        <!-- Social OAuth Buttons -->{% include 'account/oauth-buttons.html' with next=request.path %}
+                        <hr style="border-top: 2px solid #eee;">
+                        <p>Если вы уже зарегистрированы на сайте, зайдите, используя свой адрес e-mail и пароль.</p>
+                        <!-- LogIn Form -->{% include 'account/login_form.html' with redirect_field_value=request.path redirect_field_name="next" %}
+                        <p>Если вас нет в Сетях и вы еще не регистрировались на сайте,<br><a href="{% url 'account_signup' %}?next={{ request.path }}">давайте вам создадим новый аккаунт.</a></p>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
     {% block payment_modals %}
         <div class="modal" id="give-me-a-coffee-payment-success-modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
