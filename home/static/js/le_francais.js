@@ -176,3 +176,7 @@ $(document).ready(function () {
 function forceLower(strInput) {
     strInput.value = strInput.value.toLowerCase();
 }
+
+$(function () {
+  $('[data-toggle="popover"]').popover()
+})
