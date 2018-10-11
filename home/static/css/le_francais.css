@@ -618,3 +618,8 @@ td.forum-last-post, td.topic-last-post {
     margin-bottom: 10px;
     margin-top: 10px;
 }
+
+.popover-content{
+    background-color: #fdf9ca;
+    z-index: 999;
+}
