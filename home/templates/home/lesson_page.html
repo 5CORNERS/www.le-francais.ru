@@ -228,7 +228,7 @@
                                 <li class="nav-item">
                                     <a class="nav-link" data-toggle="tab" href="#mail-archive" role="tab"
                                        aria-controls="body">
-                                        Материал для повторения
+                                        Доп информация
                                     </a>
                                 </li>{% endif %}
                         {% endif %}
@@ -292,6 +292,7 @@
                         {% if self.mail_archive %}
                             {% if user.is_superuser %}
                                 <div id="mail-archive" class="{{ pane_class }}" role="tabpanel">
+                                    <h3>Дополнительная информация из почтовой рассылки</h3>
                                     <div>
                                         {% for block in self.mail_archive %}{% include block %}{% endfor %}
                                     </div>
