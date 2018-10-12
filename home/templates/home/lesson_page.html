@@ -296,8 +296,7 @@
                             </div>
                             {% assign pane_class "tab_pane" %}
                         {% endif %}
-                        {% if self.mail_archive %}
-                            {% if user.is_superuser %}
+                        {% if self.mail_archive and user.is_authenticated %}
                                 <div id="mail-archive" class="{{ pane_class }}" role="tabpanel">
                                     <h3>Дополнительная информация из&nbsp;почтовой рассылки</h3>
                                     <div>
@@ -305,7 +304,6 @@
                                     </div>
                                 </div>
                                 {% assign pane_class "tab_pane" %}
-                            {% endif %}
                         {% endif %}
                         {% for child_value in self.other_tabs %}
                             <div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
