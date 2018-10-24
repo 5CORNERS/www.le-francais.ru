@@ -91,6 +91,8 @@ INSTALLED_APPS = [
     'django_mobile',
     'conjugation',
     'guardian',
+
+    'tinkoff_merchant',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -429,3 +431,17 @@ COMMENTS_XTD_APP_MODEL_OPTIONS = {
 }
 
 FLAVOURS = ('full', 'mobile', 'tablet')
+
+# Tinkoff terminal api
+
+TINKOFF_PAYMENTS_CONFIG = {
+    'URLS': {
+        'INIT': 'https://securepay.tinkoff.ru/v2/Init',
+        'GET_STATE': 'https://securepay.tinkoff.ru/v2/GetState',
+        'CANCEL': 'https://securepay.tinkoff.ru/v2/Cancel',
+    },
+    'TAXATION': 'usn_income',
+    'ITEM_TAX': 'none',
+    'TERMINAL_KEY': os.environ.get('TINKOFF_TERMINAL_ID'),
+    'SECRET_KEY': os.environ.get('TINKOFF_TERMINAL_PASSWORD'),
+}
