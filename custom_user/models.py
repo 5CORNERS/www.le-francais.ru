@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.dispatch import receiver
 from tinkoff_merchant.models import Payment as TinkoffPayment
+from tinkoff_merchant.signals import payment_update
 
 
 class CustomUserManager(UserManager):
@@ -62,9 +63,9 @@ class User(AbstractUser):
 		self.cup_amount = self.cup_amount + payment.cups_amount
 		self.save()
 
-	@receiver('payment_update')
-	def activate_tinkoff_payment(self, payment: TinkoffPayment):
-		items_set = payment.receipt.receiptitem_set
+	@receiver(payment_update)
+	def activate_tinkoff_payment(self, sender, **kwargs):
+		items_set = kwargs['payment'].receipt.receiptitem_set
 		quantity = 0
 		for item in items_set:
 			quantity += item.quantity
