@@ -16,9 +16,8 @@ class Payment(models.Model):
 		'Message': 'message',
 		'Details': 'details',
 	}
-
 	amount = models.IntegerField(verbose_name='Сумма в копейках', editable=False)
-	# order_id = models.CharField(verbose_name='Номер заказа', max_length=100, unique=True, editable=False)
+	order_id = models.CharField(verbose_name='Номер заказа', max_length=100, unique=True, editable=False, blank=True, null=True)
 	description = models.TextField(verbose_name='Описание', max_length=250, blank=True, default='', editable=False)
 
 	success = models.BooleanField(verbose_name='Успешно проведен', default=False, editable=False)
@@ -32,6 +31,7 @@ class Payment(models.Model):
 		max_length=100, blank=True, default='', editable=False)
 	message = models.TextField(verbose_name='Краткое описание ошибки', blank=True, default='', editable=False)
 	details = models.TextField(verbose_name='Подробное описание ошибки', blank=True, default='', editable=False)
+	customer_key = models.CharField(verbose_name='Идентификатор покупателя', max_length=36, null=True, default=None, editable=False)
 
 	class Meta:
 		verbose_name = 'Транзакция'
@@ -40,8 +40,6 @@ class Payment(models.Model):
 	def __str__(self):
 		return 'Транзакция #{self.id}:{self.order_id}:{self.payment_id}'.format(self=self)
 
-	def order_id(self):
-		return str(self.pk)
 
 	def can_redirect(self) -> bool:
 		return self.status == 'NEW' and self.payment_url
@@ -49,14 +47,14 @@ class Payment(models.Model):
 	def is_paid(self) -> bool:
 		return self.status == 'CONFIRMED' or self.status == 'AUTHORIZED'
 
-	def with_receipt(self, email: str, taxation: str = None, phone: str = '') -> 'Payment':
+	def with_receipt(self, user, email: str, taxation: str = None, phone: str = '') -> 'Payment':
 		if not self.id:
 			self.save()
 
 		if hasattr(self, 'receipt'):
 			return self
 
-		Receipt.objects.create(payment=self, email=email, phone=phone, taxation=taxation)
+		Receipt.objects.create(payment=self, email=email, phone=phone, taxation=taxation, user=user)
 
 		return self
 
@@ -71,6 +69,8 @@ class Payment(models.Model):
 			'OrderId': self.order_id,
 			'Description': self.description,
 		}
+		# if self.customer_key:
+		# 	json['CustomerKey'] = self.customer_key
 		if data:
 			json['DATA'] = data
 
