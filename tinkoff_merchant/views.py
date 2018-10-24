@@ -11,6 +11,7 @@ from .services import MerchantAPI
 from .signals import payment_update
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class Notification(View):
     _merchant_api = None
 
@@ -20,9 +21,8 @@ class Notification(View):
             self._merchant_api = MerchantAPI()
         return self._merchant_api
 
-    @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
+        return super(Notification, self).dispatch(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs):
         data = json.loads(request.body.decode())
