@@ -18,7 +18,9 @@ api_urls = [
 ]
 
 payment_urls = [
+    url('^success/$', TemplateView.as_view(template_name='payments/success.html')),
     url('^wallet_one/$', views.WlletOneNotifications.as_view(), name='wmi_notification'),
+    url('^tinkoff_payments', views.TinkoffPayments.as_view(), name='tinkoff_payments'),
     url('^', views.PaymentsView.as_view(), name='payments'),
 ]
 
