@@ -63,15 +63,6 @@ class User(AbstractUser):
 		self.cup_amount = self.cup_amount + payment.cups_amount
 		self.save()
 
-	@receiver(payment_update)
-	def activate_tinkoff_payment(self, sender, **kwargs):
-		items_set = kwargs['payment'].receipt.receiptitem_set
-		quantity = 0
-		for item in items_set:
-			quantity += item.quantity
-
-		self.cup_amount = self.cup_amount + quantity
-		self.save()
 
 	objects = CustomUserManager()
 	USERNAME_FIELD = 'email'
@@ -110,3 +101,16 @@ class UsedUsernames(models.Model):
 	used_username = models.CharField(max_length=32)
 	change_datetime = models.DateTimeField()
 
+
+@receiver(payment_update)
+def activate_tinkoff_payment(sender, **kwargs):
+	payment = kwargs['payment']
+	user = User.objects.get(id=int(payment.customer_key))
+	quantity = 0
+	try:
+		for item in payment.receipt.receiptitem_set:
+			if item.name == 'C01' or item.name == 'C05' or item.name == 'C10' or item.name == 'C20' or item.name == 'C50':
+				quantity += item.quantity
+		user.cup_amount += quantity
+	except:
+		pass
