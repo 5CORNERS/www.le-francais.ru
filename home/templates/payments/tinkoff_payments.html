@@ -107,39 +107,9 @@
 {% endblock %}
 {% block extra_js %}
     <script>
-      function submitToWalletOne(cup_amount) {
-        $.ajax({
-          url: "{% url 'payments' %}",
-          type: "POST",
-          data: {
-            {% if "next" in request.GET %}
-              success_url: "{{ request.GET.next }}?modal_open={{ request.GET.success_modal }}&payment_success=true",
-              fail_url: "{{ request.GET.next }}?modal_open={{ request.GET.fail_modal }}&payment_fail=true",
-            {% else %}
-              success_url: "{{ request.path }}?modal_open=success-payment-modal&payment_success=true",
-              fail_url: "{{ request.path }}?modal_open=fail-payment-modal&payment_fail=true",
-            {% endif %}
-            cup_amount: cup_amount,
-            csrfmiddlewaretoken: "{{ csrf_token }}"
-          },
-          datatype: "json",
-          success: function (response) {
-            let form = $("<form/>",
-              {action: 'https://wl.walletone.com/checkout/checkout/Index', method: 'POST'}
-            );
-            for (let i in response.params) {
-              form.append(
-                $("<input>", {name: response.params[i][0], value: response.params[i][1], id:response.params[i][2]})
-              )
-            }
-            $("body").append(form);
-            form.submit()
-          }
-        })
-      }
       function initPayment(cup_amount) {
         $.ajax({
-          url: "{% url 'payments' %}",
+          url: "{% url 'tinkoff_payments' %}",
           type: "POST",
           data: {
           	{% if "next" in request.GET %}

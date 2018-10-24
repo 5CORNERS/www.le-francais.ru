@@ -254,7 +254,7 @@ class TinkoffPayments(View):
 			tinkoff_api = MerchantAPI()
 			tinkoff_api.init(payment)
 			if payment.can_redirect():
-				return JsonResponse({'payment_url': payment.payment_url}, safe=True)
+				return JsonResponse({'payment_url': payment.payment_url, 'success': 'true'}, safe=True)
 
 
 class PaymentsView(View):
