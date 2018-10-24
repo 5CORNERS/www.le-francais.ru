@@ -11,6 +11,7 @@ from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.contrib.sitemaps.views import sitemap
 from wagtail.core import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
+from tinkoff_merchant.urls import urlpatterns as tinkoff_urls
 
 from conjugation.sitemap import ConjugationSitemap
 from forum.sitemap_generator import ForumSitemap, TopicSitemap
@@ -80,6 +81,7 @@ urlpatterns = [
     url(r'', include('user_sessions.urls', 'user_sessions')),
     url(r'^new-users-redirect-url/', TemplateView.as_view(template_name='account/change_username_new.html')),
     url(r'^', include(wagtail_urls)),
+    url(r'^tinkoff/', include(tinkoff_urls)),
 
 ]
 
