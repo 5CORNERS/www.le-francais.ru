@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.mail import send_mail
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.dispatch import receiver
+from tinkoff_merchant.models import Payment as TinkoffPayment
 
 
 class CustomUserManager(UserManager):
@@ -58,6 +60,16 @@ class User(AbstractUser):
 
 	def activate_payment(self, payment):
 		self.cup_amount = self.cup_amount + payment.cups_amount
+		self.save()
+
+	@receiver('payment_update')
+	def activate_tinkoff_payment(self, payment: TinkoffPayment):
+		items_set = payment.receipt.receiptitem_set
+		quantity = 0
+		for item in items_set:
+			quantity += item.quantity
+
+		self.cup_amount = self.cup_amount + quantity
 		self.save()
 
 	objects = CustomUserManager()
