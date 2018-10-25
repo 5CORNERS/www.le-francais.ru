@@ -35,6 +35,11 @@ from tinkoff_merchant.services import MerchantAPI
 from .forms import ChangeUsername
 from .utils import message as buy_description
 
+if "mailer" in settings.INSTALLED_APPS:
+	from mailer import send_mail
+else:
+	from django.core.mail import send_mail
+
 flow = OAuth2WebServerFlow(client_id='499129759772-bqrp9ha0vfibn6t76fdgdmd87khnn2e0.apps.googleusercontent.com',
                            client_secret='CRTqrmLi-116OMgpFOnYS6wH',
                            scope='https://www.googleapis.com/auth/drive',
@@ -177,6 +182,12 @@ class GiveMeACoffee(View):
 				if request.user.cup_amount >= 1:
 					try:
 						cup_amount = lesson_page.add_lesson_to_user(request.user)
+						send_mail(
+							'By me a coffee cup',
+							'{0} угостил вас чашечкой кофе'.format(request.user.email),
+							from_email=settings.DEFAULT_FROM_EMAIL,
+							recipient_list=['ilia.dumov@gmail.com']
+						)
 						data = dict(result="SUCCESS", description=message_left(cup_amount))
 					except BaseException as e:
 						data = dict(result="ERROR", description="Failed to do something: " + str(e))
@@ -246,7 +257,6 @@ class TinkoffPayments(View):
 				price=price,
 				quantity=quantity,
 				amount=price * quantity,
-
 			)])
 			payment.order_id = str(payment.id)
 
@@ -273,6 +283,7 @@ class PaymentResult(View):
 			back_urls = BackUrls.objects.get(payment=payment)
 			success_url = back_urls.success
 			fail_url = back_urls.fail
+			back_urls.delete()
 		except ObjectDoesNotExist:
 			success_url = '/'
 			fail_url = '/'
