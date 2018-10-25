@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.dispatch import receiver
 from tinkoff_merchant.models import Payment as TinkoffPayment
-from tinkoff_merchant.signals import payment_confirm
+from tinkoff_merchant.signals import payment_confirm, payment_refund
 from tinkoff_merchant.models import ReceiptItem
 
 class CustomUserManager(UserManager):
@@ -112,4 +112,17 @@ def activate_tinkoff_payment(sender, **kwargs):
 		if item.category == 'coffee_cup':
 			quantity += item.quantity
 	user.cup_amount += quantity
+	user.save()
+
+
+@receiver(payment_refund)
+def deactivate_tinkoff_payment(sender, **kwargs):
+	payment = kwargs['payment']
+	user = User.objects.get(id=int(payment.customer_key))
+	quantity = 0
+	items = list(payment.receipt.receiptitem_set.all())
+	for item in items:
+		if item.category == 'coffee_cup':
+			quantity += item.quantity
+	user.cup_amount -= quantity
 	user.save()
