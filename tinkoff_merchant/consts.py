@@ -29,3 +29,11 @@ TAXES = (
     (TAX_ITEM_VAT110, 'НДС чека по расчетной ставке 10/110'),
     (TAX_ITEM_VAT118, 'НДС чека по расчетной ставке 18/118'),
 )
+
+
+COFFEE_CUPS = 'coffee_cup'
+TICKETS = 'ticket'
+CATEGORIES = (
+    (COFFEE_CUPS, 'Чашки кофе'),
+    (TICKETS, 'Билеты')
+)
