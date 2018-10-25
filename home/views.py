@@ -26,8 +26,9 @@ from social_core.utils import setting_name
 from user_sessions.models import Session
 from wagtail.contrib.sitemaps.sitemap_generator import Sitemap as WagtailSitemap
 from wagtail.core.models import Page
+from django.core.exceptions import ObjectDoesNotExist
 
-from home.models import PageWithSidebar, LessonPage, ArticlePage
+from home.models import PageWithSidebar, LessonPage, ArticlePage, BackUrls
 from home.src.site_import import import_content
 from tinkoff_merchant.models import Payment as TinkoffPayment
 from tinkoff_merchant.services import MerchantAPI
@@ -240,7 +241,7 @@ class TinkoffPayments(View):
 				name = 'C50'
 				price = 3900
 			description = "www.le-francais.ru -- Покупка " + buy_description(quantity, 'чашечки', 'чашечек', 'чашечек') + " кофе."
-			payment = TinkoffPayment.objects.create(amount=price * quantity, description=description).with_receipt(email=request.user.email, taxation='usn_income').with_items([dict(
+			payment = TinkoffPayment.objects.create(amount=price * quantity, description=description, customer_key=str(request.user.id)).with_receipt(email=request.user.email, taxation='usn_income').with_items([dict(
 				name=name,
 				price=price,
 				quantity=quantity,
@@ -250,11 +251,32 @@ class TinkoffPayments(View):
 			payment.order_id = str(payment.id)
 
 			if "success_url" in request.POST and "fail_url" in request.POST:
-				pass
+				BackUrls.objects.create(
+					payment=payment,
+					success=request.scheme + "://" + request.META['HTTP_HOST'] + request.POST['success_url'],
+					fail=request.scheme + "://" + request.META['HTTP_HOST'] + request.POST['fail_url']
+				)
+
 			tinkoff_api = MerchantAPI()
-			tinkoff_api.init(payment)
+			tinkoff_api.init(payment).save()
 			if payment.can_redirect():
 				return JsonResponse({'payment_url': payment.payment_url, 'success': 'true'}, safe=True)
+
+
+class PaymentResult(View):
+	def get(self, request, *args, **kwargs):
+		success = True
+		if request.GET['Success'] != 'true':
+			success = False
+		payment = TinkoffPayment.objects.get(order_id=request.GET['OrderId'])
+		try:
+			back_urls = BackUrls.objects.get(payment=payment)
+			success_url = back_urls.success
+			fail_url = back_urls.fail
+		except ObjectDoesNotExist:
+			success_url = '/'
+			fail_url = '/'
+		return render(request, template_name='payments/result_page.html', context={'back_url_success': success_url, 'back_url_fail': fail_url, 'success': success, 'payment': payment})
 
 
 class PaymentsView(View):
