@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import Payment
 from .services import MerchantAPI
-from .signals import payment_update
+from .signals import payment_update, payment_confirm
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -35,8 +35,14 @@ class Notification(View):
 
         payment = get_object_or_404(Payment, payment_id=data.get('PaymentId'))
 
+        was_confirmed = False
+        if payment.status == 'CONFIRMED':
+            was_confirmed = True
+
         self.merchant_api.update_payment_from_response(payment, data).save()
 
+        if not was_confirmed:
+            payment_confirm.send(self.__class__, payment=payment)
         payment_update.send(self.__class__, payment=payment)
 
         return HttpResponse(b'OK', status=200)
