@@ -109,7 +109,7 @@ def activate_tinkoff_payment(sender, **kwargs):
 	quantity = 0
 	items = list(payment.receipt.receiptitem_set.all())
 	for item in items:
-		if item.name == 'C01' or item.name == 'C05' or item.name == 'C10' or item.name == 'C20' or item.name == 'C50':
+		if item.category == 'coffee_cup':
 			quantity += item.quantity
 	user.cup_amount += quantity
 	user.save()
