@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+{#    <script auto-inline-src="https://securepay.tinkoff.ru/html/payForm/js/xss.js?ver=1513868235450" type="text/javascript">!function () {#}
+{#			function e(e) {#}
+{#				switch (n = !0, e) {#}
+{#					case'&':#}
+{#						return '&amp;';#}
+{#					case'<':#}
+{#						return '&lt;';#}
+{#					case'>':#}
+{#						return '&gt;';#}
+{#					case'"':#}
+{#						return '&quot;';#}
+{#					case'\'':#}
+{#						return '&#x27;';#}
+{#					case'/':#}
+{#						return '&#x2F;'#}
+{#				}#}
+{#				return null#}
+{#			}#}
+{##}
+{#			var n = !1;#}
+{#			if (location.search) {#}
+{#				var t = '', r = new RegExp('(&(?!(amp;|lt;|gt;|quot;|#x))|<|>|"|\'|/)', 'ig');#}
+{#				location.search.substr(1).split('&').forEach(function (n) {#}
+{#					var o = n.split('=');#}
+{#					t += '&' + encodeURIComponent(decodeURIComponent(o[0]).replace(r, e)) + '=' + encodeURIComponent(decodeURIComponent(o[1]).replace(r, e))#}
+{#				}), n && (location.search = t.substr(1))#}
+{#			}#}
+{#		}()</script>#}
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="{% static 'tinkoff_css/commonc276.css' %}">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+</head>
+<body id="body">
+<div class="wrapper">
+    <div class="wrapper__middle">
+        <div class="header">
+            <div class="header__logo"><img alt="Tinkoff bank logo" src="https://securepay.tinkoff.ru/html/payForm/logo/bank.png"></div>
+            <div class="header__fin-service">
+                <div class="header__fin-service-image images__visa"></div>
+                <div class="header__fin-service-image header__fin-service-image_diff images__master-card"></div>
+                <div class="header__fin-service-image header__fin-service-image_last header__fin-service-mobile images__maestro"></div>
+                <div class="header__fin-service-image header__fin-service-image_last images__mir"></div>
+            </div>
+        </div>
+        <div class="mobile-border mobile-border_top">
+            <div class="mobile-border__line"></div>
+        </div>
+    {% comment %}TODO: Добавить кнопку "Повторить платёж"{% endcomment %}
+        {% if request.GET.Success == 'true' %}
+        <div class="card">
+            <div class="form-ok"><p class="form-ok__message">Уважаемый покупатель!</p>
+                <h1 class="form-ok__head">Платёж успешно совершён</h1>
+                <p id="backToMerchant"><a class="button-back button-back_transparent" id="urlToMerchant" href='{% if success %}{{ back_url_success }}{% else %}{{ back_url_fail }}{% endif %}' style="font-size:large">Продолжить</a></p>
+                <p class="form-reject__answers" style="margin-top:5px">По вопросам, связанным с выполнением оплаченного заказа, обращайтесь в <span id="CompanyName"></span> по эл. почте <a href="#" id="EmailReq"></a> или телефону <span
+                        id="PhonesReq"></span></p>
+                <div class="form-ok__operation">
+                    <div class="form-ok__mobile"><p class="form-ok__operation-info"><strong>Информация об операции</strong></p>
+                        <p class="form-ok__operation-service"><span class="form-ok__operation-mobile">Услуга: </span><span class="form-ok__operation-mobile">оплата заказа <span id="OrderId"></span></span> <span
+                                class="form-ok__operation-border">|</span></p>
+                        <p class="form-ok__operation-summ">Сумма платежа: <span id="formatted_amount"><span id="Amount"></span></span> руб. <span class="form-ok__operation-border">| </span><span class="form-ok__operation-mobile">Дата и время: <span
+                                class="js-form-ok__date"><span id="TranDate"></span></span></span> <span class="form-ok__operation-border">| </span><span class="form-ok__operation-mobile">Номер&nbsp;транзакции: <span id="PaymentId"></span></span>
+                        </p></div>
+                </div>
+            </div>
+            <div class="agreement-bg js-agreement"></div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="form-reject"><p class="form-reject__message">Уважаемый покупатель!</p>
+                <h1 class="form-reject__head">Платёж не прошёл</h1>
+                <p class="form-reject__text" id="Message" hidden=""></p>
+                <p id="backToMerchant"><a class="button-back button-back_transparent" id="urlToMerchant" href='{% if success %}{{ back_url_success }}{% else %}{{ back_url_fail }}{% endif %}' style="font-size:large">Продолжить</a></p>
+                <p class="form-reject__answers" style="margin-top:5px">По вопросам, связанным с выполнением оплаченного заказа, обращайтесь в <span id="CompanyName"></span> по эл. почте <a href="#" id="EmailReq"></a> или телефону <span
+                        id="PhonesReq"></span></p>
+                <div class="form-reject__operation">
+                    <div class="form-reject__mobile"><p class="form-reject__operation-info"><strong>Информация об операции</strong></p>
+                        <p class="form-ok__operation-service"><span class="form-ok__operation-mobile">Услуга: </span><span class="form-ok__operation-mobile">оплата заказа <span id="OrderId"></span></span> <span
+                                class="form-ok__operation-border">|</span></p>
+                        <p class="form-ok__operation-summ">Сумма платежа: <span id="formatted_amount"><span id="Amount"></span></span> руб. <span class="form-ok__operation-border">| </span><span class="form-ok__operation-mobile">Номер&nbsp;транзакции: <span
+                                id="PaymentId"></span></span></p></div>
+                </div>
+            </div>
+            <div class="agreement-bg js-agreement"></div>
+        </div>
+        {% endif %}
+        <div class="mobile-border mobile-border_bottom">
+            <div class="mobile-border__line"></div>
+        </div>
+        <div class="credits">
+            <div class="credits__icons">
+                <div class="images__under-visa"></div>
+                <div class="images__under-master"></div>
+                <div class="images__under-miraccept"></div>
+                <div class="images__under-pci"></div>
+            </div>
+            <p class="credits__info">Интернет-платежи защищены сертификатом SSL и протоколом 3D Secure. АО&nbsp;"Тинькофф&nbsp;Банк" не передает магазинам платежные данные, в том числе данные карты.</p>
+            <div class="credits__tcs-logo"><img alt="Tinkoff bank logo" src="https://securepay.tinkoff.ru/html/payForm/images/tcs-logo.png" width="162" height="50"></div>
+            <p class="credits__info">Сервис предоставлен АО&nbsp;"Тинькофф&nbsp;Банк".</p></div>
+    </div>
+</div>
+<script src="https://securepay.tinkoff.ru/html/payForm/js/jquery-1.9.1.min.js?ver=1513868235450"></script>
+<script>function formatAmount(e) {
+	return (e / 100).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1 ').replace(/[\.,]/g, ', ')
+}
+
+function parse(e) {
+	var a = "", r = [];
+	return location.search.substr(1).split("&").forEach(function (t) {
+		(r = t.split("="))[0] === e && (a = decodeURIComponent(r[1]))
+	}), a
+}
+
+$(document).ready(function () {
+	parse("Amount") && $('#Amount').html(formatAmount(parse("Amount"))), parse("MerchantName") && $('#MerchantName').html(parse("MerchantName")), parse("PhonesReq") && $('#PhonesReq').html(parse("PhonesReq").replace(/^(.*)(\d{3})(\d{3})(\d{2})(\d{2})$/, '+7 ($2) $3-$4-$5', 'i')), parse("OrderId") && $('#OrderId').html(parse("OrderId")), parse("PaymentId") && $('#PaymentId').html(parse("PaymentId")), parse("TranDate") && $('#TranDate').html(parse("TranDate").replace('+', ' ')), parse("ErrorCode") && $('#ErrorCode').html(parse("ErrorCode").replace('+', ' ')), parse("CompanyName") && $('#CompanyName').html(parse("CompanyName").split('+').join(' ')), parse("Details") && $('#Details').html(parse("Details")), parse("MerchantEmail") && $('#MerchantEmail').html(parse("MerchantEmail")).attr('href', 'mailto:' + parse("MerchantEmail")), parse("EmailReq") && $('#EmailReq').html(parse("EmailReq")).attr('href', 'mailto:' + parse("EmailReq")), (massage = parse("Message")) && ($('#Message').html(parse("Message").split('+').join(' ')), $('#Message').attr('hidden', !1))
+})</script>
+</body>
+</html>

@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.dispatch import receiver
 from tinkoff_merchant.models import Payment as TinkoffPayment
 from tinkoff_merchant.signals import payment_update
-
+from tinkoff_merchant.models import ReceiptItem
 
 class CustomUserManager(UserManager):
 	def _create_user(self, username, email, password, **extra_fields):
@@ -107,10 +107,9 @@ def activate_tinkoff_payment(sender, **kwargs):
 	payment = kwargs['payment']
 	user = User.objects.get(id=int(payment.customer_key))
 	quantity = 0
-	try:
-		for item in payment.receipt.receiptitem_set:
-			if item.name == 'C01' or item.name == 'C05' or item.name == 'C10' or item.name == 'C20' or item.name == 'C50':
-				quantity += item.quantity
-		user.cup_amount += quantity
-	except:
-		pass
+	items = list(payment.receipt.receiptitem_set.all())
+	for item in items:
+		if item.name == 'C01' or item.name == 'C05' or item.name == 'C10' or item.name == 'C20' or item.name == 'C50':
+			quantity += item.quantity
+	user.cup_amount += quantity
+	user.save()

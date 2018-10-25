@@ -20,6 +20,8 @@ from home.blocks.ForumBlocks import PostBlock
 from home.blocks.Reviews import ChoosenReviews
 from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
+import datetime
+from .utils import message
 
 PAGE_CHOICES = (
     ('lesson_a1', 'Lesson A1'),
@@ -232,6 +234,8 @@ class LessonPage(Page):
     repetition_material = CharField(max_length=100, null=True, blank=True)
     audio_material = CharField(max_length=100, null=True, blank=True)
 
+    need_payment = BooleanField(default=False)
+
     comments_for_lesson = StreamField([
         ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
@@ -397,8 +401,7 @@ class UserLesson(Model):
     def __str__(self):
         return str(self.user) + str(self.lesson)
 
-import datetime
-from .utils import message
+
 class Payment(Model):
     cups_amount = IntegerField()
     user = ForeignKey('custom_user.User', related_name='payments')
@@ -483,3 +486,9 @@ class Payment(Model):
         params.append(('WMI_SIGNATURE', signature, 'signature'))
 
         return {'params': params}
+
+
+class BackUrls(Model):
+    success = URLField()
+    fail = URLField()
+    payment = ForeignKey('tinkoff_merchant.Payment')
