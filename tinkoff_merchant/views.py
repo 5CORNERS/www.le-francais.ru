@@ -35,13 +35,13 @@ class Notification(View):
 
         payment = get_object_or_404(Payment, payment_id=data.get('PaymentId'))
 
-        was_confirmed = False
-        if payment.status == 'CONFIRMED':
-            was_confirmed = True
+        confirmed = False
+        if payment.status != 'CONFIRMED' and data.get('Status') == 'CONFIRMED':
+            confirmed = True
 
         self.merchant_api.update_payment_from_response(payment, data).save()
-
-        if not was_confirmed:
+        
+        if confirmed:
             payment_confirm.send(self.__class__, payment=payment)
         payment_update.send(self.__class__, payment=payment)
 
