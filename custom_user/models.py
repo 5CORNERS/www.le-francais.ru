@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.dispatch import receiver
 from tinkoff_merchant.models import Payment as TinkoffPayment
-from tinkoff_merchant.signals import payment_update
+from tinkoff_merchant.signals import payment_confirm
 from tinkoff_merchant.models import ReceiptItem
 
 class CustomUserManager(UserManager):
@@ -102,7 +102,7 @@ class UsedUsernames(models.Model):
 	change_datetime = models.DateTimeField()
 
 
-@receiver(payment_update)
+@receiver(payment_confirm)
 def activate_tinkoff_payment(sender, **kwargs):
 	payment = kwargs['payment']
 	user = User.objects.get(id=int(payment.customer_key))
