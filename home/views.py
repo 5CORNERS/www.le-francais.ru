@@ -262,7 +262,7 @@ class TinkoffPayments(View):
 				price=price,
 				quantity=quantity,
 				amount=price * quantity,
-				categoy='coffee_cup',
+				category='coffee_cup',
 			)])
 			payment.order_id = str(payment.id)
 
