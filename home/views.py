@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -26,7 +27,6 @@ from social_core.utils import setting_name
 from user_sessions.models import Session
 from wagtail.contrib.sitemaps.sitemap_generator import Sitemap as WagtailSitemap
 from wagtail.core.models import Page
-from django.core.exceptions import ObjectDoesNotExist
 
 from home.models import PageWithSidebar, LessonPage, ArticlePage, BackUrls
 from home.src.site_import import import_content
@@ -91,9 +91,13 @@ def change_username(request):
 	redirect_field_name = 'next'
 	if 'next' in request.GET:
 		redirect_field_value = request.GET['next']
-	return render(request, template_name, {'form': form, 'redirect_field_value': redirect_field_value,
-	                                       'redirect_field_name': redirect_field_name})
-
+	return render(
+		request,
+		template_name, {
+			'form': form, 'redirect_field_value': redirect_field_value,
+			'redirect_field_name': redirect_field_name
+		}
+	)
 
 def authorize(request):
 	return redirect(flow.step1_get_authorize_url())
@@ -102,8 +106,10 @@ def authorize(request):
 def authorized(request):
 	credentials = flow.step2_exchange(request.GET['code'])
 	http = credentials.authorize(httplib2.Http())
-	t = threading.Thread(target=import_content,
-	                     args=(http,))
+	t = threading.Thread(
+		target=import_content,
+		args=(http,)
+	)
 	t.setDaemon(True)
 	t.start()
 	return HttpResponse('')
@@ -116,8 +122,7 @@ def get_navigation_object_from_page(page: Page, current_page_id: int) -> dict:
 		"href": page.get_url(),
 		"state": {}
 	}
-	if isinstance(page.specific, PageWithSidebar) or isinstance(page.specific, LessonPage) or isinstance(page.specific,
-	                                                                                                     ArticlePage):
+	if isinstance(page.specific, PageWithSidebar) or isinstance(page.specific, LessonPage) or isinstance(page.specific, ArticlePage):
 		menu_title = page.specific.menu_title
 		if not isinstance(menu_title, str):
 			menu_title = menu_title.decode()
@@ -257,6 +262,7 @@ class TinkoffPayments(View):
 				price=price,
 				quantity=quantity,
 				amount=price * quantity,
+				categoy='coffee_cup',
 			)])
 			payment.order_id = str(payment.id)
 
