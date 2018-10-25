@@ -2,7 +2,7 @@ from typing import List
 
 from django.db import models
 
-from .consts import TAXES, TAXATIONS
+from .consts import TAXES, TAXATIONS, CATEGORIES
 from .settings import get_config
 
 
@@ -118,6 +118,8 @@ class ReceiptItem(models.Model):
 	tax = models.CharField(verbose_name='Ставка налога', max_length=10, choices=TAXES)
 	ean13 = models.CharField(verbose_name='Штрих-код', max_length=20, blank=True, default='')
 	shop_code = models.CharField(verbose_name='Код магазина', max_length=64, blank=True, default='')
+
+	category = models.CharField(verbose_name='Категория товара', choices=CATEGORIES, default='', max_length=20)
 
 	class Meta:
 		verbose_name = 'Информация о товаре'
