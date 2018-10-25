@@ -34,11 +34,11 @@ class Payment(models.Model):
 	customer_key = models.CharField(verbose_name='Идентификатор покупателя', max_length=36, null=True, default=None, editable=False)
 
 	class Meta:
-		verbose_name = 'Транзакция'
-		verbose_name_plural = 'Транзакции'
+		verbose_name = 'Заказ'
+		verbose_name_plural = 'Заказы'
 
 	def __str__(self):
-		return 'Транзакция #{self.id}:{self.order_id}:{self.payment_id}'.format(self=self)
+		return 'Заказ #{self.id}:{self.order_id}:{self.payment_id}'.format(self=self)
 
 
 	def can_redirect(self) -> bool:
