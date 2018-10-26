@@ -109,7 +109,7 @@
     <script>
       function initPayment(i) {
         $.ajax({
-          url: "{% url 'payments:payments' %}",
+          url: "{% url 'payments:second_payments' %}",
           type: "POST",
           data: {
           	{% if "next" in request.GET %}
