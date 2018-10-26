@@ -34,15 +34,15 @@ class Notification(View):
             return HttpResponse(b'Bad token', status=400)
 
         payment = get_object_or_404(Payment, payment_id=data.get('PaymentId'))
+        old_status = payment.status
 
-        if payment.status != 'CONFIRMED' and data.get('Status') == 'CONFIRMED':
+        self.merchant_api.update_payment_from_response(payment, data).save()
+
+        if old_status != 'CONFIRMED' and payment.status == 'CONFIRMED':
             payment_confirm.send(self.__class__, payment=payment)
 
-        if payment.status != 'REFUNDED' and data.get('Status') == 'REFUNDED':
+        if old_status != 'REFUNDED' and payment.status == 'REFUNDED':
             payment_refund.send(self.__class__, payment=payment)
-
-        payment.status_history.append(dict(status=data.get('Status'), datetime=str(datetime.now())))
-        self.merchant_api.update_payment_from_response(payment, data).save()
 
         payment_update.send(self.__class__, payment=payment)
 
