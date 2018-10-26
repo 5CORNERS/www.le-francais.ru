@@ -7,8 +7,8 @@ import requests
 from .utils import Encoder
 from .models import Payment
 from .settings import get_config
-
-
+from datetime import datetime
+from .signals import payment_refund
 class PaymentHTTPException(Exception):
     pass
 
@@ -76,7 +76,7 @@ class MerchantAPI:
         for resp_field, model_field in Payment.RESPONSE_FIELDS.items():
             if resp_field in response:
                 setattr(p, model_field, response.get(resp_field))
-
+        p.status_history.append(dict(status=response.get('Status'), datetime=str(datetime.now())))
         return p
 
     def token_correct(self, token: str, data: dict) -> bool:
@@ -92,4 +92,6 @@ class MerchantAPI:
 
     def cancel(self, p: Payment) -> Payment:
         response = self._request('CANCEL', requests.post, {'PaymentId': p.payment_id}).json()
+        if p.status == 'CONFIRMED':
+            payment_refund.send(self.__class__, payment=p)
         return self.update_payment_from_response(p, response)
