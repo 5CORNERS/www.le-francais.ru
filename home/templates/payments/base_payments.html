@@ -109,7 +109,7 @@
     <script>
       function submitToWalletOne(cup_amount) {
         $.ajax({
-          url: "{% url 'payments' %}",
+          url: "{% url 'payments:payments' %}",
           type: "POST",
           data: {
             {% if "next" in request.GET %}

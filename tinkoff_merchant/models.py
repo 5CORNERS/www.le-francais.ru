@@ -20,7 +20,7 @@ class Payment(models.Model):
 	order_id = models.CharField(verbose_name='Номер заказа', max_length=100, unique=True, editable=False, blank=True, null=True)
 	description = models.TextField(verbose_name='Описание', max_length=250, blank=True, default='', editable=False)
 
-	success = models.BooleanField(verbose_name='Успешно проведен', default=False, editable=False)
+	success = models.BooleanField(verbose_name='Без ошибок', default=False, editable=False)
 	status = models.CharField(verbose_name='Статус транзакции', max_length=20, default='', editable=False)
 	payment_id = models.CharField(
 		verbose_name='Уникальный идентификатор транзакции в системе банка', max_length=20, default='', editable=False)
@@ -32,6 +32,9 @@ class Payment(models.Model):
 	message = models.TextField(verbose_name='Краткое описание ошибки', blank=True, default='', editable=False)
 	details = models.TextField(verbose_name='Подробное описание ошибки', blank=True, default='', editable=False)
 	customer_key = models.CharField(verbose_name='Идентификатор покупателя', max_length=36, null=True, default=None, editable=False)
+
+	creation_date = models.DateTimeField(verbose_name='Дата создания заказа', auto_now=True, null=True)
+	update_date = models.DateTimeField(verbose_name='Дата последнего обновления', auto_now=True, null=True)
 
 	class Meta:
 		verbose_name = 'Заказ'
@@ -120,6 +123,7 @@ class ReceiptItem(models.Model):
 	shop_code = models.CharField(verbose_name='Код магазина', max_length=64, blank=True, default='')
 
 	category = models.CharField(verbose_name='Категория товара', choices=CATEGORIES, default='', max_length=20)
+	site_quantity = models.IntegerField(null=True)
 
 	class Meta:
 		verbose_name = 'Информация о товаре'
