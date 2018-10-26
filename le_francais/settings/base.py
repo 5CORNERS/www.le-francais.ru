@@ -445,3 +445,9 @@ TINKOFF_PAYMENTS_CONFIG = {
     'TERMINAL_KEY': os.environ.get('TINKOFF_TERMINAL_ID'),
     'SECRET_KEY': os.environ.get('TINKOFF_TERMINAL_PASSWORD'),
 }
+
+# Pay34 settings
+
+PAY34_CLIENT_ID = os.environ.get('PAY34_CLIENT_ID')
+PAY34_CLIENT_SECRET = os.environ.get('PAY34_CLIENT_SECRET')
+PAY34_TEST_ENABLE = True
