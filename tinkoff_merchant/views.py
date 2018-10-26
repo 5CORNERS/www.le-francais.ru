@@ -35,17 +35,14 @@ class Notification(View):
 
         payment = get_object_or_404(Payment, payment_id=data.get('PaymentId'))
 
-        first_confirm = False
         if payment.status != 'CONFIRMED' and data.get('Status') == 'CONFIRMED':
-            first_confirm = True
+            payment_confirm.send(self.__class__, payment=payment)
 
-        if payment.status == 'CONFIRMED' and data.get('Status') == 'REFUNDED':
+        if payment.status != 'REFUNDED' and data.get('Status') == 'REFUNDED':
             payment_refund.send(self.__class__, payment=payment)
 
         self.merchant_api.update_payment_from_response(payment, data).save()
 
-        if first_confirm:
-            payment_confirm.send(self.__class__, payment=payment)
         payment_update.send(self.__class__, payment=payment)
 
         return HttpResponse(b'OK', status=200)
