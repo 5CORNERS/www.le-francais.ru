@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-
+from datetime import datetime
 from .models import Payment
 from .services import MerchantAPI
 from .signals import payment_update, payment_confirm, payment_refund
@@ -41,6 +41,7 @@ class Notification(View):
         if payment.status != 'REFUNDED' and data.get('Status') == 'REFUNDED':
             payment_refund.send(self.__class__, payment=payment)
 
+        payment.status_history.append(dict(status=data.get('Status'), datetime=datetime.now()))
         self.merchant_api.update_payment_from_response(payment, data).save()
 
         payment_update.send(self.__class__, payment=payment)
