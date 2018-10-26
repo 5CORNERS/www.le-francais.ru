@@ -1,5 +1,5 @@
 from typing import List
-
+from decimal import *
 from django.db import models
 
 from .consts import TAXES, TAXATIONS, CATEGORIES
@@ -23,7 +23,7 @@ class Payment(models.Model):
 	success = models.BooleanField(verbose_name='Без ошибок', default=False, editable=False)
 	status = models.CharField(verbose_name='Статус транзакции', max_length=20, default='', editable=False)
 	payment_id = models.CharField(
-		verbose_name='Уникальный идентификатор транзакции в системе банка', max_length=20, default='', editable=False)
+		verbose_name='Номер транзакции', max_length=20, default='', editable=False)
 	error_code = models.CharField(verbose_name='Код ошибки', max_length=20, default='', editable=False)
 	payment_url = models.CharField(
 		verbose_name='Ссылка на страницу оплаты.',
@@ -44,6 +44,9 @@ class Payment(models.Model):
 	def __str__(self):
 		return 'Заказ #{self.id}:{self.order_id}:{self.payment_id}'.format(self=self)
 
+	def email(self):
+		if self.receipt:
+			return self.receipt.email
 
 	def can_redirect(self) -> bool:
 		return self.status == 'NEW' and self.payment_url
@@ -112,6 +115,15 @@ class Receipt(models.Model):
 			'Items': [item.to_json() for item in self.receiptitem_set.all()]
 		}
 
+	def to_json_pay54(self, receipt_type: int, tax_type: int) -> dict:
+		return {
+			'type': receipt_type,
+			'uniqueId': self.id,
+			'customerPhone': self.phone,
+			'customerEmail': self.email,
+			'positions': [item.to_json_pay54(tax_type) for item in self.receiptitem_set.all()]
+		}
+
 
 class ReceiptItem(models.Model):
 	receipt = models.ForeignKey(to=Receipt, on_delete=models.CASCADE, verbose_name='Чек')
@@ -149,4 +161,12 @@ class ReceiptItem(models.Model):
 			'Tax': self.tax,
 			'Ean13': self.ean13,
 			'ShopCode': self.shop_code,
+		}
+
+	def to_json_pay54(self, tax: int) -> dict:
+		return {
+			'name': self.name,
+			'price': self.price/100,
+			'count': self.quantity,
+			'tax': tax,
 		}
