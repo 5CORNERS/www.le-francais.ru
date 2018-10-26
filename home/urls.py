@@ -21,7 +21,7 @@ payment_urls = [
     url('^success/$', views.PaymentResult.as_view(), name='tinkoff:payment_result_page_success'),
     url('^fail/$', views.PaymentResult.as_view(), name='tinkoff:payment_result_page_fail'),
     url('^wallet_one/$', views.WlletOneNotifications.as_view(), name='wmi_notification'),
-    url('^tinkoff_paymetns/', views.TinkoffPayments.as_view(), name='test_payments'),
+    url('^tinkoff_payments/', views.TinkoffPayments.as_view(), name='test_payments'),
     url('^', views.PaymentsView.as_view(), name='payments'),
 ]
 
