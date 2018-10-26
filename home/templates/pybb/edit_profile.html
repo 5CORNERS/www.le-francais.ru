@@ -43,7 +43,7 @@
                     {% if user.has_coffee %}У вас еще {{ message }} в загашнике.{% else %}У вас совсем нет чашечек кофе в запасе. Как же вы будете угощать?!{% endif %}
                 </p>
             <button class="coffee-button btn btn-default btn-xs" id="coffee-button"
-                    onclick="location.href='{% url 'payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal'">
+                    onclick="location.href='{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal'">
                 <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">
                 <div id="coffee-button-text" class="coffee-button-text">Пополнить запасы</div>
             </button>

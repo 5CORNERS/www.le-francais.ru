@@ -48,7 +48,7 @@ urlpatterns = [
     url(r'^import/', include(site_import_urls)),
     url(r'^api/', include(api_urls)),
 
-    url(r'^payments/', include(payment_urls)),
+    url(r'^payments/', include(payment_urls, namespace='payments')),
 
     url(r'^coffee/', include(coffee_urls)),
 

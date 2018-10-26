@@ -107,9 +107,9 @@
 {% endblock %}
 {% block extra_js %}
     <script>
-      function initPayment(cup_amount) {
+      function initPayment(i) {
         $.ajax({
-          url: "{% url 'tinkoff_payments' %}",
+          url: "{% url 'payments:payments' %}",
           type: "POST",
           data: {
           	{% if "next" in request.GET %}
@@ -119,7 +119,7 @@
               success_url: "{{ request.path }}?modal_open=success-payment-modal&payment_success=true",
               fail_url: "{{ request.path }}?modal_open=fail-payment-modal&payment_fail=true",
             {% endif %}
-          	cup_amount:cup_amount,
+          	item_id: i,
             csrfmiddlewaretoken: "{{ csrf_token }}"
           },
           datatype: "json",
@@ -158,7 +158,7 @@
                                         <div class="card-description-text">{% if card.description %}{{ card.description | safe }}{% endif %}</div>
                                     </div>
                                 </div>
-                                <button type="submit" role="button" onclick="initPayment({{ card.cups_amount }})" class="btn btn-primary btn-block">Беру!</button>
+                                <button type="submit" role="button" onclick="initPayment({{ card.item_id }})" class="btn btn-primary btn-block">Беру!</button>
                             </div>
                         </div>
                     {% endfor %}
