@@ -109,8 +109,8 @@ def activate_tinkoff_payment(sender, **kwargs):
 	quantity = 0
 	items = list(payment.receipt.receiptitem_set.all())
 	for item in items:
-		if item.category == 'coffee_cup':
-			quantity += item.quantity
+		if item.category == 'coffee_cups':
+			quantity += item.site_quantity
 	user.cup_amount += quantity
 	user.save()
 
@@ -122,7 +122,7 @@ def deactivate_tinkoff_payment(sender, **kwargs):
 	quantity = 0
 	items = list(payment.receipt.receiptitem_set.all())
 	for item in items:
-		if item.category == 'coffee_cup':
-			quantity += item.quantity
+		if item.category == 'coffee_cups':
+			quantity += item.site_quantity
 	user.cup_amount -= quantity
 	user.save()
