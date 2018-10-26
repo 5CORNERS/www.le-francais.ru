@@ -4,7 +4,7 @@ from django.db import models
 
 from .consts import TAXES, TAXATIONS, CATEGORIES
 from .settings import get_config
-
+from django.contrib.postgres.fields import JSONField
 
 class Payment(models.Model):
 	RESPONSE_FIELDS = {
@@ -35,6 +35,7 @@ class Payment(models.Model):
 
 	creation_date = models.DateTimeField(verbose_name='Дата создания заказа', auto_now=True, null=True)
 	update_date = models.DateTimeField(verbose_name='Дата последнего обновления', auto_now=True, null=True)
+	status_history = JSONField(default=list)
 
 	class Meta:
 		verbose_name = 'Заказ'
