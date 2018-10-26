@@ -84,7 +84,7 @@ class Payment(models.Model):
 
 
 class Receipt(models.Model):
-	payment = models.OneToOneField(to=Payment, on_delete=models.CASCADE, verbose_name='Платеж')
+	payment = models.OneToOneField(to=Payment, on_delete=models.CASCADE, verbose_name='Заказ')
 	email = models.CharField(
 		verbose_name='Электронный адрес для отправки чека покупателю', max_length=64)
 	phone = models.CharField(verbose_name='Телефон покупателя', max_length=64, blank=True, default='')
