@@ -41,7 +41,7 @@ class Notification(View):
         if payment.status != 'REFUNDED' and data.get('Status') == 'REFUNDED':
             payment_refund.send(self.__class__, payment=payment)
 
-        payment.status_history.append(dict(status=data.get('Status'), datetime=datetime.now()))
+        payment.status_history.append(dict(status=data.get('Status'), datetime=str(datetime.now())))
         self.merchant_api.update_payment_from_response(payment, data).save()
 
         payment_update.send(self.__class__, payment=payment)
