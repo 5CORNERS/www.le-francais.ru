@@ -55,6 +55,8 @@ class User(AbstractUser):
 
 	must_pay = models.BooleanField(default=False)
 
+	saw_message = models.BooleanField(default=False)
+
 	cup_amount = models.IntegerField(default=0)
 
 	payed_lessons = models.ManyToManyField('home.LessonPage', through='home.UserLesson', related_name='paid_users')
