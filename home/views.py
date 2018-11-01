@@ -227,15 +227,21 @@ def coffee_amount_check(request):
 class TinkoffPayments(View):
 	@method_decorator(login_required)
 	def get(self, request):
-		base_template = 'payments/tinkoff_payments.html'
-		data = dict(cards=[
-			{'title': "1 чашечка", 'image': "images/coffee_1.png", 'description': None, 'price1': "По цене стаканчика кофе в <b>McDonalds</b>", 'cups_amount': 1, 'price2': 68, 'item_id': 1},
-			{'title': "5 чашечек", 'image': "images/coffee_5.png", 'description': None, 'price1': "по 59 ₽", 'cups_amount': 5, 'price2': 295, 'item_id': 2},
-			{'title': "10 чашечек", 'image': "images/coffee_10.png", 'description': None, 'price1': "по 49 ₽", 'cups_amount': 10, 'price2': 490, 'item_id': 3},
-			{'title': "20 чашечек", 'image': "images/coffee_20.png", 'description': None, 'price1': "по 39 ₽", 'cups_amount': 20, 'price2': 780, 'item_id': 4},
-			{'title': "50 чашечек", 'image': "images/coffee_50.png", 'description': '''Хватит, чтобы угощать целый год.''', 'price1': "по 34 ₽", 'cups_amount': 50, 'price2': 1690, 'item_id': 5},
+		coffe_cups_data = dict(cards=[
+			{'title': "1 чашечка", 'image': "images/coffee_1.png", 'description': None, 'price1': "По цене стаканчика кофе в <b>McDonalds</b>", 'price2': 68, 'item_id': 1},
+			{'title': "5 чашечек", 'image': "images/coffee_5.png", 'description': None, 'price1': "по 59 ₽", 'price2': 295, 'item_id': 2},
+			{'title': "10 чашечек", 'image': "images/coffee_10.png", 'description': None, 'price1': "по 49 ₽", 'price2': 490, 'item_id': 3},
+			{'title': "20 чашечек", 'image': "images/coffee_20.png", 'description': None, 'price1': "по 39 ₽", 'price2': 780, 'item_id': 4},
+			{'title': "50 чашечек", 'image': "images/coffee_50.png", 'description': '''Хватит, чтобы угощать целый год.''', 'price1': "по 34 ₽", 'price2': 1690, 'item_id': 5},
 		])
-		return render(request, base_template, data)
+		tickets_data = dict(cards=[
+			dict(title="1 билет", image="images/ticket_1-1.png", description=None, price1="По цене стаканчика кофе в <b>McDonalds</b>", price2=68, item_id=6),
+			dict(title="5 билетов", image="images/ticket_5.png", description=None, price1="по 59 ₽", price2=295, item_id=7),
+			dict(title="10 билетов", image="images/ticket_10.png", description=None, price1="по 49 ₽", price2=490, item_id=8),
+			dict(title="20 билетов", image="images/ticket_20.png", description=None, price1="по 39 ₽", price2=780, item_id=9),
+			dict(title="50 билетов", image="images/ticket_50.png", description=None, price1="по 34 ₽", price2=1690, item_id=10),
+		])
+		return render(request, 'payments/tinkoff_payments.html', coffe_cups_data)
 
 	@method_decorator(login_required)
 	def post(self, request, *args, **kwargs):
@@ -244,37 +250,34 @@ class TinkoffPayments(View):
 			if item_id == 1:
 				item_name = 'Добровольное пожертвование в поддержку проекта 68р.'
 				item_price = 6800
-				item_quantity = 1
-				item_category = 'coffee_cups'
 				item_site_quantity = 1
 			elif item_id == 2:
 				item_name = 'Добровольное пожертвование в поддержку проекта 295р.'
 				item_price = 29500
-				item_quantity = 1
-				item_category = 'coffee_cups'
 				item_site_quantity = 5
 			elif item_id == 3:
 				item_name = 'Добровольное пожертвование в поддержку проекта 490р.'
 				item_price = 49000
-				item_quantity = 1
-				item_category = 'coffee_cups'
 				item_site_quantity = 10
 			elif item_id == 4:
 				item_name = 'Добровольное пожертвование в поддержку проекта 780р.'
 				item_price = 78000
-				item_quantity = 1
-				item_category = 'coffee_cups'
 				item_site_quantity = 20
 			elif item_id == 5:
 				item_name = 'Добровольное пожертвование в поддержку проекта 1690р.'
 				item_price = 169000
-				item_quantity = 1
-				item_category = 'coffee_cups'
 				item_site_quantity = 50
 			else:
 				return HttpResponse(status=400)
 
-			description = "www.le-francais.ru -- Покупка " + buy_description(item_quantity, 'чашечки', 'чашечек', 'чашечек') + " кофе."
+			if 1 <= item_id <= 5:
+				item_category = 'coffee_cups'
+				item_order_id_type = 1
+				item_quantity = 1
+			else:
+				return HttpResponse(status=400)
+
+			description = "le-francais.ru -- Покупка " + buy_description(item_site_quantity, 'чашечки', 'чашечек', 'чашечек') + " кофе."
 			payment = TinkoffPayment.objects.create(amount=item_price * item_quantity, description=description, customer_key=str(request.user.id)).with_receipt(email=request.user.email, taxation='usn_income').with_items([dict(
 				name=item_name,
 				price=item_price,
@@ -283,7 +286,7 @@ class TinkoffPayments(View):
 				category=item_category,
 				site_quantity=item_site_quantity,
 			)])
-			payment.order_id = str(payment.id)
+			payment.order_id = '{0:02d}'.format(item_order_id_type) + '{0:06d}'.format(payment.id)
 
 			if "success_url" in request.POST and "fail_url" in request.POST:
 				BackUrls.objects.create(

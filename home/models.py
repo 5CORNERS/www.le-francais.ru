@@ -1,13 +1,17 @@
 from __future__ import absolute_import, unicode_literals
+
+import datetime
+
 from django.conf import settings
 from django.db.models import CharField, SmallIntegerField, OneToOneField, IntegerField, BooleanField, SET_NULL, ForeignKey, URLField, \
-    Model
+	Model
 from django.db.models.fields import TextField, DateTimeField
+from django.dispatch import receiver
 from django.forms import CheckboxInput
 from modelcluster.fields import ParentalKey
 from pybb.models import Topic, Forum, Category
 from wagtail.admin.edit_handlers import StreamFieldPanel, FieldPanel, MultiFieldPanel, PageChooserPanel, \
-    InlinePanel
+	InlinePanel
 from wagtail.core.blocks import RichTextBlock, RawHTMLBlock, ListBlock, StructBlock
 from wagtail.core.fields import StreamField
 from wagtail.core.models import Page, Orderable
@@ -20,7 +24,8 @@ from home.blocks.ForumBlocks import PostBlock
 from home.blocks.Reviews import ChoosenReviews
 from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
-import datetime
+from tinkoff_merchant.signals import payment_confirm, payment_refund
+from .pay54 import Pay34API
 from .utils import message
 
 PAGE_CHOICES = (
@@ -489,6 +494,18 @@ class Payment(Model):
 
 
 class BackUrls(Model):
-    success = URLField()
-    fail = URLField()
-    payment = ForeignKey('tinkoff_merchant.Payment')
+	success = URLField()
+	fail = URLField()
+	payment = ForeignKey('tinkoff_merchant.Payment')
+
+
+@receiver(payment_confirm)
+def send_receipt(sender, **kwargs):
+	pay34_api = Pay34API()
+	pay34_api.send_receipt_request(kwargs['payment'])
+
+
+@receiver(payment_refund)
+def send_refund(sender, **kwargs):
+	pay34_api = Pay34API()
+	pay34_api.send_refund_request(kwargs['payment'])
