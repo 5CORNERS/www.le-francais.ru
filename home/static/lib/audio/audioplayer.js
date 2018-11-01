@@ -17,11 +17,11 @@
 		var hours = Math.floor(secs / 3600), minutes = Math.floor(secs % 3600 / 60),
 			seconds = Math.ceil(secs % 3600 % 60),
 			hours_str, minutes_str, seconds_str;
-		
+
 		if (hours == 0) {
 			hours_str = '';
 		} else {
-			hours_str = (hours.toString().length < 2) ? ('0' + hours) : hours; 
+			hours_str = (hours.toString().length < 2) ? ('0' + hours) : hours;
 		}
 
 		minutes_str = (minutes.toString().length < 2) ? ('0' + minutes) : minutes;
@@ -83,7 +83,8 @@
 			isAutoPlay = ((isAutoPlay === '') || (isAutoPlay === 'autoplay')) ? true : false,
 			isLoop = $this.get(0).getAttribute('loop'),
 			isLoop = ((isLoop === '') || (isLoop === 'loop')) ? true : false,
-			isSupport = false;
+			isSupport = false,
+			setTime = $this.get(0).getAttribute('set-time');
 
 			if (typeof audioFile === 'undefined') {
 				$this.find('source').each(function () {
@@ -100,9 +101,9 @@
 			}
 
 			var thePlayer = $('<div class="' + params.classPrefix + '">'
-								+ ( (isSupport) ? 
+								+ ( (isSupport) ?
 										$('<div>').append($this.eq(0).clone()).html()
-										: '<embed src="' + audioFile + '" width="0" height="0" volume="100" autostart="' + isAutoPlay.toString() + '" loop="' + isLoop.toString() + '" />' 
+										: '<embed src="' + audioFile + '" width="0" height="0" volume="100" autostart="' + isAutoPlay.toString() + '" loop="' + isLoop.toString() + '" />'
 								)
 								+ '<div class="' + cssClass.playPause + '" title="' + params.strPlay + '"><a href="#">' + params.strPlay + '</a></div></div>'
 							),
@@ -161,6 +162,7 @@
 					timeDuration.text(secondsToTime(theAudio.duration));
 					volumeAdjuster.find('div').height(theAudio.volume * 100 + '%');
 					volumeDefault = theAudio.volume;
+					theAudio.currentTime=setTime;
 				});
 
 				theAudio.addEventListener('timeupdate', function () {
@@ -229,7 +231,7 @@
 			}
 
 			if ((typeof lesson_number !== typeof undefined) && (lesson_number !== false)) {
-				if ((typeof localStorage['lecon-' + lesson_number] !== typeof undefined) 
+				if ((typeof localStorage['lecon-' + lesson_number] !== typeof undefined)
 						&& localStorage['lecon-' + lesson_number] !== 'undefined'
 				) {
 					theAudio.currentTime = +localStorage['lecon-' + lesson_number];
@@ -292,7 +294,7 @@
 
 						$menuPlayer.addClass(cssClass.playing);
 					}
-					
+
 					thePlayer.addClass(cssClass.playing);
 
 					if (isSupport) {
