@@ -145,7 +145,7 @@
 
                             <div class="row">
                                 <div class="col-md-8">
-                                    <audio data-downloadable number="{{ self.lesson_number }}" {% if request.GET.t %}set-time="{{ request.GET.t }}"{% endif %}>
+                                    <audio data-downloadable number="{{ self.lesson_number }}"{% if request.GET.t %} set-time="{{ request.GET.t }}"{% elif request.GET.T %} set-time="{% t2seconds request.GET.T %}"{% endif %}>
                                         <source src="{% if self.audio_material %}{{ self.audio_material }}{% comment %}{% elif user.is_staff or request.GET.test == 'true' %}//files.le-francais.ru/listen.php?number={{ self.lesson_number }}&key=
                                             {{ request.session.session_key }}{% endcomment %}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}" type="audio/mpeg">
                                     </audio>

@@ -1,13 +1,35 @@
 from django import template
+from django.conf import settings
 from pybb.models import Topic, Post
+
 from custom_user.models import User
 from home.models import IndexReviews
 from home.models import PageLayoutAdvertisementSnippet, LessonPage, Payment
-
 from home.utils import get_signature
-from django.conf import settings
+import datetime
+import time
+import re
 
 register = template.Library()
+
+
+def safe_int(value):
+	try:
+		result = int(value)
+	except TypeError:
+		result = 0
+	return result
+
+
+@register.simple_tag()
+def t2seconds(value):
+	pattern = r'(?:(?P<hours>\d+):)?(?P<minutes>\d+):(?P<seconds>\d+)'
+	match = re.match(pattern, value)
+	hours = safe_int(match.group('hours'))
+	minutes = safe_int(match.group('minutes'))
+	seconds = safe_int(match.group('seconds'))
+	return hours*3600+minutes*60+seconds
+
 
 @register.assignment_tag(takes_context=True)
 def get_full_path(context):
