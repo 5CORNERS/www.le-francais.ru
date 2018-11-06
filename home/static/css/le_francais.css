@@ -2,7 +2,7 @@ html, body {
     height: 100%;
 }
 
-hr{
+hr {
     margin-top: 15px;
     margin-bottom: 15px;
 }
@@ -614,12 +614,12 @@ td.forum-last-post, td.topic-last-post {
 
 }
 
-.coffee-button{
+.coffee-button {
     margin-bottom: 10px;
     margin-top: 10px;
 }
 
-.popover-content{
+.popover-content {
     background-color: #fdf9ca;
     z-index: 999;
 }
@@ -646,11 +646,11 @@ td.forum-last-post, td.topic-last-post {
     cursor: pointer;
     white-space: pre-wrap;
     border-radius: 4px;
-    background: #f8f8f8;
+    background: rgba(255, 229, 153, 0.8);
     box-shadow: inset 1px 0 #b3b3b3, inset 0 1px #b3b3b3, inset -1px 0 #b3b3b3, inset 0 -1px #b3b3b3;
 }
 
 .arnaud-comment:hover {
-    background: #f3f3f3;
+    background: rgb(255,229,153);
     box-shadow: inset 1px 0 #999, inset 0 1px #999, inset -1px 0 #999, inset 0 -1px #999
 }
