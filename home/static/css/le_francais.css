@@ -623,3 +623,34 @@ td.forum-last-post, td.topic-last-post {
     background-color: #fdf9ca;
     z-index: 999;
 }
+
+.faded::after {
+    content: '';
+    display: block;
+    position: relative;
+    bottom: 150px;
+    margin-bottom: -150px;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background: -webkit-gradient(linear, left bottom, left top, from(#fff), to(rgba(255, 255, 255, 0)));
+    background: -webkit-linear-gradient(bottom, #fff, rgba(255, 255, 255, 0));
+    background: -moz-linear-gradient(bottom, #fff, rgba(255, 255, 255, 0));
+    background: -o-linear-gradient(bottom, #fff, rgba(255, 255, 255, 0));
+    background: linear-gradient(to top, #fff, rgba(255, 255, 255, 0));
+}
+
+.arnaud-comment {
+    position: relative;
+    padding: 0 4px;
+    cursor: pointer;
+    white-space: pre-wrap;
+    border-radius: 4px;
+    background: #f8f8f8;
+    box-shadow: inset 1px 0 #b3b3b3, inset 0 1px #b3b3b3, inset -1px 0 #b3b3b3, inset 0 -1px #b3b3b3;
+}
+
+.arnaud-comment:hover {
+    background: #f3f3f3;
+    box-shadow: inset 1px 0 #999, inset 0 1px #999, inset -1px 0 #999, inset 0 -1px #999
+}
