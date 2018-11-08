@@ -157,20 +157,20 @@ def get_nav_data(request):
 
 @csrf_exempt
 def listen_request(request):
-	lesson_number = request.POST['number']
-	session_key = request.POST['key']
+	lesson_number = request.POST['number'].strip()
+	session_key = request.POST['key'].strip()
 
 	try:
 		session = Session.objects.get(session_key=session_key)
 		lesson = LessonPage.objects.get(lesson_number=lesson_number)
 	except:
-		return HttpResponse('false')
+		return HttpResponse('false', status=400)
 
 	if not session.user == None and session.user.must_pay:
-		if lesson in session.user.payed_lessons:
-			return HttpResponse('true')
+		if lesson in session.user.payed_lessons.all():
+			return HttpResponse('true', status=200)
 		else:
-			return HttpResponse('false')
+			return HttpResponse('false', status=200)
 	else:
 		return HttpResponse('true')
 
