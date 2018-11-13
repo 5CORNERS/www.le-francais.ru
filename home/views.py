@@ -188,7 +188,7 @@ class GiveMeACoffee(View):
 					try:
 						cup_amount = lesson_page.add_lesson_to_user(request.user)
 						send_mail(
-							'Buy Me A Coffee',
+							'Buy me a coffee',
 							'{0} поблагодарил(а) вас чашечкой кофе за {1}-й урок.'.format(request.user.email, str(lesson_page.lesson_number)),
 							from_email=settings.DEFAULT_FROM_EMAIL,
 							recipient_list=['ilia.dumov@gmail.com']
