@@ -33,7 +33,7 @@ class Payment(models.Model):
 	details = models.TextField(verbose_name='Подробное описание ошибки', blank=True, default='', editable=False)
 	customer_key = models.CharField(verbose_name='Идентификатор покупателя', max_length=36, null=True, default=None, editable=False)
 
-	creation_date = models.DateTimeField(verbose_name='Дата создания заказа', auto_now=True, null=True)
+	creation_date = models.DateTimeField(verbose_name='Дата создания заказа', auto_now_add=True, null=True)
 	update_date = models.DateTimeField(verbose_name='Дата последнего обновления', auto_now=True, null=True)
 	status_history = JSONField(default=list)
 
