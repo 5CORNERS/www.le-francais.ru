@@ -647,7 +647,7 @@ td.forum-last-post, td.topic-last-post {
     white-space: pre-wrap;
     border-radius: 4px;
     background: #fff0b4;
-    box-shadow: inset 1px 0 #b3b3b3, inset 0 1px #b3b3b3, inset -1px 0 #b3b3b3, inset 0 -1px #b3b3b3;
+    box-shadow: inset 1px 0 #dcdcdc, inset 0 1px #dcdcdc, inset -1px 0 #dcdcdc, inset 0 -1px #dcdcdc;
 }
 
 .arnaud-comment:hover {
