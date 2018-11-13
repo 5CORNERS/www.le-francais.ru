@@ -325,16 +325,16 @@ class LessonPage(Page):
 
 
 LessonPage.content_panels = Page.content_panels + [
-    FieldPanel('reference_title'),
-    FieldPanel('subtitle'),
-    FieldPanel('audio_material'),
-    StreamFieldPanel('comments_for_lesson'),
-    StreamFieldPanel('body'),
-    StreamFieldPanel('dictionary'),
-    FieldPanel('summary'),
-    FieldPanel('repetition_material'),
-    FieldPanel('mail_archive'),
-    StreamFieldPanel('other_tabs')
+	FieldPanel('reference_title'),
+	FieldPanel('subtitle'),
+	FieldPanel('audio_material'),
+	StreamFieldPanel('comments_for_lesson'),
+	StreamFieldPanel('body'),
+	StreamFieldPanel('dictionary'),
+	FieldPanel('summary'),
+	FieldPanel('repetition_material'),
+	StreamFieldPanel('mail_archive'),
+	StreamFieldPanel('other_tabs')
 ]
 LessonPage.promote_panels = LessonPage.promote_panels + [
     FieldPanel('menu_title'),
