@@ -646,11 +646,11 @@ td.forum-last-post, td.topic-last-post {
     cursor: pointer;
     white-space: pre-wrap;
     border-radius: 4px;
-    background: rgba(255, 229, 153, 0.8);
+    background: #fff0b4;
     box-shadow: inset 1px 0 #b3b3b3, inset 0 1px #b3b3b3, inset -1px 0 #b3b3b3, inset 0 -1px #b3b3b3;
 }
 
 .arnaud-comment:hover {
-    background: rgb(255,229,153);
+    background: #ffe168;
     box-shadow: inset 1px 0 #999, inset 0 1px #999, inset -1px 0 #999, inset 0 -1px #999
 }
