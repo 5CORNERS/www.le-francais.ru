@@ -27,7 +27,7 @@ class Payment(models.Model):
 	error_code = models.CharField(verbose_name='Код ошибки', max_length=20, default='', editable=False)
 	payment_url = models.CharField(
 		verbose_name='Ссылка на страницу оплаты.',
-		help_text='Ссылка на страницу оплаты. По умолчанию ссылка доступна в течении 24 часов.',
+		help_text='Ссылка на страницу оплаты. По умолчанию ссылка доступна в течение 24 часов.',
 		max_length=100, blank=True, default='', editable=False)
 	message = models.TextField(verbose_name='Краткое описание ошибки', blank=True, default='', editable=False)
 	details = models.TextField(verbose_name='Подробное описание ошибки', blank=True, default='', editable=False)
