@@ -42,7 +42,7 @@
 }
 
 .block-forum mark {
-    background: #ff0;
+    background: #fff874;
     color: #000
 }
 
@@ -7016,6 +7016,7 @@ body {
 
 .block-forum details {
     display: block;
+    margin-bottom: 1em;
 }
 
 .block-forum details[open] > summary::before {
