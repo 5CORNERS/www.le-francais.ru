@@ -14,11 +14,16 @@ class CustomMarkdownParser(MarkdownParser):
 			extensions=[
 				'forum.customextensions.nofollowlinks',
 				'markdown.extensions.nl2br',
+				'markdown.extensions.smarty',
 				'pymdownx.extra',
 				'pymdownx.emoji',
 				'pymdownx.tasklist',
 				'pymdownx.details',
 				'pymdownx.superfences',
+				'pymdownx.tilde',
+				'pymdownx.keys',
+				'pymdownx.mark',
+				'pymdownx.smartsymbols',
 			],
 			safe_mode='escape',
 		)
