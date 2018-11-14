@@ -21,6 +21,7 @@ class CustomMarkdownParser(MarkdownParser):
 				'pymdownx.details',
 				'pymdownx.superfences',
 				'pymdownx.tilde',
+				'pymdownx.caret',
 				'pymdownx.keys',
 				'pymdownx.mark',
 				'pymdownx.smartsymbols',
