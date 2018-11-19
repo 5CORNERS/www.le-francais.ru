@@ -7070,3 +7070,9 @@ kbd {
   width: 2rem;
   vertical-align: text-top;
   }
+
+.markItUp {
+	width: 100% !important;
+	margin:5px 0 5px 0 !important;
+	border:5px solid #F5F5F5 !important;
+}
