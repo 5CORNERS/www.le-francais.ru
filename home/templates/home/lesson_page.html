@@ -184,7 +184,7 @@
 					activateLesson('ended')
 				});
 				let downloadButton = $('.audioplayer-download-button')[0];
-				downloadButton.setAttribute('href', 'javascript:void(0)');
+				downloadButton.removeAttribute('href');
 				downloadButton.addEventListener('click', function () {
 					activateLesson('download');
 				});
