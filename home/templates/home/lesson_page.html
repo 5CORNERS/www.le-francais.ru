@@ -2,10 +2,10 @@
 {% load site_tags %}
 {% load wagtailcore_tags %}
 {% load static site_tags %}
-{% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 
+{% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 {% block extra_head %}
-    {% advert_head page %}
+	{% advert_head page %}
 {% endblock %}
 
 {% block body_class %}template-homepage{% endblock %}
@@ -13,553 +13,497 @@
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
 
 {% block extra_js %}
-    <script async type="text/javascript"
-            src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
-    <script>
-      function getSuccessButton() {
-        let new_button = $(
-          "<button" +
-          " class='coffee-button btn btn-success btn-xs'" +
-          " disabled='disabled'" +
-          " id='coffee-button'" +
-          ">" +
-          "<img" +
-          " id='coffee-button-image'" +
-          " class='coffee-button-image'" +
-          " src='{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}'>" +
-          "<div" +
-          " id='coffee-button-text'" +
-          " class='coffee-button-text'>" +
-          "Вы уже угощали меня<br>за этот урок :)" +
-          "</div>" +
-          "</button>");
-        $("#coffee-button").replaceWith(new_button);
-      }
+	{% check_user_lesson request.user self as userlesson %}
+	<script async type="text/javascript"
+	        src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
+	<script>
+		function getSuccessButton() {
+			let new_button = $(
+				"<button" +
+				" class='coffee-button btn btn-success btn-xs'" +
+				" disabled='disabled'" +
+				" id='coffee-button'" +
+				">" +
+				"<img" +
+				" id='coffee-button-image'" +
+				" class='coffee-button-image'" +
+				" src='{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}'>" +
+				"<div" +
+				" id='coffee-button-text'" +
+				" class='coffee-button-text'>" +
+				"Вы уже угощали меня<br>за этот урок :)" +
+				"</div>" +
+				"</button>");
+			$("#coffee-button").replaceWith(new_button);
+		}
 
-      function playCoffeeSound() {
-        let coffeeAudio = new Audio('{% static 'snd/coffee.mp3' %}');
-        coffeeAudio.play();
-      }
+		function playCoffeeSound() {
+			let coffeeAudio = new Audio('{% static 'snd/coffee.mp3' %}');
+			coffeeAudio.play();
+		}
 
-      function giveMeCoffee() {
-        $.ajax({
-          type: "POST",
-          url: "{% url 'give_me_a_coffee' %}",
-          data: {
-            'lesson_number': {{ self.lesson_number }},
-            'user_email': "{{ request.user }}",
-            'csrfmiddlewaretoken': "{{ csrf_token }}"
-          },
-          datatype: "json",
-          success: function (response) {
-            if (response.result === 'SUCCESS') {
-              playCoffeeSound();
-              $('#give-me-a-coffee-success-message').html(response.description);
-              $('#give-me-a-coffee-complete-modal').modal('show');
-              getSuccessButton();
-            }
-            else if(response.result === 'ALREADY'){
-              $('#give-me-a-coffee-fail-message').html(response.description);
-              $('#give-me-a-coffee-fail-modal').modal('show');
-              getSuccessButton();
-            }
-            else {
-              $('#give-me-a-coffee-fail-message').html(response.description);
-              $('#give-me-a-coffee-fail-modal').modal('show');
-            }
-          },
-          error: function (response, error) {
-            $('#give-me-a-coffee-fail-message').html(error);
-            $('#give-me-a-coffee-fail-modal').modal('show');
-          },
-        });
-      }
+		function showActivateMessage() {
+			if (sawMessage()) {
+				$('#lesson-not-activated-subsequent-modal').show()
+			} else {
+				$('#lesson-not-activated-first-modal').show()
+			}
+		}
 
-    </script>
-    {% if request.GET.modal_open %}
-        {% with modal_id=request.GET.modal_open %}
-            <script>
-              $(document).ready(function () {
-                $('#{{ modal_id }}').modal('show');
-                {% get_full_path as full_path %}
-                {% if 'payment_success' in request.GET %}
-                  history.pushState({}, title = '', url = "{{ full_path }}");
-                {% else %}
-                  history.pushState({}, title = '', url = "{{ full_path }}");
-                {% endif %}
-              });
-            </script>
-        {% endwith %}
-    {% endif %}
+		function sawMessage(val) {
+			switch (val) {
+				case 'get_state': {
+					$.ajax({
+						type: "POST",
+						url: "{% url 'custom_user:saw_message' %}",
+						data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'action': 'get_state'},
+						success: function (r) {
+							if (r.status === 200) {
+								return true
+							}
+						}
+					});
+					break
+				}
+				case 'make_true': {
+					$.ajax({
+						type: "POST",
+						url: "{% url 'custom_user:saw_message' %}",
+						data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'action': 'make_true'},
+						success: function (r) {
+							if (r.status === 200) {
+								return true
+							}
+						}
+					})
+				}
+			}
+
+		}
+
+		function giveMeCoffee() {
+			$.ajax({
+				type: "POST",
+				url: "{% url 'give_me_a_coffee' %}",
+				data: {
+					'lesson_number': {{ self.lesson_number }},
+					'user_email': "{{ request.user }}",
+					'csrfmiddlewaretoken': "{{ csrf_token }}"
+				},
+				datatype: "json",
+				success: function (response) {
+					if (response.result === 'SUCCESS') {
+						playCoffeeSound();
+						$('#give-me-a-coffee-success-message').html(response.description);
+						$('#give-me-a-coffee-complete-modal').modal('show');
+						getSuccessButton();
+					}
+					else if (response.result === 'ALREADY') {
+						$('#give-me-a-coffee-fail-message').html(response.description);
+						$('#give-me-a-coffee-fail-modal').modal('show');
+						getSuccessButton();
+					}
+					else {
+						$('#give-me-a-coffee-fail-message').html(response.description);
+						$('#give-me-a-coffee-fail-modal').modal('show');
+					}
+				},
+				error: function (response, error) {
+					$('#give-me-a-coffee-fail-message').html(error);
+					$('#give-me-a-coffee-fail-modal').modal('show');
+				},
+			});
+		}
+
+	</script>
+	{% if user.must_pay and self.need_payment %}
+		<script>
+			function activateLesson(state) {
+				switch (state) {
+					case 'download':
+					case 'ended':
+					{% if request.user.saw_message %}
+						$('#lesson-not-activated-simple-modal').modal('show');
+					{% else %}
+						$('#lesson-not-activated-details-continue-modal').modal('show');
+					{% endif %}
+						break;
+					case 'button':
+					{% if request.user.saw_message %}
+						activateLesson('proceed');
+					{% else %}
+						$('#lesson-not-activated-details-activate-modal').modal('show');
+					{% endif %}
+						break;
+					case 'saw':
+						sawMessage('make_true');
+						break;
+					case 'proceed':
+						$.ajax({
+							type: 'POST',
+							url: '{% url "activate:activate_lesson" %}',
+							data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'lesson_number': '{{ self.lesson_number }}'},
+							datatype: 'json',
+							success: function (r) {
+								if (r.result === 'SUCCESS') {
+									$('#activated-message-success').show();
+									$('#ticket-count').text(r.left);
+									$('#lesson-audio').load()
+								} else {
+									$('#activated-message-fail').show();
+									$('#activated-message-error-description').text(r.description)
+								}
+								$('#lesson-activated-modal').modal('show');
+							}
+						});
+						break;
+				}
+			}
+		</script>
+	{% endif %}
+
+	{% if request.GET.modal_open %}
+		{% with modal_id=request.GET.modal_open %}
+			<script>
+				$(document).ready(function () {
+					$('#{{ modal_id }}').modal('show');
+					{% get_full_path as full_path %}
+					{% if 'payment_success' in request.GET %}
+						history.pushState({}, title = '', url = "{{ full_path }}");
+					{% else %}
+						history.pushState({}, title = '', url = "{{ full_path }}");
+					{% endif %}
+				});
+			</script>
+		{% endwith %}
+	{% endif %}
+	{% if user.must_pay and self.need_payment %}
+		<script>
+			window.addEventListener('lessonPlayerReady', function () {
+				$('#lesson-audio')[0].addEventListener('ended', function () {
+					activateLesson('ended')
+				});
+				let downloadButton = $('.audioplayer-download-button')[0];
+				downloadButton.setAttribute('href', 'javascript:void(0)');
+				downloadButton.addEventListener('click', function () {
+					activateLesson('download');
+				});
+			})
+		</script>
+	{% endif %}
 {% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/lesson.css' %}">
-    <link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
-    <style>
-        #coffee-button {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-            margin-top: 0.5rem;
-        }
+	<link rel="stylesheet" href="{% static 'css/lesson.css' %}">
+	<link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
+	<style>
+		#coffee-button {
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			margin-bottom: 1rem;
+			margin-top: 0.5rem;
+		}
 
-        .coffee-button-image {
-            margin-right: 5px;
-            display: block;
-            height: 2.5em
-        }
+		.coffee-button-image {
+			margin-right: 5px;
+			display: block;
+			height: 2.5em
+		}
 
-        .coffee-button-text {
-            border-left: 1px solid #ccc;
-            padding-left: 5px;
-        }
+		.coffee-button-text {
+			border-left: 1px solid #ccc;
+			padding-left: 5px;
+		}
 
-    </style>
+	</style>
 {% endblock %}
 
 {% block meta %}
-    <meta name="nav-root-id" data-value="{{ self.get_nav_root.id }}">
-    <meta name="page-id" data-value="{{ self.id }}">
+	<meta name="nav-root-id" data-value="{{ self.get_nav_root.id }}">
+	<meta name="page-id" data-value="{{ self.id }}">
 {% endblock %}
 
 {% block content %}
+	{% check_user_lesson request.user self as userlesson %}
+	{% assign url request.build_absolute_uri %}
+	<div class="container-fluid">
+		<div class="row main_row">
+			<div class="sidebar-wrapper col-xs-3 _no-padding">
+				<div id="sidebar"></div>
+			</div>
+			<button class="sidebar-collapse-button" type="button" data-toggle="toggle"
+			        data-target=".sidebar-wrapper" aria-controls="sidebar" aria-expanded="false"
+			        aria-label="Toggle sidebar">
+				<div class="arrow-icon">
+			</button>
+			<div class="col-12 col-sm-9 col-lg-6 col-xlg-6 main">
+				{% include 'home/lesson_content.html' %}
+			</div>
+			<div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
+				{% page_advert_body 'sidebar' page.page_type %}
+			</div>
+		</div>
+	</div>
+	<!-- by-me-a-coffee-modals -->
+	{% assign next "/coffee/check/?next="|add:request.path %}
+	<div class="modal" id="give-me-a-coffee-modal" tabindex="-1" role="dialog" aria-labelledby="giveMeACoffeeLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
 
-    {% assign url request.build_absolute_uri %}
-    <div class="container-fluid">
-        <div class="row main_row">
-            <div class="sidebar-wrapper col-xs-3 _no-padding">
-                <div id="sidebar"></div>
-            </div>
-            <button class="sidebar-collapse-button" type="button" data-toggle="toggle"
-                    data-target=".sidebar-wrapper" aria-controls="sidebar" aria-expanded="false"
-                    aria-label="Toggle sidebar">
-                <div class="arrow-icon">
-            </button>
-            <div class="col-12 col-sm-9 col-lg-6 col-xlg-6 main">
-                <div class="row padding">{% breadcrumb calling_page=self %}
-                    <h1>{{ page.title }}</h1>
-                    {% if self.audio_material != 'None' %}
-                        <div class="block-audio">
+				{% if user.is_authenticated %}
+					{% if user.has_coffee or 'payment_success' in request.GET %}
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title" style="text-align: center">Ура!</h4>
+						</div>
+						<div class="modal-body" style="text-align: center">
+							<p>Вы угощаете меня стаканчиком кофе за этот урок.</p>
+							<p>Все так?</p>
+						</div>
+						<div class="modal-footer" style="text-align: center">
+							<p>
+								<button type="button" class="btn btn-primary coffee-proceed" onclick="giveMeCoffee()" id="give-me-a-coffee-proceed" data-dismiss="modal">OUI !</button>
+							</p>
+							<p>Каждый раз, когда вы нажимаете эту кнопку, я получаю уведомление на телефон :)</p>
+						</div>
+					{% else %}
 
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <audio data-downloadable number="{{ self.lesson_number }}"{% if request.GET.t %} set-time="{{ request.GET.t }}"{% elif request.GET.T %} set-time="{% t2seconds request.GET.T %}"{% endif %}>
-                                        <source src="{% if self.audio_material %}{{ self.audio_material }}{% comment %}{% elif user.is_staff or request.GET.test == 'true' %}//files.le-francais.ru/listen.php?number={{ self.lesson_number }}&key=
-                                            {{ request.session.session_key }}{% endcomment %}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}" type="audio/mpeg">
-                                    </audio>
-                                </div>
-                                    <div class="col-md-4">
-                                        <input type="hidden" name="next" value="{{ request.path }}">
-                                        <!-- button trigger by-me-a-coffee-modals -->
-                                        {% check_user_lesson request.user self as userlesson %}
-                                        {% if not userlesson %}
-                                            <img class="" id="coffee-button"
-                                                    {% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
-                                                 data-toggle="modal"
-                                                 data-target="#give-me-a-coffee-modal"
-                                                    {% elif user.is_authenticated and not user.has_coffee %}
-                                                 onclick="location.href='{% url 'check_amount' %}?next={{ request.path }}';"
-                                                    {% elif not user.is_authenticated %}
-                                                 data-toggle="modal"
-                                                 data-target="#give-me-a-coffee-modal"
-                                                    {% endif %}
-                                                 src="{% static "images/buttons/button-default-min.png" %}"
-                                                 onmousedown="$('#coffee-button').attr('src', '{% static 'images/buttons/button-active-min.png' %}')"
-                                                 onfocus="$('#coffee-button').attr('src', '{% static 'images/buttons/button-focus-min.png' %}')"
-                                                 onmouseover="$('#coffee-button').attr('src', '{% static 'images/buttons/button-hover-min.png' %}')"
-                                                 onmouseout="$('#coffee-button').attr('src', '{% static 'images/buttons/button-default-min.png' %}')"
-                                            >
+					{% endif %}
+				{% else %}
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" style="text-align: center">Спасибо вам огромное за готовность нас поддержать!</h4>
+					</div>
+					<div class="modal-body" style="padding-left:25px; padding-right:25px ">
+						<p>Чтобы продолжить, вам надо авторизоваться на сайте.</p>
+						<p style="margin-bottom: 20px">Самое простое — это зайти, как пользователь одной из социальных сетей. В этом случае авторизация произойдет в пару кликов — просто нажмите на одну из цветных кнопок.</p>
+						<!-- Social OAuth Buttons -->{% include 'account/oauth-buttons.html' with next=next %}
+						<hr style="border-top: 2px solid #eee;">
+						<p>Если вы уже зарегистрированы на сайте, зайдите, используя свой адрес e-mail и пароль.</p>
+						<!-- LogIn Form -->{% include 'account/login_form.html' with redirect_field_value=next redirect_field_name="next" %}
+						<p>Если вас нет в Сетях и вы еще не регистрировались на сайте,<br><a href="{% url 'account_signup' %}?next={{ next }}">давайте вам создадим новый аккаунт.</a></p>
+					</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="give-me-a-coffee-complete-modal" tabindex="-1" role="dialog" aria-labelledby="giveMeACoffeeCompleteLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 style="text-align: center">Мы вам очень признательны.</h4>
+				</div>
+				<div class="modal-body">
+					<p id="give-me-a-coffee-success-message">Считаем оставшиеся чашечки...</p>
+					<p>Учите французский и получайте удовольствие! :)</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="give-me-a-coffee-fail-modal" tabindex="-1" role="dialog" aria-labelledby="giveMeACoffeeCompleteLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 style="text-align: center">Что-то пошло не так!</h4>
+				</div>
+				<div class="modal-body">
+					<p id="give-me-a-coffee-fail-message"></p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">Закрыть</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% if self.mail_archive and not user.is_authenticated %}
+		<div class="modal" id="default-login-required-modal" tabindex="-1" role="dialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body" style="padding-left:25px; padding-right:25px "><p>Чтобы увидеть содержимое, вам надо авторизоваться на сайте.</p></div>
+					<div class="modal-footer" style="text-align: center">
+						<button class="btn btn-primary" data-dismiss="modal">OK</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	{% endif %}
+	{% block payment_modals %}
+		<div class="modal" id="give-me-a-coffee-payment-success-modal" tabindex="-1" role="dialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4>Спасибо за Ваше решение нас поддержать!</h4>
+					</div>
+					<div class="modal-body">
+						{% if not user.has_coffee and request.GET.modal_open == 'give-me-a-coffee-payment-success-modal' %}
+							<img id="ten-seconds-loading-img" style="width:100%;" src="{% static 'images/loading_icon.gif' %}">
+							<div class="ten-s-success" id="ten-seconds-success-message" style="display: none;">
+								<p>Спасибо за Ваше решение нас поддержать! Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
+								<p>Вы угощаете нас стаканчиком кофе за этот урок.</p>
+								<p>Все так?</p>
+							</div>
+							<div class="ten-s-fail" id="ten-seconds-failure-message" style="display: none;">
+								<p style="color: red">Сервис по приему платежей до сих пор не прислал нам подтверждение о платеже.</p>
+								<p>Обычно он это делает в течение секунды. Мы подождали еще десять -- тишина. :(</p>
+								<p><b>Ваш платеж в любом случае не пропадет</b> -- просто мы о нем пока еще не получили уведомления. Попробуйте нажать здесь «Закрыть», затем перегрузить страницу и попробовать снова -- все должно получиться.
+								</p>
+								<p>Это будет чем-то из ряда вон, но если, паче чаяния, ничего не получится, пожалуйста, свяжитесь со мной -- мои контакты есть в разделе <a href="/contact/" target="_blank">Об авторах&nbsp;<i
+										style="font-size: 10px" class="fas fa-external-link-alt"></i></a>.</p>
+							</div>
+							<script>
+								function showWaitFailureMessage() {
+									$('#ten-seconds-loading-img').hide();
+									$('.ten-s-fail').each(function () {
+										$(this).show()
+									})
+								}
 
-                                            {#                                                <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">#}
-                                            {#                                                <div id="coffee-button-text" class="coffee-button-text">Вам ведь понравился урок?<br>Угостите меня кофейком!</div>#}
-                                        {% else %}
-                                            <button class="coffee-button btn btn-default btn-xs" disabled="disabled" id="coffee-button">
-                                                <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}">
-                                                <div id="coffee-button-text" class="coffee-button-text">Вы уже угощали меня<br>за этот урок :)</div>
-                                            </button>
-                                        {% endif %}
-                                    </div>
-                            </div>
+								function showWaitSuccessMessage() {
+									$('#ten-seconds-loading-img').hide();
+									$('.ten-s-success').each(function () {
+										$(this).show()
+									})
+								}
 
-                        </div>
-                    {% endif %}
-                    <ul class="nav nav-tabs">
-                        {% if self.comments_for_lesson %}
-                            <li class="nav-item">
-                                <a class="nav-link" data-toggle="tab" href="#comments_for_lesson" role="tab"
-                                   aria-controls="body">
-                                    Комментарии к уроку
-                                </a>
-                            </li>
-                        {% endif %}
-                        {% if self.body %}
-                            <li class="nav-item">
-                                <a class="nav-link" data-toggle="tab" href="#body" role="tab" aria-controls="body">
-                                    Диалог урока
-                                </a>
-                            </li>
-                        {% endif %}
-                        {% if self.dictionary %}
-                            <li class="nav-item">
-                                <a class="nav-link" data-toggle="tab" href="#dictionary" role="tab"
-                                   aria-controls="body">
-                                    Словарик
-                                </a>
-                            </li>
-                        {% endif %}
-                        {% if self.summary %}
-                            <li class="nav-item">
-                                <a class="nav-link" data-toggle="tab" href="#resume" role="tab" aria-controls="body">
-                                    Конспект
-                                </a>
-                            </li>
-                        {% endif %}
-                        {% if self.repetition_material %}
-                            <li class="nav-item">
-                                <a class="nav-link" data-toggle="tab" href="#revision" role="tab"
-                                   aria-controls="body">
-                                    Материал для повторения
-                                </a>
-                            </li>
-                        {% endif %}
-                        {% if self.mail_archive %}
-                            {% if user.is_authenticated %}
-                                <li class="nav-item">
-                                    <a class="nav-link" data-target="" href="#mail-archive" role="tab"
-                                       aria-controls="body">
-                                        Доп. информация
-                                    </a>
-                                </li>
-                            {% else %}
-                                <li class="nav-item">
-                                    <a style="cursor: pointer" class="nav-link" data-toggle="modal" data-target="#default-login-required-modal">
-                                        Доп. информация
-                                    </a>
-                                </li>
-                            {% endif %}
-                        {% endif %}
-                        {% for child_value in self.other_tabs %}
-                            {% if not child_value.value.invisible or user.is_superuser %}
-                                <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#{{ child_value.value.href }}" role="tab"
-                                       aria-controls="{{ child_value.value.href }}"><span {% if child_value.value.invisible and user.is_superuser %}color="green" {% endif %}>{{ child_value.value.title }}</span></a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
+								function tenSecondsCheck() {
+									window.dataLayer = window.dataLayer || [];
+									dataLayer.push({'event': 'paymentWONotificationWHope'});
+									let timesRun = 0;
+									let success;
+									let checkEverySec = setInterval(function () {
+										if (timesRun === 5) {
+											dataLayer.push({'event': 'paymentWONotification'});
+											clearInterval(checkEverySec);
+											showWaitFailureMessage()
+										}
+										$.ajax({
+											type: "POST",
+											url: "{% url 'get_amount' %}",
+											data: {'csrfmiddlewaretoken': "{{ csrf_token }}"},
+											datatype: "json",
+											success: function (response) {
+												if (response.coffee_amount > 0) {
+													clearInterval(checkEverySec);
+													showWaitSuccessMessage();
+												}
+											}
+										});
+										timesRun += 1;
+									}, 2000)
+								}
 
-                    <div class="tab-content">
-                        {% assign pane_class "tab-pane active" %}
-                        {% if self.comments_for_lesson %}
-                            <div id="comments_for_lesson" class="{{ pane_class }}" role="tabpanel">
-                                {% for block in self.comments_for_lesson %}{% include_block block %}{% endfor %}
-                                {% page_advert_body 'comments_for_lesson_bottom' page.page_type %}
-                            </div>
-                            {% assign pane_class "tab-pane" %}
-                        {% endif %}
-                        {% if self.body %}
-                            <div id="body" class="{{ pane_class }}" role="tabpanel">
-                                {% for block in self.body %}{% include_block block %}{% endfor %}
-                                {% page_advert_body 'body_bottom' page.page_type %}
-                            </div>
-                            {% assign pane_class "tab-pane" %}
-                        {% endif %}
-                        {% if self.dictionary %}
-                            <div id="dictionary" class="{{ pane_class }}" role="tabpanel">
-                                {% for block in self.dictionary %}{% include_block block %}{% endfor %}
-                                {% page_advert_body 'dictionary_bottom' page.page_type %}
-                            </div>
-                            {% assign pane_class "tab-pane" %}
-                        {% endif %}
-                        {% if self.summary %}
-                            <div id="resume" class="{{ pane_class }}" role="tabpanel">
-                                <div>
-                                    {% page_advert_body 'resume_top' page.page_type %}
-                                    {% with "https://files.le-francais.ru"|add:self.summary as document_url %}
-                                        {% include 'blocks/document_viewer.html' %}
-                                    {% endwith %}
-                                    {% page_advert_body 'resume_bottom' page.page_type %}
-                                </div>
-                            </div>
-                            {% assign pane_class "tab-pane" %}
-                        {% endif %}
-                        {% if self.repetition_material %}
-                            <div id="revision" class="{{ pane_class }}" role="tabpanel">
-                                <div>
-                                    {% page_advert_body 'revision_top' page.page_type %}
-                                    {% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
-                                        {% include 'blocks/document_viewer.html' %}
-                                    {% endwith %}
-                                    {% page_advert_body 'revision_body' page.page_type %}
-                                </div>
-                            </div>
-                            {% assign pane_class "tab_pane" %}
-                        {% endif %}
-                        {% if self.mail_archive and user.is_authenticated %}
-                                <div id="mail-archive" class="{{ pane_class }}" role="tabpanel">
-                                    <h3>Дополнительная информация из&nbsp;почтовой рассылки</h3>
-                                    <div>
-                                        {% for block in self.mail_archive %}{% include block %}{% endfor %}
-                                    </div>
-                                </div>
-                                {% assign pane_class "tab_pane" %}
-                        {% endif %}
-                        {% for child_value in self.other_tabs %}
-                            <div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
-                                {% for block in child_value.value.body %}{% include_block block %}{% endfor %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                {% if self.lesson_number > 5 %}
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <div class="panel panel-success">
-                                <div class="panel-heading">
-                                    Пожалуйста, <a href="/collecte/">поддержите наш проект</a>, чтобы мы могли делать всякие разные клёвые фишки для вас и помогать вам еще лучше и быстрее изучать французский язык!
-                                </div>
-                            </div>
-                        </div>
-                    </div>{% endif %}
-                <hr>
-                <div class="row controls text-center">
-                    {% assign prev self.get_prev_sibling %}
-                    {% assign next self.get_next_sibling %}
-                    {% if prev.content_type.name == 'lesson page' %}
-                        <a class="pull-left btn btn-default" href="{{ self.get_prev_sibling.get_url }}"> Предыдущий
-                            урок </a>
-                    {% endif %}
-
-                    {% if next.content_type.name == 'lesson page' %}
-                        <a class="pull-right btn btn-default" href="{{ self.get_next_sibling.get_url }}"> Следующий
-                            урок </a>
-                    {% endif %}
-
-                </div>
-                {% if self.has_own_topic %}
-                    <div class="row">
-                        {% block extra_head_content %}
-                            <link rel="stylesheet" type="text/css" href="{% static 'css/forum.css' %}">
-                        {% endblock %}
-                        <div class="block-forum">
-                            <div class="topic" id="topic" style="padding: 0px">
-                                <h1>Вопросы и комментарии к уроку.</h1>
-                                <h6>Не стесняйтесь задавать вопросы и комментировать. </h6>
-                                <div class="posts">
-                                    {% with self.topic.head as post %}
-                                        <div class="first_post">{% include "tags/related_post.html" %}</div>
-                                    {% endwith %}
-                                    {% if self.topic.last_post.id != self.topic.head.id %}
-                                        <div class="text-left" style="margin: 1em 0">Последний комментарий к уроку. <a href="{{ self.topic.last_post.get_absolute_url }}">Посмотреть все.</a></div>
-                                        {% with self.topic.last_post as post %}
-                                            {% if not post == self.topic.head %}
-                                                <div class="last_post">{% include "tags/related_post.html" %}</div>
-                                            {% endif %}
-                                        {% endwith %}
-                                    {% else %}
-                                        <br>
-                                        <div class="text-left"> Последний коммментарий к уроку... Еще нет — будьте
-                                            первым, кто его напишет!
-                                        </div>
-                                        <br>
-                                    {% endif %}
-                                </div>
-                                <a class="btn btn-primary" href="{{ self.topic.get_absolute_url }}#create_post"
-                                   target="_blank">Добавьте
-                                    свой комментарий</a>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-            <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
-                {% page_advert_body 'sidebar' page.page_type %}
-            </div>
-        </div>
-    </div>
-    <!-- by-me-a-coffee-modals -->
-    {% assign next "/coffee/check/?next="|add:request.path %}
-    <div class="modal" id="give-me-a-coffee-modal" tabindex="-1" role="dialog" aria-labelledby="giveMeACoffeeLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-
-                {% if user.is_authenticated %}
-                    {% if user.has_coffee or 'payment_success' in request.GET %}
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" style="text-align: center">Ура!</h4>
-                        </div>
-                        <div class="modal-body" style="text-align: center">
-                            <p>Вы угощаете нас стаканчиком кофе за этот урок.</p>
-                            <p>Все так?</p>
-                        </div>
-                        <div class="modal-footer" style="text-align: center">
-                            <button type="button" class="btn btn-primary coffee-proceed" onclick="giveMeCoffee()" id="give-me-a-coffee-proceed" data-dismiss="modal">OUI !</button>
-                        </div>
-                    {% else %}
-
-                    {% endif %}
-                {% else %}
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" style="text-align: center">Спасибо вам огромное за готовность нас поддержать!</h4>
-                    </div>
-                    <div class="modal-body" style="padding-left:25px; padding-right:25px ">
-                        <p>Чтобы продолжить, вам надо авторизоваться на сайте.</p>
-                        <p style="margin-bottom: 20px">Самое простое — это зайти, как пользователь одной из социальных сетей. В этом случае авторизация произойдет в пару кликов — просто нажмите на одну из цветных кнопок.</p>
-                        <!-- Social OAuth Buttons -->{% include 'account/oauth-buttons.html' with next=next %}
-                        <hr style="border-top: 2px solid #eee;">
-                        <p>Если вы уже зарегистрированы на сайте, зайдите, используя свой адрес e-mail и пароль.</p>
-                        <!-- LogIn Form -->{% include 'account/login_form.html' with redirect_field_value=next redirect_field_name="next" %}
-                        <p>Если вас нет в Сетях и вы еще не регистрировались на сайте,<br><a href="{% url 'account_signup' %}?next={{ next }}">давайте вам создадим новый аккаунт.</a></p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="give-me-a-coffee-complete-modal" tabindex="-1" role="dialog" aria-labelledby="giveMeACoffeeCompleteLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 style="text-align: center">Мы вам очень признательны.</h4>
-                </div>
-                <div class="modal-body">
-                    <p id="give-me-a-coffee-success-message">Считаем оставшиеся чашечки...</p>
-                    <p>Учите французский и получайте удовольствие! :)</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="give-me-a-coffee-fail-modal" tabindex="-1" role="dialog" aria-labelledby="giveMeACoffeeCompleteLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 style="text-align: center">Что-то пошло не так!</h4>
-                </div>
-                <div class="modal-body">
-                    <p id="give-me-a-coffee-fail-message"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Закрыть</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% if self.mail_archive and not user.is_authenticated %}
-        <div class="modal" id="default-login-required-modal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
-                    <div class="modal-body" style="padding-left:25px; padding-right:25px "><p>Чтобы увидеть содержимое, вам надо авторизоваться на сайте.</p></div>
-                    <div class="modal-footer" style="text-align: center"><button class="btn btn-primary" data-dismiss="modal">OK</button></div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-    {% block payment_modals %}
-        <div class="modal" id="give-me-a-coffee-payment-success-modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4>Спасибо за Ваше решение нас поддержать!</h4>
-                </div>
-                <div class="modal-body">
-                    {% if not user.has_coffee and request.GET.modal_open == 'give-me-a-coffee-payment-success-modal' %}
-                        <img id="ten-seconds-loading-img" style="width:100%;" src="{% static 'images/loading_icon.gif' %}">
-                        <div class="ten-s-success" id="ten-seconds-success-message" style="display: none;">
-                        <p>Спасибо за Ваше решение нас поддержать! Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
-                        <p>Вы угощаете нас стаканчиком кофе за этот урок.</p>
-                        <p>Все так?</p>
-                        </div>
-                        <div class="ten-s-fail" id="ten-seconds-failure-message" style="display: none;">
-                        <p style="color: red">Сервис по приему платежей до сих пор не прислал нам подтверждение о платеже.</p>
-                        <p>Обычно он это делает в течение секунды. Мы подождали еще десять -- тишина.  :(</p>
-                        <p><b>Ваш платеж в любом случае не пропадет</b> -- просто мы о нем пока еще не получили уведомления. Попробуйте нажать здесь «Закрыть», затем перегрузить страницу и попробовать снова -- все должно получиться.</p>
-                        <p>Это будет чем-то из ряда вон, но если, паче чаяния, ничего не получится, пожалуйста, свяжитесь со мной -- мои контакты есть в разделе <a href="/contact/" target="_blank">Об авторах&nbsp;<i style="font-size: 10px" class="fas fa-external-link-alt"></i></a>.</p>
-                        </div>
-                        <script>
-                          function showWaitFailureMessage() {
-                            $('#ten-seconds-loading-img').hide();
-                            $('.ten-s-fail').each(function () {
-                              $(this).show()
-                            })
-                          }
-
-                          function showWaitSuccessMessage() {
-                            $('#ten-seconds-loading-img').hide();
-                            $('.ten-s-success').each(function () {
-                              $(this).show()
-                            })
-                          }
-
-                          function tenSecondsCheck() {
-                            window.dataLayer = window.dataLayer || [];
-                            dataLayer.push({'event':'paymentWONotificationWHope'});
-                            let timesRun = 0;
-                            let success;
-                            let checkEverySec = setInterval(function () {
-                              if (timesRun === 5) {
-                                dataLayer.push({'event':'paymentWONotification'});
-                                clearInterval(checkEverySec);
-                                showWaitFailureMessage()
-                              }
-                              $.ajax({
-                                type: "POST",
-                                url: "{% url 'get_amount' %}",
-                                data: {'csrfmiddlewaretoken': "{{ csrf_token }}"},
-                                datatype: "json",
-                                success: function (response) {
-                                  if (response.coffee_amount > 0) {
-                                    clearInterval(checkEverySec);
-                                    showWaitSuccessMessage();
-                                  }
-                                }
-                              });
-                              timesRun += 1;
-                            }, 2000)
-                          }
-
-                          $(document).ready(tenSecondsCheck())
-                        </script>
-                    {% else %}
-                        <p>Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
-                        <p>Вы угощаете нас стаканчиком кофе за этот урок.</p>
-                        <p>Всё так?</p>
-                    {% endif %}
-                </div>
-                <div class="modal-footer" style="text-align: center">
-                    <button type="button" class="btn btn-primary ten-s-success coffee-proceed" onclick="giveMeCoffee()" id="give-me-a-coffee-after-payment-proceed" data-dismiss="modal"{% if not user.has_coffee %} style="display: none"{% endif %}>OUI !</button>
-                    <button type="button" class="btn btn-primary ten-s-fail" id="ten-seconds-failure-dismiss-button" data-dismiss="modal" style="display: none">Закрыть</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal" id="give-me-a-coffee-payment-fail-modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4>Ошибка</h4>
-                </div>
-                <div class="modal-body">
-                    <p>Что-то пошло не так.</p>
-                    <p>:(</p>
-                </div>
-                <div class="modal-footer">
-                    <a href="{% url 'payments:payments' %}" type="button" class="btn btn-primary">Повторить</a>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">В другой раз</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endblock %}
+								$(document).ready(tenSecondsCheck())
+							</script>
+						{% else %}
+							<p>Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
+							<p>Вы угощаете нас стаканчиком кофе за этот урок.</p>
+							<p>Всё так?</p>
+						{% endif %}
+					</div>
+					<div class="modal-footer" style="text-align: center">
+						<button type="button" class="btn btn-primary ten-s-success coffee-proceed" onclick="giveMeCoffee()" id="give-me-a-coffee-after-payment-proceed" data-dismiss="modal"{% if not user.has_coffee %}
+						        style="display: none"{% endif %}>OUI !
+						</button>
+						<button type="button" class="btn btn-primary ten-s-fail" id="ten-seconds-failure-dismiss-button" data-dismiss="modal" style="display: none">Закрыть</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal" id="give-me-a-coffee-payment-fail-modal" tabindex="-1" role="dialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4>Ошибка</h4>
+					</div>
+					<div class="modal-body">
+						<p>Что-то пошло не так.</p>
+						<p>:(</p>
+					</div>
+					<div class="modal-footer">
+						<a href="{% url 'payments:payments' %}" type="button" class="btn btn-primary">Повторить</a>
+						<button type="button" class="btn btn-default" data-dismiss="modal">В другой раз</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	{% endblock %}
+	{% np4lesson request.user self as np4lesson_flag %}
+	{% if user.must_pay and self.need_payment %}
+		{% if not request.user.is_authenticated %}
+			{% comment %}Need login modal window{% endcomment %}
+			<div class="modal" id="listen-login-required-modal" tabindex="-1" role="dialog">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header"></div>
+						<div class="modal-body">
+							При нажатии на download или при доигрывании звука до конца появляется модальное окно: залогинься, чтобы иметь возможность скачать/послушать дальше.
+						</div>
+						<div class="modal-footer"></div>
+					</div>
+				</div>
+			</div>
+		{% else %}
+			<div class="modal" id="lesson-not-activated-simple-modal" tabindex="-1" role="dialog" aria-labelledby="lesson-not-activated-simple-modal-label">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						</div>
+						<div class="modal-body">Нужно активировать чтобы прослушать/скачать урок</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">ОК</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			{% comment %}See the message modal window{% endcomment %}
+			<div class="modal" id="lesson-not-activated-details-continue-modal" tabindex="-1" role="dialog">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header"></div>
+						<div class="modal-body">Всё объясняем</div>
+						<div class="modal-footer">
+							<button data-dismiss="modal" onclick="activateLesson('saw')" id="lesson-not-activated-continue-button" class="btn btn-default">Продолжить</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal" id="lesson-not-activated-details-activate-modal" tabindex="-1" role="dialog">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header"></div>
+						<div class="modal-body">Всё объясняем</div>
+						<div class="modal-footer">
+							<button data-dismiss="modal" onclick="activateLesson('saw');activateLesson('proceed')" id="lesson-not-activated-activate-button" class="btn btn-default">Активировать</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal" id="lesson-activated-modal" tabindex="-1" role="dialog">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header"></div>
+						<div class="modal-body">
+							<div id="activated-message-success" style="display: none">У вас осталось <span id="activated-message-ticket-count">n</span> тикетов</div>
+							<div id="activated-message-fail" style="display: none;">Ошибка: <span id="activated-message-error-description"></span></div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" onclick="$('#lesson-activated-modal').hide()">Ok</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		{% endif %}
+	{% endif %}
 {% endblock %}
