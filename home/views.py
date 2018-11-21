@@ -208,6 +208,31 @@ class GiveMeACoffee(View):
 		pass
 
 
+class ActivateLesson(View):
+	def post(self, request):
+		lesson = LessonPage.objects.get(lesson_number=request.POST['lesson_number'])
+		if request.user.is_authenticated():
+			if lesson not in request.user.payed_lessons.all():
+				if request.user.cup_amount >= 1:
+					try:
+						cup_amount = lesson.add_lesson_to_user(request.user)
+						# send_mail(
+						# 	'Lesson Activated',
+						# 	'{0} активировал урок {1}'.format(request.user.email, lesson.lesson_number),
+						# 	from_email=settings.DEFAULT_FROM_EMAIL,
+						# 	recipient_list=['ilia.dumov@gmail.com']
+						# )
+						data = dict(result="SUCCESS", left=cup_amount)
+					except BaseException as e:
+						data = dict(result="ERROR", description="Failed to do something: " + str(e))
+				else:
+					data = dict(result="ZERO_CUPS", description="У Вас закончились тикеты :(")
+			else:
+				data = dict(result="ALREADY", description='Вы уже угощали меня за этот урок :)')
+		else:
+			data = dict(result="NOT_AUTH", description="Not authenticated")
+		return JsonResponse(data)
+
 from django.urls import reverse
 
 
