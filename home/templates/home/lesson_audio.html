@@ -1,0 +1,43 @@
+{% load static site_tags %}
+<div class="block-audio">
+	<div class="row">
+		<div class="col-md-8">
+			<audio data-downloadable number="{{ lesson.lesson_number }}"{% if request.GET.t %} set-time="{{ request.GET.t }}"{% elif request.GET.T %} set-time="{% t2seconds request.GET.T %}"{% endif %}>
+				<source src="{% if lesson.audio_material %}{{ lesson.audio_material }}{% elif user.is_staff %}https://files.le-francais.ru/listen.php?number={{ lesson.lesson_number }}&key=
+					{{ request.session.session_key }}{% else %}//files.le-francais.ru/lecons/french-{{ lesson.lesson_number }}.mp3{% endif %}" type="audio/mpeg">
+			</audio>
+		</div>
+		<div class="col-md-4">
+			<input type="hidden" name="next" value="{{ request.path }}">
+			<!-- button trigger by-me-a-coffee-modals -->
+			{% if user.must_pay and self.need_payment %}
+				<button class="btn btn-default"{% if userlesson %} disabled="disabled" {% endif %}onclick="activateLesson('button')">Активировать урок</button>
+			{% else %}
+				{% if not userlesson %}
+					<img class="" id="coffee-button"
+							{% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
+							 data-toggle="modal"
+							 data-target="#give-me-a-coffee-modal"
+							{% elif user.is_authenticated and not user.has_coffee %}
+							 onclick="location.href='{% url 'check_amount' %}?next={{ request.path }}';"
+							{% elif not user.is_authenticated %}
+							 data-toggle="modal"
+							 data-target="#give-me-a-coffee-modal"
+							{% endif %}
+							 src="{% static "images/buttons/button-default-min.png" %}"
+							 onmousedown="$('#coffee-button').attr('src', '{% static 'images/buttons/button-active-min.png' %}')"
+							 onfocus="$('#coffee-button').attr('src', '{% static 'images/buttons/button-focus-min.png' %}')"
+							 onmouseover="$('#coffee-button').attr('src', '{% static 'images/buttons/button-hover-min.png' %}')"
+							 onmouseout="$('#coffee-button').attr('src', '{% static 'images/buttons/button-default-min.png' %}')">
+					{#<img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">#}
+					{#<div id="coffee-button-text" class="coffee-button-text">Вам ведь понравился урок?<br>Угостите меня кофейком!</div>#}
+				{% else %}
+					<button class="coffee-button btn btn-default btn-xs" disabled="disabled" id="coffee-button">
+						<img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}">
+						<div id="coffee-button-text" class="coffee-button-text">Вы уже угощали меня<br>за этот урок :)</div>
+					</button>
+				{% endif %}
+			{% endif %}
+		</div>
+	</div>
+</div>

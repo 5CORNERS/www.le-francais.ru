@@ -1,0 +1,179 @@
+{% load site_tags wagtailcore_tags %}
+<div class="row padding">{% breadcrumb calling_page=self %}
+	<h1>{{ page.title }}</h1>
+	{% if self.audio_material != 'None' %}
+		{% include 'home/lesson_audio.html' %}
+	{% endif %}
+	<ul class="nav nav-tabs">
+		{% if self.comments_for_lesson %}
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="tab" href="#comments_for_lesson" role="tab"
+				   aria-controls="body">
+					Комментарии к уроку
+				</a>
+			</li>
+		{% endif %}
+		{% if self.body %}
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="tab" href="#body" role="tab" aria-controls="body">
+					Диалог урока
+				</a>
+			</li>
+		{% endif %}
+		{% if self.dictionary %}
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="tab" href="#dictionary" role="tab"
+				   aria-controls="body">
+					Словарик
+				</a>
+			</li>
+		{% endif %}
+		{% if self.summary %}
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="tab" href="#resume" role="tab" aria-controls="body">
+					Конспект
+				</a>
+			</li>
+		{% endif %}
+		{% if self.repetition_material %}
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="tab" href="#revision" role="tab"
+				   aria-controls="body">
+					Материал для повторения
+				</a>
+			</li>
+		{% endif %}
+		{% if self.mail_archive %}
+			{% if user.is_authenticated %}
+				<li class="nav-item">
+					<a class="nav-link" data-target="" href="#mail-archive" role="tab"
+					   aria-controls="body">
+						Доп. информация
+					</a>
+				</li>
+			{% else %}
+				<li class="nav-item">
+					<a style="cursor: pointer" class="nav-link" data-toggle="modal" data-target="#default-login-required-modal">
+						Доп. информация
+					</a>
+				</li>
+			{% endif %}
+		{% endif %}
+		{% for child_value in self.other_tabs %}
+			{% if not child_value.value.invisible or user.is_superuser %}
+				<li class="nav-item">
+					<a class="nav-link" data-toggle="tab" href="#{{ child_value.value.href }}" role="tab"
+					   aria-controls="{{ child_value.value.href }}"><span {% if child_value.value.invisible and user.is_superuser %}color="green" {% endif %}>{{ child_value.value.title }}</span></a>
+				</li>
+			{% endif %}
+		{% endfor %}
+	</ul>
+
+	<div class="tab-content">
+		{% assign pane_class "tab-pane active" %}
+		{% if self.comments_for_lesson %}
+			<div id="comments_for_lesson" class="{{ pane_class }}" role="tabpanel">
+				{% for block in self.comments_for_lesson %}{% include_block block %}{% endfor %}
+				{% page_advert_body 'comments_for_lesson_bottom' page.page_type %}
+			</div>
+			{% assign pane_class "tab-pane" %}
+		{% endif %}
+		{% if self.body %}{% check_user_lesson request.user lesson as userlesson %}
+			<div id="body" class="{{ pane_class }}{% if not userlesson and self.need_payments %} faded{% endif %}" role="tabpanel">
+				{% if user.must_pay and self.need_payment %}
+					{% if not userlesson %}
+						{% include_30_block self.body %}
+						<hr>
+						{% if not user.is_authenticated %}
+							<span style="float: left; max-width: 65%">Войдите, чтобы получить возможность прочитать целиком.</span>
+							<a style="float: right; max-width: 35%" href="{% url 'account_login' %}?next={{ request.path }}">Войти</a>
+						{% else %}
+							<span style="float: left; max-width: 65%">Активируйте, чтобы прочитать целиком.</span>
+							<button class="btn btn-default" style="float: right; max-width: 35%" onclick="activateLesson('button')">Активировать урок</button>
+						{% endif %}
+					{% else %}
+						{% for block in self.body %}{% include_block block %}{% endfor %}
+					{% endif %}
+				{% else %}
+					{% for block in self.body %}{% include_block block %}{% endfor %}
+				{% endif %}
+				{% page_advert_body 'body_bottom' page.page_type %}
+			</div>
+			{% assign pane_class "tab-pane" %}
+		{% endif %}
+		{% if self.dictionary %}
+			<div id="dictionary" class="{{ pane_class }}" role="tabpanel">
+				{% for block in self.dictionary %}{% include_block block %}{% endfor %}
+				{% page_advert_body 'dictionary_bottom' page.page_type %}
+			</div>
+			{% assign pane_class "tab-pane" %}
+		{% endif %}
+		{% if self.summary %}
+			<div id="resume" class="{{ pane_class }}" role="tabpanel">
+				<div>
+					{% page_advert_body 'resume_top' page.page_type %}
+					{% with "https://files.le-francais.ru"|add:self.summary as document_url %}
+						{% include 'blocks/document_viewer.html' %}
+					{% endwith %}
+					{% page_advert_body 'resume_bottom' page.page_type %}
+				</div>
+			</div>
+			{% assign pane_class "tab-pane" %}
+		{% endif %}
+		{% if self.repetition_material %}
+			<div id="revision" class="{{ pane_class }}" role="tabpanel">
+				<div>
+					{% page_advert_body 'revision_top' page.page_type %}
+					{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
+						{% include 'blocks/document_viewer.html' %}
+					{% endwith %}
+					{% page_advert_body 'revision_body' page.page_type %}
+				</div>
+			</div>
+			{% assign pane_class "tab_pane" %}
+		{% endif %}
+		{% if self.mail_archive and user.is_authenticated %}
+			<div id="mail-archive" class="{{ pane_class }}" role="tabpanel">
+				<h3>Дополнительная информация из&nbsp;почтовой рассылки</h3>
+				<div>
+					{% for block in self.mail_archive %}{% include block %}{% endfor %}
+				</div>
+			</div>
+			{% assign pane_class "tab_pane" %}
+		{% endif %}
+		{% for child_value in self.other_tabs %}
+			<div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
+				{% for block in child_value.value.body %}{% include_block block %}{% endfor %}
+			</div>
+		{% endfor %}
+	</div>
+</div>
+
+{% comment %}{% if self.lesson_number > 5 %}
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="panel panel-success">
+                                <div class="panel-heading">
+                                    Пожалуйста, <a href="/collecte/">поддержите наш проект</a>, чтобы мы могли делать всякие разные клёвые фишки для вас и помогать вам еще лучше и быстрее изучать французский язык!
+                                </div>
+                            </div>
+                        </div>
+                    </div>{% endif %}{% endcomment %}
+<hr>
+<div class="row controls text-center">
+	{% assign prev self.get_prev_sibling %}
+	{% assign next self.get_next_sibling %}
+	{% if prev.content_type.name == 'lesson page' %}
+		<a class="pull-left btn btn-default" href="{{ self.get_prev_sibling.get_url }}"> Предыдущий
+			урок </a>
+	{% endif %}
+
+	{% if next.content_type.name == 'lesson page' %}
+		<a class="pull-right btn btn-default" href="{{ self.get_next_sibling.get_url }}"> Следующий
+			урок </a>
+	{% endif %}
+
+</div>
+{% if self.has_own_topic %}
+	{% include 'home/lesson_topic.html' with topic=self.topic %}
+{% endif %}
