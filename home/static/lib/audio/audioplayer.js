@@ -163,6 +163,8 @@
 					volumeAdjuster.find('div').height(theAudio.volume * 100 + '%');
 					volumeDefault = theAudio.volume;
 					theAudio.currentTime=setTime;
+					event = new CustomEvent('lessonPlayerReady');
+					window.dispatchEvent(event)
 				});
 
 				theAudio.addEventListener('timeupdate', function () {

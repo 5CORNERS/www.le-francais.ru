@@ -25,6 +25,10 @@ payment_urls = [
     url('^$', views.TinkoffPayments.as_view(), name='payments'),
 ]
 
+activate_urls = [
+    url('^', views.ActivateLesson.as_view(), name='activate_lesson'),
+]
+
 coffee_urls = [
     url('^check/$', views.coffee_amount_check, name='check_amount'),
     url('^get_amount/$', views.get_coffee_amount, name='get_amount'),
