@@ -1,0 +1,34 @@
+{% load static %}
+<div class="row">
+    {% block extra_head_content %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/forum.css' %}">
+    {% endblock %}
+    <div class="block-forum">
+        <div class="topic" id="topic" style="padding: 0px">
+            <h1>Вопросы и комментарии к уроку.</h1>
+            <h6>Не стесняйтесь задавать вопросы и комментировать. </h6>
+            <div class="posts">
+                {% with topic.head as post %}
+                    <div class="first_post">{% include "tags/related_post.html" %}</div>
+                {% endwith %}
+                {% if topic.last_post.id != topic.head.id %}
+                    <div class="text-left" style="margin: 1em 0">Последний комментарий к уроку. <a href="{{ topic.last_post.get_absolute_url }}">Посмотреть все.</a></div>
+                    {% with topic.last_post as post %}
+                        {% if not post == topic.head %}
+                            <div class="last_post">{% include "tags/related_post.html" %}</div>
+                        {% endif %}
+                    {% endwith %}
+                {% else %}
+                    <br>
+                    <div class="text-left"> Последний коммментарий к уроку... Еще нет — будьте
+                        первым, кто его напишет!
+                    </div>
+                    <br>
+                {% endif %}
+            </div>
+            <a class="btn btn-primary" href="{{ topic.get_absolute_url }}#create_post"
+               target="_blank">Добавьте
+                свой комментарий</a>
+        </div>
+    </div>
+</div>
