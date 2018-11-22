@@ -386,6 +386,7 @@ class ArticlePage(Page):
 		('audio', AudioBlock()),
 		('video', VideoPlayerBlock()),
 	], blank=True)
+	without_sightbar = BooleanField(default=False)
 
 	def get_absolute_url(self):
 		return self.full_url
@@ -393,8 +394,13 @@ class ArticlePage(Page):
 	def get_nav_root(self) -> Page:
 		return get_nav_root(self)
 
+	def get_template(self, request, *args, **kwargs):
+		if self.without_sightbar:
+			return 'home/article_page_without_sightbar.html'
+		return 'home/article_page.html'
 
 ArticlePage.content_panels = ArticlePage.content_panels + [
+	FieldPanel('without_sightbar'),
 	FieldPanel('reference_title'),
 	FieldPanel('subtitle'),
 	StreamFieldPanel('body'),
