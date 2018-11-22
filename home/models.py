@@ -215,7 +215,7 @@ class PageWithSidebar(Page):
 
 	def get_template(self, request, *args, **kwargs):
 		if self.without_right_sightbar:
-			return 'page_with_sidebar_without_right_sidebar.html'
+			return 'home/page_with_sidebar_without_right_sidebar.html'
 		return 'home/page_with_sidebar.html'
 
 
