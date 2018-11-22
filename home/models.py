@@ -211,8 +211,16 @@ class PageWithSidebar(Page):
 	def get_nav_root(self) -> Page:
 		return get_nav_root(self)
 
+	without_right_sightbar = BooleanField(default=False)
+
+	def get_template(self, request, *args, **kwargs):
+		if self.without_right_sightbar:
+			return 'page_with_sidebar_without_right_sidebar.html'
+		return 'home/page_with_sidebar.html'
+
 
 PageWithSidebar.content_panels = Page.content_panels + [
+	FieldPanel('without_right_sightbar'),
 	FieldPanel('reference_title'),
 	FieldPanel('subtitle'),
 	StreamFieldPanel('body'),
@@ -399,6 +407,7 @@ class ArticlePage(Page):
 			return 'home/article_page_without_sightbar.html'
 		return 'home/article_page.html'
 
+
 ArticlePage.content_panels = ArticlePage.content_panels + [
 	FieldPanel('without_sightbar'),
 	FieldPanel('reference_title'),
@@ -412,7 +421,7 @@ ArticlePage.settings_panels = ArticlePage.settings_panels + [
 	FieldPanel('allow_comments'),
 	FieldPanel('is_nav_root'),
 	FieldPanel('is_selectable'),
-	FieldPanel('page_type')
+	FieldPanel('page_type'),
 ]
 
 
