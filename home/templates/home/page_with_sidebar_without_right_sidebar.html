@@ -1,7 +1,4 @@
 {% extends "base.html" %}
-{% load i18n %}
-{% load comments %}
-{% load comments_xtd %}
 {% load static site_tags wagtailcore_tags %}
 
 {% block body_class %}template-homepage{% endblock %}
@@ -9,24 +6,19 @@
 {% block extra_js %}
     <script type="text/javascript"
             src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
-    <script>
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip({html: true})
-        })
-    </script>
 {% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
 {% endblock %}
 
-{% block extra_head %}
-    {% advert_head page %}
-{% endblock %}
-
 {% block meta %}
     <meta name="nav-root-id" data-value="{{ self.get_nav_root.id }}">
     <meta name="page-id" data-value="{{ self.id }}">
+{% endblock %}
+
+{% block extra_head %}
+    {% advert_head page %}
 {% endblock %}
 
 {% block content %}
@@ -44,22 +36,6 @@
                 {% breadcrumb calling_page=self %}
                 <h1>{{ page.title }}</h1>
                 {% for block in page.body %}{% include_block block %}{% endfor %}
-                <div class="comments">
-                    {% get_comment_count for page as comment_count %}
-                    {% if comment_count %}
-                        <hr/>
-                        <ul class="comments_tree">
-                            {% render_xtdcomment_tree for page allow_flagging allow_feedback show_feedback %}
-                        </ul>
-                    {% endif %}
-                    {% if page.allow_comments %}
-                        <div class="comment">
-                            <div class="well">
-                                {% render_comment_form for page %}
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
             </div>
         </div>
     </div>
