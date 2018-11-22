@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load comments %}
+{% load comments_xtd %}
+{% load static site_tags wagtailcore_tags %}
+
+{% block body_class %}template-homepage{% endblock %}
+{% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
+{% block extra_js %}
+	<script type="text/javascript"
+	        src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
+	<script>
+		$(function () {
+			$('[data-toggle="tooltip"]').tooltip({html: true})
+		})
+	</script>
+{% endblock %}
+
+{% block extra_css %}
+	<link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
+{% endblock %}
+
+{% block extra_head %}
+	{% advert_head page %}
+{% endblock %}
+
+{% block meta %}
+	<meta name="nav-root-id" data-value="{{ self.get_nav_root.id }}">
+	<meta name="page-id" data-value="{{ self.id }}">
+{% endblock %}
+
+{% block content %}
+	<div class="container-fluid">
+		<div class="row main_row">
+			<div class="sidebar-wrapper col-sm-3 _no-padding">
+				<div id="sidebar"></div>
+			</div>
+			<button class="sidebar-collapse-button" type="button" data-toggle="toggle"
+			        data-target=".sidebar-wrapper" aria-controls="sidebar" aria-expanded="false"
+			        aria-label="Toggle sidebar">
+				<div class="arrow-icon"></div>
+			</button>
+			{% for block in page.body %}{% include_block block %}{% endfor %}
+		</div>
+	</div>
+{% endblock %}
