@@ -28,7 +28,7 @@ from user_sessions.models import Session
 from wagtail.contrib.sitemaps.sitemap_generator import Sitemap as WagtailSitemap
 from wagtail.core.models import Page
 
-from home.models import PageWithSidebar, LessonPage, ArticlePage, BackUrls
+from home.models import PageWithSidebar, LessonPage, ArticlePage, BackUrls, DefaultPage, IndexPage
 from home.src.site_import import import_content
 from tinkoff_merchant.models import Payment as TinkoffPayment
 from tinkoff_merchant.services import MerchantAPI
@@ -50,17 +50,13 @@ NAMESPACE = getattr(settings, setting_name('URL_NAMESPACE'), None) or 'social'
 
 class LeFrancaisWagtailSitemap(WagtailSitemap):
 	def items(self):
-		return (
-			self.site
-				.root_page
-				.get_descendants(inclusive=True)
-				.live()
-				.public()
-				.order_by('path')) \
-			.exclude(defaultpage__show_in_sitemap=False) \
-			.exclude(articlepage__show_in_sitemap=False) \
-			.exclude(pagewithsidebar__show_in_sitemap=False) \
-			.exclude(lessonpage__show_in_sitemap=False)
+		q = []
+		q += list(ArticlePage.objects.filter(show_in_sitemap=True))
+		q += list(LessonPage.objects.filter(show_in_sitemap=True))
+		q += list(PageWithSidebar.objects.filter(show_in_sitemap=True))
+		q += list(DefaultPage.objects.filter(show_in_sitemap=True))
+		q += list(IndexPage.objects.all())
+		return q
 
 
 @login_required
