@@ -34,16 +34,17 @@ from tinkoff_merchant.models import Payment as TinkoffPayment
 from tinkoff_merchant.services import MerchantAPI
 from .forms import ChangeUsername
 from .utils import message as buy_description
-
+from django.db.models import Q
 if "mailer" in settings.INSTALLED_APPS:
 	from mailer import send_mail
 else:
 	from django.core.mail import send_mail
 
-flow = OAuth2WebServerFlow(client_id='499129759772-bqrp9ha0vfibn6t76fdgdmd87khnn2e0.apps.googleusercontent.com',
-                           client_secret='CRTqrmLi-116OMgpFOnYS6wH',
-                           scope='https://www.googleapis.com/auth/drive',
-                           redirect_uri='http://localhost:8000/import/authorized')
+flow = OAuth2WebServerFlow(
+	client_id='499129759772-bqrp9ha0vfibn6t76fdgdmd87khnn2e0.apps.googleusercontent.com',
+	client_secret='CRTqrmLi-116OMgpFOnYS6wH',
+	scope='https://www.googleapis.com/auth/drive',
+	redirect_uri='http://localhost:8000/import/authorized')
 
 NAMESPACE = getattr(settings, setting_name('URL_NAMESPACE'), None) or 'social'
 
@@ -94,6 +95,7 @@ def change_username(request):
 			'redirect_field_name': redirect_field_name
 		}
 	)
+
 
 def authorize(request):
 	return redirect(flow.step1_get_authorize_url())
@@ -229,6 +231,7 @@ class ActivateLesson(View):
 			data = dict(result="NOT_AUTH", description="Not authenticated")
 		return JsonResponse(data)
 
+
 from django.urls import reverse
 
 
@@ -248,21 +251,23 @@ def coffee_amount_check(request):
 class TinkoffPayments(View):
 	@method_decorator(login_required)
 	def get(self, request):
-		coffe_cups_data = dict(cards=[
-			{'title': "1 чашечка", 'image': "images/coffee_1.png", 'description': None, 'price1': "По цене стаканчика кофе в <b>McDonalds</b>", 'price2': 68, 'item_id': 1},
-			{'title': "5 чашечек", 'image': "images/coffee_5.png", 'description': None, 'price1': "по 59 ₽", 'price2': 295, 'item_id': 2},
-			{'title': "10 чашечек", 'image': "images/coffee_10.png", 'description': None, 'price1': "по 49 ₽", 'price2': 490, 'item_id': 3},
-			{'title': "20 чашечек", 'image': "images/coffee_20.png", 'description': None, 'price1': "по 39 ₽", 'price2': 780, 'item_id': 4},
-			{'title': "50 чашечек", 'image': "images/coffee_50.png", 'description': '''Хватит, чтобы угощать целый год.''', 'price1': "по 34 ₽", 'price2': 1690, 'item_id': 5},
-		])
-		tickets_data = dict(cards=[
-			dict(title="1 билет", image="images/ticket_1-1.png", description=None, price1="По цене стаканчика кофе в <b>McDonalds</b>", price2=68, item_id=6),
-			dict(title="5 билетов", image="images/ticket_5.png", description=None, price1="по 59 ₽", price2=295, item_id=7),
-			dict(title="10 билетов", image="images/ticket_10.png", description=None, price1="по 49 ₽", price2=490, item_id=8),
-			dict(title="20 билетов", image="images/ticket_20.png", description=None, price1="по 39 ₽", price2=780, item_id=9),
-			dict(title="50 билетов", image="images/ticket_50.png", description=None, price1="по 34 ₽", price2=1690, item_id=10),
-		])
-		return render(request, 'payments/tinkoff_payments.html', coffe_cups_data)
+		if request.user.saw_message and request.user.must_pay:
+			data = dict(cards=[
+				dict(title="1 билет", image="images/ticket_1-1.png", description=None, price1="По цене стаканчика кофе в <b>McDonalds</b>", price2=68, item_id=6),
+				dict(title="5 билетов", image="images/ticket_5.png", description=None, price1="по 59 ₽", price2=295, item_id=7),
+				dict(title="10 билетов", image="images/ticket_10.png", description=None, price1="по 49 ₽", price2=490, item_id=8),
+				dict(title="20 билетов", image="images/ticket_20.png", description=None, price1="по 39 ₽", price2=780, item_id=9),
+				dict(title="50 билетов", image="images/ticket_50.png", description=None, price1="по 34 ₽", price2=1690, item_id=10),
+			])
+		else:
+			data = dict(cards=[
+				{'title': "1 чашечка", 'image': "images/coffee_1.png", 'description': None, 'price1': "По цене стаканчика кофе в <b>McDonalds</b>", 'price2': 68, 'item_id': 1},
+				{'title': "5 чашечек", 'image': "images/coffee_5.png", 'description': None, 'price1': "по 59 ₽", 'price2': 295, 'item_id': 2},
+				{'title': "10 чашечек", 'image': "images/coffee_10.png", 'description': None, 'price1': "по 49 ₽", 'price2': 490, 'item_id': 3},
+				{'title': "20 чашечек", 'image': "images/coffee_20.png", 'description': None, 'price1': "по 39 ₽", 'price2': 780, 'item_id': 4},
+				{'title': "50 чашечек", 'image': "images/coffee_50.png", 'description': '''Хватит, чтобы угощать целый год.''', 'price1': "по 34 ₽", 'price2': 1690, 'item_id': 5},
+			])
+		return render(request, 'payments/tinkoff_payments.html', data)
 
 	@method_decorator(login_required)
 	def post(self, request, *args, **kwargs):
@@ -497,7 +502,7 @@ def move_post_processing(request):
 	new_topic = Topic.objects.get(pk=move_to_topic)
 
 	if (not perms.may_moderate_topic(request.user, old_topic) or
-			not perms.may_moderate_topic(request.user, new_topic)):
+					not perms.may_moderate_topic(request.user, new_topic)):
 		raise PermissionDenied
 
 	# filter by topic for prevent access violations
