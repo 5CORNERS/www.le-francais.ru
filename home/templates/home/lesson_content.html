@@ -79,17 +79,20 @@
 			{% assign pane_class "tab-pane" %}
 		{% endif %}
 		{% if self.body %}{% check_user_lesson request.user lesson as userlesson %}
-			<div id="body" class="{{ pane_class }}{% if not userlesson and self.need_payments %} faded{% endif %}" role="tabpanel">
-				{% if user.must_pay and self.need_payment %}
+			<div id="body" class="{{ pane_class }}" role="tabpanel">
+				{% if user.must_pay and self.need_payment or request.GET.test %}
 					{% if not userlesson %}
-						{% include_30_block self.body %}
-						<hr>
+						{% include_30_block self.body 400 %}
 						{% if not user.is_authenticated %}
-							<span style="float: left; max-width: 65%">Войдите, чтобы получить возможность прочитать целиком.</span>
-							<a style="float: right; max-width: 35%" href="{% url 'account_login' %}?next={{ request.path }}">Войти</a>
+							<div class="row">
+								<div class="col-md-12"><p>Войдите, чтобы получить возможность прочитать целиком.</p></div>
+								<div class="col-md-12"><a href="{% url 'account_login' %}?next={{ request.path }}"><button class="btn btn-primary button-small" href="{% url 'account_login' %}">Войти</button></a></div>
+							</div>
 						{% else %}
-							<span style="float: left; max-width: 65%">Активируйте, чтобы прочитать целиком.</span>
-							<button class="btn btn-default" style="float: right; max-width: 35%" onclick="activateLesson('button')">Активировать урок</button>
+							<div class="row">
+								<div class="col-md-12"><p>Активируйте, чтобы прочитать целиком.</p></div>
+								<div class="col-md-12"><button class="btn btn-primary button-small" onclick="activateLesson('button')">Активировать урок</button></div>
+							</div>
 						{% endif %}
 					{% else %}
 						{% for block in self.body %}{% include_block block %}{% endfor %}
@@ -136,7 +139,16 @@
 			<div id="mail-archive" class="{{ pane_class }}" role="tabpanel">
 				<h3>Дополнительная информация из&nbsp;почтовой рассылки</h3>
 				<div>
-					{% for block in self.mail_archive %}{% include block %}{% endfor %}
+					{% if user.must_pay and self.need_payment or request.GET.test and not userlesson %}
+						{% include_30_block self.mail_archive 40 %}
+						<div class="row">
+							<div class="col-md-12"><p>Активируйте, чтобы прочитать целиком.</p></div>
+							<div class="col-md-12"><button class="btn btn-primary button-small" onclick="activateLesson('button')">Активировать урок</button></div>
+						</div>
+					{% else %}
+						{% for block in self.mail_archive %}
+							{% include block %}{% endfor %}
+					{% endif %}
 				</div>
 			</div>
 			{% assign pane_class "tab_pane" %}
@@ -161,7 +173,7 @@
                     </div>{% endif %}{% endcomment %}
 <hr>
 <div class="row controls text-center">
-	{% assign prev self.get_prev_sibling %}
+	<div class="col-sm-12">{% assign prev self.get_prev_sibling %}
 	{% assign next self.get_next_sibling %}
 	{% if prev.content_type.name == 'lesson page' %}
 		<a class="pull-left btn btn-default" href="{{ self.get_prev_sibling.get_url }}"> Предыдущий
@@ -172,7 +184,7 @@
 		<a class="pull-right btn btn-default" href="{{ self.get_next_sibling.get_url }}"> Следующий
 			урок </a>
 	{% endif %}
-
+</div>
 </div>
 {% if self.has_own_topic %}
 	{% include 'home/lesson_topic.html' with topic=self.topic %}
