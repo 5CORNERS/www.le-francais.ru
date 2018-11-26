@@ -80,8 +80,9 @@
         <link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/forum.min.css' %}">
-        <link rel="canonical" href="https://www.le-francais.ru{{ self.url_path | slice:"5:" }}"/>
     {% endblock %}
+		{% get_full_path as full_path %}
+		{% block canonical %}<link rel="canonical" href="{% split_canonical full_path %}{% comment %}https://www.le-francais.ru{{ self.url_path | slice:"5:" }}{% endcomment %}"/>{% endblock %}
     {% block extra_css %}
         {# Override this in templates to add extra stylesheets #}
     {% endblock %}
