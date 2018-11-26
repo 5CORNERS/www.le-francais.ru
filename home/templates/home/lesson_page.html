@@ -216,6 +216,7 @@
 {% block meta %}
 	<meta name="nav-root-id" data-value="{{ self.get_nav_root.id }}">
 	<meta name="page-id" data-value="{{ self.id }}">
+	{% if not self.show_in_sitemap %}<meta name=”robots” content=”noindex” />{% endif %}
 {% endblock %}
 
 {% block content %}

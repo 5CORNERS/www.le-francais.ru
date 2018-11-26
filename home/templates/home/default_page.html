@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block body_class %}template-homepage{% endblock %}
-
+{% block meta %}
+	{% if not self.show_in_sitemap %}<meta name=”robots” content=”noindex” />{% endif %}
+{% endblock %}
 {% block content %}
     <div class="container">
         <div class="row">
