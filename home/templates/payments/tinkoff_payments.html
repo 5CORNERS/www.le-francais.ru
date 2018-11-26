@@ -139,6 +139,38 @@
 {% endblock %}
 
 {% block content %}
+	{% if tickets %}
+
+		<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<p class="h1" style="margin-top: 20px">Заголовок</p>
+				<p class="subcaption" style="margin-bottom: 20px">Подзаголовок</p>
+				<div class="row equal">
+					{% for card in cards %}
+						<div class="col-xs-6 col-sm-6 col-md-4 col-lg-5ths">
+							<div class="card card-select" data-cardSelect>
+								<div class="card-container">
+									<div class="card-image-container"><img class="card-image" src="{% static card.image %}"></div>
+								</div>
+								<button type="submit" role="button" onclick="initPayment({{ card.item_id }})" class="btn btn-primary btn-block">Беру!</button>
+							</div>
+						</div>
+						{% if forloop.counter == 2 %}<div class="clearfix visible-xs-block visible-sm-block"></div>{% endif %}
+						{% if forloop.counter == 3 %}<div class="clearfix visible-md-block"></div>{% endif %}
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="alert alert-warning">Пожалуйста, помните: над проектом в режиме полной занятости работает два человека. Это наша работа — помогать вам учить французский. Помогите и вы нам — других источников дохода у нас нет.</div>
+			</div>
+		</div>
+	</div>
+
+	{% else %}
+
 	<div class="container">
 		<div class="row">
 			<div class="col-md-12">
@@ -178,4 +210,6 @@
 			</div>
 		</div>
 	</div>
+
+	{% endif %}
 {% endblock %}
