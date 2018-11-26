@@ -128,11 +128,11 @@ def forum_advert(counter, length):
 
 
 @register.inclusion_tag('tags/include_30_block.html', takes_context=True)
-def include_30_block(context, stream_value):
+def include_30_block(context, stream_value, words_count):
 	html = ''
 	for block in stream_value:
 		html += block.render()
-	return dict(html=html)
+	return dict(html=html, words_count=words_count)
 
 
 @register.inclusion_tag('tags/advert_body.html', takes_context=True)

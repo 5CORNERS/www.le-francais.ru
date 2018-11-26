@@ -24,6 +24,7 @@
         }
     </style>
 {% endblock %}
+{% block extra_js %}{% endblock %}
 {% block content %}
     <script type="text/javascript" src="{% static 'js/jquery.are-you-sure.min.js' %}"></script>
     <script>
@@ -39,8 +40,14 @@
                 <a href="{% url 'account_change_username' %}">Изменить ник на форуме</a>
             </p>
                 <p>
-                    {% message user.cup_amount 'чашечка' 'чашечки' 'чашечек' as message %}
-                    {% if user.has_coffee %}У вас еще {{ message }} в загашнике.{% else %}У вас совсем нет чашечек кофе в запасе. Как же вы будете угощать?!{% endif %}
+
+                {% if user.has_active_lessons %}
+                    {% message user.cup_amount 'билет' 'билета' 'билетов' as message %}
+	                  {% if user.has_coffee %}У вас ещё {{ message }} в загашнике.{% else %}У вас совсем нет билетов в запасе.{% endif %} {# TODO: ссобщение о кол-ве билетов в профиле #}
+                {% else %}
+	                  {% message user.cup_amount 'чашечка' 'чашечки' 'чашечек' as message %}
+                    {% if user.has_coffee %}У вас ещё {{ message }} в загашнике.{% else %}У вас совсем нет чашечек кофе в запасе. Как же вы будете угощать?!{% endif %}
+                {% endif %}
                 </p>
             <button class="coffee-button btn btn-default btn-xs" id="coffee-button"
                     onclick="location.href='{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal'">
