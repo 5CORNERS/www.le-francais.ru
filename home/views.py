@@ -164,13 +164,9 @@ def listen_request(request):
 	except:
 		return HttpResponse('false', status=400)
 
-	if not session.user == None and session.user.must_pay:
-		if lesson in session.user.payed_lessons.all():
-			return HttpResponse('true', status=200)
-		else:
-			return HttpResponse('false', status=200)
-	else:
-		return HttpResponse('true')
+	if session.user is not None and lesson in session.user.payed_lessons.all():
+		return HttpResponse('true', status=200)
+	return HttpResponse('false', status=200)
 
 
 from .models import Payment
@@ -252,7 +248,7 @@ class TinkoffPayments(View):
 	@method_decorator(login_required)
 	def get(self, request):
 		if request.user.saw_message and request.user.must_pay:
-			data = dict(cards=[
+			data = dict(tickets=True, cards=[
 				dict(title="1 билет", image="images/ticket_1-1.png", description=None, price1="По цене стаканчика кофе в <b>McDonalds</b>", price2=68, item_id=6),
 				dict(title="5 билетов", image="images/ticket_5.png", description=None, price1="по 59 ₽", price2=295, item_id=7),
 				dict(title="10 билетов", image="images/ticket_10.png", description=None, price1="по 49 ₽", price2=490, item_id=8),
@@ -260,7 +256,7 @@ class TinkoffPayments(View):
 				dict(title="50 билетов", image="images/ticket_50.png", description=None, price1="по 34 ₽", price2=1690, item_id=10),
 			])
 		else:
-			data = dict(cards=[
+			data = dict(tickets=False, cards=[
 				{'title': "1 чашечка", 'image': "images/coffee_1.png", 'description': None, 'price1': "По цене стаканчика кофе в <b>McDonalds</b>", 'price2': 68, 'item_id': 1},
 				{'title': "5 чашечек", 'image': "images/coffee_5.png", 'description': None, 'price1': "по 59 ₽", 'price2': 295, 'item_id': 2},
 				{'title': "10 чашечек", 'image': "images/coffee_10.png", 'description': None, 'price1': "по 49 ₽", 'price2': 490, 'item_id': 3},

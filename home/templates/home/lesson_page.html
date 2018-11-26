@@ -16,6 +16,67 @@
 	{% check_user_lesson request.user self as userlesson %}
 	<script async type="text/javascript"
 	        src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
+	{% if user.must_pay and self.need_payment or request.GET.test %}
+		<script>
+			function activateLesson(state) {
+				switch (state) {
+					case 'download':
+					case 'ended':
+					{% if not request.user.is_authenticated %}
+						$('#listen-login-required-modal').modal('show');
+					{% elif request.user.saw_message %}
+						$('#lesson-not-activated-simple-modal').modal('show');
+					{% else %}
+						$('#lesson-not-activated-details-continue-modal').modal('show');
+					{% endif %}
+						break;
+					case 'button':
+					{% if request.user.saw_message %}
+						activateLesson('proceed');
+					{% else %}
+						$('#lesson-not-activated-details-activate-modal').modal('show');
+					{% endif %}
+						break;
+					case 'saw':
+						sawMessage('make_true');
+						break;
+					case 'proceed':
+						$.ajax({
+							type: 'POST',
+							url: '{% url "activate:activate_lesson" %}',
+							data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'lesson_number': '{{ self.lesson_number }}'},
+							datatype: 'json',
+							success: function (r) {
+								if (r.result === 'SUCCESS') {
+									$('#activated-message-success').show();
+									$('#ticket-count').text(r.left);
+									$('#lesson-audio').load()
+								} else if (r.result === 'ZERO_CUPS') {
+									$('#activated-message-fail').show();
+									$('#activated-message-error-description').text(r.description)
+								} else {
+									$('#activated-message-fail').show();
+									$('#activated-message-error-description').text(r.description)
+								}
+								$('#lesson-activated-modal').modal('show');
+							}
+						});
+						break;
+				}
+			}
+
+			window.addEventListener('lessonPlayerReady', function () {
+				let downloadButton = $('.audioplayer-download-button')[0];
+				downloadButton.removeAttribute('href');
+				downloadButton.addEventListener('click', function () {
+					activateLesson('download');
+				});
+				$('#lesson-audio')[0].addEventListener('ended', function () {
+					activateLesson('ended')
+				});
+			})
+		</script>
+	{% endif %}
 	<script>
 		function getSuccessButton() {
 			let new_button = $(
@@ -36,12 +97,10 @@
 				"</button>");
 			$("#coffee-button").replaceWith(new_button);
 		}
-
 		function playCoffeeSound() {
 			let coffeeAudio = new Audio('{% static 'snd/coffee.mp3' %}');
 			coffeeAudio.play();
 		}
-
 		function showActivateMessage() {
 			if (sawMessage()) {
 				$('#lesson-not-activated-subsequent-modal').show()
@@ -49,7 +108,6 @@
 				$('#lesson-not-activated-first-modal').show()
 			}
 		}
-
 		function sawMessage(val) {
 			switch (val) {
 				case 'get_state': {
@@ -80,7 +138,6 @@
 			}
 
 		}
-
 		function giveMeCoffee() {
 			$.ajax({
 				type: "POST",
@@ -114,53 +171,7 @@
 				},
 			});
 		}
-
 	</script>
-	{% if user.must_pay and self.need_payment %}
-		<script>
-			function activateLesson(state) {
-				switch (state) {
-					case 'download':
-					case 'ended':
-					{% if request.user.saw_message %}
-						$('#lesson-not-activated-simple-modal').modal('show');
-					{% else %}
-						$('#lesson-not-activated-details-continue-modal').modal('show');
-					{% endif %}
-						break;
-					case 'button':
-					{% if request.user.saw_message %}
-						activateLesson('proceed');
-					{% else %}
-						$('#lesson-not-activated-details-activate-modal').modal('show');
-					{% endif %}
-						break;
-					case 'saw':
-						sawMessage('make_true');
-						break;
-					case 'proceed':
-						$.ajax({
-							type: 'POST',
-							url: '{% url "activate:activate_lesson" %}',
-							data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'lesson_number': '{{ self.lesson_number }}'},
-							datatype: 'json',
-							success: function (r) {
-								if (r.result === 'SUCCESS') {
-									$('#activated-message-success').show();
-									$('#ticket-count').text(r.left);
-									$('#lesson-audio').load()
-								} else {
-									$('#activated-message-fail').show();
-									$('#activated-message-error-description').text(r.description)
-								}
-								$('#lesson-activated-modal').modal('show');
-							}
-						});
-						break;
-				}
-			}
-		</script>
-	{% endif %}
 
 	{% if request.GET.modal_open %}
 		{% with modal_id=request.GET.modal_open %}
@@ -177,20 +188,6 @@
 			</script>
 		{% endwith %}
 	{% endif %}
-	{% if user.must_pay and self.need_payment %}
-		<script>
-			window.addEventListener('lessonPlayerReady', function () {
-				$('#lesson-audio')[0].addEventListener('ended', function () {
-					activateLesson('ended')
-				});
-				let downloadButton = $('.audioplayer-download-button')[0];
-				downloadButton.removeAttribute('href');
-				downloadButton.addEventListener('click', function () {
-					activateLesson('download');
-				});
-			})
-		</script>
-	{% endif %}
 {% endblock %}
 
 {% block extra_css %}
@@ -204,18 +201,15 @@
 			margin-bottom: 1rem;
 			margin-top: 0.5rem;
 		}
-
 		.coffee-button-image {
 			margin-right: 5px;
 			display: block;
 			height: 2.5em
 		}
-
 		.coffee-button-text {
 			border-left: 1px solid #ccc;
 			padding-left: 5px;
 		}
-
 	</style>
 {% endblock %}
 
@@ -438,22 +432,8 @@
 			</div>
 		</div>
 	{% endblock %}
-	{% np4lesson request.user self as np4lesson_flag %}
-	{% if user.must_pay and self.need_payment %}
-		{% if not request.user.is_authenticated %}
-			{% comment %}Need login modal window{% endcomment %}
-			<div class="modal" id="listen-login-required-modal" tabindex="-1" role="dialog">
-				<div class="modal-dialog" role="document">
-					<div class="modal-content">
-						<div class="modal-header"></div>
-						<div class="modal-body">
-							При нажатии на download или при доигрывании звука до конца появляется модальное окно: залогинься, чтобы иметь возможность скачать/послушать дальше.
-						</div>
-						<div class="modal-footer"></div>
-					</div>
-				</div>
-			</div>
-		{% else %}
+	{% if user.must_pay and self.need_payment or request.GET.test %}
+		{% if request.user.is_authenticated %}
 			<div class="modal" id="lesson-not-activated-simple-modal" tabindex="-1" role="dialog" aria-labelledby="lesson-not-activated-simple-modal-label">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
@@ -501,6 +481,19 @@
 						<div class="modal-footer">
 							<button type="button" class="btn btn-default" onclick="$('#lesson-activated-modal').modal('hide')">Ok</button>
 						</div>
+					</div>
+				</div>
+			</div>
+		{% else %}
+			{% comment %}Need login modal window{% endcomment %}
+			<div class="modal" id="listen-login-required-modal" tabindex="-1" role="dialog">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header"></div>
+						<div class="modal-body">
+							Залогинься, чтобы иметь возможность скачать/послушать дальше.
+						</div>
+						<div class="modal-footer"></div>
 					</div>
 				</div>
 			</div>
