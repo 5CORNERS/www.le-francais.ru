@@ -415,7 +415,8 @@ ArticlePage.content_panels = ArticlePage.content_panels + [
 	StreamFieldPanel('body'),
 ]
 ArticlePage.promote_panels = ArticlePage.promote_panels + [
-	FieldPanel('menu_title')
+	FieldPanel('menu_title'),
+	FieldPanel('show_in_sitemap'),
 ]
 ArticlePage.settings_panels = ArticlePage.settings_panels + [
 	FieldPanel('allow_comments'),
