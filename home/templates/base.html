@@ -89,8 +89,8 @@
         <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fontawesome-all.css' %}">
         <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fa-regular.css' %}">
     {% endblock %}
-
-    <link rel="canonical" href="https://www.le-francais.ru{{ self.url_path | slice:"5:" }}"/>
+		{% get_full_path as full_path %}
+    {% block canonical %}<link rel="canonical" href="{% split_canonical full_path %}{% comment %}https://www.le-francais.ru{{ self.url_path | slice:"5:" }}{% endcomment %}"/>{% endblock %}
 
     {% block extra_css %}
         {# Override this in templates to add extra stylesheets #}

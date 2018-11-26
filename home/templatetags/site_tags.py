@@ -22,6 +22,11 @@ def safe_int(value):
 
 
 @register.simple_tag()
+def split_canonical(url):
+	return url.split('$')[0]
+
+
+@register.simple_tag()
 def t2seconds(value):
 	pattern = r'(?:(?P<hours>\d+):)?(?P<minutes>\d+):(?P<seconds>\d+)'
 	match = re.match(pattern, value)
