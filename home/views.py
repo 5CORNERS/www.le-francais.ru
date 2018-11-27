@@ -164,6 +164,9 @@ def listen_request(request):
 	except:
 		return HttpResponse('false', status=400)
 
+	if not lesson.need_payment:
+		return HttpResponse('true', status=200)
+
 	if session.user is not None and lesson in session.user.payed_lessons.all():
 		return HttpResponse('true', status=200)
 	return HttpResponse('false', status=200)
