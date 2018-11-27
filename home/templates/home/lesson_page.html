@@ -494,7 +494,7 @@
 						<div class="modal-body">
 							Залогинься, чтобы иметь возможность скачать/послушать дальше.
 						</div>
-						<div class="modal-footer"></div>
+						<div class="modal-footer"><a href="{% url 'account_login' %}?next={{ request.path }}"><button class="btn btn-primary button-small" href="{% url 'account_login' %}">Войти</button></a></div>
 					</div>
 				</div>
 			</div>
