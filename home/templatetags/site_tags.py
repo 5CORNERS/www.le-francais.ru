@@ -23,7 +23,7 @@ def safe_int(value):
 
 @register.simple_tag()
 def split_canonical(url):
-	return url.split('$')[0]
+	return url.split('==')[0]
 
 
 @register.simple_tag()
