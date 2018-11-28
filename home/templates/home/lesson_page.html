@@ -65,12 +65,14 @@
 				}
 			}
 
-			window.addEventListener('lessonPlayerReady', function () {
+			window.addEventListener('downloadButtonReady', function(){
 				let downloadButton = $('.audioplayer-download-button')[0];
 				downloadButton.removeAttribute('href');
 				downloadButton.addEventListener('click', function () {
 					activateLesson('download');
 				});
+			});
+			window.addEventListener('lessonPlayerReady', function () {
 				$('#lesson-audio')[0].addEventListener('ended', function () {
 					activateLesson('ended')
 				});
