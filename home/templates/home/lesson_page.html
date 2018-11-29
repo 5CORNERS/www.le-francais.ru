@@ -67,7 +67,6 @@
 
 			window.addEventListener('downloadButtonReady', function(){
 				let downloadButton = $('.audioplayer-download-button')[0];
-				downloadButton.removeAttribute('href');
 				downloadButton.addEventListener('click', function () {
 					activateLesson('download');
 				});
