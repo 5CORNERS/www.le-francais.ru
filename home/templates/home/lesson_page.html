@@ -64,14 +64,12 @@
 						break;
 				}
 			}
-
-			window.addEventListener('downloadButtonReady', function(){
+			
+			window.addEventListener('lessonPlayerReady', function () {
 				let downloadButton = $('.audioplayer-download-button')[0];
 				downloadButton.addEventListener('click', function () {
 					activateLesson('download');
 				});
-			});
-			window.addEventListener('lessonPlayerReady', function () {
 				let lessonAudio = $('#lesson-audio')[0];
 				lessonAudio.addEventListener('ended', function () {
 					activateLesson('ended')
