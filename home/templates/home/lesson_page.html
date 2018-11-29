@@ -443,7 +443,7 @@
 						<div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 						</div>
-						<div class="modal-body">Нужно активировать чтобы прослушать/скачать урок</div>
+						<div class="modal-body">Пожалуйста, активируйте урок, чтобы получить доступ ко всем его материалам.</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-default" data-dismiss="modal">ОК</button>
 						</div>
@@ -476,7 +476,17 @@
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						<div class="modal-header"></div>
-						<div class="modal-body">Всё объясняем</div>
+						<div class="modal-body">
+							<p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до последнего.</p>
+							<p> Сегодня стоит вопрос выживания всего проекта. Мы все перепробовали. И у нас не осталось другого выхода — нам приходится сделать часть уроков платными. Их цена символическая — меньше стоимости одной поездки на автобусе (для
+								тех, кто возьмет билетов пачку). Чашечки кофе тут тоже принимаются.</p>
+							<p>Чтобы это не застало вас в расплох, мы пускаем в минус и позволяем несколько раз прокатиться «зайцем».</p>
+							<p>У нас есть специальные предложения для студентов, пенсионеров и людей, как и мы, испытывающих большие затруднения в средствах — все детали мы опишем в письме, которое автоматически будет направлено вам на e-mail.</p>
+							<p>Пожалуйста, прочтите мое обращение ниже под спойлером.</p>
+							<details>
+								<summary></summary>
+							</details>
+						</div>
 						<div class="modal-footer">
 							<button data-dismiss="modal" onclick="activateLesson('saw');activateLesson('proceed')" id="lesson-not-activated-activate-button" class="btn btn-default">Активировать</button>
 						</div>
@@ -504,7 +514,7 @@
 					<div class="modal-content">
 						<div class="modal-header"></div>
 						<div class="modal-body">
-							Залогинься, чтобы иметь возможность скачать/послушать дальше.
+							<p>Пожалуйста, войдите на сайт под своим именем. Доступ к материалам уроков могут получить только зарегистрированные пользователи.</p>
 						</div>
 						<div class="modal-footer"><a href="{% url 'account_login' %}?next={{ request.path }}"><button class="btn btn-primary button-small" href="{% url 'account_login' %}">Войти</button></a></div>
 					</div>
