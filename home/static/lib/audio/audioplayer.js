@@ -127,6 +127,7 @@
 
 					thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="' + source + '" class="' + cssClass.downloadButton + ' glyphicon glyphicon-download"></a></div>');
 					event = new CustomEvent('downloadButtonReady');
+					window.dispatchEvent(event);
 					$(theAudio).attr('id', 'lesson-audio');
 					$(theAudio).attr('number', lesson_number);
 				}else if(downloadable === 'empty'){
