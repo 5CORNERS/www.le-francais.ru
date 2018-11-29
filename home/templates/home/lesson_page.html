@@ -73,7 +73,8 @@
 				});
 			});
 			window.addEventListener('lessonPlayerReady', function () {
-				$('#lesson-audio')[0].addEventListener('ended', function () {
+				let lessonAudio = $('#lesson-audio')[0];
+				lessonAudio.addEventListener('ended', function () {
 					activateLesson('ended')
 				});
 			})
