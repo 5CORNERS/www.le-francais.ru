@@ -258,6 +258,7 @@ class TinkoffPayments(View):
 				dict(title="20 билетов", image="images/ticket_20.png", description=None, price1="по 39 ₽", price2=780, item_id=9),
 				dict(title="50 билетов", image="images/ticket_50.png", description=None, price1="по 34 ₽", price2=1690, item_id=10),
 			])
+			return render(request, 'payments/tinkoff_payments_tickets.html', data)
 		else:
 			data = dict(tickets=False, cards=[
 				{'title': "1 чашечка", 'image': "images/coffee_1.png", 'description': None, 'price1': "По цене стаканчика кофе в <b>McDonalds</b>", 'price2': 68, 'item_id': 1},
@@ -266,7 +267,7 @@ class TinkoffPayments(View):
 				{'title': "20 чашечек", 'image': "images/coffee_20.png", 'description': None, 'price1': "по 39 ₽", 'price2': 780, 'item_id': 4},
 				{'title': "50 чашечек", 'image': "images/coffee_50.png", 'description': '''Хватит, чтобы угощать целый год.''', 'price1': "по 34 ₽", 'price2': 1690, 'item_id': 5},
 			])
-		return render(request, 'payments/tinkoff_payments.html', data)
+			return render(request, 'payments/tinkoff_payments.html', data)
 
 	@method_decorator(login_required)
 	def post(self, request, *args, **kwargs):

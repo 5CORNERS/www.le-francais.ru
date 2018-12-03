@@ -15,7 +15,7 @@
 			padding-right: 15px;
 			padding-left: 15px;
 		}
-		
+
 		@media (max-width: 768px) {
 			.col-xs-6 {
 				padding-right: 7px;
@@ -66,7 +66,7 @@
 		}
 
 		.card-image {
-			margin: 5px;
+			margin: 5px 0;
 		}
 
 		.card-header {
@@ -139,30 +139,17 @@
 {% endblock %}
 
 {% block content %}
-
 	<div class="container">
 		<div class="row">
 			<div class="col-md-12">
-				<p class="h1" style="margin-top: 20px">Запаситесь кофейком!</p>
-				<p class="subcaption" style="margin-bottom: 20px">{% comment %}Чтобы чем-то угощать, надо это что-то иметь :){% endcomment %}Чтобы угощать много раз за каждый урок.</p>
+				<p class="h1" style="margin-top: 20px">Приобрести билетики</p>
+				<p class="subcaption" style="margin-bottom: 20px">Подзаголовок</p>
 				<div class="row equal">
 					{% for card in cards %}
 						<div class="col-xs-6 col-sm-6 col-md-4 col-lg-5ths">
 							<div class="card card-select" data-cardSelect>
 								<div class="card-container">
-									<div class="card-header">{{ card.title | safe }}</div>
-									{% if forloop.first %}
-										<div class="card-description" style="padding-left: 12px">
-											<div class="card-description-text">{% if card.price1 %}{{ card.price1 | safe }}{% endif %}</div>
-										</div>
-									{% else %}
-										<div class="card-price">{% if card.price1 %}{{ card.price1 | safe }}{% endif %}</div>
-									{% endif %}
 									<div class="card-image-container"><img class="card-image" src="{% static card.image %}"></div>
-									<div class="card-fullprice">{% if card.price2 %}{{ card.price2 | safe }} ₽{% else %}&nbsp;{% endif %}</div>
-									<div class="card-description">
-										<div class="card-description-text">{% if card.description %}{{ card.description | safe }}{% endif %}</div>
-									</div>
 								</div>
 								<button type="submit" role="button" onclick="initPayment({{ card.item_id }})" class="btn btn-primary btn-block">Беру!</button>
 							</div>
@@ -179,5 +166,4 @@
 			</div>
 		</div>
 	</div>
-
 {% endblock %}
