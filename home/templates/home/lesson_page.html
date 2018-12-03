@@ -48,6 +48,7 @@
 							datatype: 'json',
 							success: function (r) {
 								if (r.result === 'SUCCESS') {
+									$('#activated-message-fail').hide();
 									$('#activated-message-success').show();
 									$('#ticket-count').text(r.left);
 									$('#lesson-audio').load()
@@ -55,6 +56,7 @@
 									$('#activated-message-fail').show();
 									$('#activated-message-error-description').text(r.description)
 								} else {
+									$('#activated-message-success').hide();
 									$('#activated-message-fail').show();
 									$('#activated-message-error-description').text(r.description)
 								}
@@ -64,7 +66,7 @@
 						break;
 				}
 			}
-			
+
 			window.addEventListener('lessonPlayerReady', function () {
 				let downloadButton = $('.audioplayer-download-button')[0];
 				downloadButton.addEventListener('click', function () {

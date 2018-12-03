@@ -223,9 +223,9 @@ class ActivateLesson(View):
 					except BaseException as e:
 						data = dict(result="ERROR", description="Failed to do something: " + str(e))
 				else:
-					data = dict(result="ZERO_CUPS", description="У Вас закончились тикеты :(")
+					data = dict(result="ZERO_CUPS", description="У Вас закончились билетики :(")
 			else:
-				data = dict(result="ALREADY", description='Вы уже угощали меня за этот урок :)')
+				data = dict(result="ALREADY", description='Вы уже активировали этот урок :)')
 		else:
 			data = dict(result="NOT_AUTH", description="Not authenticated")
 		return JsonResponse(data)
