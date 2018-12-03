@@ -56,9 +56,9 @@
 								</a>
 							</li>
                                 <li><a href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">Пополнить запасы</a> </li>
-								<li class="divider"></li>
+								{% if request.user.is_staff%}<li class="divider"></li>
 								<li class="{{ menu_admin }}"><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a>
-								</li>
+								</li>{% endif %}
 
               <li class="divider"></li>
 
