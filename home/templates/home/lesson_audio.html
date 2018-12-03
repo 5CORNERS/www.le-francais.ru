@@ -11,8 +11,8 @@
 			<!-- button trigger by-me-a-coffee-modals -->
 			{% if user.must_pay and self.need_payment or request.GET.test %}
 				{% if user.is_authenticated %}
-					<button class="btn btn-primary btn-sm"{% if userlesson %} disabled="disabled" {% endif %}onclick="activateLesson('button')"
-					style="user-select: auto;font-size: 11px;padding: 0 10px;margin: 10px 0;">Активировать<br>урок</button>
+					<button id="activate-button" class="btn {% if userlesson %}btn-success{% else %}btn-primary{% endif %} btn-sm"{% if userlesson %} disabled="disabled" {% endif %}onclick="activateLesson('button')"
+					style="user-select: auto;font-size: 11px;padding: 0 10px;margin: 10px 0;">{% if userlesson %}Урок<br>активирован{% else %}Активировать<br>урок{% endif %}</button>
 				{% endif %}
 			{% else %}
 				{% if not userlesson %}
