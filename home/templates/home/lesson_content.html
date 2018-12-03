@@ -78,7 +78,7 @@
 			</div>
 			{% assign pane_class "tab-pane" %}
 		{% endif %}
-		{% if self.body %}{% check_user_lesson request.user lesson as userlesson %}
+		{% if self.body %}{% check_user_lesson request.user self as userlesson %}
 			<div id="body" class="{{ pane_class }}" role="tabpanel">
 				{% if user.must_pay and self.need_payment or request.GET.test %}
 					{% if not userlesson %}

@@ -18,6 +18,11 @@
 	        src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
 	{% if user.must_pay and self.need_payment or request.GET.test %}
 		<script>
+			function disableActivButton() {
+				let button = $('#activate-button');
+				button.removeClass('btn-primary').addClass('btn-success');
+				button.disabled = true;
+			}
 			function activateLesson(state) {
 				switch (state) {
 					case 'download':
@@ -48,10 +53,11 @@
 							datatype: 'json',
 							success: function (r) {
 								if (r.result === 'SUCCESS') {
+									disableActivButton()
 									$('#activated-message-fail').hide();
 									$('#activated-message-success').show();
 									$('#ticket-count').text(r.left);
-									$('#lesson-audio').load()
+									$('#lesson-activated-modal').on('hide.bs.modal', location.reload())
 								} else if (r.result === 'ZERO_CUPS') {
 									$('#activated-message-fail').show();
 									$('#activated-message-error-description').text(r.description)
