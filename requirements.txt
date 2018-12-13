@@ -16,7 +16,7 @@ oauth2client==4.0.0
 django-allauth==0.37.0
 social-auth-core
 social-auth-app-django
-markdown
+markdown==2.6.11
 urllib3
 pymdown-extensions
 django-mailer
@@ -26,7 +26,6 @@ django-user-sessions
 django-cron
 django-guardian
 django-braces
-
 APScheduler==3.0.0
 
 django-storages
