@@ -322,10 +322,15 @@ class LessonPage(Page):
 		return "LessonPage " + str(self.lesson_number)
 
 	def add_lesson_to_user(self, user):
+		if user.cup_amount >= 1:
+			user.add_cups(-1)
+		elif user.cup_credit >= 1:
+			user.add_cups(-1)
+			user.add_credit_cups(-1)
+		else:
+			return False
 		ul = UserLesson(user=user, lesson=self)
 		ul.save()
-		user.cup_amount -= 1
-		user.save()
 		return user.cup_amount
 
 	def payed(self, user: User):
