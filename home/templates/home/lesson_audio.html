@@ -2,8 +2,8 @@
 <div class="block-audio">
 	<div class="row">
 		<div class="col-md-8">
-			<audio id="lesson-audio" data-downloadable{% if user.must_pay and self.need_payment or request.GET.test %}{% if not user.is_authenticated or not userlesson %}="empty"{% endif %}{% endif %} number="{{ self.lesson_number }}"{% if request.GET.t %} set-time="{{ request.GET.t }}"{% elif request.GET.T %} set-time="{% t2seconds request.GET.T %}"{% endif %}>
-				<source src="{% if self.audio_material %}{{ self.audio_material }}{% elif user.is_staff or request.GET.test %}https://files.le-francais.ru/listen.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}" type="audio/mpeg">
+			<audio onerror="reloadLessonUrl(this)" preload="auto" id="lesson-audio" data-downloadable{% if user.must_pay and self.need_payment or request.GET.test %}{% if not user.is_authenticated or not userlesson %}="empty"{% endif %}{% endif %} number="{{ self.lesson_number }}"{% if request.GET.t %} set-time="{{ request.GET.t }}"{% elif request.GET.T %} set-time="{% t2seconds request.GET.T %}"{% endif %}>
+				<source src="{% if self.audio_material %}{{ self.audio_material }}{% elif user.is_staff or request.GET.test %}{% if userlesson %}https://files.le-fancais.ru/listen.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}{% else %}https://files.le-francais.ru/lecons/coupe/french-{{ self.lesson_number }}_coupe.mp3{% endif %}{% else %}//files.le-francais.ru/lecons/french-{{ self.lesson_number }}.mp3{% endif %}" type="audio/mpeg">
 			</audio>
 		</div>
 		<div class="col-md-4">
@@ -11,12 +11,11 @@
 			<!-- button trigger by-me-a-coffee-modals -->
 			{% if user.must_pay and self.need_payment or request.GET.test %}
 				{% if user.is_authenticated %}
-					<button id="activate-button" class="btn {% if userlesson %}btn-success{% else %}btn-primary{% endif %} btn-sm"{% if userlesson %} disabled="disabled" {% endif %}onclick="activateLesson('button')"
-					style="user-select: auto;font-size: 11px;padding: 0 10px;margin: 10px 0;">{% if userlesson %}Урок<br>активирован{% else %}Активировать<br>урок{% endif %}</button>
+					<img class="new-svg-button activate-button{% if userlesson %} activated{% endif %}" src="{% if userlesson %}{% static 'images/buttons/activated.svg' %}{% else %}{% static 'images/buttons/activate.svg' %}{% endif %}" onclick="activateLesson('button')">
 				{% endif %}
 			{% else %}
 				{% if not userlesson %}
-					<img class="" id="coffee-button"
+					<img class="new-svg-button" id="coffee-button"
 							{% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
 							 data-toggle="modal"
 							 data-target="#give-me-a-coffee-modal"
@@ -26,11 +25,11 @@
 							 data-toggle="modal"
 							 data-target="#give-me-a-coffee-modal"
 							{% endif %}
-							 src="{% static "images/buttons/button-default-min.png" %}"
-							 onmousedown="$('#coffee-button').attr('src', '{% static 'images/buttons/button-active-min.png' %}')"
+							 src="{% static "images/buttons/new-button.svg" %}"
+							 {% comment %}onmousedown="$('#coffee-button').attr('src', '{% static 'images/buttons/button-active-min.png' %}')"
 							 onfocus="$('#coffee-button').attr('src', '{% static 'images/buttons/button-focus-min.png' %}')"
 							 onmouseover="$('#coffee-button').attr('src', '{% static 'images/buttons/button-hover-min.png' %}')"
-							 onmouseout="$('#coffee-button').attr('src', '{% static 'images/buttons/button-default-min.png' %}')">
+							 onmouseout="$('#coffee-button').attr('src', '{% static 'images/buttons/button-default-min.png' %}')"{% endcomment %}>
 					{#<img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">#}
 					{#<div id="coffee-button-text" class="coffee-button-text">Вам ведь понравился урок?<br>Угостите меня кофейком!</div>#}
 				{% else %}

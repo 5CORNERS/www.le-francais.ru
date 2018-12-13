@@ -57,12 +57,34 @@ class User(AbstractUser):
 
 	saw_message = models.BooleanField(default=False)
 
-	cup_amount = models.IntegerField(default=0)
+	_cup_amount = models.IntegerField(default=0)
+	_cup_credit = models.IntegerField(default=0)
+
+	def add_cups(self, n):
+		self._cup_amount += n
+		self.save()
+
+	def add_credit_cups(self, n):
+		self._cup_credit += n
+		self.save()
+
+	@property
+	def cup_amount(self):
+		return self._cup_amount
+
+	@property
+	def cups_amount(self):
+		return self._cup_amount
+
+	@property
+	def cup_credit(self):
+		return self._cup_credit
+
 
 	payed_lessons = models.ManyToManyField('home.LessonPage', through='home.UserLesson', related_name='paid_users')
 
 	def activate_payment(self, payment):
-		self.cup_amount = self.cup_amount + payment.cups_amount
+		self.add_cups(payment.cups_amount)
 		self.save()
 
 
@@ -118,8 +140,7 @@ def activate_tinkoff_payment(sender, **kwargs):
 	for item in items:
 		if item.category == 'coffee_cups':
 			quantity += item.site_quantity
-	user.cup_amount += quantity
-	user.save()
+	user.add_cups(quantity)
 
 
 @receiver(payment_refund)
@@ -131,5 +152,5 @@ def deactivate_tinkoff_payment(sender, **kwargs):
 	for item in items:
 		if item.category == 'coffee_cups':
 			quantity += item.site_quantity
-	user.cup_amount -= quantity
+	user.add_cups(-quantity)
 	user.save()
