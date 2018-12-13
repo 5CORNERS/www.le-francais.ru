@@ -18,6 +18,70 @@
 	        src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
 	{% if user.must_pay and self.need_payment or request.GET.test %}
 		<script>
+			function reloadLessonUrl() {
+				$.ajax({
+					type: 'POST',
+					url: '/api/get_lesson_url/',
+					data: {
+						'csrfmiddlewaretoken': "{{ csrf_token }}",
+						'lesson_number': '{{ self.lesson_number }}'
+					},
+					datatype: 'json',
+					success: function (r) {
+						if (r.status === 200){
+							let audio = $('#lesson-audio');
+							let audioTime = audio.currentTime;
+							audio.src(r.lesson_url);
+							audio.load();
+							audio.currentTime = audioTime;
+							audio.play();
+						}
+						else {}
+					}
+				})
+			}
+			function errHandle(a){
+				console.log("Error " + a.error.code + "; details: " + a.error.message);
+			}
+
+			activateSounds = ['composter-01.mp3','composter-02.mp3','composter-03.mp3','composter-04.mp3'];
+
+			function playActivateSound(){
+				let index = Math.floor(Math.random() * 1000) % 4;
+				console.log(index);
+        let src = ('https://files.le-francais.ru/sound/' + activateSounds[index]);
+				let audio = $('<audio class="sound-player" autoplay="autoplay" style="display:none;">'
+					+ '<source src="' + src + '" />'
+					+ '<embed src="' + src + '" hidden="true" autostart="true" loop="false"/>'
+					+ '</audio>'
+				).appendTo('body');
+				audio[0].play();
+			}
+			function activate() {
+				playActivateSound();
+				$('#activated-message-waiting').show();
+				$('#activated-dismiss-button').hide()
+				$('#lesson-activated-modal').modal('show');
+				$.ajax({
+					type: 'POST',
+					url: '{% url "activate:activate_lesson" %}',
+					data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'lesson_number': '{{ self.lesson_number }}'},
+					datatype: 'json',
+					success: function (r) {
+						if (r.result === 'SUCCESS') {
+							disableActivButton();
+							window.location.href = window.location.pathname+"?"+$.param({'modal_open':'lesson-activated-modal'});
+						} else if (r.result === 'ZERO_CUPS') {
+							$('#activated-message-fail').show();
+							$('#activated-message-error-description').text(r.description)
+						} else {
+							$('#activated-message-success').hide();
+							$('#activated-message-fail').show();
+							$('#activated-message-error-description').text(r.description)
+						}
+					}
+				});
+			}
 			function disableActivButton() {
 				let button = $('#activate-button');
 				button.removeClass('btn-primary').addClass('btn-success');
@@ -46,34 +110,14 @@
 						sawMessage('make_true');
 						break;
 					case 'proceed':
-						$.ajax({
-							type: 'POST',
-							url: '{% url "activate:activate_lesson" %}',
-							data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'lesson_number': '{{ self.lesson_number }}'},
-							datatype: 'json',
-							success: function (r) {
-								if (r.result === 'SUCCESS') {
-									disableActivButton()
-									$('#activated-message-fail').hide();
-									$('#activated-message-success').show();
-									$('#activated-message-ticket-count').text(r.left);
-									$('#lesson-activated-modal').on('hide.bs.modal', location.reload())
-								} else if (r.result === 'ZERO_CUPS') {
-									$('#activated-message-fail').show();
-									$('#activated-message-error-description').text(r.description)
-								} else {
-									$('#activated-message-success').hide();
-									$('#activated-message-fail').show();
-									$('#activated-message-error-description').text(r.description)
-								}
-								$('#lesson-activated-modal').modal('show');
-							}
-						});
+					{% if not userlesson %}
+						activate();
+					{% endif %}
 						break;
 				}
 			}
 
-			window.addEventListener('lessonPlayerReady', function () {
+			{% if not userlesson %}window.addEventListener('lessonPlayerReady', function () {
 				let downloadButton = $('.audioplayer-download-button')[0];
 				downloadButton.addEventListener('click', function () {
 					activateLesson('download');
@@ -82,7 +126,7 @@
 				lessonAudio.addEventListener('ended', function () {
 					activateLesson('ended')
 				});
-			})
+			}){% endif %}
 		</script>
 	{% endif %}
 	<script>
@@ -186,6 +230,11 @@
 			<script>
 				$(document).ready(function () {
 					$('#{{ modal_id }}').modal('show');
+					{% if modal_id == 'lesson-activated-modal' %}
+						$('#activated-message-fail').hide();
+						$('#activated-message-success').show();
+						$('#activated-message-ticket-count').text("{% message request.user.cups_amount 'тикет' 'тикета' 'тикетов' %}");
+					{% endif %}
 					{% get_full_path as full_path %}
 					{% if 'payment_success' in request.GET %}
 						history.pushState({}, title = '', url = "{{ full_path }}");
@@ -202,6 +251,35 @@
 	<link rel="stylesheet" href="{% static 'css/lesson.css' %}">
 	<link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
 	<style>
+		.new-svg-button {
+			cursor: pointer;
+			height: 40px;
+		}
+
+		.new-svg-button:hover{
+        -webkit-filter: drop-shadow( 5px 5px 5px #7d7d7d );
+                filter: drop-shadow( 5px 5px 5px #7d7d7d );
+		}
+		.new-svg-button:active{
+        -webkit-filter: drop-shadow( 2px 2px 2px #7d7d7d);
+                filter: drop-shadow( 2px 2px 2px #7d7d7d );
+		}
+		.new-svg-button:focus{
+        outline: -webkit-focus-ring-color auto 5px;
+		}
+
+		.activate-button{
+			height: 32.5px;
+			margin-top: 1rem;
+			margin-bottom: 1rem;
+		}
+
+		.activated {
+			cursor: not-allowed;
+			-webkit-filter: none !important;
+			        filter: none !important;
+		}
+
 		#coffee-button {
 			cursor: pointer;
 			display: flex;
@@ -209,6 +287,17 @@
 			margin-bottom: 1rem;
 			margin-top: 0.5rem;
 		}
+		#coffee-button:hover {}
+		#coffee-button:active {
+			background-image: none;
+			outline: 0;
+			-webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+			box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+			color: #333;
+			background-color: #e6e6e6;
+			border-color: #adadad;
+		}
+		#coffee-button:focus {}
 		.coffee-button-image {
 			margin-right: 5px;
 			display: block;
@@ -504,11 +593,12 @@
 					<div class="modal-content">
 						<div class="modal-header"></div>
 						<div class="modal-body">
-							<div id="activated-message-success" style="display: none">У вас осталось <span id="activated-message-ticket-count">n</span> тикетов</div>
-							<div id="activated-message-fail" style="display: none;">Ошибка: <span id="activated-message-error-description"></span></div>
+							<div id="activated-message-waiting" style="display: none">Урок активируется...</div>
+							<div id="activated-message-success" style="display: none"><p>Урок активирован. У вас осталось <span id="activated-message-ticket-count">n тикетов</span>.</p></div>
+							<div id="activated-message-fail" style="display: none;"><p>Ошибка: <span id="activated-message-error-description"></span></p></div>
 						</div>
 						<div class="modal-footer">
-							<button type="button" class="btn btn-default" onclick="$('#lesson-activated-modal').modal('hide')">Ok</button>
+							<button type="button" class="btn btn-default" id="activated-dismiss-button" onclick="$('#lesson-activated-modal').modal('hide')">Ok</button>
 						</div>
 					</div>
 				</div>

@@ -165,11 +165,16 @@ def listen_request(request):
 		return HttpResponse('false', status=400)
 
 	if not lesson.need_payment:
-		return HttpResponse('true', status=200)
+		return HttpResponse('full', status=200)
 
-	if session.user is not None and lesson in session.user.payed_lessons.all():
-		return HttpResponse('true', status=200)
-	return HttpResponse('false', status=200)
+	if session.user is not None and lesson in session.user.payed_lessons.all() and request.session.ip == request.POST['ipadress']:
+		return HttpResponse('full', status=200)
+	return HttpResponse('short', status=200)
+
+
+def get_lesson_url(request):
+	lesson_number = request.POST['lesson_number']
+	return JsonResponse(dict(lesson_url='http://192.168.0.27:8080/listen.php?number='+str(lesson_number)+'&key='+request.session.session_key))
 
 
 from .models import Payment
@@ -210,7 +215,7 @@ class ActivateLesson(View):
 		lesson = LessonPage.objects.get(lesson_number=request.POST['lesson_number'])
 		if request.user.is_authenticated():
 			if lesson not in request.user.payed_lessons.all():
-				if request.user.cup_amount >= 1:
+				if request.user.cup_amount >= 1 or request.user.cup_credit >= 1:
 					try:
 						cup_amount = lesson.add_lesson_to_user(request.user)
 						# send_mail(

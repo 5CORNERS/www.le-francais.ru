@@ -15,6 +15,7 @@ site_import_urls = [
 api_urls = [
     url(r'^nav/$', views.get_nav_data),
     url(r'^listen/$', views.listen_request),
+    url(r'^get_lesson_url/$', views.get_lesson_url, name='get_lesson_url')
 ]
 
 payment_urls = [
