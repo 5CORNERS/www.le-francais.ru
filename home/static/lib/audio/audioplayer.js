@@ -9,82 +9,81 @@
 
 (function ($, window, document, undefined) {
 	var isTouch = 'ontouchstart' in window,
-	eStart = isTouch ? 'touchstart' : 'mousedown',
-	eMove = isTouch ? 'touchmove' : 'mousemove',
-	eEnd = isTouch ? 'touchend' : 'mouseup',
-	eCancel = isTouch ? 'touchcancel' : 'mouseup',
-	secondsToTime = function (secs) {
-		var hours = Math.floor(secs / 3600), minutes = Math.floor(secs % 3600 / 60),
-			seconds = Math.ceil(secs % 3600 % 60),
-			hours_str, minutes_str, seconds_str;
+		eStart = isTouch ? 'touchstart' : 'mousedown',
+		eMove = isTouch ? 'touchmove' : 'mousemove',
+		eEnd = isTouch ? 'touchend' : 'mouseup',
+		eCancel = isTouch ? 'touchcancel' : 'mouseup',
+		secondsToTime = function (secs) {
+			var hours = Math.floor(secs / 3600), minutes = Math.floor(secs % 3600 / 60),
+				seconds = Math.ceil(secs % 3600 % 60),
+				hours_str, minutes_str, seconds_str;
 
-		if (hours == 0) {
-			hours_str = '';
-		} else {
-			hours_str = (hours.toString().length < 2) ? ('0' + hours) : hours;
-		}
+			if (hours == 0) {
+				hours_str = '';
+			} else {
+				hours_str = (hours.toString().length < 2) ? ('0' + hours) : hours;
+			}
 
-		minutes_str = (minutes.toString().length < 2) ? ('0' + minutes) : minutes;
-		seconds_str = (seconds.toString().length < 2) ? ('0' + seconds) : seconds;
+			minutes_str = (minutes.toString().length < 2) ? ('0' + minutes) : minutes;
+			seconds_str = (seconds.toString().length < 2) ? ('0' + seconds) : seconds;
 
-		return hours_str + ((hours == 0) ? '' : ':') + minutes_str + ':' + seconds_str;
-	},
-	canPlayType = function (file) {
-		var audioElement = document.createElement('audio');
-		return true;
-		return !!( audioElement.canPlayType &&
-					audioElement.canPlayType('audio/' + file.split('.')
-															.pop()
-															.toLowerCase() + ';')
-															.replace(/no/, '')
-				);
-	};
+			return hours_str + ((hours == 0) ? '' : ':') + minutes_str + ':' + seconds_str;
+		},
+		canPlayType = function (file) {
+			var audioElement = document.createElement('audio');
+			return true;
+			return !!(audioElement.canPlayType &&
+				audioElement.canPlayType('audio/' + file.split('.')
+					.pop()
+					.toLowerCase() + ';')
+					.replace(/no/, '')
+			);
+		};
 
 	$.fn.audioPlayer = function (params) {
 		var params = $.extend({
-			classPrefix: 'audioplayer',
-			strPlay: 'Play',
-			strPause: 'Pause',
-			strVolume: 'Volume'
+				classPrefix: 'audioplayer',
+				strPlay: 'Play',
+				strPause: 'Pause',
+				strVolume: 'Volume'
 			}, params),
 			cssClass = {},
 			cssClassSub =
-			{
-				playPause: 'playpause',
-				playing: 'playing',
-				time: 'time',
-				timeCurrent: 'time-current',
-				timeDuration: 'time-duration',
-				bar: 'bar',
-				barLoaded: 'bar-loaded',
-				barPlayed: 'bar-played',
-				volume: 'volume',
-				volumeButton: 'volume-button',
-				volumeAdjust: 'volume-adjust',
-				noVolume: 'novolume',
-				mute: 'mute',
-				mini: 'mini',
-				download: 'download',
-				downloadButton: 'download-button'
-			};
+				{
+					playPause: 'playpause',
+					playing: 'playing',
+					time: 'time',
+					timeCurrent: 'time-current',
+					timeDuration: 'time-duration',
+					bar: 'bar',
+					barLoaded: 'bar-loaded',
+					barPlayed: 'bar-played',
+					volume: 'volume',
+					volumeButton: 'volume-button',
+					volumeAdjust: 'volume-adjust',
+					noVolume: 'novolume',
+					mute: 'mute',
+					mini: 'mini',
+					download: 'download',
+					downloadButton: 'download-button'
+				};
 
-		for (var subName in cssClassSub)
-		{
+		for (var subName in cssClassSub) {
 			cssClass[subName] = params.classPrefix + '-' + cssClassSub[subName];
 		}
 
 		this.each(function () {
 			if ($(this).prop('tagName').toLowerCase() != 'audio')
-			return false;
+				return false;
 
 			var $this = $(this),
-			audioFile = $this.attr('src'),
-			isAutoPlay = $this.get(0).getAttribute('autoplay'),
-			isAutoPlay = ((isAutoPlay === '') || (isAutoPlay === 'autoplay')) ? true : false,
-			isLoop = $this.get(0).getAttribute('loop'),
-			isLoop = ((isLoop === '') || (isLoop === 'loop')) ? true : false,
-			isSupport = false,
-			setTime = $this.get(0).getAttribute('set-time');
+				audioFile = $this.attr('src'),
+				isAutoPlay = $this.get(0).getAttribute('autoplay'),
+				isAutoPlay = ((isAutoPlay === '') || (isAutoPlay === 'autoplay')) ? true : false,
+				isLoop = $this.get(0).getAttribute('loop'),
+				isLoop = ((isLoop === '') || (isLoop === 'loop')) ? true : false,
+				isSupport = false,
+				setTime = $this.get(0).getAttribute('set-time');
 
 			if (typeof audioFile === 'undefined') {
 				$this.find('source').each(function () {
@@ -101,12 +100,12 @@
 			}
 
 			var thePlayer = $('<div class="' + params.classPrefix + '">'
-								+ ( (isSupport) ?
-										$('<div>').append($this.eq(0).clone()).html()
-										: '<embed src="' + audioFile + '" width="0" height="0" volume="100" autostart="' + isAutoPlay.toString() + '" loop="' + isLoop.toString() + '" />'
-								)
-								+ '<div class="' + cssClass.playPause + '" title="' + params.strPlay + '"><a href="#">' + params.strPlay + '</a></div></div>'
-							),
+				+ ((isSupport) ?
+						$('<div>').append($this.eq(0).clone()).html()
+						: '<embed src="' + audioFile + '" width="0" height="0" volume="100" autostart="' + isAutoPlay.toString() + '" loop="' + isLoop.toString() + '" />'
+				)
+				+ '<div class="' + cssClass.playPause + '" title="' + params.strPlay + '"><a href="#">' + params.strPlay + '</a></div></div>'
+				),
 				theAudio = (isSupport) ? thePlayer.find('audio') : thePlayer.find('embed'),
 				theAudio = theAudio.get(0);
 
@@ -127,7 +126,7 @@
 					thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="' + source + '" class="' + cssClass.downloadButton + ' glyphicon glyphicon-download"></a></div>');
 					$(theAudio).attr('id', 'lesson-audio');
 					$(theAudio).attr('number', lesson_number);
-				}else if(downloadable === 'empty'){
+				} else if (downloadable === 'empty') {
 					thePlayer.append('<div class="' + cssClass.download + '"><a download="true" class="' + cssClass.downloadButton + ' glyphicon glyphicon-download"></a></div>');
 				}
 				event = new CustomEvent('downloadButtonReady');
@@ -143,11 +142,11 @@
 					volumeDefault = 0,
 					adjustCurrentTime = function (e) {
 						theRealEvent = isTouch ? e.originalEvent.touches[0] : e;
-						theAudio.currentTime = Math.round(( theAudio.duration * ( theRealEvent.pageX - theBar.offset().left ) ) / theBar.width());
+						theAudio.currentTime = Math.round((theAudio.duration * (theRealEvent.pageX - theBar.offset().left)) / theBar.width());
 					},
 					adjustVolume = function (e) {
 						theRealEvent = isTouch ? e.originalEvent.touches[0] : e;
-						theAudio.volume = Math.abs(( theRealEvent.pageY - ( volumeAdjuster.offset().top + volumeAdjuster.height() ) ) / volumeAdjuster.height());
+						theAudio.volume = Math.abs((theRealEvent.pageY - (volumeAdjuster.offset().top + volumeAdjuster.height())) / volumeAdjuster.height());
 					};
 
 				var volumeTestDefault = theAudio.volume, volumeTestValue = theAudio.volume = 0.111;
@@ -162,20 +161,29 @@
 				timeCurrent.text(secondsToTime(0));
 
 				theAudio.addEventListener('loadeddata', function () {
+					if ((typeof lesson_number !== typeof undefined) && (lesson_number !== false)) {
+						if (setTime) {
+							theAudio.currentTime = setTime;
+						}
+						else if ((typeof localStorage['lecon-' + lesson_number] !== typeof undefined)
+							&& localStorage['lecon-' + lesson_number] !== 'undefined'
+						) {
+							theAudio.currentTime = +localStorage['lecon-' + lesson_number];
+						}
+					}
 					timeDuration.text(secondsToTime(theAudio.duration));
 					volumeAdjuster.find('div').height(theAudio.volume * 100 + '%');
 					volumeDefault = theAudio.volume;
-					theAudio.currentTime=setTime;
 					event = new CustomEvent('lessonPlayerReady');
 					window.dispatchEvent(event)
 				});
 
 				theAudio.addEventListener('timeupdate', function () {
 					timeCurrent.text(secondsToTime(theAudio.currentTime));
-					barPlayed.width(( theAudio.currentTime / theAudio.duration ) * 100 + '%');
+					barPlayed.width((theAudio.currentTime / theAudio.duration) * 100 + '%');
 
 					var lesson_number = $(theAudio).attr('number');
-					if ((typeof lesson_number !== typeof undefined) && (lesson_number !== false)) {
+					if ((typeof lesson_number !== typeof undefined) && (lesson_number !== false) && (theAudio.currentTime !== 0)) {
 						localStorage['lecon-' + lesson_number] = theAudio.currentTime;
 					}
 				});
@@ -205,7 +213,7 @@
 				theBar.on(eStart, function (e) {
 					adjustCurrentTime(e);
 					theBar.on(eMove, function (e) {
-					adjustCurrentTime(e);
+						adjustCurrentTime(e);
 					});
 				}).on(eCancel, function () {
 					theBar.off(eMove);
@@ -237,7 +245,7 @@
 
 			if ((typeof lesson_number !== typeof undefined) && (lesson_number !== false)) {
 				if ((typeof localStorage['lecon-' + lesson_number] !== typeof undefined)
-						&& localStorage['lecon-' + lesson_number] !== 'undefined'
+					&& localStorage['lecon-' + lesson_number] !== 'undefined'
 				) {
 					theAudio.currentTime = +localStorage['lecon-' + lesson_number];
 				}
@@ -247,7 +255,7 @@
 				$menuPlayer.find('audio').remove();
 				$('.navbar-header').prepend($menuPlayer);
 
-				$menuPlayer.find('.' + cssClass.playPause).on('click', function(e) {
+				$menuPlayer.find('.' + cssClass.playPause).on('click', function (e) {
 					e.preventDefault();
 					return playerPlayPause(true);
 				});
@@ -288,8 +296,7 @@
 					$(this).attr('title', params.strPause).find('a').html(params.strPause);
 
 					if (typeof $menuPlayer !== typeof undefined) {
-						if (is_menu)
-						{
+						if (is_menu) {
 							thePlayer.find('.' + cssClass.playPause)
 								.attr('title', params.strPause).find('a').html(params.strPause);
 						} else {
