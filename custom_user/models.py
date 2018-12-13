@@ -153,4 +153,3 @@ def deactivate_tinkoff_payment(sender, **kwargs):
 		if item.category == 'coffee_cups':
 			quantity += item.site_quantity
 	user.add_cups(-quantity)
-	user.save()
