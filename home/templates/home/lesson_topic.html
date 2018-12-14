@@ -12,7 +12,7 @@
                     <div class="first_post">{% include "tags/related_post.html" %}</div>
                 {% endwith %}
                 {% if topic.last_post.id != topic.head.id %}
-                    <div class="text-left" style="margin: 1em 0"><h1>Последний комментарий к уроку.</h1> <a href="{{ topic.last_post.get_absolute_url }}"><button class="btn btn-primary">Посмотреть все</button></a></div>
+                    <div class="text-left" style="margin: 1em 0"><a href="{{ topic.last_post.get_absolute_url }}" style="float: right; margin-top: -3px" class="btn btn-primary">Посмотреть все</a><h1>Последний комментарий к уроку:</h1></div>
                     {% with topic.last_post as post %}
                         {% if not post == topic.head %}
                             <div class="last_post">{% include "tags/related_post.html" %}</div>
