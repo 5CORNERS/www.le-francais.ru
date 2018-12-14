@@ -29,7 +29,7 @@
 					datatype: 'json',
 					success: function (r) {
 						if (r.status === 200){
-							let audio = $('#lesson-audio');
+							let audio = $('#lesson-audio')[0];
 							let audioTime = audio.currentTime;
 							audio.src(r.lesson_url);
 							audio.load();
@@ -91,6 +91,8 @@
 				switch (state) {
 					case 'download':
 					case 'ended':
+						let audio = $('#lesson-audio')[0];
+						localStorage['lecon-{{ self.lesson_number }}'] = audio.duration - 5;
 					{% if not request.user.is_authenticated %}
 						$('#listen-login-required-modal').modal('show');
 					{% elif request.user.saw_message %}
@@ -117,16 +119,18 @@
 				}
 			}
 
-			{% if not userlesson %}window.addEventListener('lessonPlayerReady', function () {
-				let downloadButton = $('.audioplayer-download-button')[0];
-				downloadButton.addEventListener('click', function () {
-					activateLesson('download');
-				});
-				let lessonAudio = $('#lesson-audio')[0];
-				lessonAudio.addEventListener('ended', function () {
-					activateLesson('ended')
-				});
-			}){% endif %}
+			{% if not userlesson %}
+				window.addEventListener('lessonPlayerReady', function () {
+					let downloadButton = $('.audioplayer-download-button')[0];
+					downloadButton.addEventListener('click', function () {
+						activateLesson('download');
+					});
+					let lessonAudio = $('#lesson-audio')[0];
+					lessonAudio.addEventListener('ended', function () {
+						activateLesson('ended')
+					});
+				})
+			{% endif %}
 		</script>
 	{% endif %}
 	<script>
