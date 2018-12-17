@@ -60,6 +60,15 @@ class User(AbstractUser):
 	_cup_amount = models.IntegerField(default=0)
 	_cup_credit = models.IntegerField(default=0)
 
+	_low_price = models.BooleanField(default=False)
+
+	def switch_low_price(self):
+		if self._low_price:
+			self._low_price = False
+		else:
+			self._low_price = True
+		self.save()
+
 	def add_cups(self, n):
 		self._cup_amount += n
 		self.save()
@@ -77,8 +86,19 @@ class User(AbstractUser):
 		return self._cup_amount
 
 	@property
+	def has_cups(self):
+		if self.cups_amount > 0:
+			return True
+		return False
+
+
+	@property
 	def cup_credit(self):
 		return self._cup_credit
+
+	@property
+	def low_price(self):
+		return self._low_price
 
 
 	payed_lessons = models.ManyToManyField('home.LessonPage', through='home.UserLesson', related_name='paid_users')
