@@ -33,8 +33,7 @@ from home.src.site_import import import_content
 from tinkoff_merchant.models import Payment as TinkoffPayment
 from tinkoff_merchant.services import MerchantAPI
 from .forms import ChangeUsername
-from .utils import message as buy_description
-from django.db.models import Q
+
 if "mailer" in settings.INSTALLED_APPS:
 	from mailer import send_mail
 else:
@@ -174,7 +173,7 @@ def listen_request(request):
 
 def get_lesson_url(request):
 	lesson_number = request.POST['lesson_number']
-	return JsonResponse(dict(lesson_url='http://192.168.0.27:8080/listen.php?number='+str(lesson_number)+'&key='+request.session.session_key))
+	return JsonResponse(dict(lesson_url='http://192.168.0.27:8080/listen.php?number=' + str(lesson_number) + '&key=' + request.session.session_key))
 
 
 from .models import Payment
@@ -228,11 +227,11 @@ class ActivateLesson(View):
 					except BaseException as e:
 						data = dict(result="ERROR", description="Failed to do something: " + str(e))
 				else:
-					data = dict(result="ZERO_CUPS", description="У Вас закончились билетики :(")
+					data = dict(result="ZERO_CUPS")
 			else:
-				data = dict(result="ALREADY", description='Вы уже активировали этот урок :)')
+				data = dict(result="ALREADY")
 		else:
-			data = dict(result="NOT_AUTH", description="Not authenticated")
+			data = dict(result="NOT_AUTH")
 		return JsonResponse(data)
 
 
@@ -249,13 +248,17 @@ def coffee_amount_check(request):
 		if request.user.has_coffee():
 			return HttpResponseRedirect(request.GET['next'] + "?modal_open=give-me-a-coffee-modal")
 		else:
-			return HttpResponseRedirect(reverse('payments:payments') + "?next=" + request.GET['next'] + "&success_modal=give-me-a-coffee-payment-success-modal&fail_modal=give-me-a-coffee-payment-fail-modal")
+			return HttpResponseRedirect(
+				reverse('payments:payments') + "?next=" + request.GET['next'] + "&success_modal=give-me-a-coffee-payment-success-modal&fail_modal=give-me-a-coffee-payment-fail-modal")
+
+
+from .consts import ITEMS
 
 
 class TinkoffPayments(View):
 	@method_decorator(login_required)
 	def get(self, request):
-		if request.user.saw_message and request.user.must_pay:
+		if request.user.saw_message and request.user.must_pay and not (request.user.low_price or not 'low_price' in request.GET.keys() == '1'):
 			data = dict(tickets=True, cards=[
 				dict(title="1 билет", image="images/ticket_1-1.png", description=None, price1="По цене стаканчика кофе в <b>McDonalds</b>", price2=68, item_id=6),
 				dict(title="5 билетов", image="images/ticket_5.png", description=None, price1="по 59 ₽", price2=295, item_id=7),
@@ -264,13 +267,22 @@ class TinkoffPayments(View):
 				dict(title="50 билетов", image="images/ticket_50.png", description=None, price1="по 34 ₽", price2=1690, item_id=10),
 			])
 			return render(request, 'payments/tinkoff_payments_tickets.html', data)
+		elif request.user.low_price or 'low_price' in request.GET.keys():
+			data = dict(tickets=True, cards=[
+				dict(title="1 билет", image="images/ticket_1-39.png", description=None, price1="по 39 ₽", price2=39, item_id=11),
+				dict(title="5 билет", image="images/ticket_5-39.png", description=None, price1="по 39 ₽", price2=295, item_id=12),
+				dict(title="10 билет", image="images/ticket_10-39.png", description=None, price1="по 39 ₽", price2=490, item_id=13),
+				dict(title="20 билет", image="images/ticket_20.png", description=None, price1="по 39 ₽", price2=780, item_id=14),
+				dict(title="50 билет", image="images/ticket_50.png", description=None, price1="по 34 ₽", price2=1690, item_id=15),
+			])
+			return render(request, 'payments/tinkoff_payments_tickets.html', data)
 		else:
 			data = dict(tickets=False, cards=[
-				{'title': "1 чашечка", 'image': "images/coffee_1.png", 'description': None, 'price1': "По цене стаканчика кофе в <b>McDonalds</b>", 'price2': 68, 'item_id': 1},
-				{'title': "5 чашечек", 'image': "images/coffee_5.png", 'description': None, 'price1': "по 59 ₽", 'price2': 295, 'item_id': 2},
-				{'title': "10 чашечек", 'image': "images/coffee_10.png", 'description': None, 'price1': "по 49 ₽", 'price2': 490, 'item_id': 3},
-				{'title': "20 чашечек", 'image': "images/coffee_20.png", 'description': None, 'price1': "по 39 ₽", 'price2': 780, 'item_id': 4},
-				{'title': "50 чашечек", 'image': "images/coffee_50.png", 'description': '''Хватит, чтобы угощать целый год.''', 'price1': "по 34 ₽", 'price2': 1690, 'item_id': 5},
+				dict(title="1 чашечка", image="images/coffee_1.png", description=None, price1="По цене стаканчика кофе в <b>McDonalds</b>", price2=68, item_id=1),
+				dict(title="5 чашечек", image="images/coffee_5.png", description=None, price1="по 59 ₽", price2=295, item_id=2),
+				dict(title="10 чашечек", image="images/coffee_10.png", description=None, price1="по 49 ₽", price2=490, item_id=3),
+				dict(title="20 чашечек", image="images/coffee_20.png", description=None, price1="по 39 ₽", price2=780, item_id=4),
+				dict(title="50 чашечек", image="images/coffee_50.png", description='''Хватит, чтобы угощать целый год.''', price1="по 34 ₽", price2=1690, item_id=5),
 			])
 			return render(request, 'payments/tinkoff_payments.html', data)
 
@@ -278,46 +290,26 @@ class TinkoffPayments(View):
 	def post(self, request, *args, **kwargs):
 		if 'item_id' in request.POST:
 			item_id = int(request.POST['item_id'])
-			if item_id == 1:
-				item_name = 'Добровольное пожертвование в поддержку проекта 68р.'
-				item_price = 6800
-				item_site_quantity = 1
-			elif item_id == 2:
-				item_name = 'Добровольное пожертвование в поддержку проекта 295р.'
-				item_price = 29500
-				item_site_quantity = 5
-			elif item_id == 3:
-				item_name = 'Добровольное пожертвование в поддержку проекта 490р.'
-				item_price = 49000
-				item_site_quantity = 10
-			elif item_id == 4:
-				item_name = 'Добровольное пожертвование в поддержку проекта 780р.'
-				item_price = 78000
-				item_site_quantity = 20
-			elif item_id == 5:
-				item_name = 'Добровольное пожертвование в поддержку проекта 1690р.'
-				item_price = 169000
-				item_site_quantity = 50
-			else:
+			if item_id not in ITEMS.keys():
 				return HttpResponse(status=400)
+			if item_id == 11 and not request.user.low_price:
+				return HttpResponse(status=403)
 
-			if 1 <= item_id <= 5:
-				item_category = 'coffee_cups'
-				item_order_id_type = 1
-				item_quantity = 1
-			else:
-				return HttpResponse(status=400)
+			description = ITEMS[item_id]['description']
 
-			description = "le-francais.ru -- Покупка " + buy_description(item_site_quantity, 'чашечки', 'чашечек', 'чашечек') + " кофе."
-			payment = TinkoffPayment.objects.create(amount=item_price * item_quantity, description=description, customer_key=str(request.user.id)).with_receipt(email=request.user.email, taxation='usn_income').with_items([dict(
-				name=item_name,
-				price=item_price,
-				quantity=item_quantity,
-				amount=item_price * item_quantity,
-				category=item_category,
-				site_quantity=item_site_quantity,
-			)])
-			payment.order_id = '{0:02d}'.format(item_order_id_type) + '{0:06d}'.format(payment.id)
+			payment = TinkoffPayment.objects.create(
+				amount=ITEMS[item_id]['price'] * ITEMS[item_id]['quantity'], description=description, customer_key=str(request.user.id)).with_receipt(
+				email=request.user.email, taxation='usn_income').with_items(
+				[
+					dict(
+						name=ITEMS[item_id]['name'],
+						price=ITEMS[item_id]['price'],
+						quantity=ITEMS[item_id]['quantity'],
+						amount=ITEMS[item_id]['price'] * ITEMS[item_id]['quantity'],
+						category=ITEMS[item_id]['category'],
+						site_quantity=ITEMS[item_id]['site_quantity'],
+					)])
+			payment.order_id = '{0:02d}'.format(ITEMS[item_id]['order_type_id']) + '{0:06d}'.format(payment.id)
 
 			if "success_url" in request.POST and "fail_url" in request.POST:
 				BackUrls.objects.create(
@@ -330,6 +322,8 @@ class TinkoffPayments(View):
 			tinkoff_api.init(payment).save()
 			if payment.can_redirect():
 				return JsonResponse({'payment_url': payment.payment_url, 'success': 'true'}, safe=True)
+		else:
+			pass
 
 
 class PaymentResult(View):
