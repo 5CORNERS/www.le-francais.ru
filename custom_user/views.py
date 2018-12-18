@@ -46,7 +46,7 @@ class SawMessageView(View):
 	def post(self, request):
 		user = request.user
 		if request.POST['action'] == 'make_true':
-			if user.has_payed:
+			if user.has_payed():
 				msg_body = MESSAGE_FOR_PAYED
 				user.add_cups(5)
 			else:

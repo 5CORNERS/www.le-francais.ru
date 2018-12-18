@@ -343,6 +343,14 @@ class LessonPage(Page):
 			return True
 		return False
 
+	def get_context(self, request, *args, **kwargs):
+		context = super().get_context(request)
+
+		if request.user.is_authenticated and (request.user.has_cups or request.user.payed_lessons.all()):
+			context['already_payed'] = True
+
+		return context
+
 	class Meta:
 		permissions = (
 			('listen_lesson', 'Can listen lesson'),

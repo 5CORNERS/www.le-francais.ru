@@ -18,6 +18,7 @@
 	        src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
 	{% if user.must_pay and self.need_payment or request.GET.test %}
 		<script>
+			let saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
 			function reloadLessonUrl() {
 				$.ajax({
 					type: 'POST',
@@ -58,9 +59,10 @@
 				audio[0].play();
 			}
 			function activate() {
+				$('.success-message').hide();
+				$('.fail-message').hide();
+				$('.waiting-message').show();
 				playActivateSound();
-				$('#activated-message-waiting').show();
-				$('#activated-dismiss-button').hide()
 				$('#lesson-activated-modal').modal('show');
 				$.ajax({
 					type: 'POST',
@@ -69,15 +71,19 @@
 					datatype: 'json',
 					success: function (r) {
 						if (r.result === 'SUCCESS') {
-							disableActivButton();
 							window.location.href = window.location.pathname+"?"+$.param({'modal_open':'lesson-activated-modal'});
 						} else if (r.result === 'ZERO_CUPS') {
-							$('#activated-message-fail').show();
-							$('#activated-message-error-description').text(r.description)
-						} else {
-							$('#activated-message-success').hide();
-							$('#activated-message-fail').show();
-							$('#activated-message-error-description').text(r.description)
+							$('.waiting-message').hide();
+							$('.unsofficiant-cups').show();
+
+						} else if (r.result === 'ALREADY') {
+							$('.waiting-message').hide();
+							$('.already-activated').show();
+
+						} else if (r.result === 'NOT_AUTH') {
+							$('.waiting-message').hide();
+							$('.login-need').show();
+
 						}
 					}
 				});
@@ -95,18 +101,16 @@
 						localStorage['lecon-{{ self.lesson_number }}'] = audio.duration - 5;
 					{% if not request.user.is_authenticated %}
 						$('#listen-login-required-modal').modal('show');
-					{% elif request.user.saw_message %}
-						$('#lesson-not-activated-simple-modal').modal('show');
 					{% else %}
-						$('#lesson-not-activated-details-continue-modal').modal('show');
+						if (saw_message){
+							$('#lesson-not-activated-simple-modal').modal('show')
+						}else{
+							$('#lesson-not-activated-details-continue-modal').modal('show')
+						}
 					{% endif %}
 						break;
 					case 'button':
-					{% if request.user.saw_message %}
-						activateLesson('proceed');
-					{% else %}
-						$('#lesson-not-activated-details-activate-modal').modal('show');
-					{% endif %}
+						if(saw_message){activateLesson('proceed')}else{$('#lesson-not-activated-details-activate-modal').modal('show')}
 						break;
 					case 'saw':
 						sawMessage('make_true');
@@ -180,6 +184,7 @@
 					break
 				}
 				case 'make_true': {
+					saw_message = true;
 					$.ajax({
 						type: "POST",
 						url: "{% url 'custom_user:saw_message' %}",
@@ -235,9 +240,10 @@
 				$(document).ready(function () {
 					$('#{{ modal_id }}').modal('show');
 					{% if modal_id == 'lesson-activated-modal' %}
-						$('#activated-message-fail').hide();
-						$('#activated-message-success').show();
-						$('#activated-message-ticket-count').text("{% message request.user.cups_amount 'тикет' 'тикета' 'тикетов' %}");
+						$('.fail-message').hide();
+						$('.waiting-message').hide();
+						$('.success-message').show();
+						$('#activated-message-ticket-count').text("{{ request.user.cups_amount }}");
 					{% endif %}
 					{% get_full_path as full_path %}
 					{% if 'payment_success' in request.GET %}
@@ -553,18 +559,61 @@
 			<div class="modal" id="lesson-not-activated-details-continue-modal" tabindex="-1" role="dialog">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
-						<div class="modal-header"></div>
-						<div class="modal-body">
-							<p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до последнего.</p>
-							<p> Сегодня стоит вопрос выживания всего проекта. Мы все перепробовали. И у нас не осталось другого выхода — нам приходится сделать часть уроков платными. Их цена символическая — меньше стоимости одной поездки на автобусе (для
-								тех, кто возьмет билетов пачку). Чашечки кофе тут тоже принимаются.</p>
-							<p>Чтобы это не застало вас в расплох, мы пускаем в минус и позволяем несколько раз прокатиться «зайцем».</p>
-							<p>У нас есть специальные предложения для студентов, пенсионеров и людей, как и мы, испытывающих большие затруднения в средствах — все детали мы опишем в письме, которое автоматически будет направлено вам на e-mail.</p>
-							<p>Пожалуйста, прочтите мое обращение ниже под спойлером.</p>
-							<details>
-								<summary></summary>
-							</details>
-						</div>
+						{% if request.user.has_payed %}
+							<div class="modal-header" style="text-align: center;"><h2>Пожалуйста, прочтите это!</h2></div>
+							<div class=" modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
+								последнего.</p>
+
+								<p> Сегодня сто<em>и</em>т вопрос выживания всего проекта. Мы все перепробовали. И у нас не осталось другого выхода —
+									нам приходится сделать часть уроков платными. Увы, таких, как вы — тех, кто помогал проекту добровольно, — оказалось очень немного. Нам не выжить.
+
+									Мы сделали цену урока символической — она меньше стоимости одной поездки в автобусе
+									(если взять билетов пачку). Чашечки кофе тут тоже принимаются. Если вы раньше просто переводили мне деньги и
+									сообщили свой e-mail, мы сконвертировали их в уроки — проверьте, они должны уже быть на вашем балансе.</p>
+
+								<p>У нас есть специальные предложения для студентов и пенсионеров — все детали мы опишем в письме, которое автоматически
+									будет направлено вам на e-mail.</p>
+
+								<details>
+									<summary> Пожалуйста, прочтите мое обращение ниже под спойлером.</summary>
+									<p><br>Большинство людей склонны не платить в тех случаях, когда этого можно избежать. Добровольные пожертвования,
+										как оказалось, делают единицы. Вы — один из этих немногих. Вы поддерживали нас тогда, когда нам было трудно и
+										когда большинство оставалось равнодушным.</p>
+
+									<p>Платные уроки — это то, чего мы старались избежать всеми силами, но обстоятельства вынуждают нас сделать выбор: или так, или
+										закрыть проект. Я хочу хотыбы попытаться дать ему шанс не сгинуть.</p>
+
+									<p>Ваше добровольное пожертваоавание в прошлом ставит вас из ряда вон — вы выручили меня, когда я больше всего
+										нуждался в помощи. Пусть это немного и символично, но я хотел бы хоть чем-то вас отметить. </p>
+								</details>
+
+							</div>
+						{% else %}
+							<div class="modal-header" style="text-align: center"><h2>Пожалуйста, прочтите это!</h2></div>
+							<div class="modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
+								последнего.</p>
+								<p> Сегодня сто<em>и</em>т вопрос выживания всего проекта. Мы все перепробовали. И у нас не осталось другого выхода —
+									нам приходится сделать часть уроков платными. Их цена символическая — меньше стоимости одной поездки в автобусе
+									(для тех, кто возьмет билетов пачку).</p>
+								<p>Чтобы это не застало вас врасплох, мы пустим в минус и позволяем несколько раз прокатиться «зайцем».</p>
+								<p>У нас есть специальные предложения для студентов, пенсионеров и людей, как и мы, испытывающих большие затруднения
+									в средствах — все детали мы опишем в письме, которое автоматически будет направлено вам на e-mail.</p>
+								<details>
+									<summary> Пожалуйста, прочтите мое обращение ниже под спойлером.</summary>
+									<p><br>Люди охотно платят, когда плата мотивирована и разумна (сотовая связь, интренет, общественный транспорт
+										и т.д.), и предсказуемо воздерживаются от платежей, когда их можно избежать — это совершенно
+										рациональное поведение; полагаю, я сам поступаю так же.</p>
+									<p>
+										Мы поняли, что штучный продукт с уникальным контентом — даже когда он востребован и помогает здорово
+										экономить — никогда не окупится, если расчитывать только на самоорганизацию пользователей и если не
+										организовать сбор средств.</p>
+									<p>
+										Я искренне верю в то, что вы цените то, что мы делаем, и не считаете наши старания и наш труд не стоящими
+										вознаграждения.</p>
+									<p>Пожалуйста, поддержите нас и оставайтесь с нами!</p>
+								</details>
+							</div>
+						{% endif %}
 						<div class="modal-footer">
 							<button data-dismiss="modal" onclick="activateLesson('saw')" id="lesson-not-activated-continue-button" class="btn btn-default">Продолжить</button>
 						</div>
@@ -574,18 +623,61 @@
 			<div class="modal" id="lesson-not-activated-details-activate-modal" tabindex="-1" role="dialog">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
-						<div class="modal-header"></div>
-						<div class="modal-body">
-							<p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до последнего.</p>
-							<p> Сегодня стоит вопрос выживания всего проекта. Мы все перепробовали. И у нас не осталось другого выхода — нам приходится сделать часть уроков платными. Их цена символическая — меньше стоимости одной поездки на автобусе (для
-								тех, кто возьмет билетов пачку). Чашечки кофе тут тоже принимаются.</p>
-							<p>Чтобы это не застало вас в расплох, мы пускаем в минус и позволяем несколько раз прокатиться «зайцем».</p>
-							<p>У нас есть специальные предложения для студентов, пенсионеров и людей, как и мы, испытывающих большие затруднения в средствах — все детали мы опишем в письме, которое автоматически будет направлено вам на e-mail.</p>
-							<p>Пожалуйста, прочтите мое обращение ниже под спойлером.</p>
-							<details>
-								<summary></summary>
-							</details>
-						</div>
+						{% if request.user.has_payed %}
+							<div class="modal-header" style="text-align: center;"><h2>Пожалуйста, прочтите это!</h2></div>
+							<div class=" modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
+								последнего.</p>
+
+								<p> Сегодня сто<em>и</em>т вопрос выживания всего проекта. Мы все перепробовали. И у нас не осталось другого выхода —
+									нам приходится сделать часть уроков платными. Увы, таких, как вы — тех, кто помогал проекту добровольно, — оказалось очень немного. Нам не выжить.
+
+									Мы сделали цену урока символической — она меньше стоимости одной поездки в автобусе
+									(если взять билетов пачку). Чашечки кофе тут тоже принимаются. Если вы раньше просто переводили мне деньги и
+									сообщили свой e-mail, мы сконвертировали их в уроки — проверьте, они должны уже быть на вашем балансе.</p>
+
+								<p>У нас есть специальные предложения для студентов и пенсионеров — все детали мы опишем в письме, которое автоматически
+									будет направлено вам на e-mail.</p>
+
+								<details>
+									<summary> Пожалуйста, прочтите мое обращение ниже под спойлером.</summary>
+									<p><br>Большинство людей склонны не платить в тех случаях, когда этого можно избежать. Добровольные пожертвования,
+										как оказалось, делают единицы. Вы — один из этих немногих. Вы поддерживали нас тогда, когда нам было трудно и
+										когда большинство оставалось равнодушным.</p>
+
+									<p>Платные уроки — это то, чего мы старались избежать всеми силами, но обстоятельства вынуждают нас сделать выбор: или так, или
+										закрыть проект. Я хочу хотыбы попытаться дать ему шанс не сгинуть.</p>
+
+									<p>Ваше добровольное пожертваоавание в прошлом ставит вас из ряда вон — вы выручили меня, когда я больше всего
+										нуждался в помощи. Пусть это немного и символично, но я хотел бы хоть чем-то вас отметить. </p>
+								</details>
+
+							</div>
+						{% else %}
+							<div class="modal-header" style="text-align: center"><h2>Пожалуйста, прочтите это!</h2></div>
+							<div class="modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
+								последнего.</p>
+								<p> Сегодня сто<em>и</em>т вопрос выживания всего проекта. Мы все перепробовали. И у нас не осталось другого выхода —
+									нам приходится сделать часть уроков платными. Их цена символическая — меньше стоимости одной поездки в автобусе
+									(для тех, кто возьмет билетов пачку).</p>
+								<p>Чтобы это не застало вас врасплох, мы пустим в минус и позволяем несколько раз прокатиться «зайцем».</p>
+								<p>У нас есть специальные предложения для студентов, пенсионеров и людей, как и мы, испытывающих большие затруднения
+									в средствах — все детали мы опишем в письме, которое автоматически будет направлено вам на e-mail.</p>
+								<details>
+									<summary> Пожалуйста, прочтите мое обращение ниже под спойлером.</summary>
+									<p><br>Люди охотно платят, когда плата мотивирована и разумна (сотовая связь, интренет, общественный транспорт
+										и т.д.), и предсказуемо воздерживаются от платежей, когда их можно избежать — это совершенно
+										рациональное поведение; полагаю, я сам поступаю так же.</p>
+									<p>
+										Мы поняли, что штучный продукт с уникальным контентом — даже когда он востребован и помогает здорово
+										экономить — никогда не окупится, если расчитывать только на самоорганизацию пользователей и если не
+										организовать сбор средств.</p>
+									<p>
+										Я искренне верю в то, что вы цените то, что мы делаем, и не считаете наши старания и наш труд не стоящими
+										вознаграждения.</p>
+									<p>Пожалуйста, поддержите нас и оставайтесь с нами!</p>
+								</details>
+							</div>
+						{% endif %}
 						<div class="modal-footer">
 							<button data-dismiss="modal" onclick="activateLesson('saw');activateLesson('proceed')" id="lesson-not-activated-activate-button" class="btn btn-default">Активировать</button>
 						</div>
@@ -595,14 +687,25 @@
 			<div class="modal" id="lesson-activated-modal" tabindex="-1" role="dialog">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
-						<div class="modal-header"></div>
+						<div class="modal-header">
+							<h3 class="waiting-message" style="display: none;">Урок активируется</h3>
+							<h3 class="success-message" style="display: none;">Урок активирован</h3>
+							<h3 class="fail-message unsofficiant-cups login-need" style="display: none;">Упс!</h3>
+							<h3 class="fail-message already-activated" style="display: none;">Хорошая новость!</h3>
+						</div>
 						<div class="modal-body">
-							<div id="activated-message-waiting" style="display: none">Урок активируется...</div>
-							<div id="activated-message-success" style="display: none"><p>Урок активирован. У вас осталось <span id="activated-message-ticket-count">n тикетов</span>.</p></div>
-							<div id="activated-message-fail" style="display: none;"><p>Ошибка: <span id="activated-message-error-description"></span></p></div>
+							<div id="activated-message-waiting" class="waiting-message" style="display: none">
+								<p>Пожалуйста, подождите, это займёт несколько секунд.</p>
+								<img style="width:100%;" src="{% static 'images/loading_icon.gif' %}"></div>
+							<div id="activated-message-success" class="success-message" style="display: none"><p>У вас в запасе уроков: <span id="activated-message-ticket-count">ХХХ</span>.</p></div>
+							<div class="fail-message unsofficiant-cups" style="display: none"><p>А пуговки-то нету у правого кармана! (с) Билетики закончились еще в прошлый раз. Пора пополнить запас.</p></div>
+							<div class="fail-message already-activated" style="display: none"><p>Вы уже активировали этот урок. Возможно, в другом окне или в другой жизни.</p></div>
+							<div class="fail-message login-need" style="display: none"><p>Похоже, Вы вышли из своего аккаунта в другом окне, то есть завершили сессию, а в этом окне всё еще видите кнопку «Активировать». Выхода
+								два: залогиниться по-новой и активировать урок или перезагрузить страницу — и кнопка исчезнет.</p></div>
 						</div>
 						<div class="modal-footer">
-							<button type="button" class="btn btn-default" id="activated-dismiss-button" onclick="$('#lesson-activated-modal').modal('hide')">Ok</button>
+							<button type="button" class="btn btn-default success-message" id="activated-dismiss-button" onclick="$('#lesson-activated-modal').modal('hide')">Ok</button>
+							<a type="button" class="btn btn-primary fail-message unsofficiant-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}">Пополнить запас</a>
 						</div>
 					</div>
 				</div>
