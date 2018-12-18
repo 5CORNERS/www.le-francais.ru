@@ -77,6 +77,11 @@ class User(AbstractUser):
 		self._cup_credit += n
 		self.save()
 
+	def has_payed(self):
+		if self.has_cups or self.payed_lessons.all().exists():
+			return True
+		return False
+
 	@property
 	def cup_amount(self):
 		return self._cup_amount
@@ -90,7 +95,6 @@ class User(AbstractUser):
 		if self.cups_amount > 0:
 			return True
 		return False
-
 
 	@property
 	def cup_credit(self):
@@ -158,7 +162,7 @@ def activate_tinkoff_payment(sender, **kwargs):
 	quantity = 0
 	items = list(payment.receipt.receiptitem_set.all())
 	for item in items:
-		if item.category == 'coffee_cups':
+		if item.category in ['coffee_cups', 'tickets']:
 			quantity += item.site_quantity
 	user.add_cups(quantity)
 
@@ -170,6 +174,6 @@ def deactivate_tinkoff_payment(sender, **kwargs):
 	quantity = 0
 	items = list(payment.receipt.receiptitem_set.all())
 	for item in items:
-		if item.category == 'coffee_cups':
+		if item.category in ['coffee_cups', 'tickets']:
 			quantity += item.site_quantity
 	user.add_cups(-quantity)
