@@ -163,7 +163,7 @@ def listen_request(request):
 	except:
 		return HttpResponse('false', status=400)
 
-	if not lesson.need_payment or not session.user.must_pay:
+	if session.user is None or not lesson.need_payment or not session.user.must_pay:  # TODO delete None
 		return HttpResponse('full', status=200)
 
 	if session.user is not None and lesson in session.user.payed_lessons.all() and session.ip == request.POST['ipaddress']:
