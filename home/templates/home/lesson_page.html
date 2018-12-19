@@ -444,15 +444,19 @@
 				<div class="modal-content">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-						<h4>Спасибо за Ваше решение нас поддержать!</h4>
+						{% if not request.user.saw_message%}<h4>Спасибо за Ваше решение нас поддержать!</h4>{% else %}<h4>Спасибо, что остаётесь с нами!</h4>{% endif %}
 					</div>
 					<div class="modal-body">
 						{% if not user.has_coffee and request.GET.modal_open == 'give-me-a-coffee-payment-success-modal' %}
 							<img id="ten-seconds-loading-img" style="width:100%;" src="{% static 'images/loading_icon.gif' %}">
 							<div class="ten-s-success" id="ten-seconds-success-message" style="display: none;">
-								<p>Спасибо за Ваше решение нас поддержать! Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
-								<p>Вы угощаете нас стаканчиком кофе за этот урок.</p>
-								<p>Все так?</p>
+								{% if not request.user.saw_message%}
+									<p>Спасибо за Ваше решение нас поддержать! Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
+									<p>Вы угощаете нас стаканчиком кофе за этот урок.</p>
+									<p>Все так?</p>
+								{% else %}
+									<p>Вы не пожалеете. Мы продолжим наш каждодневный труд над проектом, чтбы позволить вам получить максимум знаний, быстрее выучить французский — и получать от этого удовольствие. :)</p>
+								{% endif %}
 							</div>
 							<div class="ten-s-fail" id="ten-seconds-failure-message" style="display: none;">
 								<p style="color: red">Сервис по приему платежей до сих пор не прислал нам подтверждение о платеже.</p>
@@ -513,9 +517,9 @@
 						{% endif %}
 					</div>
 					<div class="modal-footer" style="text-align: center">
-						<button type="button" class="btn btn-primary ten-s-success coffee-proceed" onclick="giveMeCoffee()" id="give-me-a-coffee-after-payment-proceed" data-dismiss="modal"{% if not user.has_coffee %}
+						{% if not request.user.saw_message %}<button type="button" class="btn btn-primary ten-s-success coffee-proceed" onclick="giveMeCoffee()" id="give-me-a-coffee-after-payment-proceed" data-dismiss="modal"{% if not user.has_coffee %}
 						        style="display: none"{% endif %}>OUI !
-						</button>
+						</button>{% endif %}
 						<button type="button" class="btn btn-primary ten-s-fail" id="ten-seconds-failure-dismiss-button" data-dismiss="modal" style="display: none">Закрыть</button>
 					</div>
 				</div>
