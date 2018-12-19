@@ -168,7 +168,7 @@ def listen_request(request):
 
 	if session.user is not None and lesson in session.user.payed_lessons.all() and request.session.ip == request.POST['ipaddress']:
 		return HttpResponse('full', status=200)
-	return HttpResponse('short', status=200)
+	return HttpResponse('short', status=403)
 
 
 def get_lesson_url(request):
