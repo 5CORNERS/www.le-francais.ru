@@ -539,11 +539,15 @@ class BackUrls(Model):
 
 @receiver(payment_confirm)
 def send_receipt(sender, **kwargs):
+	if settings.DEBUG:
+		return
 	pay34_api = Pay34API()
 	pay34_api.send_receipt_request(kwargs['payment'])
 
 
 @receiver(payment_refund)
 def send_refund(sender, **kwargs):
+	if settings.DEBUG:
+		return
 	pay34_api = Pay34API()
 	pay34_api.send_refund_request(kwargs['payment'])

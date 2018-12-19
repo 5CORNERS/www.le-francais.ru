@@ -95,6 +95,7 @@
 			}
 			function activateLesson(state) {
 				switch (state) {
+					case 'tab':
 					case 'download':
 					case 'ended':
 						let audio = $('#lesson-audio')[0];
@@ -564,7 +565,7 @@
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						{% if request.user.has_payed %}
-							<div class="modal-header" style="text-align: center;"><h2>Пожалуйста, прочтите это!</h2></div>
+							<div class="modal-header" style="text-align: center;"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h3>Пожалуйста, прочтите это!</h3></div>
 							<div class=" modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
 								последнего.</p>
 
@@ -593,7 +594,7 @@
 
 							</div>
 						{% else %}
-							<div class="modal-header" style="text-align: center"><h2>Пожалуйста, прочтите это!</h2></div>
+							<div class="modal-header" style="text-align: center"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h3>Пожалуйста, прочтите это!</h3></div>
 							<div class="modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
 								последнего.</p>
 								<p> Сегодня сто<em>и</em>т вопрос выживания всего проекта. Мы все перепробовали. И у нас не осталось другого выхода —
@@ -628,7 +629,7 @@
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						{% if request.user.has_payed %}
-							<div class="modal-header" style="text-align: center;"><h2>Пожалуйста, прочтите это!</h2></div>
+							<div class="modal-header" style="text-align: center;"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h3>Пожалуйста, прочтите это!</h3></div>
 							<div class=" modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
 								последнего.</p>
 
@@ -657,7 +658,7 @@
 
 							</div>
 						{% else %}
-							<div class="modal-header" style="text-align: center"><h2>Пожалуйста, прочтите это!</h2></div>
+							<div class="modal-header" style="text-align: center"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h3>Пожалуйста, прочтите это!</h3></div>
 							<div class="modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
 								последнего.</p>
 								<p> Сегодня сто<em>и</em>т вопрос выживания всего проекта. Мы все перепробовали. И у нас не осталось другого выхода —
