@@ -166,7 +166,7 @@ def listen_request(request):
 	if not lesson.need_payment:
 		return HttpResponse('full', status=200)
 
-	if session.user is not None and lesson in session.user.payed_lessons.all() and request.session.ip == request.POST['ipadress']:
+	if session.user is not None and lesson in session.user.payed_lessons.all() and request.session.ip == request.POST['ipaddress']:
 		return HttpResponse('full', status=200)
 	return HttpResponse('short', status=200)
 
