@@ -1,5 +1,6 @@
 {% load site_tags wagtailcore_tags %}
 <div class="row padding">{% breadcrumb calling_page=self %}
+	{% check_user_lesson request.user self as userlesson %}
 	<h1>{{ page.title }}</h1>
 	{% if self.audio_material != 'None' %}
 		{% include 'home/lesson_audio.html' %}
@@ -36,24 +37,68 @@
 			</li>
 		{% endif %}
 		{% if self.repetition_material %}
-			<li class="nav-item">
-				<a class="nav-link" data-toggle="tab" href="#revision" role="tab"
-				   aria-controls="body">
-					Материал для повторения
-				</a>
-			</li>
+			{% if user.is_authenticated %}
+				{% if user.must_pay and self.need_payment %}
+					{% if userlesson %}
+						<li class="nav-item">
+							<a class="nav-link" data-toggle="tab" href="#revision" role="tab"
+							   aria-controls="body">
+								Материал для повторения
+							</a>
+						</li>
+					{% else %}
+						<li class="nav-item">
+							<a class="nav-link" style="cursor: pointer" data-toggle="tab" onclick="activateLesson('tab')" role="tab"
+							   aria-controls="body">
+								Материал для повторения
+							</a>
+						</li>
+					{% endif %}
+				{% else %}
+					<li class="nav-item">
+						<a class="nav-link" data-toggle="tab" href="#revision" role="tab"
+						   aria-controls="body">
+							Материал для повторения
+						</a>
+					</li>
+				{% endif %}
+			{% else %}
+				<li class="nav-item">
+					<a class="nav-link" style="cursor: pointer" data-toggle="modal" data-target="#listen-login-required-modal" role="tab"
+					   aria-controls="body">
+						Материал для повторения
+					</a>
+				</li>
+			{% endif %}
 		{% endif %}
 		{% if self.mail_archive %}
 			{% if user.is_authenticated %}
-				<li class="nav-item">
-					<a class="nav-link" data-target="" href="#mail-archive" role="tab"
-					   aria-controls="body">
-						Доп. информация
-					</a>
-				</li>
+				{% if user.must_pay and self.need_payment %}
+					{% if userlesson %}
+						<li class="nav-item">
+							<a class="nav-link" data-target="" href="#mail-archive" role="tab"
+							   aria-controls="body">
+								Доп. информация
+							</a>
+						</li>
+					{% else %}
+						<li class="nav-item">
+							<a style="cursor: pointer" class="nav-link" onclick="activateLesson('tab')">
+								Доп. информация
+							</a>
+						</li>
+					{% endif %}
+				{% else %}
+					<li class="nav-item">
+						<a class="nav-link" data-target="" href="#mail-archive" role="tab"
+						   aria-controls="body">
+							Доп. информация
+						</a>
+					</li>
+				{% endif %}
 			{% else %}
 				<li class="nav-item">
-					<a style="cursor: pointer" class="nav-link" data-toggle="modal" data-target="#default-login-required-modal">
+					<a style="cursor: pointer" class="nav-link" data-toggle="modal" data-target="#listen-login-required-modal">
 						Доп. информация
 					</a>
 				</li>
@@ -78,7 +123,7 @@
 			</div>
 			{% assign pane_class "tab-pane" %}
 		{% endif %}
-		{% if self.body %}{% check_user_lesson request.user self as userlesson %}
+		{% if self.body %}
 			<div id="body" class="{{ pane_class }}" role="tabpanel">
 				{% if user.must_pay and self.need_payment or request.GET.test %}
 					{% if not userlesson %}
@@ -123,17 +168,30 @@
 			</div>
 			{% assign pane_class "tab-pane" %}
 		{% endif %}
-		{% if self.repetition_material %}
-			<div id="revision" class="{{ pane_class }}" role="tabpanel">
-				<div>
-					{% page_advert_body 'revision_top' page.page_type %}
-					{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
-						{% include 'blocks/document_viewer.html' %}
-					{% endwith %}
-					{% page_advert_body 'revision_body' page.page_type %}
+		{% if self.repetition_material and user.is_authenticated %}
+			{% if user.must_pay and self.need_payment and userlesson %}
+				<div id="revision" class="{{ pane_class }}" role="tabpanel">
+					<div>
+						{% page_advert_body 'revision_top' page.page_type %}
+						{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
+							{% include 'blocks/document_viewer.html' %}
+						{% endwith %}
+						{% page_advert_body 'revision_body' page.page_type %}
+					</div>
 				</div>
-			</div>
-			{% assign pane_class "tab_pane" %}
+				{% assign pane_class "tab_pane" %}
+			{% elif not user.must_pay %}
+				<div id="revision" class="{{ pane_class }}" role="tabpanel">
+					<div>
+						{% page_advert_body 'revision_top' page.page_type %}
+						{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
+							{% include 'blocks/document_viewer.html' %}
+						{% endwith %}
+						{% page_advert_body 'revision_body' page.page_type %}
+					</div>
+				</div>
+				{% assign pane_class "tab_pane" %}
+			{% endif %}
 		{% endif %}
 		{% if self.mail_archive and user.is_authenticated %}
 			<div id="mail-archive" class="{{ pane_class }}" role="tabpanel">

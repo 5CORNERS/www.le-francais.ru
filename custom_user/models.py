@@ -92,7 +92,7 @@ class User(AbstractUser):
 
 	@property
 	def has_cups(self):
-		if self.cups_amount > 0:
+		if self.cups_amount > 0 or self.cup_credit > 0:
 			return True
 		return False
 
@@ -117,7 +117,7 @@ class User(AbstractUser):
 	REQUIRED_FIELDS = ['username']
 
 	def has_coffee(self):
-		if self.cup_amount > 0:
+		if self.cups_amount > 0 or self.cup_credit > 0:
 			return True
 		else:
 			return False

@@ -3,94 +3,96 @@
 
 {% block title %}{% trans "Profile editing" %}{% endblock title %}
 {% block extra_css %}
-    <style>
-        .coffee-button {
+	<style>
+		.coffee-button {
 
-            display: flex !important;
-            align-items: center !important;
-            margin-bottom: 1rem !important;
-            margin-top: 0.5rem !important;
-        }
+			display: flex !important;
+			align-items: center !important;
+			margin-bottom: 1rem !important;
+			margin-top: 0.5rem !important;
+		}
 
-        .coffee-button-image {
-            margin-right: 5px !important;
-            display: block !important;
-            height: 2.5em !important
-        }
+		.coffee-button-image {
+			margin-right: 5px !important;
+			display: block !important;
+			height: 2.5em !important
+		}
 
-        .coffee-button-text {
-            border-left: 1px solid #ccc !important;
-            padding-left: 5px !important;
-        }
-    </style>
+		.coffee-button-text {
+			border-left: 1px solid #ccc !important;
+			padding-left: 5px !important;
+		}
+	</style>
 {% endblock %}
 {% block extra_js %}{% endblock %}
 {% block content %}
-    <script type="text/javascript" src="{% static 'js/jquery.are-you-sure.min.js' %}"></script>
-    <script>
-      $('form').areYouSure({'message': 'Изменения будут потеряны!'});
-    </script>
-    <div class="row">
-        <div class="col-md-4">
-            {% include "pybb/avatar.html" %}
-            <p>
-                <a href="{% url 'account_change_password' %}">Изменить пароль{# TODO l18n #}</a>
-            </p>
-            <p>
-                <a href="{% url 'account_change_username' %}">Изменить ник на форуме</a>
-            </p>
-                <p>
-
-                {% if user.has_active_lessons %}
-                    {% message user.cup_amount 'билет' 'билета' 'билетов' as message %}
-	                  {% if user.has_coffee %}У вас ещё {{ message }} в загашнике.{% else %}У вас совсем нет билетов в запасе.{% endif %} {# TODO: ссобщение о кол-ве билетов в профиле #}
-                {% else %}
-	                  {% message user.cup_amount 'чашечка' 'чашечки' 'чашечек' as message %}
-                    {% if user.has_coffee %}У вас ещё {{ message }} в загашнике.{% else %}У вас совсем нет чашечек кофе в запасе. Как же вы будете угощать?!{% endif %}
-                {% endif %}
-                </p>
-            <button class="coffee-button btn btn-default btn-xs" id="coffee-button"
-                    onclick="location.href='{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal'">
-                <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">
-                <div id="coffee-button-text" class="coffee-button-text">Пополнить запасы</div>
-            </button>
-        </div>
-        <div class="col-md-8">
-            <form action="" method="post" enctype="multipart/form-data"
-                  class="profile-edit">
-                {% include "pybb/form.html" %}
-                <div>Выбрать варианты подписок на push-уведомления о выходе новых статей, обзоров, уроков или просто
-                    новостей (в любых сочетаниях)
-                </div>
-                <div>Il faut bien que je supporte deux ou trois chenilles si je veux connaître les papillons (Antoine de
-                    Saint-Exupéry, Le Petit Prince)
-                </div>
-                <div>Управляйте своими подписками!</div>
-                <div class="p4s-button"></div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        {% trans "Save" %}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-    {% if user.subscriptions.all %}
-        <div class="row">
-            <div class="col-md-12">
-                <h1>Мои подписки{# TODO l18n #}{#{% trans "Subscriptions on topics" %}#}</h1>
-                <ul>
-                    {% for sub in user.subscriptions.all %}
-                        <li>
-                            {% pybb_link sub %}
-                            &mdash;
-                            <strong>
-                                <a href="{% url 'pybb:delete_subscription' sub.id %}">{% trans "delete" %}</a>
-                            </strong>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    {% endif %}
+	<script type="text/javascript" src="{% static 'js/jquery.are-you-sure.min.js' %}"></script>
+	<script>
+		$('form').areYouSure({'message': 'Изменения будут потеряны!'});
+	</script>
+	<div class="row">
+		<div class="col-md-4">
+			{% include "pybb/avatar.html" %}
+			<p>
+				<a href="{% url 'account_change_password' %}">Изменить пароль{# TODO l18n #}</a>
+			</p>
+			<p>
+				<a href="{% url 'account_change_username' %}">Изменить ник на форуме</a>
+			</p>
+			<p>
+				{% if user.saw_message %}
+					{% message user.cup_amount 'активация' 'активации' 'активаций' as message %}
+					{% if user.has_coffee %}У вас ещё {{ message }} в загашнике.{% else %}У вас пусто в закромах. Пора пополнить запасы.{% endif %}
+					<button class="coffee-button btn btn-default btn-xs" id="coffee-button"
+					        onclick="location.href='{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal'">
+						Пополнить
+					</button>
+				{% else %}
+					{% message user.cup_amount 'чашечка' 'чашечки' 'чашечек' as message %}
+					{% if user.has_coffee %}У вас ещё {{ message }} в загашнике.{% else %}У вас совсем нет чашечек кофе в запасе. Как же вы будете угощать?!</p>{% endif %}
+					<button class="coffee-button btn btn-default btn-xs" id="coffee-button"
+					        onclick="location.href='{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal'">
+						<img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">
+						<div id="coffee-button-text" class="coffee-button-text">Пополнить запасы</div>
+					</button>
+				{% endif %}
+		</div>
+		<div class="col-md-8">
+			<form action="" method="post" enctype="multipart/form-data"
+			      class="profile-edit">
+				{% include "pybb/form.html" %}
+				<div>Выбрать варианты подписок на push-уведомления о выходе новых статей, обзоров, уроков или просто
+					новостей (в любых сочетаниях)
+				</div>
+				<div>Il faut bien que je supporte deux ou trois chenilles si je veux connaître les papillons (Antoine de
+					Saint-Exupéry, Le Petit Prince)
+				</div>
+				<div>Управляйте своими подписками!</div>
+				<div class="p4s-button"></div>
+				<div class="form-actions">
+					<button type="submit" class="btn btn-primary">
+						{% trans "Save" %}
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	{% if user.subscriptions.all %}
+		<div class="row">
+			<div class="col-md-12">
+				<h1>Мои подписки{# TODO l18n #}{#{% trans "Subscriptions on topics" %}#}</h1>
+				<ul>
+					{% for sub in user.subscriptions.all %}
+						<li>
+							{% pybb_link sub %}
+							&mdash;
+							<strong>
+								<a href="{% url 'pybb:delete_subscription' sub.id %}">{% trans "delete" %}</a>
+							</strong>
+						</li>
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+	{% endif %}
 {% endblock content %}
