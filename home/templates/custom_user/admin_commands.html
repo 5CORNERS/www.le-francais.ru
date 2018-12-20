@@ -8,8 +8,9 @@
 					<select name="action" class="form-control">
 						<option value="add_cup">Добавить 1 чашку</option>
 						<option value="add_minus_cup">Убрать 1 чашку</option>
-						<option value="zero">Обнулить(не видел сообщения, убрать чашки и активированные уроки)</option>
+						<option value="zero">Обнулить(не видел сообщения, убрать все чашки и активированные уроки)</option>
 						<option value="switch_low_price">Переключить статус пенсионера/студента</option>
+						<option value="switch_must_pay">Переключить статус должен/не должен платить за уроки</option>
 					</select>
 					<button type="submit" class="btn btn-primary">Submit</button>
 				</div>
@@ -27,6 +28,19 @@
 		<div class="col-xs-12">
 			low_price={{ request.user.low_price }}
 		</div>
+		<div class="col-xs-12">
+			must_pay={{ request.user.must_pay }}
+		</div>
+	</div>
+	<div class="row" style="margin-top: 1rem">
+		<div class="col-xs-12">
+			Активированные уроки:
+		</div>
+		{% for lesson in request.user.payed_lessons.all %}
+			<div class="col-xs-12">
+				<a href="{{ lesson.url }}">{{ lesson.slug }}</a>
+			</div>
+		{% endfor %}
 	</div>
 </div>
 {% endblock %}
