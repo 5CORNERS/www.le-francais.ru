@@ -42,7 +42,7 @@
 			<p>
 				{% if user.saw_message %}
 					{% message user.cup_amount 'активация' 'активации' 'активаций' as message %}
-					{% if user.has_coffee %}У вас ещё {{ message }} в загашнике.{% else %}У вас пусто в закромах. Пора пополнить запасы.{% endif %}
+					{% if user.has_coffee %}У вас ещё {{ message }} в загашнике.{% elif user.cups_amount < 0 and user.cup_credit == 0 %}У вас ещё {{ message }} в загашнике. Вы исчерпали кредит в 3 урока.{% else %}У вас пусто в закромах. Пора пополнить запасы.{% endif %}
 					<button class="coffee-button btn btn-default btn-xs" id="coffee-button"
 					        onclick="location.href='{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal'">
 						Пополнить

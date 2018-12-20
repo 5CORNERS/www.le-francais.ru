@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin-top: 50px">
+	<div class="row">
+		<div class="col-xs-12">
+			<form class="form-inline" method="post" action="{% url 'custom_user:admin_commands' %}">{% csrf_token %}
+				<div class="form-group">
+					<select name="action" class="form-control">
+						<option value="zero">Обнулить(не видел сообщения, убрать чашки и активированнык уроки)</option>
+						<option value="add_cup">Добавить 1 чашку</option>
+						<option value="switch_low_price">Переключить статус пенсионера/студента</option>
+					</select>
+					<button type="submit" class="btn btn-primary">Submit</button>
+				</div>
+			</form>
+		</div>
+		<div class="col-xs-12">
+			cups_amount={{ request.user.cups_amount }}
+		</div>
+		<div class="col-xs-12">
+			credit_cups_amount={{ request.user.cup_credit }}
+		</div>
+		<div class="col-xs-12">
+			saw_message={{ request.user.saw_message }}
+		</div>
+		<div class="col-xs-12">
+			low_price={{ request.user.low_price }}
+		</div>
+	</div>
+</div>
+{% endblock %}
