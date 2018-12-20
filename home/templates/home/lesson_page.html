@@ -19,6 +19,8 @@
 	{% if user.must_pay and self.need_payment or request.GET.test %}
 		<script>
 			let saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
+			let cups_amount = {{ request.user.cup_amount }};
+			let cups_credit = {{ request.user.cup_credit }};
 			function reloadLessonUrl() {
 				$.ajax({
 					type: 'POST',
@@ -74,6 +76,9 @@
 							window.location.href = window.location.pathname+"?"+$.param({'modal_open':'lesson-activated-modal'});
 						} else if (r.result === 'ZERO_CUPS') {
 							$('.waiting-message').hide();
+							if (cups_credit === 0){
+								$('.unsofficiant-cups-credit').show()
+							}
 							$('.unsofficiant-cups').show();
 
 						} else if (r.result === 'ALREADY') {
@@ -83,7 +88,6 @@
 						} else if (r.result === 'NOT_AUTH') {
 							$('.waiting-message').hide();
 							$('.login-need').show();
-
 						}
 					}
 				});
@@ -134,7 +138,7 @@
 					lessonAudio.addEventListener('ended', function () {
 						activateLesson('ended')
 					});
-				})
+				});
 			{% endif %}
 		</script>
 	{% endif %}
@@ -243,6 +247,7 @@
 					{% if modal_id == 'lesson-activated-modal' %}
 						$('.fail-message').hide();
 						$('.waiting-message').hide();
+						if ((cups_amount < 0)&&(cups_credit === 0)){$('.unsofficiant-cups-credit').show()}
 						$('.success-message').show();
 						$('#activated-message-ticket-count').text("{{ request.user.cups_amount }}");
 					{% endif %}
@@ -693,17 +698,18 @@
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h3 class="waiting-message" style="display: none;">Урок активируется</h3>
-							<h3 class="success-message" style="display: none;">Урок активирован</h3>
-							<h3 class="fail-message unsofficiant-cups login-need" style="display: none;">Упс!</h3>
-							<h3 class="fail-message already-activated" style="display: none;">Хорошая новость!</h3>
+							<button class="close success-message fail-message unsofficiant-cups login-need already-activated" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="waiting-message" style="display: none;">Урок активируется</h4>
+							<h4 class="success-message" style="display: none;">Урок активирован</h4>
+							<h4 class="fail-message unsofficiant-cups login-need" style="display: none;">Упс!</h4>
+							<h4 class="fail-message already-activated" style="display: none;">Хорошая новость!</h4>
 						</div>
 						<div class="modal-body">
 							<div id="activated-message-waiting" class="waiting-message" style="display: none">
 								<p>Пожалуйста, подождите, это займёт несколько секунд.</p>
 								<img style="width:100%;" src="{% static 'images/loading_icon.gif' %}"></div>
-							<div id="activated-message-success" class="success-message" style="display: none"><p>У вас в запасе уроков: <span id="activated-message-ticket-count">ХХХ</span>.</p></div>
-							<div class="fail-message unsofficiant-cups" style="display: none"><p>А пуговки-то нету у правого кармана! (с) Билетики закончились еще в прошлый раз. Пора пополнить запас.</p></div>
+							<div id="activated-message-success" class="success-message" style="display: none"><p>У вас в запасе уроков: <span id="activated-message-ticket-count">ХХХ</span>.<span class="unsofficiant-cups-credit" style="display: none"> Вы исчерпали кредит в 3 урока.</span></p></div>
+							<div class="fail-message unsofficiant-cups" style="display: none"><p>А пуговки-то нету у левого кармана! (с) Билетики закончились еще в прошлый раз.<span class="unsofficiant-cups-credit" style="display: none"> Вы исчерпали кредит в 3 урока. </span>Пора пополнить запас.</p></div>
 							<div class="fail-message already-activated" style="display: none"><p>Вы уже активировали этот урок. Возможно, в другом окне или в другой жизни.</p></div>
 							<div class="fail-message login-need" style="display: none"><p>Похоже, Вы вышли из своего аккаунта в другом окне, то есть завершили сессию, а в этом окне всё еще видите кнопку «Активировать». Выхода
 								два: залогиниться по-новой и активировать урок или перезагрузить страницу — и кнопка исчезнет.</p></div>

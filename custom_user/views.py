@@ -1,8 +1,9 @@
 from django.views import View
-from django.shortcuts import HttpResponse
+from django.shortcuts import HttpResponse, render
 import json
 from django.core.mail import EmailMessage
-
+from django.utils.decorators import method_decorator
+from django.contrib.admin.views.decorators import staff_member_required
 
 MESSAGE_FOR_NOT_PAYED = '''Добрый день!
 
@@ -97,3 +98,30 @@ class SawMessageView(View):
 			return HttpResponse(json.dumps(user.saw_message), content_type='application/json', status=200)
 		else:
 			return HttpResponse(status=400)
+
+from home.models import UserLesson
+
+class AdminCommands(View):
+
+	@method_decorator(staff_member_required)
+	def dispatch(self, request, *args, **kwargs):
+		return super(AdminCommands, self).dispatch(request, *args, **kwargs)
+
+	def get(self, request):
+		return render(request, template_name='custom_user/admin_commands.html')
+
+	def post(self, request):
+		action = request.POST['action']
+		user = request.user
+		if action == 'zero':
+			for userlesson in user.payed_lessons.all():
+				userlesson.delete()
+			user.add_cups(-user.cup_amount)
+			user.add_credit_cups(-user.cup_credit)
+			user.saw_message = False
+			user.save()
+		elif action == 'add_cup':
+			user.add_cups(1)
+		elif action == 'switch_low_price':
+			user.switch_low_price()
+		return render(request, template_name='custom_user/admin_commands.html')
