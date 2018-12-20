@@ -7,7 +7,7 @@
 				{% if self.audio_material %}
 					src = "{{ self.audio_material }}"
 				{% else %}
-					{% if userlesson or not user.must_pay %}
+					{% if userlesson or not user.must_pay or not self.need_payment %}
 						src="https://files.le-francais.ru/listen.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}"
 					{% else %}
 						src="http://files.le-francais.ru/lecons/coupe/french-{{ self.lesson_number }}_coupe.mp3"
