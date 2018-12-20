@@ -76,7 +76,7 @@
 							window.location.href = window.location.pathname+"?"+$.param({'modal_open':'lesson-activated-modal'});
 						} else if (r.result === 'ZERO_CUPS') {
 							$('.waiting-message').hide();
-							if (cups_credit === 0){
+							if ((cups_amount < 0)&&(cups_credit === 0)){
 								$('.unsofficiant-cups-credit').show()
 							}
 							$('.unsofficiant-cups').show();
