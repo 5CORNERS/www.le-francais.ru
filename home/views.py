@@ -272,8 +272,8 @@ class TinkoffPayments(View):
 				dict(title="1 билет", image="images/ticket_1-39.png", description=None, price1="по 39 ₽", price2=39, item_id=11),
 				dict(title="5 билет", image="images/ticket_5-39.png", description=None, price1="по 39 ₽", price2=295, item_id=12),
 				dict(title="10 билет", image="images/ticket_10-39.png", description=None, price1="по 39 ₽", price2=490, item_id=13),
-				dict(title="20 билет", image="images/ticket_20.png", description=None, price1="по 39 ₽", price2=780, item_id=14),
-				dict(title="50 билет", image="images/ticket_50.png", description=None, price1="по 34 ₽", price2=1690, item_id=15),
+				dict(title="20 билет", image="images/ticket_20.png", description=None, price1="по 39 ₽", price2=780, item_id=9),
+				dict(title="50 билет", image="images/ticket_50.png", description=None, price1="по 34 ₽", price2=1690, item_id=10),
 			])
 			return render(request, 'payments/tinkoff_payments_tickets.html', data)
 		else:
