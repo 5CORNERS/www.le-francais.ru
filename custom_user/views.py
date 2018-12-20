@@ -124,4 +124,6 @@ class AdminCommands(View):
 			user.add_cups(1)
 		elif action == 'switch_low_price':
 			user.switch_low_price()
+		elif action == 'add_minus_cup':
+			user.add_cups(-1)
 		return render(request, template_name='custom_user/admin_commands.html')
