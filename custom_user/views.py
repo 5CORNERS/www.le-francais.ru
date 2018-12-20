@@ -114,8 +114,6 @@ class AdminCommands(View):
 		action = request.POST['action']
 		user = request.user
 		if action == 'zero':
-			for userlesson in user.payed_lessons.all():
-				userlesson.delete()
 			user.add_cups(-user.cup_amount)
 			user.add_credit_cups(-user.cup_credit)
 			user.saw_message = False
