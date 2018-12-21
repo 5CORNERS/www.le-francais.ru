@@ -168,30 +168,16 @@
 			</div>
 			{% assign pane_class "tab-pane" %}
 		{% endif %}
-		{% if self.repetition_material and user.is_authenticated %}
-			{% if user.must_pay and self.need_payment and userlesson %}
-				<div id="revision" class="{{ pane_class }}" role="tabpanel">
-					<div>
-						{% page_advert_body 'revision_top' page.page_type %}
-						{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
-							{% include 'blocks/document_viewer.html' %}
-						{% endwith %}
-						{% page_advert_body 'revision_body' page.page_type %}
-					</div>
+		{% if self.repetition_material %}
+			<div id="revision" class="{{ pane_class }}" role="tabpanel">
+				<div>
+					{% page_advert_body 'revision_top' page.page_type %}
+					{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
+						{% include 'blocks/document_viewer.html' %}
+					{% endwith %}
+					{% page_advert_body 'revision_body' page.page_type %}
 				</div>
-				{% assign pane_class "tab_pane" %}
-			{% elif not user.must_pay %}
-				<div id="revision" class="{{ pane_class }}" role="tabpanel">
-					<div>
-						{% page_advert_body 'revision_top' page.page_type %}
-						{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
-							{% include 'blocks/document_viewer.html' %}
-						{% endwith %}
-						{% page_advert_body 'revision_body' page.page_type %}
-					</div>
-				</div>
-				{% assign pane_class "tab_pane" %}
-			{% endif %}
+			</div>
 		{% endif %}
 		{% if self.mail_archive and user.is_authenticated %}
 			<div id="mail-archive" class="{{ pane_class }}" role="tabpanel">
