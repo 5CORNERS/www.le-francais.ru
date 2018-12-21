@@ -53,7 +53,7 @@ class User(AbstractUser):
 
 	used_usernames = JSONField(encoder=DjangoJSONEncoder, default=list)
 
-	must_pay = models.BooleanField(default=False)
+	must_pay = models.BooleanField(default=True)
 
 	saw_message = models.BooleanField(default=False)
 
