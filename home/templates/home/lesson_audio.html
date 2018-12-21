@@ -4,23 +4,63 @@
 		<div class="col-md-8">
 			<audio onerror="reloadLessonUrl(this)" preload="auto" id="lesson-audio" data-downloadable{% if user.must_pay and self.need_payment or request.GET.test %}{% if not user.is_authenticated or not userlesson %}="empty"{% endif %}{% endif %} number="{{ self.lesson_number }}"{% if request.GET.t %} set-time="{{ request.GET.t }}"{% elif request.GET.T %} set-time="{% t2seconds request.GET.T %}"{% endif %}>
 				<source
-				{% if self.audio_material %}
-					src = "{{ self.audio_material }}"
-				{% else %}
-					{% if userlesson or not user.must_pay or not self.need_payment %}
-						src="https://files.le-francais.ru/listen.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}"
+					{% if self.audio_material %}
+						src="{{ self.audio_material }}"
 					{% else %}
-						src="http://files.le-francais.ru/lecons/coupe/french-{{ self.lesson_number }}_coupe.mp3"
-					{% endif %}
-				{% endif %} type="audio/mpeg">
+						{% if self.need_payment %}
+							{% if not user.is_authenticated %}
+								src="https://files.le-francais.ru/lecons/coupe/french-{{ self.lesson_number }}_coupe.mp3"
+							{% elif not user.must_pay %}
+								src="https://files.le-francais.ru/listen.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}"
+							{% elif not userlesson %}
+								src="http://files.le-francais.ru/lecons/coupe/french-{{ self.lesson_number }}_coupe.mp3"
+							{% else %}
+								src="https://files.le-francais.ru/listen.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}"
+							{% endif %}
+						{% else %}
+							src="https://files.le-francais.ru/listen.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}"
+						{% endif %}
+					{% endif %} type="audio/mpeg">
 			</audio>
 		</div>
 		<div class="col-md-4">
 			<input type="hidden" name="next" value="{{ request.path }}">
 			<!-- button trigger by-me-a-coffee-modals -->
-			{% if user.must_pay and self.need_payment or request.GET.test %}
-				{% if user.is_authenticated %}
-					<img class="new-svg-button activate-button{% if userlesson %} activated{% endif %}" src="{% if userlesson %}{% static 'images/buttons/activated.svg' %}{% else %}{% static 'images/buttons/activate.svg' %}{% endif %}" onclick="activateLesson('button')">
+
+			{% if self.need_payment %}
+				{% if not user.is_authenticated %}
+				{% elif not user.must_pay %}
+					{% if not userlesson %}
+					<img class="new-svg-button" id="coffee-button"
+							{% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
+							 data-toggle="modal"
+							 data-target="#give-me-a-coffee-modal"
+							{% elif user.is_authenticated and not user.has_coffee %}
+							 onclick="location.href='{% url 'check_amount' %}?next={{ request.path }}';"
+							{% elif not user.is_authenticated %}
+							 data-toggle="modal"
+							 data-target="#give-me-a-coffee-modal"
+							{% endif %}
+							 src="{% static "images/buttons/new-button.svg" %}"
+					>
+				{% else %}
+					<button class="coffee-button btn btn-default btn-xs" disabled="disabled" id="coffee-button">
+						<img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}">
+						<div id="coffee-button-text" class="coffee-button-text">Вы уже угощали меня<br>за этот урок :)</div>
+					</button>
+				{% endif %}
+				{% elif not userlesson %}
+					<img
+							class="new-svg-button activate-button{% if userlesson %} activated{% endif %}"
+							src="{% if userlesson %}{% static 'images/buttons/activated.svg' %}{% else %}{% static 'images/buttons/activate.svg' %}{% endif %}"
+							onclick="activateLesson('button')"
+					>
+				{% else %}
+					<img
+							class="new-svg-button activate-button{% if userlesson %} activated{% endif %}"
+							src="{% if userlesson %}{% static 'images/buttons/activated.svg' %}{% else %}{% static 'images/buttons/activate.svg' %}{% endif %}"
+							onclick="activateLesson('button')"
+					>
 				{% endif %}
 			{% else %}
 				{% if not userlesson %}
@@ -35,12 +75,7 @@
 							 data-target="#give-me-a-coffee-modal"
 							{% endif %}
 							 src="{% static "images/buttons/new-button.svg" %}"
-							 {% comment %}onmousedown="$('#coffee-button').attr('src', '{% static 'images/buttons/button-active-min.png' %}')"
-							 onfocus="$('#coffee-button').attr('src', '{% static 'images/buttons/button-focus-min.png' %}')"
-							 onmouseover="$('#coffee-button').attr('src', '{% static 'images/buttons/button-hover-min.png' %}')"
-							 onmouseout="$('#coffee-button').attr('src', '{% static 'images/buttons/button-default-min.png' %}')"{% endcomment %}>
-					{#<img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">#}
-					{#<div id="coffee-button-text" class="coffee-button-text">Вам ведь понравился урок?<br>Угостите меня кофейком!</div>#}
+					>
 				{% else %}
 					<button class="coffee-button btn btn-default btn-xs" disabled="disabled" id="coffee-button">
 						<img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}">
