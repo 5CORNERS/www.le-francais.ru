@@ -104,7 +104,7 @@ ITEMS = {
 		category='tickets',
 		order_type_id=1,
 		quantity=1,
-		price=29500,
+		price=19500,
 		site_quantity=5,
 	),
 	13: dict(
@@ -113,7 +113,7 @@ ITEMS = {
 		category='tickets',
 		order_type_id=1,
 		quantity=1,
-		price=49000,
+		price=39000,
 		site_quantity=10,
 	),
 }
