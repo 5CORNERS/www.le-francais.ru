@@ -135,7 +135,7 @@
 							</div>
 						{% else %}
 							<div class="row">
-								<div class="col-md-12"><p>Активируйте, чтобы прочитать целиком.</p></div>
+								<div class="col-md-12"><p>Пожалуйста, активируйте урок, чтобы получить доступ к его материалам.</p></div>
 								<div class="col-md-12"><button class="btn btn-primary button-small" onclick="activateLesson('button')">Активировать урок</button></div>
 							</div>
 						{% endif %}
@@ -200,7 +200,7 @@
 					{% if user.must_pay and self.need_payment or request.GET.test and not userlesson %}
 						{% include_30_block self.mail_archive 40 %}
 						<div class="row">
-							<div class="col-md-12"><p>Активируйте, чтобы прочитать целиком.</p></div>
+							<div class="col-md-12"><p>Пожалуйста, активируйте урок, чтобы получить доступ к его материалам.</p></div>
 							<div class="col-md-12"><button class="btn btn-primary button-small" onclick="activateLesson('button')">Активировать урок</button></div>
 						</div>
 					{% else %}
