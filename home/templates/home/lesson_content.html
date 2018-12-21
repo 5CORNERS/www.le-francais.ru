@@ -37,12 +37,44 @@
 			</li>
 		{% endif %}
 		{% if self.repetition_material %}
-			<li class="nav-item">
+			{% if self.need_payment %}
+				{% if not user.is_authenticated %}
+					<li class="nav-item">
+						<a class="nav-link" style="cursor: pointer" data-toggle="modal" data-target="#listen-login-required-modal" role="tab"
+						   aria-controls="body">
+							Материал для повторения
+						</a>
+					</li>
+				{% elif not user.must_pay %}
+					<li class="nav-item">
 						<a class="nav-link" data-toggle="tab" href="#revision" role="tab"
 						   aria-controls="body">
 							Материал для повторения
 						</a>
 					</li>
+				{% elif not userlesson %}
+					<li class="nav-item">
+						<a class="nav-link" style="cursor: pointer" data-toggle="tab" onclick="activateLesson('tab')" role="tab"
+						   aria-controls="body">
+							Материал для повторения
+						</a>
+					</li>
+				{% else %}
+					<li class="nav-item">
+						<a class="nav-link" data-toggle="tab" href="#revision" role="tab"
+						   aria-controls="body">
+							Материал для повторения
+						</a>
+					</li>
+				{% endif %}
+			{% else %}
+				<li class="nav-item">
+							<a class="nav-link" data-toggle="tab" href="#revision" role="tab"
+							   aria-controls="body">
+								Материал для повторения
+							</a>
+						</li>
+			{% endif %}
 		{% endif %}
 		{% if self.mail_archive %}
 			{% if user.is_authenticated %}
@@ -142,21 +174,50 @@
 			{% assign pane_class "tab-pane" %}
 		{% endif %}
 		{% if self.repetition_material %}
-			<div id="revision" class="{{ pane_class }}" role="tabpanel">
-				<div>
-					{% page_advert_body 'revision_top' page.page_type %}
-					{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
-						{% include 'blocks/document_viewer.html' %}
-					{% endwith %}
-					{% page_advert_body 'revision_body' page.page_type %}
+			{% if self.need_payment %}
+				{% if not user.is_authenticated %}
+				{% elif not user.must_pay %}
+					<div id="revision" class="{{ pane_class }}" role="tabpanel">
+						<div>
+							{% page_advert_body 'revision_top' page.page_type %}
+							{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
+								{% include 'blocks/document_viewer.html' %}
+							{% endwith %}
+							{% page_advert_body 'revision_body' page.page_type %}
+						</div>
+					</div>
+					{% assign pane_class "tab_pane" %}
+				{% elif not userlesson %}
+				{% else %}
+					<div id="revision" class="{{ pane_class }}" role="tabpanel">
+						<div>
+							{% page_advert_body 'revision_top' page.page_type %}
+							{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
+								{% include 'blocks/document_viewer.html' %}
+							{% endwith %}
+							{% page_advert_body 'revision_body' page.page_type %}
+						</div>
+					</div>
+					{% assign pane_class "tab_pane" %}
+				{% endif %}
+			{% else %}
+				<div id="revision" class="{{ pane_class }}" role="tabpanel">
+					<div>
+						{% page_advert_body 'revision_top' page.page_type %}
+						{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
+							{% include 'blocks/document_viewer.html' %}
+						{% endwith %}
+						{% page_advert_body 'revision_body' page.page_type %}
+						{% assign pane_class "tab_pane" %}
+					</div>
 				</div>
-			</div>
+			{% endif %}
 		{% endif %}
 		{% if self.mail_archive and user.is_authenticated %}
 			<div id="mail-archive" class="{{ pane_class }}" role="tabpanel">
 				<h3>Дополнительная информация из&nbsp;почтовой рассылки</h3>
 				<div>
-					{% if user.must_pay and self.need_payment or request.GET.test and not userlesson %}
+					{% if user.must_pay and self.need_payment and not userlesson %}
 						{% include_30_block self.mail_archive 40 %}
 						<div class="row">
 							<div class="col-md-12"><p>Пожалуйста, активируйте урок, чтобы получить доступ к его материалам.</p></div>
@@ -170,6 +231,7 @@
 			</div>
 			{% assign pane_class "tab_pane" %}
 		{% endif %}
+
 		{% for child_value in self.other_tabs %}
 			<div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
 				{% for block in child_value.value.body %}{% include_block block %}{% endfor %}
