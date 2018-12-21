@@ -37,39 +37,12 @@
 			</li>
 		{% endif %}
 		{% if self.repetition_material %}
-			{% if user.is_authenticated %}
-				{% if user.must_pay and self.need_payment %}
-					{% if userlesson %}
-						<li class="nav-item">
-							<a class="nav-link" data-toggle="tab" href="#revision" role="tab"
-							   aria-controls="body">
-								Материал для повторения
-							</a>
-						</li>
-					{% else %}
-						<li class="nav-item">
-							<a class="nav-link" style="cursor: pointer" data-toggle="tab" onclick="activateLesson('tab')" role="tab"
-							   aria-controls="body">
-								Материал для повторения
-							</a>
-						</li>
-					{% endif %}
-				{% else %}
-					<li class="nav-item">
+			<li class="nav-item">
 						<a class="nav-link" data-toggle="tab" href="#revision" role="tab"
 						   aria-controls="body">
 							Материал для повторения
 						</a>
 					</li>
-				{% endif %}
-			{% else %}
-				<li class="nav-item">
-					<a class="nav-link" style="cursor: pointer" data-toggle="modal" data-target="#listen-login-required-modal" role="tab"
-					   aria-controls="body">
-						Материал для повторения
-					</a>
-				</li>
-			{% endif %}
 		{% endif %}
 		{% if self.mail_archive %}
 			{% if user.is_authenticated %}
