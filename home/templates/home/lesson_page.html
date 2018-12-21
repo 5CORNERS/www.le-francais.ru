@@ -726,11 +726,14 @@
 			<div class="modal" id="listen-login-required-modal" tabindex="-1" role="dialog">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
-						<div class="modal-header"></div>
+						<div class="modal-header"><button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
 						<div class="modal-body">
-							<p>Пожалуйста, войдите на сайт под своим именем. Доступ к материалам уроков могут получить только зарегистрированные пользователи.</p>
+							<p>Доступ к материалам урока могут получить только зарегистрированные пользователи. Пожалуйста, войдите на сайт под своим именем.</p>
 						</div>
-						<div class="modal-footer"><a href="{% url 'account_login' %}?next={{ request.path }}"><button class="btn btn-primary button-small" href="{% url 'account_login' %}">Войти</button></a></div>
+						<div class="modal-footer">
+							<button class="btn btn-default" {# style="float: left" #} data-dismiss="modal">Ok</button>
+							<a href="{% url 'account_login' %}?next={{ request.path }}"><button class="btn btn-primary button-small" href="{% url 'account_login' %}">Войти</button></a>
+						</div>
 					</div>
 				</div>
 			</div>
