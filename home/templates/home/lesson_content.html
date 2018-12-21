@@ -130,7 +130,7 @@
 						{% include_30_block self.body 400 %}
 						{% if not user.is_authenticated %}
 							<div class="row">
-								<div class="col-md-12"><p>Войдите, чтобы получить возможность прочитать целиком.</p></div>
+								<div class="col-md-12"><p>Доступ к материалам урока могут получить только зарегистрированные пользователи.</p></div>
 								<div class="col-md-12"><a href="{% url 'account_login' %}?next={{ request.path }}"><button class="btn btn-primary button-small" href="{% url 'account_login' %}">Войти</button></a></div>
 							</div>
 						{% else %}
