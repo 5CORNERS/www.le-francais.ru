@@ -148,7 +148,16 @@
 						{% for block in self.body %}{% include_block block %}{% endfor %}
 					{% endif %}
 				{% else %}
-					{% for block in self.body %}{% include_block block %}{% endfor %}
+					{% if self.need_payment %}
+						{% include_30_block self.body 400 %}
+						{% if not user.is_authenticated %}
+						<div class="row">
+								<div class="col-md-12"><p>Доступ к материалам урока могут получить только зарегистрированные пользователи.</p></div>
+								<div class="col-md-12"><a href="{% url 'account_login' %}?next={{ request.path }}"><button class="btn btn-primary button-small" href="{% url 'account_login' %}">Войти</button></a></div>
+						</div>
+					{% else %}
+							{% for block in self.body %}{% include_block block %}{% endfor %}
+					{% endif %}
 				{% endif %}
 				{% page_advert_body 'body_bottom' page.page_type %}
 			</div>
