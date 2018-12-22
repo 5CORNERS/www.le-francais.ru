@@ -18,9 +18,9 @@
 	        src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
 	{% if self.need_payment %}
 		<script>
-			let saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
+			{% if user.is_authenticated %}let saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
 			let cups_amount = {{ request.user.cup_amount }};
-			let cups_credit = {{ request.user.cup_credit }};
+			let cups_credit = {{ request.user.cup_credit }};{% endif %}
 			function reloadLessonUrl() {
 				$.ajax({
 					type: 'POST',
