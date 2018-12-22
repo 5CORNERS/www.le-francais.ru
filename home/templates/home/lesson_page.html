@@ -16,7 +16,7 @@
 	{% check_user_lesson request.user self as userlesson %}
 	<script async type="text/javascript"
 	        src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
-	{% if user.must_pay and self.need_payment or request.GET.test %}
+	{% if self.need_payment %}
 		<script>
 			let saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
 			let cups_amount = {{ request.user.cup_amount }};
