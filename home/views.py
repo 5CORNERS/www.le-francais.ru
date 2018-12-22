@@ -217,12 +217,12 @@ class ActivateLesson(View):
 				if request.user.cup_amount >= 1 or request.user.cup_credit >= 1:
 					try:
 						cup_amount = lesson.add_lesson_to_user(request.user)
-						# send_mail(
-						# 	'Lesson Activated',
-						# 	'{0} активировал урок {1}'.format(request.user.email, lesson.lesson_number),
-						# 	from_email=settings.DEFAULT_FROM_EMAIL,
-						# 	recipient_list=['ilia.dumov@gmail.com']
-						# )
+						send_mail(
+							'Lesson Activated',
+							'{0} активировал урок {1}. Осталось {2} активаций'.format(request.user.email, lesson.lesson_number, request.user.cup_amount),
+							from_email=settings.DEFAULT_FROM_EMAIL,
+							recipient_list=['ilia.dumov@gmail.com']
+						)
 						data = dict(result="SUCCESS", left=cup_amount)
 					except BaseException as e:
 						data = dict(result="ERROR", description="Failed to do something: " + str(e))
