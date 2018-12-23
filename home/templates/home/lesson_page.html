@@ -730,7 +730,8 @@
 							<button class="close success-message fail-message unsofficiant-cups login-need already-activated" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 							<h4 class="waiting-message" style="display: none;">Урок активируется</h4>
 							<h4 class="success-message" style="display: none;">Урок активирован</h4>
-							<h4 class="fail-message unsofficiant-cups login-need" style="display: none;">Упс!</h4>
+							<h4 class="fail-message unsofficiant-cups" style="display: none;">Увы!</h4>
+							<h4 class="fail-message login-need" style="display: none;">Упс!</h4>
 							<h4 class="fail-message already-activated" style="display: none;">Хорошая новость!</h4>
 						</div>
 						<div class="modal-body">
@@ -745,7 +746,7 @@
 								<p class="minus-cups" style="display: none">Останьтесь с нами. Без Вас конкретно и без каждого из вас, кто с нами уже так давно — нам просто не выжить. Это будет самым большим подарком и самой большой благодарностью, которую вы, может быть, и хотели нам выразить — и которую вы можете нам выразить таким образом. Мы очень, очень расчитываем на Вас и Вашу поддержку.</p>
 							</div>
 							<div class="fail-message unsofficiant-cups" style="display: none">
-								<p>А пуговки-то нету у левого кармана! (с) Билетики закончились еще в прошлый раз.</p>
+								<p>У вас не осталось активаций.</p>
 								<p class="unsofficiant-cups-credit" style="display: none">Вы исчерпали кредит в 3 урока.</p>
 								<p class="unsofficiant-cups-credit" style="display: none"> Если все, что мы сделали и чем помогли Вам, для Вас что-то значит, не бросайте и поддержите нас. Мы ведь не едим ананасов и не жуём рябчиков. Всё, что мы просим — это справедливое вознаграждение за наш труд. Труд — ничего больше!</p>
 							</div>
@@ -756,8 +757,8 @@
 						<div class="modal-footer">
 							<button type="button" class="btn btn-default success-message" id="activated-dismiss-button" onclick="$('#lesson-activated-modal').modal('hide')">Закрыть</button>
 							<a type="button" class="btn btn-primary fail-message unsofficiant-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}">Пополнить запас</a>
-							<a style="display: none;" type="button" class="btn btn-primary unsofficiant-cups-credit minus-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}&open_modal=description">Поддержать</a>
-							<button style="display: none;" class="btn btn-danger unsofficiant-cups-credit minus-cups" data-dismiss="modal">Отказаться</button>
+							<button style="display: none;" class="btn btn-danger unsofficiant-cups-credit minus-cups" data-dismiss="modal">Отказать</button>
+							<a style="display: none;" type="button" class="btn btn-primary unsofficiant-cups-credit minus-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}">Поддержать</a>
 						</div>
 					</div>
 				</div>
