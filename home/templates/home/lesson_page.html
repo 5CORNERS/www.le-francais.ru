@@ -47,6 +47,17 @@
 				console.log("Error " + a.error.code + "; details: " + a.error.message);
 			}
 
+			function showMinusCups(){
+				$('#activated-dismiss-button').hide();
+				$('#activated-unsofficiant-cups-button').hide();
+				$('.minus-cups').show();
+			}
+			function showUnsMinusCups(){
+				$('#activated-dismiss-button').hide();
+				$('#activated-unsofficiant-cups-button').hide();
+				$('.unsofficiant-cups-credit').show();
+			}
+
 			activateSounds = ['composter-01.mp3','composter-02.mp3','composter-03.mp3','composter-04.mp3'];
 
 			function playActivateSound(){
@@ -63,6 +74,8 @@
 			function activate() {
 				$('.success-message').hide();
 				$('.fail-message').hide();
+				$('.minus-cups').hide();
+				$('.unsofficiant-cups-credit').hide()
 				$('.waiting-message').show();
 				playActivateSound();
 				$('#lesson-activated-modal').modal('show');
@@ -73,14 +86,13 @@
 					datatype: 'json',
 					success: function (r) {
 						if (r.result === 'SUCCESS') {
-							window.location.href = window.location.pathname+"?"+$.param({'modal_open':'lesson-activated-modal'});
+							window.location.href = window.location.pathname + "?" + $.param({'modal_open': 'lesson-activated-modal'});
 						} else if (r.result === 'ZERO_CUPS') {
 							$('.waiting-message').hide();
-							if ((cups_amount < 0)&&(cups_credit === 0)){
-								$('.unsofficiant-cups-credit').show()
-							}
 							$('.unsofficiant-cups').show();
-
+							if ((cups_amount < 0) && (cups_credit === 0)) {
+								showUnsMinusCups()
+							}
 						} else if (r.result === 'ALREADY') {
 							$('.waiting-message').hide();
 							$('.already-activated').show();
@@ -247,9 +259,10 @@
 					{% if modal_id == 'lesson-activated-modal' %}
 						$('.fail-message').hide();
 						$('.waiting-message').hide();
-						if ((cups_amount < 0)&&(cups_credit === 0)){$('.unsofficiant-cups-credit').show()}
 						$('.success-message').show();
 						$('#activated-message-ticket-count').text("{{ request.user.cups_amount }}");
+						if ((cups_amount < 0)&&(cups_credit === 0)){showUnsMinusCups()}
+						else if((cups_amount < 0)&&(cups_credit > 0)){showMinusCups()}
 					{% endif %}
 					{% get_full_path as full_path %}
 					{% if 'payment_success' in request.GET %}
@@ -724,8 +737,18 @@
 							<div id="activated-message-waiting" class="waiting-message" style="display: none">
 								<p>Пожалуйста, подождите, это займёт несколько секунд.</p>
 								<img style="width:100%;" src="{% static 'images/loading_icon.gif' %}"></div>
-							<div id="activated-message-success" class="success-message" style="display: none"><p>У вас в запасе уроков: <span id="activated-message-ticket-count">ХХХ</span>.<span class="unsofficiant-cups-credit" style="display: none"> Вы исчерпали кредит в 3 урока.</span></p></div>
-							<div class="fail-message unsofficiant-cups" style="display: none"><p>А пуговки-то нету у левого кармана! (с) Билетики закончились еще в прошлый раз.<span class="unsofficiant-cups-credit" style="display: none">Вы исчерпали кредит в 3 урока.</span> Пора пополнить запас.</p></div>
+							<div id="activated-message-success" class="success-message" style="display: none">
+								<p>У вас в запасе уроков: <span id="activated-message-ticket-count">ХХХ</span>.</p>
+								<p class="unsofficiant-cups-credit" style="display: none"> Вы исчерпали кредит в 3 урока.</p>
+								<p class="unsofficiant-cups-credit" style="display: none"> Если все, что мы сделали и чем помогли Вам, для Вас что-то значит, не бросайте и поддержите нас. Мы ведь не едим ананасов и не жуём рябчиков. Всё, что мы просим — это справедливое вознаграждение за наш труд. Труд — ничего больше!</p>
+								<p class="minus-cups" style="display: none">Пожалуйста, поддержите нас!</p>
+								<p class="minus-cups" style="display: none">Останьтесь с нами. Без Вас конкретно и без каждого из вас, кто с нами уже так давно — нам просто не выжить. Это будет самым большим подарком и самой большой благодарностью, которую вы, может быть, и хотели нам выразить — и которую вы можете нам выразить таким образом. Мы очень, очень расчитываем на Вас и Вашу поддержку.</p>
+							</div>
+							<div class="fail-message unsofficiant-cups" style="display: none">
+								<p>А пуговки-то нету у левого кармана! (с) Билетики закончились еще в прошлый раз.</p>
+								<p class="unsofficiant-cups-credit" style="display: none">Вы исчерпали кредит в 3 урока.</p>
+								<p class="unsofficiant-cups-credit" style="display: none"> Если все, что мы сделали и чем помогли Вам, для Вас что-то значит, не бросайте и поддержите нас. Мы ведь не едим ананасов и не жуём рябчиков. Всё, что мы просим — это справедливое вознаграждение за наш труд. Труд — ничего больше!</p>
+							</div>
 							<div class="fail-message already-activated" style="display: none"><p>Вы уже активировали этот урок. Возможно, в другом окне или в другой жизни.</p></div>
 							<div class="fail-message login-need" style="display: none"><p>Похоже, Вы вышли из своего аккаунта в другом окне, то есть завершили сессию, а в этом окне всё еще видите кнопку «Активировать». Выхода
 								два: залогиниться по-новой и активировать урок или перезагрузить страницу — и кнопка исчезнет.</p></div>
@@ -733,6 +756,8 @@
 						<div class="modal-footer">
 							<button type="button" class="btn btn-default success-message" id="activated-dismiss-button" onclick="$('#lesson-activated-modal').modal('hide')">Закрыть</button>
 							<a type="button" class="btn btn-primary fail-message unsofficiant-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}">Пополнить запас</a>
+							<a style="display: none;" type="button" class="btn btn-primary unsofficiant-cups-credit minus-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}">Поддержать</a>
+							<button style="display: none;" class="btn btn-danger unsofficiant-cups-credit minus-cups" data-dismiss="modal">Отказаться</button>
 						</div>
 					</div>
 				</div>
