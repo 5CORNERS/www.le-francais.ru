@@ -756,7 +756,7 @@
 						<div class="modal-footer">
 							<button type="button" class="btn btn-default success-message" id="activated-dismiss-button" onclick="$('#lesson-activated-modal').modal('hide')">Закрыть</button>
 							<a type="button" class="btn btn-primary fail-message unsofficiant-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}">Пополнить запас</a>
-							<a style="display: none;" type="button" class="btn btn-primary unsofficiant-cups-credit minus-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}">Поддержать</a>
+							<a style="display: none;" type="button" class="btn btn-primary unsofficiant-cups-credit minus-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}&open_modal=description">Поддержать</a>
 							<button style="display: none;" class="btn btn-danger unsofficiant-cups-credit minus-cups" data-dismiss="modal">Отказаться</button>
 						</div>
 					</div>

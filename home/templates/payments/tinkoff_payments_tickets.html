@@ -136,6 +136,9 @@
 				}
 			})
 		}
+		{% if 'open_modal' in request.GET %}
+			$('#{{ request.GET.open_modal }}').modal('show');
+		{% endif %}
 	</script>
 {% endblock %}
 
@@ -144,7 +147,7 @@
 		<div class="row">
 			<div class="col-md-12">
 				<p class="h1" style="margin-top: 20px">Поддержите проект и оставайтесь с нами!</p>
-				<p class="subcaption" style="margin-bottom: 20px">Приобретите абонемент на активации. Рlus grand est le nombre des leçons,  plus vous économisez !</p>
+				<p class="subcaption" style="margin-bottom: 20px">Приобретите абонемент на активации. Рlus grand est le nombre des leçons, plus vous économisez !</p>
 				<div class="row equal">
 					{% for card in cards %}
 						<div class="col-xs-6 col-sm-6 col-md-4 col-lg-5ths">
@@ -155,16 +158,33 @@
 								<button type="submit" role="button" onclick="initPayment({{ card.item_id }})" class="btn btn-primary btn-block">Беру!</button>
 							</div>
 						</div>
-						{% if forloop.counter == 2 %}<div class="clearfix visible-xs-block visible-sm-block"></div>{% endif %}
-						{% if forloop.counter == 3 %}<div class="clearfix visible-md-block"></div>{% endif %}
+						{% if forloop.counter == 2 %}
+							<div class="clearfix visible-xs-block visible-sm-block"></div>{% endif %}
+						{% if forloop.counter == 3 %}
+							<div class="clearfix visible-md-block"></div>{% endif %}
 					{% endfor %}
 				</div>
 			</div>
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-				<div class="alert alert-warning">Пожалуйста, помните: над проектом в режиме полной занятости работает два человека. Это наша работа — помогать вам учить французский. Помогите и вы нам — других источников дохода у нас нет.</div>
+				<div class="alert alert-warning">Пожалуйста, помните: над проектом в режиме полной занятости работает два человека. Это наша работа — помогать вам учить французский. Помогите и вы нам — других
+					источников дохода у нас нет.
+				</div>
 			</div>
 		</div>
+		<div class="modal fade" id="description" tabindex="-1" role="dialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-body">
+						<p>Чтобы обозначить размер нашей услуги в сравнении с другими, которые мы все привыкли, не задумываясь, оплачивать, <b>мы выбрали простую метафору</b> — проезд в общественном транспорте, который стоит столько же, если не больше. Просто представьте, что вы доехали до занятий на автобусе — это бы не разорило, правда? А ведь в жизни  часто именно так и происходит, а то еще и в оба конца.</p>
+						<p>Оставайтесь с нами! :)</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Продолжить</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
 	</div>
 {% endblock %}
