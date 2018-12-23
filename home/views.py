@@ -219,7 +219,7 @@ class ActivateLesson(View):
 						cup_amount = lesson.add_lesson_to_user(request.user)
 						send_mail(
 							'Lesson Activated',
-							'{0} активировал урок {1}. Осталось {2} активаций'.format(request.user.email, lesson.lesson_number, request.user.cup_amount),
+							'{0} активировал урок {1}. Осталось {2} активаций'.format(request.user.email, lesson.lesson_number, cup_amount),
 							from_email=settings.DEFAULT_FROM_EMAIL,
 							recipient_list=['ilia.dumov@gmail.com']
 						)
