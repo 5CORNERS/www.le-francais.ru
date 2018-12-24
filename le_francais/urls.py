@@ -18,7 +18,7 @@ from forum.sitemap_generator import ForumSitemap, TopicSitemap
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
 from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls, activate_urls
-from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing, favicon
+from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing, favicon, activation_log
 from home.views import change_username, LeFrancaisWagtailSitemap as WagtailSitemap
 from profiles.views import UserTopics, UserPosts
 from search import views as search_views
@@ -39,6 +39,8 @@ urlpatterns = [
     url('^sitemap\.xml$', TemplateView.as_view(template_name='static_sitemap.xml', content_type='application/xml')),
 
     url(r'^django-admin/', include(admin.site.urls)),
+
+    url(r'^activation-log/$', activation_log),
 
     url(r'^admin/', include(wagtailadmin_urls)),
     url(r'^documents/', include(wagtaildocs_urls)),
