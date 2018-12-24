@@ -330,6 +330,7 @@ class LessonPage(Page):
 		else:
 			return False
 		ul = UserLesson(user=user, lesson=self)
+		ul.fill_remains()
 		ul.save()
 		return user.cup_amount
 
@@ -439,13 +440,21 @@ ArticlePage.settings_panels = ArticlePage.settings_panels + [
 ]
 
 
+from django.db.models import PROTECT
+
+
 class UserLesson(Model):
-	user = ForeignKey('custom_user.User', related_name='payment')
-	lesson = ForeignKey('home.LessonPage', related_name='payment')
+	user = ForeignKey('custom_user.User', related_name='payment', on_delete=PROTECT)
+	lesson = ForeignKey('home.LessonPage', related_name='payment', on_delete=PROTECT)
 	date = DateTimeField(auto_now=True)
+	remains = IntegerField(blank=True, null=True, default=None)
 
 	def __str__(self):
 		return str(self.user) + str(self.lesson)
+
+	def fill_remains(self):
+		self.remains = self.user.cup_amount
+		self.save()
 
 
 class Payment(Model):
