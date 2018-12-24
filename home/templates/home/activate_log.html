@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load tz %}
+{% block content %}
+	<div class="container">
+		<div class="row">
+			<table>
+			{% for ul in activations %}
+				<tr>
+					<td>{% timezone 'Europe/Moscow' %}{{ ul.date|date:'Y-m-d'}} </td>
+					<td>{{ ul.date|localtime|time:'H:i' }}{% endtimezone %}</td>
+					<td>{{ ul.user.email }}</td>
+					<td>{{ ul.lesson.lesson_number }}</td>
+					<td>{{ ul.remains }}</td>
+				</tr>
+			{% endfor %}
+			</table>
+		</div>
+	</div>
+{% endblock %}

@@ -235,6 +235,15 @@ class ActivateLesson(View):
 		return JsonResponse(data)
 
 
+from django.contrib.admin.views.decorators import staff_member_required
+from home.models import UserLesson
+
+
+@staff_member_required
+def activation_log(request):
+	return render(request, template_name='home/activate_log.html', context={'activations': list(UserLesson.objects.exclude(remains__isnull=True))})
+
+
 from django.urls import reverse
 
 
