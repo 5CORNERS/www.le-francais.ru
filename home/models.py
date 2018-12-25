@@ -446,11 +446,11 @@ from django.db.models import PROTECT
 class UserLesson(Model):
 	user = ForeignKey('custom_user.User', related_name='payment', on_delete=PROTECT)
 	lesson = ForeignKey('home.LessonPage', related_name='payment', on_delete=PROTECT)
-	date = DateTimeField(auto_now=True)
+	date = DateTimeField(auto_now_add=True)
 	remains = IntegerField(blank=True, null=True, default=None)
 
 	def __str__(self):
-		return str(self.user) + str(self.lesson)
+		return '{0} {1} {2}'.format(self.user, self.lesson.lesson_number, self.remains)
 
 	def fill_remains(self):
 		self.remains = self.user.cup_amount
