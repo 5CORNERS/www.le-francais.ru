@@ -2,7 +2,7 @@
 <div class="block-audio">
 	<div class="row">
 		<div class="col-md-8">
-			<audio onerror="reloadLessonUrl(this)" preload="auto" id="lesson-audio" data-downloadable{% if user.must_pay and self.need_payment or request.GET.test %}{% if not user.is_authenticated or not userlesson %}="empty"{% endif %}{% endif %} number="{{ self.lesson_number }}"{% if request.GET.t %} set-time="{{ request.GET.t }}"{% elif request.GET.T %} set-time="{% t2seconds request.GET.T %}"{% endif %}>
+			<audio onerror="reloadLessonUrl(this)" preload="auto" id="lesson-audio" data-downloadable{% if user.must_pay and self.need_payment or request.GET.test %}{% if not user.is_authenticated or not userlesson %}="empty"{% endif %}{% elif self.need_payment and not user.is_authenticated %}="empty"{% endif %} number="{{ self.lesson_number }}"{% if request.GET.t %} set-time="{{ request.GET.t }}"{% elif request.GET.T %} set-time="{% t2seconds request.GET.T %}"{% endif %}>
 				<source
 					{% if self.audio_material %}
 						src="{{ self.audio_material }}"
