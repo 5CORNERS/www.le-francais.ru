@@ -4,7 +4,7 @@ import json
 from django.core.mail import EmailMessage
 from django.utils.decorators import method_decorator
 from django.contrib.admin.views.decorators import staff_member_required
-
+# TODO move to consts
 MESSAGE_FOR_NOT_PAYED = '''Добрый день!
 
 Вы активировали урок на сайте le-francais.ru —  поэтому я направил Вам это письмо. Я описал там в двух словах положение дел, но если позволите, я хотел бы добавить несколько слов. Не сочтите за труд, прочтите мои объяснения. Здесь, кроме того, описаны важные моменты этого перехода.
