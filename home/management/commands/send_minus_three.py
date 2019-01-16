@@ -150,5 +150,7 @@ class Command(BaseCommand):
 				reply_to=['support@le-francais.ru'],
 			)
 			if from_today.days > 13:
-				print(u.email)
-
+				u.switch_low_price()
+				u.add_cups(3)
+				message.send()
+		print('Done')
