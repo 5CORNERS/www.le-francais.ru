@@ -6,6 +6,7 @@ from django.core.management import BaseCommand
 from custom_user.models import User
 from home.models import UserLesson
 from tinkoff_merchant.models import Payment
+import time
 
 TABLE = {
 	"ikka-2008@mail.ru": ", Ирина",
@@ -100,6 +101,29 @@ le-francais.ru
 P.S. И да, вот же еще что! Я кажется, нигде это не обговаривал: оплачивать можно карточкамиами, выпущенными в любой валюте и из любой страны — сумма пересчитывается по курсу в валюту карты автоматически. Вот.
 Au revoir ! :)'''
 
+ALREADY = [
+	"ikka-2008@mail.ru",
+	"alexandra.baranova@me.com",
+	"hasmik.asa@yandex.ru",
+	"svetlana02031962@gmail.com",
+	"ivcn121@gmail.com",
+	"k-i-n-a-@mail.ru",
+	"valeriatetarchuk@gmail.com",
+	"jesuislada@yandex.ru",
+	"tzvetkova.anna@yandex.ru",
+	"fplay.tm@mail.ru",
+	"ofilipok@gmail.com",
+	"anna_1barrister@mail.ru",
+	"deadlyalex@mail.ru",
+	"bunlesque8@gmail.com",
+	"alexgladilin@rambler.ru",
+	"milkman3005@rambler.ru",
+	"elgrach@yandex.ru",
+	"serafima-michalchenko@mail.ru",
+	"olga54_kr@mail.ru",
+	"krispinpin@mail.ru",
+]
+
 def find_users():
 	users = list(User.objects.filter(_cup_amount=-3))
 	l = []
@@ -151,7 +175,9 @@ class Command(BaseCommand):
 				reply_to=['support@le-francais.ru'],
 			)
 			if from_today.days > 13:
-				u.switch_low_price()
-				u.add_cups(3)
+				time.sleep(5)
+				print(u.email)
 				message.send()
+				u.low_price_set_true()
+				u.add_cups(3)
 		print('Done')

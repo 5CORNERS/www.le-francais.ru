@@ -69,6 +69,14 @@ class User(AbstractUser):
 			self._low_price = True
 		self.save()
 
+	def low_price_set_true(self):
+		self._low_price = True
+		self.save()
+
+	def low_price_set_false(self):
+		self._low_price = False
+		self.save()
+
 	def add_cups(self, n):
 		self._cup_amount += n
 		self.save()
@@ -76,6 +84,7 @@ class User(AbstractUser):
 	def add_credit_cups(self, n):
 		self._cup_credit += n
 		self.save()
+
 
 	def has_payed(self):
 		if self.has_cups or self.payed_lessons.all().exists():
