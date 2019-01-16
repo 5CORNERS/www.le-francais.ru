@@ -145,6 +145,9 @@ class User(AbstractUser):
 			return True
 		return False
 
+	def get_all_payments(self):
+		return list(TinkoffPayment.objects.filter(customer_key=self.id))
+
 
 from django.db import models
 
