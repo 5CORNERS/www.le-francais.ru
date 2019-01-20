@@ -489,14 +489,14 @@ td.forum-last-post, td.topic-last-post {
     .sidebar-wrapper.active {
         z-index: 1000;
         display: initial;
-        position: relative;
+        position: fixed;
         width: 100%;
         padding-right: 20%;
     }
 
     .sidebar-collapse-button {
         display: inline;
-        position: absolute;
+        position: fixed;
         top: 70px;
         left: 0;
         z-index: 1000;
