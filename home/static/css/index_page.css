@@ -73,7 +73,7 @@ a.page-reference:hover .page-reference_title {
 .cat-logo {
     position: relative;
     max-width: 120%;
-    top: 20px;
+    top: 30px;
     left: 50px;
     margin: -70px;
 }
@@ -202,21 +202,6 @@ a.page-review:hover {
     font-style: italic;
 }
 
-@media (min-height: 1200px) {
-
-    .col-offset-336 {
-        padding-right: 336px;
-        z-index: 0;
-    }
-
-    .col-fixed-336 {
-        width: 336px;
-        position: absolute;
-        margin-left: -336px;
-        z-index: 1;
-    }
-}
-
 @media (min-width: 992px) {
     .col-offset-336 {
         padding-right: 300px;
@@ -227,6 +212,21 @@ a.page-review:hover {
         width: 300px;
         position: absolute;
         margin-left: -300px;
+        z-index: 1;
+    }
+}
+
+@media (min-width: 1200px) {
+
+    .col-offset-336 {
+        padding-right: 336px;
+        z-index: 0;
+    }
+
+    .col-fixed-336 {
+        width: 336px;
+        position: absolute;
+        margin-left: -336px;
         z-index: 1;
     }
 }
