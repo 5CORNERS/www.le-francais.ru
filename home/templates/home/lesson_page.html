@@ -81,6 +81,7 @@
 				$('#lesson-activated-modal').modal('show');
 				$.ajax({
 					type: 'POST',
+					async: false,
 					url: '{% url "activate:activate_lesson" %}',
 					data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'lesson_number': '{{ self.lesson_number }}'},
 					datatype: 'json',
@@ -204,6 +205,7 @@
 					saw_message = true;
 					$.ajax({
 						type: "POST",
+						async: false,
 						url: "{% url 'custom_user:saw_message' %}",
 						data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'action': 'make_true'},
 						success: function (r) {
