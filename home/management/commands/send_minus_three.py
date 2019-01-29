@@ -176,7 +176,8 @@ class Command(BaseCommand):
 				reply_to=['support@le-francais.ru'],
 			)
 			if from_today.days > 13:
-				time.sleep(5)
+				time.sleep(10)
+				print(u.email)
 				message.send()
 				u.low_price_set_true().add_cups(3)
 		print('Done')
