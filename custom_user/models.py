@@ -68,22 +68,27 @@ class User(AbstractUser):
 		else:
 			self._low_price = True
 		self.save()
+		return self
 
 	def low_price_set_true(self):
 		self._low_price = True
 		self.save()
+		return self
 
 	def low_price_set_false(self):
 		self._low_price = False
 		self.save()
+		return self
 
 	def add_cups(self, n):
 		self._cup_amount += n
 		self.save()
+		return self
 
 	def add_credit_cups(self, n):
 		self._cup_credit += n
 		self.save()
+		return self
 
 
 	def has_payed(self):
