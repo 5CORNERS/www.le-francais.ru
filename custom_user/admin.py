@@ -1,19 +1,10 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.forms import UserChangeForm
 
 from .models import User
 
 
-class CustomUserChangeForm(UserChangeForm):
-	class Meta(UserChangeForm.Meta):
-		model = User
-
-
 @admin.register(User)
-class CustomUserAdmin(UserAdmin):
-	form = CustomUserChangeForm
-
-	fieldsets = UserAdmin.fieldsets + (
-		(None, {'fields': ('cup_amount',)}),
-	)
+class CustomUserAdmin(admin.ModelAdmin):
+	list_display = ['username', 'email', 'date_joined', 'must_pay', 'saw_message', '_cup_amount', '_cup_credit', '_low_price', 'is_active']
+	list_filter = ['date_joined']
+	search_fields = ['username', 'email', 'first_name', 'last_name']
