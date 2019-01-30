@@ -18,7 +18,7 @@ from django.views import generic, View
 from django.views.decorators.csrf import csrf_exempt
 from oauth2client.client import OAuth2WebServerFlow
 from pure_pagination import Paginator, PaginationMixin
-from pybb import defaults
+from pybb import defaults, util as pybb_util
 from pybb.forms import PostForm
 from pybb.models import Post, Topic
 from pybb.permissions import perms
@@ -520,7 +520,12 @@ def move_post_processing(request):
 	# filter by topic for prevent access violations
 	post_qs = Post.objects.filter(topic=move_from_topic, pk__in=move_post_list)
 	post_qs = perms.filter_posts(request.user, post_qs)
+	post_list = list(post_qs)
 	post_qs.update(topic=move_to_topic)
+
+	for post in post_list:
+		if pybb_util.get_pybb_profile(post.user).autosubscribe and perms.may_subscribe_topic(post.user, new_topic):
+			new_topic.subscribers.add(post.user)
 
 	old_topic.update_counters()
 	new_topic.update_counters()
