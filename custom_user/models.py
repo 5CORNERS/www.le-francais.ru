@@ -51,16 +51,16 @@ class User(AbstractUser):
 	from django.core.serializers.json import DjangoJSONEncoder
 	from django.contrib.postgres.fields import JSONField
 
-	used_usernames = JSONField(encoder=DjangoJSONEncoder, default=list)
+	used_usernames = JSONField(encoder=DjangoJSONEncoder, default=list, editable=False, verbose_name='Used Usernames')
 
-	must_pay = models.BooleanField(default=True)
+	must_pay = models.BooleanField(default=True, editable=True, verbose_name='Должен платить', help_text='Определяет, должен ли пользователь активировать урок для доступа к материалам')
 
-	saw_message = models.BooleanField(default=False)
+	saw_message = models.BooleanField(default=False, editable=True, verbose_name='Видел сообщение', help_text='Пользователь получил сообщение о системе активации уроков')
 
-	_cup_amount = models.IntegerField(default=0)
-	_cup_credit = models.IntegerField(default=0)
+	_cup_amount = models.IntegerField(default=0, editable=True, verbose_name='Кол-во чашек/билеткиов')
+	_cup_credit = models.IntegerField(default=0, editable=True, verbose_name='Кол-во "кредитных" чашек')
 
-	_low_price = models.BooleanField(default=False)
+	_low_price = models.BooleanField(default=False, editable=True, verbose_name='Статус пенсионера/студента')
 
 	def switch_low_price(self):
 		if self._low_price:
