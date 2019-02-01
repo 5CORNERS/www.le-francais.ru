@@ -1,6 +1,6 @@
 {% load i18n wagtailcore_tags static %}
 {% load postman_tags %}
-
+{% load svg %}
 <nav class="navbar navbar-inverse navbar-fixed-top">
 	<div class="container">
 		<div class="navbar-header">
@@ -66,6 +66,11 @@
                 <a href="{% url 'account_logout' %}?next={{ request.path }}">Выйти{# TODO l18n #}</a>
               </li>
             </ul>
+					</li>
+					<li>
+						<a class="coffee-icon" href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal" class="swg">
+							{% svg 'coffee icon' %}
+						</a>
 					</li>
 
 				{% else %}

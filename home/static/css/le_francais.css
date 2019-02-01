@@ -662,6 +662,7 @@ details {
     display: block;
     margin-bottom: 1em;
 }
+
 details[open] > summary::before {
     content: "\25BC";
 }
@@ -670,6 +671,7 @@ details summary {
     display: block;
     cursor: pointer;
 }
+
 details summary:focus {
     outline: none;
 }
@@ -678,9 +680,11 @@ details summary::before {
     content: "\25B6";
     padding-right: 0.5em;
 }
+
 details summary::-webkit-details-marker {
     display: none;
 }
+
 /* Attach the "no-details" class to details tags
    in browsers that do not support them to get
    open/show functionality. */
@@ -690,4 +694,22 @@ details.no-details:not([open]) > * {
 
 details.no-details:not([open]) summary {
     display: block;
+}
+
+.coffee-icon > svg {
+    display: block;
+    height: 20px;
+    width: 20px;
+}
+
+.coffee-icon > svg:hover {
+    fill: #fff;
+}
+
+.coffee-icon > svg:focus {
+    fill: #fff;
+}
+
+.coffee-icon > svg:active {
+    fill: #fff;
 }

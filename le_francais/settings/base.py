@@ -74,7 +74,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.mailru',
     'allauth.socialaccount.providers.odnoklassniki',
-
+    'svg',
     'custom_user',
     'pybb',
     'mailer',
