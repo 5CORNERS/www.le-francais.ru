@@ -40,7 +40,7 @@ urlpatterns = [
 
     url(r'^django-admin/', include(admin.site.urls)),
 
-    url(r'^activation-log/$', activation_log),
+    url(r'^activation-log/$', activation_log, name='activation_log'),
 
     url(r'^admin/', include(wagtailadmin_urls)),
     url(r'^documents/', include(wagtaildocs_urls)),
