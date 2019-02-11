@@ -3,7 +3,7 @@
 {% block content %}
 	<div class="container">
 		<div class="row">
-			<table>
+			<div class="col-xs-12"><table>
 			{% for ul in activations %}
 				<tr>
 					<td>{% timezone 'Europe/Moscow' %}{{ ul.date|date:'Y-m-d'}} </td>
@@ -13,7 +13,7 @@
 					<td>{{ ul.remains }}</td>
 				</tr>
 			{% endfor %}
-			</table>
+			</table></div>
 		</div>
 		<div class="row">
 			<div class="col-xs-12"><a href="{% url 'activation_log' %}?all=true">Посмотреть все</a></div>
