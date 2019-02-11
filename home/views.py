@@ -248,7 +248,7 @@ def activation_log(request):
 	return render(
 		request,
 		template_name='home/activate_log.html',
-		context={'activations': list(UserLesson.objects.filter(remains__isnull=False, user__is_staff=False, lesson__need_payment=True).order_by('date'))[start:]}
+		context={'activations': list(UserLesson.objects.select_related('user').select_related('lesson').filter(remains__isnull=False, user__is_staff=False, lesson__need_payment=True).order_by('date'))[start:]}
 	)
 
 
