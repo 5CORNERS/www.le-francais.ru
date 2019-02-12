@@ -146,11 +146,13 @@ def fix_null():
 
 
 def print_list_imperative():
-    V_LIST = ['grasseyer',
-'aller',
-'brumasser',
-'ester',
-'référencier']
+    V_LIST = [
+        'grasseyer',
+        'aller',
+        'brumasser',
+        'ester',
+        'référencier'
+    ]
     PERSONS = ['person_I_S_M', 'person_II_S_M', 'person_III_S_M', 'person_I_P_M', 'person_II_P_M', 'person_III_P_M', ]
     # with open('verb_list','w',encoding='utf-8') as f:
     for verb in V_LIST:
@@ -211,6 +213,7 @@ def make_blue(table):
         verb = row['verb']
         print(verb)
         v = V.objects.get(infinitive=verb)
+        t = v.template
         for person in PERSONS_MAPPING:
             # print('\t' + str(person)+' - ', end='')
             table_positions = row[person]
@@ -218,9 +221,9 @@ def make_blue(table):
                 # print()
                 continue
             positions = real_pos(table_positions, v)
-            t_endings = get_ending(v.template.data[MOOD_TENSE[0]][MOOD_TENSE[1]]['p'][PERSONS_MAPPING[person]]['i'])
+            t_endings = get_ending(t.data[MOOD_TENSE[0]][MOOD_TENSE[1]]['p'][PERSONS_MAPPING[person]]['i'])
             if isinstance(t_endings, list):
-                v.template.new_data[MOOD_TENSE[0]][MOOD_TENSE[1]]['p'][PERSONS_MAPPING[person]]['i'] = []
+                t.new_data[MOOD_TENSE[0]][MOOD_TENSE[1]]['p'][PERSONS_MAPPING[person]]['i'] = []
                 for n,t_ending in enumerate(t_endings):
                     if t_ending == None:
                         # print()
@@ -228,9 +231,9 @@ def make_blue(table):
                     for pos in reversed(positions):
                         t_ending = t_ending[:pos] + '<i>' + t_ending[pos] + '</i>' + t_ending[pos+1:]
                     t_ending = re.sub('\<\/i\>\<i\>', '', t_ending)
-                    v.template.new_data[MOOD_TENSE[0]][MOOD_TENSE[1]]['p'][PERSONS_MAPPING[person]]['i'].append(t_ending)
+                    t.new_data[MOOD_TENSE[0]][MOOD_TENSE[1]]['p'][PERSONS_MAPPING[person]]['i'].append(t_ending)
             else:
-                v.template.new_data[MOOD_TENSE[0]][MOOD_TENSE[1]]['p'][PERSONS_MAPPING[person]]['i'] = []
+                t.new_data[MOOD_TENSE[0]][MOOD_TENSE[1]]['p'][PERSONS_MAPPING[person]]['i'] = []
                 t_ending = t_endings
                 if t_ending == None:
                     # print()
@@ -238,8 +241,8 @@ def make_blue(table):
                 for pos in reversed(positions):
                     t_ending = t_ending[:pos] + '<i>' + t_ending[pos] + '</i>' + t_ending[pos + 1:]
                 t_ending = re.sub('\<\/i\>\<i\>', '', t_ending)
-                v.template.new_data[MOOD_TENSE[0]][MOOD_TENSE[1]]['p'][PERSONS_MAPPING[person]]['i'].append(t_ending)
-            v.template.save()
+                t.new_data[MOOD_TENSE[0]][MOOD_TENSE[1]]['p'][PERSONS_MAPPING[person]]['i'].append(t_ending)
+            t.save()
 
 
 

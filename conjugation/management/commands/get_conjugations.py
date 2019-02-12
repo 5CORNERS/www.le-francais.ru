@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from conjugation.models import Verb
-from conjugation.views import Tense
+from conjugation.views import Table
 
 
 class Command(BaseCommand):
@@ -446,14 +446,16 @@ class Command(BaseCommand):
         for verb in verb_list:
             v = Verb.objects.get(infinitive=verb)
             v.construct_conjugations()
-            tense = Tense(v,'indicative','present', 0, False)
-            print(v.infinitive)
-            s += v.infinitive + '\n'
-            for person in tense.persons:
-                # print(person.part_0 + person.forms[0] + person.part_2)
-                s += person.part_0 + person.forms[0] + person.part_2 + '\n'
-            # print('pauseee')
-            s += 'pauseee\n'
+            table = Table(v, 0, False)
+            # print(v.infinitive)
+            # s += v.infinitive + '\n'
+            for mood in table.moods:
+                for tense in mood.tenses:
+                    for person in tense.persons:
+                        print(person.part_0 + person.forms[0] + person.part_2 + '\t'+ v.infinitive + '\t' + mood.name + '\t' + tense.name)
+                        s += person.part_0 + person.forms[0] + person.part_2 + '\t'+ v.infinitive + '\t' + mood.name + '\t' + tense.name +'\n'
+                    print('pauseee'+ '\t'+ v.infinitive + '\t' + mood.name + '\t' + tense.name)
+                    s += 'pauseee' + '\t'+ v.infinitive + '\t' + mood.name + '\t' + tense.name +'\n'
         open('conjugations.txt','w',encoding='utf-8').write(s)
 
 

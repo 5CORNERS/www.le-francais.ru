@@ -985,17 +985,17 @@ TEMPLATE_NAME = {
     'imperative': "Impératif",
     'infinitive': "Infinitif",
     'gerund': "Gérondif",
-    'participle':"Participe",
+    'participle': "Participe",
 }
 
 SHORT_LIST = {
-    'indicative':["simple-past","antérieur-past"],
-    'subjunctive':["imperfect","pluperfect"],
-    'conditional':["past-second"],
-    'imperative':["past"],
-    'gerund':[],
-    'infinitive':[],
-    'participle':[],
+    'indicative': ["simple-past", "antérieur-past"],
+    'subjunctive': ["imperfect", "pluperfect"],
+    'conditional': ["past-second"],
+    'imperative': ["past"],
+    'gerund': [],
+    'infinitive': [],
+    'participle': [],
 }
 
 AUDIO_LIST = ["être",
