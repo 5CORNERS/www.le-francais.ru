@@ -107,12 +107,30 @@
 {% endblock %}
 {% block extra_js %}
     <script>
-        {% comment %}$(function () {
-            $("#verb").autocomplete({
-                source: "/conjugation/verbs_autocomplete/",
-                minLength: 2
-            });
-        });{% endcomment %}
+        let polly = {};
+
+			function pollyListen(key) {
+				if (polly[key] === undefined) {
+					$.ajax(
+						url = '{% url 'conjugation:polly' %}',
+						options = {
+							type: 'POST',
+							async: false,
+							datatype: 'json',
+							data: {csrfmiddlewaretoken: "{{ csrf_token }}", key: key,},
+							success: function (r) {
+								polly.key = r.link;
+								pollyListen(key);
+							},
+						}
+					)
+				} else {
+					console.log(polly.key)
+				}
+			}
+				if (window.localStorage.getItem('long_list')){
+					see_more()
+				}
         $("#search-verb")["autocomplete"]({
             source: "{% url 'conjugation:autocomplete' %}",
             minLength: 1,
@@ -133,7 +151,8 @@
                 v.style.display = "none";
             });
             $("#more_tab").removeClass("active");
-            $("#less_tab").addClass("active")
+            $("#less_tab").addClass("active");
+	          window.localStorage.setItem('long_list', 'false');
         }
 
         function see_more() {
@@ -142,6 +161,7 @@
             });
             $("#more_tab").addClass("active");
             $("#less_tab").removeClass("active");
+            window.localStorage.setItem('long_list', 'true');
         }
 
         var audio = $("#audio")[0];
@@ -172,6 +192,10 @@
                 blue_arrow.style.display="none";
             }, 5000)
         });
+
+        $('.tenses').each(function (){
+	        
+        })
 
     </script>
 {% endblock %}

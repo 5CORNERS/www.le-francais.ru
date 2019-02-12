@@ -58,7 +58,7 @@ cha:loir,chaloir,0,0,0,0,0,0
 chauv:ir,chauvir,1,1,1,0,0,0
 circonc:ire,circoncire,0,0,0,2,2,2
 cr:oire,croire,0,0,0,2,2,0
-d:evoir,devoir,0,0,0,"1,2","1,2","1,2,3"
+d:evoir,devoir,0,0,0,"1,2","1,2",3
 déch:oir,déchoir,0,0,0,2,2,0
 éch:oir,échoir,0,0,0,0,0,0
 fa:illir,faillir,0,0,0,"1,2,3","1,2,3","1,2,3"

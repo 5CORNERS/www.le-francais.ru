@@ -1,301 +1,283 @@
+from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from unidecode import unidecode
 
-from conjugation.models import Verb as V, ReflexiveVerb as RV
+from conjugation.models import Verb, ReflexiveVerb, PollyAudio
+from .consts import *
 from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE, SHORT_LIST, FORMULAS_PASSIVE_X
 
 
+def get_polly_audio_link(request, key):
+	polly_audio, created = PollyAudio.objects.get_or_create(key=key)
+	if created:
+		verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive = key.split('_')
+		tense = Tense(Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents), mood_name, tense_name, int(gender), False if reflexive == 'False' else True)
+		text = tense.get_polly_ssml
+
 @csrf_exempt
 def search(request):
+	search_string = unidecode(switch_keyboard_layout(str(request.POST.get('verb')).strip(' ').lower()))
 
-    try:
-        search_string = unidecode(switch_keyboard_layout(str(request.POST.get('verb')).strip(' ').lower()))
-    except:
-        return redirect(reverse('conjugation:index'))
+	if search_string[:2] == "s'" or search_string[:3] == "se ":
+		try:
+			re_verb = ReflexiveVerb.objects.get(infinitive_no_accents=search_string)
+		except ReflexiveVerb.DoesNotExist:
+			return render(request, 'conjugation/verb_not_found.html', {'search_string': search_string})
+		return redirect(re_verb.get_absolute_url())
 
-    if search_string[:2] == "s'" or search_string[:3] == "se ":
-        try:
-            re_verb=RV.objects.get(infinitive_no_accents=search_string)
-        except:
-            return render(request,'conjugation/verb_not_found.html', {'search_string':search_string})
-        return redirect(re_verb.get_absolute_url())
-
-    try:
-        verb = V.objects.get(infinitive_no_accents=search_string)
-    except:
-        return render(request,'conjugation/verb_not_found.html', {'search_string':search_string})
-    return redirect(verb.get_absolute_url())
+	try:
+		verb = Verb.objects.get(infinitive_no_accents=search_string)
+	except Verb.DoesNotExist:
+		return render(request, 'conjugation/verb_not_found.html', {'search_string': search_string})
+	return redirect(verb.get_absolute_url())
 
 
 def index(request):
-    FREQUENT_URLS = [
-        '''<a href="/conjugaison/etre">être</a>''',
-        '''<a href="/conjugaison/avoir">avoir</a>''',
-        '''<a href="/conjugaison/faire">faire</a>''',
-        '''<a href="/conjugaison/dire">dire</a>''',
-        '''<a href="/conjugaison/pouvoir">pouvoir</a>''',
-        '''<a href="/conjugaison/aller">aller</a>''',
-        '''<a href="/conjugaison/voir">voir</a>''',
-        '''<a href="/conjugaison/vouloir">vouloir</a>''',
-        '''<a href="/conjugaison/venir">venir</a>''',
-        '''<a href="/conjugaison/devoir">devoir</a>''',
-        '''<a href="/conjugaison/prendre">prendre</a>''',
-        '''<a href="/conjugaison/trouver">trouver</a>''',
-        '''<a href="/conjugaison/donner">donner</a>''',
-        '''<a href="/conjugaison/falloir">falloir</a>''',
-        '''<a href="/conjugaison/parler">parler</a>''',
-        '''<a href="/conjugaison/mettre">mettre</a>''',
-        '''<a href="/conjugaison/savoir">savoir</a>''',
-        '''<a href="/conjugaison/passer">passer</a>''',
-        '''<a href="/conjugaison/regarder">regarder</a>''',
-        '''<a href="/conjugaison/aimer">aimer</a>''',
-        '''<a href="/conjugaison/croire">croire</a>''',
-        '''<a href="/conjugaison/demander">demander</a>''',
-        '''<a href="/conjugaison/rester">rester</a>''',
-        '''<a href="/conjugaison/repondre">répondre</a>''',
-        '''<a href="/conjugaison/entendre">entendre</a>''',
-        '''<a href="/conjugaison/penser">penser</a>''',
-        '''<a href="/conjugaison/arriver">arriver</a>''',
-        '''<a href="/conjugaison/connaitre">connaître</a>''',
-        '''<a href="/conjugaison/devenir">devenir</a>''',
-        '''<a href="/conjugaison/sentir">sentir</a>''',
-        '''<a href="/conjugaison/sembler">sembler</a>''',
-        '''<a href="/conjugaison/tenir">tenir</a>''',
-        '''<a href="/conjugaison/comprendre">comprendre</a>''',
-        '''<a href="/conjugaison/rendre">rendre</a>''',
-        '''<a href="/conjugaison/attendre">attendre</a>''',
-        '''<a href="/conjugaison/sortir">sortir</a>''',
-        '''<a href="/conjugaison/vivre">vivre</a>''',
-        '''<a href="/conjugaison/reprendre">reprendre</a>''',
-        '''<a href="/conjugaison/entrer">entrer</a>''',
-        '''<a href="/conjugaison/porter">porter</a>''',
-        '''<a href="/conjugaison/chercher">chercher</a>''',
-        '''<a href="/conjugaison/revenir">revenir</a>''',
-        '''<a href="/conjugaison/appeler">appeler</a>''',
-    ]
-    return render(request, 'conjugation/index.html', dict(frequent_urls=FREQUENT_URLS))
+	return render(request, 'conjugation/index.html', dict(frequent_urls=FREQUENT_URLS))
 
 
-def verb(request, se, feminin, verb, homonym):
+def verb_page(request, se, feminin, verb, homonym):
+	word_no_accent = unidecode(verb)
+	try:
+		verb = Verb.objects.get(infinitive_no_accents=word_no_accent)
+	except Verb.DoesNotExist:
+		return render(request, 'conjugation/verb_not_found.html', {'search_string': word_no_accent})
 
-    verb_no_accent = unidecode(verb)
-    try:
-        v = V.objects.get(infinitive_no_accents=verb_no_accent)
-    except V.DoesNotExist:
-        return render(request,'conjugation/verb_not_found.html', {'search_string':verb_no_accent})
+	if feminin:
+		feminin = True
+		gender = -1
+	else:
+		feminin = False
+		gender = 0
 
+	if verb.reflexive_only and not se:
+		return redirect(verb.reflexiveverb.get_absolute_url())
+	if not (verb.reflexive_only or verb.can_reflexive) and se:
+		return redirect(verb.get_absolute_url())
 
+	if (se == "se_" and verb.reflexiveverb.is_short()) or (se == "s_" and not verb.reflexiveverb.is_short()):
+		return redirect(verb.reflexiveverb.get_absolute_url())
 
-    if feminin:
-        feminin = True
-        gender = -1
-    else:
-        feminin = False
-        gender = 0
+	reflexive = verb.can_reflexive and se
 
-    if v.reflexive_only and not se:
-        return redirect(v.reflexiveverb.get_absolute_url())
-    if not (v.reflexive_only or v.can_reflexive) and se:
-        return redirect(v.get_absolute_url())
-
-    if (se=="se_" and v.reflexiveverb.is_short()) or (se=="s_" and not v.reflexiveverb.is_short()):
-        return redirect(v.reflexiveverb.get_absolute_url())
-
-
-    reflexive = v.can_reflexive and se
-
-    v.count += 1
-    v.save()
-    v.construct_conjugations()
-    table = Table(v, gender, reflexive)
-    template_name = 'conjugation/table.html'
-    return render(request, template_name, {'v':v, 'reflexive':reflexive,'feminin':feminin, 'table': table, 'forms_count': v.template.forms_count, 'forms_range': list(range(1, v.template.forms_count + 1))})
+	verb.count += 1
+	verb.save()
+	verb.construct_conjugations()
+	table = Table(verb, gender, reflexive)
+	return render(request, 'conjugation/table.html', {
+		'v': verb,
+		'reflexive': reflexive,
+		'feminin': feminin,
+		'table': table,
+		'forms_count': verb.template.forms_count,
+		'forms_range': list(range(1, verb.template.forms_count + 1))
+	})
 
 
 def switch_keyboard_layout(s: str):
-    LAYOUT_EN = '''`~!@#$%^&qwertyuiop[]asdfghjkl;'zxcvbnm,./QWERTYUIOP{}ASDFGHJKL:"|ZXCVBNM<>?'''
-    LAYOUT_RU = '''ёЁ!"№;%:?йцукенгшщзхъфывапролджэячсмитьбю.ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ,'''
-    for n in range(LAYOUT_EN.__len__()):
-        s = s.replace(LAYOUT_RU[n], LAYOUT_EN[n])
-    return s
+	for n in range(LAYOUT_EN.__len__()):
+		s = s.replace(LAYOUT_RU[n], LAYOUT_EN[n])
+	return s
 
 
 def get_autocomplete_list(request):
-    list_len = 50
-    _term = request.GET['term'].lower()
-    term = unidecode(_term)
+	list_len = 50
+	_term = request.GET['term'].lower()
+	term = unidecode(_term)
 
-    if term[:3] == 'se ' or term[:2] == "s'":
-        C = RV
-    else:
-        C = V
-    q_startswith = C.objects.filter(infinitive_no_accents__startswith=term)
+	if term[:3] == 'se ' or term[:2] == "s'":
+		verb_class = ReflexiveVerb
+	else:
+		verb_class = Verb
+	q_startswith = verb_class.objects.filter(infinitive_no_accents__startswith=term)
 
-    if q_startswith.__len__() == 0:
-        term = switch_keyboard_layout(_term)
-        q_startswith = C.objects.filter(infinitive_no_accents__startswith=term)
+	if q_startswith.__len__() == 0:
+		term = switch_keyboard_layout(_term)
+		q_startswith = verb_class.objects.filter(infinitive_no_accents__startswith=term)
 
-    if q_startswith.__len__() < list_len:
-        q_contains = C.objects.filter(infinitive_no_accents__contains=term).difference(q_startswith)
-        q = list(q_startswith) + list(q_contains)
-    else:
-        q = q_startswith
+	if q_startswith.__len__() < list_len:
+		q_contains = verb_class.objects.filter(infinitive_no_accents__contains=term).difference(q_startswith)
+		q = list(q_startswith) + list(q_contains)
+	else:
+		q = q_startswith
 
-    autocomplete_list = []
-    term_len = term.__len__()
-    for v in q[0:list_len]:
-        if not isinstance(v, RV) and v.reflexive_only:
-            v = v.reflexiveverb
-        pos_start = v.infinitive_no_accents.find(term)
-        pos_end = pos_start + term_len
-        html = v.infinitive[0:pos_start] + '<b>' + v.infinitive[pos_start:pos_end] + '</b>' + v.infinitive[pos_end:]
+	autocomplete_list = []
+	term_len = term.__len__()
+	for v in q[0:list_len]:
+		if not isinstance(v, ReflexiveVerb) and v.reflexive_only:
+			v = v.reflexiveverb
+		pos_start = v.infinitive_no_accents.find(term)
+		pos_end = pos_start + term_len
+		html = v.infinitive[0:pos_start] + '<b>' + v.infinitive[pos_start:pos_end] + '</b>' + v.infinitive[pos_end:]
 
-
-        autocomplete_list.append(
-            dict(url=v.get_absolute_url(), verb=v.infinitive, html=html))
-    return JsonResponse(autocomplete_list, safe=False)
+		autocomplete_list.append(
+			dict(url=v.get_absolute_url(), verb=v.infinitive, html=html))
+	return JsonResponse(autocomplete_list, safe=False)
 
 
 class Table:
-    def __init__(self, v: V, gender: int, reflexive: bool):
-        self.v = v
-        self.t = v.template
-        self.moods = self.get_moods_list(gender, reflexive)
+	def __init__(self, v: Verb, gender: int, reflexive: bool):
+		self.v = v
+		self.t = v.template
+		self.moods = self.get_moods_list(gender, reflexive)
 
-    def get_moods_list(self, gender, reflexive):
-        moods = []
-        for mood_name in FORMULAS.keys():
-            mood = Mood(self.v, mood_name, gender, reflexive)
-            moods.append(mood)
-        return moods
+	def get_moods_list(self, gender, reflexive):
+		moods = []
+		for mood_name in FORMULAS.keys():
+			mood = Mood(self.v, mood_name, gender, reflexive)
+			moods.append(mood)
+		return moods
 
-    def __str__(self):
-        return self.v.infinitive + ' Table Object'
+	def __str__(self):
+		return self.v.infinitive + ' Table Object'
 
 
 class Mood:
-    def __init__(self, v, mood_name, gender: int, reflexive: bool):
-        self.name = TEMPLATE_NAME[mood_name]
-        self.v = v
-        self.mood_name = mood_name
-        self.tenses = self.get_tenses_list(gender, reflexive)
+	def __init__(self, v, mood_name, gender: int, reflexive: bool):
+		self.name = TEMPLATE_NAME[mood_name]
+		self.v = v
+		self.mood_name = mood_name
+		self.tenses = self.get_tenses_list(gender, reflexive)
 
-    def get_tenses_list(self, gender, reflexive):
-        tenses = []
-        mood_dict = FORMULAS[self.mood_name]
-        for tense_name in mood_dict.keys():
-            tense = Tense(self.v, self.mood_name, tense_name, gender, reflexive)
-            tenses.append(tense)
-        return tenses
+	def get_tenses_list(self, gender, reflexive):
+		tenses = []
+		mood_dict = FORMULAS[self.mood_name]
+		for tense_name in mood_dict.keys():
+			tense = Tense(self.v, self.mood_name, tense_name, gender, reflexive)
+			tenses.append(tense)
+		return tenses
 
-    def __str__(self):
-        return self.mood_name
+	def __str__(self):
+		return self.mood_name
 
 
 class Tense:
-    def __init__(self, v: V, moode_name, tense_name, gender: int, reflexive: bool):
-        self.name = TEMPLATE_NAME[tense_name]
-        self.v = v
-        self.tense_name = tense_name
-        self.mood_name = moode_name
-        self.gender = gender
-        self.reflexive = reflexive
-        self.persons = self.get_persons_list()
+	_key = None
 
-    def get_persons_list(self):
-        if self.v.deffective:
-            if self.v.deffective.has_mood_tense(self.mood_name, self.tense_name):
-                return self.get_empty_persons_list()
-        persons = []
-        tense_dict = FORMULAS[self.mood_name][self.tense_name]
-        for person_name in tense_dict[1].keys():
-            person = Person(self.v, self.mood_name, self.tense_name, person_name, self.gender, self.reflexive)
-            persons.append(person)
-        return persons
+	def __init__(self, v: Verb, moode_name, tense_name, gender: int, reflexive: bool):
+		self.v = v
+		self.tense_name = tense_name
+		self.mood_name = moode_name
+		self.gender = gender
+		self.reflexive = reflexive
+		self.name = TEMPLATE_NAME[tense_name]
+		self.persons = self.get_persons_list()
 
-    def is_in_short_list(self):
-        return True if self.tense_name in SHORT_LIST[self.mood_name] else False
+	@property
+	def key(self):
+		if not self._key:
+			self._key = self.v.infinitive_no_accents + '_' + self.mood_name + '_' + self.tense_name + '_' + self.gender.__str__() + '_' + self.reflexive.__str__()
+		return self._key
 
-    def __str__(self):
-        return self.tense_name
+	def get_persons_list(self):
+		if self.v.deffective:
+			if self.v.deffective.has_mood_tense(self.mood_name, self.tense_name):
+				return self.get_empty_persons_list()
+		persons = []
+		tense_dict = FORMULAS[self.mood_name][self.tense_name]
+		for person_name in tense_dict[1].keys():
+			person = Person(self.v, self.mood_name, self.tense_name, person_name, self.gender, self.reflexive)
+			persons.append(person)
+		return persons
 
-    def get_empty_persons_list(self):
-        persons = []
-        tense_dict = FORMULAS[self.mood_name][self.tense_name]
-        for person_name in tense_dict[1].keys():
-            person = Person(self.v, self.mood_name, self.tense_name, person_name, self.gender, self.reflexive, empty=True)
-            persons.append(person)
-        return persons
+	def is_in_short_list(self):
+		return True if self.tense_name in SHORT_LIST[self.mood_name] else False
+
+	def __str__(self):
+		return self.tense_name
+
+	def get_empty_persons_list(self):
+		persons = []
+		tense_dict = FORMULAS[self.mood_name][self.tense_name]
+		for person_name in tense_dict[1].keys():
+			person = Person(self.v, self.mood_name, self.tense_name, person_name, self.gender, self.reflexive, empty=True)
+			persons.append(person)
+		return persons
+
+	def get_polly_ssml(self):
+		ssml = '<speak>Subjonctif PRÉSENT<break/>du verbe<break/><emphasis level="moderate">avoir</emphasis>.<prosody rate="slow">'
+		for person in self.persons:
+			ssml += '{part0} {part1} {part2},'.format(part0=person.part_0, part1=person.forms[0], part2=person.part_2)
+		ssml += '</prosody></speak>'
+		return ssml
 
 
 class Person:
-    VOWELS_LIST = ['a', 'ê', 'é', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
 
-    def __init__(self, v: V, mood_name: str, tense_name: str, person_name: str, gender: int, reflexive: bool, empty=False):
-        self.v = v
-        self.mood_name = mood_name
-        self.tense_name = tense_name
-        self.person_name = person_name
+	def __init__(self, v: Verb, mood_name: str, tense_name: str, person_name: str, gender: int, reflexive: bool, empty=False):
+		self.v = v
+		self.mood_name = mood_name
+		self.tense_name = tense_name
+		self.person_name = person_name
 
-        pronoun = -1 if v.infnitive_first_letter_is_vowel() else 0
-        etre = 2 if not self.v.conjugated_with_avoir and self.v.conjugated_with_etre else 1
-        if self.v.is_impersonal and self.person_name!="person_III_S":
-            self.part_0, self.forms, self.part_2 = '-', '', ''
-        elif empty:
-            self.part_0, self.forms, self.part_2 = '-','',''
-        else:
-            self.part_0, self.forms, self.part_2 = self.get_parts(etre, 0, gender, pronoun, reflexive)
-        if not isinstance(self.forms, list):
-            self.forms = [self.forms]
+		pronoun = -1 if v.infnitive_first_letter_is_vowel() else 0
+		etre = 2 if not self.v.conjugated_with_avoir and self.v.conjugated_with_etre else 1
+		if self.v.is_impersonal and self.person_name != "person_III_S":
+			self.all_empty()
+		elif empty:
+			self.all_empty()
+		else:
+			self.part_0, self.forms, self.part_2 = self.get_parts(etre, 0, gender, pronoun, reflexive)
+		if not isinstance(self.forms, list):
+			self.forms = [self.forms]
 
-    def more_than_one(self):
-        if len(self.forms) > 1:
-            return True
-        else:
-            return False
+	def more_than_one(self):
+		if len(self.forms) > 1:
+			return True
+		else:
+			return False
 
-    def get_parts(self, maison, switch, gender, pronoun, reflexive):
-        if not reflexive:
-            parts = FORMULAS[self.mood_name][self.tense_name][maison][self.person_name][switch]
-        else:
-            if self.v.infinitive in [
-            "plaire",
-            "complaire",
-            "déplaire",
-            "rire",
-            "convenir",
-            "nuire",
-            "mentir",
-            "ressembler",
-            "sourire",
-            "suffire",
-            "survivre",
-            "acheter",
-            "succéder",
-            "téléphoner",
-            "parler",
-            "demander",
-            "ntre-nuire",
-            ]:
-                parts = FORMULAS_PASSIVE_X[self.mood_name][self.tense_name][maison][self.person_name][switch]
-            else:
-                parts = FORMULAS_PASSIVE[self.mood_name][self.tense_name][maison][self.person_name][switch]
-        path_to_conjugation = parts[1][gender]
-        if path_to_conjugation == None:
-            return '-', '', ''
-        verb_forms = self.v.conjugations[path_to_conjugation[0]][path_to_conjugation[1]][int(path_to_conjugation[2])]
-        if verb_forms == None:
-            return '-', '', ''
+	def all_empty(self):
+		self.part_0, self.forms, self.part_2 = '-', '', ''
 
-        if isinstance(verb_forms, list):
-            pronoun = -1 if verb_forms[0][0] in self.VOWELS_LIST and not self.v.aspirate_h else 0
-        else:
-            pronoun = -1 if verb_forms[0] in self.VOWELS_LIST and not self.v.aspirate_h else 0
+	def get_parts(self, maison, switch, gender, pronoun, reflexive):
+		if not reflexive:
+			parts = FORMULAS[self.mood_name][self.tense_name][maison][self.person_name][switch]
+		else:
+			if self.v.infinitive in [
+				"plaire",
+				"complaire",
+				"déplaire",
+				"rire",
+				"convenir",
+				"nuire",
+				"mentir",
+				"ressembler",
+				"sourire",
+				"suffire",
+				"survivre",
+				"acheter",
+				"succéder",
+				"téléphoner",
+				"parler",
+				"demander",
+				"ntre-nuire",
+			]:
+				parts = FORMULAS_PASSIVE_X[self.mood_name][self.tense_name][maison][self.person_name][switch]
+			else:
+				parts = FORMULAS_PASSIVE[self.mood_name][self.tense_name][maison][self.person_name][switch]
+		path_to_conjugation = parts[1][gender]
+		if path_to_conjugation is None:
+			return '-', '', ''
+		verb_forms = self.v.conjugations[path_to_conjugation[0]][path_to_conjugation[1]][int(path_to_conjugation[2])]
+		if verb_forms is None:
+			return '-', '', ''
 
-        return parts[0][gender][pronoun], verb_forms, parts[2][gender][pronoun]
 
-    def __str__(self):
-        return self.person_name
+		if isinstance(verb_forms, list):
+			if verb_forms[0][0] == '<':
+				pronoun = -1 if verb_forms[0][3] in VOWELS_LIST and not self.v.aspirate_h else 0
+			else:
+				pronoun = -1 if verb_forms[0][0] in VOWELS_LIST and not self.v.aspirate_h else 0
+		else:
+			if verb_forms[0] == '<':
+				pronoun = -1 if verb_forms[3] in VOWELS_LIST and not self.v.aspirate_h else 0
+			else:
+				pronoun = -1 if verb_forms[0] in VOWELS_LIST and not self.v.aspirate_h else 0
+
+		return parts[0][gender][pronoun], verb_forms, parts[2][gender][pronoun]
+
+	def __str__(self):
+		return self.person_name
