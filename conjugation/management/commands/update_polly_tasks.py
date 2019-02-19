@@ -9,5 +9,5 @@ class Command(BaseCommand):
 		api = PollyAPI()
 		tasks = list(PollyAudio.objects.all())
 		for c, task in enumerate(tasks):
-			print('\rUpdating... {0} in {1}'.format(c + 1, len(tasks)))
+			print('\rUpdating... {0} in {1}'.format(c + 1, len(tasks)), end='')
 			api.update_task(task)
