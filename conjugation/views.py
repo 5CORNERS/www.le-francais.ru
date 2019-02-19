@@ -189,10 +189,7 @@ class Tense:
 		return self._key
 
 	def is_empty(self):
-		for person in self.persons:
-			if person.part_0 != '-':
-				return True
-		return False
+		return all(map(lambda a: a.part_0 == '-', self.persons))
 
 	def get_persons_list(self):
 		if self.v.deffective:
