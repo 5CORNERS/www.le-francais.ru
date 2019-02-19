@@ -6,14 +6,17 @@ from conjugation.polly import *
 
 
 class Command(BaseCommand):
+	def add_arguments(self, parser):
+		parser.add_argument('count', nargs='?', type=int, default=1)
+
 	def handle(self, *args, **options):
 		api = PollyAPI()
-		verbs = list(Verb.objects.prefetch_related('reflexiveverb').all().order_by('-count'))
+		verbs = list(Verb.objects.prefetch_related('reflexiveverb').all().order_by('-count'))[:options['count']]
 		tasks = []
-		for v in verbs:  # type: Verb
+		for counter, v in enumerate(verbs):  # type: Verb
+			print('{0} in {1} {2}'.format(counter, options['count'], v))
 			for verb, gender, is_reflexive in v.get_all():
 				table = Table(verb, gender, is_reflexive)  # type: Table
-				print()
 				for mood in table.moods:  # type: Mood
 					for tense in mood.tenses:  # type: Tense
 						polly_audio, created = PollyAudio.objects.get_or_create(key=tense.key)
@@ -26,4 +29,6 @@ class Command(BaseCommand):
 							polly_audio.voice_id = VOICE_ID_LEA
 							polly_audio.output_format = OUTPUT_FORMAT_MP3
 							tasks.append(polly_audio)
+		print('\nStart creating polly tasks')
 		api.bulk_start_task(tasks)
+		print('\nDone!')
