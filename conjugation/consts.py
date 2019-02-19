@@ -46,3 +46,12 @@ FREQUENT_URLS = [
 	'''<a href="/conjugaison/appeler">appeler</a>''',
 ]
 VOWELS_LIST = ['a', 'ê', 'é', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
+
+POLLY_EMPTY_MOOD_NAMES = [
+	('indicative', 'composé-past'),
+	('indicative', 'pluperfect'),
+	('indicative', 'simple-past'),
+	('indicative', 'antérieur-past'),
+	('indicative', 'future'),
+	('indicative', 'antérieur-future'),
+]

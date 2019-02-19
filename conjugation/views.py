@@ -1,4 +1,5 @@
-from django.conf import settings
+from re import sub
+
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -6,15 +7,26 @@ from unidecode import unidecode
 
 from conjugation.models import Verb, ReflexiveVerb, PollyAudio
 from .consts import *
+from .polly import *
 from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE, SHORT_LIST, FORMULAS_PASSIVE_X
 
 
-def get_polly_audio_link(request, key):
+def get_polly_audio_link(request):
+	key = request.POST.get('key')
 	polly_audio, created = PollyAudio.objects.get_or_create(key=key)
-	if created:
+	if created or polly_audio.url is None:
 		verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive = key.split('_')
-		tense = Tense(Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents), mood_name, tense_name, int(gender), False if reflexive == 'False' else True)
-		text = tense.get_polly_ssml
+		tense = Tense(Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents), mood_name, tense_name, int(gender), False if reflexive in ('False', 'None') else True)
+		api = PollyAPI(output_s3_key_prefix='polly-test/')
+		polly_audio.text = tense.get_polly_ssml()
+		polly_audio.text_type = TEXT_TYPE_SSML
+		polly_audio.language_code = LANGUAGE_CODE_FR
+		polly_audio.sample_rate = SAMPLE_RATE_22050
+		polly_audio.voice_id = VOICE_ID_LEA
+		polly_audio.output_format = OUTPUT_FORMAT_MP3
+		api.start_task(polly_audio, wait=True)
+	return JsonResponse(data={key: {'url': polly_audio.url}})
+
 
 @csrf_exempt
 def search(request):
@@ -119,6 +131,11 @@ def get_autocomplete_list(request):
 
 class Table:
 	def __init__(self, v: Verb, gender: int, reflexive: bool):
+		"""
+		:param v: Verb object
+		:param gender: -1 if feminine 0 if masculine
+		:param reflexive: True|False
+		"""
 		self.v = v
 		self.t = v.template
 		self.moods = self.get_moods_list(gender, reflexive)
@@ -171,6 +188,12 @@ class Tense:
 			self._key = self.v.infinitive_no_accents + '_' + self.mood_name + '_' + self.tense_name + '_' + self.gender.__str__() + '_' + self.reflexive.__str__()
 		return self._key
 
+	def is_empty(self):
+		for person in self.persons:
+			if person.part_0 != '-':
+				return True
+		return False
+
 	def get_persons_list(self):
 		if self.v.deffective:
 			if self.v.deffective.has_mood_tense(self.mood_name, self.tense_name):
@@ -197,9 +220,19 @@ class Tense:
 		return persons
 
 	def get_polly_ssml(self):
-		ssml = '<speak>Subjonctif PRÉSENT<break/>du verbe<break/><emphasis level="moderate">avoir</emphasis>.<prosody rate="slow">'
-		for person in self.persons:
-			ssml += '{part0} {part1} {part2},'.format(part0=person.part_0, part1=person.forms[0], part2=person.part_2)
+		ssml = '<speak>{mood} {tense}.<prosody rate="slow">'.format(
+			infinitive=self.v.infinitive,
+			mood=TEMPLATE_NAME[self.mood_name] if (self.mood_name, self.tense_name) not in POLLY_EMPTY_MOOD_NAMES else '',
+			tense=TEMPLATE_NAME[self.tense_name])
+		for n, person in enumerate(self.persons):
+			if person.part_0 == '-':
+				continue
+			ssml += sub('<.*?>', '', '{part0}{part1}{part2}'.format(part0=person.part_0, part1=person.forms[0], part2=person.part_2))
+			if n == 2:
+				ssml += '. '
+			else:
+				ssml += ', '
+		ssml = ssml[0:-1] + '.'
 		ssml += '</prosody></speak>'
 		return ssml
 
@@ -264,7 +297,6 @@ class Person:
 		verb_forms = self.v.conjugations[path_to_conjugation[0]][path_to_conjugation[1]][int(path_to_conjugation[2])]
 		if verb_forms is None:
 			return '-', '', ''
-
 
 		if isinstance(verb_forms, list):
 			if verb_forms[0][0] == '<':

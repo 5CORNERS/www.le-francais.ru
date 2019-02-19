@@ -2,13 +2,39 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.urls import reverse
 from unidecode import unidecode
+from .polly import TEXT_TYPES, LANGUAGE_CODES, OUTPUT_FORMATS, SAMPLE_RATES, VOICE_IDS, TASK_STATUSES, PARAMS
 
 VOWELS_LIST = ['a', 'ê', 'é', 'è', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
 
+FEMININE = -1
+MASCULINE = 0
+
 
 class PollyAudio(models.Model):
-	key = models.CharField(max_length=30, primary_key=True)
-	link = models.URLField(null=True, verbose_name='Ссылка на файл')
+	key = models.CharField(max_length=64, primary_key=True)
+	datetime_creation = models.DateTimeField(null=True, default=None, verbose_name='Дата создания')
+	text = models.CharField(max_length=1024, null=True, default=None)
+	text_type = models.CharField(max_length=4, choices=TEXT_TYPES, null=True, default=None)
+	language_code = models.CharField(choices=LANGUAGE_CODES, null=True, default=None, max_length=16)
+	output_format = models.CharField(choices=OUTPUT_FORMATS, null=True, default=None, max_length=16)
+	sample_rate = models.CharField(choices=SAMPLE_RATES, null=True, default=None, max_length=16)
+	voice_id = models.CharField(choices=VOICE_IDS, null=True, default=None, max_length=16)
+	task_id = models.CharField(max_length=64, null=True, default=None)
+	task_status = models.CharField(choices=TASK_STATUSES, null=True, default=None, max_length=16)
+	request_characters = models.IntegerField(null=True, default=None)
+	url = models.URLField(null=True, verbose_name='Ссылка на файл', default=None)
+
+	def to_dict(self) -> dict:
+		opts = self._meta
+		data = {}
+		for f in opts.concrete_fields:
+			if not f.value_from_object(self) is None and f.name in PARAMS.keys():
+				data[PARAMS[f.name]] = f.value_from_object(self)
+		return data
+
+
+class Translation(models.Model):
+	verb = models.OneToOneField('conjugation.Verb', primary_key=True)
 
 
 class Regle(models.Model):
@@ -32,6 +58,8 @@ class Template(models.Model):
 
 
 class Verb(models.Model):
+	_conjugations = None
+
 	count = models.IntegerField(default=0)
 	infinitive = models.CharField(max_length=100)
 	infinitive_no_accents = models.CharField(max_length=100, default='')
@@ -134,11 +162,11 @@ class Verb(models.Model):
 		return True if self.infinitive[0] in VOWELS_LIST and not self.aspirate_h else False
 
 	def construct_conjugations(self):
-		self.conjugations = {}
+		self._conjugations = {}
 		for mood in self.template.new_data.keys():
-			self.conjugations[mood] = {}
+			self._conjugations[mood] = {}
 			for tense in self.template.new_data[mood].keys():
-				self.conjugations[mood][tense] = [None] * 6
+				self._conjugations[mood][tense] = [None] * 6
 				for person, i in enumerate(self.template.new_data[mood][tense]['p']):
 					endings = self.template.new_data[mood][tense]['p'][person]['i']
 					if endings == None:
@@ -147,12 +175,38 @@ class Verb(models.Model):
 						forms = []
 						for ending in endings:
 							forms.append(self.main_part() + ending)
-						self.conjugations[mood][tense][person] = forms
+						self._conjugations[mood][tense][person] = forms
 					else:
-						self.conjugations[mood][tense][person] = self.main_part() + endings
+						self._conjugations[mood][tense][person] = self.main_part() + endings
 		if self.pp_invariable:
 			for i in range(1, 3):
-				self.conjugations['participle']['past-participle'][i] = self.conjugations['participle']['past-participle'][0]
+				self._conjugations['participle']['past-participle'][i] = self._conjugations['participle']['past-participle'][0]
+
+	@property
+	def conjugations(self):
+		if self._conjugations is None:
+			self.construct_conjugations()
+		return self._conjugations
+
+	def get_all(self):
+		result = []
+
+		genders = (MASCULINE, FEMININE)
+		if self.masculin_only:
+			genders = (MASCULINE, )
+
+		if self.can_reflexive:
+			refs = (False, True)
+		elif self.reflexive_only:
+			refs = (True, )
+		else:
+			refs = (False, )
+
+		for gender in genders:
+			for reflexive in refs:
+				result.append((self, gender, reflexive))
+		return result
+
 
 
 class ReflexiveVerb(models.Model):
