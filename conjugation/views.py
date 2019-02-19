@@ -17,7 +17,7 @@ def get_polly_audio_link(request):
 	if created or polly_audio.url is None:
 		verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive = key.split('_')
 		tense = Tense(Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents), mood_name, tense_name, int(gender), False if reflexive in ('False', 'None') else True)
-		api = PollyAPI(output_s3_key_prefix='polly-test/')
+		api = PollyAPI(output_s3_key_prefix='polly-conjugations/')
 		polly_audio.text = tense.get_polly_ssml()
 		polly_audio.text_type = TEXT_TYPE_SSML
 		polly_audio.language_code = LANGUAGE_CODE_FR
