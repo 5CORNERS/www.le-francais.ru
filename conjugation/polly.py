@@ -179,11 +179,15 @@ class PollyAPI:
 
 	def bulk_start_task(self, audio_list: list):
 		scheduled_audio = []
-		for polly_audio in audio_list:
+		for c, polly_audio in enumerate(audio_list):
+			print('\rSending request... {0} in {1}'.format(c+1, len(audio_list)), end='')
 			new_task = self.start_task(polly_audio, wait=False, save=False)
 			scheduled_audio.append(new_task)
-		for polly_audio in scheduled_audio:
+		print()
+		for c, polly_audio in enumerate(scheduled_audio):
+			print('\rSaving url... {0} in {1}'.format(c+1, len(scheduled_audio)), end='')
 			polly_audio.save()
+		print()
 
 	def update_task(self, polly_audio):
 		response = self.client.get_speech_synthesis_task(TaskId=polly_audio.task_id)
