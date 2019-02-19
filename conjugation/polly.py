@@ -1,7 +1,5 @@
 import boto3
 from django.conf import settings
-from django.db import transaction
-from .models import PollyAudio
 
 OUTPUT_FORMAT_JSON = 'json'
 OUTPUT_FORMAT_MP3 = 'mp3'
@@ -165,6 +163,7 @@ class PollyAPI:
 		"""
 		:param polly_audio: PollyAudio
 		:param wait: wait while task is complited (or failed)
+		:param save: save object before return
 		:return: dict {'AudioStream': StreamingBody(),'ContentType': 'string','RequestCharacters': 123}
 		"""
 		data = polly_audio.to_dict()  # type: dict
@@ -180,7 +179,7 @@ class PollyAPI:
 
 	def bulk_start_task(self, audio_list: list):
 		scheduled_audio = []
-		for polly_audio in audio_list:  # type: PollyAudio
+		for polly_audio in audio_list:
 			new_task = self.start_task(polly_audio, wait=False, save=False)
 			scheduled_audio.append(new_task)
 		for polly_audio in scheduled_audio:
