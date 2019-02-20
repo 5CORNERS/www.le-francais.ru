@@ -359,7 +359,7 @@ FORMULAS = {
             },
             2: {
                 'person_II_S': (((("sois ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
-                'person_I_P': (((("souons ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
+                'person_I_P': (((("soyons ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
                 'person_II_P': (((("soyez ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_M,), (("",),),),),
             },
         },
