@@ -79,7 +79,7 @@ def verb_page(request, se, feminin, verb, homonym):
 	verb.save()
 	verb.construct_conjugations()
 	table = Table(verb, gender, reflexive)
-	return render(request, 'conjugation/table_test.html' if request.user.is_staff else 'conjugation/table.html', {
+	return render(request, 'conjugation/table.html', {
 		'v': verb,
 		'reflexive': reflexive,
 		'feminin': feminin,
