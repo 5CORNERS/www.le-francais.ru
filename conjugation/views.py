@@ -1,5 +1,6 @@
 from re import sub
 
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -72,13 +73,13 @@ def verb_page(request, se, feminin, verb, homonym):
 	if (se == "se_" and verb.reflexiveverb.is_short()) or (se == "s_" and not verb.reflexiveverb.is_short()):
 		return redirect(verb.reflexiveverb.get_absolute_url())
 
-	reflexive = verb.can_reflexive and se
+	reflexive = True if verb.can_reflexive and se else False
 
 	verb.count += 1
 	verb.save()
 	verb.construct_conjugations()
 	table = Table(verb, gender, reflexive)
-	return render(request, 'conjugation/table.html', {
+	return render(request, 'conjugation/table_test.html' if request.user.is_staff else 'conjugation/table.html', {
 		'v': verb,
 		'reflexive': reflexive,
 		'feminin': feminin,
@@ -146,6 +147,16 @@ class Table:
 			mood = Mood(self.v, mood_name, gender, reflexive)
 			moods.append(mood)
 		return moods
+
+	def all_polly(self):
+		keys = list(filter(None, [tense.key if not tense.is_empty() else None for mood in self.moods for tense in mood.tenses]))
+		polly_filter = Q()
+		for key in keys:
+			polly_filter = polly_filter | Q(key=key)
+		query = PollyAudio.objects.filter(polly_filter)
+		if len(query) < len(keys):
+			return False
+		return True
 
 	def __str__(self):
 		return self.v.infinitive + ' Table Object'
