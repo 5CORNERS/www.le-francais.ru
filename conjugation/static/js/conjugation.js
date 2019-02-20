@@ -59,7 +59,7 @@ $(document).ready(function () {
 	$('.play-pause-icon').each(function () {
 		$(this).addClass(NORMAL_CLASS);
 		this.addEventListener('click', function () {
-			if (audio !== undefined && (!audio.paused || audio.currentTime)) {
+			if (audio !== undefined && !audio.paused) {
 				audio.pause();
 				audio.currentTime = 0;
 				changeClassTo(this, NORMAL_CLASS);
