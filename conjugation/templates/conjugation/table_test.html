@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load static conjugation_tags%}
+{% load site_tags %}
+
+{% block title %}Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} во французском языке.{% endblock %}
+{% block description %}Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} — в самой крутой спрягалке из всех здесь представленных: с озвучанием, комментариями и особенностями спряжения. Вам понравится! :){% endblock %}
+
+
+{% block extra_head %}
+    <script src="{% static "components/jquery-ui-1.12.1.custom/jquery-ui.min.js" %}"></script>
+    <link rel="stylesheet" href="{% static "components/jquery-ui-1.12.1.custom/jquery-ui.min.css" %}">
+    {% conjugation_advertisement_head "lf_fr_conj_rsb_01"%}
+    {% conjugation_advertisement_head "lf_fr_conj_rsb_02"%}
+{#    {% conjugation_advertisement_head "lf_fr_conj_mob_01"%}#}
+
+{% endblock %}
+{% block extra_css %}
+    <style>
+        h4 {
+            line-height: 1.42857143;
+        }
+        .noselect {
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none;
+            /* Non-prefixed version, currently
+                                             supported by Chrome and Opera */
+        }
+        .col-fixed-210{
+            height: 40px;
+            width: 230px;
+            position: absolute;
+            padding-left: 15px;
+            z-index: 1;
+        }
+        .col-offset-210{
+            padding-left: 245px;
+            z-index: 0;
+        }
+        .col-fixed-315{
+            height: 40px;
+            width: 335px;
+            position: absolute;
+            padding-left: 15px;
+            z-index: 1;
+        }
+        .col-offset-315{
+            padding-left: 350px;
+            z-index: 0;
+        }
+        .row {
+            margin-bottom: 0.5em;
+        }
+
+{#        .row-eq-height {#}
+{#            display: -webkit-box;#}
+{#            display: -webkit-flex;#}
+{#            display: -ms-flexbox;#}
+{#            display: flex;#}
+{#        }#}
+
+        .tenses i {
+            font-style: normal;
+            color: #337ab7;
+            font-weight: bold;
+        {#            font-weight: bold#}
+        }
+
+        .part_0 i{
+            font-weight: normal;
+        }
+
+        .tenses b {
+{#            color: #d83131;#}
+            color: #F28B1A;
+            font-weight: bold
+        }
+
+        .tab-content > .active {
+            display: inline;
+        }
+
+{#        .tenses .block {#}
+{#            border-color: #ddd;#}
+{#        }#}
+{##}
+{#        .tenses .block {#}
+{#            margin: 0 0 20px 0;#}
+{#            padding: 10px;#}
+{#            border-width: 1px;#}
+{#            border-style: solid;#}
+{#            border-radius: 4px;#}
+{#        }#}
+    </style>
+    <style>
+        .ui-autocomplete-loading {
+            background: white url("{% static 'images/ui-anim_basic_16x16.gif' %}") right center no-repeat;
+        }
+        .red {
+	        color: #c80000;
+        }
+    </style>
+{% endblock %}
+
+{% block extra_js %}
+		<script>
+			const CONJ_POLLY_URL = '{% url 'conjugation:polly' %}';
+			const CSRF_TOKEN = '{{ csrf_token }}';
+			const AUDIO_URL = '{{ v.audio_url }}'
+			const IS_REFLEXIVE = '{{ v.reflexive }}'
+		</script>
+		<script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
+{#    <script async src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>#}
+		<script src="{% static 'js/conjugation.min.js' %}"></script>
+    <script>
+				if (window.localStorage.getItem('long_list')){
+					see_more()
+				}
+        $("#search-verb")["autocomplete"]({
+            source: "{% url 'conjugation:autocomplete' %}",
+            minLength: 1,
+            focus: function (event, ui) {
+                $("#search-verb").val(ui.item["verb"]);
+                return false;
+            },
+            select: function (event, ui) {
+                event.preventDefault();
+                window.location.href = ui.item['url'];
+            }
+        })["data"]("ui-autocomplete")["_renderItem"] = function (a, b) {
+            return $("<li>")["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
+        };
+
+        function see_less() {
+            $.each($(".in_short_list"), function (i, v) {
+                v.style.display = "none";
+            });
+            $("#more_tab").removeClass("active");
+            $("#less_tab").addClass("active");
+	          window.localStorage.setItem('long_list', 'false');
+        }
+
+        function see_more() {
+            $.each($(".in_short_list"), function (i, v) {
+                v.style.display = "block";
+            });
+            $("#more_tab").addClass("active");
+            $("#less_tab").removeClass("active");
+            window.localStorage.setItem('long_list', 'true');
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% load i18n site_tags %}
+    <div class="container">
+
+        <div class="row first_row">
+            <div class="col-xs-12 col-sm-12 col-md-6">
+                <div class="row">
+                    {% if flavour == 'mobile' %}
+                        <div class="col-xs-12" style="margin: 0 10px 0">
+                            {% conjugation_advertisement_body "lf_fr_conj_mob_01"%}
+                        </div>
+                    {% endif %}
+                    <div class="col-xs-12">
+                        {% include 'conjugation/verb_form.html' %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <h1 style="margin-bottom: 25px">Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %}</h1>
+                    </div>
+	                {% if not table.all_polly %}<div class="col-xs-12">
+		                <div class="alert alert-warning alert-dismissable" role="alert">
+			                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+				                <span aria-hidden="true">&times;</span>
+			                </button>
+			                Озвучивание некоторых спряжений этого глагола до вас ни разу не запрашивали. Самый первый запуск озвучки выполняется около 20 с. После этого все работает быстро.
+		                </div>
+	                </div>{% endif %}
+                </div>
+                {% if flavour == "mobile" %}
+                <div class="row">
+                    <div class="col-xs-12">
+                        Читайте об особенностях спряжения {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} в <a href="#regle">конце страницы</a>.
+                    </div>
+                </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-xs-12">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item active" id="less_tab">
+                                <a style="cursor: pointer" class="nav-link noselect" onclick="see_less()">Сокращенная версия</a>
+                            </li>
+                            <li class="nav-item" id="more_tab" >
+                                <a style="cursor: pointer" class="nav-link noselect" onclick="see_more()">Полная версия</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row">
+                    {% if forms_count > 1%}
+                    <div class="{% if forms_count == 2 %}col-fixed-210{% elif forms_count == 3 %}col-fixed-315{% endif %}">
+                        <ul class="nav nav-pills">
+                            {% for i in forms_range %}
+                            <li style="cursor: pointer" {% if i == 1 %}class="active"{% endif %}><a data-toggle="pill" data-target=".form{{ forloop.counter0 }}">Вариант {{ i }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <div class="col-xs-12 {% if forms_count == 2 %} col-offset-210{% elif forms_count == 3 %} col-offset-315{% else %}{% endif %}">
+                        <div class="btn">
+                            {% if v.can_feminin%}<a class="btn btn-primary" href="{% option_url 'gender' %}">{% if not feminin%}В женском роде{% else %}В мужском роде{% endif %}</a>{% endif %}
+                            {% if v.can_reflexive%}<a class="btn btn-primary" href="{% option_url 'se' %}">{% if not reflexive%}В возвратной форме{% else %}В невозвратной форме{% endif %}</a>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row mood_name">
+                    <div class="col-xs-12">
+                        <div><h2 style="margin-bottom: 3px">{{ table.moods.0.name | safe }}</h2></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-6" style="text-align: center">
+                {% if flavour != 'mobile' %}
+                    {% conjugation_advertisement_body "lf_fr_conj_rsb_01"%}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-6">
+                <div class="row tenses">
+                    {% for tense in table.moods.0.tenses %}
+                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
+                            <div class="tense_name"><h4>{{ tense.name.upper }} {% if not tense.is_empty %}<a style="cursor: pointer; margin: -2px 0;"><span
+		                            style="height: 19px"
+		                            data-toggle="tooltip"
+		                            data-placement="top"
+		                            title="Послушать"
+		                            class="fa play-pause-icon"
+		                            aria-hidden="true"
+		                            data-key="{{ tense.key }}"
+		                            data-mood="{{ tense.mood_name }}"
+		                            data-tense="{{ tense.tense_name }}"
+                            ></span></a>{% endif %}{% comment %}<img
+		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
+                            >{% endcomment %}</h4></div>
+                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+	            {% for mood in table.moods|slice:'1:' %}
+		            <div class="row mood_name">
+			            <div class="col-xs-12">
+				            <div><h2>{{ mood.name | safe }}</h2></div>
+			            </div>
+		            </div>
+		            <div class="row tenses">
+			            {% for tense in mood.tenses %}
+										<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}"{% if tense.is_in_short_list %} style="display: none"{% endif %}>
+                            <div class="tense_name"><h4>{{ tense.name.upper }} {% if not tense.is_empty %}<a style="cursor: pointer; margin: -2px 0;"><span
+		                            style="height: 19px"
+		                            data-toggle="tooltip"
+		                            data-placement="top"
+		                            title="Послушать"
+		                            class="fa play-pause-icon"
+		                            aria-hidden="true"
+		                            data-key="{{ tense.key }}"
+		                            data-mood="{{ tense.mood_name }}"
+		                            data-tense="{{ tense.tense_name }}"
+                            ></span></a>{% endif %}{% comment %}<img
+		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
+                            >{% endcomment %}</h4></div>
+                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
+                        </div>
+			            {% endfor %}
+		            </div>
+	            {% endfor %}
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-6">
+                <div class="row emploi">
+                    <div class="col-xs-12">
+                        <h3 style="margin-top: 6px">Коротко о главном</h3><p>{{ v.employs | safe }}</p>
+                    </div>
+                </div>
+                <div id="regle" class="row regle">
+                    <div class="col-xs-12" style="text-align: center">
+                        {% if flavour == 'mobile' %}
+                            {% conjugation_advertisement_body "lf_fr_conj_mob_02"%}
+                        {% endif %}
+                    </div>
+                    <div class="col-xs-12">
+                        {% if v.regle%}<h3>Особенности спряжения глагола {{ v.infinitive }}</h3><p>{{ v.regle.text_rus | safe }}</p>{% endif %}
+                    </div>
+                </div>
+                <div class="row novichkam">
+                    <div class="col-sm-12">
+                    <h2>Новичкам</h2>
+                    <p>Глядя на внушительный список времен, в которых спрягаются французские глаголы, загрустит любой новичок. Я поспешу таких успокоить: вам показали то, что ваша неокрепшая психика не должна была увидеть. :) Мы-то, взрослые, знаем, что реальная жизнь несоизмеримо проще: среднестатистический современный француз в беглой речи использует <b>всего три времени</b>: настоящее, прошедшее (событийное) и будущее. Причем, последнее с легкостью заменяется на удивительный по простоте образования глагольный оборот с использованием спряжения одного единственного глагола «идти» в настоящем времени и инфинитива смыслового глагола.</p>
+                    <p>Таким образом, все знания сводятся к двум временам, которые надолго позволят вам абстрагироваться от всей прочей парадигмы спряжения и излагать практически любую вашу мысль без искажения смысла.</p>
+                    <p>И еще одна хорошая новость: второе из этих двух времен — составное, а это значит, что не надо учить шесть форм глагола во всех лицах и числах — достаточно знать его причастие, которое у 90% глаголов звучит так же, как инфинитив. Это французский язык: снаружи кажется ужасно сложно и запутано, а копнешь — все уже упростили до нас.</p>
+                </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12" style="text-align: center">
+                        {% conjugation_advertisement_body "lf_fr_conj_rsb_02"%}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        {% include 'conjugation/feedback.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -50,12 +50,12 @@ function pollyListen(icon, key) {
 }
 
 $(document).ready(function () {
-	setTimeout(function () {
+	/*setTimeout(function () {
 		let blue_arrow = $(".blue_arrow");
 		blue_arrow.each(function () {
 			this.style.display = "none";
 		})
-	}, 5000);
+	}, 5000);*/
 	$('.play-pause-icon').each(function () {
 		$(this).addClass(NORMAL_CLASS);
 		this.addEventListener('click', function () {
