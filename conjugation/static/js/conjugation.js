@@ -69,5 +69,14 @@ $(document).ready(function () {
 			}
 			pollyListen(this, this.attributes['data-key'].value)
 		})
+	});
+	$('.nav-pills > li > a').each(function () {
+		this.addEventListener('click', function () {
+			if(this.attributes['data-target'].value !== '.form0'){
+				$('.play-pause-icon').hide()
+			}else{
+				$('.play-pause-icon').show()
+			}
+		})
 	})
 });
