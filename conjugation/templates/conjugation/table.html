@@ -99,35 +99,23 @@
         .ui-autocomplete-loading {
             background: white url("{% static 'images/ui-anim_basic_16x16.gif' %}") right center no-repeat;
         }
+        .red {
+	        color: #c80000;
+        }
     </style>
 {% endblock %}
-{% block js %}
-    <script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
-    <script async src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
-{% endblock %}
-{% block extra_js %}
-    <script>
-        let polly = {};
 
-			function pollyListen(key) {
-				if (polly[key] === undefined) {
-					$.ajax(
-						url = '{% url 'conjugation:polly' %}',
-						options = {
-							type: 'POST',
-							async: false,
-							datatype: 'json',
-							data: {csrfmiddlewaretoken: "{{ csrf_token }}", key: key,},
-							success: function (r) {
-								polly.key = r.link;
-								pollyListen(key);
-							},
-						}
-					)
-				} else {
-					console.log(polly.key)
-				}
-			}
+{% block extra_js %}
+		<script>
+			const CONJ_POLLY_URL = '{% url 'conjugation:polly' %}';
+			const CSRF_TOKEN = '{{ csrf_token }}';
+			const AUDIO_URL = '{{ v.audio_url }}'
+			const IS_REFLEXIVE = '{{ v.reflexive }}'
+		</script>
+		<script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
+{#    <script async src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>#}
+		<script src="{% static 'js/conjugation.min.js' %}"></script>
+    <script>
 				if (window.localStorage.getItem('long_list')){
 					see_more()
 				}
@@ -163,40 +151,6 @@
             $("#less_tab").removeClass("active");
             window.localStorage.setItem('long_list', 'true');
         }
-
-        var audio = $("#audio")[0];
-        audio.addEventListener("ended", toggleIcon);
-        var playPauseIcon = $("#playPauseIcon")[0];
-        function toggleIcon() {
-            if(playPauseIcon.className == "fa fa-pause-circle"){
-                playPauseIcon.className = ("fa fa-play-circle");
-            }
-            else {
-                playPauseIcon.className = ("fa fa-pause-circle");
-            }
-        }
-        function togglePlay() {
-            if (audio.paused){
-                toggleIcon();
-                return audio.play();
-            }
-            else {
-                toggleIcon();
-                return audio.pause();
-            }
-        }
-
-        $(document).ready(function () {
-            setTimeout(function () {
-                var blue_arrow = $("#blue_arrow")[0];
-                blue_arrow.style.display="none";
-            }, 5000)
-        });
-
-        $('.tenses').each(function (){
-	        
-        })
-
     </script>
 {% endblock %}
 
@@ -218,8 +172,16 @@
                 </div>
                 <div class="row">
                     <div class="col-xs-12">
-                        <h1 style="margin-bottom: 25px">Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %}</h1>{% if v.audio_url and not reflexive%}<audio id="audio" src="{{ v.audio_url }}" preload="auto"></audio>{% endif %}
+                        <h1 style="margin-bottom: 25px">Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %}</h1>
                     </div>
+	                {% if not table.all_polly %}<div class="col-xs-12">
+		                <div class="alert alert-warning alert-dismissable" role="alert">
+			                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+				                <span aria-hidden="true">&times;</span>
+			                </button>
+			                Озвучивание некоторых спряжений этого глагола до вас ни разу не запрашивали. Самый первый запуск озвучки выполняется около 20 с. После этого все работает быстро.
+		                </div>
+	                </div>{% endif %}
                 </div>
                 {% if flavour == "mobile" %}
                 <div class="row">
@@ -275,89 +237,50 @@
                 <div class="row tenses">
                     {% for tense in table.moods.0.tenses %}
                         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h4>{{ tense.name.upper }}{% if v.audio_url and not reflexive %} {% if forloop.counter0 == 0 %}<a style="cursor: pointer; margin: -2px 0;" onclick="togglePlay()"><span style="height: 19px" data-toggle="tooltip" data-placement="top" title="Послушать" id="playPauseIcon" class="fa fa-play-circle" aria-hidden="true"></span></a><img id="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}">{% endif %}{% endif %}</h4></div>
+                            <div class="tense_name"><h4>{{ tense.name.upper }} {% if not tense.is_empty %}<a style="cursor: pointer; margin: -2px 0;"><span
+		                            style="height: 19px"
+		                            data-toggle="tooltip"
+		                            data-placement="top"
+		                            title="Послушать"
+		                            class="fa play-pause-icon"
+		                            aria-hidden="true"
+		                            data-key="{{ tense.key }}"
+		                            data-mood="{{ tense.mood_name }}"
+		                            data-tense="{{ tense.tense_name }}"
+                            ></span></a>{% endif %}{% comment %}<img
+		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
+                            >{% endcomment %}</h4></div>
                             <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
                         </div>
                     {% endfor %}
                 </div>
-                <div class="row mood_name">
-                        <div class="col-xs-12">
-                            <div><h2>{{ table.moods.1.name | safe }}</h2></div>
-                        </div>
-                </div>
-                <div class="row tenses">
-                    {% for tense in table.moods.1.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
+	            {% for mood in table.moods|slice:'1:' %}
+		            <div class="row mood_name">
+			            <div class="col-xs-12">
+				            <div><h2>{{ mood.name | safe }}</h2></div>
+			            </div>
+		            </div>
+		            <div class="row tenses">
+			            {% for tense in mood.tenses %}
+										<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}"{% if tense.is_in_short_list %} style="display: none"{% endif %}>
+                            <div class="tense_name"><h4>{{ tense.name.upper }} {% if not tense.is_empty %}<a style="cursor: pointer; margin: -2px 0;"><span
+		                            style="height: 19px"
+		                            data-toggle="tooltip"
+		                            data-placement="top"
+		                            title="Послушать"
+		                            class="fa play-pause-icon"
+		                            aria-hidden="true"
+		                            data-key="{{ tense.key }}"
+		                            data-mood="{{ tense.mood_name }}"
+		                            data-tense="{{ tense.tense_name }}"
+                            ></span></a>{% endif %}{% comment %}<img
+		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
+                            >{% endcomment %}</h4></div>
                             <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
                         </div>
-                    {% endfor %}
-            </div>
-                <div class="row mood_name">
-                        <div class="col-xs-12">
-                            <div><h2>{{ table.moods.2.name | safe }}</h2></div>
-                        </div>
-                    </div>
-                <div class="row tenses">
-                    {% for tense in table.moods.2.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
-                        </div>
-                    {% endfor %}
-                </div>
-                <div class="row mood_name">
-                        <div class="col-xs-12">
-                            <div><h2>{{ table.moods.3.name | safe }}</h2></div>
-                        </div>
-                    </div>
-                <div class="row tenses">
-                    {% for tense in table.moods.3.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
-                        </div>
-                    {% endfor %}
-                </div>
-                <div class="row mood_name">
-                        <div class="col-xs-12">
-                            <div><h2>{{ table.moods.4.name | safe }}</h2></div>
-                        </div>
-                    </div>
-                <div class="row tenses">
-                    {% for tense in table.moods.4.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
-                        </div>
-                    {% endfor %}
-                </div>
-                <div class="row mood_name">
-                        <div class="col-xs-12">
-                            <div><h2>{{ table.moods.5.name | safe }}</h2></div>
-                        </div>
-                    </div>
-                <div class="row tenses">
-                    {% for tense in table.moods.5.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
-                        </div>
-                    {% endfor %}
-                </div>
-                <div class="row mood_name">
-                        <div class="col-xs-12">
-                            <div><h2>{{ table.moods.6.name | safe }}</h2></div>
-                        </div>
-                    </div>
-                <div class="row tenses">
-                    {% for tense in table.moods.6.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h4>{{ tense.name.upper }}</h4></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
-                        </div>
-                    {% endfor %}
-                </div>
+			            {% endfor %}
+		            </div>
+	            {% endfor %}
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row emploi">
