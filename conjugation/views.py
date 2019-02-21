@@ -16,8 +16,7 @@ def get_polly_audio_link(request):
 	key = request.POST.get('key')
 	polly_audio, created = PollyAudio.objects.get_or_create(key=key)
 	if created or polly_audio.url is None:
-		verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive = key.split('_')
-		tense = Tense(Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents), mood_name, tense_name, int(gender), False if reflexive in ('False', 'None') else True)
+		tense = Tense(key=key)
 		api = PollyAPI(output_s3_key_prefix='polly-conjugations/')
 		polly_audio.text = tense.get_polly_ssml()
 		polly_audio.text_type = TEXT_TYPE_SSML
@@ -184,10 +183,13 @@ class Mood:
 class Tense:
 	_key = None
 
-	def __init__(self, v: Verb, moode_name, tense_name, gender: int, reflexive: bool):
+	def __init__(self, v: Verb=None, mood_name=None, tense_name=None, gender: int=None, reflexive: bool=None, key=None):
+		if key:
+			verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive = key.split('_')
+			v, gender, reflexive = Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents), int(gender), False if reflexive in ('False', 'None') else True
 		self.v = v
 		self.tense_name = tense_name
-		self.mood_name = moode_name
+		self.mood_name = mood_name
 		self.gender = gender
 		self.reflexive = reflexive
 		self.name = TEMPLATE_NAME[tense_name]
