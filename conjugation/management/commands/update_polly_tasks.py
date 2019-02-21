@@ -2,12 +2,19 @@ from django.core.management import BaseCommand
 
 from conjugation.models import PollyAudio
 from conjugation.polly import PollyAPI
-
+from conjugation.views import Tense
+from conjugation.polly import COMPLETED, FAILED
 
 class Command(BaseCommand):
 	def handle(self, *args, **options):
 		api = PollyAPI()
 		tasks = list(PollyAudio.objects.all())
+		to_recreate = []
 		for c, task in enumerate(tasks):
-			print('\rUpdating... {0} in {1}'.format(c + 1, len(tasks)), end='')
-			api.update_task(task)
+			print('\rChecking... {0} in {1}, {2} needs recreating'.format(c + 1, len(tasks), len(to_recreate)), end='')
+			tense = Tense(key=task.key)
+			if task.text != tense.get_polly_ssml() or task.task_status == FAILED:
+				to_recreate.append(task)
+		print()
+		api.bulk_start_task(to_recreate)
+
