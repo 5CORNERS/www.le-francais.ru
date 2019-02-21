@@ -170,7 +170,8 @@ class PollyAPI:
 		data['OutputS3BucketName'] = self.output_s3_bucket_name
 		data['OutputS3KeyPrefix'] = self.output_s3_key_prefix
 		response = self.client.start_speech_synthesis_task(**data)
-		polly_audio.task_id, polly_audio.task_status, polly_audio.url = response['SynthesisTask']['TaskId'], response['SynthesisTask']['TaskStatus'], response['SynthesisTask']['OutputUri']
+		for response_key, field in RESPONSE_PARAMS.items():
+			setattr(polly_audio, field, response['SynthesisTask'][response_key])
 		while wait and polly_audio.task_status not in ('completed', 'failed'):
 			polly_audio.task_status = self.client.get_speech_synthesis_task(TaskId=polly_audio.task_id)['SynthesisTask']['TaskStatus']
 		if save:
