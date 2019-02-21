@@ -722,3 +722,11 @@ details.no-details:not([open]) summary {
     padding-right: 10px;
     padding-left: 10px;
 }
+
+.username{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 153px;
+    display: block;
+    white-space: nowrap;
+}

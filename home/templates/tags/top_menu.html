@@ -44,7 +44,7 @@
 
 				{% if request.user.is_authenticated %}{% postman_unread as unread_count %}
 					<li class="dropdown" style="cursor: pointer" >
-                        <a class="dropdown-toggle" data-toggle="dropdown">{{ request.user.username }} {% if unread_count%}<i class="fa fa-envelope" aria-hidden="true" style="color: inherit;"></i>{% endif %}<b class="caret"></b></a>
+                        <a class="dropdown-toggle username" title="{{ request.user.username }}" data-toggle="dropdown">{{ request.user.username }} {% if unread_count%}<i class="fa fa-envelope" aria-hidden="true" style="color: inherit;"></i>{% endif %}<b class="caret"></b></a>
 						<ul class="dropdown-menu">
                             <li><a href="{% url 'pybb:edit_profile' %}">Настройки профиля{# TODO l18n #}</a></li>
                             {% if user.pybb_profile.post_count > 0 %}
