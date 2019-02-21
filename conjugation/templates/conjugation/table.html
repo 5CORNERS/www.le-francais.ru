@@ -15,6 +15,7 @@
 
 {% endblock %}
 {% block extra_css %}
+		<link rel="stylesheet" href="{% static 'css/conjugation.css' %}">
     <style>
         h4 {
             line-height: 1.42857143;
@@ -172,7 +173,17 @@
                 </div>
                 <div class="row">
                     <div class="col-xs-12">
-                        <h1 style="margin-bottom: 25px">Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %}</h1>
+                        <h1 style="margin-bottom: 25px; font-size: 30px">Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %}{% if not table.moods.5.tenses.0.is_empty %} <a style="cursor: pointer; margin: -2px 0;"><span
+		                            style="height: 31px"
+		                            data-toggle="tooltip"
+		                            data-placement="top"
+		                            title="Послушать"
+		                            class="fa play-pause-icon"
+		                            aria-hidden="true"
+		                            data-key="{{ table.moods.5.tenses.0.key }}"
+		                            data-mood="{{ table.moods.5.tenses.0.mood_name }}"
+		                            data-tense="{{ table.moods.5.tenses.0.tense_name }}"
+                            ></span></a>{% endif %}</h1>
                     </div>
 	                {% if not table.all_polly %}<div class="col-xs-12">
 		                <div class="alert alert-warning alert-dismissable" role="alert">

@@ -714,6 +714,13 @@ details.no-details:not([open]) summary {
     fill: #fff;
 }
 
+@media (max-width: 1000px) {
+    .navbar > .container{
+        width: 100%;
+    }
+}
+
+
 .navbar-nav > li > a {
     padding: 15px 10px;
 }
