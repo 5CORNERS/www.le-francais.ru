@@ -173,7 +173,7 @@
                 </div>
                 <div class="row">
                     <div class="col-xs-12">
-                        <h1 style="margin-bottom: 25px; font-size: 30px">Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %}{% if not table.moods.5.tenses.0.is_empty %} <a style="cursor: pointer; margin: -2px 0;"><span
+                        <h1 style="margin-bottom: 25px; font-size: 30px">Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %}{% if not table.moods.5.tenses.0.is_empty %} <a class="link-play-pause" style="cursor: pointer; margin: -2px 0;"><span
 		                            style="height: 31px"
 		                            data-toggle="tooltip"
 		                            data-placement="top"
@@ -248,7 +248,7 @@
                 <div class="row tenses">
                     {% for tense in table.moods.0.tenses %}
                         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-                            <div class="tense_name"><h4>{{ tense.name.upper }} {% if not tense.is_empty %}<a style="cursor: pointer; margin: -2px 0;"><span
+                            <div class="tense_name"><h4>{{ tense.name.upper }} {% if not tense.is_empty %}<a class="link-play-pause" style="cursor: pointer; margin: -2px 0;"><span
 		                            style="height: 19px"
 		                            data-toggle="tooltip"
 		                            data-placement="top"
@@ -274,7 +274,7 @@
 		            <div class="row tenses">
 			            {% for tense in mood.tenses %}
 										<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}"{% if tense.is_in_short_list %} style="display: none"{% endif %}>
-                            <div class="tense_name"><h4>{{ tense.name.upper }} {% if not tense.is_empty %}<a style="cursor: pointer; margin: -2px 0;"><span
+                            <div class="tense_name"><h4>{{ tense.name.upper }} {% if not tense.is_empty %}<a class="link-play-pause" style="cursor: pointer; margin: -2px 0;"><span
 		                            style="height: 19px"
 		                            data-toggle="tooltip"
 		                            data-placement="top"
