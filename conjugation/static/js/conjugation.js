@@ -1,6 +1,11 @@
 let polly = {};
 let audio = undefined;
 
+let ua = window.navigator.userAgent;
+let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+let webkit = !!ua.match(/WebKit/i);
+let iOSSafari = iOS && webkit && !ua.match(/CriOS/i);
+
 const NORMAL_CLASS = 'fa-volume-down';
 const LOADING_CLASS = 'fa-spinner fa-pulse';
 const SPEAKING_CLASS = 'fa-volume-up';
@@ -24,7 +29,7 @@ function pollyListen(icon, key) {
 		$.ajax({
 				url: CONJ_POLLY_URL,
 				type: 'POST',
-				async: true,
+				async: !iOSSafari,
 				datatype: 'json',
 				data: {csrfmiddlewaretoken: CSRF_TOKEN, key: key,},
 				success: function (r) {
@@ -32,7 +37,7 @@ function pollyListen(icon, key) {
 					pollyListen(icon, key);
 				},
 				error: function (r) {
-					changeClassTo(icon, ERROR_CLASS)
+					changeClassTo(icon, ERROR_CLASS);
 				}
 			}
 		)
