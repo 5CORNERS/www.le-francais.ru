@@ -128,6 +128,7 @@ class AdminCommands(View):
 			user.add_cups(-user.cup_amount)
 			user.add_credit_cups(-user.cup_credit)
 			user.saw_message = False
+			user.saw_message_datetime = None
 			user.save()
 		elif action == 'add_cup':
 			user.add_cups(1)
