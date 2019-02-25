@@ -1,6 +1,8 @@
 ﻿# -*- coding: UTF-8 -*-
+from datetime import datetime
 
 from django.views import View
+from custom_user.models import User
 from django.shortcuts import HttpResponse, render
 import json
 from django.core.mail import EmailMessage
@@ -79,7 +81,7 @@ class SawMessageView(View):
 		return super(SawMessageView, self).dispatch(request, *args, **kwargs)
 
 	def post(self, request):
-		user = request.user
+		user = request.user  # type: User
 		if request.POST['action'] == 'make_true':
 			if user.saw_message:
 				return HttpResponse(status=403)
@@ -98,6 +100,7 @@ class SawMessageView(View):
 					reply_to=['support@le-francais.ru']
 				).send()
 			user.saw_message = True
+			user.saw_message_datetime = datetime.now()
 			user.save()
 			return HttpResponse(b'OK', status=200)
 		elif request.POST['action'] == 'get_state':

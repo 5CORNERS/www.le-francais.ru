@@ -56,6 +56,7 @@ class User(AbstractUser):
 	must_pay = models.BooleanField(default=True, editable=True, verbose_name='Должен платить', help_text='Определяет, должен ли пользователь активировать урок для доступа к материалам')
 
 	saw_message = models.BooleanField(default=False, editable=True, verbose_name='Видел сообщение', help_text='Пользователь получил сообщение о системе активации уроков')
+	saw_message_datetime = models.DateTimeField(default=None, null=True, verbose_name='Дата сообщения')
 
 	_cup_amount = models.IntegerField(default=0, editable=True, verbose_name='Кол-во чашек/билеткиов')
 	_cup_credit = models.IntegerField(default=0, editable=True, verbose_name='Кол-во "кредитных" чашек')
