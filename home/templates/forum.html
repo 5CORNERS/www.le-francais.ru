@@ -25,6 +25,8 @@
         f.parentNode.insertBefore(j, f);
     })(window, document, 'script', 'dataLayer', 'GTM-WC2Q4XT');</script>
     <!-- End Google Tag Manager -->
+		<!-- Google Publisher Tag -->
+		<script async="async" src="https://www.googletagservices.com/tag/js/gpt.js"></script>
     {% if 'payment_success' in request.GET and request.GET.payment_id %}
         {% get_payment_by_id request.GET.payment_id as payment %}
         <script>
