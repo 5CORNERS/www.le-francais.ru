@@ -24,6 +24,9 @@
         f.parentNode.insertBefore(j, f);
     })(window, document, 'script', 'dataLayer', 'GTM-WC2Q4XT');</script>
     <!-- End Google Tag Manager -->
+		<!-- Google Publisher Tag -->
+		<script async="async" src="https://www.googletagservices.com/tag/js/gpt.js"></script>
+
     {% if 'payment_success' in request.GET and request.GET.payment_id %}
         {% get_payment_by_id request.GET.payment_id as payment %}
         <script>
@@ -65,26 +68,23 @@
     <meta name="description" content="{% block description %}{% endblock %}"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
+{% block bootstrap_js %}
     <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
-
-
-    <!-- Latest compiled and minified JavaScript -->
-
-
-
-
+{% endblock %}
+{% block bootstrap_css %}
+	<link rel="stylesheet" href="{% static 'components/bootstrap/dist/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.min.css' %}">
+{% endblock %}
     {% block css %}
 
         <link rel="stylesheet" href="{% static 'lib/audio/audioplayer.min.css' %}">
 
         <!-- Latest compiled and minified CSS -->
-        <link rel="stylesheet" href="{% static 'components/bootstrap/dist/css/bootstrap.min.css' %}">
 
-        {# Global stylesheets #}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
-        <link rel="stylesheet" type="text/css"
-              href="{% static 'components/bootstrap-social/bootstrap-social.min.css' %}">
+
+	    {# Global stylesheets #}
+	    <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
         <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fontawesome-all.css' %}">
         <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fa-regular.css' %}">
     {% endblock %}
@@ -226,11 +226,11 @@
 
       return !!match;
     },
-    
+
     /**
      * Attempt to scroll to the current location's hash.
      */
-    scrollToCurrent: function(e) { 
+    scrollToCurrent: function(e) {
       if(this.scrollIfAnchor(window.location.hash) && e) {
       	e.preventDefault();
       }
