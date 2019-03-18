@@ -2,169 +2,194 @@
 {% load static site_tags %}
 
 {% block extra_head %}
-    {% advert_head page %}
+	{% advert_head page %}
 {% endblock %}
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/index_page.min.css' %}">
+	<link rel="stylesheet" href="{% static 'css/index_page.min.css' %}">
 {% endblock %}
 {% block meta %}
-	{% if not self.show_in_sitemap %}<meta name=”robots” content=”noindex” />{% endif %}
+	{% if not self.show_in_sitemap %}
+		<meta name=”robots” content=”noindex”/>{% endif %}
 {% endblock %}
 {% block content %}
-    <div class="container">
-        <div class="row main_row">
-            <div class="col-xs-12 col-offset-336 main">
-                <div class="row title">
-                    <div class="col-xs-12"><h1>Французский язык как удовольствие</h1></div>
-                </div>
-                <div class="row"><div class="col-xs-12">
-                    <div class="row">
-                        <div class="caption col-md-12">Этот сайт поможет вам научиться говорить по-французски. Точка.
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-9 text_description">
-                            <div class="subcaption">
-                                Нет, не точка. Не просто научиться говорить по-французски, а делать это с
-                                наименьшими трудозатратами и получать от этого удовольствие. Важен будет не только (и не
-                                столько)
-                                результат, но и процесс. И все это безвозмездно, то есть даром
-                                (понимай:&nbsp;<b>бесплатно</b>).
-                            </div>
-                        </div>
-                        <div class="col-xs-3 cat-logo-collapse">
-                            <img class="cat-logo" src="{% static 'images/cat_logo.png' %}">
-                        </div>
-                    </div>
-                </div></div>
-                <div class="row"><div class="col-xs-12">
-                    <img class="cat-logo-mini" src="{% static 'images/hat-logo.png' %}">
-                    <div class="page-references">
-                        {% for reference in self.related_pages.all %}
-                            <a class="page-reference" href="{{ reference.referenced_page.url }}">
-                                <h4 class="page-reference_title">{{ reference.referenced_page.specific.reference_title }}</h4>
-                                <div class="page-reference_text">{{ reference.referenced_page.specific.subtitle }}</div>
-                            </a>
-                        {% endfor %}
-                    </div>
-                </div></div>
-                <div class="row">
-                    <div class="col-xs-12"><div class="too_many_letters">
-                        <p>Я сознательно <b>не</b> пишу "изучить французский язык". "Изучить" — понятие более широкое.
-                            Здесь
-                            же
-                            ставится вполне приземленная, но весьма утилитарная цель: овладеть современным
-                            <u>разговорным</u>
-                            французским, то есть иметь возможность устно объясняться по-французски и понимать, что вам
-                            отвечают.
-                            Не много. Но и не мало :-).</p>
+	<div class="container">
+		<div class="row main_row">
+			<div class="col-xs-12 col-offset-336 main">
+				<div class="row top-mobile-advert-row">
+					<div class="top-mobile-advert-div">
+						<!-- GPT AdSlot 3 for Ad unit 'lf_fr_main_mobile_top' ### Size: [[728,90],[320,50]] -->
+						<!-- Adslot's refresh function: googletag.pubads().refresh([gptadslots[2]]) -->
+						<div id='div-gpt-ad-7192401-3'>
+							<script>
+								googletag.cmd.push(function () {
+									googletag.display('div-gpt-ad-7192401-3');
+								});
+							</script>
+						</div>
+						<!-- End AdSlot 3 -->
+					</div>
+				</div>
+				<div class="row title">
+					<div class="col-xs-12"><h1 class="title">Французский язык как удовольствие</h1></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="row">
+							<div class="caption col-md-12">Этот сайт поможет вам научиться говорить по-французски. Точка.
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-xs-9 text_description">
+								<div class="subcaption">
+									Нет, не точка. Не просто научиться говорить по-французски, а делать это с
+									наименьшими трудозатратами и получать от этого удовольствие. Важен будет не только (и не
+									столько)
+									результат, но и процесс. И все это безвозмездно, то есть даром
+									(понимай:&nbsp;<b>бесплатно</b>).
+								</div>
+							</div>
+							<div class="col-xs-3 cat-logo-collapse">
+								<img class="cat-logo" src="{% static 'images/cat_logo.png' %}">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<img class="cat-logo-mini" src="{% static 'images/hat-logo.png' %}">
+						<div class="page-references">
+							{% for reference in self.related_pages.all %}
+								<a class="page-reference" href="{{ reference.referenced_page.url }}">
+									<h4 class="page-reference_title">{{ reference.referenced_page.specific.reference_title }}</h4>
+									<div class="page-reference_text">{{ reference.referenced_page.specific.subtitle }}</div>
+								</a>
+							{% endfor %}
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="too_many_letters">
+							<p>Я сознательно <b>не</b> пишу "изучить французский язык". "Изучить" — понятие более широкое.
+								Здесь
+								же
+								ставится вполне приземленная, но весьма утилитарная цель: овладеть современным
+								<u>разговорным</u>
+								французским, то есть иметь возможность устно объясняться по-французски и понимать, что вам
+								отвечают.
+								Не много. Но и не мало :-).</p>
 
-                        <p>Вся соль нашего "самоучителя" — в его <a href="/lecons" title="Уроки французского">уроках</a>,
-                            виртуозно исполненных
-                            однажды и доступных теперь
-                            всем
-                            вам. Вот крохотный пример того, что вас ждет :):</p>
-                        <div class="block-audio" style="margin-top: 15px;margin-bottom: 5px">
-                            <audio>
-                                <source src="//files.le-francais.ru/vocabulaire/aguiche/teaser-17.mp3"
-                                        type="audio/mpeg">
-                            </audio>
-                        </div>
-                        <p>Кроме того, вам доступен весь набор комплементарных материалов —
-                            подкасты, аудио-словари,
-                            конспекты,
-                            сопутствующие ссылки по теме и — sic! — апробированная методика, которая позволила мне не
-                            потратить
-                            на занятия языком ни одной лишней минуты. Потому что <b>нет никаких домашних заданий</b> — в
-                            том
-                            виде,
-                            в
-                            котором мы привыкли об этом думать. Вне уроков, конечно, работать приходится — чудес не
-                            бывает.
-                            Известный факт: иностранный язык берется задницей. Но та "задница", которую я вам предлагаю
-                            —
-                            она
-                            сладка :).</p>
+							<p>Вся соль нашего "самоучителя" — в его <a href="/lecons" title="Уроки французского">уроках</a>,
+								виртуозно исполненных
+								однажды и доступных теперь
+								всем
+								вам. Вот крохотный пример того, что вас ждет :):</p>
+							<div class="block-audio" style="margin-top: 15px;margin-bottom: 5px">
+								<audio>
+									<source src="//files.le-francais.ru/vocabulaire/aguiche/teaser-17.mp3"
+									        type="audio/mpeg">
+								</audio>
+							</div>
+							<p>Кроме того, вам доступен весь набор комплементарных материалов —
+								подкасты, аудио-словари,
+								конспекты,
+								сопутствующие ссылки по теме и — sic! — апробированная методика, которая позволила мне не
+								потратить
+								на занятия языком ни одной лишней минуты. Потому что <b>нет никаких домашних заданий</b> — в
+								том
+								виде,
+								в
+								котором мы привыкли об этом думать. Вне уроков, конечно, работать приходится — чудес не
+								бывает.
+								Известный факт: иностранный язык берется задницей. Но та "задница", которую я вам предлагаю
+								—
+								она
+								сладка :).</p>
 
-                        <p>Всё то, что делается вне уроков во имя изучения языка — всё это делается в фоне и не отнимает
-                            ни
-                            сил, ни дополнительного времени (я надеюсь, вы понимаете, что речь не идет ни о каком
-                            шарлатанстве
-                            типа 25-го кадра или обучения во сне). Ко всему прочему, это прикольно. Факт.</p>
+							<p>Всё то, что делается вне уроков во имя изучения языка — всё это делается в фоне и не отнимает
+								ни
+								сил, ни дополнительного времени (я надеюсь, вы понимаете, что речь не идет ни о каком
+								шарлатанстве
+								типа 25-го кадра или обучения во сне). Ко всему прочему, это прикольно. Факт.</p>
 
-                        <p>Одним словом, ребята, получился классный аудио-самоучитель французского языка для начинающих,
-                            поверьте.</p>
-                    </div></div>
-                </div>
-                <div class="row"><div class="col-xs-12">
-                    <hr>
-                    <div class="page-reviews">
-                        {% random_review %}
-                    </div>
-                    <hr>
-                    <div align="center">
-                        <a style="float: left" href="/forum/forum/15/">Все отзывы</a>
-                        <a href="/reussites/temoignage_de_respect/">Избранные</a>
-                        <a style="float: right" href="/reussites/">Истории успеха</a>
-                    </div>
-                    <hr>
-                </div></div>
-                <div class="row home_comments"><div class="col-xs-12">
-                    <p>
-                        Всё это звучит, как сказка, но я это на себе опробовал — ведь я в этих уроках такой же ученик,
-                        как и
-                        вы. Не буду здесь долго распинаться — все это описано <a href="/lecons/">на отдельной странице</a>. Скажу лишь одно:
-                        собственная лень сподвигла меня на то, чтобы найти этот незатратный и эффективный путь. Я
-                        специально
-                        ничего не придумывал. Просто, стремясь свести затраты энергии к минимуму, а роль свою к как
-                        можно
-                        более пассивной, я нашел способы, которые, как оказалось, весьма успешно работают. Зато теперь
-                        это
-                        можно называть "<a href="/methode" title="Методика">авторской методикой</a>". Смешно, честное
-                        слово!
-                        :)
-                    </p>
-                    <p>
-                        Разумеется, при ином подходе за тот же срок можно добиться бОльшего. Люди в том же универе на
-                        филфаке за 4 года выучиваются свободно владеть языком. Но чего им это стоит! А ведь можно
-                        научиться
-                        говорить и понимать, и к тому же получать от процесса удовольствие — так зачем тогда спешить?!
-                        ;)
-                    </p>
-                    <hr>
-                    <div class="lyrical_digression_h">Лирическое отступление.</div>
-                    <p>
-                        Французскую речь я воспринимаю скорее, как музыку. Научиться говорить по-французски — это всё
-                        равно,
-                        что овладеть игрой на музыкальном инструменте. В самом деле, ощущения очень схожие. Сумел по
-                        всем
-                        <a href="/lecons/prononciation" title="Правила чтения и фонетика французского">правилам</a>
-                        прочесть
-                        первое слово по-французски (какое-нибудь beaucoup) — уже радость. Сказал первую
-                        фразу типа "Ça va bien aujourd'hui, merci" — и ты словно выучил первые такты любимого
-                        произведения и
-                        даже узнаёшь его в собственном исполнении. Чес-слово, очень похожие ощущения :).
-                    </p>
-                    <p>
-                        Изучить теорию музыки, сольфеджио, гармонию — в наших терминах это "изучить язык". А просто
-                        суметь
-                        сыграть — это, по-нашему, научиться говорить по-французски. Этим мы здесь и занимаемся.
-                        <a href="/lecons/pronociation">Присоединяйтесь! :-)</a>
-                    </p>
-                    <p>
-                        А ещё: заглядывайте в нашу группу во ВКонтакте — там мнооого интересного!<br><br>
-                        <a href="//vk.com/le_francais_ru" class="btn btn-social btn-sm btn-vk"><span
-                                class="fab fa-vk"></span>Наша группа вам в помощь!</a>
-                        <a href="//www.facebook.com/groups/lefrancais.ru/"
-                           class="btn btn-social btn-sm btn-facebook"><span
-                                class="fab fa-facebook"></span>...а то вот ещё есть</a>
-                    </p>
-                </div></div>
-            </div>
-            <div class="hidden-xs hidden-sm col-fixed-336 sidebar-right">
-                {% page_advert_body 'sidebar' page.page_type %}
-            </div>
-        </div>
-    </div>
+							<p>Одним словом, ребята, получился классный аудио-самоучитель французского языка для начинающих,
+								поверьте.</p>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<hr>
+						<div class="page-reviews">
+							{% random_review %}
+						</div>
+						<hr>
+						<div align="center">
+							<a style="float: left" href="/forum/forum/15/">Все отзывы</a>
+							<a href="/reussites/temoignage_de_respect/">Избранные</a>
+							<a style="float: right" href="/reussites/">Истории успеха</a>
+						</div>
+						<hr>
+					</div>
+				</div>
+				<div class="row home_comments">
+					<div class="col-xs-12">
+						<p>
+							Всё это звучит, как сказка, но я это на себе опробовал — ведь я в этих уроках такой же ученик,
+							как и
+							вы. Не буду здесь долго распинаться — все это описано <a href="/lecons/">на отдельной странице</a>. Скажу лишь одно:
+							собственная лень сподвигла меня на то, чтобы найти этот незатратный и эффективный путь. Я
+							специально
+							ничего не придумывал. Просто, стремясь свести затраты энергии к минимуму, а роль свою к как
+							можно
+							более пассивной, я нашел способы, которые, как оказалось, весьма успешно работают. Зато теперь
+							это
+							можно называть "<a href="/methode" title="Методика">авторской методикой</a>". Смешно, честное
+							слово!
+							:)
+						</p>
+						<p>
+							Разумеется, при ином подходе за тот же срок можно добиться бОльшего. Люди в том же универе на
+							филфаке за 4 года выучиваются свободно владеть языком. Но чего им это стоит! А ведь можно
+							научиться
+							говорить и понимать, и к тому же получать от процесса удовольствие — так зачем тогда спешить?!
+							;)
+						</p>
+						<hr>
+						<div class="lyrical_digression_h">Лирическое отступление.</div>
+						<p>
+							Французскую речь я воспринимаю скорее, как музыку. Научиться говорить по-французски — это всё
+							равно,
+							что овладеть игрой на музыкальном инструменте. В самом деле, ощущения очень схожие. Сумел по
+							всем
+							<a href="/lecons/prononciation" title="Правила чтения и фонетика французского">правилам</a>
+							прочесть
+							первое слово по-французски (какое-нибудь beaucoup) — уже радость. Сказал первую
+							фразу типа "Ça va bien aujourd'hui, merci" — и ты словно выучил первые такты любимого
+							произведения и
+							даже узнаёшь его в собственном исполнении. Чес-слово, очень похожие ощущения :).
+						</p>
+						<p>
+							Изучить теорию музыки, сольфеджио, гармонию — в наших терминах это "изучить язык". А просто
+							суметь
+							сыграть — это, по-нашему, научиться говорить по-французски. Этим мы здесь и занимаемся.
+							<a href="/lecons/pronociation">Присоединяйтесь! :-)</a>
+						</p>
+						<p>
+							А ещё: заглядывайте в нашу группу во ВКонтакте — там мнооого интересного!<br><br>
+							<a href="//vk.com/le_francais_ru" class="btn btn-social btn-sm btn-vk"><span
+									class="fab fa-vk"></span>Наша группа вам в помощь!</a>
+							<a href="//www.facebook.com/groups/lefrancais.ru/"
+							   class="btn btn-social btn-sm btn-facebook"><span
+									class="fab fa-facebook"></span>...а то вот ещё есть</a>
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="hidden-xs hidden-sm col-fixed-336 sidebar-right">
+				{% page_advert_body 'sidebar' page.page_type %}
+			</div>
+		</div>
+	</div>
 {% endblock %}
