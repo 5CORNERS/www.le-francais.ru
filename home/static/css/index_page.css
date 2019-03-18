@@ -2,6 +2,24 @@
     margin-top: 273px;
 }
 
+.top-mobile-advert-row {}
+
+.top-mobile-advert-div {
+    margin: 10px auto;
+}
+
+.title {
+    font-size: 32px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 767px) {
+    .title {
+        font-size: 28px;
+    }
+}
+
 @media (max-width: 1199px) {
     .advert_top {
         margin-top: 359px;
@@ -14,15 +32,32 @@
 }
 
 .caption {
-    margin-top: 30px;
+    margin-top: 8px;
     font-weight: bold;
     font-size: 18px;
 }
 
 .subcaption {
-    margin-top: 30px;
+    margin-top: 15px;
     color: #282b36;
     font-size: 15.6px;
+}
+
+@media (max-width: 767px) {
+    .title {
+        font-size: 28px;
+        margin-top: 5px;
+        margin-bottom: 9px;
+    }
+
+    .caption {
+        font-size: 16px;
+    }
+
+    .subcaption {
+        margin-top: 15px;
+        font-size: 14px;
+    }
 }
 
 .page-references {
