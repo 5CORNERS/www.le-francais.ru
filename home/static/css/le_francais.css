@@ -42,10 +42,6 @@ body {
     margin-bottom: 0;
 }
 
-.navbar {
-    z-index: 1000;
-}
-
 img {
     max-width: 100%;
     height: auto;
@@ -167,6 +163,10 @@ body {
 @media (min-width: 768px) {
     .main {
         padding: 40px 30px 40px;
+    }
+    .nav>li>a {
+        padding-right: 10px;
+        padding-left: 10px;
     }
 }
 
@@ -607,7 +607,7 @@ td.forum-last-post, td.topic-last-post {
 }
 
 .first_row {
-    padding-top: 30px;
+    padding-top: 5px;
 }
 
 .cofee-icon {
