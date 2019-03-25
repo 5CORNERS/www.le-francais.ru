@@ -4,6 +4,7 @@
 
 ;$(document).ready(function () {
 	$('audio').audioPlayer();
+	dispatchEvent(new Event('audioplayerReady'));
 });
 
 
