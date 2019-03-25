@@ -73,7 +73,8 @@ td {
     max-width: 70%;
 }
 
-.main {}
+.main {
+}
 
 .main > h1 {
     margin: 20px 0px;
@@ -164,7 +165,8 @@ body {
     .main {
         padding: 40px 30px 40px;
     }
-    .nav>li>a {
+
+    .nav > li > a {
         padding-right: 10px;
         padding-left: 10px;
     }
@@ -713,11 +715,10 @@ details.no-details:not([open]) summary {
 }
 
 @media (max-width: 1000px) {
-    .navbar > .container{
+    .navbar > .container {
         width: 100%;
     }
 }
-
 
 .navbar-nav > li > a {
     /*padding: 15px 10px;*/
@@ -728,10 +729,68 @@ details.no-details:not([open]) summary {
     padding-left: 10px;
 }
 
-.username{
+.username {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 153px;
     display: block;
     white-space: nowrap;
 }
+
+.bottom-message {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: auto;
+    min-height: 21px;
+    z-index: 2147483647;
+    background: hsla(208, 56%, 93%, 1);
+    color: rgb(51, 51, 51);
+    line-height: 21px;
+    padding: 8px 18px;
+    font-family: verdana, arial, sans-serif;
+    font-size: 14px;
+    /*text-align: center;*/
+    opacity: 1;
+    border-top: #337ab7 solid 2px;
+    /*transition: height 0.5s ease-out;*/
+}
+
+
+.bottom-message-content {
+    max-width: 1160px;
+    margin: 0 auto;
+}
+
+.bottom-message-close {
+    color: #666c7d;
+    float: right;
+    display: block;
+    padding: 5px 8px;
+    margin-left: 5px;
+    /*border: grey solid;*/
+    /*border-radius: 100%;*/
+    cursor: pointer;
+    text-align: center;
+}
+
+.bottom-message-text {
+    display: block;
+    padding: 5px 0 5px 0;
+}
+
+.bottom-message-buttons {
+    text-align: center;
+}
+
+.bottom-message-button {
+    margin-top: 10px;
+    padding: 10px 13px 10px 13px;
+}
+
+/*@media (min-width: 500px) {*/
+    /*.bottom-message-buttons{*/
+        /*text-align: left;*/
+    /*}*/
+/*}*/

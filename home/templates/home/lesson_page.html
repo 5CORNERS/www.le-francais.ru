@@ -5,6 +5,7 @@
 
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 {% block extra_head %}
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 	{% advert_head page %}
 {% endblock %}
 
@@ -367,7 +368,7 @@
 			<button class="sidebar-collapse-button" type="button" data-toggle="toggle"
 			        data-target=".sidebar-wrapper" aria-controls="sidebar" aria-expanded="false"
 			        aria-label="Toggle sidebar">
-				<div class="arrow-icon">
+				<div class="arrow-icon"></div>
 			</button>
 			<div class="col-12 col-sm-9 col-lg-6 col-xlg-6 main">
 				{% include 'home/lesson_content.html' %}
@@ -794,4 +795,52 @@
 			{% comment %}Need login modal window{% endcomment %}
 		{% endif %}
 	{% endif %}
+	<div class="bottom-message" id="bottom-message" style="display: none">
+		<div class="bottom-message-content">
+			<div class="bottom-message-description">
+				<div class="bottom-message-close"
+				     id="'#bottom-message-close"
+				     onclick="toggleBottomMessage()"><i class="fas fa-times"></i>
+				</div>
+				<div class="bottom-message-text">
+					<h4>Пожалуйста, поддержите наш проект — мы остро нуждаемся в вашей помощи.</h4>
+					<p>Нас двое. Мы работаем над этим проектом каждый день — с утра и до вечера. <b>Это наша работа.</b> У нас нет других источников дохода, кроме ваших пожертвований.</p>
+					<p>Мы расчитываем на вас. Наше благополучие зависит только от вашей щедрости.</p>
+				</div>
+			</div>
+			<div class="bottom-message-buttons"><a id="bottom-message-who-do-you-think-we-are-button" href="{% slugurl 'who-do-you-think-we-are' %}">
+				<div class="btn btn-primary bottom-message-button">
+					Узнайте, кто стоит за этим проектом
+				</div>
+			</a>
+				<a id="bottom-message-payments-button" href="{% url 'payments:payments' %}">
+					<div class="btn btn-primary bottom-message-button">
+						Поддержите нас
+					</div>
+				</a></div>
+		</div>
+	</div>
+	{% if self.lesson_number > 6 %}<script>
+		const uHP =
+			{% if user.is_authenticated and user.has_payed %}true;{% else %}false;{% endif %}
+		const uLP =
+			{% if user.is_authenticated and user.has_payed and request.user.last_payment.update_date %}new Date('{{ request.user.last_payment.update_date }}');{% else %}null;{% endif %}
+		addEventListener('audioplayerReady', function () {
+			setTimeout(function () {
+				$('#lesson-audio').on('pause', showBottomMessage);
+			}, 50 * 1000);
+			$('.audioplayer-download-button').on('click', showBottomMessage);
+		});
+
+		function showBottomMessage() {
+			if ($.cookie('bottom_message') == null && uHP === false) {
+				$('#bottom-message').slideDown(1000);
+			}
+		}
+
+		function toggleBottomMessage() {
+			$('#bottom-message').slideUp(1000);
+			$.cookie('bottom_message', 'true', {expires: 1, path: '/'});
+		}
+	</script>{% endif %}
 {% endblock %}
