@@ -763,7 +763,7 @@ details.no-details:not([open]) summary {
     margin: 0 auto;
 }
 
-.bottom-message-close {
+.bottom-message-button-close {
     color: #666c7d;
     float: right;
     display: block;
