@@ -14,6 +14,9 @@
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
 
 {% block extra_js %}
+	<script>
+		var LESSON_NUMBER = {{ self.lesson_number }};
+	</script>
 	{% check_user_lesson request.user self as userlesson %}
 	<script async type="text/javascript"
 	        src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
@@ -798,8 +801,8 @@
 	<div class="bottom-message" id="bottom-message" style="display: none">
 		<div class="bottom-message-content">
 			<div class="bottom-message-description">
-				<div class="bottom-message-close"
-				     id="'#bottom-message-close"
+				<div class="bottom-message-button-close"
+				     id="bottom-message-button-close"
 				     onclick="toggleBottomMessage()"><i class="fas fa-times"></i>
 				</div>
 				<div class="bottom-message-text">
@@ -808,12 +811,14 @@
 					<p>Мы расчитываем на вас. Наше благополучие зависит только от вашей щедрости.</p>
 				</div>
 			</div>
-			<div class="bottom-message-buttons"><a id="bottom-message-who-do-you-think-we-are-button" href="{% slugurl 'who-do-you-think-we-are' %}">
+			<div class="bottom-message-buttons"><a id="bottom-message-button-who"
+			                                       href="{% slugurl 'who-do-you-think-we-are' %}" target="">
 				<div class="btn btn-primary bottom-message-button">
 					Узнайте, кто стоит за этим проектом
 				</div>
 			</a>
-				<a id="bottom-message-payments-button" href="{% url 'payments:payments' %}">
+				<a id="bottom-message-button-payments"
+				   href="{% url 'payments:payments' %}" target="_blank">
 					<div class="btn btn-primary bottom-message-button">
 						Поддержите нас
 					</div>
@@ -825,12 +830,17 @@
 			{% if user.is_authenticated and user.has_payed %}true;{% else %}false;{% endif %}
 		const uLP =
 			{% if user.is_authenticated and user.has_payed and request.user.last_payment.update_date %}new Date('{{ request.user.last_payment.update_date }}');{% else %}null;{% endif %}
+
 		addEventListener('audioplayerReady', function () {
-			setTimeout(function () {
-				$('#lesson-audio').on('pause', showBottomMessage);
-			}, 50 * 1000);
+			$('#lesson-audio').one('play', function () {
+				setTimeout(function () {
+					$('#lesson-audio').on('pause', showBottomMessage);
+				}, 50 * 1000);
+			});
+
 			$('.audioplayer-download-button').on('click', showBottomMessage);
 		});
+
 
 		function showBottomMessage() {
 			if ($.cookie('bottom_message') == null && uHP === false) {
