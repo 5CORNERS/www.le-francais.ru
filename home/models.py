@@ -66,6 +66,9 @@ class AdUnit(Model):
 		FieldPanel('adunit_sizes'),
 	]
 
+	def __str__(self):
+		return self.name
+
 
 @register_snippet
 class InlineAdvertisementSnippet(Model):
