@@ -6,8 +6,8 @@
 		{% endfor %}
 	];
 	let parent_contaner = $('#script-{{ id }}').parent();
-	for (var i = 1; i < ~~parent_contaner.height()/800 && i < ad_elements.length - 1; i++){
-		parent_contaner.append(ad_elements[i])
+	for (let i = 0; i < ~~parent_contaner.height()/800 || i < ad_elements.length; i++){
+		parent_contaner.append(ad_elements[i]);
 	}
 
 </script>
@@ -21,6 +21,13 @@
 		gptadslots.push(googletag.defineSlot('/21671132665/{{ ad.adunit_code }}', {{ ad.adunit_sizes }}, '{{ ids|index:forloop.counter0 }}').addService(googletag.pubads()));
 	{% endfor %}
 	});
+
+	googletag.pubads().enableLazyLoad({
+    		fetchMarginPercent: 500,
+    		renderMarginPercent: 200,
+    		mobileScaling: 2.0
+  		});
+	googletag.enableServices();
 
 	let adunits = document.querySelectorAll('div[id^="{{ id }}-"]');
   for (let i = 0; i < adunits.length; i++)
