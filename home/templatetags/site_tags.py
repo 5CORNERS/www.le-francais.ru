@@ -1,16 +1,35 @@
+import random
+import re
+import string
+
 from django import template
 from django.conf import settings
 from pybb.models import Topic, Post
 
 from custom_user.models import User
-from home.models import IndexReviews
+from home.models import IndexReviews, AdUnit
 from home.models import PageLayoutAdvertisementSnippet, LessonPage, Payment
 from home.utils import get_signature
-import datetime
-import time
-import re
 
 register = template.Library()
+
+
+@register.filter
+def index(List, i):
+	return List[int(i)]
+
+
+@register.inclusion_tag('tags/include_advertisements.html')
+def include_advertisements(contains=None):
+	random_id = ''.join(
+		random.choices(string.ascii_uppercase + string.digits, k=5))
+	if contains:
+		snippets = list(AdUnit.objects.filter(
+			adunit_code__contains=contains).order_by('adunit_code'))
+	return {
+		'id': random_id, 'ads': snippets,
+		'ids': [random_id + '-' + str(i) for i in range(len(snippets))]
+	}
 
 
 def safe_int(value):
@@ -33,11 +52,12 @@ def t2seconds(value):
 	hours = safe_int(match.group('hours'))
 	minutes = safe_int(match.group('minutes'))
 	seconds = safe_int(match.group('seconds'))
-	return hours*3600+minutes*60+seconds
+	return hours * 3600 + minutes * 60 + seconds
 
 
-@register.simple_tag()
-
+@register.simple_tag(takes_context=True)
+def php_listen_request(context, n):
+	pass
 
 
 @register.simple_tag()
@@ -85,7 +105,8 @@ def payment_params(context, payment):
 
 	currency_id = u'643'  ## Russian rubles
 	payment_no = payment.id
-	description = "www.le-francais.ru -- Покупка " + str(payment.cups_amount) + " «чашек кофе»."
+	description = "www.le-francais.ru -- Покупка " + str(
+		payment.cups_amount) + " «чашек кофе»."
 	success_url = "https://www.le-francais.ru/payments?success"
 	fail_url = "https://www.le-francais.ru/payments?fail"
 	expired_date = payment.expired_date().isoformat()
@@ -143,7 +164,8 @@ def include_30_block(context, stream_value, words_count):
 @register.inclusion_tag('tags/advert_body.html', takes_context=True)
 def page_advert_body(context, placement, page_type):
 	try:
-		test = dict(body=PageLayoutAdvertisementSnippet.objects.filter(placement=placement, page_type=page_type).exclude(live=False)[0].body)
+		test = dict(body=PageLayoutAdvertisementSnippet.objects.filter(
+			placement=placement, page_type=page_type).exclude(live=False)[0].body)
 		return dict(
 			body=PageLayoutAdvertisementSnippet.objects \
 				.filter(placement=placement, page_type=page_type) \
@@ -169,8 +191,9 @@ def advert_head(context, page):
 	elif page.page_type == 'page_with_sidebar' or page.page_type == 'article_page':
 		block_list = search_advertisement_heads([page.body], block_list)
 
-	for layout_advert in PageLayoutAdvertisementSnippet.objects.filter(page_type=page.page_type).exclude(
-			placement='none').exclude(live=False):
+	for layout_advert in PageLayoutAdvertisementSnippet.objects.filter(
+			page_type=page.page_type).exclude(
+		placement='none').exclude(live=False):
 		for block in layout_advert.head:
 			block_list.append(block.value)
 		block_list = search_advertisement_heads([layout_advert.body], block_list)
@@ -188,7 +211,8 @@ def search_advertisement_heads(page_elements: list, list):
 @register.assignment_tag()
 def sidebar_adverisement_head(placement):
 	try:
-		return PageLayoutAdvertisementSnippet.objects.filter(placement=placement)[0].head
+		return PageLayoutAdvertisementSnippet.objects.filter(placement=placement)[
+			0].head
 	except:
 		return None
 
@@ -312,7 +336,8 @@ def do_assign(parser, token):
 	"""
 	bits = token.split_contents()
 	if len(bits) != 3:
-		raise template.TemplateSyntaxError("'%s' tag takes two arguments" % bits[0])
+		raise template.TemplateSyntaxError(
+			"'%s' tag takes two arguments" % bits[0])
 	value = parser.compile_filter(bits[2])
 	return AssignNode(bits[1], value)
 
