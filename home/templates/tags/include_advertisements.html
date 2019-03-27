@@ -6,7 +6,7 @@
 		{% endfor %}
 	];
 	let parent_contaner = $('#script-{{ id }}').parent();
-	for (let i = 0; i < ~~parent_contaner.height()/800 || i < ad_elements.length; i++){
+	for (let i = 0; i < ~~parent_contaner.height()/800 && i < ad_elements.length; i++){
 		parent_contaner.append(ad_elements[i]);
 	}
 
