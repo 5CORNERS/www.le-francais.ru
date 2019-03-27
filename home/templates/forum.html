@@ -10,193 +10,262 @@
 <!--[if gt IE 8]><!-->
 <html class="no-js"> <!--<![endif]-->
 <head>
-    <!-- Google Tag Manager -->
-    <script>(function (w, d, s, l, i) {
-        w[l] = w[l] || [];
-        w[l].push({
-            'gtm.start':
-                new Date().getTime(), event: 'gtm.js'
-        });
-        var f = d.getElementsByTagName(s)[0],
-            j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
-        j.async = true;
-        j.src =
-            'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
-        f.parentNode.insertBefore(j, f);
-    })(window, document, 'script', 'dataLayer', 'GTM-WC2Q4XT');</script>
-    <!-- End Google Tag Manager -->
-		<!-- Google Publisher Tag -->
-		<script async="async" src="https://www.googletagservices.com/tag/js/gpt.js"></script>
-    {% if 'payment_success' in request.GET and request.GET.payment_id %}
-        {% get_payment_by_id request.GET.payment_id as payment %}
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          dataLayer.push({
-            'event':'paymentSuccess',
-            'transactionId': '{{ payment.id }}',
-            'transactionTotal': {{ payment.e_transaction_total }},
-            'transactionProducts': [{
-              'sku': '{{ payment.e_product_sku }}',
-              'name': '{{ payment.e_product_name }}',
-              'category': '{{ payment.e_product_category }}',
-              'price': {{ payment.e_product_price }},
-              'quantity': {{ payment.e_product_quantity }}
-            }]
-          });
-        </script>
-    {% endif %}
+	<!-- Google Tag Manager -->
+	<script>(function (w, d, s, l, i) {
+		w[l] = w[l] || [];
+		w[l].push({
+			'gtm.start':
+				new Date().getTime(), event: 'gtm.js'
+		});
+		var f = d.getElementsByTagName(s)[0],
+			j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+		j.async = true;
+		j.src =
+			'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+		f.parentNode.insertBefore(j, f);
+	})(window, document, 'script', 'dataLayer', 'GTM-WC2Q4XT');</script>
+	<!-- End Google Tag Manager -->
+	<!-- Google Publisher Tag -->
+	<script async="async"
+	        src="https://www.googletagservices.com/tag/js/gpt.js"></script>
+	{% if 'payment_success' in request.GET and request.GET.payment_id %}
+		{% get_payment_by_id request.GET.payment_id as payment %}
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			dataLayer.push({
+				'event': 'paymentSuccess',
+				'transactionId': '{{ payment.id }}',
+				'transactionTotal': {{ payment.e_transaction_total }},
+				'transactionProducts': [{
+					'sku': '{{ payment.e_product_sku }}',
+					'name': '{{ payment.e_product_name }}',
+					'category': '{{ payment.e_product_category }}',
+					'price': {{ payment.e_product_price }},
+					'quantity': {{ payment.e_product_quantity }}
+				}]
+			});
+		</script>
+	{% endif %}
 
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
-    <title>{% block title %}Французский язык - {% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}
-    {% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>
-    <link rel="icon" href="{% static 'favicon/favicon.ico' %}">
-    <link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicon/apple-icon-57x57.png' %}">
-    <link rel="apple-touch-icon" sizes="60x60" href="{% static 'favicon/apple-icon-60x60.png' %}">
-    <link rel="apple-touch-icon" sizes="72x72" href="{% static 'favicon/apple-icon-72x72.png' %}">
-    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'favicon/apple-icon-76x76.png' %}">
-    <link rel="apple-touch-icon" sizes="114x114" href="{% static 'favicon/apple-icon-114x114.png' %}">
-    <link rel="apple-touch-icon" sizes="120x120" href="{% static 'favicon/apple-icon-120x120.png' %}">
-    <link rel="apple-touch-icon" sizes="144x144" href="{% static 'favicon/apple-icon-144x144.png' %}">
-    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'favicon/apple-icon-152x152.png' %}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon/apple-icon-180x180.png' %}">
-    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'favicon/android-icon-192x192.png' %}">
-    <link rel="manifest" href="{% static 'favicon/manifest.json' %}">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="{% static 'favicon/ms-icon-144x144.png' %}">
-    <meta name="theme-color" content="#ffffff">
-    <meta name="description" content="{% block description %}{% endblock %}"/>
+	<meta charset="utf-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<link rel="shortcut icon"
+	      type="image/png"
+	      href="{% static 'images/favicon.ico' %}"/>
+	<title>{% block title %}Французский язык -
+		{% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}
+		{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>
+	<link rel="icon" href="{% static 'favicon/favicon.ico' %}">
+	<link rel="apple-touch-icon"
+	      sizes="57x57"
+	      href="{% static 'favicon/apple-icon-57x57.png' %}">
+	<link rel="apple-touch-icon"
+	      sizes="60x60"
+	      href="{% static 'favicon/apple-icon-60x60.png' %}">
+	<link rel="apple-touch-icon"
+	      sizes="72x72"
+	      href="{% static 'favicon/apple-icon-72x72.png' %}">
+	<link rel="apple-touch-icon"
+	      sizes="76x76"
+	      href="{% static 'favicon/apple-icon-76x76.png' %}">
+	<link rel="apple-touch-icon"
+	      sizes="114x114"
+	      href="{% static 'favicon/apple-icon-114x114.png' %}">
+	<link rel="apple-touch-icon"
+	      sizes="120x120"
+	      href="{% static 'favicon/apple-icon-120x120.png' %}">
+	<link rel="apple-touch-icon"
+	      sizes="144x144"
+	      href="{% static 'favicon/apple-icon-144x144.png' %}">
+	<link rel="apple-touch-icon"
+	      sizes="152x152"
+	      href="{% static 'favicon/apple-icon-152x152.png' %}">
+	<link rel="apple-touch-icon"
+	      sizes="180x180"
+	      href="{% static 'favicon/apple-icon-180x180.png' %}">
+	<link rel="icon"
+	      type="image/png"
+	      sizes="192x192"
+	      href="{% static 'favicon/android-icon-192x192.png' %}">
+	<link rel="manifest" href="{% static 'favicon/manifest.json' %}">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage"
+	      content="{% static 'favicon/ms-icon-144x144.png' %}">
+	<meta name="theme-color" content="#ffffff">
+	<meta name="description" content="{% block description %}{% endblock %}"/>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-    <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
-    <script src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+	<script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
+	<script src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
 
 
-    {# Global stylesheets #}
-    {% block css %}
-        <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fontawesome-all.css' %}">
-        <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fa-regular.css' %}">
-        <link rel="stylesheet" href="{% static 'components/bootstrap/dist/css/bootstrap.min.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'css/forum.min.css' %}">
-    {% endblock %}
-		{% get_full_path as full_path %}
-		{% block canonical %}<link rel="canonical" href="{% split_canonical full_path %}{% comment %}https://www.le-francais.ru{{ self.url_path | slice:"5:" }}{% endcomment %}"/>{% endblock %}
-    {% block extra_css %}
-        {# Override this in templates to add extra stylesheets #}
-    {% endblock %}
+	{# Global stylesheets #}
+	{% block css %}
+		<link rel="stylesheet"
+		      href="{% static 'components/font-awesome-5.0.3/css/fontawesome-all.css' %}">
+		<link rel="stylesheet"
+		      href="{% static 'components/font-awesome-5.0.3/css/fa-regular.css' %}">
+		<link rel="stylesheet"
+		      href="{% static 'components/bootstrap/dist/css/bootstrap.min.css' %}">
+		<link rel="stylesheet"
+		      type="text/css"
+		      href="{% static 'components/bootstrap-social/bootstrap-social.css' %}">
+		<link rel="stylesheet"
+		      type="text/css"
+		      href="{% static 'css/le_francais.min.css' %}">
+		<link rel="stylesheet"
+		      type="text/css"
+		      href="{% static 'css/forum.min.css' %}">
+	{% endblock %}
+	{% get_full_path as full_path %}
+	{% block canonical %}
+		<link rel="canonical"
+		      href="
+				      {% split_canonical full_path %}{% comment %}https://www.le-francais.ru{{ self.url_path | slice:"5:" }}{% endcomment %}"/>{% endblock %}
+	{% block extra_css %}
+		{# Override this in templates to add extra stylesheets #}
+	{% endblock %}
 
-    {% block meta %}
-        {# Override this in templates to add extra stylesheets #}
-    {% endblock %}
+	{% block meta %}
+		{# Override this in templates to add extra stylesheets #}
+	{% endblock %}
 </head>
 
-<body class="{% block body_class %}{% endblock %}" data-spy="scroll" data-target="#myScrollspy" data-offset="15">
+<body class="{% block body_class %}{% endblock %}"
+      data-spy="scroll"
+      data-target="#myScrollspy"
+      data-offset="15">
 <!-- Google Tag Manager (noscript) -->
 <noscript>
- <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WC2Q4XT"
-            height="0" width="0" style="display:none;visibility:hidden"></iframe>
+	<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WC2Q4XT"
+	        height="0" width="0" style="display:none;visibility:hidden"></iframe>
 </noscript>
 <!-- End Google Tag Manager (noscript) -->
 {% wagtailuserbar %}
 
 {% block menu %}
-    {% get_site_root as site_root %}
-    {% top_menu parent=site_root calling_page=self %}
+	{% get_site_root as site_root %}
+	{% top_menu parent=site_root calling_page=self %}
 {% endblock %}
 <div class="_content">
-    <div class="block-forum">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-xs-12 col-sm-9 col-sm-offset-1 col-lg-7 col-lg-offset-2">
-                    <div class="breadcrumb">
-                        {% block breadcrumb %}
-                        {% endblock %}
-                    </div>
-                    {% block content %}
-                    {% endblock %}</div>
-            </div>
-        </div>
-    </div>
+	<div class="block-forum">
+		<div class="container-fluid">
+			<div class="row" style="display: flex; flex-direction: row">
+				<div class="col-xs-12 col-sm-9 col-lg-7 col-lg-offset-2">
+					<div class="breadcrumb">
+						{% block breadcrumb %}
+						{% endblock %}
+					</div>
+					{% block content %}
+					{% endblock %}
+				</div>
+				<div class="hidden-xs col-sm-3 col-lg-3">
+					{% if user.is_superuser %}<div class="row" style="padding-top: 70px; display: flex; flex-direction: column; height: 100%; margin-left: -20px; justify-content: space-between">
+						{% include_advertisements contains='lf_fr_topic_rsb' %}
+					</div>{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 {% include 'tags/footer.html' %}
 {% block payment_modals %}
-    {% if 'payment_success' in request.GET and request.GET.modal_open == 'success-payment-modal' %}
-        <div class="modal" id="success-payment-modal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-	                {% if not user.saw_message %}
-		                <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4>Спасибо за Ваше решение нас поддержать!</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
-                        <p>Теперь Вы можете благодарить нас за наш труд чашечками кофе :)</p>
-                    </div>
-	                {% else %}
-		                <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4>Спасибо, что остаётесь с нами!</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>Вы не пожалеете. Мы продолжим наш каждодневный труд над проектом, чтбы позволить вам получить максимум знаний, быстрее выучить французский — и получать от этого удовольствие. :)</p>
-                    </div>
-	                {% endif %}
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Закрыть</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% elif "payment_fail" in request.GET  and request.GET.modal_open == 'fail-payment-modal' %}
-        <div class="modal" id="fail-payment-modal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">Ошибка!
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Что-то пошло не так.</p>
-                        <p>:(</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
+	{% if 'payment_success' in request.GET and request.GET.modal_open == 'success-payment-modal' %}
+		<div class="modal" id="success-payment-modal" tabindex="-1" role="dialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					{% if not user.saw_message %}
+						<div class="modal-header">
+							<button type="button"
+							        class="close"
+							        data-dismiss="modal"
+							        aria-label="Close">
+								<span aria-hidden="true">&times;</span></button>
+							<h4>Спасибо за Ваше решение нас поддержать!</h4>
+						</div>
+						<div class="modal-body">
+							<p>Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
+							<p>Теперь Вы можете благодарить нас за наш труд чашечками кофе :)</p>
+						</div>
+					{% else %}
+						<div class="modal-header">
+							<button type="button"
+							        class="close"
+							        data-dismiss="modal"
+							        aria-label="Close">
+								<span aria-hidden="true">&times;</span></button>
+							<h4>Спасибо, что остаётесь с нами!</h4>
+						</div>
+						<div class="modal-body">
+							<p>Вы не пожалеете. Мы продолжим наш каждодневный труд над проектом, чтбы позволить вам получить максимум знаний, быстрее выучить французский — и получать от этого удовольствие. :)</p>
+						</div>
+					{% endif %}
+					<div class="modal-footer">
+						<button type="button"
+						        class="btn btn-primary"
+						        data-dismiss="modal">Закрыть
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	{% elif "payment_fail" in request.GET  and request.GET.modal_open == 'fail-payment-modal' %}
+		<div class="modal" id="fail-payment-modal" tabindex="-1" role="dialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">Ошибка!
+						<button type="button"
+						        class="close"
+						        data-dismiss="modal"
+						        aria-label="Close"><span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>Что-то пошло не так.</p>
+						<p>:(</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button"
+						        class="btn btn-default"
+						        data-dismiss="modal">Закрыть
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	{% endif %}
 {% endblock %}
 {# Global javascript #}
 {% block js %}
-    <script async type="text/javascript" src="{% static 'pybb/js/pybbjs.js' %}"></script>
-    <script defer type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
-    {% get_full_path as full_path %}
-    {% if 'payment_success' in request.GET and request.GET.modal_open == 'success-payment-modal' %}
-    <script>
-      $(document).ready(function () {
-        $('#success-payment-modal').modal('show');
-        history.pushState({}, title='',url="{{ full_path }}?payment_success=true");
-      })
-    </script>
-{% elif 'payment_fail' in request.GET and request.GET.modal_open == 'fail-payment-modal' %}
-    <script>
-      $(document).ready(function () {
-        $('#fail-payment-modal').modal('show');
-        history.pushState(url="{{ full_path }}");
-      })
-    </script>
-{% endif %}
+	<script async
+	        type="text/javascript"
+	        src="{% static 'pybb/js/pybbjs.js' %}"></script>
+	<script defer
+	        type="text/javascript"
+	        src="{% static 'js/le_francais.min.js' %}"></script>
+	{% get_full_path as full_path %}
+	{% if 'payment_success' in request.GET and request.GET.modal_open == 'success-payment-modal' %}
+		<script>
+			$(document).ready(function () {
+				$('#success-payment-modal').modal('show');
+				history.pushState({}, title = '', url = "{{ full_path }}?payment_success=true");
+			})
+		</script>
+	{% elif 'payment_fail' in request.GET and request.GET.modal_open == 'fail-payment-modal' %}
+		<script>
+			$(document).ready(function () {
+				$('#fail-payment-modal').modal('show');
+				history.pushState(url = "{{ full_path }}");
+			})
+		</script>
+	{% endif %}
 {% endblock %}
 {#<script type='text/javascript' async defer src='https://le-francais.push4site.com/sdk'></script>#}
 
 {% block extra_js %}
-    {# Override this in templates to add extra javascript #}
+	{# Override this in templates to add extra javascript #}
 {% endblock %}
 </body>
 </html>
