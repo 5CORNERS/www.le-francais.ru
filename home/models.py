@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import datetime
 
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.db.models import CharField, SmallIntegerField, OneToOneField, IntegerField, BooleanField, SET_NULL, ForeignKey, URLField, \
 	Model
 from django.db.models.fields import TextField, DateTimeField
@@ -51,17 +52,27 @@ PLACEMENT_CHOICES = (
 )
 
 
+# @register_snippet
+# class HTMLTemplate(Model):
+# 	code = CharField(max_length=20, unique=True)
+# 	html = StreamField([
+# 		('html', RawHTMLBlock())
+# 	])
+
+
 @register_snippet
 class InlineAdvertisementSnippet(Model):
 	name = CharField(max_length=100, unique=True)
-	# id = CharField(max_length=100, unique=True)
+	adunit_code = CharField(max_length=100, default='')
+	adunit_sizes = CharField(max_length=500, default='')
 	header = TextField(max_length=10000, blank=True)
 	body = TextField(max_length=5000, blank=True)
 	body_mobile = TextField(max_length=5000, blank=True)
 
 	panels = [
 		FieldPanel('name'),
-		# FieldPanel('id'),
+		FieldPanel('adunit_code'),
+		FieldPanel('adunit_sizes'),
 		FieldPanel('header'),
 		FieldPanel('body'),
 		FieldPanel('body_mobile')
@@ -70,6 +81,8 @@ class InlineAdvertisementSnippet(Model):
 	def __str__(self):
 		return self.name
 
+	def get_sizes(self):
+		return self.adunit_sizes
 
 from home.blocks.AdvertisementBlocks import AdvertisementInline
 
