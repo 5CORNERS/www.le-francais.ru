@@ -3,17 +3,19 @@ from __future__ import absolute_import, unicode_literals
 import datetime
 
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField
-from django.db.models import CharField, SmallIntegerField, OneToOneField, IntegerField, BooleanField, SET_NULL, ForeignKey, URLField, \
+from django.db.models import CharField, SmallIntegerField, OneToOneField, \
+	IntegerField, BooleanField, SET_NULL, ForeignKey, URLField, \
 	Model
 from django.db.models.fields import TextField, DateTimeField
 from django.dispatch import receiver
 from django.forms import CheckboxInput
 from modelcluster.fields import ParentalKey
 from pybb.models import Topic, Forum, Category
-from wagtail.admin.edit_handlers import StreamFieldPanel, FieldPanel, MultiFieldPanel, PageChooserPanel, \
+from wagtail.admin.edit_handlers import StreamFieldPanel, FieldPanel, \
+	MultiFieldPanel, PageChooserPanel, \
 	InlinePanel
-from wagtail.core.blocks import RichTextBlock, RawHTMLBlock, ListBlock, StructBlock
+from wagtail.core.blocks import RichTextBlock, RawHTMLBlock, ListBlock, \
+	StructBlock
 from wagtail.core.fields import StreamField
 from wagtail.core.models import Page, Orderable
 from wagtail.images.blocks import ImageChooserBlock
@@ -52,12 +54,17 @@ PLACEMENT_CHOICES = (
 )
 
 
-# @register_snippet
-# class HTMLTemplate(Model):
-# 	code = CharField(max_length=20, unique=True)
-# 	html = StreamField([
-# 		('html', RawHTMLBlock())
-# 	])
+@register_snippet
+class AdUnit(Model):
+	name = CharField(max_length=100, unique=True)
+	adunit_code = CharField(max_length=100, unique=True)
+	adunit_sizes = CharField(max_length=500, default='')
+
+	panels = [
+		FieldPanel('name'),
+		FieldPanel('adunit_code'),
+		FieldPanel('adunit_sizes'),
+	]
 
 
 @register_snippet
