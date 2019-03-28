@@ -12,25 +12,30 @@
 
 </script>
 <script>
-    var gptadslots = [];
-    var googletag = googletag || {cmd:[]};
-</script>
-<script>
-	googletag.cmd.push(function ()
-	{{% for ad in ads %}
-		gptadslots.push(googletag.defineSlot('/21671132665/{{ ad.adunit_code }}', {{ ad.adunit_sizes }}, '{{ ids|index:forloop.counter0 }}').addService(googletag.pubads()));
+	var gptadslots = [];
+	var googletag = googletag || {cmd: []};
+	googletag.cmd.push(function () {
+	{% for mapping in mappings %}
+		var {{ mapping.name }} = {{ mapping.script }};
 	{% endfor %}
+	{% for ad in ads %}
+		gptadslots.push(googletag.defineSlot('/21671132665/{{ ad.adunit_code }}', {{ ad.adunit_sizes }}, '{{ ids|index:forloop.counter0 }}')
+			.defineSizeMapping({{ ad.size_mapping.name }})
+			.addService(googletag.pubads()));
+	{% endfor %}
+		googletag.pubads().enableLazyLoad({
+			fetchMarginPercent: 500,
+			renderMarginPercent: 200,
+			mobileScaling: 2.0
+		});
+		googletag.enableServices();
 	});
 
-	googletag.pubads().enableLazyLoad({
-    		fetchMarginPercent: 500,
-    		renderMarginPercent: 200,
-    		mobileScaling: 2.0
-  		});
-	googletag.enableServices();
-
 	let adunits = document.querySelectorAll('div[id^="{{ id }}-"]');
-  for (let i = 0; i < adunits.length; i++)
-  { googletag.cmd.push(function() {googletag.display(adunits[i].getAttribute('id'));}); }
+	for (let i = 0; i < adunits.length; i++) {
+		googletag.cmd.push(function () {
+			googletag.display(adunits[i].getAttribute('id'));
+		});
+	}
 
 </script>
