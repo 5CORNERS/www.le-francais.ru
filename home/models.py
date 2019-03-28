@@ -60,10 +60,27 @@ class AdUnit(Model):
 	adunit_code = CharField(max_length=100, unique=True)
 	adunit_sizes = CharField(max_length=500, default='')
 
+	size_mapping = ForeignKey('Mapping', null=True, default=None)
+
 	panels = [
 		FieldPanel('name'),
 		FieldPanel('adunit_code'),
 		FieldPanel('adunit_sizes'),
+		FieldPanel('size_mapping'),
+	]
+
+	def __str__(self):
+		return self.name
+
+
+@register_snippet
+class Mapping(Model):
+	name = CharField(max_length=16, unique=True)
+	script = TextField(max_length=1000)
+
+	panels = [
+		FieldPanel('name'),
+		FieldPanel('script')
 	]
 
 	def __str__(self):

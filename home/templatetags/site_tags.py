@@ -28,6 +28,7 @@ def include_advertisements(contains=None):
 			adunit_code__contains=contains).order_by('adunit_code'))
 	return {
 		'id': random_id, 'ads': snippets,
+		'mappings': list(set(ad.size_mapping for ad in snippets)),
 		'ids': [random_id + '-' + str(i) for i in range(len(snippets))]
 	}
 
