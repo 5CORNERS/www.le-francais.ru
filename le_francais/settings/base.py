@@ -335,12 +335,12 @@ WAGTAIL_SITE_NAME = "le_francais"
 BASE_URL = 'www.le-francais.ru'
 
 ALLOWED_HOSTS = [
-    'hidden-refuge-27954.herokuapp.com',
-    'www.le-francais.ru',
-    'le-francais.ru',
-    'localhost',
-    '127.0.0.1',
-    '192.168.0.27',
+	'hidden-refuge-27954-stage1.herokuapp.com',
+	'www.le-francais.ru',
+	'le-francais.ru',
+	'localhost',
+	'127.0.0.1',
+	'192.168.0.27',
 ]
 
 X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS','SAMEORIGIN')
