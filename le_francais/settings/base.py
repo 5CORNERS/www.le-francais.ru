@@ -27,96 +27,100 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 # Application definition
 
 INSTALLED_APPS = [
-    'home',
-    'search',
-    'django_cron',
+	'home',
+	'search',
+	'django_cron',
 
-    'wagtail.contrib.forms',
-    'wagtail.contrib.redirects',
-    'wagtail.embeds',
-    'wagtail.sites',
-    'wagtail.users',
-    'wagtail.snippets',
-    'wagtail.documents',
-    'wagtail.images',
-    'wagtail.search',
-    'wagtail.admin',
-    'wagtail.core',
+	'wagtail.contrib.forms',
+	'wagtail.contrib.redirects',
+	'wagtail.embeds',
+	'wagtail.sites',
+	'wagtail.users',
+	'wagtail.snippets',
+	'wagtail.documents',
+	'wagtail.images',
+	'wagtail.search',
+	'wagtail.admin',
+	'wagtail.core',
 
-    'modelcluster',
-    'taggit',
-    'robots',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    # 'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.sites',
-    'django.contrib.sitemaps',
-    'django.contrib.postgres',
-    'bootstrapform',
-    'django.core.mail',
+	'modelcluster',
+	'taggit',
+	'robots',
 
-    'user_sessions',
+	'dal',
+	'dal_select2',
 
-    'storages',
+	'django.contrib.admin',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	# 'django.contrib.sessions',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
+	'django.contrib.sites',
+	'django.contrib.sitemaps',
+	'django.contrib.postgres',
+	'bootstrapform',
+	'django.core.mail',
 
-    'social_django',
-    'social_core',
+	'user_sessions',
 
-    'allauth',
-    'allauth.account',
+	'storages',
 
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.vk',
-    'allauth.socialaccount.providers.facebook',
-    'allauth.socialaccount.providers.mailru',
-    'allauth.socialaccount.providers.odnoklassniki',
-    'svg',
-    'custom_user',
-    'pybb',
-    'mailer',
-    'postman',
-    'forum',
-    'forum_messages',
-    'profiles',
-    'pure_pagination',
-    'captcha',
-    'crispy_forms',
-    'django_comments_xtd',
-    'django_comments',
-    'le_nombres',
-    'django_mobile',
-    'conjugation',
-    'guardian',
+	'social_django',
+	'social_core',
 
-    'tinkoff_merchant',
+	'allauth',
+	'allauth.account',
+
+	'allauth.socialaccount',
+	'allauth.socialaccount.providers.google',
+	'allauth.socialaccount.providers.vk',
+	'allauth.socialaccount.providers.facebook',
+	'allauth.socialaccount.providers.mailru',
+	'allauth.socialaccount.providers.odnoklassniki',
+	'svg',
+	'custom_user',
+	'pybb',
+	'mailer',
+	'postman',
+	'forum',
+	'forum_messages',
+	'profiles',
+	'pure_pagination',
+	'captcha',
+	'crispy_forms',
+	'django_comments_xtd',
+	'django_comments',
+	'le_nombres',
+	'django_mobile',
+	'conjugation',
+	'guardian',
+
+	'tinkoff_merchant',
 ]
 
 MIDDLEWARE_CLASSES = [
-    'django.middleware.gzip.GZipMiddleware',
-    'htmlmin.middleware.HtmlMinifyMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    # 'django.contrib.sessions.middleware.SessionMiddleware',
-    'le_francais.middleware.CustomSessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'django.middleware.gzip.GZipMiddleware',
+	'htmlmin.middleware.HtmlMinifyMiddleware',
+	'django.middleware.security.SecurityMiddleware',
+	'whitenoise.middleware.WhiteNoiseMiddleware',
+	# 'django.contrib.sessions.middleware.SessionMiddleware',
+	'le_francais.middleware.CustomSessionMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+	'django.contrib.messages.middleware.MessageMiddleware',
+	'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    'wagtail.core.middleware.SiteMiddleware',
-    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
+	'wagtail.core.middleware.SiteMiddleware',
+	'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 
-    'pybb.middleware.PybbMiddleware',
-    'social_django.middleware.SocialAuthExceptionMiddleware',
-    'home.middleware.MobileTabletDetectionMiddleware',
-    'home.middleware.CanonicalDomainMiddleware',
-    'django_mobile.middleware.SetFlavourMiddleware',
+	'pybb.middleware.PybbMiddleware',
+	'social_django.middleware.SocialAuthExceptionMiddleware',
+	'home.middleware.MobileTabletDetectionMiddleware',
+	'home.middleware.CanonicalDomainMiddleware',
+	'django_mobile.middleware.SetFlavourMiddleware',
 ]
 
 SESSION_ENGINE = 'user_sessions.backends.db'
@@ -125,37 +129,37 @@ SESSION_SAVE_EVERY_REQUEST = True
 ROOT_URLCONF = 'le_francais.urls'
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(PROJECT_DIR, 'templates'),
-            'forum_messages/templates',
-            'conjugation/templates'
-        ],
-        # 'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                "django.template.context_processors.i18n",
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+	{
+		'BACKEND': 'django.template.backends.django.DjangoTemplates',
+		'DIRS': [
+			os.path.join(PROJECT_DIR, 'templates'),
+			'forum_messages/templates',
+			'conjugation/templates'
+		],
+		# 'APP_DIRS': True,
+		'OPTIONS': {
+			'context_processors': [
+				'django.template.context_processors.debug',
+				'django.template.context_processors.request',
+				"django.template.context_processors.i18n",
+				'django.contrib.auth.context_processors.auth',
+				'django.contrib.messages.context_processors.messages',
 
-                'pybb.context_processors.processor',
-                'social_django.context_processors.backends',
-                'social_django.context_processors.login_redirect',
-                'django_mobile.context_processors.flavour',
-            ],
-            'libraries':{
-                'conjugation_tags':'conjugation.templatetags.conjugation_tags',
-            },
-            'loaders': (
-                'django_mobile.loader.Loader',
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',
-            )
-        }
-    }
+				'pybb.context_processors.processor',
+				'social_django.context_processors.backends',
+				'social_django.context_processors.login_redirect',
+				'django_mobile.context_processors.flavour',
+			],
+			'libraries': {
+				'conjugation_tags': 'conjugation.templatetags.conjugation_tags',
+			},
+			'loaders': (
+				'django_mobile.loader.Loader',
+				'django.template.loaders.filesystem.Loader',
+				'django.template.loaders.app_directories.Loader',
+			)
+		}
+	}
 ]
 
 TEMPLATE_LOADERS = TEMPLATES[0]['OPTIONS']['loaders']
@@ -175,14 +179,14 @@ SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT") == "True"
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': '123',
-        'HOST': '127.0.0.1',
-        'PORT': '5432'
-    }
+	'default': {
+		'ENGINE': 'django.db.backends.postgresql_psycopg2',
+		'NAME': 'postgres',
+		'USER': 'postgres',
+		'PASSWORD': '123',
+		'HOST': 'localhost',
+		'PORT': '5433',
+	}
 }
 
 db_from_env = dj_database_url.config(conn_max_age=500)
@@ -196,16 +200,16 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520
 AUTH_USER_MODEL = 'custom_user.User'
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',
-    'social_core.backends.vk.VKOAuth2',
-    'social_core.backends.yandex.YandexOAuth2',
-    'social_core.backends.mailru.MailruOAuth2',
-    'social_core.backends.facebook.FacebookOAuth2',
-    'social_core.backends.odnoklassniki.OdnoklassnikiOAuth2',
+	'social_core.backends.google.GoogleOAuth2',
+	'social_core.backends.vk.VKOAuth2',
+	'social_core.backends.yandex.YandexOAuth2',
+	'social_core.backends.mailru.MailruOAuth2',
+	'social_core.backends.facebook.FacebookOAuth2',
+	'social_core.backends.odnoklassniki.OdnoklassnikiOAuth2',
 
-    'django.contrib.auth.backends.ModelBackend',
-    'guardian.backends.ObjectPermissionBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
+	'django.contrib.auth.backends.ModelBackend',
+	'guardian.backends.ObjectPermissionBackend',
+	'allauth.account.auth_backends.AuthenticationBackend',
 )
 
 # Internationalization
@@ -219,22 +223,22 @@ USE_TZ = True
 SITE_ID = 1
 
 LOCALE_PATHS = [
-    os.path.join(BASE_DIR, 'forum_messages', 'locale'),
-    os.path.join(BASE_DIR, 'home', 'locale')
+	os.path.join(BASE_DIR, 'forum_messages', 'locale'),
+	os.path.join(BASE_DIR, 'home', 'locale')
 ]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+	'django.contrib.staticfiles.finders.FileSystemFinder',
+	'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 STATICFILES_DIRS = [
-    os.path.join(PROJECT_DIR, 'static'),
+	os.path.join(PROJECT_DIR, 'static'),
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -245,8 +249,8 @@ WHITENOISE_MAX_AGE = 31557600
 # Amazon AWS S3 settings
 
 AWS_S3_OBJECT_PARAMETERS = {
-    'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
-    'CacheControl': 'max-age=94608000',
+	'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
+	'CacheControl': 'max-age=94608000',
 }
 AWS_STORAGE_BUCKET_NAME = 'le-francais'
 AWS_S3_REGION_NAME = 'eu-central-1'  # e.g. us-east-2
@@ -280,7 +284,7 @@ PYBB_USE_DJANGO_MAILER = True
 PYBB_FORUM_PAGE_SIZE = 60
 PYBB_TOPIC_PAGE_SIZE = 20
 PYBB_MARKUP_ENGINES_PATHS = {
-    'custom_markdown': 'forum.markup_engines.CustomMarkdownParser'
+	'custom_markdown': 'forum.markup_engines.CustomMarkdownParser'
 }
 PYBB_MARKUP = 'custom_markdown'
 PYBB_BODY_CLEANERS = []
@@ -343,7 +347,7 @@ ALLOWED_HOSTS = [
 	'192.168.0.27',
 ]
 
-X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS','SAMEORIGIN')
+X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS', 'SAMEORIGIN')
 
 # Allauth settings
 
@@ -359,48 +363,48 @@ NEW_USER_REDIRECT_URL = '/accounts/username/change_new'
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 SOCIAL_AUTH_NEW_USER_REDIRECT = 'new-users-redirect-url/'
 SOCIAL_AUTH_PIPELINE = (
-    # Get the information we can about the user and return it in a simple
-    # format to create the user instance later. On some cases the details are
-    # already part of the auth response from the provider, but sometimes this
-    # could hit a provider API.
-    'social_core.pipeline.social_auth.social_details',
+	# Get the information we can about the user and return it in a simple
+	# format to create the user instance later. On some cases the details are
+	# already part of the auth response from the provider, but sometimes this
+	# could hit a provider API.
+	'social_core.pipeline.social_auth.social_details',
 
-    # Get the social uid from whichever service we're authing thru. The uid is
-    # the unique identifier of the given user in the provider.
-    'social_core.pipeline.social_auth.social_uid',
+	# Get the social uid from whichever service we're authing thru. The uid is
+	# the unique identifier of the given user in the provider.
+	'social_core.pipeline.social_auth.social_uid',
 
-    # Verifies that the current auth process is valid within the current
-    # project, this is where emails and domains whitelists are applied (if
-    # defined).
-    'social_core.pipeline.social_auth.auth_allowed',
+	# Verifies that the current auth process is valid within the current
+	# project, this is where emails and domains whitelists are applied (if
+	# defined).
+	'social_core.pipeline.social_auth.auth_allowed',
 
-    # Checks if the current social-account is already associated in the site.
-    # 'social_core.pipeline.social_auth.social_user',
+	# Checks if the current social-account is already associated in the site.
+	# 'social_core.pipeline.social_auth.social_user',
 
-    # Make up a username for this person, appends a random string at the end if
-    # there's any collision.
-    'social_core.pipeline.user.get_username',
+	# Make up a username for this person, appends a random string at the end if
+	# there's any collision.
+	'social_core.pipeline.user.get_username',
 
-    # Send a validation email to the user to verify its email address.
-    # Disabled by default.
-    # 'social_core.pipeline.mail.mail_validation',
+	# Send a validation email to the user to verify its email address.
+	# Disabled by default.
+	# 'social_core.pipeline.mail.mail_validation',
 
-    # Associates the current social details with another user account with
-    # a similar email address. Disabled by default.
-    'social_core.pipeline.social_auth.associate_by_email',
+	# Associates the current social details with another user account with
+	# a similar email address. Disabled by default.
+	'social_core.pipeline.social_auth.associate_by_email',
 
-    # Create a user account if we haven't found one yet.
-    'social_core.pipeline.user.create_user',
+	# Create a user account if we haven't found one yet.
+	'social_core.pipeline.user.create_user',
 
-    # Create the record that associates the social account with the user.
-    'social_core.pipeline.social_auth.associate_user',
+	# Create the record that associates the social account with the user.
+	'social_core.pipeline.social_auth.associate_user',
 
-    # Populate the extra_data field in the social record with the values
-    # specified by settings (and the default ones like access_token, etc).
-    'social_core.pipeline.social_auth.load_extra_data',
+	# Populate the extra_data field in the social record with the values
+	# specified by settings (and the default ones like access_token, etc).
+	'social_core.pipeline.social_auth.load_extra_data',
 
-    # Update the user record with any changed info from the auth service.
-    'social_core.pipeline.user.user_details',
+	# Update the user record with any changed info from the auth service.
+	'social_core.pipeline.user.user_details',
 )
 
 SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']
@@ -425,7 +429,7 @@ SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET')
 SOCIAL_AUTH_FACEBOOK_API_VERSION = '2.10'
 
 SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
-    'fields': 'id, name, email',
+	'fields': 'id, name, email',
 }
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
@@ -437,11 +441,11 @@ COMMENTS_APP = 'django_comments_xtd'
 COMMENTS_XTD_MAX_THREAD_LEVEL = 999
 COMMENTS_XTD_CONFIRM_EMAIL = True
 COMMENTS_XTD_APP_MODEL_OPTIONS = {
-    'default': {
-        'allow_flagging': True,
-        'allow_feedback': True,
-        'show_feedback': True,
-    }
+	'default': {
+		'allow_flagging': True,
+		'allow_feedback': True,
+		'show_feedback': True,
+	}
 }
 
 FLAVOURS = ('full', 'mobile', 'tablet')
@@ -449,15 +453,15 @@ FLAVOURS = ('full', 'mobile', 'tablet')
 # Tinkoff terminal api
 
 TINKOFF_PAYMENTS_CONFIG = {
-    'URLS': {
-        'INIT': 'https://securepay.tinkoff.ru/v2/Init',
-        'GET_STATE': 'https://securepay.tinkoff.ru/v2/GetState',
-        'CANCEL': 'https://securepay.tinkoff.ru/v2/Cancel',
-    },
-    'TAXATION': 'usn_income',
-    'ITEM_TAX': 'none',
-    'TERMINAL_KEY': os.environ.get('TINKOFF_TERMINAL_ID'),
-    'SECRET_KEY': os.environ.get('TINKOFF_TERMINAL_PASSWORD'),
+	'URLS': {
+		'INIT': 'https://securepay.tinkoff.ru/v2/Init',
+		'GET_STATE': 'https://securepay.tinkoff.ru/v2/GetState',
+		'CANCEL': 'https://securepay.tinkoff.ru/v2/Cancel',
+	},
+	'TAXATION': 'usn_income',
+	'ITEM_TAX': 'none',
+	'TERMINAL_KEY': os.environ.get('TINKOFF_TERMINAL_ID'),
+	'SECRET_KEY': os.environ.get('TINKOFF_TERMINAL_PASSWORD'),
 }
 
 # Pay34 settings
