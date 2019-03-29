@@ -174,9 +174,7 @@
 {% block content %}
 	{% load i18n site_tags %}
 	<div class="container">
-		{% if request.user.is_staff %}
-			<a href="{% url 'conjugation:translation_update' v.pk %}" style="display: none"></a>
-		{% endif %}
+
 		<div class="row first_row">
 			<div class="col-xs-12 col-sm-12 col-md-6">
 				<div class="row">
