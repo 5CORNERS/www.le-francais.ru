@@ -174,17 +174,11 @@
 {% block content %}
 	{% load i18n site_tags %}
 	<div class="container">
-
+		{% if request.user.is_staff %}
+			<a href="{% url 'conjugation:translation_update' v.pk %}" style="display: none"></a>
+		{% endif %}
 		<div class="row first_row">
 			<div class="col-xs-12 col-sm-12 col-md-6">
-				<div class="row top-mobile-advert-row">
-					<div class="top-mobile-advert-div" style="text-align: center;">
-						{% comment %}{% if flavour == 'mobile' %}
-							{% conjugation_advertisement_body "lf_fr_conj_mob_01" %}
-					{% endif %}{% endcomment %}
-						
-					</div>
-				</div>
 				<div class="row">
 					<div class="col-xs-12">
 						{% include 'conjugation/verb_form.html' %}
@@ -224,9 +218,9 @@
 				{% if flavour == "mobile" %}
 					<div class="row">
 						<div class="col-xs-12">
-							Читайте об особенностях спряжения
-							{% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} в
-							<a href="#regle">конце страницы</a>.
+							Читайте об особенностях спряжения <a href="#regle"><i class="fa fa-arrow-down"></i></a>
+{#							{% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} в#}
+{#							<a >конце страницы</a>.#}
 						</div>
 					</div>
 				{% endif %}
@@ -280,9 +274,7 @@
 				</div>
 			</div>
 			<div class="col-xs-12 col-sm-12 col-md-6" style="text-align: center">
-				{% if flavour != 'mobile' %}
 					{% conjugation_advertisement_body "lf_fr_conj_rsb_01" %}
-				{% endif %}
 			</div>
 		</div>
 
@@ -360,10 +352,10 @@
 						<p>{{ v.employs | safe }}</p>
 					</div>
 				</div>
-				<div id="regle" class="row regle">
+				<div id="regle" name="regle" class="row regle">
 					<div class="col-xs-12" style="text-align: center">
 						{% if flavour == 'mobile' %}
-							{% conjugation_advertisement_body "lf_fr_conj_mob_02" %}
+{#							{% conjugation_advertisement_body "lf_fr_conj_mob_02" %}#}
 						{% endif %}
 					</div>
 					<div class="col-xs-12">
@@ -384,7 +376,7 @@
 				</div>
 				<div class="row">
 					<div class="col-xs-12" style="text-align: center">
-						{% conjugation_advertisement_body "lf_fr_conj_rsb_02" %}
+{#						{% conjugation_advertisement_body "lf_fr_conj_rsb_02" %}#}
 					</div>
 				</div>
 				<div class="row">
