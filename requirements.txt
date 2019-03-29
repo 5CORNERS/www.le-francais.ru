@@ -3,7 +3,7 @@ wagtail==2.1
 dj-email-url
 bs4==0.0.1
 xmltodict==0.10.2
-django == 1.11.16
+django == 1.11.20
 django-robots
 gunicorn==19.6.0
 psycopg2==2.7.3.2
@@ -30,7 +30,7 @@ APScheduler==3.0.0
 
 django-storages
 boto3
-
+django-autocomplete-light==3.2.10
 django-simple-captcha
 django-bootstrap-form
 django-postman==3.5.1
@@ -41,5 +41,9 @@ brotlipy
 django-inline-svg
 Pillow
 
--e git+https://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26#egg=django_pure_pagination
--e git+https://github.com/5CORNERS/pybbm.git#egg=pybbm
+git+https://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26#egg=django_pure_pagination
+git+https://github.com/5CORNERS/pybbm.git#egg=pybbm
+
+pymorphy2
+pymorphy2-dicts
+DAWG-Python
