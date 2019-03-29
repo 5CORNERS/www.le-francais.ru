@@ -42,7 +42,7 @@ django-inline-svg
 Pillow
 
 git+https://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26#egg=django_pure_pagination
-git+https://github.com/5CORNERS/pybbm.git#egg=pybbm
+git+https://github.com/5CORNERS/pybbm.git#egg=pybb
 
 pymorphy2
 pymorphy2-dicts
