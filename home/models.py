@@ -60,7 +60,7 @@ class AdUnit(Model):
 	adunit_code = CharField(max_length=100, unique=True)
 	adunit_sizes = CharField(max_length=500, default='')
 
-	size_mapping = ForeignKey('Mapping', null=True, default=None)
+	size_mapping = ForeignKey('Mapping', blank=True, null=True, default=None)
 
 	panels = [
 		FieldPanel('name'),
