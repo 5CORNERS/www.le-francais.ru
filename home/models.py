@@ -62,11 +62,16 @@ class AdUnit(Model):
 
 	size_mapping = ForeignKey('Mapping', blank=True, null=True, default=None)
 
+	page_type = CharField(max_length=20, choices=PAGE_CHOICES, null=True, blank=True, default=None)
+	placement = CharField(max_length=20, choices=PLACEMENT_CHOICES, null=True, blank=True, default=None)
+
 	panels = [
 		FieldPanel('name'),
 		FieldPanel('adunit_code'),
 		FieldPanel('adunit_sizes'),
 		FieldPanel('size_mapping'),
+		FieldPanel('page_type'),
+		FieldPanel('placement'),
 	]
 
 	def __str__(self):
