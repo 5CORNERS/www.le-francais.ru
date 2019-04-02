@@ -13,7 +13,8 @@ body {
 }
 
 .main_row {
-    display: table;
+    display: flex;
+    flex-direction: row;
 }
 
 .main {
@@ -22,10 +23,44 @@ body {
     vertical-align: top;
 }
 
+@media (min-width: 768px) {
+    .main {
+        padding: 40px 30px 40px;
+    }
+}
+
 .sidebar-right {
-    float: none;
-    display: table-cell;
-    vertical-align: top;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-last-topics{
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+
+    margin-bottom: 20px;
+    margin-top: 10px;
+    margin-right: 5px;
+
+    background-color: #fff;
+
+    border-color: #E0E0E0;
+    padding: 10px;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 4px;
+
+    /*overflow: auto;*/
+    /*height: 300px;*/
+}
+
+.sidebar-advertisements{
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .sidebar-wrapper {
@@ -71,9 +106,6 @@ td {
 
 .right {
     max-width: 70%;
-}
-
-.main {
 }
 
 .main > h1 {
@@ -162,10 +194,6 @@ body {
 }
 
 @media (min-width: 768px) {
-    .main {
-        padding: 40px 30px 40px;
-    }
-
     .nav > li > a {
         padding-right: 10px;
         padding-left: 10px;
@@ -580,13 +608,6 @@ td.forum-last-post, td.topic-last-post {
     margin-top: 1em;
 }
 
-.sidebar-right {
-    padding: 40px 0;
-!important;
-    margin: 0;
-!important;
-}
-
 .advert_bottom {
     position: absolute;
     bottom: 0px;
@@ -790,7 +811,7 @@ details.no-details:not([open]) summary {
 }
 
 /*@media (min-width: 500px) {*/
-    /*.bottom-message-buttons{*/
-        /*text-align: left;*/
-    /*}*/
+/*.bottom-message-buttons{*/
+/*text-align: left;*/
+/*}*/
 /*}*/
