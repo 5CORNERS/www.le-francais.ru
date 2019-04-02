@@ -67,11 +67,6 @@
               </li>
             </ul>
 					</li>
-					<li>
-						<a class="coffee-icon" href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal" class="swg">
-							{% svg 'coffee icon' %}
-						</a>
-					</li>
 
 				{% else %}
 
@@ -89,6 +84,13 @@
 						</ul>
 					</li>
 				{% endif %}
+				<li>
+					<a class="coffee-icon"
+					   href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal"
+					   class="swg">
+						{% svg 'coffee icon' %}
+					</a>
+				</li>
 
 			</ul>
 		</div>
