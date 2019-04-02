@@ -59,6 +59,7 @@ body {
 .sidebar-advertisements{
     display: flex;
     flex: 1 1 auto;
+    align-items: center;
     flex-direction: column;
     justify-content: space-between;
 }
