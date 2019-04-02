@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load site_tags %}
+{% load site_tags forum_tags %}
 {% load wagtailcore_tags %}
 {% load static site_tags %}
 
@@ -374,10 +374,18 @@
 				<div class="arrow-icon"></div>
 			</button>
 			<div class="col-12 col-sm-9 col-lg-6 col-xlg-6 main">
+				{% breadcrumb calling_page=self %}
+				<h1>{{ page.title }}</h1>
 				{% include 'home/lesson_content.html' %}
 			</div>
 			<div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
-				{% page_advert_body 'sidebar' page.page_type %}
+				<div class="sidebar-last-topics block">
+					<h6>Последние обновления на&nbsp;форуме</h6>
+					{% last_topics 10 %}
+				</div>
+				<div class="sidebar-advertisements">
+					{% include_advertisements page_type=self.page_type placement='sidebar' %}
+				</div>
 			</div>
 		</div>
 	</div>
