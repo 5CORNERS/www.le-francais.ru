@@ -5,22 +5,28 @@
 			$("<div id='{{ ids|index:forloop.counter0 }}' style='margin-bottom:20px'></div>"),
 		{% endfor %}
 	];
+	let last = ad_elements.pop();
 	let parent_contaner = $('#script-{{ id }}').parent();
-	for (let i = 0; i < ~~parent_contaner.height()/1000 && i < ad_elements.length; i++){
+	let n = ~~(parent_contaner.height()/1000);
+	parent_contaner.append(ad_elements[0]);
+	var i;
+	for (i = 1; i < n && i < ad_elements.length; i++){
 		parent_contaner.append(ad_elements[i]);
 	}
-
+	if (i === n) {
+		parent_contaner.append(last)
+	}
 </script>
 <script>
 	var gptadslots = [];
 	var googletag = googletag || {cmd: []};
 	googletag.cmd.push(function () {
 	{% for mapping in mappings %}
-		var {{ mapping.name }} = {{ mapping.script }};
+		{% if mapping %}var {{ mapping.name }} = {{ mapping.script }};{% endif %}
 	{% endfor %}
 	{% for ad in ads %}
 		gptadslots.push(googletag.defineSlot('/21671132665/{{ ad.adunit_code }}', {{ ad.adunit_sizes }}, '{{ ids|index:forloop.counter0 }}')
-			.defineSizeMapping({{ ad.size_mapping.name }})
+			{% if ad.size_mapping %}.defineSizeMapping({{ ad.size_mapping.name }}){% endif %}
 			.addService(googletag.pubads()));
 	{% endfor %}
 		googletag.pubads().enableLazyLoad({
