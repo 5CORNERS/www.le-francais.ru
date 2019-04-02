@@ -196,12 +196,6 @@ def advert_head(context, page):
 	elif page.page_type == 'page_with_sidebar' or page.page_type == 'article_page':
 		block_list = search_advertisement_heads([page.body], block_list)
 
-	for layout_advert in PageLayoutAdvertisementSnippet.objects.filter(
-			page_type=page.page_type).exclude(
-		placement='none').exclude(live=False):
-		for block in layout_advert.head:
-			block_list.append(block.value)
-		block_list = search_advertisement_heads([layout_advert.body], block_list)
 	return dict(block_list=block_list)
 
 
