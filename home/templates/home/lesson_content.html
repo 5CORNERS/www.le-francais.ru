@@ -1,7 +1,6 @@
 {% load site_tags wagtailcore_tags %}
-<div class="row padding">{% breadcrumb calling_page=self %}
+<div class="row">
 	{% check_user_lesson request.user self as userlesson %}
-	<h1>{{ page.title }}</h1>
 	{% if self.audio_material != 'None' %}
 		{% include 'home/lesson_audio.html' %}
 	{% endif %}
