@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load comments %}
 {% load comments_xtd %}
-{% load static site_tags wagtailcore_tags %}
+{% load static site_tags wagtailcore_tags forum_tags %}
 
 {% block body_class %}template-homepage{% endblock %}
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
@@ -64,8 +64,14 @@
                 </div>
             </div>
             <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
-                {% page_advert_body 'sidebar' page.page_type %}
-            </div>
+		        <div class="sidebar-last-topics block">
+			        <h6>Последние обновления на&nbsp;форуме</h6>
+			        {% last_topics 10 %}
+		        </div>
+		        <div class="sidebar-advertisements">
+			        {% include_advertisements page_type=self.page_type placement='sidebar' %}
+		        </div>
+	        </div>
         </div>
     </div>
 {% endblock %}
