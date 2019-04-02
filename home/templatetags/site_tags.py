@@ -20,12 +20,16 @@ def index(List, i):
 
 
 @register.inclusion_tag('tags/include_advertisements.html')
-def include_advertisements(contains=None):
+def include_advertisements(contains=None, page_type=None, placement=None):
 	random_id = ''.join(
 		random.choices(string.ascii_uppercase + string.digits, k=5))
+	snippets = AdUnit.objects.all().order_by('adunit_code')
 	if contains:
-		snippets = list(AdUnit.objects.filter(
-			adunit_code__contains=contains).order_by('adunit_code'))
+		snippets = snippets.filter(adunit_code__contains=contains)
+	if page_type:
+		snippets = snippets.filter(page_type=page_type)
+	if placement:
+		snippets = snippets.filter(placement=placement)
 	return {
 		'id': random_id, 'ads': snippets,
 		'mappings': list(set(ad.size_mapping for ad in snippets)),
