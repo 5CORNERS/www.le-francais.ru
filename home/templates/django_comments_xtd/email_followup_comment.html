@@ -4,7 +4,7 @@
 <p>{% blocktrans %}There is a new comment following up yours.{% endblocktrans %}</p>
 
 <p>{% blocktrans %}Sent by:{% endblocktrans %} {{ comment.name }}, {{ comment.submit_date|date:"SHORT_DATE_FORMAT" }}<br/>
-<a href="http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}">http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}</a></p>
+<a href="{{ comment.content_object.get_absolute_url }}">{{ comment.content_object.get_absolute_url }}</a></p>
 
 <p>{% blocktrans %}The comment:{% endblocktrans %}<br/>
 <i>{{ comment.comment }}</i>
