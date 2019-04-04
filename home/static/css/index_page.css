@@ -246,7 +246,7 @@ a.page-review:hover {
 
     .col-fixed-336 {
         width: 300px;
-        position: absolute;
+        /*position: absolute;*/
         margin-left: -300px;
         z-index: 1;
     }
@@ -261,7 +261,7 @@ a.page-review:hover {
 
     .col-fixed-336 {
         width: 336px;
-        position: absolute;
+        /*position: absolute;*/
         margin-left: -336px;
         z-index: 1;
     }
