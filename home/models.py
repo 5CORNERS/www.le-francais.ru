@@ -95,8 +95,8 @@ class Mapping(Model):
 @register_snippet
 class InlineAdvertisementSnippet(Model):
 	name = CharField(max_length=100, unique=True)
-	adunit_code = CharField(max_length=100, default='')
-	adunit_sizes = CharField(max_length=500, default='')
+	adunit_code = CharField(max_length=100, default='', blank=True, null=True)
+	adunit_sizes = CharField(max_length=500, default='', blank=True, null=True)
 	header = TextField(max_length=10000, blank=True)
 	body = TextField(max_length=5000, blank=True)
 	body_mobile = TextField(max_length=5000, blank=True)
