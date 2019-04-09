@@ -179,4 +179,6 @@ function forceLower(strInput) {
 
 $(function () {
   $('[data-toggle="popover"]').popover()
-})
+});
+
+$('video').each(function () {this.controls = true});
