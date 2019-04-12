@@ -755,7 +755,11 @@
 								</details>
 							</div>
 							<div class="modal-footer">
+							{% if user.days_since_joined > 7 %}
+								<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-default">Активировать</button>
+							{% else %}
 								<a type="button" onclick="activateLesson('saw')" class="btn btn-primary" href="{% url 'payments:payments' %}?next={{ request.path }}" id="lesson-not-activated-activate-button">Поддержать</a>
+							{% endif %}
 							</div>
 						{% endif %}
 
