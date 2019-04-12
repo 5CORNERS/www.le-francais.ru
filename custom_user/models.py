@@ -1,11 +1,16 @@
+from datetime import timedelta, datetime
+import pytz
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.mail import send_mail
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.db.models import Q
 from django.dispatch import receiver
+from django.utils.translation import ugettext_lazy as _
+
 from tinkoff_merchant.models import Payment as TinkoffPayment
-from tinkoff_merchant.signals import payment_confirm, payment_refund
 from tinkoff_merchant.models import ReceiptItem
+from tinkoff_merchant.signals import payment_confirm, payment_refund
+
 
 class CustomUserManager(UserManager):
 	def _create_user(self, username, email, password, **extra_fields):
@@ -96,6 +101,9 @@ class User(AbstractUser):
 		if self.has_cups or self.payed_lessons.all().exists():
 			return True
 		return False
+
+	def days_since_joined(self):
+		return (datetime.now(pytz.utc) - self.date_joined).days
 
 	@property
 	def cup_amount(self):

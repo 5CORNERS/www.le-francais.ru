@@ -90,7 +90,8 @@ class SawMessageView(View):
 				user.add_cups(5)
 			else:
 				msg_body = MESSAGE_FOR_NOT_PAYED
-				# user.add_cups(1)
+				if user.days_since_joined() > 7:
+					user.add_cups(1)
 			if not user.is_staff:
 				EmailMessage(
 					to=[request.user.email],
@@ -109,6 +110,7 @@ class SawMessageView(View):
 			return HttpResponse(status=400)
 
 from home.models import UserLesson
+
 
 class AdminCommands(View):
 
