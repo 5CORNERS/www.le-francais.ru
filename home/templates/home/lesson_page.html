@@ -685,6 +685,9 @@
 								</details>
 							</div>
 							<div class="modal-footer">
+								{% if user.days_since_joined > 7 %}
+									<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-default">Активировать</button>
+								{% endif %}
 								<a type="button" onclick="activateLesson('saw')" class="btn btn-primary" id="lesson-not-activated-continue-button"
 								   href="{% url 'payments:payments' %}?next={{ request.path }}&open_modal=description">Поддержать</a>
 							</div>
