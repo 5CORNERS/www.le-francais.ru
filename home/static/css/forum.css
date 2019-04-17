@@ -7047,6 +7047,7 @@ kbd {
     position: absolute;
     bottom: 0;
     left: 5px;
+    font-size: 14.5px;
 }
 
 .action-menu li{
