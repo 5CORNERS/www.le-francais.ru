@@ -2,133 +2,150 @@
 
 {% pybb_get_profile post.user as post_user_profile %}
 {% pybb_get_profile request.user as request_user_profile %}
+{% liked post request_user_profile as liked %}
 
 <table class="table table-bordered post post-row
        {% if post.on_moderation %}on-moderation{% endif %}"
        id="post-{{ post.id }}"
-       >
-    <thead>
-    <tr>
-        <td class="post-author">
-            <a href="{% url 'pybb:user' post.user.username %}">
-                <span class="post-username">{{ post.user.username }}</span>
-            </a>
-        </td>
-        <td class="post-date">
-            <div class="post-control">
-                {% if is_move %}
-                    {% if post != post.topic.head %}
-                        <input type="checkbox" name="move_post_list" value="{{ post.id }}" />
-                    {% endif %}
-                {% else %}
-                    {% if user.is_authenticated %}
-                        {% if user.is_moderator %}
-                            {% if post != post.topic.head %}
-                                <a href="{% url 'move_post' pk=topic.id %}"
-                                   title="{% trans "Move post" %}">
-                                    <i class="glyphicon glyphicon-arrow-right"></i></a>
-                            {% endif %}
+>
+	<thead>
+	<tr>
+		<td class="post-author">
+			<a href="{% url 'pybb:user' post.user.username %}">
+				<span class="post-username">{{ post.user.username }}</span>
+			</a>
+		</td>
+		<td class="post-date">
+			<div class="post-control">
+				{% if is_move %}
+					{% if post != post.topic.head %}
+						<input type="checkbox"
+						       name="move_post_list"
+						       value="{{ post.id }}"/>
+					{% endif %}
+				{% else %}
+					{% if user.is_authenticated %}
+						{% if user.is_moderator %}
+							{% if post != post.topic.head %}
+								<a href="{% url 'move_post' pk=topic.id %}"
+								   title="{% trans "Move post" %}">
+									<i class="glyphicon glyphicon-arrow-right"></i></a>
+							{% endif %}
 
-                            <a href="{% url 'pybb:move_post' pk=post.id %}">
-                                    {% if post.is_topic_head %}
-                                        <i class="glyphicon glyphicon-arrow-right" title="{% trans "Move post" %}">
-                                    {% else %}
-                                        <i class="glyphicon glyphicon-transfer" title="{% trans "Split posts" %}">
-                                    {% endif %}</i></a>
+							<a href="{% url 'pybb:move_post' pk=post.id %}">
+								{% if post.is_topic_head %}
+									<i class="glyphicon glyphicon-arrow-right"
+									   title="{% trans "Move post" %}">
+								{% else %}
+									<i class="glyphicon glyphicon-transfer"
+									   title="{% trans "Split posts" %}">
+								{% endif %}</i></a>
 
-                            {% if post.on_moderation %}
-                                <a href="{% url 'pybb:moderate_post' pk=post.id %}"
-                                   title="{% trans "Approve post" %}">
-                                    <i class="glyphicon glyphicon-check"></i></a>
-                            {% endif %}
-                        {% endif %}
+							{% if post.on_moderation %}
+								<a href="{% url 'pybb:moderate_post' pk=post.id %}"
+								   title="{% trans "Approve post" %}">
+									<i class="glyphicon glyphicon-check"></i></a>
+							{% endif %}
+						{% endif %}
 
-                        {% if user|pybb_may_delete_post:post %}
-                            <a {% comment %}onclick="pybb_delete_post('{% url 'pybb:delete_post' post.id %}',
+						{% if user|pybb_may_delete_post:post %}
+							<a {% comment %}onclick="pybb_delete_post('{% url 'pybb:delete_post' post.id %}',
                             'post-{{ post.id }}', '{% trans 'Delete post?' as txt %}{{ txt|escapejs }}'); return false;"{% endcomment %}
-                                   class="post-control-delete"
-                                   href="{% url 'pybb:delete_post' post.id %}"
-                                   title="{% trans "Delete" %}">
-                                    <i class="glyphicon glyphicon-remove"></i></a>
-                        {% endif %}
+									class="post-control-delete"
+									href="{% url 'pybb:delete_post' post.id %}"
+									title="{% trans "Delete" %}">
+								<i class="glyphicon glyphicon-remove"></i></a>
+						{% endif %}
 
-                        {% if user|pybb_may_edit_post:post %}
-                            <a href="{% url 'pybb:edit_post' pk=post.id %}"
-                               title="{% trans "Edit" %}">
-                                <i class="glyphicon glyphicon-pencil"></i></a>
-                        {% endif %}
+						{% if user|pybb_may_edit_post:post %}
+							<a href="{% url 'pybb:edit_post' pk=post.id %}"
+							   title="{% trans "Edit" %}">
+								<i class="glyphicon glyphicon-pencil"></i></a>
+						{% endif %}
 
-                        <a href="{% url 'pybb:add_post' post.topic.id %}?quote_id={{ post.id }}"
-                           title="{% trans "quote" %}"
-                           class="quote-link">
-                            <i class="glyphicon glyphicon-comment"></i></a>
-                        <a href="#" title="{% trans 'quote selected' %}" class="quote-selected-link"><i class="glyphicon glyphicon-hand-down"></i></a>
+						<a href="{% url 'pybb:add_post' post.topic.id %}?quote_id={{ post.id }}"
+						   title="{% trans "quote" %}"
+						   class="quote-link">
+							<i class="glyphicon glyphicon-comment"></i></a>
+						<a href="#"
+						   title="{% trans 'quote selected' %}"
+						   class="quote-selected-link"><i class="glyphicon glyphicon-hand-down"></i></a>
 
-                        {% if user.id != post.user.id %}
-                            <a href="{% url 'postman:write' post.user.username %}" title="{% trans "Write personal message" %}"><i class="glyphicon glyphicon-envelope"></i></a>
-                        {% endif %}
-                    {% endif %}
-                {% endif %}
-            </div>
-            <a class="permalink" href="{{ post.get_absolute_url }}">#</a>
-            {% if request_user_profile.date_show_type == 1 %}{{ post.created }}{% else %}{{ post.created|timesince }} {% trans "ago" %}{% endif %}
-            {% if post.updated %}
-                ({% trans "edited" %}
-                {% if request_user_profile.date_show_type == 1 %}
-                    {{ post.updated }})
-                {% else %}
-                    {{ post.updated|timesince }} {% trans "ago" %})
-                {% endif %}
-            {% endif %}
-            {% if user.is_superuser %}
-                {% trans "from" %} {{ post.user_ip }}
-            {% endif %}
-        </td>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td class="post-info">
-            {% include "pybb/avatar.html" with profile=post.user.pybb_profile %}
-            <div>
-                {% trans "Topics" %}:
-                <a href="{% url 'user_topics' post.user.username %}">
-                    {{ post.user.topic_set.count }}
-                </a>
-            </div>
-            <div>
-                {% trans "Posts" %}:
-                <a href="{% url 'user_posts' post.user.username %}">
-                    {{ post_user_profile.post_count }}
-                </a>
-            </div>
-            <div>
-                {% trans "Member since" %}: {{ post.user.date_joined|date:'d E Y' }}
-            </div>
-            {% if not post.user.is_active %}
-                <div class="label label-warning">{% trans 'blocked' %}</div>
-            {% endif %}
-        </td>
-        <td class="post-content">
-            {{ post.body_html|safe }}
-            {% if not user.is_authenticated or request_user_profile.show_signatures %}
-                {% if post_user_profile.signature %}
-                    <div class="post-signature">
-                        {{ post_user_profile.signature_html|safe }}
-                    </div>
-                {% endif %}
-            {% endif %}
+						{% if user.id != post.user.id %}
+							<a href="{% url 'postman:write' post.user.username %}"
+							   title="{% trans "Write personal message" %}"><i class="glyphicon glyphicon-envelope"></i></a>
+						{% endif %}
+					{% endif %}
+				{% endif %}
+			</div>
+			<a class="permalink" href="{{ post.get_absolute_url }}">#</a>
+			{% if request_user_profile.date_show_type == 1 %}{{ post.created }}{% else %}{{ post.created|timesince }} {% trans "ago" %}{% endif %}
+			{% if post.updated %}
+				({% trans "edited" %}
+				{% if request_user_profile.date_show_type == 1 %}
+					{{ post.updated }})
+				{% else %}
+					{{ post.updated|timesince }} {% trans "ago" %})
+				{% endif %}
+			{% endif %}
+			{% if user.is_superuser %}
+				{% trans "from" %} {{ post.user_ip }}
+			{% endif %}
+		</td>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td class="post-info">
+			{% include "pybb/avatar.html" with profile=post.user.pybb_profile %}
+			<div>
+				{% trans "Topics" %}:
+				<a href="{% url 'user_topics' post.user.username %}">
+					{{ post.user.topic_set.count }}
+				</a>
+			</div>
+			<div>
+				{% trans "Posts" %}:
+				<a href="{% url 'user_posts' post.user.username %}">
+					{{ post_user_profile.post_count }}
+				</a>
+			</div>
+			<div>
+				{% trans "Member since" %}: {{ post.user.date_joined|date:'d E Y' }}
+			</div>
+			{% if not post.user.is_active %}
+				<div class="label label-warning">{% trans 'blocked' %}</div>
+			{% endif %}
+		</td>
+		<td class="post-content">
+			{{ post.body_html|safe }}
+			{% if not user.is_authenticated or request_user_profile.show_signatures %}
+				{% if post_user_profile.signature %}
+					<div class="post-signature">
+						{{ post_user_profile.signature_html|safe }}
+					</div>
+				{% endif %}
+			{% endif %}
+			{% if user.is_authenticated and user.is_superuser %}
+				<ul class="list-inline action-menu">
+					<li class="{% if liked %}selected{% endif %}">
+						<a href="{% url 'pybb:like_post' post.pk %}" data-count="{{ post.likes.count }}" class="like"><span
+								class="{% if liked%}fas{% else %}far{% endif %} fa-heart"></span><span class="menulabel">{% if liked%}Liked{% else %}Like{% endif %}</span> <span
+								class="counter"
+								id="{{ post.pk }}-likecount">{{ post.likes.count }}</span></a></li>
+				</ul>
+			{% endif %}
 
-            <div class="post-related">
-                <div class='attachments'>
-                    {% for attachment in post.attachments.all %}
-                        <a href="{{ attachment.file.url }}">
-                          <img src="{% static 'pybb/img/attachment.png' %}"> {{ attachment.size_display }}
-                        </a>
-                    {% endfor %}
-                </div>
-            </div>
-        </td>
-    </tr>
-    </tbody>
+			<div class="post-related">
+				<div class='attachments'>
+					{% for attachment in post.attachments.all %}
+						<a href="{{ attachment.file.url }}">
+							<img src="{% static 'pybb/img/attachment.png' %}"> {{ attachment.size_display }}
+						</a>
+					{% endfor %}
+				</div>
+			</div>
+		</td>
+	</tr>
+	</tbody>
 </table>
