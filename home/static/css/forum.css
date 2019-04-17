@@ -6367,7 +6367,9 @@ body {
 
 .block-forum .post-content {
     max-width: 1033px;
-    word-wrap: break-word
+    word-wrap: break-word;
+    position: relative;
+    padding-bottom: 26px !important;
 }
 
 .block-forum .post-control {
@@ -6576,7 +6578,7 @@ body {
 
 .block-forum .post-signature {
     border-top: 1px dashed #ddd;
-    color: #bbb
+    color: #666
 }
 
 .block-forum .post-form input[type="text"], .block-forum .post-form input[type="password"], .block-forum .post-form textarea {
@@ -7037,4 +7039,41 @@ kbd {
 	width: 100% !important;
 	margin:5px 0 5px 0 !important;
 	border:5px solid #F5F5F5 !important;
+}
+
+.action-menu{
+    margin: 5px 0 !important;
+    padding: 5px 0 !important;
+    position: absolute;
+    bottom: 0;
+    left: 5px;
+}
+
+.action-menu li{
+    min-width: 102px;
+    padding-right: 5px;
+    color: #333;
+}
+
+.action-menu li:selected a {
+    color: #5cb85c; /*$brand-success;*/
+    opacity: 1;
+}
+
+.action-menu a{
+    cursor: pointer;
+    position: relative;
+    text-decoration: none !important;
+    opacity: .8;
+}
+
+.action-menu a:hover{
+    opacity: 1;
+}
+
+.counter:before{
+  content: '[';
+}
+.counter:after{
+  content: ']';
 }
