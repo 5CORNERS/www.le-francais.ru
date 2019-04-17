@@ -130,15 +130,15 @@
 				<ul class="list-inline action-menu">
 					<li class="{% if liked %}selected{% endif %}">
 						<a href="{% url 'pybb:like_post' post.pk %}" data-count="{{ post.likes.count }}" class="like"><span
-								class="{% if liked%}fas{% else %}far{% endif %} fa-heart"></span> <span class="menulabel">{% if liked%}Liked{% else %}Like{% endif %}</span> <span
+								class="{% if liked%}fas{% else %}far{% endif %} fa-heart"></span> <span
 								class="counter"
-								id="{{ post.pk }}-likecount">{{ post.likes.count }}</span></a></li>
+								id="{{ post.pk }}-likecount">{% if post.likes.count > 0 %}{{ post.likes.count }}{% endif %}</span></a></li>
 				</ul>
 			{% else %}
 				<ul class="list-inline action-menu">
 					<li class="{% if liked %}selected{% endif %}">
 						<a href="{% url 'account_login' %}?next={{ post.get_absolute_url }}" data-count="{{ post.likes.count }}" class="like-disabled"><span
-								class="{% if liked%}fas{% else %}far{% endif %} fa-heart"></span> <span class="menulabel">{% if liked%}Liked{% else %}Like{% endif %}</span> <span
+								class="{% if liked%}fas{% else %}far{% endif %} fa-heart"></span> <span
 								class="counter"
 								id="{{ post.pk }}-likecount">{{ post.likes.count }}</span></a></li>
 				</ul>

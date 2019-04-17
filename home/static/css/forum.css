@@ -7050,31 +7050,39 @@ kbd {
     font-size: 14.5px;
 }
 
-.action-menu li{
+.action-menu > li{
+    color: #0077bb;
     min-width: 102px;
     padding-right: 5px;
-    color: #333;
 }
 
-.action-menu li:selected a {
-    color: #5cb85c; /*$brand-success;*/
+.action-menu > li.selected{
+    color: #cc2939 !important;
     opacity: 1;
 }
 
-.action-menu a{
+.action-menu > li > a{
     cursor: pointer;
     position: relative;
-    text-decoration: none !important;
     opacity: .8;
+    color: inherit;
 }
 
-.action-menu a:hover{
+.action-menu > li > a:hover{
+    color: inherit;
     opacity: 1;
+    text-decoration: none !important;
+}
+
+.action-menu > li > a:focus{
+    color: inherit;
+    opacity: 1;
+    text-decoration: none !important;
 }
 
 .counter:before{
-  content: '[';
+  /*content: '[';*/
 }
 .counter:after{
-  content: ']';
+  /*content: ']';*/
 }
