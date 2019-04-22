@@ -7041,40 +7041,39 @@ kbd {
 	border:5px solid #F5F5F5 !important;
 }
 
-.action-menu{
-    margin: 5px 0 !important;
-    padding: 5px 0 !important;
+.list-inline.action-menu{
+    margin: 0 0 5px 0;
     position: absolute;
     bottom: 0;
     left: 5px;
     font-size: 14.5px;
 }
 
-.action-menu > li{
+.list-inline.action-menu > li{
     color: #0077bb;
     min-width: 102px;
     padding-right: 5px;
 }
 
-.action-menu > li.selected{
+.list-inline.action-menu > li.selected{
     color: #cc2939 !important;
     opacity: 1;
 }
 
-.action-menu > li > a{
+.list-inline.action-menu > li > a{
     cursor: pointer;
     position: relative;
     opacity: .8;
     color: inherit;
 }
 
-.action-menu > li > a:hover{
+.list-inline.action-menu > li > a:hover{
     color: inherit;
     opacity: 1;
     text-decoration: none !important;
 }
 
-.action-menu > li > a:focus{
+.list-inline.action-menu > li > a:focus{
     color: inherit;
     opacity: 1;
     text-decoration: none !important;
@@ -7085,4 +7084,48 @@ kbd {
 }
 .counter:after{
   /*content: ']';*/
+}
+
+.like-container .tooltip-who-liked{
+    display: flex;
+    flex-direction: column;
+
+    font-size: 10px;
+    visibility: hidden;
+    overflow: auto;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 4px 6px;
+    position: absolute;
+    z-index: 1;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -60px;
+
+    /* Fade in tooltip - takes 1 second to go from 0% to 100% opac: */
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+.tooltip-who-liked-container{
+    display: flex;
+    flex: 1;
+    margin-bottom: 2px;
+}
+
+.like-container:hover .tooltip-who-liked {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-who-liked-text{
+    text-align: right;
+    text-decoration: underline dotted;
+    cursor: pointer;
+}
+
+.tooltip-like-entry:not(:last-child){
+    margin-right: 6px;
 }
