@@ -10,14 +10,15 @@
 <script>
   googletag.cmd.push(function() {
  var mapping = googletag.sizeMapping().
-    addSize([768, 0],  []).
-    addSize([728, 0],  [728, 90]).
-    addSize([320, 0],[[320, 50]]).build();
+    addSize([0,0],    []).
+    addSize([320, 0], [[320, 50]]).
+    addSize([728, 0], [[728, 90]]).
+	  addSize([991, 0], []).build();
     //Adslot 1 declaration
-    gptadslots.push(googletag.defineSlot('/21671132665/lf_fr_main_rsb_01', [[300,250],[300,600],[336,280]], 'div-gpt-ad-7192401-1')
+    gptadslots.push(googletag.defineSlot('/21671132665/lf_fr_main_rsb_01', [[300,250],[300,600],[336,280],[160,600],[120,600]], 'div-gpt-ad-7192401-1')
                              .addService(googletag.pubads()));
     //Adslot 2 declaration
-    gptadslots.push(googletag.defineSlot('/21671132665/lf_fr_main_rsb_02', [[300,250],[300,600],[336,280]], 'div-gpt-ad-7192401-2')
+    gptadslots.push(googletag.defineSlot('/21671132665/lf_fr_main_rsb_02', [[300,250],[300,600],[336,280],[160,600],[120,600]], 'div-gpt-ad-7192401-2')
                              .addService(googletag.pubads()));
     //Adslot 3 declaration
     gptadslots.push(googletag.defineSlot('/21671132665/lf_fr_main_mobile_top', [[728,90],[320,50]], 'div-gpt-ad-7192401-3')
