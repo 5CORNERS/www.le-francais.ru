@@ -442,7 +442,7 @@ td.forum-last-post, td.topic-last-post {
 
 .post-signature {
     border-top: 1px dashed #ddd;
-    color: #bbb
+    color: #666
 }
 
 .post-form input[type="text"], .post-form input[type="password"], .post-form textarea {
