@@ -141,7 +141,7 @@
 								id="{{ post.pk }}-likecount">{% if post.likes.count > 0 %}{{ post.likes.count }}{% endif %}</span
 						>
 					</a>
-				<div class='tooltip-who-liked'>{% who_liked post 5 %}</div>
+					{% if post.likes.count > 0 %}<div class='tooltip-who-liked'>{% who_liked post 5 %}</div>{% endif %}
 				</li>
 			</ul>
 			<div class="post-related">
