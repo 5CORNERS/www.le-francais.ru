@@ -9,7 +9,7 @@
             <img src="{{ profile.avatar.url }}" alt="{{ profile.user.username }} avatar" width="{{ PYBB_AVATAR_WIDTH }}" height="{{ PYBB_AVATAR_HEIGHT }}" style="max-width: {{ PYBB_AVATAR_WIDTH }}px;"/>
         {% endif %}
     {% else %}
-        <img src="{{ PYBB_DEFAULT_AVATAR_URL }}" alt="default avatar" width="{{ PYBB_AVATAR_WIDTH }}" height="{{ PYBB_AVATAR_HEIGHT }}" style="max-width: {{ PYBB_AVATAR_WIDTH }}px;"/>
+        <img src="{{ profile.avatar_url }}" alt="default avatar" width="{{ PYBB_AVATAR_WIDTH }}" height="{{ PYBB_AVATAR_HEIGHT }}" style="max-width: {{ PYBB_AVATAR_WIDTH }}px;"/>
     {% endif %}
     </a>
 </div>

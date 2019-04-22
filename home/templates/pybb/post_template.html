@@ -126,24 +126,24 @@
 					</div>
 				{% endif %}
 			{% endif %}
-			{% if user.is_authenticated %}
-				<ul class="list-inline action-menu">
-					<li class="{% if liked %}selected{% endif %}">
-						<a href="{% url 'pybb:like_post' post.pk %}" data-count="{{ post.likes.count }}" class="like"><span
-								class="{% if liked%}fas{% else %}far{% endif %} fa-heart"></span> <span
+			<ul class="list-inline action-menu">
+				<li class="{% if liked %}selected{% endif %} like-container">
+					<a {% if user.is_authenticated %}href="{% url 'pybb:like_post' post.pk %}"
+					   data-count="{{ post.likes.count }}"
+					   class="like"
+					   {% else %}href="{% url 'account_login' %}?next={{ post.get_absolute_url }}"
+					   data-count="{{ post.likes.count }}"
+					   class="like-disabled"{% endif %}
+					><span
+							class="{% if liked %}fas{% else %}far{% endif %} fa-heart"></span>
+						<span
 								class="counter"
-								id="{{ post.pk }}-likecount">{% if post.likes.count > 0 %}{{ post.likes.count }}{% endif %}</span></a></li>
-				</ul>
-			{% else %}
-				<ul class="list-inline action-menu">
-					<li class="{% if liked %}selected{% endif %}">
-						<a href="{% url 'account_login' %}?next={{ post.get_absolute_url }}" data-count="{{ post.likes.count }}" class="like-disabled"><span
-								class="{% if liked%}fas{% else %}far{% endif %} fa-heart"></span> <span
-								class="counter"
-								id="{{ post.pk }}-likecount">{{ post.likes.count }}</span></a></li>
-				</ul>
-			{% endif %}
-
+								id="{{ post.pk }}-likecount">{% if post.likes.count > 0 %}{{ post.likes.count }}{% endif %}</span
+						>
+					</a>
+				<div class='tooltip-who-liked'>{% who_liked post 5 %}</div>
+				</li>
+			</ul>
 			<div class="post-related">
 				<div class='attachments'>
 					{% for attachment in post.attachments.all %}
