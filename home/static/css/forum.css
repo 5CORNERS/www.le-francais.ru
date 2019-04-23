@@ -7092,27 +7092,41 @@ kbd {
 
     font-size: 10px;
     visibility: hidden;
-    overflow: auto;
-    background-color: black;
+    background-color: #679efe;
     color: #fff;
     text-align: center;
     border-radius: 6px;
     padding: 4px 6px;
     position: absolute;
     z-index: 1;
-    bottom: 100%;
+    bottom: 150%;
     left: 50%;
     margin-left: -60px;
+
+
+    box-shadow: 0 20px 40px rgba(0,0,0,.3), 0 0 1px 0 rgba(0,20,51,.4);
 
     /* Fade in tooltip - takes 1 second to go from 0% to 100% opac: */
     opacity: 0;
     transition: opacity 1s;
 }
 
+.like-container .tooltip-who-liked:after {
+    content: " ";
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 30%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #679efe transparent transparent transparent;
+}
+
 .tooltip-who-liked-container{
     display: flex;
     flex: 1;
     margin-bottom: 2px;
+    max-width:170px;
 }
 
 .like-container:hover .tooltip-who-liked {
@@ -7124,6 +7138,29 @@ kbd {
     text-align: right;
     text-decoration: underline dotted;
     cursor: pointer;
+}
+
+.tooltip-who-liked-container > .outer{
+    display: none;
+}
+
+.tooltip-who-liked-container.show-all > .outer{
+    display: block;
+}
+
+.tooltip-like-entry > .avatar{
+    width: 32px;
+    height: 32px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.tooltip-like-entry > .avatar > img{
+    display: inline;
+    margin: 0 auto;
+    height: 100%;
+    width: auto;
 }
 
 .tooltip-like-entry:not(:last-child){
