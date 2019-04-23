@@ -232,6 +232,10 @@ body {
     background-color: #f5f5f5;
 }
 
+.__in_house_sidebar{
+    margin-bottom: auto;
+}
+
 @media (min-width: 768px) {
     .sidebar {
         top: 104px;
