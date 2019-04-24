@@ -242,7 +242,7 @@ def unwrap(context, blocks):
 @register.inclusion_tag('tags/random_reviews.html')
 def random_review(count=3):
 	qs = IndexReviews.objects.order_by('?')
-	qs = qs[:]
+	qs = qs[:count]
 	return dict(object_list=qs)
 
 
