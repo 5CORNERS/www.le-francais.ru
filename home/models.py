@@ -51,6 +51,7 @@ PLACEMENT_CHOICES = (
 	('resume_bottom', 'Resume Bottom'),
 	('revision_top', 'Revision Top'),
 	('revision_bottom', 'Revision Bottom'),
+	('in_house_sidebar', 'In-House Sidebar')
 )
 
 
