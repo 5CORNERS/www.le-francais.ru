@@ -2,7 +2,7 @@
 <script id="script-{{ id }}">
 	let ad_elements = [
 		{% for ad in ads %}
-			$("<div id='{{ ids|index:forloop.counter0 }}' class='__{{ ad.placement }}' style='margin-bottom:20px'></div>"),
+			$("<div id='{{ ids|index:forloop.counter0 }}' class='__{{ ad.placement }}'</div>"),
 		{% endfor %}
 	];
 	let last = ad_elements.pop();
