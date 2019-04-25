@@ -7090,9 +7090,8 @@ kbd {
     padding: 4px 6px;
     position: absolute;
     z-index: 1;
-    bottom: 100%;
-    left: 50%;
-    margin-left: -60px;
+    bottom: 115%;
+    left: 0;
     box-sizing: border-box;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 1px 0 rgba(0, 20, 51, 0.4);
 
@@ -7109,7 +7108,7 @@ kbd {
     content: " ";
     position: absolute;
     top: 100%; /* At the bottom of the tooltip */
-    left: 70px;
+    left: 29px;
     margin-left: -5px;
     border-width: 5px;
     border-style: solid;
