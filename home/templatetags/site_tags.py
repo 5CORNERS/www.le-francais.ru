@@ -31,8 +31,11 @@ def include_advertisements(contains=None, page_type=None, placement=None, in_hou
 	if placement:
 		snippets = snippets.filter(placement=placement)
 	if in_house:
-		snippets = list(snippets)
-		snippets.insert(1, AdUnit.objects.get(placement='in_house_sidebar', page_type=page_type))
+		try:
+			snippets = list(snippets)
+			snippets.insert(1, AdUnit.objects.get(placement='in_house_sidebar', page_type=page_type))
+		except:
+			pass
 	return {
 		'id': random_id, 'ads': snippets,
 		'mappings': list(set(ad.size_mapping for ad in snippets)),
