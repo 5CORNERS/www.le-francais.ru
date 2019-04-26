@@ -7164,7 +7164,7 @@ kbd {
 .tooltip-who-liked-container > .tooltip-like-entry {
 }
 
-.like-container:hover .tooltip-who-liked {
+.like-container.show-tooltip .tooltip-who-liked {
     visibility: visible;
     opacity: 1;
 }
