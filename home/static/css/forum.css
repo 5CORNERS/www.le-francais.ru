@@ -7120,7 +7120,7 @@ kbd {
     flex: 1;
     align-items: center;
     margin-bottom: 2px;
-    max-width: 295px;
+    max-width: 185px;
     flex-wrap: nowrap;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
@@ -7140,6 +7140,7 @@ kbd {
 }
 
 .tooltip-who-liked-container.show-chevrones .fa-chevron-left {
+    display: inherit;
     color: #ffffff;
     font-size: 22px;
     margin-right: 4px;
@@ -7150,6 +7151,7 @@ kbd {
 }
 
 .tooltip-who-liked-container.show-chevrones .fa-chevron-right {
+    display: inherit;
     color: #ffffff;
     font-size: 22px;
     margin-right: 4px;
