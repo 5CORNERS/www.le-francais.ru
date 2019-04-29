@@ -240,6 +240,13 @@
 {% endblock %}
 {# Global javascript #}
 {% block js %}
+	<script>
+		{% if flavour == 'mobile' or flavour == 'tablet' %}
+			const touch = true;
+		{% else %}
+			const touch = false;
+		{% endif %}
+	</script>
 	<script async
 	        type="text/javascript"
 	        src="{% static 'pybb/js/pybbjs.js' %}"></script>
