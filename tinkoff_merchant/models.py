@@ -2,7 +2,7 @@ from typing import List
 from decimal import *
 from django.db import models
 
-from .consts import TAXES, TAXATIONS, CATEGORIES
+from .consts import TAXES, TAXATIONS, CATEGORIES, LESSON_TICKETS, COFFEE_CUPS
 from .settings import get_config
 from django.contrib.postgres.fields import JSONField
 
@@ -85,6 +85,9 @@ class Payment(models.Model):
 			json['Receipt'] = self.receipt.to_json()
 
 		return json
+
+	def items(self) -> list:
+		return [item for item in self.receipt.receiptitem_set.all()]
 
 
 class Receipt(models.Model):
@@ -170,3 +173,6 @@ class ReceiptItem(models.Model):
 			'count': self.quantity,
 			'tax': tax,
 		}
+
+	def e_sku(self):
+		return '{0}{1}'.format('C' if self.category==COFFEE_CUPS else 'T', self.site_quantity)

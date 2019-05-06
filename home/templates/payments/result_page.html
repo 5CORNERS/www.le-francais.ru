@@ -2,41 +2,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-{#    <script auto-inline-src="https://securepay.tinkoff.ru/html/payForm/js/xss.js?ver=1513868235450" type="text/javascript">!function () {#}
-{#			function e(e) {#}
-{#				switch (n = !0, e) {#}
-{#					case'&':#}
-{#						return '&amp;';#}
-{#					case'<':#}
-{#						return '&lt;';#}
-{#					case'>':#}
-{#						return '&gt;';#}
-{#					case'"':#}
-{#						return '&quot;';#}
-{#					case'\'':#}
-{#						return '&#x27;';#}
-{#					case'/':#}
-{#						return '&#x2F;'#}
-{#				}#}
-{#				return null#}
-{#			}#}
-{##}
-{#			var n = !1;#}
-{#			if (location.search) {#}
-{#				var t = '', r = new RegExp('(&(?!(amp;|lt;|gt;|quot;|#x))|<|>|"|\'|/)', 'ig');#}
-{#				location.search.substr(1).split('&').forEach(function (n) {#}
-{#					var o = n.split('=');#}
-{#					t += '&' + encodeURIComponent(decodeURIComponent(o[0]).replace(r, e)) + '=' + encodeURIComponent(decodeURIComponent(o[1]).replace(r, e))#}
-{#				}), n && (location.search = t.substr(1))#}
-{#			}#}
-{#		}()</script>#}
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="stylesheet" href="{% static 'tinkoff_css/commonc276.css' %}">
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+	<!-- Google Tag Manager -->
+	<script>(function (w, d, s, l, i) {
+		w[l] = w[l] || [];
+		w[l].push({
+			'gtm.start':
+				new Date().getTime(), event: 'gtm.js'
+		});
+		var f = d.getElementsByTagName(s)[0],
+			j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+		j.async = true;
+		j.src =
+			'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+		f.parentNode.insertBefore(j, f);
+	})(window, document, 'script', 'dataLayer', 'GTM-WC2Q4XT');</script>
+	<!-- End Google Tag Manager -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<link rel="stylesheet" href="{% static 'tinkoff_css/commonc276.css' %}">
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+	<meta name="viewport"
+	      content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+	{% if success %}
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			let event = {
+				'event': 'paymentSuccess',
+				'transactionId': '{{ payment.order_id }}',
+				'transactionTotal': {{ payment.amount }},
+				'transactionProducts': [{% for item in payment.items %}{
+						'sku': '{{ item.e_sku }}',
+						'name': '{{ item.name }}',
+						'category': '{{ item.category }}',
+						'price': {{ item.price }},
+						'quantity': {{ item.quantity|floatformat }}
+					},
+					{% endfor %}]
+			};
+			dataLayer.push(event)
+		</script>
+	{% endif %}
 </head>
 <body id="body">
+<!-- Google Tag Manager (noscript) -->
+<noscript>
+	<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WC2Q4XT"
+	        height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+<!-- End Google Tag Manager (noscript) -->
 <div class="wrapper">
     <div class="wrapper__middle">
         <div class="header">
