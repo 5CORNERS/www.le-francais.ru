@@ -26,7 +26,7 @@
 	{% if success %}
 		<script>
 			window.dataLayer = window.dataLayer || [];
-			let event = {
+			dataLayer.push({
 				'event': 'paymentSuccess',
 				'transactionId': '{{ payment.order_id }}',
 				'transactionTotal': {{ payment.amount }},
@@ -38,8 +38,7 @@
 						'quantity': {{ item.quantity|floatformat }}
 					},
 					{% endfor %}]
-			};
-			dataLayer.push(event)
+			})
 		</script>
 	{% endif %}
 </head>
