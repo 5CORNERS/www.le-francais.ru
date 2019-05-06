@@ -28,24 +28,6 @@
 	<!-- Google Publisher Tag -->
 	<script async="async"
 	        src="https://www.googletagservices.com/tag/js/gpt.js"></script>
-	{% if 'payment_success' in request.GET and request.GET.payment_id %}
-		{% get_payment_by_id request.GET.payment_id as payment %}
-		<script>
-			window.dataLayer = window.dataLayer || [];
-			dataLayer.push({
-				'event': 'paymentSuccess',
-				'transactionId': '{{ payment.id }}',
-				'transactionTotal': {{ payment.e_transaction_total }},
-				'transactionProducts': [{
-					'sku': '{{ payment.e_product_sku }}',
-					'name': '{{ payment.e_product_name }}',
-					'category': '{{ payment.e_product_category }}',
-					'price': {{ payment.e_product_price }},
-					'quantity': {{ payment.e_product_quantity }}
-				}]
-			});
-		</script>
-	{% endif %}
 
 	<meta charset="utf-8"/>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>

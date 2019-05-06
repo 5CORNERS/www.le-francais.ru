@@ -348,7 +348,7 @@ class PaymentResult(View):
 		success = True
 		if request.GET['Success'] != 'true':
 			success = False
-		payment = TinkoffPayment.objects.get(order_id=request.GET['OrderId'])
+		payment = TinkoffPayment.objects.select_related('receipt').prefetch_related('receipt__receiptitem_set').get(order_id=request.GET['OrderId'])
 		try:
 			back_urls = BackUrls.objects.get(payment=payment)
 			success_url = back_urls.success
