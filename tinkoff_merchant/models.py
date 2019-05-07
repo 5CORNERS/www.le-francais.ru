@@ -176,3 +176,6 @@ class ReceiptItem(models.Model):
 
 	def e_sku(self):
 		return '{0}{1}'.format('C' if self.category==COFFEE_CUPS else 'T', self.site_quantity)
+
+	def e_name(self):
+		return '{0} {1}'.format('Ticket' if self.category==LESSON_TICKETS else 'Coffee Cup', self.site_quantity)
