@@ -72,7 +72,7 @@ def verb_page(request, se, feminin, verb, homonym):
 	if (se == "se_" and verb.reflexiveverb.is_short()) or (se == "s_" and not verb.reflexiveverb.is_short()):
 		return redirect(verb.reflexiveverb.get_absolute_url())
 
-	reflexive = True if verb.can_reflexive and se else False
+	reflexive = True if (verb.can_reflexive or verb.reflexive_only) and se else False
 
 	verb.count += 1
 	verb.save()
