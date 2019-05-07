@@ -32,7 +32,7 @@
 				'transactionTotal': {{ payment.amount }},
 				'transactionProducts': [{% for item in payment.items %}{
 						'sku': '{{ item.e_sku }}',
-						'name': '{{ item.name }}',
+						'name': '{{ item.e_name }}',
 						'category': '{{ item.category }}',
 						'price': {{ item.price }},
 						'quantity': {{ item.quantity|floatformat }}
