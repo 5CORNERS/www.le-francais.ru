@@ -321,8 +321,8 @@ EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', email_config['EMAIL_USE_SSL']) =
 
 # Django Mailer Settings
 
-MAILER_EMAIL_MAX_BATCH = None
-MAILER_EMAIL_MAX_DEFERRED = None
+MAILER_EMAIL_MAX_BATCH = 20
+MAILER_EMAIL_MAX_DEFERRED = 1
 MAILER_EMAIL_THROTTLE = 20
 
 # WalletOne settings
