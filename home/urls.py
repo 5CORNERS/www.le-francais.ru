@@ -26,6 +26,10 @@ payment_urls = [
     url('^$', views.TinkoffPayments.as_view(), name='payments'),
 ]
 
+modal_urls = [
+    url('^download-login-required/$', view=views.modal_login_required, name='login_required')
+]
+
 activate_urls = [
     url('^', views.ActivateLesson.as_view(), name='activate_lesson'),
 ]
