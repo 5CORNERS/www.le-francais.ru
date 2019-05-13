@@ -487,6 +487,10 @@ class MovePostView(TopicView):
 		return data
 
 
+def modal_login_required(request):
+	redirect_url = request.GET.get('redirect_url', '/')
+	return render(request, template_name='modals/login-required.html', context={'next': redirect_url})
+
 class AorAddPostView(AddPostView):
 	def get_form_class(self):
 		return PostForm

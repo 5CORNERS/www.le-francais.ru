@@ -24,7 +24,9 @@
 		<script>
 			{% if user.is_authenticated %}let saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
 			let cups_amount = {{ request.user.cup_amount }};
-			let cups_credit = {{ request.user.cup_credit }};{% endif %}
+			let cups_credit = {{ request.user.cup_credit }};
+			{% endif %}
+
 			function reloadLessonUrl() {
 				$.ajax({
 					type: 'POST',
@@ -163,6 +165,28 @@
 				});
 			{% endif %}
 		</script>
+	{% else %}
+		{% if not request.user.is_authenticated %}
+		<script>
+			$(window).one('lessonPlayerReady', function () {
+				$('.audioplayer-download-button').on('click', function (e) {
+					e.preventDefault();
+					$.ajax({
+						url: '{% url 'modal:login_required' %}',
+						type: 'GET',
+						data: {
+							redirect_url: '{{ request.path }}'
+						},
+						datatype: 'html',
+						success: function (data) {
+							let modal = $(data);
+							modal.modal('show');
+						}
+					})
+				})
+			})
+		</script>
+		{% endif %}
 	{% endif %}
 	<script>
 		function getSuccessButton() {
@@ -840,7 +864,7 @@
 				</a></div>
 		</div>
 	</div>
-	{% if self.lesson_number > 6 %}<script>
+	{% if self.lesson_number > 6 and not self.need_payment %}<script>
 		const uHP =
 			{% if user.is_authenticated and user.has_payed %}true;{% else %}false;{% endif %}
 		const uLP =
