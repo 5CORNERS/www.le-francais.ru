@@ -24,6 +24,8 @@ class PollyAudio(models.Model):
 	request_characters = models.IntegerField(null=True, default=None)
 	url = models.URLField(null=True, verbose_name='Ссылка на файл', default=None)
 
+	error = models.BooleanField(default=False)
+
 	def to_dict(self) -> dict:
 		opts = self._meta
 		data = {}
