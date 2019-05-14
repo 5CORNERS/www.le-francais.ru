@@ -108,6 +108,14 @@
 				</li>
 			{% endif %}
 		{% endif %}
+		{% if self.exercise and request.user.is_staff %}
+			<li class="nav-item">
+				<a class="nav-link" data-target="" href="#exercise" role="tab"
+							   aria-controls="body">
+								Exercice
+							</a>
+			</li>
+		{% endif %}
 		{% for child_value in self.other_tabs %}
 			{% if not child_value.value.invisible or user.is_superuser %}
 				<li class="nav-item">
@@ -243,6 +251,15 @@
 				</div>
 			</div>
 			{% assign pane_class "tab_pane" %}
+		{% endif %}
+		{% if self.exercise and user.is_staff %}
+			<div id="exercise" class="{{ pane_class }}" role="tabpanel">
+				<div>
+					{% for block in self.exercise %}
+						{% include block %}
+					{% endfor %}
+				</div>
+			</div>
 		{% endif %}
 
 		{% for child_value in self.other_tabs %}
