@@ -24,24 +24,6 @@
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 	<meta name="viewport"
 	      content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
-	{% if success %}
-		<script>
-			window.dataLayer = window.dataLayer || [];
-			dataLayer.push({
-				'event': 'paymentSuccess',
-				'transactionId': '{{ payment.order_id }}',
-				'transactionTotal': {{ payment.amount }},
-				'transactionProducts': [{% for item in payment.items %}{
-						'sku': '{{ item.e_sku }}',
-						'name': '{{ item.e_name }}',
-						'category': '{{ item.category }}',
-						'price': {{ item.price|div:100 }},
-						'quantity': {{ item.quantity|floatformat }}
-					},
-					{% endfor %}]
-			})
-		</script>
-	{% endif %}
 </head>
 <body id="body">
 <!-- Google Tag Manager (noscript) -->
@@ -132,5 +114,26 @@ function parse(e) {
 $(document).ready(function () {
 	parse("Amount") && $('#Amount').html(formatAmount(parse("Amount"))), parse("MerchantName") && $('#MerchantName').html(parse("MerchantName")), parse("PhonesReq") && $('#PhonesReq').html(parse("PhonesReq").replace(/^(.*)(\d{3})(\d{3})(\d{2})(\d{2})$/, '+7 ($2) $3-$4-$5', 'i')), parse("OrderId") && $('#OrderId').html(parse("OrderId")), parse("PaymentId") && $('#PaymentId').html(parse("PaymentId")), parse("TranDate") && $('#TranDate').html(parse("TranDate").replace('+', ' ')), parse("ErrorCode") && $('#ErrorCode').html(parse("ErrorCode").replace('+', ' ')), parse("CompanyName") && $('#CompanyName').html(parse("CompanyName").split('+').join(' ')), parse("Details") && $('#Details').html(parse("Details")), parse("MerchantEmail") && $('#MerchantEmail').html(parse("MerchantEmail")).attr('href', 'mailto:' + parse("MerchantEmail")), parse("EmailReq") && $('#EmailReq').html(parse("EmailReq")).attr('href', 'mailto:' + parse("EmailReq")), (massage = parse("Message")) && ($('#Message').html(parse("Message").split('+').join(' ')), $('#Message').attr('hidden', !1))
 })</script>
+	{% if success %}
+		<script>
+			function eccomercePushSuccess() {
+				window.dataLayer = window.dataLayer || [];
+				dataLayer.push({
+					'event': 'paymentSuccess',
+					'transactionId': '{{ payment.order_id }}',
+					'transactionTotal': {{ payment.amount|div:100 }},
+					'transactionProducts': [{% for item in payment.items %}{
+							'sku': '{{ item.e_sku }}',
+							'name': '{{ item.e_name }}',
+							'category': '{{ item.category }}',
+							'price': {{ item.price|div:100 }},
+							'quantity': {{ item.quantity|floatformat }}
+							},
+						{% endfor %}]
+				});
+			}
+			window.onload = eccomercePushSuccess;
+		</script>
+	{% endif %}
 </body>
 </html>
