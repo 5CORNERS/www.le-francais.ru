@@ -1,4 +1,5 @@
 {% load static %}
+{% load site_tags %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -34,7 +35,7 @@
 						'sku': '{{ item.e_sku }}',
 						'name': '{{ item.e_name }}',
 						'category': '{{ item.category }}',
-						'price': {{ item.price }},
+						'price': {{ item.price|div:100 }},
 						'quantity': {{ item.quantity|floatformat }}
 					},
 					{% endfor %}]
