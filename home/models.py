@@ -292,7 +292,7 @@ class LessonPage(Page):
 	subtitle = TextField(null=True, blank=True)
 	lesson_number = SmallIntegerField(blank=True, null=True)
 	summary = CharField(max_length=100, null=True, blank=True)
-	repetition_material = CharField(max_length=100, null=True, blank=True)
+	repetition_material = CharField(max_length=100, null=True, blank=True, verbose_name='Révision')
 	audio_material = CharField(max_length=100, null=True, blank=True)
 
 	need_payment = BooleanField(default=False)
@@ -347,6 +347,11 @@ class LessonPage(Page):
 		]), template="blocks/transcriptions.html")),
 		('post', PostBlock())
 	], null=True, blank=True)
+
+	exercise = StreamField([
+		('paragraph', RichTextBlock()),
+		('html', RawHTMLBlock()),
+	], verbose_name='Exercice', null=True, blank=True)
 
 	other_tabs = StreamField([('tab', TabBlock())], blank=True)
 
@@ -414,6 +419,7 @@ LessonPage.content_panels = Page.content_panels + [
 	FieldPanel('summary'),
 	FieldPanel('repetition_material'),
 	StreamFieldPanel('mail_archive'),
+	StreamFieldPanel('exercise'),
 	StreamFieldPanel('other_tabs')
 ]
 LessonPage.promote_panels = LessonPage.promote_panels + [
