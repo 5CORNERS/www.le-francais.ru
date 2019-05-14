@@ -166,7 +166,7 @@
 			{% endif %}
 		</script>
 	{% else %}
-		{% if not request.user.is_authenticated %}
+		{% if not request.user.is_authenticated and self.lesson_number > 5 %}
 		<script>
 			$(window).one('lessonPlayerReady', function () {
 				$('.audioplayer-download-button').on('click', function (e) {
