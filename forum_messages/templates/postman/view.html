@@ -1,5 +1,5 @@
 {% extends "./base.html" %}
-{% load i18n postman_tags pybb_tags static %}
+{% load i18n postman_tags pybb_tags %}
 
 {% block extra_css %}
     {{ form.media.css }}
@@ -7,9 +7,6 @@
 
 {% block extra_js %}
     {{ form.media.js }}
-	<script async
-	        type="text/javascript"
-	        src="{% static 'pybb/js/pybbjs.js' %}"></script>
 {% endblock %}
 
 {% block postman_content %}
