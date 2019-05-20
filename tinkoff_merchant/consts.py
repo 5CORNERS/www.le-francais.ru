@@ -32,7 +32,7 @@ TAXES = (
 
 
 COFFEE_CUPS = 'coffee_cups'
-LESSON_TICKETS = 'lesson_tickets'
+LESSON_TICKETS = 'tickets'
 CATEGORIES = (
     (COFFEE_CUPS, 'Чашки кофе'),
     (LESSON_TICKETS, 'Тикеты')
