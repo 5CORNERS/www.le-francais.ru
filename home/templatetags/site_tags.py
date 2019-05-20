@@ -4,14 +4,29 @@ import string
 
 from django import template
 from django.conf import settings
-from pybb.models import Topic, Post
 
 from custom_user.models import User
 from home.models import IndexReviews, AdUnit
 from home.models import PageLayoutAdvertisementSnippet, LessonPage, Payment
 from home.utils import get_signature
+from pybb.models import Topic, Post
 
 register = template.Library()
+
+@register.filter
+def div(value, arg):
+	"""
+    Divides the value; argument is the divisor.
+    Returns empty string on any error.
+    """
+	try:
+		value = int(value)
+		arg = int(arg)
+		if arg:
+			return value / arg
+	except:
+		pass
+	return ''
 
 
 @register.filter
