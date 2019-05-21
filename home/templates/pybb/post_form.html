@@ -1,0 +1,35 @@
+{% load i18n pybb_tags staticfiles %}
+<form class="post-form" action="
+    {% if forum %}
+        {% url 'pybb:add_topic' forum.pk %}
+    {% else %}
+        {% if topic %}
+            {% url 'pybb:add_post' topic.pk %}
+        {% else %}
+            {% url 'pybb:edit_post' pk=object.pk %}
+        {% endif %}
+    {% endif %}" method="post" enctype="multipart/form-data">
+	{% csrf_token %}
+	<fieldset>
+		{% include "pybb/form_errors.html" %}
+		{% if form.name %} {% include "pybb/form_field.html" with field=form.name %} {% endif %}
+		{% if form.slug %} {% include "pybb/form_field.html" with field=form.slug %} {% endif %}
+		{% if form.login %} {% include "pybb/form_field.html" with field=form.login %}  {% endif %}
+		{% if form.body %} {% include "pybb/form_field.html" with field=form.body %}  {% endif %}
+		{{ form.media }}
+		{% if request.user|pybb_may_create_poll and form.poll_type %}
+			<div class="panel panel-default">
+				<div class="panel panel-heading">
+					<button type="button" class="btn btn-default btn-xs spoiler-trigger" data-toggle="collapse">Create
+						poll
+					</button>
+				</div>
+				<div class="panel-collapse collapse out"><div class="panel-body">{% include "pybb/poll_edit_form.html" %}</div></div>
+			</div>
+		{% endif %}
+		{% include "pybb/attachments_formset.html" %}
+		<p class="submit">{% include "pybb/_button_submit.html" %}</p>
+	</fieldset>
+</form>
+<script async src="//extraimage.net/sdk/pup.js" data-url="https://extraimage.net/upload" data-auto-insert="markdown-embed"></script>
+
