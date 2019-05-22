@@ -31,6 +31,7 @@ class CustomSessionMiddleware(SessionMiddleware):
 			ip = request.META.get('REMOTE_ADDR')
 		else:
 			ip = 'UNKNOWN'
+		ip = ip.split(',')[0]
 		request.session = engine.SessionStore(
 			ip=ip,
 			user_agent=request.META.get('HTTP_USER_AGENT', ''),
