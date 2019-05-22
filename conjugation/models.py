@@ -69,6 +69,8 @@ class Verb(models.Model):
 	aspirate_h = models.BooleanField(default=False)
 	maison = models.BooleanField(default=False)
 
+	homonym = models.IntegerField(null=True, default=None)
+
 	reflexive_only = models.BooleanField(default=False)
 
 	is_defective = models.BooleanField(default=False)
