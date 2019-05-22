@@ -55,7 +55,10 @@ def verb_page(request, se, feminin, verb, homonym):
 	try:
 		verb = Verb.objects.get(infinitive_no_accents=word_no_accent)
 	except Verb.DoesNotExist:
-		return render(request, 'conjugation/verb_not_found.html', {'search_string': word_no_accent})
+		return render(request, 'conjugation/verb_not_found.html',
+		              {'search_string': word_no_accent})
+	except Verb.MultipleObjectsReturned:
+		verb = Verb.objects.get(infinitive=word_no_accent)
 
 	if feminin:
 		feminin = True
