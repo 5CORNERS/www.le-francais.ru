@@ -357,11 +357,13 @@ ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_SESSION_REMEMBER = True
 
 SOCIALACCOUNT_EMAIL_VERIFICATION = False
+LOGIN_ERROR_URL = '/accounts/login/'
 
 # Social-Auth settings
 NEW_USER_REDIRECT_URL = '/accounts/username/change_new'
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 SOCIAL_AUTH_NEW_USER_REDIRECT = 'new-users-redirect-url/'
+SOCIAL_AUTH_LOGIN_ERROR_URL = '/accounts/login/'
 SOCIAL_AUTH_PIPELINE = (
 	# Get the information we can about the user and return it in a simple
 	# format to create the user instance later. On some cases the details are
