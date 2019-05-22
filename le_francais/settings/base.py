@@ -270,7 +270,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 LOGIN_URL = '/accounts/login'
-LOGIN_REDIRECT_URL = '/forum/profile/edit/'
+LOGIN_REDIRECT_URL = '/'
 
 # Robots settings
 
