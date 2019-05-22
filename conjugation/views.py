@@ -36,13 +36,19 @@ def search(request):
 		try:
 			re_verb = ReflexiveVerb.objects.get(infinitive_no_accents=search_string)
 		except ReflexiveVerb.DoesNotExist:
-			return render(request, 'conjugation/verb_not_found.html', {'search_string': search_string})
+			return render(request, 'conjugation/verb_not_found.html',
+			              {'search_string': search_string})
+		except ReflexiveVerb.MultipleObjectsReturned:
+			re_verb = ReflexiveVerb.objects.get(infinitive=search_string)
 		return redirect(re_verb.get_absolute_url())
 
 	try:
 		verb = Verb.objects.get(infinitive_no_accents=search_string)
 	except Verb.DoesNotExist:
-		return render(request, 'conjugation/verb_not_found.html', {'search_string': search_string})
+		return render(request, 'conjugation/verb_not_found.html',
+		              {'search_string': search_string})
+	except Verb.MultipleObjectsReturned:
+		verb = Verb.objects.get(infinitive=search_string)
 	return redirect(verb.get_absolute_url())
 
 
