@@ -3,6 +3,7 @@ import threading
 from datetime import datetime, timedelta
 
 import httplib2
+from django import shortcuts
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -16,6 +17,7 @@ from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import generic, View
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from oauth2client.client import OAuth2WebServerFlow
 from pure_pagination import Paginator, PaginationMixin
 from pybb import defaults, util as pybb_util
@@ -536,6 +538,7 @@ def move_post_processing(request):
 	for post in post_list:
 		if pybb_util.get_pybb_profile(post.user).autosubscribe and perms.may_subscribe_topic(post.user, new_topic):
 			new_topic.subscribers.add(post.user)
+
 
 	old_topic.update_counters()
 	new_topic.update_counters()
