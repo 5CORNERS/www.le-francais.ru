@@ -181,6 +181,11 @@ from .utils import message_left
 
 
 class GiveMeACoffee(View):
+
+	@method_decorator(require_http_methods(["POST"]))
+	def dispatch(self, request, *args, **kwargs):
+		return super(GiveMeACoffee, self).dispatch(request, *args, **kwargs)
+
 	def post(self, request, *args, **kwargs):
 		lesson_page = LessonPage.objects.get(lesson_number=request.POST['lesson_number'])
 		if request.user.is_authenticated():
@@ -204,9 +209,6 @@ class GiveMeACoffee(View):
 		else:
 			data = dict(result="NOT_AUTH", description="Not authenticated")
 		return JsonResponse(data)
-
-	def get(self, request, *args, **kwargs):
-		pass
 
 
 class ActivateLesson(View):
