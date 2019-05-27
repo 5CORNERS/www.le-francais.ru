@@ -66,8 +66,9 @@
 
 	    {# Global stylesheets #}
 	    <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
-        <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fontawesome-all.css' %}">
-        <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fa-regular.css' %}">
+      <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fontawesome-all.css' %}">
+      <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fa-regular.css' %}">
+	    <link rel="stylesheet" type="text/css" href="{% static 'lib/footable-bootstrap.v3.1.6/css/footable.bootstrap.min.css' %}">
     {% endblock %}
 		{% get_full_path as full_path %}
     {% block canonical %}<link rel="canonical" href="{% split_canonical full_path %}{% comment %}https://www.le-francais.ru{{ self.url_path | slice:"5:" }}{% endcomment %}"/>{% endblock %}
@@ -154,104 +155,105 @@
 
 {# Global javascript #}
 {% block js %}
-<script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
-<script async src="{% static 'lib/audio/audioplayer.min.js' %}"></script>
-<script>
-(function(document, history, location) {
-  var HISTORY_SUPPORT = !!(history && history.pushState);
+	<script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
+	<script async src="{% static 'lib/audio/audioplayer.min.js' %}"></script>
+	<script async type="text/javascript" src="{% static 'lib/footable-bootstrap.v3.1.6/js/footable.min.js' %}"></script>
+	<script>
+	(function(document, history, location) {
+	  var HISTORY_SUPPORT = !!(history && history.pushState);
 
-  var anchorScrolls = {
-    ANCHOR_REGEX: /^#[^ ]+$/,
-    OFFSET_HEIGHT_PX: 71,
+	  var anchorScrolls = {
+	    ANCHOR_REGEX: /^#[^ ]+$/,
+	    OFFSET_HEIGHT_PX: 71,
 
-    /**
-     * Establish events, and fix initial scroll position if a hash is provided.
-     */
-    init: function() {
-      this.scrollToCurrent();
-      $(window).on('hashchange', $.proxy(this, 'scrollToCurrent'));
-      $('body').on('click', 'a', $.proxy(this, 'delegateAnchors'));
-    },
+	    /**
+	     * Establish events, and fix initial scroll position if a hash is provided.
+	     */
+	    init: function() {
+	      this.scrollToCurrent();
+	      $(window).on('hashchange', $.proxy(this, 'scrollToCurrent'));
+	      $('body').on('click', 'a', $.proxy(this, 'delegateAnchors'));
+	    },
 
-    /**
-     * Return the offset amount to deduct from the normal scroll position.
-     * Modify as appropriate to allow for dynamic calculations
-     */
-    getFixedOffset: function() {
-      return this.OFFSET_HEIGHT_PX;
-    },
+	    /**
+	     * Return the offset amount to deduct from the normal scroll position.
+	     * Modify as appropriate to allow for dynamic calculations
+	     */
+	    getFixedOffset: function() {
+	      return this.OFFSET_HEIGHT_PX;
+	    },
 
-    /**
-     * If the provided href is an anchor which resolves to an element on the
-     * page, scroll to it.
-     * @param  {String} href
-     * @return {Boolean} - Was the href an anchor.
-     */
-    scrollIfAnchor: function(href, pushToHistory) {
-      var match, anchorOffset;
+	    /**
+	     * If the provided href is an anchor which resolves to an element on the
+	     * page, scroll to it.
+	     * @param  {String} href
+	     * @return {Boolean} - Was the href an anchor.
+	     */
+	    scrollIfAnchor: function(href, pushToHistory) {
+	      var match, anchorOffset;
 
-      if(!this.ANCHOR_REGEX.test(href)) {
-        return false;
-      }
+	      if(!this.ANCHOR_REGEX.test(href)) {
+	        return false;
+	      }
 
-      match = document.getElementsByName(href.slice(1));
+	      match = document.getElementsByName(href.slice(1));
 
-      if(match) {
-        anchorOffset = $(match).offset().top - this.getFixedOffset();
-        $('html, body').animate({ scrollTop: anchorOffset});
+	      if(match) {
+	        anchorOffset = $(match).offset().top - this.getFixedOffset();
+	        $('html, body').animate({ scrollTop: anchorOffset});
 
-        // Add the state to history as-per normal anchor links
-        if(HISTORY_SUPPORT && pushToHistory) {
-          history.pushState({}, document.title, location.pathname + href);
-        }
-      }
+	        // Add the state to history as-per normal anchor links
+	        if(HISTORY_SUPPORT && pushToHistory) {
+	          history.pushState({}, document.title, location.pathname + href);
+	        }
+	      }
 
-      return !!match;
-    },
+	      return !!match;
+	    },
 
-    /**
-     * Attempt to scroll to the current location's hash.
-     */
-    scrollToCurrent: function(e) {
-      if(this.scrollIfAnchor(window.location.hash) && e) {
-      	e.preventDefault();
-      }
-    },
+	    /**
+	     * Attempt to scroll to the current location's hash.
+	     */
+	    scrollToCurrent: function(e) {
+	      if(this.scrollIfAnchor(window.location.hash) && e) {
+	        e.preventDefault();
+	      }
+	    },
 
-    /**
-     * If the click event's target was an anchor, fix the scroll position.
-     */
-    delegateAnchors: function(e) {
-      var elem = e.target;
+	    /**
+	     * If the click event's target was an anchor, fix the scroll position.
+	     */
+	    delegateAnchors: function(e) {
+	      var elem = e.target;
 
-      if(this.scrollIfAnchor(elem.getAttribute('href'), true)) {
-        e.preventDefault();
-      }
-    }
-  };
+	      if(this.scrollIfAnchor(elem.getAttribute('href'), true)) {
+	        e.preventDefault();
+	      }
+	    }
+	  };
 
-	$(document).ready($.proxy(anchorScrolls, 'init'));
-})(window.document, window.history, window.location);
+		$(document).ready($.proxy(anchorScrolls, 'init'));
+	})(window.document, window.history, window.location);
 
 
 
-</script>
-    {% get_full_path as full_path %}
-{% if 'payment_success' in request.GET and request.GET.modal_open == 'success-payment-modal' %}
-    <script>
-      $(document).ready(function () {
-        $('#success-payment-modal').modal('show');
-        history.pushState({}, title='',url="{{ full_path }}");
-      })
-    </script>
-{% elif 'payment_fail' in request.GET and request.GET.modal_open == 'fail-payment-modal' %}
-    <script>
-      $(document).ready(function () {
-        $('#fail-payment-modal').modal('show');
-        history.pushState(url="{{ full_path }}");
-      })
-    </script>
-{% endif %}
+	</script>
+	    {% get_full_path as full_path %}
+	{% if 'payment_success' in request.GET and request.GET.modal_open == 'success-payment-modal' %}
+	    <script>
+	      $(document).ready(function () {
+	        $('#success-payment-modal').modal('show');
+	        history.pushState({}, title='',url="{{ full_path }}");
+	      })
+	    </script>
+	{% elif 'payment_fail' in request.GET and request.GET.modal_open == 'fail-payment-modal' %}
+	    <script>
+	      $(document).ready(function () {
+	        $('#fail-payment-modal').modal('show');
+	        history.pushState(url="{{ full_path }}");
+	      })
+	    </script>
+	{% endif %}
 {% endblock %}
 {% block extra_js %}
     {# Override this in templates to add extra javascript #}
