@@ -401,7 +401,7 @@ class LessonPage(Page):
 		if request.user.is_authenticated and (request.user.has_cups or request.user.payed_lessons.all()):
 			context['already_payed'] = True
 
-		if request.user.is_authenticated and (self in request.user.payed_lessons.all() or not request.user.must_pay):
+		if request.user.is_authenticated and self in request.user.payed_lessons.all():
 			context['lesson_was_payed_by_user'] = True
 
 		return context
