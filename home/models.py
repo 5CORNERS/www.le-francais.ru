@@ -351,7 +351,7 @@ class LessonPage(Page):
 	exercise = StreamField([
 		('paragraph', RichTextBlock()),
 		('html', RawHTMLBlock()),
-	], verbose_name='Exercice', null=True, blank=True)
+	], verbose_name='Домашка', null=True, blank=True)
 
 	other_tabs = StreamField([('tab', TabBlock())], blank=True)
 
@@ -400,6 +400,9 @@ class LessonPage(Page):
 
 		if request.user.is_authenticated and (request.user.has_cups or request.user.payed_lessons.all()):
 			context['already_payed'] = True
+
+		if request.user.is_authenticated and (self in request.user.payed_lessons.all() or not request.user.must_pay):
+			context['lesson_was_payed_by_user'] = True
 
 		return context
 
