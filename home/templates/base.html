@@ -51,6 +51,7 @@
 {% block bootstrap_js %}
     <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'lib/footable-bootstrap.v3.1.6/js/footable.min.js' %}"></script>
 {% endblock %}
 {% block bootstrap_css %}
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
@@ -157,7 +158,6 @@
 {% block js %}
 	<script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
 	<script async src="{% static 'lib/audio/audioplayer.min.js' %}"></script>
-	<script async type="text/javascript" src="{% static 'lib/footable-bootstrap.v3.1.6/js/footable.min.js' %}"></script>
 	<script>
 	(function(document, history, location) {
 	  var HISTORY_SUPPORT = !!(history && history.pushState);
