@@ -29,14 +29,14 @@ urlpatterns = [
 
     url(r'^favicon\.ico$', favicon),
 
-    url('^update_sitemap\.xml$', sitemap, {'sitemaps': {
+    url('^sitemap\.xml$', sitemap, {'sitemaps': {
         'forum': ForumSitemap,
         'topic': TopicSitemap,
         'wagtail': WagtailSitemap,
         'conjugation': ConjugationSitemap,
     }}),
 
-    url('^sitemap\.xml$', TemplateView.as_view(template_name='static_sitemap.xml', content_type='application/xml')),
+    url('^update_sitemap\.xml$', TemplateView.as_view(template_name='static_sitemap.xml', content_type='application/xml')),
 
     url(r'^django-admin/', include(admin.site.urls)),
 
