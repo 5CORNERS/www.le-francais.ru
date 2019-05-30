@@ -56,17 +56,38 @@ class User(AbstractUser):
 	from django.core.serializers.json import DjangoJSONEncoder
 	from django.contrib.postgres.fields import JSONField
 
-	used_usernames = JSONField(encoder=DjangoJSONEncoder, default=list, editable=False, verbose_name='Used Usernames')
+	used_usernames = JSONField(
+		encoder=DjangoJSONEncoder, default=list,
+		editable=False, verbose_name='Used Usernames')
 
-	must_pay = models.BooleanField(default=True, editable=True, verbose_name='Должен платить', help_text='Определяет, должен ли пользователь активировать урок для доступа к материалам')
+	push4site = JSONField(
+		encoder=DjangoJSONEncoder, default=list,
+		verbose_name="push4site ids"
+	)
 
-	saw_message = models.BooleanField(default=False, editable=True, verbose_name='Видел сообщение', help_text='Пользователь получил сообщение о системе активации уроков')
-	saw_message_datetime = models.DateTimeField(default=None, null=True, verbose_name='Дата сообщения')
+	must_pay = models.BooleanField(
+		default=True, editable=True,
+		verbose_name='Должен платить',
+		help_text='Определяет, должен ли пользователь активировать урок для доступа к материалам')
 
-	_cup_amount = models.IntegerField(default=0, editable=True, verbose_name='Кол-во чашек/билеткиов')
-	_cup_credit = models.IntegerField(default=0, editable=True, verbose_name='Кол-во "кредитных" чашек')
+	saw_message = models.BooleanField(
+		default=False, editable=True,
+		verbose_name='Видел сообщение',
+		help_text='Пользователь получил сообщение о системе активации уроков')
+	saw_message_datetime = models.DateTimeField(
+		default=None, null=True,
+		verbose_name='Дата сообщения')
 
-	_low_price = models.BooleanField(default=False, editable=True, verbose_name='Статус пенсионера/студента')
+	_cup_amount = models.IntegerField(
+		default=0, editable=True,
+		verbose_name='Кол-во чашек/билеткиов')
+	_cup_credit = models.IntegerField(
+		default=0, editable=True,
+		verbose_name='Кол-во "кредитных" чашек')
+
+	_low_price = models.BooleanField(
+		default=False, editable=True,
+		verbose_name='Статус пенсионера/студента')
 
 	def switch_low_price(self):
 		if self._low_price:
@@ -96,11 +117,18 @@ class User(AbstractUser):
 		self.save()
 		return self
 
-
 	def has_payed(self):
-		if self.has_cups or self.payed_lessons.all().exists():
+		if self.cup_amount > 0 or self.payed_lessons.all().exists():
 			return True
 		return False
+
+	def last_payment(self):
+		try:
+			return TinkoffPayment.objects.filter(
+				(Q(status='CONFIRMED') | Q(status='AUTHORIZED')) & Q(
+					customer_key=self.id)).latest('update_date')
+		except TinkoffPayment.DoesNotExist:
+			return None
 
 	def days_since_joined(self):
 		return (datetime.now(pytz.utc) - self.date_joined).days
@@ -127,13 +155,14 @@ class User(AbstractUser):
 	def low_price(self):
 		return self._low_price
 
-
-	payed_lessons = models.ManyToManyField('home.LessonPage', through='home.UserLesson', related_name='paid_users')
+	payed_lessons = models.ManyToManyField(
+		'home.LessonPage',
+		through='home.UserLesson',
+		related_name='paid_users')
 
 	def activate_payment(self, payment):
 		self.add_cups(payment.cups_amount)
 		self.save()
-
 
 	objects = CustomUserManager()
 	USERNAME_FIELD = 'email'
@@ -179,6 +208,12 @@ class UsedUsernames(models.Model):
 	user = models.ForeignKey('User', on_delete=models.CASCADE)
 	used_username = models.CharField(max_length=32)
 	change_datetime = models.DateTimeField()
+
+
+class LogMessage(models.Model):
+	datetime = models.DateTimeField(auto_now_add=True)
+	user = models.OneToOneField('User', related_name='log_messages')
+	message = models.CharField(max_length=200)
 
 
 @receiver(payment_confirm)
