@@ -17,7 +17,7 @@ from conjugation.sitemap import ConjugationSitemap
 from forum.sitemap_generator import ForumSitemap, TopicSitemap
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
-from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls, activate_urls, modal_urls
+from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls, activate_urls, modal_urls, meta_urls
 from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing, favicon, activation_log
 from home.views import change_username, LeFrancaisWagtailSitemap as WagtailSitemap
 from profiles.views import UserTopics, UserPosts
@@ -83,6 +83,7 @@ urlpatterns = [
 
 
     url(r'^le_nombres/', include('le_nombres.urls')),
+    url(r'^', include(meta_urls, namespace='meta')),
     url(r'^', include('social_django.urls'.format(extra), namespace='social')),
     url(r'', include('user_sessions.urls', 'user_sessions')),
     url(r'^new-users-redirect-url/', TemplateView.as_view(template_name='account/change_username_new.html')),
