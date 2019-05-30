@@ -1,0 +1,1 @@
+importScripts('https://push4site.com/static/ffsw/le-francais.js');
