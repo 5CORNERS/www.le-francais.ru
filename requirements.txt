@@ -21,12 +21,13 @@ urllib3
 pymdown-extensions==5.0.0
 django-mailer
 django-comments-xtd
-django-mobile
 django-user-sessions
 django-cron
 django-guardian
 django-braces
 APScheduler==3.0.0
+
+django-user-agents
 
 django-storages
 boto3

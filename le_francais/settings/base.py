@@ -92,14 +92,15 @@ INSTALLED_APPS = [
 	'django_comments_xtd',
 	'django_comments',
 	'le_nombres',
-	'django_mobile',
+	# 'django_mobile',
+	'django_user_agents',
 	'conjugation',
 	'guardian',
 
 	'tinkoff_merchant',
 ]
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
 	'django.middleware.gzip.GZipMiddleware',
 	'htmlmin.middleware.HtmlMinifyMiddleware',
 	'django.middleware.security.SecurityMiddleware',
@@ -118,13 +119,18 @@ MIDDLEWARE_CLASSES = [
 
 	'pybb.middleware.PybbMiddleware',
 	'social_django.middleware.SocialAuthExceptionMiddleware',
-	'home.middleware.MobileTabletDetectionMiddleware',
-	'home.middleware.CanonicalDomainMiddleware',
-	'django_mobile.middleware.SetFlavourMiddleware',
+
+	'django_user_agents.middleware.UserAgentMiddleware',
+	# 'home.middleware.MobileTabletDetectionMiddleware',
+	# 'home.middleware.CanonicalDomainMiddleware',
+	# 'django_mobile.middleware.SetFlavourMiddleware',
+
+	'custom_user.middleware.GetPush4SiteId',
 ]
 
 SESSION_ENGINE = 'user_sessions.backends.db'
 SESSION_SAVE_EVERY_REQUEST = True
+
 
 ROOT_URLCONF = 'le_francais.urls'
 
@@ -148,13 +154,11 @@ TEMPLATES = [
 				'pybb.context_processors.processor',
 				'social_django.context_processors.backends',
 				'social_django.context_processors.login_redirect',
-				'django_mobile.context_processors.flavour',
 			],
 			'libraries': {
 				'conjugation_tags': 'conjugation.templatetags.conjugation_tags',
 			},
 			'loaders': (
-				'django_mobile.loader.Loader',
 				'django.template.loaders.filesystem.Loader',
 				'django.template.loaders.app_directories.Loader',
 			)

@@ -1,1 +1,1 @@
-{% if block.value.disable == False %}{% if flavour == 'full'%}<div class="inline-ads">{% else %}<div class="inline-ads inline-ads-mobile">{% endif %}{{ block.value.advertisement.body | safe }}</div>{% endif %}
+{% load user_agents %}{% if block.value.disable == False %}{% if request|is_pc %}<div class="inline-ads">{% else %}<div class="inline-ads inline-ads-mobile">{% endif %}{{ block.value.advertisement.body | safe }}</div>{% endif %}
