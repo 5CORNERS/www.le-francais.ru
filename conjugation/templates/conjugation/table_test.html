@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static conjugation_tags%}
 {% load site_tags %}
-
+{% load user_agents %}
 {% block title %}Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} во французском языке.{% endblock %}
 {% block description %}Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} — в самой крутой спрягалке из всех здесь представленных: с озвучанием, комментариями и особенностями спряжения. Вам понравится! :){% endblock %}
 
@@ -161,7 +161,7 @@
         <div class="row first_row">
             <div class="col-xs-12 col-sm-12 col-md-6">
                 <div class="row">
-                    {% if flavour == 'mobile' %}
+                    {% if request|is_mobile %}
                         <div class="col-xs-12" style="margin: 0 10px 0">
                             {% conjugation_advertisement_body "lf_fr_conj_mob_01"%}
                         </div>
@@ -183,7 +183,7 @@
 		                </div>
 	                </div>{% endif %}
                 </div>
-                {% if flavour == "mobile" %}
+                {% if request|is_mobile %}
                 <div class="row">
                     <div class="col-xs-12">
                         Читайте об особенностях спряжения {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} в <a href="#regle">конце страницы</a>.
@@ -226,7 +226,7 @@
                 </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6" style="text-align: center">
-                {% if flavour != 'mobile' %}
+                {% if not request|is_mobile %}
                     {% conjugation_advertisement_body "lf_fr_conj_rsb_01"%}
                 {% endif %}
             </div>
@@ -250,7 +250,7 @@
                             ></span></a>{% endif %}{% comment %}<img
 		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
                             >{% endcomment %}</h4></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
+                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.forms_more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
                         </div>
                     {% endfor %}
                 </div>
@@ -276,7 +276,7 @@
                             ></span></a>{% endif %}{% comment %}<img
 		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
                             >{% endcomment %}</h4></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
+                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.forms_more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %}in active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
                         </div>
 			            {% endfor %}
 		            </div>
@@ -290,7 +290,7 @@
                 </div>
                 <div id="regle" class="row regle">
                     <div class="col-xs-12" style="text-align: center">
-                        {% if flavour == 'mobile' %}
+                        {% if request|is_mobile %}
                             {% conjugation_advertisement_body "lf_fr_conj_mob_02"%}
                         {% endif %}
                     </div>

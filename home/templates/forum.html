@@ -2,6 +2,7 @@
 {% load static site_tags %}
 {% load i18n %}
 {% load pybb_tags i18n %}
+{% load user_agents %}
 
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -222,7 +223,7 @@
 {# Global javascript #}
 {% block js %}
 	<script>
-		{% if flavour == 'mobile' or flavour == 'tablet' %}
+		{% if request|is_mobile or request|is_tablet %}
 			const touch = true;
 		{% else %}
 			const touch = false;

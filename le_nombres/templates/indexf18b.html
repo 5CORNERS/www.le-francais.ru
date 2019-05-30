@@ -1,5 +1,6 @@
 {% load static %}
 {% load site_tags %}
+{% load user_agents %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -28,7 +29,7 @@
             max-width: 750px;
         }
     </style>
-    {% if flavour == "full" %}
+    {% if request|is_pc %}
         <!--startDefaultVersion-->
 
         <link rel="stylesheet" href="{% static 'css/imnorm_new9d.min.css' %}" type="text/css"/>
@@ -129,7 +130,7 @@ les nombres</a></span>
         &#x430;&#x443;&#x434;&#x438;&#x440;&#x43e;&#x432;&#x430;&#x43d;&#x438;&#x44f;
     </button>
 
-    {% if flavour == "full" %}
+    {% if request|is_pc %}
         <!--startDefaultVersion-->
 
         <audio id="player" autoplay>
