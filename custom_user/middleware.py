@@ -11,4 +11,4 @@ class GetPush4SiteId(object):
         p4s_id = request.COOKIES.get('p4s_push_subscriber_id', None)
         if request.user.is_authenticated and not (p4s_id is None or p4s_id in request.user.push4site):
             request.user.push4site.append(p4s_id)
-            # request.user.save()
+            request.user.save()
