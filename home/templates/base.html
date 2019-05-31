@@ -1,6 +1,8 @@
 {% load static wagtailuserbar %}
 {% load static site_tags %}
 {% load i18n %}
+{% load pybb_tags i18n %}
+{% load user_agents %}
 
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -57,6 +59,7 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
 	<link rel="stylesheet" href="{% static 'components/bootstrap/dist/css/bootstrap.min.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.min.css' %}">
+
 {% endblock %}
     {% block css %}
 
