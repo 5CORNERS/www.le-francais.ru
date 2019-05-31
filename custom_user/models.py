@@ -61,6 +61,7 @@ class User(AbstractUser):
 		editable=False, verbose_name='Used Usernames')
 
 	push4site = JSONField(
+		null=True,
 		encoder=DjangoJSONEncoder, default=list,
 		verbose_name="push4site ids"
 	)
