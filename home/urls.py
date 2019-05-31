@@ -8,9 +8,9 @@ urlpatterns = [
 ]
 
 meta_urls = [
-    url(r'^manifest.json$', TemplateView.as_view(template_name='meta/manifest.json'), name='manifest'),
-    url(r'^sw.js', TemplateView.as_view(template_name='meta/sw.js'), name='sw'),
-    url(r'^ffsw.js', TemplateView.as_view(template_name='meta/ffsw.js'), name='ffsw')
+    url(r'^manifest.json$', TemplateView.as_view(template_name='meta/manifest.json', content_type='application/json'), name='manifest'),
+    url(r'^sw.js', TemplateView.as_view(template_name='meta/sw.js', content_type='application/javascript'), name='sw'),
+    url(r'^ffsw.js', TemplateView.as_view(template_name='meta/ffsw.js', content_type='application/javascript'), name='ffsw')
 ]
 
 site_import_urls = [
