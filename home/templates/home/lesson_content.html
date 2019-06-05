@@ -110,7 +110,7 @@
 		{% endif %}
 		{% if self.exercise and lesson_was_payed_by_user or self.exercise and request.user.is_superuser %}
 			<li class="nav-item">
-				<a class="nav-link" data-target="" href="#exercise" role="tab"
+				<a class="nav-link" data-toggle="tab" href="#exercise" role="tab"
 							   aria-controls="body">
 								Домашка
 							</a>
@@ -260,6 +260,7 @@
 					{% endfor %}
 				</div>
 			</div>
+			{% assign pane_class "tab_pane" %}
 		{% endif %}
 
 		{% for child_value in self.other_tabs %}
