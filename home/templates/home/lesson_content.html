@@ -207,7 +207,7 @@
 							{% page_advert_body 'revision_body' page.page_type %}
 						</div>
 					</div>
-					{% assign pane_class "tab_pane" %}
+					{% assign pane_class "tab-pane" %}
 				{% elif not userlesson %}
 				{% else %}
 					<div id="revision" class="{{ pane_class }}" role="tabpanel">
@@ -219,7 +219,7 @@
 							{% page_advert_body 'revision_body' page.page_type %}
 						</div>
 					</div>
-					{% assign pane_class "tab_pane" %}
+					{% assign pane_class "tab-pane" %}
 				{% endif %}
 			{% else %}
 				<div id="revision" class="{{ pane_class }}" role="tabpanel">
@@ -229,7 +229,7 @@
 							{% include 'blocks/document_viewer.html' %}
 						{% endwith %}
 						{% page_advert_body 'revision_body' page.page_type %}
-						{% assign pane_class "tab_pane" %}
+						{% assign pane_class "tab-pane" %}
 					</div>
 				</div>
 			{% endif %}
@@ -250,7 +250,7 @@
 					{% endif %}
 				</div>
 			</div>
-			{% assign pane_class "tab_pane" %}
+			{% assign pane_class "tab-pane" %}
 		{% endif %}
 		{% if self.exercise and lesson_was_payed_by_user or self.exercise and request.user.is_superuser %}
 			<div id="exercise" class="{{ pane_class }}" role="tabpanel">
@@ -260,7 +260,7 @@
 					{% endfor %}
 				</div>
 			</div>
-			{% assign pane_class "tab_pane" %}
+			{% assign pane_class "tab-pane" %}
 		{% endif %}
 
 		{% for child_value in self.other_tabs %}
