@@ -159,7 +159,7 @@
 						{% for block in self.body %}{% include_block block %}{% endfor %}
 					{% endif %}
 				{% else %}
-					{% if self.need_payment %}
+					{% if self.need_payment and user.must_pay  %}
 						{% include_30_block self.body 400 %}
 						<div class="row">
 							<div class="col-md-12"><p>Доступ к материалам урока могут получить только зарегистрированные пользователи.</p></div>
