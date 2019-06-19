@@ -95,6 +95,7 @@ INSTALLED_APPS = [
 	# 'django_mobile',
 	'django_user_agents',
 	'conjugation',
+	'notifications',
 	'guardian',
 
 	'tinkoff_merchant',
