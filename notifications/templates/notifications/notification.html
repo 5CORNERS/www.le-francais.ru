@@ -1,0 +1,16 @@
+<li class="notify"
+    data-url="{{ notify_data.notification.click_url }}"
+    data-datetime="{{ notify_data.notification.datetime_creation }}"
+    data-check_datetime="{{ notify_data.check_datetime }}"
+    data-pk="{{ notify_data.notification.pk }}">
+	<div class="col-md-3 col-sm-3 col-xs-3">
+		<div class="notify-img">
+			<img src="{{ notify_data.notification.image.url }}"
+			     height="10px" alt="">
+		</div>
+	</div>
+	<div class="col-md-9 col-sm-9 col-xs-9">
+		<div class="notify-text">{{ notify_data.notification.text|safe }}</div>
+		<p class="time">{{ notify_data.notification.datetime_creation|timesince }} назад</p>
+	</div>
+</li>

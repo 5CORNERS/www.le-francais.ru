@@ -1,98 +1,153 @@
 {% load i18n wagtailcore_tags static %}
 {% load postman_tags %}
 {% load svg %}
+{% load notifications %}
 <nav class="navbar navbar-inverse navbar-fixed-top">
 	<div class="container">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-			        aria-expanded="false" aria-controls="navbar">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-            <a class="navbar-brand navbar-brand-home" href="/"><span style="font-size: 18px"><i class="fa fa-home fa-3" aria-hidden="true"></i></span></a>
+
+		{# Title #}
+		<div class="navbar-header pull-left">
+      <a class="navbar-brand navbar-brand-home" href="/"><span style="font-size: 18px"><i class="fa fa-home fa-3" aria-hidden="true"></i></span></a>
 			<a class="navbar-brand navbar-brand-text" href="/"><span style="font-size: 18px"><i class="fa fa-home fa-3" aria-hidden="true"></i></span>&nbsp;Le-Francais.ru</a>
 		</div>
 
-		<div class="collapse navbar-collapse" id="navbar">
-			<ul class="nav navbar-nav">
-				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-					<a style="color: rgb(170,170,170)" onmouseover="this.style.color='white'"
-					   onmouseout="this.style.color='rgb(170,170,170)'" href="/forum">Форум</a>
-				</li>
-				<li class="dropdown" style="cursor: pointer">
-                    <a class="dropdown-toggle" data-toggle="dropdown">Уроки</a>
-					<ul class="dropdown-menu">
-                        <li><a href="/lecons/prononciation/">Уроки 1—5</a></li>
-                        <li><a href="/lecons_a1/lecon-6/">Уроки 6—59</a></li>
-                        <li><a href="/lecons_b2/season_1/lecon-61/">Уроки 61—312</a></li>
-                    </ul>
-				</li>
-                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-                    <a href="{% url 'conjugation:index' %}">Спряжение глаголов</a>
-                </li>
-                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-                    <a href="/faq">FAQ</a>
-                </li>
-                <li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-                    <a href="/le-francais-sur-skype/">Французский по скайпу</a>
-                </li>
-				{% comment %}<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-					<a href="/collecte">Сами мы не местные...</a>
-				</li>{% endcomment %}
-
+		{# 'Sticky' (non-collapsing) right-side menu item(s) #}
+		<div class="navbar-header navbar-right pull-right navbar-sticky">
+			<ul class="nav navbar-sticky-ul pull-left">
 				{% if request.user.is_authenticated %}{% postman_unread as unread_count %}
-					<li class="dropdown" style="cursor: pointer" >
-                        <a class="dropdown-toggle username" title="{{ request.user.username }}" data-toggle="dropdown">{{ request.user.username }} {% if unread_count%}<i class="fa fa-envelope" aria-hidden="true" style="color: inherit;"></i>{% endif %}<b class="caret"></b></a>
+					<li class="dropdown pull-left" style="cursor: pointer">
+						<a class="dropdown-toggle"
+						   title="{{ request.user.username }}"
+						   data-toggle="dropdown"><span class="username">{{ request.user.username }}</span>
+							{% if unread_count %}<i class="fa fa-envelope"
+							                        aria-hidden="true"
+							                        style="color: inherit;"></i>{% endif %}<b
+									class="caret"></b></a>
 						<ul class="dropdown-menu">
-                            <li><a href="{% url 'pybb:edit_profile' %}">Настройки профиля{# TODO l18n #}</a></li>
-                            {% if user.pybb_profile.post_count > 0 %}
-                                <li><a href="{{ request.user.profile.get_absolute_url }}">Мои посты{# TODO l18n Forum activity #}</a></li>
-                            {% endif %}
+							<li>
+								<a href="{% url 'pybb:edit_profile' %}">Настройки профиля{# TODO l18n #}</a>
+							</li>
+							{% if user.pybb_profile.post_count > 0 %}
+								<li>
+									<a href="{{ request.user.profile.get_absolute_url }}">Мои посты{# TODO l18n Forum activity #}</a>
+								</li>
+							{% endif %}
 							<li>
 								<a href="{% url 'postman:inbox' %}">
-									Личные сообщения{# TODO l18n #}{% if unread_count %} <strong>({{ unread_count }})</strong>{% endif %}
+									Личные сообщения{# TODO l18n #}{% if unread_count %}
+									<strong>({{ unread_count }})</strong>{% endif %}
 								</a>
 							</li>
-                                <li><a href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">Пополнить запасы</a> </li>
-								{% if request.user.is_staff%}<li class="divider"></li>
-								<li class="{{ menu_admin }}"><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a>
+							<li>
+								<a href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">Пополнить запасы</a>
+							</li>
+							{% if request.user.is_staff %}
+								<li class="divider"></li>
+								<li class="{{ menu_admin }}">
+									<a href="{% url 'admin:index' %}">{% trans "Admin" %}</a>
 								</li>{% endif %}
 
-              <li class="divider"></li>
+							<li class="divider"></li>
 
-              <li>
-                <a href="{% url 'account_logout' %}?next={{ request.path }}">Выйти{# TODO l18n #}</a>
-              </li>
-            </ul>
+							<li>
+								<a href="{% url 'account_logout' %}?next={{ request.path }}">Выйти{# TODO l18n #}</a>
+							</li>
+						</ul>
 					</li>
 
 				{% else %}
 
-					<li class="dropdown">
-						<a href="{% url 'account_login' %}?next={{ request.path }}" class="dropdown-toggle"
+					<li class="dropdown pull-left">
+						<a href="{% url 'account_login' %}?next={{ request.path }}"
+						   class="dropdown-toggle"
 						   data-toggle="dropdown">
 							Войти
 							<b class="caret"></b>
 						</a>
 						<ul class="dropdown-menu">
-							<li><a href="{% url 'account_login' %}?next={{ request.path }}">{% trans "Login" %}</a></li>
+							<li>
+								<a href="{% url 'account_login' %}?next={{ request.path }}">{% trans "Login" %}</a>
+							</li>
 							<li>
 								<a href="{% url 'account_signup' %}?next={{ request.path }}">Регистрация{# TODO l18n #}</a>
 							</li>
 						</ul>
 					</li>
 				{% endif %}
-				<li>
-					<a class="coffee-icon"
-					   href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal"
-					   class="swg">
+				<li class="pull-left">
+					<a class="coffee-icon swg"
+					   href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">
 						{% svg 'coffee icon' %}
+{#						<span class="nav-mobile-text hidden-sm hidden-md hidden-lg">Угостить кофе</span>#}
 					</a>
 				</li>
+				{% notification_navbar_dropdown %}
+			</ul>
 
+			{# Required bootstrap placeholder for the collapsed menu #}
+		<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+			        aria-expanded="false" aria-controls="navbar">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+
+		</div>
+
+
+	<div class="visible-xs-block clearfix"></div>
+
+
+
+
+		<div class="collapse navbar-collapse navbar-left" id="navbar">
+			<ul class="nav navbar-nav pull-left">
+				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
+					<a style="color: rgb(170,170,170)"
+					   onmouseover="this.style.color='white'"
+					   onmouseout="this.style.color='rgb(170,170,170)'"
+					   href="/forum">Форум</a>
+				</li>
+				<li class="dropdown" style="cursor: pointer">
+					<a class="dropdown-toggle" data-toggle="dropdown">Уроки</a>
+					<ul class="dropdown-menu">
+						<li><a href="/lecons/prononciation/">Уроки 1—5</a></li>
+						<li><a href="/lecons_a1/lecon-6/">Уроки 6—59</a></li>
+						<li><a href="/lecons_b2/season_1/lecon-61/">Уроки 61—312</a></li>
+					</ul>
+				</li>
+				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
+					<a href="{% url 'conjugation:index' %}">Спряжение глаголов</a>
+				</li>
+				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
+					<a href="/faq">FAQ</a>
+				</li>
+				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
+					<a href="/le-francais-sur-skype/">Французский по скайпу</a>
+				</li>
+				{% comment %}<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
+					<a href="/collecte">Сами мы не местные...</a>
+				</li>{% endcomment %}
+
+
+				{% comment %}<li>
+					<a class="coffee-icon swg"
+					   href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">
+						{% svg 'coffee icon' %}
+						<span class="nav-mobile-text hidden-sm hidden-md hidden-lg">Угостить кофе</span>
+					</a>
+				</li>{% endcomment %}
+				{% comment %}<li>
+					<a class="t-shirt-icon"
+					   href=""
+					   target="_blank">
+						<i class="fas fa-tshirt" style="color: inherit; vertical-align: middle"></i>
+						<span class="nav-mobile-text hidden-sm hidden-md hidden-lg">Футболки</span>
+					</a>
+				</li>{% endcomment %}
 			</ul>
 		</div>
+
 	</div>
 </nav>

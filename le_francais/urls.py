@@ -20,6 +20,7 @@ from home.forms import AORProfileForm
 from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls, activate_urls, modal_urls, meta_urls
 from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing, favicon, activation_log
 from home.views import change_username, LeFrancaisWagtailSitemap as WagtailSitemap
+from notifications.urls import notifications_api as notifications_api_urls
 from profiles.views import UserTopics, UserPosts
 from search import views as search_views
 
@@ -49,6 +50,7 @@ urlpatterns = [
 
     url(r'^import/', include(site_import_urls)),
     url(r'^api/', include(api_urls)),
+    url(r'^api/', include(notifications_api_urls, namespace='notifications')),
     url(r'^modal/', include(modal_urls, namespace='modal')),
 
     url(r'^payments/', include(payment_urls, namespace='payments')),
