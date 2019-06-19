@@ -27,6 +27,7 @@ from search import views as search_views
 extra = getattr(settings, setting_name('TRAILING_SLASH'), True) and '/' or ''
 urlpatterns = [
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+    url(r'^ads\.txt$', TemplateView.as_view(template_name='ads.txt', content_type='text/plain')),
 
     url(r'^favicon\.ico$', favicon),
 
