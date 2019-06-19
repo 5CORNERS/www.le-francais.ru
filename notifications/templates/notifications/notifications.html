@@ -1,10 +1,4 @@
 {% load static %}
-<script>
-	const NEW_NOTIFY_PKS = [{% for notify_data in new_notifications %}{{ notify_data.id }}, {% endfor %}];
-	const CHECK_URL = '{{ check_list_url }}';
-</script>
-<link type="text/css" rel="stylesheet" href="{% static 'notifications/css/notifications.min.css' %}">
-<script type="text/javascript" src="{% static 'notifications/js/notifications.min.js' %}"></script>
 <li class="dropdown notify-dropdown pull-right">
 	<a href="#"
 	   class="dropdown-toggle"
@@ -45,4 +39,9 @@
 		</div>
 	</ul>
 </li>
-<style></style>
+<script>
+	const NEW_NOTIFY_PKS = [{% for notify_data in new_notifications %}{{ notify_data.id }}, {% endfor %}];
+	const CHECK_URL = '{{ check_list_url }}';
+</script>
+<link type="text/css" rel="stylesheet" href="{% static 'notifications/css/notifications.min.css' %}">
+<script type="text/javascript" src="{% static 'notifications/js/notifications.min.js' %}"></script>
