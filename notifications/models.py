@@ -79,30 +79,31 @@ class NotificationUser(models.Model):
 
 
 def create_pybb_post_notification(sender, instance: Post, **kwargs):
-    notification = Notification(
-        title='Новый ответ в теме',
-        category=Notification.REPLYES,
-        data = dict(
-            username=str(instance.user),
-            post_name=str(instance),
-            post_url=instance.get_absolute_url(),
-            topic_name=str(instance.topic),
-            topic_url=instance.topic.get_absolute_url()
-        ),
-        click_url=instance.get_absolute_url(),
-        image=NotificationImage.objects.get_or_create(
-            url=instance.user.pybb_profile.avatar_url
-        )[0],
-        content_object=instance,
-    )
-    notification.save()
-    users_to_notify = User.objects.filter(
-        id__in=instance.topic.subscribers.all()).exclude(id=instance.user.id)
-    for user in users_to_notify:
-        notification_user, created = NotificationUser.objects.get_or_create(
-            notification=notification,
-            user=user
+    if instance.updated is None :
+        notification = Notification(
+            title='Новый ответ в теме',
+            category=Notification.REPLYES,
+            data = dict(
+                username=str(instance.user),
+                post_name=str(instance),
+                post_url=instance.get_absolute_url(),
+                topic_name=str(instance.topic),
+                topic_url=instance.topic.get_absolute_url()
+            ),
+            click_url=instance.get_absolute_url(),
+            image=NotificationImage.objects.get_or_create(
+                url=instance.user.pybb_profile.avatar_url
+            )[0],
+            content_object=instance,
         )
+        notification.save()
+        users_to_notify = User.objects.filter(
+            id__in=instance.topic.subscribers.all()).exclude(id=instance.user.id)
+        for user in users_to_notify:
+            notification_user, created = NotificationUser.objects.get_or_create(
+                notification=notification,
+                user=user
+            )
 
 
 def create_pybb_like_notification(sender, instance: Like, **kwargs):
