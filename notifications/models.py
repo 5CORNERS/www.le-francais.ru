@@ -97,7 +97,7 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
     )
     notification.save()
     users_to_notify = User.objects.filter(
-        id__in=instance.topic.subscribers.all()).exclude()
+        id__in=instance.topic.subscribers.all()).exclude(id=instance.user.id)
     for user in users_to_notify:
         notification_user, created = NotificationUser.objects.get_or_create(
             notification=notification,
