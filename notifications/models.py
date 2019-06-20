@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models.signals import post_save, post_delete
+from postman.models import Message
 
 from custom_user.models import User
 from pybb.models import Post, Like
@@ -24,9 +25,11 @@ class NotificationImage(models.Model):
 class Notification(models.Model):
     LIKES = 'LK'
     REPLYES = 'RP'
+    MESSAGES = 'MG'
     CATEGORIES_CHOICES = [
         (LIKES, 'Likes'),
         (REPLYES, 'Replyes'),
+        (MESSAGES, 'Messages')
     ]
     title = models.CharField(max_length=50)
     # field was removed
@@ -40,7 +43,8 @@ class Notification(models.Model):
     datetime_creation = models.DateTimeField(auto_now_add=True)
 
     data = JSONField(null=True)
-    category = models.CharField(choices=CATEGORIES_CHOICES, max_length=10, null=True)
+    category = models.CharField(choices=CATEGORIES_CHOICES, max_length=10,
+                                null=True)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -98,7 +102,8 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
         )
         notification.save()
         users_to_notify = User.objects.filter(
-            id__in=instance.topic.subscribers.all()).exclude(id=instance.user.id)
+            id__in=instance.topic.subscribers.all()).exclude(
+            id=instance.user.id)
         for user in users_to_notify:
             notification_user, created = NotificationUser.objects.get_or_create(
                 notification=notification,
@@ -152,6 +157,31 @@ def delete_pybb_like_notification(sender, instance: Like, **kwargs):
         .update(active=False)
 
 
+def create_postman_notification(sender, instance: Message, **kwargs):
+    if kwargs['created']:
+        data = dict(
+                sender=str(instance.sender),
+                message=instance.body[:20] + '...' if len(
+                    instance.body) > 20 else instance.body[:20] + '',
+                message_url=instance.get_absolute_url(),
+            )
+        notification, created = Notification.objects.get_or_create(
+            category=Notification.MESSAGES,
+            data=data,
+            click_url=data['message_url'],
+            image=NotificationImage.objects.get_or_create(
+                url=instance.sender.pybb_profile.avatar_url
+            )[0],
+            content_type=ContentType.objects.get_for_model(sender),
+            object_id=instance.pk,
+        )
+        NotificationUser.objects.create(
+            notification=notification,
+            user=instance.recipient
+        )
+
+
 post_save.connect(create_pybb_post_notification, Post)
 post_save.connect(create_pybb_like_notification, Like)
 post_delete.connect(delete_pybb_like_notification, Like)
+post_save.connect(create_postman_notification, Message)
