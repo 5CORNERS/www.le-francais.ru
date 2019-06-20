@@ -252,7 +252,7 @@
 			</div>
 			{% assign pane_class "tab-pane" %}
 		{% endif %}
-		{% if self.exercise and lesson_was_payed_by_user or self.exercise and request.user.is_superuser %}
+		{% if self.exercise and lesson_was_payed_by_user or self.exercise and request.user.is_superuser or self.exercise and not request.user.must_pay %}
 			<div id="exercise" class="{{ pane_class }}" role="tabpanel">
 				<div>
 					{% for block in self.exercise %}
