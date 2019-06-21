@@ -108,7 +108,7 @@
 				</li>
 			{% endif %}
 		{% endif %}
-		{% if self.exercise and lesson_was_payed_by_user or self.exercise and request.user.is_superuser %}
+		{% if self.exercise and lesson_was_payed_by_user or self.exercise and request.user.is_superuser or self.exercise and not request.user.must_pay %}
 			<li class="nav-item">
 				<a class="nav-link" data-toggle="tab" href="#exercise" role="tab"
 							   aria-controls="exercise">
