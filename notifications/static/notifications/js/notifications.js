@@ -27,7 +27,7 @@ function update_badge() {
 }
 
 function get_drop_content() {
-	$('.notify-drop > .drop-content').replaceWith($("<div class=\"drop-content\"><img src='static/images/loading_icon.gif'></div>"));
+	$('.notify-drop > .drop-content').replaceWith($("<div class=\"drop-content\"><img src='/static/images/loading_icon.gif'></div>"));
 	$.ajax(Urls['notifications:get_drop_content_html'](), {
 		data: {
 			path: window.location.pathname,
