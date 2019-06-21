@@ -1,6 +1,6 @@
 $(document).ready(function () {
 	$('.notify-dropdown').on('click', get_drop_content);
-	setInterval(update_badge, 10000);
+	setInterval(update_badge, 25000);
 });
 
 function check_notifications(pks) {
