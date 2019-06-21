@@ -15,4 +15,4 @@
 	</ul>
 </li>
 <link type="text/css" rel="stylesheet" href="{% static 'notifications/css/notifications.min.css' %}">
-<script type="text/javascript" src="{% static 'notifications/js/notifications.min.js' %}"></script>
+{% if authenticated%}<script type="text/javascript" src="{% static 'notifications/js/notifications.min.js' %}"></script>{% endif %}
