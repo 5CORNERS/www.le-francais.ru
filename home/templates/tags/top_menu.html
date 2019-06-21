@@ -19,9 +19,9 @@
 						<a class="dropdown-toggle"
 						   title="{{ request.user.username }}"
 						   data-toggle="dropdown"><span class="username">{{ request.user.username }}</span>
-							{% if unread_count %}<i class="fa fa-envelope"
+							{% comment %}{% if unread_count %}<i class="fa fa-envelope"
 							                        aria-hidden="true"
-							                        style="color: inherit;"></i>{% endif %}<b
+							                        style="color: inherit;"></i>{% endif %}{% endcomment %}<b
 									class="caret"></b></a>
 						<ul class="dropdown-menu">
 							<li>
