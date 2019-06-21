@@ -6,42 +6,13 @@
 	   role="button"
 	   aria-haspopup="true"
 	   aria-expanded="true">
-		<i class="fas fa-bell notify-icon"></i>{% if new_notifications %}
-		<span class="notify-badge">{{ new_notifications|length }}</span>{% endif %}
+		<i class="fas fa-bell notify-icon"></i>
+		<span class="notify-badge" id="notify-badge-nav" {% if not new_notifications %}style="display: none" {% endif %}>{{ new_notifications|length }}</span>
 	</a>
 
 	<ul class="dropdown-menu notify-drop">
-		<div class="drop-content">
-			{% if has_notifications and authenticated %}
-				{% if new_notifications %}
-					<div class="col-xs-12 col-md-12 col-lg-12 notify-drop-title">
-						Новые
-					</div>
-					{% for notify_data in new_notifications %}
-						{% include 'notifications/notification.html' with notify_data=notify_data %}
-					{% endfor %}{% endif %}
-				{% if old_notifications %}
-					<div class="col-xs-12 col-md-12 col-lg-12 notify-drop-title">
-						Просмотренные
-					</div>
-					{% for notify_data in old_notifications %}
-						{% include 'notifications/notification.html' with notify_data=notify_data %}
-					{% endfor %}{% endif %}
-			{% elif not authenticated %}
-				<div class="col-xs-12 col-md-12 col-lg-12 notify-drop-title">
-					<a href="{{ login_url }}">Авторизуйтесь</a>, чтобы увидеть уведомления.
-				</div>
-			{% else %}
-				<div class="col-xs-12 col-md-12 col-lg-12 notify-drop-title">
-					Нет уведомлений
-				</div>
-			{% endif %}
-		</div>
+			{% include 'notifications/drop-content.html' with has_notifications=has_notification authenticated=authenticated new_notifications=new_notifications old_notifications=old_notifications login_url=login_url %}
 	</ul>
 </li>
-<script>
-	const NEW_NOTIFY_PKS = [{% for notify_data in new_notifications %}{{ notify_data.id }}, {% endfor %}];
-	const CHECK_URL = '{{ check_list_url }}';
-</script>
 <link type="text/css" rel="stylesheet" href="{% static 'notifications/css/notifications.min.css' %}">
 <script type="text/javascript" src="{% static 'notifications/js/notifications.min.js' %}"></script>
