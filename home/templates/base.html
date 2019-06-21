@@ -50,6 +50,10 @@
     <meta name="description" content="{% block description %}{% endblock %}"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
+
+{% block js_reverse %}
+	<script src="{% static 'django_js_reverse/js/reverse.js' %}"></script>
+{% endblock %}
 {% block bootstrap_js %}
     <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
