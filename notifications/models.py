@@ -61,7 +61,16 @@ class Notification(models.Model):
             Title=self.title,
             Text=self.text,
             ClickUrl=self.click_url,
-            ImageBase64=self.image,
+            ImageBase64=self.image.base64,
+        )
+        return data
+
+    def to_dict(self):
+        data = dict(
+            image=self.image.url,
+            html=self.text,
+            url=self.click_url,
+            datetime=self.datetime_creation,
         )
         return data
 
@@ -83,11 +92,11 @@ class NotificationUser(models.Model):
 
 
 def create_pybb_post_notification(sender, instance: Post, **kwargs):
-    if instance.updated is None :
+    if instance.updated is None:
         notification = Notification(
             title='Новый ответ в теме',
             category=Notification.REPLYES,
-            data = dict(
+            data=dict(
                 username=str(instance.user),
                 post_name=str(instance),
                 post_url=instance.get_absolute_url(),

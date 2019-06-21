@@ -1,5 +1,6 @@
+from django.conf import settings
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
@@ -7,21 +8,70 @@ from django.views.decorators.http import require_POST, require_GET
 from .models import Notification, NotificationUser
 
 
-# Create your views here.
+def query_notifications(request):
+    login_url = settings.LOGIN_URL + '?next=' + request.GET.get('path', '')
+    if request.user.is_anonymous:
+        return dict(authenticated=False, login_url=login_url)
+    notifyes = list(
+        NotificationUser.objects.select_related('notification').filter(
+            user=request.user, notification__active=True).order_by(
+            '-notification__datetime_creation'))
+    if not notifyes:
+        has_notifyes = False
+    else:
+        has_notifyes = True
+    new_notifyes = list(filter(lambda x: x.check_datetime is None, notifyes))
+    old_notifyes = [x for x in notifyes if x not in new_notifyes]
+    return dict(
+        authenticated=True,
+        has_notifications=has_notifyes,
+        new_notifications=new_notifyes,
+        old_notifications=old_notifyes,
+        login_url=login_url,
+    )
 
 
-def notification_list_to_json(notifications: list):
-    return [notification.to_json() for notification in notifications]
+def notification_list_to_dict(notifications: list):
+    return [notification.to_dict() for notification in notifications]
 
 
-@require_POST
+@require_GET
 def get_notifications(request):
     user = request.user
     notifications = Notification.objects \
         .order_by('datetime_creation') \
-        .filter(notificationuser=user)
-    data = {'notification_list': notification_list_to_json(notifications)}
+        .filter(notificationuser__user=user)
+    data = {'notification_list': notification_list_to_dict(notifications)}
     return JsonResponse(data)
+
+
+@require_GET
+def get_new_notifications_count(request):
+    user = request.user
+    if not user.is_authenticated:
+        return HttpResponse(0, status=200)
+    count = NotificationUser.objects.filter(
+        check_datetime=None, user=user
+    ).count()
+    return HttpResponse(count, status=200)
+
+
+@require_GET
+def get_new_notifications(request):
+    user = request.user
+    notifications = Notification.objects \
+        .order_by('datetime_creation') \
+        .filter(notificationuser__user=user,
+                notificationuser__check_datetime=None)
+    data = {'notification_list': notification_list_to_dict(notifications)}
+    return JsonResponse(data)
+
+
+@require_GET
+def get_drop_content_html(request):
+    data = query_notifications(request)
+    return render(request, template_name='notifications/drop-content.html',
+                  context=data)
 
 
 @require_GET
