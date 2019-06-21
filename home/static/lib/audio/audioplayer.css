@@ -348,7 +348,11 @@ a.audioplayer-download-button {
 }
 
 .navbar-header .audioplayer {
-    position: absolute;
-    right: 58px;
     top: 9px;
+}
+
+@media (max-width: 768px) {
+    .navbar-header .audioplayer {
+        top: 3px;
+}
 }

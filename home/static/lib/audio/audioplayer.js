@@ -33,12 +33,12 @@
 		canPlayType = function (file) {
 			var audioElement = document.createElement('audio');
 			return true;
-			return !!(audioElement.canPlayType &&
-				audioElement.canPlayType('audio/' + file.split('.')
-					.pop()
-					.toLowerCase() + ';')
-					.replace(/no/, '')
-			);
+			// return !!(audioElement.canPlayType &&
+			// 	audioElement.canPlayType('audio/' + file.split('.')
+			// 		.pop()
+			// 		.toLowerCase() + ';')
+			// 		.replace(/no/, '')
+			// );
 		};
 
 	$.fn.audioPlayer = function (params) {
@@ -251,10 +251,10 @@
 					theAudio.currentTime = +localStorage['lecon-' + lesson_number];
 				}
 
-				$menuPlayer.addClass(cssClass.mini);
+				$menuPlayer.addClass(cssClass.mini).addClass('pull-right');
 				$menuPlayer.attr('number', $menuPlayer.find('audio').attr('number'));
 				$menuPlayer.find('audio').remove();
-				$('.navbar-header').prepend($menuPlayer);
+				$('.nav.navbar-sticky-ul').prepend($menuPlayer);
 
 				$menuPlayer.find('.' + cssClass.playPause).on('click', function (e) {
 					e.preventDefault();
