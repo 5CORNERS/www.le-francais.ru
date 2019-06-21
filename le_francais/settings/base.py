@@ -99,6 +99,7 @@ INSTALLED_APPS = [
 	'guardian',
 
 	'tinkoff_merchant',
+	'django_js_reverse',
 ]
 
 MIDDLEWARE = [
@@ -476,3 +477,9 @@ TINKOFF_PAYMENTS_CONFIG = {
 PAY54_CLIENT_ID = os.environ.get('PAY54_CLIENT_ID')
 PAY54_CLIENT_SECRET = os.environ.get('PAY54_CLIENT_SECRET')
 PAY54_TEST_ENABLE = False
+
+# Js Reverse settings
+
+JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['notifications']
+JS_REVERSE_OUTPUT_PATH = 'home/static/django_js_reverse/js/'
+
