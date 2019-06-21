@@ -28,6 +28,7 @@ django-braces
 APScheduler==3.0.0
 
 django-user-agents
+django-js-reverse
 
 django-storages
 boto3
