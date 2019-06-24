@@ -7,3 +7,5 @@ RP_TEXT = "<b>{username}</b> ответил(а) <a href='{post_url}'>\"{post_nam
 # {sender}, {message}, {message_url}
 MG_TEXT = "<b>{sender}</b> отправил(а) вам личное сообщение \"<a href='{message_url}'>{message}</a>\""
 
+TP_TEXT = "<b>{author}</b> создал(а) тему \"<a href='{topic_url}'>{name}</a>\"."
+
