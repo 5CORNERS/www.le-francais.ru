@@ -7202,3 +7202,7 @@ kbd {
 .tooltip-like-entry:not(:last-child) {
     margin-right: 6px;
 }
+
+.block-forum summary{
+    margin: 0 0 0.5em 0;
+}
