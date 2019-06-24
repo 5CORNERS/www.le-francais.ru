@@ -1,34 +1,38 @@
+from typing import List, Any
+
 from django.conf import settings
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
+from notifications.models import Notification
 from .models import Notification, NotificationUser
 
 
-def query_notifications(request):
-    login_url = settings.LOGIN_URL + '?next=' + request.GET.get('path', '')
-    if request.user.is_anonymous:
-        return dict(authenticated=False, login_url=login_url)
-    notifyes = list(
-        NotificationUser.objects.select_related('notification').filter(
-            user=request.user, notification__active=True).order_by(
-            '-notification__datetime_creation'))
-    if not notifyes:
-        has_notifyes = False
-    else:
-        has_notifyes = True
-    new_notifyes = list(filter(lambda x: x.check_datetime is None, notifyes))
-    old_notifyes = [x for x in notifyes if x not in new_notifyes]
-    return dict(
-        authenticated=True,
-        has_notifications=has_notifyes,
-        new_notifications=new_notifyes,
-        old_notifications=old_notifyes,
-        login_url=login_url,
-    )
+# def query_notifications(request):
+#     login_url = settings.LOGIN_URL + '?next=' + request.GET.get('path', '')
+#     if request.user.is_anonymous:
+#         return dict(authenticated=False, login_url=login_url)
+#     notifyes = list(
+#         NotificationUser.objects.select_related('notification').filter(
+#             user=request.user, notification__active=True).order_by(
+#             '-notification__datetime_creation'))
+#     if not notifyes:
+#         has_notifyes = False
+#     else:
+#         has_notifyes = True
+#     new_notifyes = list(filter(lambda x: x.check_datetime is None, notifyes))
+#     old_notifyes = [x for x in notifyes if x not in new_notifyes]
+#     return dict(
+#         authenticated=True,
+#         has_notifications=has_notifyes,
+#         new_notifications=new_notifyes,
+#         old_notifications=old_notifyes,
+#         login_url=login_url,
+#     )
 
 
 def notification_list_to_dict(notifications: list):
@@ -50,10 +54,19 @@ def get_new_notifications_count(request):
     user = request.user
     if not user.is_authenticated:
         return HttpResponse(0, status=200)
-    count = NotificationUser.objects.filter(
-        check_datetime=None, user=user
-    ).count()
-    return HttpResponse(count, status=200)
+    notifications = Notification.objects.filter(Q(to_all=True) | Q(notificationuser__user=request.user),
+            active=True).exclude(excpt=request.user)
+    new_notifyes = []
+    for notify in notifications:  # type: Notification
+        try:
+            notification_user = notify.notificationuser_set.get(
+                user=request.user)
+            if notification_user.check_datetime is None:
+                new_notifyes.append(notify)
+        except NotificationUser.DoesNotExist:
+            if notify.to_all:
+                new_notifyes.append(notify)
+    return HttpResponse(len(new_notifyes), status=200)
 
 
 @require_GET
@@ -69,7 +82,36 @@ def get_new_notifications(request):
 
 @require_GET
 def get_drop_content_html(request):
-    data = query_notifications(request)
+    login_url = settings.LOGIN_URL + '?next=' + request.GET.get('path', '')
+    if request.user.is_anonymous:
+        return dict(authenticated=False, login_url=login_url)
+    notifyes = list(
+        Notification.objects.prefetch_related('notificationuser_set').filter(
+            Q(to_all=True) | Q(notificationuser__user=request.user),
+            active=True,
+        ).exclude(excpt=request.user).order_by('-datetime_creation')) # TODO: фильтровать по разрешениям
+    if not notifyes:
+        has_notifyes = False
+    else:
+        has_notifyes = True
+    new_notifyes: List[Notification] = []
+    for notify in notifyes:  # type: Notification
+        try:
+            notification_user = notify.notificationuser_set.get(
+                user=request.user)
+            if notification_user.check_datetime is None:
+                new_notifyes.append(notify)
+        except NotificationUser.DoesNotExist:
+            if notify.to_all:
+                new_notifyes.append(notify)
+    old_notifyes: List[Notification] = [x for x in notifyes if x not in new_notifyes]
+    data =  dict(
+        authenticated=True,
+        has_notifications=has_notifyes,
+        new_notifications=new_notifyes,
+        old_notifications=old_notifyes,
+        login_url=login_url,
+    )
     return render(request, template_name='notifications/drop-content.html',
                   context=data)
 
@@ -85,8 +127,11 @@ def check_notification(request, pk):
 @csrf_exempt
 @require_POST
 def check_notifications(request):
-    user = request.user
     pks = list(map(int, request.POST.get('pks', '').split(',')))
-    NotificationUser.objects.filter(user=user, pk__in=pks).update(
-        check_datetime=timezone.now())
+    notifyes = Notification.objects.prefetch_related('notificationuser_set').filter(pk__in=pks)
+    for notify in notifyes:
+        notification_user, created = notify.notificationuser_set.get_or_create(
+            user=request.user
+        )
+    NotificationUser.objects.filter(notification_id__in=notifyes).update(check_datetime=timezone.now())
     return HttpResponse('OK', status=200)

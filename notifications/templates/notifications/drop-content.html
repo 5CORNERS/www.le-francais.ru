@@ -1,22 +1,22 @@
 <div class="drop-content">
 {% if has_notifications and authenticated %}
 	<script>
-		var NEW_NOTIFY_PKS = [{% for notify_data in new_notifications %}{{ notify_data.id }}, {% endfor %}];
+		var NEW_NOTIFY_PKS = [{% for notify in new_notifications %}{{ notify.id }}, {% endfor %}];
 		var CHECK_URL = '{{ check_list_url }}';
 	</script>
 	{% if new_notifications %}
 		<div class="col-xs-12 col-md-12 col-lg-12 notify-drop-title">
 			Новые
 		</div>
-		{% for notify_data in new_notifications %}
-			{% include 'notifications/notification.html' with notify_data=notify_data %}
+		{% for notify in new_notifications %}
+			{% include 'notifications/notification.html' with notify=notify %}
 		{% endfor %}{% endif %}
 	{% if old_notifications %}
 		<div class="col-xs-12 col-md-12 col-lg-12 notify-drop-title">
 			Просмотренные
 		</div>
-		{% for notify_data in old_notifications %}
-			{% include 'notifications/notification.html' with notify_data=notify_data %}
+		{% for notify in old_notifications %}
+			{% include 'notifications/notification.html' with notify=notify %}
 		{% endfor %}{% endif %}
 {% elif not authenticated %}
 	<div class="col-xs-12 col-md-12 col-lg-12 notify-drop-title">
