@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import ast
 from datetime import datetime
 
 from django.conf import settings
@@ -10,7 +11,7 @@ from django.db.models.signals import post_save, post_delete
 from postman.models import Message
 
 from custom_user.models import User
-from pybb.models import Post, Like
+from pybb.models import Post, Like, Topic
 from pybb.models import Post, Like
 from . import consts
 
@@ -26,10 +27,12 @@ class Notification(models.Model):
     LIKES = 'LK'
     REPLYES = 'RP'
     MESSAGES = 'MG'
+    TOPICS = 'TP'
     CATEGORIES_CHOICES = [
         (LIKES, 'Likes'),
         (REPLYES, 'Replyes'),
-        (MESSAGES, 'Messages')
+        (MESSAGES, 'Messages'),
+        (TOPICS, 'Topics')
     ]
     title = models.CharField(max_length=50)
     # field was removed
@@ -52,9 +55,22 @@ class Notification(models.Model):
 
     active = models.BooleanField(default=True)
 
+    to_all = models.BooleanField(default=False)
+    excpt = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
+
     @property
     def text(self):
-        return getattr(consts, self.category + '_TEXT', '').format(**self.data)
+        try:
+            return getattr(consts, self.category + '_TEXT', '').format(**self.data)
+        except TypeError:
+            self.data = ast.literal_eval(self.data)
+            return self.text
+
+    def check_datetime(self, user):
+        try:
+            return self.notificationuser_set.get(user=user).check_datetime
+        except NotificationUser.DoesNotExist:
+            return None
 
     def to_json(self):
         data = dict(
@@ -171,7 +187,7 @@ def create_postman_notification(sender, instance: Message, **kwargs):
         data = dict(
                 sender=str(instance.sender),
                 message=instance.body[:20] + '...' if len(
-                    instance.body) > 20 else instance.body[:20] + '',
+                    instance.body) > 20 else instance.body,
                 message_url=instance.get_absolute_url(),
             )
         notification, created = Notification.objects.get_or_create(
@@ -190,7 +206,38 @@ def create_postman_notification(sender, instance: Message, **kwargs):
         )
 
 
+def create_pybb_topic_notification(sender, instance: Topic, **kwargs):
+    if not kwargs['created']:
+        return
+    data = dict(
+        author=str(instance.user),
+        name=instance.name[:20] + '...' if len(
+            instance.name) > 20 else instance.name,
+        topic_url=instance.get_absolute_url(),
+    )
+    notification, created = Notification.objects.get_or_create(
+        category=Notification.TOPICS,
+        data=data,
+        click_url=data['topic_url'],
+        image=NotificationImage.objects.get_or_create(
+            url=instance.user.pybb_profile.avatar_url
+        )[0],
+        content_type=ContentType.objects.get_for_model(sender),
+        object_id=instance.pk,
+        to_all=True,
+        excpt=instance.user,
+    )
+
+
+def delete_pybb_topic_notification(sender, instance: Topic, **kwargs):
+    Notification.objects.filter(
+        content_type=ContentType.objects.get_for_model(sender),
+        object_id=instance.pk,
+    ).update(active=False)
+
 post_save.connect(create_pybb_post_notification, Post)
 post_save.connect(create_pybb_like_notification, Like)
 post_delete.connect(delete_pybb_like_notification, Like)
 post_save.connect(create_postman_notification, Message)
+post_save.connect(create_pybb_topic_notification, Topic)
+post_delete.connect(delete_pybb_topic_notification, Topic)
