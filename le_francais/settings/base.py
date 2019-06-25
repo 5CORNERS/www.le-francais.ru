@@ -483,3 +483,20 @@ PAY54_TEST_ENABLE = False
 JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['notifications']
 JS_REVERSE_OUTPUT_PATH = 'home/static/django_js_reverse/js/'
 
+# Logging settings
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'ERROR'),
+        },
+    },
+}
