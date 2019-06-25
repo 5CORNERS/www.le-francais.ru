@@ -2281,13 +2281,13 @@ body {
 
 .block-forum .btn-warning {
     border-color: #eea236;
-    background-color: #f0ad4e;
+    background-color: #FAA916;
     color: #fff
 }
 
 .block-forum .btn-warning:hover, .block-forum .btn-warning:focus, .block-forum .btn-warning:active, .block-forum .btn-warning.active, .block-forum .open .dropdown-toggle.btn-warning {
     border-color: #d58512;
-    background-color: #ed9c28;
+    background-color: #d88716;
     color: #fff
 }
 
@@ -2297,7 +2297,7 @@ body {
 
 .block-forum .btn-warning.disabled, .block-forum .btn-warning[disabled], .block-forum fieldset[disabled] .btn-warning, .block-forum .btn-warning.disabled:hover, .block-forum .btn-warning[disabled]:hover, .block-forum fieldset[disabled] .btn-warning:hover, .block-forum .btn-warning.disabled:focus, .block-forum .btn-warning[disabled]:focus, .block-forum fieldset[disabled] .btn-warning:focus, .block-forum .btn-warning.disabled:active, .block-forum .btn-warning[disabled]:active, .block-forum fieldset[disabled] .btn-warning:active, .block-forum .btn-warning.disabled.active, .block-forum .btn-warning[disabled].active, .block-forum fieldset[disabled] .btn-warning.active {
     border-color: #eea236;
-    background-color: #f0ad4e
+    background-color: #ffe869
 }
 
 .block-forum .btn-warning .badge {
@@ -6733,22 +6733,22 @@ body {
 }
 
 .block-forum .btn-warning {
-    border-color: #e38d13;
-    background-image: -webkit-linear-gradient(top, #f0ad4e 0, #eb9316 100%);
-    background-image: linear-gradient(to bottom, #f0ad4e 0, #eb9316 100%);
+    border-color: #e09016;
+    background-image: -webkit-linear-gradient(top, #FAA916 0, #e09016 100%);
+    background-image: linear-gradient(to bottom, #FAA916 0, #e09016 100%);
     background-repeat: repeat-x;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff0ad4e', endColorstr='#ffeb9316', GradientType=0);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FAA916', endColorstr='#e09016', GradientType=0);
     filter: progid:DXImageTransform.Microsoft.gradient(enabled=false)
 }
 
 .block-forum .btn-warning:hover, .block-forum .btn-warning:focus {
-    background-color: #eb9316;
+    background-color: #ea9c16;
     background-position: 0 -15px
 }
 
 .block-forum .btn-warning:active, .block-forum .btn-warning.active {
-    border-color: #e38d13;
-    background-color: #eb9316
+    border-color: #e09016;
+    background-color: #ea9c16
 }
 
 .block-forum .btn-danger {
