@@ -19,6 +19,8 @@ from django.views import generic, View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from oauth2client.client import OAuth2WebServerFlow
+
+from custom_user.models import LogMessage
 from pure_pagination import Paginator, PaginationMixin
 from pybb import defaults, util as pybb_util
 from pybb.forms import PostForm
@@ -164,6 +166,12 @@ def listen_request(request):
 		lesson = LessonPage.objects.get(lesson_number=lesson_number)
 	except:
 		return HttpResponse('false', status=400)
+
+	if request.POST.get('download'):
+		LogMessage(
+			user=session.user,
+			message='Download Lesson ' + lesson_number
+		).save()
 
 	if not lesson.need_payment or not session.user.must_pay:
 		return HttpResponse('full', status=200)
