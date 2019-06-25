@@ -211,8 +211,8 @@ def create_pybb_topic_notification(sender, instance: Topic, **kwargs):
         return
     data = dict(
         author=str(instance.user),
-        name=instance.name[:20] + '...' if len(
-            instance.name) > 20 else instance.name,
+        name=instance.name[:40] + '...' if len(
+            instance.name) > 40 else instance.name,
         topic_url=instance.get_absolute_url(),
     )
     notification, created = Notification.objects.get_or_create(
