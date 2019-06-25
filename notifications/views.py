@@ -89,13 +89,7 @@ def get_drop_content_html(request):
         Notification.objects.prefetch_related('notificationuser_set').filter(
             Q(to_all=True) | Q(notificationuser__user=request.user),
             active=True,
-        ).exclude(excpt=request.user).order_by('-datetime_creation')) # TODO: фильтровать по разрешениям
-    pks = set()
-    for i, notify in reversed(list(enumerate(notifyes))):
-        if notify.pk in pks:
-            notifyes.pop(i)
-            continue
-        pks.add(notify.pk)
+        ).exclude(excpt=request.user).distinct().order_by('-datetime_creation')) # TODO: фильтровать по разрешениям
     if not notifyes:
         has_notifyes = False
     else:
