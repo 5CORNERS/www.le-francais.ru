@@ -213,7 +213,7 @@ class UsedUsernames(models.Model):
 
 class LogMessage(models.Model):
 	datetime = models.DateTimeField(auto_now_add=True)
-	user = models.ForeignKey('User', related_name='log_messages')
+	user = models.ForeignKey('User', related_name='log_messages', null=True)
 	message = models.CharField(max_length=200, null=True)
 
 
