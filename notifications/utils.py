@@ -30,6 +30,12 @@ def query_notifications(request):
         except NotificationUser.DoesNotExist:
             if notify.to_all:
                 new_notifyes.append(notify)
+        except NotificationUser.MultipleObjectsReturned:
+            first_notify = notify.notificationuser_set.filter(
+                user=request.user)[:1].values_list("id", flat=True)
+            notify.notificationuser_set.exclude(
+                pk__in=list(first_notify)).delete()
+            query_notifications(request)
     old_notifyes: List[Notification] = [x for x in notifyes if
                                         x not in new_notifyes]
     return dict(
