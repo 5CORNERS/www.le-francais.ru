@@ -45,6 +45,7 @@ Pillow
 
 -e git+https://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26#egg=django_pure_pagination
 -e git+https://github.com/5CORNERS/pybbm.git#egg=pybbm
+-e git+https://github.com/AntonDumov/django-recaptcha3.git#egg=django-recaptcha3
 
 pymorphy2
 pymorphy2-dicts
