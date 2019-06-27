@@ -1,8 +1,10 @@
 {% extends "account/base.html" %}
 
 {% load i18n %}
+{% load recaptcha3 %}
 
 {% block head_title %}{% trans "Signup" %}{% endblock %}
+{% block extra_head %}{% recaptcha_init %}{% recaptcha_ready action_name='signup' %}{% endblock %}
 
 {% block content %}
   <div class="container-fluid">
@@ -99,9 +101,11 @@
               <input type="text" name="username" autofocus="autofocus" id="id_username"
                      class="form-control form-control-lg" placeholder="Nickname (имя для форума)" required autocomplete="username">
             </div>
+            {{ form.captcha }}
             <div class="form-group">
               <button class="btn btn-primary btn-lg btn-block">Зарегистрироваться</button>
             </div>
+
             {% if redirect_field_value %}
               <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
             {% endif %}
@@ -111,5 +115,4 @@
       <div class="col-sm-2 col-lg-3 hidden-xs "></div>
     </div>
   </div>
-
 {% endblock %}
