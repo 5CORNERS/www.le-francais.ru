@@ -890,3 +890,7 @@ details.no-details:not([open]) summary {
 .navbar {
     border-radius: 0px;
 }}
+
+.grecaptcha-badge{
+	visibility: collapse !important;
+}
