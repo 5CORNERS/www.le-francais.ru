@@ -73,16 +73,17 @@
                 {% for field in form %}
                   {% for error in field.errors %}
                     <li class="">
-                      <strong>{{ error|escape }}</strong>
+	                    <div class="alert alert-danger" role="alert"><strong>{{ error|escape }}</strong></div>
                     </li>
                   {% endfor %}
                 {% endfor %}
                 {% for error in form.non_field_errors %}
                   <li class="">
-                    <strong>{{ error|escape }}</strong>
+                    <div class="alert alert-warning" role="alert"><strong>{{ error|escape }}</strong></div>
                   </li>
                 {% endfor %}
               </ul>
+
             {% endif %}
             <div class="form-group">
               <input type="email" name="email" id="id_email" class="form-control form-control-lg"
