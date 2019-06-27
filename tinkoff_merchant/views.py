@@ -1,5 +1,7 @@
 import json
 
+from django.contrib.auth.decorators import user_passes_test
+from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -47,3 +49,17 @@ class Notification(View):
         payment_update.send(self.__class__, payment=payment)
 
         return HttpResponse(b'OK', status=200)
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def get_log(request:HttpRequest, year, month):
+    payments = list(Payment.objects.select_related('receipt').filter(
+        Q(status='CONFIRMED') | Q(status='AUTHORIZED'), update_date__year=int(year), update_date__month=int(month)))
+    s = ''
+    for p in payments:
+        for item in p.items():
+            s += '{date}\t{amount}\tTinkoff\t{type}\t{email}\n'.format(
+                date=p.update_date.strftime("%Y-%m-%d %H:%M"), amount=p.amount/100, email=p.email(),
+                type=item.category
+            )
+    return HttpResponse(s, status=200, content_type='text/plain')
