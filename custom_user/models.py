@@ -56,6 +56,8 @@ class User(AbstractUser):
 	from django.core.serializers.json import DjangoJSONEncoder
 	from django.contrib.postgres.fields import JSONField
 
+	recaptcha3_score = models.FloatField(null=True)
+
 	used_usernames = JSONField(
 		encoder=DjangoJSONEncoder, default=list,
 		editable=False, verbose_name='Used Usernames')
