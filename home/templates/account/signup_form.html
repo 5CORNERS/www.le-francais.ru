@@ -18,20 +18,20 @@
     {% endif %}
     <div class="form-group">
         <input type="email" name="email" id="id_email" class="form-control form-control-lg"
-               placeholder="Email" required>
+               placeholder="Email" required autocomplete="email">
     </div>
     <div class="form-group">
         <input type="password" minlength="6" name="password1" id="id_password1"
-               class="form-control form-control-lg" placeholder="Задайте пароль" required>
+               class="form-control form-control-lg" placeholder="Задайте пароль" required autocomplete="new-password">
     </div>
     <div class="form-group">
         <input type="password" minlength="6" name="password2" id="id_password2"
                class="form-control form-control-lg"
-               placeholder="Повторите ввод пароля" required>
+               placeholder="Повторите ввод пароля" required autocomplete="new-password">
     </div>
     <div class="form-group">
         <input type="text" name="username" autofocus="autofocus" id="id_username"
-               class="form-control form-control-lg" placeholder="Nickname (имя для форума)" required>
+               class="form-control form-control-lg" placeholder="Nickname (имя для форума)" required autocomplete="username">
     </div>
     <div class="form-group">
         <button class="btn btn-primary btn-lg btn-block">Зарегистрироваться</button>
