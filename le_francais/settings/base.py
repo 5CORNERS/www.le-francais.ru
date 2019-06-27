@@ -72,6 +72,8 @@ INSTALLED_APPS = [
 	'allauth',
 	'allauth.account',
 
+	'snowpenguin.django.recaptcha3',
+
 	'allauth.socialaccount',
 	'allauth.socialaccount.providers.google',
 	'allauth.socialaccount.providers.vk',
@@ -361,6 +363,7 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_SIGNUP_FORM_CLASS = 'custom_user.forms.CaptchaAllauthSignupForm'
 
 SOCIALACCOUNT_EMAIL_VERIFICATION = False
 LOGIN_ERROR_URL = '/accounts/login/'
@@ -500,3 +503,9 @@ LOGGING = {
         },
     },
 }
+# ReCaptcha V3 settings
+
+RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_SECRET_KEY')
+RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_SITE_KEY')
+RECAPTCHA_DEFAULT_ACTION = 'generic'
+RECAPTCHA_SCORE_THRESHOLD = 0.5
