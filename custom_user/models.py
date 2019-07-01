@@ -81,6 +81,10 @@ class User(AbstractUser):
 		default=None, null=True,
 		verbose_name='Дата сообщения')
 
+	show_tickets = models.NullBooleanField(
+		null=True
+	)
+
 	_cup_amount = models.IntegerField(
 		default=0, editable=True,
 		verbose_name='Кол-во чашек/билеткиов')
