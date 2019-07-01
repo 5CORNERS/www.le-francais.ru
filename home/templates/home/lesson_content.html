@@ -108,6 +108,7 @@
 				</li>
 			{% endif %}
 		{% endif %}
+	{% if request.user.is_authenticated %}
 		{% if self.exercise and lesson_was_payed_by_user or self.exercise and request.user.is_superuser or self.exercise and not request.user.must_pay %}
 			<li class="nav-item">
 				<a class="nav-link" data-toggle="tab" href="#exercise" role="tab"
@@ -116,6 +117,7 @@
 							</a>
 			</li>
 		{% endif %}
+	{% endif %}
 		{% for child_value in self.other_tabs %}
 			{% if not child_value.value.invisible or user.is_superuser %}
 				<li class="nav-item">
@@ -252,6 +254,7 @@
 			</div>
 			{% assign pane_class "tab-pane" %}
 		{% endif %}
+	{% if request.user.is_authenticated %}
 		{% if self.exercise and lesson_was_payed_by_user or self.exercise and request.user.is_superuser or self.exercise and not request.user.must_pay %}
 			<div id="exercise" class="{{ pane_class }}" role="tabpanel">
 				<div>
@@ -262,6 +265,7 @@
 			</div>
 			{% assign pane_class "tab-pane" %}
 		{% endif %}
+	{% endif %}
 
 		{% for child_value in self.other_tabs %}
 			<div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
