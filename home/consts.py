@@ -117,3 +117,5 @@ ITEMS = {
 		site_quantity=10,
 	),
 }
+
+CUPS_IDS = [1, 2, 3, 4, 5]
