@@ -785,7 +785,7 @@
 							{% if user.days_since_joined > 7 %}
 								<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-default">Активировать</button>
 							{% else %}
-								<a type="button" onclick="activateLesson('saw')" class="btn btn-primary" href="{% url 'payments:payments' %}?next={{ request.path }}" id="lesson-not-activated-activate-button">Поддержать</a>
+								<a type="button" onclick="activateLesson('saw')" class="btn btn-primary" href="{% url 'payments:payments' %}?next={{ request.path }}&s_t=1" id="lesson-not-activated-activate-button">Поддержать</a>
 							{% endif %}
 							</div>
 						{% endif %}
@@ -826,9 +826,9 @@
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-default success-message" id="activated-dismiss-button" onclick="$('#lesson-activated-modal').modal('hide')">Закрыть</button>
-							<a type="button" class="btn btn-primary fail-message unsofficiant-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}">Пополнить запас</a>
+							<a type="button" class="btn btn-primary fail-message unsofficiant-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}&s_t=1">Пополнить запас</a>
 							<button style="display: none;" class="btn btn-danger unsofficiant-cups-credit minus-cups" data-dismiss="modal">Отказать</button>
-							<a style="display: none;" type="button" class="btn btn-primary unsofficiant-cups-credit minus-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}&open_modal=description">Поддержать</a>
+							<a style="display: none;" type="button" class="btn btn-primary unsofficiant-cups-credit minus-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}&open_modal=description&s_t=1">Поддержать</a>
 						</div>
 					</div>
 				</div>
