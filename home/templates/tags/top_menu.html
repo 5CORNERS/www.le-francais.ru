@@ -76,7 +76,7 @@
 				{% endif %}
 				<li class="pull-left">
 					<a class="coffee-icon swg"
-					   href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">
+					   href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal&s_t={% if request.user.is_authenticated and request.user.show_tickets %}1{% else %}0{% endif %}">
 						{% if request.user.is_authenticated and request.user.show_tickets %}<i class="fas fa-ticket-alt"></i>{% else %}{% svg 'coffee icon' %}{% endif %}
 {#						<span class="nav-mobile-text hidden-sm hidden-md hidden-lg">Угостить кофе</span>#}
 					</a>
