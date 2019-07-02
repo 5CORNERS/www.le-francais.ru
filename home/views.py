@@ -254,13 +254,17 @@ from home.models import UserLesson
 @staff_member_required
 def activation_log(request):
 	all = request.GET.get('all', '')
+	cups = request.GET.get('cups', '')
 	start = -100
 	if all == 'true':
 		start = 0
+	need_payment = True
+	if cups:
+		need_payment = False
 	return render(
 		request,
 		template_name='home/activate_log.html',
-		context={'activations': list(UserLesson.objects.select_related('user').select_related('lesson').filter(remains__isnull=False, user__is_staff=False, lesson__need_payment=True).order_by('date'))[start:]}
+		context={'activations': list(UserLesson.objects.select_related('user').select_related('lesson').filter(remains__isnull=False, user__is_staff=False, lesson__need_payment=need_payment).order_by('date'))[start:]}
 	)
 
 
