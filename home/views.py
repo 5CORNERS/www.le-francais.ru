@@ -282,7 +282,7 @@ def coffee_amount_check(request):
 			return HttpResponseRedirect(request.GET['next'] + "?modal_open=give-me-a-coffee-modal")
 		else:
 			return HttpResponseRedirect(
-				reverse('payments:payments') + "?next=" + request.GET['next'] + "&success_modal=give-me-a-coffee-payment-success-modal&fail_modal=give-me-a-coffee-payment-fail-modal&s_t=" + request.GET['s_t'])
+				reverse('payments:payments') + "?next=" + request.GET['next'] + "&success_modal=give-me-a-coffee-payment-success-modal&fail_modal=give-me-a-coffee-payment-fail-modal&s_t=" + request.GET.get('s_t', '0'))
 
 
 from .consts import ITEMS, CUPS_IDS
