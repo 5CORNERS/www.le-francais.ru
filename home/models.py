@@ -9,6 +9,7 @@ from django.db.models import CharField, SmallIntegerField, OneToOneField, \
 from django.db.models.fields import TextField, DateTimeField
 from django.dispatch import receiver
 from django.forms import CheckboxInput
+from django.http import HttpRequest
 from modelcluster.fields import ParentalKey
 from pybb.models import Topic, Forum, Category
 from wagtail.admin.edit_handlers import StreamFieldPanel, FieldPanel, \

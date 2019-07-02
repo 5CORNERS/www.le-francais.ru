@@ -278,7 +278,7 @@ def coffee_amount_check(request):
 			return HttpResponseRedirect(request.GET['next'] + "?modal_open=give-me-a-coffee-modal")
 		else:
 			return HttpResponseRedirect(
-				reverse('payments:payments') + "?next=" + request.GET['next'] + "&success_modal=give-me-a-coffee-payment-success-modal&fail_modal=give-me-a-coffee-payment-fail-modal")
+				reverse('payments:payments') + "?next=" + request.GET['next'] + "&success_modal=give-me-a-coffee-payment-success-modal&fail_modal=give-me-a-coffee-payment-fail-modal&s_t=" + request.GET['s_t'])
 
 
 from .consts import ITEMS
@@ -287,7 +287,7 @@ from .consts import ITEMS
 class TinkoffPayments(View):
 	@method_decorator(login_required)
 	def get(self, request):
-		if request.user.saw_message and request.user.must_pay and not request.user.low_price:
+		if request.user.saw_message and request.user.must_pay and not request.user.low_price and request.user.show_tickets != bool(request.GET.get('s_t', '')):
 			data = dict(tickets=True, cards=[
 				dict(title="1 билет", image="images/ticket_1-1.png", description=None, price1="По цене стаканчика кофе в <b>McDonalds</b>", price2=68, item_id=6),
 				dict(title="5 билетов", image="images/ticket_5.png", description=None, price1="по 59 ₽", price2=295, item_id=7),
@@ -296,7 +296,7 @@ class TinkoffPayments(View):
 				dict(title="50 билетов", image="images/ticket_50.png", description=None, price1="по 34 ₽", price2=1690, item_id=10),
 			])
 			return render(request, 'payments/tinkoff_payments_tickets.html', data)
-		elif request.user.low_price:
+		elif request.user.low_price and request.user.show_tickets != bool(request.GET.get('s_t', '')):
 			data = dict(tickets=True, cards=[
 				dict(title="1 билет", image="images/ticket_1-39.png", description=None, price1="по 39 ₽", price2=39, item_id=11),
 				dict(title="5 билет", image="images/ticket_5-39.png", description=None, price1="по 39 ₽", price2=295, item_id=12),
@@ -321,8 +321,15 @@ class TinkoffPayments(View):
 			item_id = int(request.POST['item_id'])
 			if item_id not in ITEMS.keys():
 				return HttpResponse(status=400)
-			if item_id == 11 and not request.user.low_price:
+			if item_id in [11, 12, 13] and not request.user.low_price:
 				return HttpResponse(status=403)
+			if item_id in CUPS_IDS:
+				show_tickets = False
+			else:
+				show_tickets = True
+			if request.user.show_tickets != show_tickets:
+				request.user.show_tickets = show_tickets
+				request.user.save()
 
 			description = ITEMS[item_id]['description']
 
