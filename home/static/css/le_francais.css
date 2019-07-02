@@ -894,3 +894,11 @@ details.no-details:not([open]) summary {
 .grecaptcha-badge{
 	visibility: collapse !important;
 }
+
+.fa-ticket-alt{
+    -webkit-transform: rotate(-60deg);
+    -moz-transform: rotate(-60deg);
+    -ms-transform: rotate(-60deg);
+    -o-transform: rotate(-60deg);
+    transform: rotate(-60deg);
+}
