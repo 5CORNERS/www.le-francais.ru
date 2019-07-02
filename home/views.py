@@ -19,21 +19,22 @@ from django.views import generic, View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from oauth2client.client import OAuth2WebServerFlow
+from social_core.utils import setting_name
+from user_sessions.models import Session
+from wagtail.contrib.sitemaps.sitemap_generator import \
+	Sitemap as WagtailSitemap
+from wagtail.core.models import Page
 
 from custom_user.models import LogMessage
+from home.models import PageWithSidebar, LessonPage, ArticlePage, BackUrls, \
+	DefaultPage, IndexPage
+from home.src.site_import import import_content
 from pure_pagination import Paginator, PaginationMixin
 from pybb import defaults, util as pybb_util
 from pybb.forms import PostForm
 from pybb.models import Post, Topic
 from pybb.permissions import perms
 from pybb.views import AddPostView, EditPostView, TopicView
-from social_core.utils import setting_name
-from user_sessions.models import Session
-from wagtail.contrib.sitemaps.sitemap_generator import Sitemap as WagtailSitemap
-from wagtail.core.models import Page
-
-from home.models import PageWithSidebar, LessonPage, ArticlePage, BackUrls, DefaultPage, IndexPage
-from home.src.site_import import import_content
 from tinkoff_merchant.models import Payment as TinkoffPayment
 from tinkoff_merchant.services import MerchantAPI
 from .forms import ChangeUsername
@@ -281,37 +282,57 @@ def coffee_amount_check(request):
 				reverse('payments:payments') + "?next=" + request.GET['next'] + "&success_modal=give-me-a-coffee-payment-success-modal&fail_modal=give-me-a-coffee-payment-fail-modal&s_t=" + request.GET['s_t'])
 
 
-from .consts import ITEMS
+from .consts import ITEMS, CUPS_IDS
 
 
 class TinkoffPayments(View):
 	@method_decorator(login_required)
 	def get(self, request):
-		if request.user.saw_message and request.user.must_pay and not request.user.low_price and request.user.show_tickets != bool(request.GET.get('s_t', '')):
-			data = dict(tickets=True, cards=[
-				dict(title="1 билет", image="images/ticket_1-1.png", description=None, price1="По цене стаканчика кофе в <b>McDonalds</b>", price2=68, item_id=6),
-				dict(title="5 билетов", image="images/ticket_5.png", description=None, price1="по 59 ₽", price2=295, item_id=7),
-				dict(title="10 билетов", image="images/ticket_10.png", description=None, price1="по 49 ₽", price2=490, item_id=8),
-				dict(title="20 билетов", image="images/ticket_20.png", description=None, price1="по 39 ₽", price2=780, item_id=9),
-				dict(title="50 билетов", image="images/ticket_50.png", description=None, price1="по 34 ₽", price2=1690, item_id=10),
-			])
-			return render(request, 'payments/tinkoff_payments_tickets.html', data)
-		elif request.user.low_price and request.user.show_tickets != bool(request.GET.get('s_t', '')):
-			data = dict(tickets=True, cards=[
-				dict(title="1 билет", image="images/ticket_1-39.png", description=None, price1="по 39 ₽", price2=39, item_id=11),
-				dict(title="5 билет", image="images/ticket_5-39.png", description=None, price1="по 39 ₽", price2=295, item_id=12),
-				dict(title="10 билет", image="images/ticket_10-39.png", description=None, price1="по 39 ₽", price2=490, item_id=13),
-				dict(title="20 билет", image="images/ticket_20.png", description=None, price1="по 39 ₽", price2=780, item_id=9),
-				dict(title="50 билет", image="images/ticket_50.png", description=None, price1="по 34 ₽", price2=1690, item_id=10),
-			])
-			return render(request, 'payments/tinkoff_payments_tickets.html', data)
+		if request.user.saw_message and request.user.must_pay and request.GET.get('s_t', '') == '1':
+			if request.user.low_price:
+				data = dict(tickets=True, cards=[
+					dict(title="1 билет", image="images/ticket_1-1.png",
+						 description=None,
+						 price1="По цене стаканчика кофе в <b>McDonalds</b>",
+						 price2=68, item_id=6),
+					dict(title="5 билетов", image="images/ticket_5.png",
+						 description=None, price1="по 59 ₽", price2=295, item_id=7),
+					dict(title="10 билетов", image="images/ticket_10.png",
+						 description=None, price1="по 49 ₽", price2=490, item_id=8),
+					dict(title="20 билетов", image="images/ticket_20.png",
+						 description=None, price1="по 39 ₽", price2=780, item_id=9),
+					dict(title="50 билетов", image="images/ticket_50.png",
+						 description=None, price1="по 34 ₽", price2=1690, item_id=10),
+				])
+				return render(request, 'payments/tinkoff_payments_tickets.html', data)
+			else:
+				data = dict(tickets=True, cards=[
+					dict(title="1 билет", image="images/ticket_1-39.png",
+						 description=None, price1="по 39 ₽", price2=39, item_id=11),
+					dict(title="5 билет", image="images/ticket_5-39.png",
+						 description=None, price1="по 39 ₽", price2=295, item_id=12),
+					dict(title="10 билет", image="images/ticket_10-39.png",
+						 description=None, price1="по 39 ₽", price2=490, item_id=13),
+					dict(title="20 билет", image="images/ticket_20.png",
+						 description=None, price1="по 39 ₽", price2=780, item_id=9),
+					dict(title="50 билет", image="images/ticket_50.png",
+						 description=None, price1="по 34 ₽", price2=1690, item_id=10),
+				])
+				return render(request, 'payments/tinkoff_payments_tickets.html', data)
 		else:
 			data = dict(tickets=False, cards=[
-				dict(title="1 чашечка", image="images/coffee_1.png", description=None, price1="По цене стаканчика кофе в <b>McDonalds</b>", price2=68, item_id=1),
-				dict(title="5 чашечек", image="images/coffee_5.png", description=None, price1="по 59 ₽", price2=295, item_id=2),
-				dict(title="10 чашечек", image="images/coffee_10.png", description=None, price1="по 49 ₽", price2=490, item_id=3),
-				dict(title="20 чашечек", image="images/coffee_20.png", description=None, price1="по 39 ₽", price2=780, item_id=4),
-				dict(title="50 чашечек", image="images/coffee_50.png", description='''Хватит, чтобы угощать целый год.''', price1="по 34 ₽", price2=1690, item_id=5),
+				dict(title="1 чашечка", image="images/coffee_1.png", description=None,
+					 price1="По цене стаканчика кофе в <b>McDonalds</b>", price2=68,
+					 item_id=1),
+				dict(title="5 чашечек", image="images/coffee_5.png", description=None,
+					 price1="по 59 ₽", price2=295, item_id=2),
+				dict(title="10 чашечек", image="images/coffee_10.png",
+					 description=None, price1="по 49 ₽", price2=490, item_id=3),
+				dict(title="20 чашечек", image="images/coffee_20.png",
+					 description=None, price1="по 39 ₽", price2=780, item_id=4),
+				dict(title="50 чашечек", image="images/coffee_50.png",
+					 description='''Хватит, чтобы угощать целый год.''',
+					 price1="по 34 ₽", price2=1690, item_id=5),
 			])
 			return render(request, 'payments/tinkoff_payments.html', data)
 
