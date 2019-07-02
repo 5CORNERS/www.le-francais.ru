@@ -3,7 +3,6 @@ import threading
 from datetime import datetime, timedelta
 
 import httplib2
-from django import shortcuts
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
