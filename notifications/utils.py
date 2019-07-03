@@ -13,8 +13,8 @@ def query_notifications(request):
     notifyes = list(
         Notification.objects.prefetch_related('notificationuser_set').filter(
             Q(to_all=True) | Q(notificationuser__user=request.user),
-            active=True,
-        ).exclude(excpt=request.user).distinct().order_by(
+            active=True
+        ).exclude(datetime_creation__lt=request.user.date_joined).exclude(excpt=request.user).distinct().order_by(
             '-datetime_creation'))  # TODO: фильтровать по разрешениям
     if not notifyes:
         has_notifyes = False
