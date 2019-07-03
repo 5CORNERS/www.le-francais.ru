@@ -384,6 +384,15 @@ class LessonPage(Page):
 		ul = UserLesson(user=user, lesson=self)
 		ul.fill_remains()
 		ul.save()
+
+		if self.need_payment and user.must_pay:
+			show_tickets = True
+		else:
+			show_tickets = False
+		if user.show_tickets != show_tickets:
+			user.show_tickets = show_tickets
+			user.save()
+
 		return user.cup_amount
 
 	def payed(self, user: User):
