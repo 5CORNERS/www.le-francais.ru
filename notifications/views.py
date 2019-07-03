@@ -56,7 +56,7 @@ def get_new_notifications_count(request):
     if not user.is_authenticated:
         return HttpResponse(0, status=200)
     notifications = Notification.objects.filter(Q(to_all=True) | Q(notificationuser__user=request.user),
-            active=True).exclude(excpt=request.user)
+            active=True).exclude(excpt=request.user).exclude(datetime_creation__lt=request.user.date_joined).distinct()
     new_notifyes = []
     for notify in notifications:  # type: Notification
         try:
