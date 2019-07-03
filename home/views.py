@@ -292,7 +292,7 @@ class TinkoffPayments(View):
 	@method_decorator(login_required)
 	def get(self, request):
 		if request.user.saw_message and request.user.must_pay and request.GET.get('s_t', '') == '1':
-			if request.user.low_price:
+			if not request.user.low_price:
 				data = dict(tickets=True, cards=[
 					dict(title="1 билет", image="images/ticket_1-1.png",
 						 description=None,
@@ -345,7 +345,7 @@ class TinkoffPayments(View):
 			item_id = int(request.POST['item_id'])
 			if item_id not in ITEMS.keys():
 				return HttpResponse(status=400)
-			if item_id in [11, 12, 13] and not request.user.low_price:
+			if item_id in [9, 10, 11, 12, 13] and not request.user.low_price:
 				return HttpResponse(status=403)
 			if item_id in CUPS_IDS:
 				show_tickets = False
@@ -354,9 +354,9 @@ class TinkoffPayments(View):
 			if request.user.show_tickets != show_tickets:
 				request.user.show_tickets = show_tickets
 				request.user.save()
-
+	
 			description = ITEMS[item_id]['description']
-
+	
 			payment = TinkoffPayment.objects.create(
 				amount=ITEMS[item_id]['price'] * ITEMS[item_id]['quantity'], description=description, customer_key=str(request.user.id)).with_receipt(
 				email=request.user.email, taxation='usn_income').with_items(
@@ -370,14 +370,14 @@ class TinkoffPayments(View):
 						site_quantity=ITEMS[item_id]['site_quantity'],
 					)])
 			payment.order_id = '{0:02d}'.format(ITEMS[item_id]['order_type_id']) + '{0:06d}'.format(payment.id)
-
+	
 			if "success_url" in request.POST and "fail_url" in request.POST:
 				BackUrls.objects.create(
 					payment=payment,
 					success=request.scheme + "://" + request.META['HTTP_HOST'] + request.POST['success_url'],
 					fail=request.scheme + "://" + request.META['HTTP_HOST'] + request.POST['fail_url']
 				)
-
+	
 			tinkoff_api = MerchantAPI()
 			tinkoff_api.init(payment).save()
 			if payment.can_redirect():
