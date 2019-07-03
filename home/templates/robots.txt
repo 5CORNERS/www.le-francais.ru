@@ -8,6 +8,8 @@ Disallow: /forum/users/
 Disallow: /comments
 Disallow: /conjugation/
 Disallow: /payments/
+Disallow: /conjugaison/polly/
+Disallow: /conjugaison/verbs_autocomplete/
 
 Host: https://www.le-francais.ru
 
