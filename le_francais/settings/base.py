@@ -96,6 +96,7 @@ INSTALLED_APPS = [
 	'le_nombres',
 	# 'django_mobile',
 	'django_user_agents',
+	'polly',
 	'conjugation',
 	'notifications',
 	'guardian',

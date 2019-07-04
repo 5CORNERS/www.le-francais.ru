@@ -12,6 +12,7 @@ MASCULINE = 0
 
 class PollyAudio(models.Model):
 	key = models.CharField(max_length=64, primary_key=True)
+	polly = models.ForeignKey('polly.PollyTask', null=True)
 	datetime_creation = models.DateTimeField(null=True, default=None, verbose_name='Дата создания')
 	text = models.CharField(max_length=1024, null=True, default=None)
 	text_type = models.CharField(max_length=4, choices=TEXT_TYPES, null=True, default=None)
