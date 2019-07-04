@@ -7,25 +7,30 @@ from django.views.decorators.csrf import csrf_exempt
 from unidecode import unidecode
 
 from conjugation.models import Verb, ReflexiveVerb, PollyAudio
+from polly.models import PollyTask
 from .consts import *
 from .polly import *
 from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE, SHORT_LIST, FORMULAS_PASSIVE_X
 
 
+@require_http_methods(["POST"])
 def get_polly_audio_link(request):
 	key = request.POST.get('key')
-	polly_audio, created = PollyAudio.objects.get_or_create(key=key)
-	if created or polly_audio.url is None:
+	polly_audio, created = PollyAudio.objects.select_related('polly').get_or_create(key=key)
+	if created or polly_audio.polly is None:
 		tense = Tense(key=key)
-		api = PollyAPI(output_s3_key_prefix='polly-conjugations/')
-		polly_audio.text = tense.get_polly_ssml()
-		polly_audio.text_type = TEXT_TYPE_SSML
-		polly_audio.language_code = LANGUAGE_CODE_FR
-		polly_audio.sample_rate = SAMPLE_RATE_22050
-		polly_audio.voice_id = VOICE_ID_LEA
-		polly_audio.output_format = OUTPUT_FORMAT_MP3
-		api.start_task(polly_audio, wait=True)
-	return JsonResponse(data={key: {'url': polly_audio.url}})
+		polly_task = PollyTask(
+			text=tense.get_polly_ssml(),
+			text_type=TEXT_TYPE_SSML,
+			language_code=LANGUAGE_CODE_FR,
+			sample_rate=SAMPLE_RATE_22050,
+			voice_id=VOICE_ID_LEA,
+			output_format=OUTPUT_FORMAT_MP3,
+		)
+		polly_task.create_task('polly-conjugations/', wait=True, save=True)
+		polly_audio.polly = polly_task
+		polly_audio.save()
+	return JsonResponse(data={key: {'url': polly_audio.polly.url}})
 
 
 @csrf_exempt
