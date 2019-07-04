@@ -18,7 +18,7 @@ from .utils import FORMULAS, TEMPLATE_NAME, FORMULAS_PASSIVE, SHORT_LIST, FORMUL
 def get_polly_audio_link(request):
 	key = request.POST.get('key')
 	polly_audio, created = PollyAudio.objects.select_related('polly').get_or_create(key=key)
-	if created or polly_audio.polly is None:
+	if created or polly_audio.polly is None or polly_audio.polly.url is None:
 		tense = Tense(key=key)
 		polly_task = PollyTask(
 			text=tense.get_polly_ssml(),
