@@ -54,7 +54,7 @@ class Notification(View):
 @user_passes_test(lambda u: u.is_superuser)
 def get_log(request:HttpRequest, year, month):
     payments = list(Payment.objects.select_related('receipt').filter(
-        Q(status='CONFIRMED') | Q(status='AUTHORIZED'), update_date__year=int(year), update_date__month=int(month)).order_by('-update_date'))
+        Q(status='CONFIRMED') | Q(status='AUTHORIZED'), update_date__year=int(year), update_date__month=int(month)).order_by('update_date'))
     s = ''
     for p in payments:
         for item in p.items():
