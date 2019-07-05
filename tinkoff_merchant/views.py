@@ -60,6 +60,6 @@ def get_log(request:HttpRequest, year, month):
         for item in p.items():
             s += '{date}\t{amount}\tTinkoff\t{type}\t{email}\n'.format(
                 date=p.update_date.strftime("%Y-%m-%d %H:%M"), amount=p.amount/100, email=p.email(),
-                type=item.category
+                type=item.category.split('_')[0]
             )
     return HttpResponse(s, status=200, content_type='text/plain')
