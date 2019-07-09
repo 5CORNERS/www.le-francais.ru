@@ -345,7 +345,7 @@ class TinkoffPayments(View):
 			item_id = int(request.POST['item_id'])
 			if item_id not in ITEMS.keys():
 				return HttpResponse(status=400)
-			if item_id in [9, 10, 11, 12, 13] and not request.user.low_price:
+			if item_id in [11, 12, 13] and not request.user.low_price:
 				return HttpResponse(status=403)
 			if item_id in CUPS_IDS:
 				show_tickets = False
