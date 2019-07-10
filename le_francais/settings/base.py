@@ -98,6 +98,7 @@ INSTALLED_APPS = [
 	'django_user_agents',
 	'polly',
 	'conjugation',
+	'le_francais_dictionary',
 	'notifications',
 	'guardian',
 
