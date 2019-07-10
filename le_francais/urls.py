@@ -4,25 +4,29 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic import TemplateView
-from pybb.views import ProfileEditView
 from social_core.utils import setting_name
 # from registration.backends.default.views import RegistrationView
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.contrib.sitemaps.views import sitemap
 from wagtail.core import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
-from tinkoff_merchant.urls import urlpatterns as tinkoff_urls
 
 from conjugation.sitemap import ConjugationSitemap
 from forum.sitemap_generator import ForumSitemap, TopicSitemap
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
-from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls, activate_urls, modal_urls, meta_urls
-from home.views import MovePostView, AorAddPostView, AorEditPostView, AorTopicView, move_post_processing, favicon, activation_log
-from home.views import change_username, LeFrancaisWagtailSitemap as WagtailSitemap
+from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls, \
+    activate_urls, modal_urls, meta_urls
+from home.views import MovePostView, AorAddPostView, AorEditPostView, \
+    AorTopicView, move_post_processing, favicon, activation_log
+from home.views import change_username, \
+    LeFrancaisWagtailSitemap as WagtailSitemap
 from notifications import urls as notifications_api_urls
 from profiles.views import UserTopics, UserPosts
+from pybb.views import ProfileEditView
 from search import views as search_views
+from tinkoff_merchant.urls import urlpatterns as tinkoff_urls
+from le_francais_dictionary.urls import urlpatterns as dictionary_urls
 
 extra = getattr(settings, setting_name('TRAILING_SLASH'), True) and '/' or ''
 urlpatterns = [
@@ -38,7 +42,11 @@ urlpatterns = [
         'conjugation': ConjugationSitemap,
     }}),
 
-    url('^update_sitemap\.xml$', TemplateView.as_view(template_name='static_sitemap.xml', content_type='application/xml')),
+    url('^update_sitemap\.xml$',
+        TemplateView.as_view(template_name='static_sitemap.xml',
+                             content_type='application/xml')),
+
+	url(r'^dictionary/', include(dictionary_urls, namespace='dictionary')),
 
     url(r'^django-admin/', include(admin.site.urls)),
 
