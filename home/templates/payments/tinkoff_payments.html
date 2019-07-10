@@ -138,6 +138,8 @@
 	</script>
 {% endblock %}
 
+{% block title %}Запаситесь кофейком!{% endblock %}
+
 {% block content %}
 
 	<div class="container">
@@ -145,6 +147,7 @@
 
 			<div class="col-md-12">
 				<p class="h1" style="margin-top: 20px; margin-bottom: 20px">Запаситесь кофейком!</p>
+				<p class="subcaption">Чтобы угощать много раз — по чашечке за каждый урок.</p>
 				{% if not request.user.has_payed %}
 					<div class="row" style="margin-bottom: 5px;">
 						<div class="col-md-6">
