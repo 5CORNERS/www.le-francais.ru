@@ -196,6 +196,13 @@ body {
 
 @media (min-width: 768px) {
     .nav > li > a {
+        padding-right: 8px;
+        padding-left: 8px;
+    }
+}
+
+@media (min-width: 823px) {
+    .nav > li > a {
         padding-right: 10px;
         padding-left: 10px;
     }
@@ -592,6 +599,7 @@ td.forum-last-post, td.topic-last-post {
         display: none;
         margin-left: 10%;
         margin-right: 10%;
+        padding: 15px 5px;
     }
 
     .navbar-brand-text {
@@ -869,6 +877,12 @@ details.no-details:not([open]) summary {
 .navbar-sticky > ul > li.open > a {
     color: #fff;
     background-color: #080808 !important;
+}
+
+@media (max-width: 822px) {
+    .navbar-sticky > ul > li > a {
+        padding: 15px 5px;
+    }
 }
 
 @media (max-width: 767px) {
