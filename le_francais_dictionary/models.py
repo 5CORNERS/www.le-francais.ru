@@ -1,3 +1,5 @@
+import json
+
 from django.conf import settings
 from django.db import models
 
@@ -12,18 +14,26 @@ class Word(models.Model):
 		(GENRE_FEMININE, 'Feminine'),
 		(GENRE_MASCULINE, 'Masculine')
 	]
-	word = models.CharField(max_length=50)
+	cd_id = models.CharField(null=True, verbose_name='Color Dictionary ID', max_length=10)
+	word = models.CharField(max_length=120, verbose_name='Word')
 	polly = models.ForeignKey(PollyTask, null=True)
-	cd_id = models.IntegerField(null=True)
 	genre = models.CharField(choices=GENRE_CHOICES, max_length=1, null=True)
 	lessons = models.ManyToManyField('home.LessonPage', related_name='dictionary_words', null=True)
 
 	@property
 	def polly_url(self):
-		if self.polly is None:
-			return None
-		else:
-			return self.polly.url
+		return self.polly.url if self.polly else None
+
+	def to_dict(self):
+		return {
+			'word': self.word,
+			'translations': [
+				tr.to_dict() for tr in self.wordtranslation_set.all()
+			],
+			'gender': self.genre,
+			'polly_url': self.polly_url
+
+		}
 
 	def create_polly_task(self):
 		if self.polly is None:
@@ -46,7 +56,7 @@ class Word(models.Model):
 
 class WordTranslation(models.Model):
 	word = models.ForeignKey(Word)
-	translation = models.CharField(max_length=50)
+	translation = models.CharField(max_length=120)
 	polly = models.ForeignKey(PollyTask, null=True)
 
 	@property
@@ -55,6 +65,12 @@ class WordTranslation(models.Model):
 			return None
 		else:
 			return self.polly.url
+
+	def to_dict(self):
+		return {
+			'translation': self.translation,
+			'polly_url': self.polly_url,
+		}
 
 	def create_polly_task(self):
 		if self.polly is None:
