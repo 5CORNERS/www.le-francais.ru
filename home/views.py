@@ -161,6 +161,8 @@ def listen_request(request):
 	lesson_number = request.POST['number'].strip()
 	session_key = request.POST['key'].strip()
 
+	ipadress_list = json.loads(request.POST.get('ipadress_list', '[]'))
+	ipadress = ipadress_list[0]
 	try:
 		session = Session.objects.get(session_key=session_key)
 		lesson = LessonPage.objects.get(lesson_number=lesson_number)
@@ -176,7 +178,7 @@ def listen_request(request):
 	if not lesson.need_payment or not session.user.must_pay:
 		return HttpResponse('full', status=200)
 
-	if session.user is not None and lesson in session.user.payed_lessons.all() and session.ip == request.POST['ipaddress']:
+	if session.user is not None and lesson in session.user.payed_lessons.all() and session.ip == ipadress:
 		return HttpResponse('full', status=200)
 	return HttpResponse('short', status=403)
 
