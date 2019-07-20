@@ -204,7 +204,7 @@ def listen_request_test(request, number):
 			<pre id="json"></pre>
 			<script>
 				var xhr = new XMLHttpRequest();
-				xhr.open('GET', 'http://192.168.8.110:8080/listen_test.php?key={0}&number={1}');
+				xhr.open('GET', 'https://files.le-francais.ru/listen_test.php?key={0}&number={1}');
 				xhr.onload = function() {{
 					var data = JSON.parse(JSON.parse(xhr.responseText));
 					document.getElementById("json").innerHTML = JSON.stringify(data, undefined, 2);
