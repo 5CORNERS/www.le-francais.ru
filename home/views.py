@@ -157,17 +157,29 @@ def get_nav_data(request):
 
 
 @csrf_exempt
-def listen_request(request):
+def listen_request(request, test=False):
 	lesson_number = request.POST['number'].strip()
 	session_key = request.POST['key'].strip()
 
 	ipadress_list = json.loads(request.POST.get('ipadress_list', '[]'))
 	ipadress = ipadress_list[0]
-	try:
-		session = Session.objects.get(session_key=session_key)
-		lesson = LessonPage.objects.get(lesson_number=lesson_number)
-	except:
-		return HttpResponse('false', status=400)
+
+	session = Session.objects.filter(session_key=session_key).first()
+	lesson = LessonPage.objects.filter(lesson_number=lesson_number).first()
+
+	if test:
+		return JsonResponse(
+			data = {
+				"lesson_number": lesson_number,
+				"remote_session_key": session_key,
+				"user": str(session.user) if session else None,
+				"ip": session.ip,
+				"remote_ip": ipadress,
+				"remote_ip_list": ipadress_list,
+				"activated_lesson": session.user is not None and lesson in session.user.payed_lessons.all()
+			},
+			safe=True,
+		)
 
 	if request.POST.get('download'):
 		LogMessage(
@@ -181,6 +193,26 @@ def listen_request(request):
 	if session.user is not None and lesson in session.user.payed_lessons.all() and session.ip == ipadress:
 		return HttpResponse('full', status=200)
 	return HttpResponse('short', status=403)
+@csrf_exempt
+def listen_request_check(request):
+	return listen_request(request, test=True)
+@login_required
+@csrf_exempt
+def listen_request_test(request, number):
+	return HttpResponse(
+		content='''
+			<pre id="json"></pre>
+			<script>
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET', 'http://192.168.8.110:8080/listen_test.php?key={0}&number={1}');
+				xhr.onload = function() {{
+					var data = JSON.parse(JSON.parse(xhr.responseText));
+					document.getElementById("json").innerHTML = JSON.stringify(data, undefined, 2);
+				}}
+				xhr.send()
+			</script>
+			'''.format(request.session.session_key, number)
+	)
 
 
 def get_lesson_url(request):
