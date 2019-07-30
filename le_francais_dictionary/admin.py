@@ -26,9 +26,9 @@ class WordTranslationInline(admin.TabularInline):
 @admin.register(Word)
 class WordAdmin(admin.ModelAdmin):
 	change_list_template = 'dictionary/admin/change_list.html'
-	ordering = ['cd_id']
-	list_display = ['word']
-	list_filter = ['genre']
+	list_display = ['cd_id', 'word', 'genre', 'part_of_speech', 'plural']
+	ordering = ['id']
+	list_filter = ['genre', 'part_of_speech', 'plural']
 	list_select_related = []
 	readonly_fields = ['polly']
 	inlines = [WordTranslationInline]
@@ -55,19 +55,31 @@ class WordAdmin(admin.ModelAdmin):
 				lesson_relations=[],
 			)
 			lesson_ids = dict(LessonPage.objects.values_list('lesson_number', 'id'))
-			for i, row in enumerate(reader):
-				if row[0]:
-					print('\r' + str(
-						int(i / 3641 * 100)), end='')
+			for i, row in enumerate(reader, 1):
+				if i==1:
+					continue
+				if row[1]:
+					if int(row[1]) > 20 and request.POST.get('test', False):
+						continue
+					genre = row[5].split(',')[0] if row[5] else None
+					plural = True if row[5].split(',')[
+						                 -1].strip() == 'pl' else False
+					locution = True if 'loc' in row[4] else False
+					if locution:
+						part_of_speech = 'loc'
+					else:
+						part_of_speech = row[4].split(' ')[0]
 					word = Word(
 						id=i,
-						word=row[3],
+						word=row[2],
 						cd_id=row[0],
-						genre=row[2] if row[2] in ['m','f'] else None,
+						genre=genre,
+						plural = plural,
+						part_of_speech=part_of_speech
 						)
 					translation = WordTranslation(
 						word_id=i,
-						translation=row[4]
+						translation=row[3]
 					)
 					lesson_relation = Word.lessons.through(
 						word_id = i,
@@ -76,19 +88,15 @@ class WordAdmin(admin.ModelAdmin):
 					to_create['words'].append(word)
 					to_create['translations'].append(translation)
 					to_create['lesson_relations'].append(lesson_relation)
-			print('\nBulk creating words')
 			Word.objects.bulk_create(
 				[w for w in to_create['words']]
 			)
-			print('Bulk crating translations')
 			WordTranslation.objects.bulk_create(
 				[wt for wt in to_create['translations']]
 			)
-			print('Bulk creating relations')
 			Word.lessons.through.objects.bulk_create(
 				[wl for wl in filter(None.__ne__, to_create['lesson_relations'])]
 			)
-			print('Done!')
 			self.message_user(request, 'CSV file has been imported')
 			return redirect('admin:le_francais_dictionary_word_changelist')
 		form = DictionaryCsvImportForm()
