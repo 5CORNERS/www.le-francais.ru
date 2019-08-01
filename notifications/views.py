@@ -1,6 +1,3 @@
-from typing import List, Any
-
-from django.conf import settings
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render
@@ -8,7 +5,6 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
-from notifications.models import Notification
 from notifications.utils import query_notifications
 from .models import Notification, NotificationUser
 
@@ -44,8 +40,9 @@ def notification_list_to_dict(notifications: list):
 def get_notifications(request):
     user = request.user
     notifications = Notification.objects \
-        .order_by('datetime_creation') \
-        .filter(notificationuser__user=user)
+	    .prefetch_related('image') \
+	    .order_by('datetime_creation') \
+	    .filter(notificationuser__user=user)
     data = {'notification_list': notification_list_to_dict(notifications)}
     return JsonResponse(data)
 
