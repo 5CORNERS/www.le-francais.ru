@@ -11,7 +11,7 @@ def query_notifications(request):
     if request.user.is_anonymous:
         return dict(authenticated=False, login_url=login_url)
     notifyes = list(
-        Notification.objects.prefetch_related('notificationuser_set').filter(
+        Notification.objects.prefetch_related('notificationuser_set', 'image').filter(
             Q(to_all=True) | Q(notificationuser__user=request.user),
             active=True
         ).exclude(datetime_creation__lt=request.user.date_joined).exclude(excpt=request.user).distinct().order_by(
