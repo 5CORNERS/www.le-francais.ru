@@ -130,10 +130,12 @@ class WordUser(models.Model):
 	word = models.ForeignKey(Word, on_delete=models.CASCADE)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL,
 	                         on_delete=models.CASCADE)
+	datetime = models.DateTimeField(auto_now_add=True)
 
 	def to_dict(self):
 		return {
 			'word': self.word.pk,
+			'datetime': self.datetime, # TODO: serialize datetime to json
 		}
 
 
