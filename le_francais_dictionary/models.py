@@ -135,7 +135,7 @@ class WordUser(models.Model):
 	def to_dict(self):
 		return {
 			'word': self.word.pk,
-			'datetime': self.datetime, # TODO: serialize datetime to json
+			'datetime': self.datetime.isoformat(),
 		}
 
 
