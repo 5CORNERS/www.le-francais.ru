@@ -28,5 +28,5 @@ def get_words(request, lesson_number):
 
 def add_user_words(request):
 	user = request.user
-	words = Word.json_to_query(request.POST.get('words'))
-	
+	words = Word.objects.get(pk__in=request.POST.get('words', []))
+	return HttpResponse(content=b'OK', status=200)
