@@ -1,4 +1,5 @@
 from django.http import JsonResponse, HttpResponse
+from rest_framework import serializers
 
 # Create your views here.
 from le_francais_dictionary.models import Word, WordUser
@@ -12,8 +13,7 @@ def get_words(request, lesson_number):
 		'polly',
 		'lessons'
 	).order_by('pk').filter(
-		lessons__lesson_number__in=[lesson_number, lesson_number - 1,
-		                            lesson_number - 2, lesson_number - 3])
+		lessons__lesson_number__in=list(range(lesson_number+1))[-6:])
 	words_dict = [word.to_dict() for word in words]
 	if request.user.is_authenticated:
 		user_words = WordUser.objects.filter(
@@ -34,7 +34,7 @@ def get_words_alt(request, lesson_number):
 		'wordtranslation_set__polly',
 		'polly',
 		'lessons'
-	).order_by('pk').filter(lessons__lesson_number__in=[lesson_number, lesson_number-1, lesson_number-2, lesson_number-3])
+	).order_by('pk').filter(lessons__lesson_number__in=list(range(lesson_number+1))[-6:])
 	data = serializers.serialize('json', words)
 	return HttpResponse(data, content_type='application/json')
 

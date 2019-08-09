@@ -49,23 +49,26 @@ class PollyAPI:
 			self._client = boto3.Session(self.access_key_id, self.secret_access_key).client('polly', region_name=settings.AWS_S3_REGION_NAME)
 		return self._client
 
-	def start_task(self, polly_audio, wait=False, save=True):
+	def start_task(self, polly_task, wait=False, save=True):
 		"""
-		:param polly_audio: PollyAudio
+		:param polly_task: PollyAudio
 		:param wait: wait while task is complited (or failed)
 		:param save: save object before return
 		:return: dict {'AudioStream': StreamingBody(),'ContentType': 'string','RequestCharacters': 123}
 		"""
-		data = polly_audio.to_dict()  # type: dict
+		data = polly_task.to_dict()  # type: dict
 		data['OutputS3BucketName'] = self.output_s3_bucket_name
 		data['OutputS3KeyPrefix'] = self.output_s3_key_prefix
 		response = self.client.start_speech_synthesis_task(**data)
-		polly_audio.task_id, polly_audio.task_status, polly_audio.url = response['SynthesisTask']['TaskId'], response['SynthesisTask']['TaskStatus'], response['SynthesisTask']['OutputUri']
-		while wait and polly_audio.task_status not in ('completed', 'failed'):
-			polly_audio.task_status = self.client.get_speech_synthesis_task(TaskId=polly_audio.task_id)['SynthesisTask']['TaskStatus']
+		polly_task.task_id, polly_task.task_status, polly_task.url = (
+			response['SynthesisTask']['TaskId'],
+			response['SynthesisTask']['TaskStatus'],
+			response['SynthesisTask']['OutputUri'])
+		while wait and polly_task.task_status not in ('completed', 'failed'):
+			polly_task.task_status = self.client.get_speech_synthesis_task(TaskId=polly_task.task_id)['SynthesisTask']['TaskStatus']
 		if save:
-			polly_audio.save()
-		return polly_audio
+			polly_task.save()
+		return polly_task
 
 	def bulk_start_task(self, audio_list: list):
 		scheduled_audio = []
