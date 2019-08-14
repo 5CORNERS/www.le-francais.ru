@@ -1,6 +1,6 @@
 import json
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import httplib2
 from django.conf import settings
@@ -176,7 +176,8 @@ def listen_request(request, test=False):
 				"ip": session.ip,
 				"remote_ip": ipadress,
 				"remote_ip_list": ipadress_list,
-				"activated_lesson": session.user is not None and lesson in session.user.payed_lessons.all()
+				"activated_lesson": session.user is not None and lesson in session.user.payed_lessons.all(),
+				"2_hours_check": "True" if datetime.now(timezone.utc) - session.last_activity < timedelta(hours=2) else "False",
 			},
 			safe=True,
 		)
@@ -191,7 +192,7 @@ def listen_request(request, test=False):
 		return HttpResponse('full', status=200)
 
 	# Temporarily supress ip check
-	if datetime.now() - session.last_activity < timedelta(hours=2) and lesson in session.user.payed_lessons.all():
+	if datetime.now(timezone.utc) - session.last_activity < timedelta(hours=2) and lesson in session.user.payed_lessons.all():
 		return HttpResponse('full', status=200)
 
 	if session.user is not None and lesson in session.user.payed_lessons.all() and session.ip == ipadress:
