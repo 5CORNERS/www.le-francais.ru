@@ -190,12 +190,20 @@ def listen_request(request, test=False):
 	if not lesson.need_payment or not session.user.must_pay:
 		return HttpResponse('full', status=200)
 
+	# Temporarily supress ip check
+	if datetime.now() - session.last_activity < timedelta(hours=2) and lesson in session.user.payed_lessons.all():
+		return HttpResponse('full', status=200)
+
 	if session.user is not None and lesson in session.user.payed_lessons.all() and session.ip == ipadress:
 		return HttpResponse('full', status=200)
 	return HttpResponse('short', status=403)
+
+
 @csrf_exempt
 def listen_request_check(request):
 	return listen_request(request, test=True)
+
+
 @login_required
 @csrf_exempt
 def listen_request_test(request, number):
@@ -388,9 +396,9 @@ class TinkoffPayments(View):
 			if request.user.show_tickets != show_tickets:
 				request.user.show_tickets = show_tickets
 				request.user.save()
-	
+
 			description = ITEMS[item_id]['description']
-	
+
 			payment = TinkoffPayment.objects.create(
 				amount=ITEMS[item_id]['price'] * ITEMS[item_id]['quantity'], description=description, customer_key=str(request.user.id)).with_receipt(
 				email=request.user.email, taxation='usn_income').with_items(
@@ -404,14 +412,14 @@ class TinkoffPayments(View):
 						site_quantity=ITEMS[item_id]['site_quantity'],
 					)])
 			payment.order_id = '{0:02d}'.format(ITEMS[item_id]['order_type_id']) + '{0:06d}'.format(payment.id)
-	
+
 			if "success_url" in request.POST and "fail_url" in request.POST:
 				BackUrls.objects.create(
 					payment=payment,
 					success=request.scheme + "://" + request.META['HTTP_HOST'] + request.POST['success_url'],
 					fail=request.scheme + "://" + request.META['HTTP_HOST'] + request.POST['fail_url']
 				)
-	
+
 			tinkoff_api = MerchantAPI()
 			tinkoff_api.init(payment).save()
 			if payment.can_redirect():
