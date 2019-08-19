@@ -63,6 +63,7 @@ INSTALLED_APPS = [
 	'django.core.mail',
 
 	'user_sessions',
+    'corsheaders',
 
 	'storages',
 
@@ -113,6 +114,7 @@ MIDDLEWARE = [
 	'whitenoise.middleware.WhiteNoiseMiddleware',
 	# 'django.contrib.sessions.middleware.SessionMiddleware',
 	'le_francais.middleware.CustomSessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 	'django.middleware.common.CommonMiddleware',
 	'django.middleware.csrf.CsrfViewMiddleware',
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -511,3 +513,7 @@ RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_SECRET_KEY')
 RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_SITE_KEY')
 RECAPTCHA_DEFAULT_ACTION = 'generic'
 RECAPTCHA_SCORE_THRESHOLD = 0.5
+
+# Corse Headers settings
+
+CORS_ORIGIN_ALLOW_ALL = os.getenv('CORS_ORIGIN_ALLOW_ALL', 'False') == 'True'
