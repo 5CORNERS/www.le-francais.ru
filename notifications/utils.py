@@ -2,6 +2,7 @@ from typing import List
 
 from django.conf import settings
 from django.db.models import Q
+from django.utils import timezone
 
 from notifications.models import Notification, NotificationUser
 
@@ -10,7 +11,7 @@ def query_notifications(request):
     login_url = settings.LOGIN_URL + '?next=' + request.GET.get('path', '')
     if request.user.is_anonymous:
         return dict(authenticated=False, login_url=login_url)
-    notifyes = list(
+    notifyes: List[Notification] = list(
         Notification.objects.prefetch_related('notificationuser_set', 'image').filter(
             Q(to_all=True) | Q(notificationuser__user=request.user),
             active=True
@@ -36,8 +37,9 @@ def query_notifications(request):
             notify.notificationuser_set.exclude(
                 pk__in=list(first_notify)).delete()
             query_notifications(request)
+    time_threshold = timezone.now() - timezone.timedelta(days=14)
     old_notifyes: List[Notification] = [x for x in notifyes if
-                                        x not in new_notifyes]
+                                        x not in new_notifyes and x.datetime_creation > time_threshold ]
     return dict(
         authenticated=True,
         has_notifications=has_notifyes,
