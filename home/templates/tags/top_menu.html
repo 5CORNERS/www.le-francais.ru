@@ -74,16 +74,20 @@
 						</ul>
 					</li>
 				{% endif %}
-				<li class="pull-left">
+				<li class="pull-left" title="Магазин всяких клёвых чтучек">
 					<a class="t-shirt-icon"
 					   href="http://le-francais.vsemaykishop.ru"
 					   target="_blank">
 						<i class="fas fa-tshirt" style="color: inherit; vertical-align: middle"></i>
 					</a>
 				</li>
-				<li class="pull-left">
+				<li
+						class="pull-left"
+						title="{% if request.user.is_authenticated and request.user.show_tickets %}Кто возьмет билетов пачку...{% else %}Поблагодарить нас{% endif %}"
+				>
 					<a class="coffee-icon swg"
-					   href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal&s_t={% if request.user.is_authenticated and request.user.show_tickets %}1{% else %}0{% endif %}">
+					   href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal&s_t={% if request.user.is_authenticated and request.user.show_tickets %}1{% else %}0{% endif %}"
+					>
 						{% if request.user.is_authenticated and request.user.show_tickets %}<i class="fas fa-ticket-alt"></i>{% else %}{% svg 'coffee icon' %}{% endif %}
 {#						<span class="nav-mobile-text hidden-sm hidden-md hidden-lg">Угостить кофе</span>#}
 					</a>
