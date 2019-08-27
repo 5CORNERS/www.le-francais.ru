@@ -354,6 +354,14 @@ class LessonPage(Page):
 		('html', RawHTMLBlock()),
 	], verbose_name='Домашка', null=True, blank=True)
 
+	resume_populaire = StreamField([
+        ('paragraph', RichTextBlock()),
+        ('image', ImageChooserBlock()),
+        ('document', DocumentViewerBlock()),
+        ('html', RawHTMLBlock()),
+        ('audio', AudioBlock()),
+        ('video', VideoPlayerBlock()),
+    ], verbose_name='Народный конспект', null=True, blank=True)
 	other_tabs = StreamField([('tab', TabBlock())], blank=True)
 
 	def get_lesson_number(self):
@@ -433,6 +441,7 @@ LessonPage.content_panels = Page.content_panels + [
 	FieldPanel('repetition_material'),
 	StreamFieldPanel('mail_archive'),
 	StreamFieldPanel('exercise'),
+	StreamFieldPanel('resume_populaire'),
 	StreamFieldPanel('other_tabs')
 ]
 LessonPage.promote_panels = LessonPage.promote_panels + [
