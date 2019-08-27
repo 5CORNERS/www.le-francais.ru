@@ -116,6 +116,13 @@
 							</a>
 			</li>
 		{% endif %}{% endif %}
+		{% if self.resume_populaire %}
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="tab" href="#resume-populaire" role="tab" aria-controls="resume-populaire">
+					Народный Конспект
+				</a>
+			</li>
+		{% endif %}
 		{% for child_value in self.other_tabs %}
 			{% if not child_value.value.invisible or user.is_superuser %}
 				<li class="nav-item">
@@ -262,6 +269,15 @@
 			</div>
 			{% assign pane_class "tab-pane" %}
 		{% endif %}{% endif %}
+		{% if self.resume_populaire %}
+			<div id="resume-populaire" class="{{ pane_class }}" role="tabpanel">
+				<div>
+					{% for block in self.resume_populaire %}
+						{% include block %}
+					{% endfor %}
+				</div>
+			</div>
+		{% endif %}
 
 		{% for child_value in self.other_tabs %}
 			<div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
