@@ -46,9 +46,4 @@ class Migration(migrations.Migration):
             name='body',
             field=wagtail.core.fields.StreamField((('paragraph', wagtail.core.blocks.RichTextBlock()), ('image', wagtail.images.blocks.ImageChooserBlock()), ('document', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.CharBlock()),))), ('html', wagtail.core.blocks.RawHTMLBlock()), ('audio', wagtail.core.blocks.StructBlock((('url', wagtail.core.blocks.CharBlock()), ('downloadable', wagtail.core.blocks.BooleanBlock(required=False))))), ('video', wagtail.core.blocks.StructBlock((('source', wagtail.core.blocks.CharBlock()), ('poster', wagtail.core.blocks.CharBlock(required=False))))), ('tabs', home.blocks.TabsBlock.TabsBlock()), ('translations', wagtail.core.blocks.ListBlock(wagtail.core.blocks.StructBlock((('word', wagtail.core.blocks.RichTextBlock(required=True)), ('translation', wagtail.core.blocks.RichTextBlock(required=True)))), template='blocks/transcriptions.html')), ('post', wagtail.core.blocks.StructBlock((('post_id', wagtail.core.blocks.IntegerBlock()),))), ('choosen_reviews', wagtail.core.blocks.StructBlock(())))),
         ),
-        migrations.AlterField(
-            model_name='placementadvertisementsnippet',
-            name='body',
-            field=wagtail.core.fields.StreamField((('html', wagtail.core.blocks.RawHTMLBlock()),), blank=True),
-        ),
     ]

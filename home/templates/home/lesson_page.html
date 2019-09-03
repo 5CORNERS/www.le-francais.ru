@@ -189,6 +189,21 @@
 		{% endif %}
 	{% endif %}
 	<script>
+		function reloadPage(lesson_number) {
+			$.ajax({
+				type: 'GET',
+				url: Urls['api:get_lesson_content'](lesson_number, 1),
+				success: function (r) {
+					r.tabs.forEach(function (tab, i) {
+						if (tab.value != null) {
+							$(`li.nav-link[href=${tab.href}]`).html(tab.title);
+							$(`div.tab-pane#${tab.href}`).html(tab.value);
+						}
+					});
+					$('[data-toggle="popover"]').popover()
+				}
+			})
+		}
 		function getSuccessButton() {
 			let new_button = $(
 				"<button" +
@@ -267,11 +282,13 @@
 						$('#give-me-a-coffee-success-message').html(response.description);
 						$('#give-me-a-coffee-complete-modal').modal('show');
 						getSuccessButton();
+						reloadPage(LESSON_NUMBER);
 					}
 					else if (response.result === 'ALREADY') {
 						$('#give-me-a-coffee-fail-message').html(response.description);
 						$('#give-me-a-coffee-fail-modal').modal('show');
 						getSuccessButton();
+						reloadPage(LESSON_NUMBER)
 					}
 					else {
 						$('#give-me-a-coffee-fail-message').html(response.description);
@@ -847,7 +864,9 @@
 				<div class="bottom-message-text">
 					<h4>Пожалуйста, поддержите наш проект — мы остро нуждаемся в вашей помощи.</h4>
 					<p>Нас двое. Мы работаем над этим проектом каждый день — с утра и до вечера. <b>Это наша работа.</b> У нас нет других источников дохода, кроме ваших пожертвований.</p>
-					<p>Мы расчитываем на вас. Наше благополучие зависит только от вашей щедрости.</p>
+					<p>Наше благополучие и развитие этого проекта зависит только от вашей щедрости. </p>
+					<p>Уже сегодня нам есть, что предложить вам взамен — огромный корпус интерактивных упражнений на запоминание лексики и отработки грамматики. Упражнения сильно ускорят ваше продвижение в языке. </p>
+					<p>Мы помогаем вам — вы поддерживаете нас ! :)</p>
 				</div>
 			</div>
 			<div class="bottom-message-buttons"><a id="bottom-message-button-who"
