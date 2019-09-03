@@ -13,6 +13,7 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.views import generic, View
 from django.views.decorators.csrf import csrf_exempt
@@ -658,3 +659,66 @@ def socialauth_success(request):
 
 def favicon(request):
 	return HttpResponseRedirect(settings.STATIC_URL + 'favicon/favicon.ico')
+def render_wagtail_blocks(stream_field):
+	return ''.join([str(block) for block in stream_field])
+def json_default_tabs(page:LessonPage, user, request, render_pdf):
+	result = []
+	for type, attr, href, title in LESSON_PAGE_FIELDS:
+		if type is 'html':
+			value = render_wagtail_blocks(getattr(page, attr))
+		elif type is 'pdf':
+			url = getattr(page, attr)
+			if render_pdf:
+				value = render_to_string('blocks/document_viewer.html', context={'document_url':url})
+			else:
+				value = url
+		else:
+			value = None
+		result.append(dict(
+			attr=attr, type=type, href=href, title=title, value=value or None
+		))
+	if not page.payed(user):
+		for blocked in LESSON_PAGE_BLOCKED_CONTENT:
+			for tab in result:
+				if tab['attr'] == blocked[0]:
+					tab['value'] = render_to_string('home/content_is_blocked.html', request=request)
+	return result
+def json_other_tabs(other_tabs):
+	result = []
+	for tab in other_tabs:
+		result.append(dict(
+			type='html', href=tab.value['href'],
+			title=tab.value['title'], value=render_wagtail_blocks(tab.value['body'] or None)
+		))
+	return result
+LESSON_PAGE_BLOCKED_CONTENT = [
+	('resume_populaire', 7),
+	('repetition_material', 8),
+	('exercise', 9),
+	('flashcards', 10)
+]
+LESSON_PAGE_FIELDS = [
+	# type, page attribute, href, title
+	('html','comments_for_lesson', 'comments_for_lesson', 'Комментарии к уроку'),
+	('html', 'body', 'body', 'Диалог урока'),
+	('html', 'dictionary', 'dictionary', 'Словарик'),
+	('pdf', 'summary_full_url', 'resume', 'Конспект'),
+	('pdf', 'repetition_material_full_url', 'revision', 'Материал для повторения'),
+	('html', 'mail_archive', 'mail-archive', 'Доп. информация'),
+	('html', 'exercise', 'exercise', 'Домашка'),
+	('html', 'resume_populaire', 'resume-populaire', 'Народный Конспект')
+]
+def lesson_page_to_json(page:LessonPage, render_pdf, user, request):
+	json_tabs = json_default_tabs(page, user, request, render_pdf) + json_other_tabs(page.other_tabs)
+	data = {
+		'tabs': json_tabs
+	}
+	return data
+PAGE_STREAMFIELDS = [('commentsForLesson', 'comments_for_lesson'),
+                     ('body', 'body'), ('dictionary', 'dictionary'),
+                     ('mailArchive', 'mail_archive'), ('exercise', 'exercise'),
+                     ('resumePopulaire', 'resume_populaire')]
+def get_lesson_content(request, n, render_pdf):
+	render_pdf = bool(render_pdf)
+	page:LessonPage = LessonPage.objects.get(lesson_number=n)
+	return JsonResponse(lesson_page_to_json(page, render_pdf, user=request.user, request=request), safe=False)

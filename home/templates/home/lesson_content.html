@@ -230,16 +230,20 @@
 				{% endif %}
 			{% else %}
 				<div id="revision" class="{{ pane_class }}" role="tabpanel">
+				{% if block_repetition_material %}
+					{% include 'home/content_is_blocked.html' %}
+				{% else %}
 					<div>
 						{% page_advert_body 'revision_top' page.page_type %}
 						{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
 							{% include 'blocks/document_viewer.html' %}
 						{% endwith %}
 						{% page_advert_body 'revision_body' page.page_type %}
-						{% assign pane_class "tab-pane" %}
 					</div>
+				{% endif %}
 				</div>
 			{% endif %}
+			{% assign pane_class "tab-pane" %}
 		{% endif %}
 		{% if self.mail_archive and user.is_authenticated %}
 			<div id="mail-archive" class="{{ pane_class }}" role="tabpanel">
@@ -259,23 +263,33 @@
 			</div>
 			{% assign pane_class "tab-pane" %}
 		{% endif %}
-		{% if self.exercise %}{% if lesson_was_payed_by_user or request.user.is_superuser or request.user.is_authenticated and not request.user.must_pay %}
-			<div id="exercise" class="{{ pane_class }}" role="tabpanel">
-				<div>
-					{% for block in self.exercise %}
-						{% include block %}
-					{% endfor %}
+		{% if self.exercise %}
+			{% if lesson_was_payed_by_user or request.user.is_superuser or request.user.is_authenticated and not request.user.must_pay %}
+				<div id="exercise" class="{{ pane_class }}" role="tabpanel">
+					{% if block_exercise %}
+						{% include 'home/content_is_blocked.html' %}
+					{% else %}
+						<div>
+							{% for block in self.exercise %}
+								{% include block %}
+							{% endfor %}
+						</div>
+					{% endif %}
 				</div>
-			</div>
-			{% assign pane_class "tab-pane" %}
-		{% endif %}{% endif %}
+				{% assign pane_class "tab-pane" %}
+			{% endif %}
+		{% endif %}
 		{% if self.resume_populaire %}
 			<div id="resume-populaire" class="{{ pane_class }}" role="tabpanel">
-				<div>
-					{% for block in self.resume_populaire %}
-						{% include block %}
-					{% endfor %}
-				</div>
+				{% if block_resume_populaire %}
+					{% include 'home/content_is_blocked.html' %}
+				{% else %}
+					<div>
+						{% for block in self.resume_populaire %}
+							{% include block %}
+						{% endfor %}
+					</div>
+				{% endif %}
 			</div>
 		{% endif %}
 
@@ -287,16 +301,6 @@
 	</div>
 </div>
 
-{% comment %}{% if self.lesson_number > 5 %}
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <div class="panel panel-success">
-                                <div class="panel-heading">
-                                    Пожалуйста, <a href="/collecte/">поддержите наш проект</a>, чтобы мы могли делать всякие разные клёвые фишки для вас и помогать вам еще лучше и быстрее изучать французский язык!
-                                </div>
-                            </div>
-                        </div>
-                    </div>{% endif %}{% endcomment %}
 <hr>
 <div class="row controls text-center">
 	<div class="col-sm-12">{% assign prev self.get_prev_sibling %}
