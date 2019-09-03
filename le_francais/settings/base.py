@@ -487,7 +487,7 @@ PAY54_TEST_ENABLE = False
 
 # Js Reverse settings
 
-JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['notifications']
+JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['notifications', 'api']
 JS_REVERSE_OUTPUT_PATH = 'home/static/django_js_reverse/js/'
 
 # Logging settings

@@ -1,0 +1,31 @@
+{% load wagtailcore_tags static%}
+<div>
+	<p>Мы вынуждены мотивировать вас поддерживать le-lrancais.ru.<br>Материал этой вкладки станет доступен после пожертвования.
+		<span
+				class="arnaud-comment"
+				data-container="body"
+				data-toggle="popover"
+				data-placement="top"
+				data-html="true"
+				data-content='<p>Проект находится в критическом состоянии.
+			Скоро будет три года, как мы развиваем его в кредит.
+			Пожертвований, которые мы собираем, хватает только на его техническое обеспечение.
+			На вознаграждение тех, кто трудится над проектом, средств не остается. <span style="white-space: nowrap;">:((</span>
+			Нам остро нужна ваша помощь. Положение критическое.
+			Развитие проекта под угрозой. <a href="{% slugurl 'who-do-you-think-we-are' %}">Подробнее »»</a></p>'
+		>Почему так?</span></p>
+
+		<img class="new-svg-button" id="coffee-button"
+				{% if request.user.is_authenticated and request.user.has_coffee or 'payment_success' in request.GET %}
+				 data-toggle="modal"
+				 data-target="#give-me-a-coffee-modal"
+				{% elif request.user.is_authenticated and not request.user.has_coffee %}
+				 onclick="location.href='{% url 'check_amount' %}?next={{ request.path }}&s_t=0';"
+				{% elif not request.user.is_authenticated %}
+				 data-toggle="modal"
+				 data-target="#give-me-a-coffee-modal"
+				{% endif %}
+				 src="{% static 'svg/say thank you.svg' %}"
+				 alt="Поблагодарите нас за наш труд"
+		>
+</div>

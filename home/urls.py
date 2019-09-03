@@ -18,12 +18,15 @@ site_import_urls = [
     url(r'^authorized/$', views.authorized)
 ]
 
-api_urls = [
-    url(r'^nav/$', views.get_nav_data),
-    url(r'^listen/$', views.listen_request),
+service_urls = [
+	url(r'^listen/$', views.listen_request),
 	url(r'^test_listen/(?P<number>.+?)/$', views.listen_request_test),
 	url(r'^check_listen/$', views.listen_request_check),
-    url(r'^get_lesson_url/$', views.get_lesson_url, name='get_lesson_url')
+    url(r'^get_lesson_url/$', views.get_lesson_url, name='get_lesson_url'),
+]
+api_urls = [
+    url(r'^nav/$', views.get_nav_data),
+	url(r'^get_lesson_content/(?P<n>.+?)/(?P<render_pdf>.)/$', views.get_lesson_content, name='get_lesson_content')
 ]
 
 payment_urls = [

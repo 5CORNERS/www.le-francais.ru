@@ -16,7 +16,7 @@ from forum.sitemap_generator import ForumSitemap, TopicSitemap
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
 from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls, \
-    activate_urls, modal_urls, meta_urls
+	activate_urls, modal_urls, meta_urls, service_urls
 from home.views import MovePostView, AorAddPostView, AorEditPostView, \
     AorTopicView, move_post_processing, favicon, activation_log
 from home.views import change_username, \
@@ -58,7 +58,8 @@ urlpatterns = [
     url(r'^search/$', search_views.search, name='search'),
 
     url(r'^import/', include(site_import_urls)),
-    url(r'^api/', include(api_urls)),
+    url(r'^api/', include(api_urls, namespace='api')),
+	url(r'^api/', include(service_urls)),
     url(r'^api/', include(notifications_api_urls, namespace='notifications')),
     url(r'^modal/', include(modal_urls, namespace='modal')),
 

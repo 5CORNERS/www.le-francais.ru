@@ -55,6 +55,10 @@ PLACEMENT_CHOICES = (
 	('in_house_sidebar', 'In-House Sidebar')
 )
 
+BLOCK_AFTER_RESUME_POPULAIRE = 7
+BLOCK_AFTER_REPETITION_MATERIAL = 8
+BLOCK_AFTER_EXERCISE = 9
+BLOCK_AFTER_FLASHCARDS = 10
 
 @register_snippet
 class AdUnit(Model):
@@ -363,6 +367,12 @@ class LessonPage(Page):
         ('video', VideoPlayerBlock()),
     ], verbose_name='Народный конспект', null=True, blank=True)
 	other_tabs = StreamField([('tab', TabBlock())], blank=True)
+	@property
+	def summary_full_url(self):
+		return '//files.le-francais.ru' + self.summary
+	@property
+	def repetition_material_full_url(self):
+		return '//files.le-francais.ru' + self.repetition_material
 
 	def get_lesson_number(self):
 		return self.slug.split("lecon-", 1)[1]
@@ -404,7 +414,7 @@ class LessonPage(Page):
 		return user.cup_amount
 
 	def payed(self, user: User):
-		if self in user.payed_lessons.all():
+		if user.is_authenticated and (self in user.payed_lessons.all() or not user.must_pay):
 			return True
 		return False
 
@@ -413,14 +423,35 @@ class LessonPage(Page):
 			return True
 		return False
 
+	def serve(self, request:HttpRequest, *args, **kwargs):
+		# user = request.user
+		# if user.is_authenticated and user.show_tickets != self.must_pay(user):
+		# 	user.show_tickets = self.must_pay(user)
+		# 	user.save()
+		return super(LessonPage, self).serve(request, *args, **kwargs)
 	def get_context(self, request, *args, **kwargs):
 		context = super().get_context(request)
+		user = request.user
 
+		context['already_payed'] = False
 		if request.user.is_authenticated and (request.user.has_cups or request.user.payed_lessons.all()):
 			context['already_payed'] = True
 
+		context['lesson_was_payed_by_user'] = False
 		if request.user.is_authenticated and self in request.user.payed_lessons.all():
 			context['lesson_was_payed_by_user'] = True
+		context['block_exercise'] = True
+		if self.exercise:
+			if BLOCK_AFTER_EXERCISE >= self.lesson_number or self.payed(user):
+				context['block_exercise'] = False
+		context['block_resume_populaire'] = True
+		if self.resume_populaire:
+			if BLOCK_AFTER_RESUME_POPULAIRE >= self.lesson_number or self.payed(user):
+				context['block_resume_populaire'] = False
+		context['block_repetition_material'] = True
+		if self.repetition_material:
+			if BLOCK_AFTER_REPETITION_MATERIAL >= self.lesson_number or self.payed(user):
+				context['block_repetition_material'] = False
 
 		return context
 
