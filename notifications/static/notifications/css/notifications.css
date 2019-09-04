@@ -21,6 +21,12 @@
     border-bottom-color: #fafbfc;
 }
 
+@media (min-width: 359px) {
+    .pull-right > .dropdown-menu {
+        left: -256px;
+    }
+}
+
 @media (min-width: 767px) {
     .pull-right > .dropdown-menu {
         left: inherit;
