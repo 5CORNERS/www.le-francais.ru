@@ -1,5 +1,6 @@
 import csv
 from io import TextIOWrapper
+from typing import List
 
 from django.conf.urls import url
 from django.contrib import admin
@@ -8,10 +9,11 @@ from django.shortcuts import redirect, render
 
 from home.models import LessonPage
 from .forms import DictionaryCsvImportForm
-from .models import Word, WordTranslation
+from .models import Word, WordTranslation, Packet
 
 
 # Register your models here.
+
 
 def create_polly_task(modeladmin: admin.ModelAdmin, request, qs):
 	for p in qs:
@@ -49,12 +51,14 @@ class WordAdmin(admin.ModelAdmin):
 				return redirect('admin:le_francais_dictionary_word_changelist')
 			csv_file = TextIOWrapper(request.FILES['csv_file'].file, encoding='utf-8', errors='replace')
 			reader = csv.reader(csv_file)
-			to_create = dict(
-				words=[],
-				translations=[],
-				lesson_relations=[],
-			)
+
+			words_to_create: List[Word] = []
+			translations_to_create: List[WordTranslation] = []
+			packets_to_create:List[Packet] = []
+
+			packets_count = 1
 			lesson_ids = dict(LessonPage.objects.values_list('lesson_number', 'id'))
+
 			for i, row in enumerate(reader, 1):
 				if i==1:
 					continue
@@ -69,8 +73,22 @@ class WordAdmin(admin.ModelAdmin):
 						part_of_speech = 'loc'
 					else:
 						part_of_speech = row[4].split(' ')[0]
+
+					# Getting or creating new packet object
+					packet = next((x for x in packets_to_create if
+					               x.name == 'урок ' + row[1]), None)
+					if packet is None:
+						packet = Packet(
+							id=packets_count,
+							name='урок ' + row[1],
+							lesson_id=lesson_ids[int(row[1])]
+						)
+						packets_to_create.append(packet)
+						packets_count += 1
+
 					word = Word(
 						id=i,
+						packet_id=packet.id,
 						word=row[2],
 						cd_id=row[0],
 						genre=genre,
@@ -81,22 +99,20 @@ class WordAdmin(admin.ModelAdmin):
 						word_id=i,
 						translation=row[3]
 					)
-					lesson_relation = Word.lessons.through(
-						word_id = i,
-						lessonpage_id = lesson_ids[int(row[1])]
-					) if row[1] else None
-					to_create['words'].append(word)
-					to_create['translations'].append(translation)
-					to_create['lesson_relations'].append(lesson_relation)
+
+					words_to_create.append(word)
+					translations_to_create.append(translation)
+
+			Packet.objects.bulk_create(
+				packets_to_create
+			)
 			Word.objects.bulk_create(
-				[w for w in to_create['words']]
+				words_to_create
 			)
 			WordTranslation.objects.bulk_create(
-				[wt for wt in to_create['translations']]
+				translations_to_create
 			)
-			Word.lessons.through.objects.bulk_create(
-				[wl for wl in filter(None.__ne__, to_create['lesson_relations'])]
-			)
+
 			self.message_user(request, 'CSV file has been imported')
 			return redirect('admin:le_francais_dictionary_word_changelist')
 		form = DictionaryCsvImportForm()
