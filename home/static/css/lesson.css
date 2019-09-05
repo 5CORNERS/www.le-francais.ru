@@ -6,3 +6,11 @@
 .rich-text {
     white-space: pre-line;
 }
+
+.block-message-alert {
+    padding-bottom: 9px;
+}
+
+.block-message-alert p{
+    margin-bottom: 15px;
+}
