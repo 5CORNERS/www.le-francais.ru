@@ -108,14 +108,14 @@
 				</li>
 			{% endif %}
 		{% endif %}
-		{% if self.exercise %}{% if lesson_was_payed_by_user or request.user.is_superuser or request.user.is_authenticated and not request.user.must_pay %}
+		{% if self.exercise %}
 			<li class="nav-item">
 				<a class="nav-link" data-toggle="tab" href="#exercise" role="tab"
 							   aria-controls="exercise">
 								Домашка
 							</a>
 			</li>
-		{% endif %}{% endif %}
+		{% endif %}
 		{% if self.resume_populaire %}
 			<li class="nav-item">
 				<a class="nav-link" data-toggle="tab" href="#resume-populaire" role="tab" aria-controls="resume-populaire">
@@ -264,7 +264,7 @@
 			{% assign pane_class "tab-pane" %}
 		{% endif %}
 		{% if self.exercise %}
-			{% if lesson_was_payed_by_user or request.user.is_superuser or request.user.is_authenticated and not request.user.must_pay %}
+
 				<div id="exercise" class="{{ pane_class }}" role="tabpanel">
 					{% if block_exercise %}
 						{% include 'home/content_is_blocked.html' %}
@@ -277,7 +277,7 @@
 					{% endif %}
 				</div>
 				{% assign pane_class "tab-pane" %}
-			{% endif %}
+			
 		{% endif %}
 		{% if self.resume_populaire %}
 			<div id="resume-populaire" class="{{ pane_class }}" role="tabpanel">
