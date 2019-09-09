@@ -3,6 +3,7 @@ from datetime import datetime
 from django.conf import settings
 from django.db import models
 from django_bulk_update.manager import BulkUpdateManager
+from typing import Tuple, List
 
 from le_francais_dictionary.consts import GENRE_CHOICES, PARTOFSPEECH_CHOICES
 from polly import const as polly_const
@@ -15,6 +16,18 @@ class Packet(models.Model):
 
 	def __str__(self):
 		return '{self.name}'.format(self=self)
+
+	def to_dict(self, user=None):
+		return dict(
+			pk=self.pk,
+			name=self.name,
+		)
+
+
+# TODO: migrate all userwords to userpacket
+class UserPacket(models.Model):
+	packet = models.ForeignKey(Packet)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 
 
 class Word(models.Model):
@@ -102,7 +115,7 @@ class WordTranslation(models.Model):
 	def __str__(self):
 		return self.translation
 
-
+# TODO: delete model
 class UserWord(models.Model):
 
 	word = models.ForeignKey(Word, on_delete=models.CASCADE)
@@ -129,7 +142,8 @@ class UserWord(models.Model):
 
 
 class UserWordData(models.Model):
-	user_word = models.ForeignKey(UserWord)
+	word = models.ForeignKey(Word, related_name='userdata')
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	date = models.DateField(auto_now_add=True)
 	grade = models.IntegerField()
 	mistakes = models.IntegerField()
