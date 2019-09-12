@@ -89,6 +89,14 @@ class Payment(models.Model):
 	def items(self) -> list:
 		return [item for item in self.receipt.receiptitem_set.all()]
 
+	@property
+	def closest_activation(self):
+		from home.models import UserLesson
+		closest_activation = UserLesson.objects.filter(user_id=int(self.customer_key), date__gt=self.update_date).select_related('lesson').order_by('date').first()
+		if closest_activation:
+			return closest_activation.lesson.lesson_number
+		return '-'
+
 
 class Receipt(models.Model):
 	payment = models.OneToOneField(to=Payment, on_delete=models.CASCADE, verbose_name='Заказ')
