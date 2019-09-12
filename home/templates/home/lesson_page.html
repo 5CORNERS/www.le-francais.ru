@@ -267,6 +267,7 @@
 
 		}
 		function giveMeCoffee() {
+		  $('.modal').modal('hide');
 			$.ajax({
 				type: "POST",
 				url: "{% url 'give_me_a_coffee' %}",
@@ -448,7 +449,7 @@
 						</div>
 						<div class="modal-footer" style="text-align: center">
 							<p>
-								<button type="button" class="btn btn-primary coffee-proceed" onclick="giveMeCoffee()" id="give-me-a-coffee-proceed" data-dismiss="modal">OUI !</button>
+								<button type="button" class="btn btn-primary coffee-proceed" onclick="giveMeCoffee()" id="give-me-a-coffee-proceed">OUI !</button>
 							</p>
 							<p>Каждый раз, когда вы нажимаете эту кнопку, я получаю уведомление на телефон :)</p>
 						</div>
