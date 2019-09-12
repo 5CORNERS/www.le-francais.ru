@@ -71,6 +71,11 @@ $(document).ready(function () {
         });
     }
 
+    // Disable backdrop modal if Safari
+    $(document).on('show.bs.modal', '.modal', function () {
+      $(this).data('bs.modal').options.backdrop = 'static';
+    });
+
 
     // Javascript to enable link to tab
     var hash = document.location.hash;
@@ -85,7 +90,7 @@ $(document).ready(function () {
         $('.nav-tabs a[href="#' + location.hash.substring(1) + '"]').tab('show');
     };
 
-// Change hash for page-reload
+    // Change hash for page-reload
     $('.nav-tabs a').on('shown.bs.tab', function (e) {
         history.pushState(null, null, e.target.hash);
     })
