@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
+from django.template import defaultfilters
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -59,7 +60,7 @@ def get_log(request:HttpRequest, year, month):
     for p in payments:
         for item in p.items():
             s += '{date}\t{amount}\tTinkoff\t{type}\t{email}\n'.format(
-                date=p.update_date.strftime("%Y-%m-%d %H:%M"), amount=p.amount/100, email=p.email(),
+                date=defaultfilters.date(p.update_date, "Y-m-d H:i"), amount=p.amount/100, email=p.email(),
                 type=item.category.split('_')[0]
             )
     return HttpResponse(s, status=200, content_type='text/plain')
