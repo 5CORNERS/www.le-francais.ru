@@ -6,6 +6,8 @@ from django_bulk_update.manager import BulkUpdateManager
 from typing import Tuple, List
 
 from le_francais_dictionary.consts import GENRE_CHOICES, PARTOFSPEECH_CHOICES
+from le_francais_dictionary.utils import sm2_response_quality, \
+	sm2_next_repetition_date
 from polly import const as polly_const
 from polly.models import PollyTask
 
@@ -22,6 +24,10 @@ class Packet(models.Model):
 			pk=self.pk,
 			name=self.name,
 		)
+
+	@property
+	def words_count(self):
+		return self.word_set.count()
 
 
 # TODO: migrate all userwords to userpacket
@@ -115,38 +121,20 @@ class WordTranslation(models.Model):
 	def __str__(self):
 		return self.translation
 
-# TODO: delete model
-class UserWord(models.Model):
-
-	word = models.ForeignKey(Word, on_delete=models.CASCADE)
-	user = models.ForeignKey(settings.AUTH_USER_MODEL,
-	                         on_delete=models.CASCADE)
-	update_datetime = models.DateTimeField(default=None)
-	stars = models.IntegerField(default=None)
-
-	def to_dict(self):
-		return {
-			'datetime': self.update_datetime.isoformat(),
-			'stars': self.stars,
-		}
-
-	@property
-	def difficulty(self):
-		...
-		return
-
-	@property
-	def next_datetime(self):
-		...
-		return
-
 
 class UserWordData(models.Model):
 	word = models.ForeignKey(Word, related_name='userdata')
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
-	date = models.DateField(auto_now_add=True)
+	datetime = models.DateTimeField(auto_now_add=True)
 	grade = models.IntegerField()
 	mistakes = models.IntegerField()
+
+	def response_quality(self):
+		return sm2_response_quality(self.grade, self.mistakes)
+
+
+	def get_next_repetition_datetime(self):
+		return sm2_next_repetition_date(UserWordData.objects.filter(word=self.word, user=self.user))
 
 
 class Example(models.Model):
