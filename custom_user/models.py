@@ -3,7 +3,7 @@ import pytz
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.mail import send_mail
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 
@@ -162,6 +162,9 @@ class User(AbstractUser):
 	def low_price(self):
 		return self._low_price
 
+	@property
+	def latest_lesson_number(self):
+		return self.payed_lessons.aggregate(Max('lesson_number'))['lesson_number__max']
 	payed_lessons = models.ManyToManyField(
 		'home.LessonPage',
 		through='home.UserLesson',
