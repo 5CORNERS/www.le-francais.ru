@@ -50,6 +50,9 @@ class Word(models.Model):
 	def polly_url(self):
 		return self.polly.url if self.polly else None
 
+	def get_repetition_date(self, user):
+		self.userwordrepetition_set.filter(user=user, word=self)
+
 	def to_dict(self, with_user=False, user=None):
 		return {
 			'pk': self.pk,
@@ -62,7 +65,7 @@ class Word(models.Model):
 				tr.to_dict() for tr in self.wordtranslation_set.all()
 			],
 			'packet':self.packet.pk,
-			'userData': self.userword_set.get(user=user).to_dict() if with_user else None,
+			'userData': None,
 		}
 
 	def create_polly_task(self):
@@ -132,9 +135,16 @@ class UserWordData(models.Model):
 	def response_quality(self):
 		return sm2_response_quality(self.grade, self.mistakes)
 
+	def get_repetition_datetime(self):
+		dataset = UserWordData.objects.filter(word=self.word, user=self.user, datetime__lte=self.datetime)
+		repetition_datetime = sm2_next_repetition_date(dataset)
+		return repetition_datetime
 
-	def get_next_repetition_datetime(self):
-		return sm2_next_repetition_date(UserWordData.objects.filter(word=self.word, user=self.user))
+
+class UserWordRepetition(models.Model):
+	word = models.ForeignKey(Word)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	repetition_date = models.DateField(null=True)
 
 
 class Example(models.Model):
