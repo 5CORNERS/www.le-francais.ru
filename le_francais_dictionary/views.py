@@ -10,7 +10,7 @@ from django.http import JsonResponse
 
 # Create your views here.
 from le_francais_dictionary.models import Word, Packet, UserPacket, \
-	UserWordData
+	UserWordData, UserWordRepetition
 from home.models import UserLesson
 
 
@@ -26,7 +26,8 @@ def add_packets(request):
 	added = []
 	already_exist = []
 	for packet in packets:
-		usr_packet, created = UserPacket.objects.get_or_create(packet=packet, user=request.user)
+		usr_packet, created = UserPacket.objects.get_or_create(packet=packet,
+		                                                       user=request.user)
 		if created:
 			added.append(usr_packet)
 		else:
@@ -37,18 +38,18 @@ def add_packets(request):
 	))
 
 
-
-
-
 def get_progress(request):
 	last_lesson_number = request.user.latest_lesson_number
-	packets:List[Packet] = Packet.objects.filter(
-		Q(lesson__lesson_number__lte=last_lesson_number if last_lesson_number is not None and last_lesson_number > 10 else 10)|Q(
+	packets: List[Packet] = Packet.objects.filter(
+		Q(
+			lesson__lesson_number__lte=last_lesson_number if last_lesson_number is not None and last_lesson_number > 10 else 10) | Q(
 			userpacket__user=request.user
 		)
 	)
-	activated_lessons = list(request.user.payed_lessons.all().values_list('id', flat=True))
-	added_packets = Packet.objects.filter(userpacket__user=request.user).values_list('id', flat=True)
+	activated_lessons = list(
+		request.user.payed_lessons.all().values_list('id', flat=True))
+	added_packets = Packet.objects.filter(
+		userpacket__user=request.user).values_list('id', flat=True)
 	packets_data = []
 	for packet in packets:
 		packets_data.append(dict(
@@ -57,7 +58,9 @@ def get_progress(request):
 			activated=True if packet.lesson_id in activated_lessons else False,
 			added=True if packet.pk in added_packets else False,
 			wordsCount=packet.words_count,
-			wordsLearned=Word.objects.filter(userdata__user=request.user, userdata__grade=1, packet=packet).count()
+			wordsLearned=Word.objects.filter(userdata__user=request.user,
+			                                 userdata__grade=1,
+			                                 packet=packet).count()
 		))
 	return JsonResponse({'packets': packets_data})
 
@@ -71,9 +74,21 @@ def get_words(request, packet_id):
 	words_dict = [word.to_dict() for word in words]
 	return JsonResponse({'words': words_dict}, safe=False)
 
+
+def get_repetition_words(request):
+	repetitions = UserWordRepetition.objects.prefetch_related(
+		'word',
+		'word__wordtranslation_set',
+		'word__wordtranslation_set__polly',
+		'word__polly').filter(
+		repetition_date__lte=timezone.now())
+	word_dict = [repetition.word.to_dict() for repetition in repetitions]
+	return JsonResponse({'words': word_dict}, safe=False)
+
+
 def update_words(request):
 	words_data = json.loads(request.body)['words']
-	user_words:List[UserWordData] = []
+	user_words: List[UserWordData] = []
 	for word in words_data:
 		user_words.append(UserWordData(
 			word_id=word['pk'],
@@ -83,9 +98,19 @@ def update_words(request):
 		))
 	user_words = UserWordData.objects.bulk_create(user_words)
 	result = []
+	repetitions = []
 	for user_word in user_words:
+		repetition_datetime = user_word.get_repetition_datetime()
+		if repetition_datetime:
+			repetition, created = UserWordRepetition.objects.get_or_create(
+				user=request.user,
+				word_id=user_word.word_id,
+			)
+			repetition.repetition_date = repetition_datetime.date()
+			repetitions.append(repetition)
 		result.append(dict(
 			pk=user_word.word_id,
-			nextRepetition=user_word.get_next_repetition_datetime()
+			nextRepetition=repetition_datetime,
 		))
+	bulk_update(repetitions, update_fields=['repetition_date'])
 	return JsonResponse(result, safe=False)

@@ -8,7 +8,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from le_francais_dictionary.views import update_words
-from .models import Word, WordTranslation, Packet, UserPacket, UserWordData
+from .models import Word, WordTranslation, Packet, UserPacket, UserWordData, UserWordRepetition
 from . import views
 
 from django.contrib.auth import get_user_model
@@ -147,6 +147,7 @@ class WordUserTestCase(TestCase):
 							remembering = False
 				passing = True
 				while passing:
-					frozen_datetime.tick(delta=datetime.timedelta(days=1))
-					if not any(user_data.get_next_repetition_datetime() > timezone.now() for user_data in list(UserWordData.objects.filter(user=self.user))):
+					if UserWordRepetition.objects.filter(repetition_date__gt=timezone.now()):
+						frozen_datetime.tick(delta=datetime.timedelta(days=1))
+					else:
 						passing = False
