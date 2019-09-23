@@ -15,6 +15,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 	# change_list_template = 'custom_user/admin/change_list.html'
 	exclude = ['password']
 	list_display = ['user_actions', 'username', 'email', 'first_name', 'last_name', 'date_joined', 'must_pay', 'saw_message', '_cup_amount', '_cup_credit', '_low_price', 'is_active']
+	list_display_links = ['username']
 	readonly_fields = ['user_actions']
 	list_filter = ['date_joined']
 	search_fields = ['username', 'email', 'first_name', 'last_name']
