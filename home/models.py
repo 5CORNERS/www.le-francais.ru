@@ -358,6 +358,10 @@ class LessonPage(Page):
 		('html', RawHTMLBlock()),
 	], verbose_name='Домашка', null=True, blank=True)
 
+	additional_exercise = StreamField([
+		('paragraph', RichTextBlock()),
+		('html', RawHTMLBlock()),
+	], verbose_name='Exercises De Lecon', null=True, blank=True)
 	resume_populaire = StreamField([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
@@ -444,6 +448,10 @@ class LessonPage(Page):
 		if self.exercise:
 			if BLOCK_AFTER_EXERCISE >= self.lesson_number or self.payed(user):
 				context['block_exercise'] = False
+		context['block_additional_exercise'] = True
+		if self.additional_exercise:
+			if self.payed(user):
+				context['block_additional_exercise'] = False
 		context['block_resume_populaire'] = True
 		if self.resume_populaire:
 			if BLOCK_AFTER_RESUME_POPULAIRE >= self.lesson_number or self.payed(user):
@@ -472,6 +480,7 @@ LessonPage.content_panels = Page.content_panels + [
 	FieldPanel('repetition_material'),
 	StreamFieldPanel('mail_archive'),
 	StreamFieldPanel('exercise'),
+	StreamFieldPanel('additional_exercise'),
 	StreamFieldPanel('resume_populaire'),
 	StreamFieldPanel('other_tabs')
 ]
