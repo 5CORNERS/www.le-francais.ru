@@ -196,7 +196,9 @@
 				success: function (r) {
 					r.tabs.forEach(function (tab, i) {
 						if (tab.value != null) {
-							$(`li.nav-link[href=${tab.href}]`).html(tab.title);
+						  let navLink = $(`a.nav-link[href="#${tab.href}"]`);
+							navLink.parent().show();
+							navLink.html(tab.title);
 							$(`div.tab-pane#${tab.href}`).html(tab.value);
 						}
 					});
