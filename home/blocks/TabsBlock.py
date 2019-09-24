@@ -18,7 +18,8 @@ class TabsBlock(blocks.ListBlock):
 
 
 class TabBlock(blocks.StructBlock):
-    invisible = BooleanBlock(required=False)
+    invisible_for_all = BooleanBlock(required=False, help_text='Табик виден только для администраторов, приоритет над всеми')
+    visible_only_if_payed = BooleanBlock(required=False, help_text='Табик виден только для пользователей, которые активировали урок')
     title = CharBlock(required=True)
     href = CharBlock(required=True)
     body = StreamBlock([

@@ -1,4 +1,5 @@
 {% load site_tags wagtailcore_tags %}
+{# self: LessonPage #}
 <div class="row">
 	{% check_user_lesson request.user self as userlesson %}
 	{% if self.audio_material != 'None' %}
@@ -116,6 +117,14 @@
 							</a>
 			</li>
 		{% endif %}
+		{% if self.additional_exercise %}
+			<li class="nav-item" {% if block_additional_exercise %}style="display: none"{% endif %}>
+				<a class="nav-link" data-toggle="tab" href="#exercises_de_lecon" role="tab"
+				   aria-controls="exercises_de_lecon">
+					Упражнения с урока
+				</a>
+			</li>
+		{% endif %}
 		{% if self.resume_populaire %}
 			<li class="nav-item">
 				<a class="nav-link" data-toggle="tab" href="#resume-populaire" role="tab" aria-controls="resume-populaire">
@@ -124,11 +133,13 @@
 			</li>
 		{% endif %}
 		{% for child_value in self.other_tabs %}
-			{% if not child_value.value.invisible or user.is_superuser %}
+			{% if not child_value.value.invisible_for_all or user.is_superuser %}
+				{% if not child_value.value.visible_only_if_payed or already_payed %}
 				<li class="nav-item">
 					<a class="nav-link" data-toggle="tab" href="#{{ child_value.value.href }}" role="tab"
 					   aria-controls="{{ child_value.value.href }}"><span {% if child_value.value.invisible and user.is_superuser %}color="green" {% endif %}>{{ child_value.value.title }}</span></a>
 				</li>
+				{% endif %}
 			{% endif %}
 		{% endfor %}
 	</ul>
@@ -277,7 +288,19 @@
 					{% endif %}
 				</div>
 				{% assign pane_class "tab-pane" %}
-			
+		{% endif %}
+		{% if self.additional_exercise %}
+			<div id="exercises_de_lecon" class="{{ pane_class }}" role="tabpanel">
+				{% if block_additional_exercise %}
+					{% include 'home/content_is_blocked.html' %}
+				{% else %}
+				<div>
+					{% for block in self.additional_exercise %}
+						{% include block %}
+					{% endfor %}
+				</div>
+				{% endif %}
+			</div>
 		{% endif %}
 		{% if self.resume_populaire %}
 			<div id="resume-populaire" class="{{ pane_class }}" role="tabpanel">
@@ -294,9 +317,9 @@
 		{% endif %}
 
 		{% for child_value in self.other_tabs %}
-			<div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
+			{% if not child_value.value.invisible_for_all or user.is_superuser %}{% if not child_value.value.visible_only_if_payed or already_payed %}<div id="{{ child_value.value.href }}" class="tab-pane" role="tabpanel">
 				{% for block in child_value.value.body %}{% include_block block %}{% endfor %}
-			</div>
+			</div>{% endif %}{% endif %}
 		{% endfor %}
 	</div>
 </div>

@@ -542,7 +542,7 @@ class Search(PaginationMixin, generic.ListView):
 			return qs.none()
 		for word in self.query.split()[:10]:
 			qs = qs.filter(Q(body_text__icontains=word) |
-			               Q(topic__name__icontains=word))
+						   Q(topic__name__icontains=word))
 		topic_list = qs.values_list('topic', flat=True)
 		return Topic.objects.filter(pk__in=topic_list)
 
@@ -570,7 +570,7 @@ class MovePostView(TopicView):
 		topic_qs = Topic.objects.filter(updated__gt=since)
 		topic_qs = perms.filter_topics(self.request.user, topic_qs)
 		data['move_to_topic_list'] = (topic_qs.select_related('forum')
-		                              .order_by('forum', 'forum__name', 'name'))
+									  .order_by('forum', 'forum__name', 'name'))
 		return data
 
 
@@ -639,7 +639,7 @@ def ajax_login(request):
 		if form.is_valid():
 			login(request, form.get_user())
 			return HttpResponse(json.dumps({'success': 'ok'})
-			                    , mimetype='application/json')
+								, mimetype='application/json')
 	return render(request, 'templates/ajax_login.html', {'form': form})
 
 
@@ -649,7 +649,7 @@ def ajax_registration(request):
 		form = RegistrationForm(request.POST)
 		if form.is_valid():
 			return HttpResponse(json.dumps({'success': 'ok', 'mail_activation': True})
-			                    , mimetype='application/json')
+								, mimetype='application/json')
 	return render(request, 'templates/ajax_registration.html', {'form': form})
 
 
@@ -692,6 +692,7 @@ def json_other_tabs(other_tabs):
 		))
 	return result
 LESSON_PAGE_BLOCKED_CONTENT = [
+	('additional_exercise', 0),
 	('resume_populaire', 7),
 	('repetition_material', 8),
 	('exercise', 9),
@@ -706,7 +707,8 @@ LESSON_PAGE_FIELDS = [
 	('pdf', 'repetition_material_full_url', 'revision', 'Материал для повторения'),
 	('html', 'mail_archive', 'mail-archive', 'Доп. информация'),
 	('html', 'exercise', 'exercise', 'Домашка'),
-	('html', 'resume_populaire', 'resume-populaire', 'Народный Конспект')
+	('html', 'additional_exercise', 'exercises_de_lecon', 'Упражнения с урока'),
+	('html', 'resume_populaire', 'resume-populaire', 'Народный Конспект'),
 ]
 def lesson_page_to_json(page:LessonPage, render_pdf, user, request):
 	json_tabs = json_default_tabs(page, user, request, render_pdf) + json_other_tabs(page.other_tabs)
