@@ -663,7 +663,7 @@ def render_wagtail_blocks(stream_field):
 	return ''.join([str(block) for block in stream_field])
 def json_default_tabs(page:LessonPage, user, request, render_pdf):
 	result = []
-	for type, attr, href, title in LESSON_PAGE_FIELDS:
+	for type, attr, href, title, transition in LESSON_PAGE_FIELDS:
 		if type is 'html':
 			value = render_wagtail_blocks(getattr(page, attr))
 		elif type is 'pdf':
@@ -675,7 +675,7 @@ def json_default_tabs(page:LessonPage, user, request, render_pdf):
 		else:
 			value = None
 		result.append(dict(
-			attr=attr, type=type, href=href, title=title, value=value or None
+			attr=attr, type=type, href=href, title=title, value=value or None, transition=transition
 		))
 	if not page.payed(user):
 		for blocked in LESSON_PAGE_BLOCKED_CONTENT:
@@ -688,7 +688,9 @@ def json_other_tabs(other_tabs):
 	for tab in other_tabs:
 		result.append(dict(
 			type='html', href=tab.value['href'],
-			title=tab.value['title'], value=render_wagtail_blocks(tab.value['body'] or None)
+			title=tab.value['title'],
+			value=render_wagtail_blocks(tab.value['body'] or None,),
+			transition=False,
 		))
 	return result
 LESSON_PAGE_BLOCKED_CONTENT = [
@@ -700,15 +702,15 @@ LESSON_PAGE_BLOCKED_CONTENT = [
 ]
 LESSON_PAGE_FIELDS = [
 	# type, page attribute, href, title
-	('html','comments_for_lesson', 'comments_for_lesson', 'Комментарии к уроку'),
-	('html', 'body', 'body', 'Диалог урока'),
-	('html', 'dictionary', 'dictionary', 'Словарик'),
-	('pdf', 'summary_full_url', 'resume', 'Конспект'),
-	('pdf', 'repetition_material_full_url', 'revision', 'Материал для повторения'),
-	('html', 'mail_archive', 'mail-archive', 'Доп. информация'),
-	('html', 'exercise', 'exercise', 'Домашка'),
-	('html', 'additional_exercise', 'exercises_de_lecon', 'Упражнения с урока'),
-	('html', 'resume_populaire', 'resume-populaire', 'Народный Конспект'),
+	('html','comments_for_lesson', 'comments_for_lesson', 'Комментарии к уроку', False),
+	('html', 'body', 'body', 'Диалог урока', False),
+	('html', 'dictionary', 'dictionary', 'Словарик', False),
+	('pdf', 'summary_full_url', 'resume', 'Конспект', False),
+	('pdf', 'repetition_material_full_url', 'revision', 'Материал для повторения', False),
+	('html', 'mail_archive', 'mail-archive', 'Доп. информация', False),
+	('html', 'exercise', 'exercise', 'Домашка', False),
+	('html', 'additional_exercise', 'exercises_de_lecon', 'Упражнения с урока', True),
+	('html', 'resume_populaire', 'resume-populaire', 'Народный Конспект', False),
 ]
 def lesson_page_to_json(page:LessonPage, render_pdf, user, request):
 	json_tabs = json_default_tabs(page, user, request, render_pdf) + json_other_tabs(page.other_tabs)
