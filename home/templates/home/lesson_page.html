@@ -199,6 +199,12 @@
 						  let navLink = $(`a.nav-link[href="#${tab.href}"]`);
 							navLink.parent().show();
 							navLink.html(tab.title);
+							if (tab.transition){
+							  navLink.css({"background-color":"#9fb8ad", "transition":"background-color 0.5s ease", "color":"#004252"});
+								navLink.one("click", function () {
+									navLink.css({"background-color": "inherit", "color":"inherit"})
+                })
+							}
 							$(`div.tab-pane#${tab.href}`).html(tab.value);
 						}
 					});
