@@ -197,13 +197,13 @@
 					r.tabs.forEach(function (tab, i) {
 						if (tab.value != null) {
 						  let navLink = $(`a.nav-link[href="#${tab.href}"]`);
-							navLink.parent().show();
+							navLink.parent().fadeIn(500);
 							navLink.html(tab.title);
 							if (tab.transition){
-							  navLink.css({"background-color":"#9fb8ad", "transition":"background-color 0.5s ease", "color":"#004252"});
-								navLink.one("click", function () {
-									navLink.css({"background-color": "", "color":""})
-                })
+							  navLink.css({"background-color":"#90ee90", "color":"#003e73", "transition":"background-color 0.5s ease"});
+							  setTimeout(function(){
+							    navLink.css({"background-color":"#ffffff", "color":"", "transition":"background-color 10s ease"});
+							  },500)
 							}
 							$(`div.tab-pane#${tab.href}`).html(tab.value);
 						}
