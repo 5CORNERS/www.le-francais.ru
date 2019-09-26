@@ -444,7 +444,7 @@ SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET')
 SOCIAL_AUTH_FACEBOOK_API_VERSION = '2.10'
 
 SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
-	'fields': 'id, name, email',
+	'fields': 'public_profile, email',
 }
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
