@@ -83,12 +83,12 @@
 				</li>
 				<li
 						class="pull-left"
-						title="{% if request.user.is_authenticated and request.user.show_tickets %}Кто возьмет билетов пачку...{% else %}Поблагодарить нас{% endif %}"
+						title="{% if request.user.is_authenticated and request.user.show_tickets or request.user.is_authenticated and request.user.low_price %}Кто возьмет билетов пачку...{% else %}Поблагодарить нас{% endif %}"
 				>
 					<a class="coffee-icon swg"
-					   href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal&s_t={% if request.user.is_authenticated and request.user.show_tickets %}1{% else %}0{% endif %}"
+					   href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal&s_t={% if request.user.is_authenticated and request.user.show_tickets or request.user.is_authenticated and request.user.low_price %}1{% else %}0{% endif %}"
 					>
-						{% if request.user.is_authenticated and request.user.show_tickets %}<i class="fas fa-ticket-alt"></i>{% else %}{% svg 'coffee icon' %}{% endif %}
+						{% if request.user.is_authenticated and request.user.show_tickets or request.user.is_authenticated and request.user.low_price %}<i class="fas fa-ticket-alt"></i>{% else %}{% svg 'coffee icon' %}{% endif %}
 {#						<span class="nav-mobile-text hidden-sm hidden-md hidden-lg">Угостить кофе</span>#}
 					</a>
 				</li>
