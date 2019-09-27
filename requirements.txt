@@ -23,7 +23,6 @@ django-mailer
 django-comments-xtd
 django-user-sessions
 django-cron
-django-guardian
 django-braces
 APScheduler==3.0.0
 

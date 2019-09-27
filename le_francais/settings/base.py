@@ -101,7 +101,6 @@ INSTALLED_APPS = [
 	'conjugation',
 	'le_francais_dictionary',
 	'notifications',
-	'guardian',
 
 	'tinkoff_merchant',
 	'django_js_reverse',
@@ -220,7 +219,6 @@ AUTHENTICATION_BACKENDS = (
 	'social_core.backends.odnoklassniki.OdnoklassnikiOAuth2',
 
 	'django.contrib.auth.backends.ModelBackend',
-	'guardian.backends.ObjectPermissionBackend',
 	'allauth.account.auth_backends.AuthenticationBackend',
 )
 
