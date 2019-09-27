@@ -349,6 +349,7 @@ WAGTAIL_SITE_NAME = "le_francais"
 BASE_URL = 'www.le-francais.ru'
 
 ALLOWED_HOSTS = [
+	'hidden-refuge-27954-heroku-18.herokuapp.com'
 	'hidden-refuge-27954-stage1.herokuapp.com',
 	'www.le-francais.ru',
 	'le-francais.ru',
