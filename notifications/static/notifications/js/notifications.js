@@ -51,7 +51,7 @@ window.setBadgeUpdater = function (timing) {
 
 $(document).ready(function () {
   $('.notify-dropdown').on('click', get_drop_content);
-  var badgeUpdater = setBadgeUpdater(15000);
+  var badgeUpdater = setBadgeUpdater(60000);
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') {
       badgeUpdater.start();
