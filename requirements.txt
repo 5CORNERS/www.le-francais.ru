@@ -19,7 +19,7 @@ social-auth-app-django
 markdown==2.6.11
 urllib3
 pymdown-extensions==5.0.0
-django-mailer
+django-mailer==1.2.6
 django-comments-xtd
 django-user-sessions
 django-cron
