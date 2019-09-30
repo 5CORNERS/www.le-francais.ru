@@ -1,6 +1,64 @@
+function updateBadge() {
+    $.ajax({
+      url: Urls['notifications:get_new_count'](),
+      success: function (r) {
+        if (r > 0) {
+          $('#notify-badge-nav').html(r).show();
+        } else {
+          $('#notify-badge-nav').html(r).hide();
+        }
+      }
+    });
+}
+
+
+window.setBadgeUpdater = function (timing) {
+  let badgeUpdaterInternal = {
+    interval: timing,
+    stopTime: undefined,
+    callback: updateBadge,
+    stopped: false,
+    runLoop: function () {
+      if (badgeUpdaterInternal.stopped) return;
+      var result = badgeUpdaterInternal.callback.call(this);
+      if (typeof result == 'number') {
+        if (result === 0) return;
+        badgeUpdaterInternal.interval = result;
+      }
+      badgeUpdaterInternal.loop()
+    },
+    stop: function () {
+      if (!this.stopped) {
+        this.stopped = true;
+        window.clearTimeout(this.timeout);
+        this.stopTime = Date.now();
+      }
+    },
+    start: function () {
+      this.stopped = false;
+      if (Date.now() - this.stopTime > this.interval) {
+        this.callback.call(this)
+      }
+      return this.loop();
+    },
+    loop: function () {
+      this.timeout = window.setTimeout(this.runLoop, this.interval);
+      return this;
+    }
+  };
+  return badgeUpdaterInternal.start()
+};
+
 $(document).ready(function () {
-	$('.notify-dropdown').on('click', get_drop_content);
-	setInterval(update_badge, 360000);
+  $('.notify-dropdown').on('click', get_drop_content);
+  var badgeUpdater = setBadgeUpdater(15000);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') {
+      badgeUpdater.start();
+    } else {
+      badgeUpdater.stop();
+    }
+  })
 });
 
 function check_notifications(pks) {
@@ -13,18 +71,6 @@ function check_notifications(pks) {
 	}
 }
 
-function update_badge() {
-	$.ajax({
-		url: Urls['notifications:get_new_count'](),
-		success: function (r) {
-			if (r > 0) {
-				$('#notify-badge-nav').html(r).show();
-			}else{
-				$('#notify-badge-nav').html(r).hide();
-			}
-		}
-	});
-}
 
 function get_drop_content() {
 	$('.notify-drop > .drop-content').replaceWith($("<div class=\"drop-content\"><img src='/static/images/loading_icon.gif'></div>"));
