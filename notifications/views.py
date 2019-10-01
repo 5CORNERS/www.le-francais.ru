@@ -35,7 +35,7 @@ def get_new_notifications_count(request):
 		notificationuser__check_datetime__isnull=True, active=True
 	)
 	new_notifications_to_all = Notification.objects.prefetch_related().filter(
-		to_all=True, datetime_creation__gte=user.date_joined).exclude(
+		to_all=True, datetime_creation__gte=user.date_joined).exclude(excpt=request.user).exclude(
 		notificationuser__user=request.user)
 	return HttpResponse(len(new_notifications)+ len(new_notifications_to_all), status=200)
 
