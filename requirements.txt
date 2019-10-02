@@ -27,6 +27,7 @@ django-braces
 APScheduler==3.0.0
 
 django-user-agents
+django-annoying
 django-js-reverse
 django-cors-headers
 
