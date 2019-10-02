@@ -11,6 +11,8 @@ function ifHasNewNotification(func) {
     success: function (r) {
       if (r.hasNewNotifications){
         func.call()
+      } else if(!r.hasNewNotifications) {
+        $('#notify-badge-nav').html('0').hide()
       }
     }
   })
@@ -42,11 +44,7 @@ window.setBadgeUpdater = function (timing) {
     stopped: false,
     runLoop: function () {
       if (badgeUpdaterInternal.stopped) return;
-      var result = badgeUpdaterInternal.callback.call(this);
-      if (typeof result == 'number') {
-        if (result === 0) return;
-        badgeUpdaterInternal.interval = result;
-      }
+      badgeUpdaterInternal.callback.call(this);
       badgeUpdaterInternal.loop()
     },
     stop: function () {
@@ -56,11 +54,11 @@ window.setBadgeUpdater = function (timing) {
         this.stopTime = Date.now();
       }
     },
-    start: function (first_run=undefined) {
+    start: function (firstRun=undefined) {
       this.stopped = false;
       if (Date.now() - this.stopTime > this.interval) {
         this.callback.call(this)
-      } else if (first_run){
+      } else if (firstRun){
         this.callback.call(this)
       }
       return this.loop();
