@@ -62,6 +62,7 @@ INSTALLED_APPS = [
 	'bootstrapform',
 	'django.core.mail',
 
+	'annoying',
 	'user_sessions',
     'corsheaders',
 

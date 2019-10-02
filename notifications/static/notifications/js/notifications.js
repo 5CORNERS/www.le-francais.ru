@@ -1,9 +1,29 @@
+var notificationsUpdateDatetime = 0;
+
+function ifHasNewNotification(func) {
+  $.ajax(Urls['notifications:has_new_notifications'](), {
+    type: 'POST',
+    dataType: 'json',
+    contentType: 'application/json; charset=utf-8',
+    data: JSON.stringify({
+      'datetime': notificationsUpdateDatetime
+    }),
+    success: function (r) {
+      if (r.hasNewNotifications){
+        func.call()
+      }
+    }
+  })
+}
+
+
 function updateBadge() {
     $.ajax({
       url: Urls['notifications:get_new_count'](),
       success: function (r) {
         if (r > 0) {
           $('#notify-badge-nav').html(r).show();
+          notificationsUpdateDatetime = Date.now()
         } else {
           $('#notify-badge-nav').html(r).hide();
         }
@@ -16,7 +36,9 @@ window.setBadgeUpdater = function (timing) {
   let badgeUpdaterInternal = {
     interval: timing,
     stopTime: undefined,
-    callback: updateBadge,
+    callback: function () {
+      ifHasNewNotification(updateBadge)
+    },
     stopped: false,
     runLoop: function () {
       if (badgeUpdaterInternal.stopped) return;
@@ -34,9 +56,11 @@ window.setBadgeUpdater = function (timing) {
         this.stopTime = Date.now();
       }
     },
-    start: function () {
+    start: function (first_run=undefined) {
       this.stopped = false;
       if (Date.now() - this.stopTime > this.interval) {
+        this.callback.call(this)
+      } else if (first_run){
         this.callback.call(this)
       }
       return this.loop();
@@ -46,12 +70,13 @@ window.setBadgeUpdater = function (timing) {
       return this;
     }
   };
-  return badgeUpdaterInternal.start()
+  return badgeUpdaterInternal.start(true)
 };
 
 $(document).ready(function () {
   $('.notify-dropdown').on('click', get_drop_content);
   var badgeUpdater = setBadgeUpdater(60000);
+  var notificationsUpdateDatetime=0;
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') {
       badgeUpdater.start();
@@ -60,6 +85,7 @@ $(document).ready(function () {
     }
   })
 });
+
 
 function check_notifications(pks) {
 	if (pks.length > 0) {
