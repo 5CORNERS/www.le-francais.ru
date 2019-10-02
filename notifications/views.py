@@ -1,12 +1,15 @@
+import datetime
+import json
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
+from django.core.exceptions import SuspiciousOperation
 
 from notifications.utils import query_notifications
-from .models import Notification, NotificationUser
+from .models import Notification, NotificationUser, CheckNotifications
 
 
 def notification_list_to_dict(notifications: list):
@@ -58,6 +61,19 @@ def get_drop_content_html(request):
 	              context=data)
 
 
+@csrf_exempt
+@require_POST
+def has_new_notifications(request):
+	user_check = request.user.check_notifications
+	try:
+		data:dict = json.loads(request.body)
+		if user_check.has_new_notifications or user_check.last_update > timezone.datetime.utcfromtimestamp(data['datetime']/1000).replace(tzinfo=datetime.timezone.utc):
+			return JsonResponse({'hasNewNotifications': True})
+	except ValueError:
+		raise SuspiciousOperation('Invalid JSON')
+	except KeyError:
+		raise SuspiciousOperation('Invalid JSON')
+	return JsonResponse({'hasNewNotifications': False}, status=200)
 @require_GET
 def check_notification(request, pk):
 	user = request.user

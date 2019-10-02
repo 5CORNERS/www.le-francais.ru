@@ -8,4 +8,5 @@ urlpatterns = [
     url(r'^get_drop_content_html/$', get_drop_content_html, name='get_drop_content_html'),
     url(r'^check_notification/(?P<pk>\d+)/$', check_notification, name='check_pk'),
     url(r'^check_notifications/$', check_notifications, name='check_list'),
+	url(r'^has_new_notifications/$', has_new_notifications, name='has_new_notifications')
 ]
