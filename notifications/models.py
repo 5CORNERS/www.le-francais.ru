@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import ast
 from datetime import datetime
 
@@ -125,9 +125,9 @@ class NotificationUser(models.Model):
 
 def check_users(sender, instance, **kwargs):
 	if isinstance(instance, Notification) and instance.to_all:
-		CheckNotifications.objects.all().exclude(user=instance.excpt).update(new_notifications=True)
+		CheckNotifications.objects.all().exclude(user=instance.excpt).update(has_new_notifications=True)
 	elif isinstance(instance, NotificationUser):
-		instance.user.check_notifications.new_notifications = True
+		instance.user.check_notifications.has_new_notifications = True
 		instance.user.check_notifications.save()
 
 
