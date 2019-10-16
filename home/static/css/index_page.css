@@ -79,9 +79,9 @@ a.page-reference:hover .page-reference_title {
 }
 
 .page-reference {
-    width: 27%;
+    width: 30%;
     margin-top: 10px;
-    margin-right: 6%;
+    margin-right: 3%;
     margin-bottom: 10px;
     min-height: 150px;
 }

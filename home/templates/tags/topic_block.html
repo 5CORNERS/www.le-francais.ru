@@ -28,21 +28,21 @@
         <div class="controls btn-group">
             {% if user.is_moderator %}
                 {% if topic.sticky %}
-                    <a class="btn btn-default"
+                    <a class="btn btn-secondary"
                        href="{% url 'pybb:unstick_topic' topic.id %}">{% trans "Unstick topic" %}</a>
                 {% else %}
-                    <a class="btn btn-default"
+                    <a class="btn btn-secondary"
                        href="{% url 'pybb:stick_topic' topic.id %}">{% trans "Stick topic" %}</a>
                 {% endif %}
 
                 {% if topic.closed %}
-                    <a class="btn btn-default" href="{% url 'pybb:open_topic' topic.id %}">{% trans "Open topic" %}</a>
+                    <a class="btn btn-secondary" href="{% url 'pybb:open_topic' topic.id %}">{% trans "Open topic" %}</a>
                 {% else %}
-                    <a class="btn btn-default"
+                    <a class="btn btn-secondary"
                        href="{% url 'pybb:close_topic' topic.id %}">{% trans "Close topic" %}</a>
                 {% endif %}
                 {% if perms.pybb.change_topic and user.is_staff %}
-                    <a class="btn btn-default"
+                    <a class="btn btn-secondary"
                        href="{% url 'admin:pybb_topic_change' topic.id %}">{% trans 'Admin' %}</a>
                 {% endif %}
                 {% comment %}
@@ -51,10 +51,10 @@
             {% endif %}
 
             {% if user.is_subscribed %}
-                <a class="btn btn-default" href="{% url 'pybb:delete_subscription' topic.id %}?from_topic">Больше не
+                <a class="btn btn-secondary" href="{% url 'pybb:delete_subscription' topic.id %}?from_topic">Больше не
                     получать уведомления о новых постах в этой теме</a>
             {% elif user|pybb_may_subscribe_topic:topic %}
-                <a class="btn btn-default" href="{% url 'pybb:add_subscription' topic.id %}">Получать уведомления о
+                <a class="btn btn-secondary" href="{% url 'pybb:add_subscription' topic.id %}">Получать уведомления о
                     новых постах в этой теме</a>
             {% endif %}
         </div>

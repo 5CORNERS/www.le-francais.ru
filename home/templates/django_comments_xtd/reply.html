@@ -13,7 +13,7 @@
 <h5 class="text-center">{% trans "Reply to comment" %}</h5>
 <hr/>
 <div class="row">
-  <div class="col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10">
+  <div class="col-lg-offset-1 col-md-offset-1 col-xl-10 col-lg-10">
     <div class="media">
       <div class="media-left">
         {% if comment.user_url %}
@@ -39,7 +39,7 @@
     </div>
   </div>
 </div>
-<div class="well well-lg">
+<div class="card card-body card card-body-lg">
   {% include "comments/form.html" %}
 </div>
 {% endblock %}

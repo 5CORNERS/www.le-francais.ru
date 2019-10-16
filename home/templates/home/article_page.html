@@ -8,7 +8,7 @@
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
 {% block extra_js %}
     <script type="text/javascript"
-            src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
+            src="{% static 'components/bootstrap-treeview-le-francais/dist/bootstrap-treeview.min.js' %}"></script>
     <script>
         $(function () {
             $('[data-toggle="tooltip"]').tooltip({html: true})
@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
+    <link rel="stylesheet" href="{% static 'components/bootstrap-treeview-le-francais/dist/bootstrap-treeview.min.css' %}">
 {% endblock %}
 
 {% block extra_head %}
@@ -33,7 +33,7 @@
 {% block content %}
     <div class="container-fluid">
         <div class="row main_row">
-            <div class="sidebar-wrapper col-sm-3 _no-padding">
+            <div class="sidebar-wrapper col-md-3 _no-padding">
                 <div id="sidebar"></div>
             </div>
             <button class="sidebar-collapse-button" type="button" data-toggle="toggle"
@@ -41,7 +41,7 @@
                     aria-label="Toggle sidebar">
                 <div class="arrow-icon"></div>
             </button>
-            <div class="col-xs-12 col-sm-9 col-lg-6 main">
+            <div class="col-12 col-md-9 col-xl-6 main">
                 {% breadcrumb calling_page=self %}
                 <h1>{{ page.title }}</h1>
                 {% for block in page.body %}{% include_block block %}{% endfor %}
@@ -56,14 +56,14 @@
                     {% endif %}
                     {% if page.allow_comments %}
                         <div class="comment">
-                            <div class="well">
+                            <div class="card card-body">
                                 {% render_comment_form for page %}
                             </div>
                         </div>
                     {% endif %}
                 </div>
             </div>
-            <div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
+            <div class="d-none d-sm-none d-md-none d-xl-flex col-xl-3 sidebar-right">
 		        <div class="sidebar-last-topics block">
 			        <h6>Последние обновления на&nbsp;форуме</h6>
 			        {% last_topics 10 %}

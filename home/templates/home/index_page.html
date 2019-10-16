@@ -41,7 +41,7 @@
 {% block content %}
 	<div class="container">
 		<div class="row main_row">
-			<div class="col-xs-12 col-offset-336 main">
+			<div class="col-12 col-offset-336 main">
 				<div class="row top-mobile-advert-row">
 					<div class="top-mobile-advert-div">
 						<!-- GPT AdSlot 3 for Ad unit 'lf_fr_main_mobile_top' ### Size: [[728,90],[320,50]] -->
@@ -57,16 +57,16 @@
 					</div>
 				</div>
 				<div class="row title">
-					<div class="col-xs-12"><h1 class="title">Французский язык как удовольствие</h1></div>
+					<div class="col-12"><h1 class="title">Французский язык как удовольствие</h1></div>
 				</div>
 				<div class="row">
-					<div class="col-xs-12">
+					<div class="col-12">
 						<div class="row">
-							<div class="caption col-md-12">Этот сайт поможет вам научиться говорить по-французски. Точка.
+							<div class="caption col-lg-12">Этот сайт поможет вам научиться говорить по-французски. Точка.
 							</div>
 						</div>
 						<div class="row">
-							<div class="col-xs-9 text_description">
+							<div class="col-9 text_description">
 								<div class="subcaption">
 									Нет, не точка. Не просто научиться говорить по-французски, а делать это с
 									наименьшими трудозатратами и получать от этого удовольствие. Важен будет не только (и не
@@ -75,14 +75,14 @@
 									(понимай:&nbsp;<b>бесплатно</b>).
 								</div>
 							</div>
-							<div class="col-xs-3 cat-logo-collapse">
+							<div class="col-3 cat-logo-collapse">
 								<img class="cat-logo" src="{% static 'images/cat_logo.png' %}">
 							</div>
 						</div>
 					</div>
 				</div>
 				<div class="row">
-					<div class="col-xs-12">
+					<div class="col-12">
 						<img class="cat-logo-mini" src="{% static 'images/hat-logo.png' %}">
 						<div class="page-references">
 							{% for reference in self.related_pages.all %}
@@ -95,7 +95,7 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="col-xs-12">
+					<div class="col-12">
 						<div class="too_many_letters">
 							<p>Я сознательно <b>не</b> пишу "изучить французский язык". "Изучить" — понятие более широкое.
 								Здесь
@@ -145,7 +145,7 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="col-xs-12">
+					<div class="col-12">
 						<hr>
 						<div class="page-reviews">
 							{% random_review %}
@@ -160,7 +160,7 @@
 					</div>
 				</div>
 				<div class="row home_comments">
-					<div class="col-xs-12">
+					<div class="col-12">
 						<p>
 							Всё это звучит, как сказка, но я это на себе опробовал — ведь я в этих уроках такой же ученик,
 							как и
@@ -213,7 +213,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="hidden-xs hidden-sm col-fixed-336 sidebar-right">
+			<div class="d-none d-sm-none d-md-flex col-fixed-336 sidebar-right">
 				{% page_advert_body 'sidebar' page.page_type %}
 			</div>
 		</div>

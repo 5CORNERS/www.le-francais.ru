@@ -4,6 +4,6 @@
   "homepage": "https://github.com/5CORNERS/www.le-francais.ru",
   "private": true,
   "dependencies": {
-    "bootstrap-treeview": "^1.2.0"
+    "bootstrap-treeview-le-francais": "https://github.com/AntonDumov/bootstrap-treeview.git#1.2.1"
   }
 }

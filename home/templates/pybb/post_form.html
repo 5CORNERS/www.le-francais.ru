@@ -18,13 +18,13 @@
 		{% if form.body %} {% include "pybb/form_field.html" with field=form.body %}  {% endif %}
 		{{ form.media }}
 		{% if request.user|pybb_may_create_poll and form.poll_type %}
-			<div class="panel panel-default">
-				<div class="panel panel-heading">
+			<div class="card card-default">
+				<div class="card card-heading">
 					<button type="button" class="btn btn-default btn-xs spoiler-trigger" data-toggle="collapse">Create
 						poll
 					</button>
 				</div>
-				<div class="panel-collapse collapse out"><div class="panel-body">{% include "pybb/poll_edit_form.html" %}</div></div>
+				<div class="card-collapse collapse out"><div class="card-body">{% include "pybb/poll_edit_form.html" %}</div></div>
 			</div>
 		{% endif %}
 		{% include "pybb/attachments_formset.html" %}

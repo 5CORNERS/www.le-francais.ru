@@ -73,7 +73,7 @@ $(document).ready(function () {
 
     // Disable backdrop modal if Safari
     $(document).on('show.bs.modal', '.modal', function () {
-      $(this).data('bs.modal').options.backdrop = 'static';
+      $(this).data('bs.modal')._config.backdrop = 'static';
     });
 
 

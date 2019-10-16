@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container" style="margin-top: 50px">
 	<div class="row">
-		<div class="col-xs-12">
+		<div class="col-12">
 			<form class="form-inline" method="post" action="{% url 'custom_user:admin_commands' %}">{% csrf_token %}
 				<div class="form-group">
 					<select name="action" class="form-control">
@@ -16,28 +16,28 @@
 				</div>
 			</form>
 		</div>
-		<div class="col-xs-12">
+		<div class="col-12">
 			cups_amount={{ request.user.cups_amount }}
 		</div>
-		<div class="col-xs-12">
+		<div class="col-12">
 			credit_cups_amount={{ request.user.cup_credit }}
 		</div>
-		<div class="col-xs-12">
+		<div class="col-12">
 			saw_message={{ request.user.saw_message }}
 		</div>
-		<div class="col-xs-12">
+		<div class="col-12">
 			low_price={{ request.user.low_price }}
 		</div>
-		<div class="col-xs-12">
+		<div class="col-12">
 			must_pay={{ request.user.must_pay }}
 		</div>
 	</div>
 	<div class="row" style="margin-top: 1rem">
-		<div class="col-xs-12">
+		<div class="col-12">
 			Активированные уроки:
 		</div>
 		{% for lesson in request.user.payed_lessons.all %}
-			<div class="col-xs-12">
+			<div class="col-12">
 				<a href="{{ lesson.url }}">{{ lesson.slug }}</a>
 			</div>
 		{% endfor %}
