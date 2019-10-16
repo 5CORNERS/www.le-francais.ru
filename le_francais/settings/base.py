@@ -66,6 +66,8 @@ INSTALLED_APPS = [
 	'user_sessions',
     'corsheaders',
 
+	'sass_processor',
+
 	'storages',
 
 	'social_django',
@@ -244,6 +246,7 @@ LOCALE_PATHS = [
 STATICFILES_FINDERS = [
 	'django.contrib.staticfiles.finders.FileSystemFinder',
 	'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+	'sass_processor.finders.CssFinder',
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -256,6 +259,19 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
 WHITENOISE_MAX_AGE = 31557600
+
+# Sass Processor settings
+
+SASS_PROCESSOR_AUTO_INCLUDE = False
+
+SASS_PROCESSOR_INCLUDE_DIRS = [
+	os.path.join(BASE_DIR, 'home/static/scss'),
+	# os.path.join(BASE_DIR, 'home/static/components'),
+]
+
+SASS_PRECISION = 8
+
+SASS_OUTPUT_STYLE = 'compact'
 
 # Amazon AWS S3 settings
 
@@ -351,7 +367,7 @@ BASE_URL = 'www.le-francais.ru'
 
 ALLOWED_HOSTS = [
 	'hidden-refuge-27954-heroku-18.herokuapp.com',
-	'hidden-refuge-27954-stage1.herokuapp.com',
+	'hidden-refuge-27954-bs-4.herokuapp.com',
 	'www.le-francais.ru',
 	'le-francais.ru',
 	'localhost',

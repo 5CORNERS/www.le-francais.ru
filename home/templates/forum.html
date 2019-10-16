@@ -81,26 +81,17 @@
 
 	<script src="{% static 'django_js_reverse/js/reverse.js' %}"></script>
 	<script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
-	<script src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 	{# Global stylesheets #}
 	{% block css %}
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
-		<link rel="stylesheet"
-		      href="{% static 'components/font-awesome-5.0.3/css/fontawesome-all.css' %}">
-		<link rel="stylesheet"
-		      href="{% static 'components/font-awesome-5.0.3/css/fa-regular.css' %}">
-		<link rel="stylesheet"
-		      href="{% static 'components/bootstrap/dist/css/bootstrap.min.css' %}">
-		<link rel="stylesheet"
-		      type="text/css"
-		      href="{% static 'components/bootstrap-social/bootstrap-social.css' %}">
-		<link rel="stylesheet"
-		      type="text/css"
-		      href="{% static 'css/le_francais.min.css' %}">
-		<link rel="stylesheet"
-		      type="text/css"
-		      href="{% static 'css/forum.min.css' %}">
+		<link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fontawesome-all.css' %}">
+		<link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fa-regular.css' %}">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/forum.min.css' %}">
 	{% endblock %}
 	{% get_full_path as full_path %}
 	{% block canonical %}
@@ -136,7 +127,7 @@
 	<div class="block-forum">
 		<div class="container-fluid">
 			<div class="row" style="display: flex; flex-direction: row">
-				<div class="col-xs-12 col-sm-9 col-lg-7 col-lg-offset-2">
+				<div class="col-12 col-md-9 col-xl-7 col-lg-offset-2">
 					<div class="breadcrumb">
 						{% block breadcrumb %}
 						{% endblock %}
@@ -144,7 +135,7 @@
 					{% block content %}
 					{% endblock %}
 				</div>
-				<div class="hidden-xs col-sm-3 col-lg-3"
+				<div class="d-none d-md-flex col-md-3 col-xl-3"
 				     style="padding: 70px 0 0 0; display: flex; flex-direction: column; justify-content: space-between">
 						{% include_advertisements contains='lf_fr_topic_rsb' %}
 				</div>
@@ -212,7 +203,7 @@
 					</div>
 					<div class="modal-footer">
 						<button type="button"
-						        class="btn btn-default"
+						        class="btn btn-secondary"
 						        data-dismiss="modal">Закрыть
 						</button>
 					</div>

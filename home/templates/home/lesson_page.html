@@ -19,7 +19,7 @@
 	</script>
 	{% check_user_lesson request.user self as userlesson %}
 	<script async type="text/javascript"
-	        src="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.js' %}"></script>
+	        src="{% static 'components/bootstrap-treeview-le-francais/dist/bootstrap-treeview.min.js' %}"></script>
 	{% if self.need_payment %}
 		<script>
 			{% if user.is_authenticated %}let saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
@@ -341,7 +341,7 @@
 
 {% block extra_css %}
 	<link rel="stylesheet" href="{% static 'css/lesson.css' %}">
-	<link rel="stylesheet" href="{% static 'components/bootstrap-treeview/dist/bootstrap-treeview.min.css' %}">
+	<link rel="stylesheet" href="{% static 'components/bootstrap-treeview-le-francais/dist/bootstrap-treeview.min.css' %}">
 	<style>
 		.new-svg-button {
 			cursor: pointer;
@@ -376,8 +376,6 @@
 			cursor: pointer;
 			display: flex;
 			align-items: center;
-			margin-bottom: 1rem;
-			margin-top: 0.5rem;
 		}
 		#coffee-button:hover {}
 		#coffee-button:active {
@@ -417,7 +415,7 @@
 	{% assign url request.build_absolute_uri %}
 	<div class="container-fluid">
 		<div class="row main_row">
-			<div class="sidebar-wrapper col-xs-3 _no-padding">
+			<div class="sidebar-wrapper col-xs-12 col-sm-12 col-md-3 col-xl-3 _no-padding">
 				<div id="sidebar"></div>
 			</div>
 			<button class="sidebar-collapse-button" type="button" data-toggle="toggle"
@@ -425,12 +423,12 @@
 			        aria-label="Toggle sidebar">
 				<div class="arrow-icon"></div>
 			</button>
-			<div class="col-12 col-sm-9 col-lg-6 col-xlg-6 main">
+			<div class="col-12 col-md-9 col-xl-6 main">
 				{% breadcrumb calling_page=self %}
 				<h1>{{ page.title }}</h1>
 				{% include 'home/lesson_content.html' %}
 			</div>
-			<div class="hidden-xs hidden-sm hidden-md col-lg-3 sidebar-right">
+			<div class="d-none d-xl-flex col-xl-3 sidebar-right">
 				<div class="sidebar-last-topics block">
 					<h6>Последние обновления на&nbsp;форуме</h6>
 					{% last_topics 10 %}
@@ -632,7 +630,7 @@
 					</div>
 					<div class="modal-footer">
 						<a href="{% url 'payments:payments' %}" type="button" class="btn btn-primary">Повторить</a>
-						<button type="button" class="btn btn-default" data-dismiss="modal">В другой раз</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">В другой раз</button>
 					</div>
 				</div>
 			</div>
@@ -647,7 +645,7 @@
 							<p>Доступ к материалам урока могут получить только зарегистрированные пользователи. Пожалуйста, войдите на сайт под своим именем.</p>
 						</div>
 						<div class="modal-footer">
-							<button class="btn btn-default" {# style="float: left" #} data-dismiss="modal">Закрыть</button>
+							<button class="btn btn-secondary" {# style="float: left" #} data-dismiss="modal">Закрыть</button>
 							<a href="{% url 'account_login' %}?next={{ request.path }}"><button class="btn btn-primary button-small" href="{% url 'account_login' %}">Войти</button></a>
 						</div>
 					</div>
@@ -664,7 +662,7 @@
 						</div>
 						<div class="modal-body">Пожалуйста, активируйте урок, чтобы получить доступ ко всем его материалам.</div>
 						<div class="modal-footer">
-							<button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
 						</div>
 					</div>
 				</div>
@@ -706,7 +704,7 @@
 
 							</div>
 							<div class="modal-footer">
-								<button data-dismiss="modal" onclick="activateLesson('saw')" id="lesson-not-activated-continue-button" class="btn btn-default">Продолжить</button>
+								<button data-dismiss="modal" onclick="activateLesson('saw')" id="lesson-not-activated-continue-button" class="btn btn-secondary">Продолжить</button>
 							</div>
 						{% else %}
 							<div class="modal-header" style="text-align: center">
@@ -738,7 +736,7 @@
 							</div>
 							<div class="modal-footer">
 								{% if user.days_since_joined > 7 %}
-									<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-default">Активировать</button>
+									<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
 								{% endif %}
 								<a type="button" onclick="activateLesson('saw')" class="btn btn-primary" id="lesson-not-activated-continue-button"
 								   href="{% url 'payments:payments' %}?next={{ request.path }}&open_modal=description">Поддержать</a>
@@ -781,7 +779,7 @@
 								</details>
 							</div>
 							<div class="modal-footer">
-								<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-default">Активировать</button>
+								<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
 							</div>
 						{% else %}
 							<div class="modal-header" style="text-align: center"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h3>Пожалуйста, прочтите это!</h3></div>
@@ -811,7 +809,7 @@
 							</div>
 							<div class="modal-footer">
 							{% if user.days_since_joined > 7 %}
-								<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-default">Активировать</button>
+								<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
 							{% else %}
 								<a type="button" onclick="activateLesson('saw')" class="btn btn-primary" href="{% url 'payments:payments' %}?next={{ request.path }}&s_t=1" id="lesson-not-activated-activate-button">Поддержать</a>
 							{% endif %}
@@ -853,7 +851,7 @@
 								два: залогиниться по-новой и активировать урок или перезагрузить страницу — и кнопка исчезнет.</p></div>
 						</div>
 						<div class="modal-footer">
-							<button type="button" class="btn btn-default success-message" id="activated-dismiss-button" onclick="$('#lesson-activated-modal').modal('hide')">Закрыть</button>
+							<button type="button" class="btn btn-secondary success-message" id="activated-dismiss-button" onclick="$('#lesson-activated-modal').modal('hide')">Закрыть</button>
 							<a type="button" class="btn btn-primary fail-message unsofficiant-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}&s_t=1">Пополнить запас</a>
 							<button style="display: none;" class="btn btn-danger unsofficiant-cups-credit minus-cups" data-dismiss="modal">Отказать</button>
 							<a style="display: none;" type="button" class="btn btn-primary unsofficiant-cups-credit minus-cups" id="activated-unsofficiant-cups-button" href="{% url 'payments:payments' %}?next={{ request.path }}&open_modal=description&s_t=1">Поддержать</a>
