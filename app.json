@@ -1,0 +1,145 @@
+{
+  "addons": [
+    "coralogix",
+    "loaderio",
+    "logdna",
+    "heroku-postgresql",
+    "scheduler"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "env": {
+    "AWS_ACCESS_KEY_ID": {
+      "required": true
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "required": true
+    },
+    "CORS_ORIGIN_ALLOW_ALL": {
+      "required": true
+    },
+    "DJANGO_SETTINGS_MODULE": {
+      "required": true
+    },
+    "EMAIL_HOST": {
+      "required": true
+    },
+    "EMAIL_HOST_PASSWORD": {
+      "required": true
+    },
+    "EMAIL_HOST_USER": {
+      "required": true
+    },
+    "EMAIL_PORT": {
+      "required": true
+    },
+    "EMAIL_URL": {
+      "required": true
+    },
+    "EMAIL_USE_SSL": {
+      "required": true
+    },
+    "EMAIL_USE_TLS": {
+      "required": true
+    },
+    "HEROKU_POSTGRESQL_CRIMSON_URL": {
+      "required": true
+    },
+    "LOADERIO_API_KEY": {
+      "required": true
+    },
+    "LOGDNA_KEY": {
+      "required": true
+    },
+    "PAY54_CLIENT_ID": {
+      "required": true
+    },
+    "PAY54_CLIENT_SECRET": {
+      "required": true
+    },
+    "RECAPTCHA_SECRET_KEY": {
+      "required": true
+    },
+    "RECAPTCHA_SITE_KEY": {
+      "required": true
+    },
+    "SECRET_KEY": {
+      "required": true
+    },
+    "SECURE_SSL_REDIRECT": {
+      "required": true
+    },
+    "SOCIAL_AUTH_FACEBOOK_KEY": {
+      "required": true
+    },
+    "SOCIAL_AUTH_FACEBOOK_SECRET": {
+      "required": true
+    },
+    "SOCIAL_AUTH_GOOGLE_OAUTH2_KEY": {
+      "required": true
+    },
+    "SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET": {
+      "required": true
+    },
+    "SOCIAL_AUTH_MAILRU_OAUTH2_KEY": {
+      "required": true
+    },
+    "SOCIAL_AUTH_MAILRU_OAUTH2_SECRET": {
+      "required": true
+    },
+    "SOCIAL_AUTH_ODNOKLASSNIKI_OAUTH2_KEY": {
+      "required": true
+    },
+    "SOCIAL_AUTH_ODNOKLASSNIKI_OAUTH2_PUBLIC_NAME": {
+      "required": true
+    },
+    "SOCIAL_AUTH_ODNOKLASSNIKI_OAUTH2_SECRET": {
+      "required": true
+    },
+    "SOCIAL_AUTH_VK_OAUTH2_KEY": {
+      "required": true
+    },
+    "SOCIAL_AUTH_VK_OAUTH2_SECRET": {
+      "required": true
+    },
+    "SOCIAL_AUTH_YANDEX_OAUTH2_KEY": {
+      "required": true
+    },
+    "SOCIAL_AUTH_YANDEX_OAUTH2_SECRET": {
+      "required": true
+    },
+    "TINKOFF_TERMINAL_ID": {
+      "required": true
+    },
+    "TINKOFF_TERMINAL_PASSWORD": {
+      "required": true
+    },
+    "WALLET_ONE_MERCHANT_ID": {
+      "required": true
+    },
+    "WALLET_ONE_SECRET_KEY": {
+      "required": true
+    },
+    "X_FRAME_OPTIONS": {
+      "required": true
+    }
+  },
+  "formation": {
+    "clock": {
+      "quantity": 1
+    },
+    "web": {
+      "quantity": 1
+    }
+  },
+  "name": "www.le-francais.ru",
+  "scripts": {
+  },
+  "stack": "heroku-18"
+}
