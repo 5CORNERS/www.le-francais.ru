@@ -159,22 +159,22 @@
     <div class="container">
 
         <div class="row first_row">
-            <div class="col-xs-12 col-sm-12 col-md-6">
+            <div class="col-12 col-md-12 col-lg-6">
                 <div class="row">
                     {% if request|is_mobile %}
-                        <div class="col-xs-12" style="margin: 0 10px 0">
+                        <div class="col-12" style="margin: 0 10px 0">
                             {% conjugation_advertisement_body "lf_fr_conj_mob_01"%}
                         </div>
                     {% endif %}
-                    <div class="col-xs-12">
+                    <div class="col-12">
                         {% include 'conjugation/verb_form.html' %}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-12">
+                    <div class="col-12">
                         <h1 style="margin-bottom: 25px">Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %}</h1>
                     </div>
-	                {% if not table.all_polly %}<div class="col-xs-12">
+	                {% if not table.all_polly %}<div class="col-12">
 		                <div class="alert alert-warning alert-dismissable" role="alert">
 			                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
 				                <span aria-hidden="true">&times;</span>
@@ -185,13 +185,13 @@
                 </div>
                 {% if request|is_mobile %}
                 <div class="row">
-                    <div class="col-xs-12">
+                    <div class="col-12">
                         Читайте об особенностях спряжения {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} в <a href="#regle">конце страницы</a>.
                     </div>
                 </div>
                 {% endif %}
                 <div class="row">
-                    <div class="col-xs-12">
+                    <div class="col-12">
                         <ul class="nav nav-tabs">
                             <li class="nav-item active" id="less_tab">
                                 <a style="cursor: pointer" class="nav-link noselect" onclick="see_less()">Сокращенная версия</a>
@@ -212,7 +212,7 @@
                         </ul>
                     </div>
                     {% endif %}
-                    <div class="col-xs-12 {% if forms_count == 2 %} col-offset-210{% elif forms_count == 3 %} col-offset-315{% else %}{% endif %}">
+                    <div class="col-12 {% if forms_count == 2 %} col-offset-210{% elif forms_count == 3 %} col-offset-315{% else %}{% endif %}">
                         <div class="btn">
                             {% if v.can_feminin%}<a class="btn btn-primary" href="{% option_url 'gender' %}">{% if not feminin%}В женском роде{% else %}В мужском роде{% endif %}</a>{% endif %}
                             {% if v.can_reflexive%}<a class="btn btn-primary" href="{% option_url 'se' %}">{% if not reflexive%}В возвратной форме{% else %}В невозвратной форме{% endif %}</a>{% endif %}
@@ -220,12 +220,12 @@
                     </div>
                 </div>
                 <div class="row mood_name">
-                    <div class="col-xs-12">
+                    <div class="col-12">
                         <div><h2 style="margin-bottom: 3px">{{ table.moods.0.name | safe }}</h2></div>
                     </div>
                 </div>
             </div>
-            <div class="col-xs-12 col-sm-12 col-md-6" style="text-align: center">
+            <div class="col-12 col-md-12 col-lg-6" style="text-align: center">
                 {% if not request|is_mobile %}
                     {% conjugation_advertisement_body "lf_fr_conj_rsb_01"%}
                 {% endif %}
@@ -233,10 +233,10 @@
         </div>
 
         <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-6">
+            <div class="col-12 col-md-12 col-lg-6">
                 <div class="row tenses">
                     {% for tense in table.moods.0.tenses %}
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
+                        <div class="col-12 col-md-6 col-lg-6 col-xl-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}" {% if tense.is_in_short_list %}style="display: none" {% endif %}>
                             <div class="tense_name"><h4>{{ tense.name.upper }} {% if not tense.is_empty %}<a style="cursor: pointer; margin: -2px 0;"><span
 		                            style="height: 19px"
 		                            data-toggle="tooltip"
@@ -256,13 +256,13 @@
                 </div>
 	            {% for mood in table.moods|slice:'1:' %}
 		            <div class="row mood_name">
-			            <div class="col-xs-12">
+			            <div class="col-12">
 				            <div><h2>{{ mood.name | safe }}</h2></div>
 			            </div>
 		            </div>
 		            <div class="row tenses">
 			            {% for tense in mood.tenses %}
-										<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}"{% if tense.is_in_short_list %} style="display: none"{% endif %}>
+										<div class="col-12 col-md-6 col-lg-6 col-xl-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}"{% if tense.is_in_short_list %} style="display: none"{% endif %}>
                             <div class="tense_name"><h4>{{ tense.name.upper }} {% if not tense.is_empty %}<a style="cursor: pointer; margin: -2px 0;"><span
 		                            style="height: 19px"
 		                            data-toggle="tooltip"
@@ -282,24 +282,24 @@
 		            </div>
 	            {% endfor %}
             </div>
-            <div class="col-xs-12 col-sm-12 col-md-6">
+            <div class="col-12 col-md-12 col-lg-6">
                 <div class="row emploi">
-                    <div class="col-xs-12">
+                    <div class="col-12">
                         <h3 style="margin-top: 6px">Коротко о главном</h3><p>{{ v.employs | safe }}</p>
                     </div>
                 </div>
                 <div id="regle" class="row regle">
-                    <div class="col-xs-12" style="text-align: center">
+                    <div class="col-12" style="text-align: center">
                         {% if request|is_mobile %}
                             {% conjugation_advertisement_body "lf_fr_conj_mob_02"%}
                         {% endif %}
                     </div>
-                    <div class="col-xs-12">
+                    <div class="col-12">
                         {% if v.regle%}<h3>Особенности спряжения глагола {{ v.infinitive }}</h3><p>{{ v.regle.text_rus | safe }}</p>{% endif %}
                     </div>
                 </div>
                 <div class="row novichkam">
-                    <div class="col-sm-12">
+                    <div class="col-md-12">
                     <h2>Новичкам</h2>
                     <p>Глядя на внушительный список времен, в которых спрягаются французские глаголы, загрустит любой новичок. Я поспешу таких успокоить: вам показали то, что ваша неокрепшая психика не должна была увидеть. :) Мы-то, взрослые, знаем, что реальная жизнь несоизмеримо проще: среднестатистический современный француз в беглой речи использует <b>всего три времени</b>: настоящее, прошедшее (событийное) и будущее. Причем, последнее с легкостью заменяется на удивительный по простоте образования глагольный оборот с использованием спряжения одного единственного глагола «идти» в настоящем времени и инфинитива смыслового глагола.</p>
                     <p>Таким образом, все знания сводятся к двум временам, которые надолго позволят вам абстрагироваться от всей прочей парадигмы спряжения и излагать практически любую вашу мысль без искажения смысла.</p>
@@ -307,12 +307,12 @@
                 </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-12" style="text-align: center">
+                    <div class="col-12" style="text-align: center">
                         {% conjugation_advertisement_body "lf_fr_conj_rsb_02"%}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-12">
+                    <div class="col-12">
                         {% include 'conjugation/feedback.html' %}
                     </div>
                 </div>

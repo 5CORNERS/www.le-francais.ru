@@ -31,6 +31,10 @@ django-annoying
 django-js-reverse
 django-cors-headers
 
+libsass
+django-compressor
+django-sass-processor
+
 django-storages
 boto3
 django-bulk-update

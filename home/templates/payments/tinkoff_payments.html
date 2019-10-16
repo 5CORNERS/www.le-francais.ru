@@ -6,10 +6,10 @@
 
 {% block extra_css %}
 	<style>
-		.col-xs-5ths,
-		.col-sm-5ths,
+		.col-5ths,
 		.col-md-5ths,
-		.col-lg-5ths {
+		.col-lg-5ths,
+		.col-xl-5ths {
 			position: relative;
 			min-height: 1px;
 			padding-right: 15px;
@@ -17,33 +17,33 @@
 		}
 		
 		@media (max-width: 768px) {
-			.col-xs-6 {
+			.col-6 {
 				padding-right: 7px;
 				padding-left: 7px;
 			}
 		}
 
-		.col-xs-5ths {
+		.col-5ths {
 			width: 20%;
 			float: left;
 		}
 
 		@media (min-width: 768px) {
-			.col-sm-5ths {
-				width: 20%;
-				float: left;
-			}
-		}
-
-		@media (min-width: 992px) {
 			.col-md-5ths {
 				width: 20%;
 				float: left;
 			}
 		}
 
-		@media (min-width: 1200px) {
+		@media (min-width: 992px) {
 			.col-lg-5ths {
+				width: 20%;
+				float: left;
+			}
+		}
+
+		@media (min-width: 1200px) {
+			.col-xl-5ths {
 				width: 20%;
 				float: left;
 			}
@@ -145,17 +145,17 @@
 	<div class="container">
 		<div class="row">
 
-			<div class="col-md-12">
+			<div class="col-lg-12">
 				<p class="h1" style="margin-top: 20px; margin-bottom: 20px">Запаситесь кофейком!</p>
 				<p class="subcaption">Чтобы угощать много раз — по чашечке за каждый урок.</p>
 				{% if not request.user.has_payed %}
 					<div class="row" style="margin-bottom: 5px;">
-						<div class="col-md-6">
+						<div class="col-lg-6">
 								<p>Мы использовали простую и понятную метафору — её часто используют проекты, финансируемые за счет пожертвований. Это —
 									<b>виртуальная чашечка кофе.</b></p>
 							<p>Если вы будете угощать нас за каждый урок такой чашечкой, мы будем чувствовать себя хорошо. А проект будет и дальше развиваться. :) </p>
 						</div>
-						<div class="col-md-6">
+						<div class="col-lg-6">
 							<p>Наше благополучие — и ваш успех — зависят о вашей щедрости. <a
 									href="{% slugurl 'who-do-you-think-we-are' %}">Почитайте</a>, кто стоит за этим проектом и как этот проект устроен.
 							</p>
@@ -165,7 +165,7 @@
 				{#				<p class="subcaption" style="margin-bottom: 20px">{% comment %}Чтобы чем-то угощать, надо это что-то иметь :){% endcomment %}Чтобы угощать много раз за каждый урок.</p>#}
 				<div class="row equal" style="margin-bottom: 10px">
 					{% for card in cards %}
-						<div class="col-xs-6 col-sm-6 col-md-4 col-lg-5ths">
+						<div class="col-6 col-md-6 col-lg-4 col-xl-5ths">
 							<div class="card card-select" data-cardSelect>
 								<div class="card-container">
 									<div class="card-header">{{ card.title | safe }}</div>
@@ -204,7 +204,7 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-lg-6">
 				<div class="alert alert-success"><p>Платежи можно совершать
 					<b>из любой страны и в любой валюте</b> — спишется сумма, эквивалентная рублевой по курсу рубля на день платежа. И это
 					<b>абсолютно безопасно</b> — реквизиты карты вводятся через защищенное шифрованное соединение на сайте банка.
@@ -220,7 +220,7 @@
 					<p>При всех таких переводах сообщайте ваш e-mail, пожалуйста, — мы сконвертируем ваш перевод в чашечки кофе :).</p>
 				</div>
 			</div>
-			<div class="col-md-6">
+			<div class="col-lg-6">
 				<p>Каждый раз, когда вы нажимаете на кнопку «Поблагодарить», мы получаем уведомление на почту и телефон и в ту же секунду узнаём о Вашем жесте.</p>
 				<div class="alert alert-warning">Пожалуйста, помните: над проектом в режиме полной занятости работает два человека. Это наша работа — помогать вам учить французский. Помогите и вы нам — других источников дохода у нас нет.</div>
 			</div>

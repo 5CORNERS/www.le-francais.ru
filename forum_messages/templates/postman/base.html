@@ -9,18 +9,18 @@
 {% block content %}
     <div class="container">
     <div class="row">
-        <div class="col-md-12 top-buffer">
+        <div class="col-lg-12 top-buffer">
             {% block postman_content_menu %}
                 <div id="postman_menu" class="btn-group">{% postman_unread as unread_count %}
-                    <a class="btn btn-default" href="{% url 'postman:inbox' %}">
+                    <a class="btn btn-secondary" href="{% url 'postman:inbox' %}">
                         {% trans "Inbox" %}{% if unread_count %} <strong>({{ unread_count }})</strong>{% endif %}</a>
-                    <a class="btn btn-default" href="{% url 'postman:sent' %}">{% trans "Sent Messages" %}</a>
-                    <a class="btn btn-default" href="{% url 'postman:write' %}">{% trans "Write" %}</a>
-                    <a class="btn btn-default" href="{% url 'postman:archives' %}">{% trans "Archives" %}</a>
-                    <a class="btn btn-default" href="{% url 'postman:trash' %}">{% trans "Trash" %}</a>
+                    <a class="btn btn-secondary" href="{% url 'postman:sent' %}">{% trans "Sent Messages" %}</a>
+                    <a class="btn btn-secondary" href="{% url 'postman:write' %}">{% trans "Write" %}</a>
+                    <a class="btn btn-secondary" href="{% url 'postman:archives' %}">{% trans "Archives" %}</a>
+                    <a class="btn btn-secondary" href="{% url 'postman:trash' %}">{% trans "Trash" %}</a>
                 </div>
             {% endblock %}</div>
-        <div class="col-md-12">
+        <div class="col-lg-12">
             {% block postman_content %}
             {% endblock %}
         </div>
