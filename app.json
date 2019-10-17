@@ -132,12 +132,10 @@
       "value": "1"
     },
     "HEROKU_APP_NAME": {
-      "required": true,
-      "value": "hidden-refuge-27954-bs-4"
+      "required": true
     },
     "HEROKU_PARENT_APP_NAME": {
-      "required": true,
-      "value": "hidden-refuge-27954"
+      "required": true
     },
     "DATABASE_URL": {
       "required": true
