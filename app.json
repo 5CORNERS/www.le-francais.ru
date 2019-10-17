@@ -1,9 +1,7 @@
 {
   "addons": [
-    "coralogix",
     "loaderio",
     "logdna",
-    "heroku-postgresql",
     "scheduler"
   ],
   "buildpacks": [
