@@ -129,7 +129,7 @@
     },
     "DISABLE_COLLECTSTATIC:": {
       "required": true,
-      "value": 1
+      "value": "1"
     }
   },
   "formation": {
