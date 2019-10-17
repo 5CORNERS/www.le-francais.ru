@@ -933,7 +933,7 @@ details.no-details:not([open]) summary {
 }
 
 .nav-link.active {
-    margin-top: -1px;
+    margin-top: -7px;
     height: 3em;
 }
 
