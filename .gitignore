@@ -13,7 +13,6 @@ venv
 /html_files/
 */__pycache__
 src
-scripts
 
 media
 node_modules/
@@ -21,3 +20,4 @@ node_modules/
 forum/dat
 config.txt
 /staticfiles/
+/home/static/components/
