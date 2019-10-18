@@ -2,7 +2,7 @@
 {% load postman_tags %}
 {% load svg %}
 {% load notifications %}
-<nav class="navbar fixed-top navbar-dark bg-dark navbar-expand-lg" id="topMenu">
+<nav class="navbar fixed-top navbar-dark navbar-expand-lg" id="topMenu" style="background-color: #222;">
     <div class="container">
 
         <a class="navbar-brand" href="/"><span style="font-size: 18px"><i
@@ -47,7 +47,7 @@
                                 {% if unread_count %}
                                     <strong>({{ unread_count }})</strong>{% endif %}
                             </a>
-                            <a class="dropdown-item"
+                            <a class="dropdown-item{% if '/payments/' in request.path %} active{% endif %}"
                                href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">Пополнить
                                 запасы</a>
                             {% if request.user.is_staff %}
@@ -119,7 +119,7 @@
                        href="/forum/">Форум</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle"
+                    <a class="nav-link dropdown-toggle{% if '/lecons' in request.path %} active{% endif %}"
                        id="navbarDropdownLessonsLink" role="button"
                        data-toggle="dropdown" aria-haspopup="true"
                        aria-expanded="false" href="#">Уроки</a>
@@ -135,14 +135,14 @@
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'conjugation:index' %}">Спряжение
+                    <a class="nav-link{% if '/conjugaison/' in request.path %} active{% endif %}" href="{% url 'conjugation:index' %}">Спряжение
                         глаголов</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/faq">FAQ</a>
+                    <a class="nav-link{% if '/faq/' in request.path %} active{% endif %}" href="/faq/">FAQ</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/ecoles-francais/ecoles-review/">Французский
+                    <a class="nav-link{% if '/ecoles-francais/ecoles-review/' in request.path %} active{% endif %}" href="/ecoles-francais/ecoles-review/">Французский
                         по скайпу</a>
                 </li>
             </ul>
