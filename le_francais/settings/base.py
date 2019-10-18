@@ -205,7 +205,7 @@ DATABASES = {
 
 db_from_env = dj_database_url.config(conn_max_age=500)
 
-DATABASES['default'].update(db_from_env)
+# DATABASES['default'].update(db_from_env)
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 20971520
 FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520
