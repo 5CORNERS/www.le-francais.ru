@@ -921,7 +921,7 @@ details.no-details:not([open]) summary {
     margin-top: 3px;
 }
 
-.nav-link.active {
+.nav-tabs > .nav-item > .nav-link.active {
     margin-top: -7px;
     height: 3em;
 }
