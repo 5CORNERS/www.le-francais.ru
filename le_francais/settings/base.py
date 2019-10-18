@@ -372,7 +372,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '192.168.0.27',
-    os.environ.get('HEROKU_APP_NAME', 'none')+'herokuapp.com'
+    os.environ.get('HEROKU_APP_NAME', 'none')+'.herokuapp.com'
 ]
 
 X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS', 'SAMEORIGIN')
