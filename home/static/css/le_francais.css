@@ -17,6 +17,10 @@ body {
     flex-direction: column;
 }
 
+video{
+    max-width: 100%;
+}
+
 .main_row {
     display: flex;
     flex-direction: row;
@@ -83,6 +87,7 @@ img {
 }
 
 iframe {
+    width: 100%;
     max-width: 100%;
 }
 
@@ -533,7 +538,7 @@ td.forum-last-post, td.topic-last-post {
         border-left: none;
         border-top-right-radius: 5px;
         border-bottom-right-radius: 5px;
-        background: #f5f5f5;
+        background:#f5f5f5ba;
     }
 
     .sidebar-collapse-button .arrow-icon {
