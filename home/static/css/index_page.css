@@ -2,7 +2,8 @@
     margin-top: 273px;
 }
 
-.top-mobile-advert-row {}
+.top-mobile-advert-row {
+}
 
 .top-mobile-advert-div {
     text-align: center;
@@ -109,7 +110,7 @@ a.page-reference:hover .page-reference_title {
 .cat-logo {
     position: relative;
     max-width: 120%;
-    top: 30px;
+    top: -10px;
     left: 50px;
     margin: -70px;
     z-index: 10;
@@ -137,7 +138,7 @@ a.page-reference:hover .page-reference_title {
 
 @media (max-width: 1199px) {
     .cat-logo {
-        top: 120px;
+        top: 50px;
     }
 
     .too_many_letters {
@@ -146,10 +147,18 @@ a.page-reference:hover .page-reference_title {
 
 @media (max-width: 991px) {
     .cat-logo {
-        top: 85px;
+        top: 15px;
+        left: 100px;
     }
 
     .too_many_letters {
+    }
+}
+
+@media (max-width: 767px) {
+    .cat-logo {
+        top: 65px;
+        left: 50px;
     }
 }
 
@@ -228,6 +237,14 @@ a.page-review:hover {
     float: right;
     top: .45em;
     margin-right: -15px;
+}
+
+@media (max-width: 575px) {
+    .page-review_text:after, .page-review_text:before {
+        display: none;
+
+    }
+
 }
 
 .lyrical_digression_h {
