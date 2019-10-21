@@ -46,7 +46,7 @@
                         {% trans "Member since" %}: {{ message.sender.date_joined|date:'d E Y' }}
                     </div>
                     {% if not message.sender %}
-                        <div class="label label-warning">{% trans 'blocked' %}</div>
+                        <div class="badge badge-warning">{% trans 'blocked' %}</div>
                     {% endif %}
                 </td>
                 <td class="post-content">
@@ -60,7 +60,7 @@
         <form action="" method="post">{% csrf_token %}
             <input type="hidden" {% if pm_messages|length > 1 and message.thread_id %}name="tpks" value="{{ message.thread_id }}"{% else %}name="pks" value="{{ message.pk }}"{% endif %} />
 
-            <a href="{{ next_url }}" class="btn btn-default">{% trans "Back" %}</a>
+            <a href="{{ next_url }}" class="btn btn-secondary">{% trans "Back" %}</a>
             <span id="pm_buttons">
                 <button class="btn btn-danger btn-sm" type="submit" onclick="this.form.action='{% url 'postman:delete' %}?next={{ next_url|urlencode }}'">
                     {% trans "Delete" %}{% if pm_messages|length > 1 and message.thread_id %} {% trans "all thread" %}{% endif %}

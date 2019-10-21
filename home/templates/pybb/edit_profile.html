@@ -31,7 +31,7 @@
 		$('form').areYouSure({'message': 'Изменения будут потеряны!'});
 	</script>
 	<div class="row">
-		<div class="col-md-4">
+		<div class="col-lg-4">
 			{% include "pybb/avatar.html" %}
 			<p>
 				<a href="{% url 'account_change_password' %}">Изменить пароль{# TODO l18n #}</a>
@@ -57,7 +57,7 @@
 					</button>
 				{% endif %}
 		</div>
-		<div class="col-md-8">
+		<div class="col-lg-8">
 			<form action="" method="post" enctype="multipart/form-data"
 			      class="profile-edit">
 				{% include "pybb/form.html" %}
@@ -79,7 +79,7 @@
 	</div>
 	{% if user.subscriptions.all %}
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-lg-12">
 				<h1>Мои подписки{# TODO l18n #}{#{% trans "Subscriptions on topics" %}#}</h1>
 				<ul>
 					{% for sub in user.subscriptions.all %}

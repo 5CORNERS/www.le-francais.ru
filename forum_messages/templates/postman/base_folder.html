@@ -30,7 +30,7 @@
                                 <button class="btn btn-warning btn-sm" type="submit"
                                         onclick="this.form.action='{% url 'postman:archive' %}'">{% trans "Archive" %}</button>{% endblock %}
                             {% block pm_undelete_button %}
-                                <button class="btn btn-default" type="submit"
+                                <button class="btn btn-secondary" type="submit"
                                         onclick="this.form.action='{% url 'postman:undelete' %}'">{% trans "Undelete" %}</button>{% endblock %}
                         </div>
                     {% endblock %}

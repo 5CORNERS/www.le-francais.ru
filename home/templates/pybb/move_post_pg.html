@@ -18,11 +18,11 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{% url 'move_post_processing' %}" method="post" class="form-horizontal">
+    <form action="{% url 'move_post_processing' %}" method="post" class="(removed)">
         {% csrf_token %}
         <input type="hidden" name="move_from_topic" value="{{ topic.id }}" />
 
-        <label class="control-label" for="move_to_topic">
+        <label class="col-form-label" for="move_to_topic">
             {% trans 'Choose topic where to move post' %}
         </label>
         <div class="controls">

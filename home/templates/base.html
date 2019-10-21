@@ -1,5 +1,6 @@
 {% load static wagtailuserbar %}
-{% load static site_tags %}
+{% load sass_tags %}
+{% load site_tags %}
 {% load i18n %}
 {% load pybb_tags i18n %}
 {% load user_agents %}
@@ -56,14 +57,14 @@
 {% endblock %}
 {% block bootstrap_js %}
     <script src="{% static 'components/jquery/dist/jquery.min.js' %}"></script>
-    <script src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
-		<script type="text/javascript" src="{% static 'lib/footable-bootstrap.v3.1.6/js/footable.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="{% static 'lib/footable-bootstrap.v3.1.6/js/footable.min.js' %}"></script>
 {% endblock %}
 {% block bootstrap_css %}
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
-	<link rel="stylesheet" href="{% static 'components/bootstrap/dist/css/bootstrap.min.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'components/bootstrap-social/bootstrap-social.min.css' %}">
-
+    <link rel="stylesheet" href="{% sass_src 'scss/custom_bootstrap.scss' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/bootstrap-social/bootstrap-social.min.css' %}">
 {% endblock %}
     {% block css %}
 
@@ -74,8 +75,8 @@
 
 	    {# Global stylesheets #}
 	    <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
-      <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fontawesome-all.css' %}">
-      <link rel="stylesheet" href="{% static 'components/font-awesome-5.0.3/css/fa-regular.css' %}">
+      <link rel="stylesheet" href="{% static 'lib/font-awesome-5.0.3/css/fontawesome-all.css' %}">
+      <link rel="stylesheet" href="{% static 'lib/font-awesome-5.0.3/css/fa-regular.css' %}">
 	    <link rel="stylesheet" type="text/css" href="{% static 'lib/footable-bootstrap.v3.1.6/css/footable.bootstrap.min.css' %}">
     {% endblock %}
 		{% get_full_path as full_path %}
@@ -152,7 +153,7 @@
                         <p>:(</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
                     </div>
                 </div>
             </div>
