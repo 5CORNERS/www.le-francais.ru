@@ -108,12 +108,60 @@ a.page-reference:hover .page-reference_title {
 }
 
 .cat-logo {
+    display: none;
     position: relative;
     max-width: 120%;
     top: -10px;
     left: 50px;
     margin: -70px;
     z-index: 10;
+}
+
+.cat-logo-mini {
+    position: relative;
+    z-index: 2;
+    top: -5px;
+    float: right;
+    margin-bottom: -47px;
+    display: none;
+}
+
+
+.cat-logo-mini {
+    display: inline
+}
+
+
+@media (min-width: 576px) {
+    .cat-logo-mini{
+        display: none;
+    }
+    .cat-logo{
+        display: inline;
+        top: 70px;
+        left: 50px;
+    }
+}
+
+@media (min-width: 768px) {
+    .cat-logo{
+        top: 33px;
+        left: 29px;
+    }
+}
+
+@media (min-width: 992px) {
+    .cat-logo{
+        top: 68px;
+        left: 39px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .cat-logo{
+        top: 10px;
+        left: 39px;
+    }
 }
 
 .too_many_letters {
@@ -127,50 +175,7 @@ a.page-reference:hover .page-reference_title {
     font-size: 14px;
 }
 
-.cat-logo-mini {
-    position: relative;
-    z-index: 2;
-    top: -5px;
-    float: right;
-    margin-bottom: -47px;
-    display: none;
-}
-
-@media (max-width: 1199px) {
-    .cat-logo {
-        top: 50px;
-    }
-
-    .too_many_letters {
-    }
-}
-
-@media (max-width: 991px) {
-    .cat-logo {
-        top: 15px;
-        left: 100px;
-    }
-
-    .too_many_letters {
-    }
-}
-
-@media (max-width: 767px) {
-    .cat-logo {
-        top: 65px;
-        left: 50px;
-    }
-}
-
 @media (max-width: 576px) {
-    .cat-logo-collapse {
-        display: none;
-    }
-
-    .cat-logo-mini {
-        display: inline
-    }
-
     .text_description {
         width: 100%;
     }
