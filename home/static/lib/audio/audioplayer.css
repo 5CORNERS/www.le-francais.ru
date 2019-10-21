@@ -107,6 +107,7 @@
 .audioplayer-time-duration {
     border-right: 1px solid #555;
     border-right-color: rgba(255, 255, 255, .1);
+    width: 4.4em;
 }
 
 .audioplayer-novolume .audioplayer-time-duration {
@@ -205,8 +206,8 @@
     height: 0.313em; /* 5 */
     border: 0.25em double #fff; /* 4 */
     border-width: 0.25em 0.25em 0 0; /* 4 */
-    left: 0.563em; /* 9 */
-    top: -0.063em; /* 1 */
+    left: 0.663em; /* 9 */
+    top: 0; /* 1 */
     -webkit-border-radius: 0 0.938em 0 0; /* 15 */
     -moz-border-radius: 0 0.938em 0 0; /* 15 */
     border-radius: 0 0.938em 0 0; /* 15 */
@@ -336,7 +337,7 @@
     border-left-color: rgba(0, 0, 0, .25);
     cursor: pointer;
     z-index: 2;
-    top: 0;
+    top: 2px;
 }
 
 a.audioplayer-download-button {
@@ -355,4 +356,14 @@ a.audioplayer-download-button {
     .navbar-header .audioplayer {
         top: 3px;
 }
+}
+
+.audioplayer-space{
+    width: 6px;
+    height: 100%;
+    border-left: 1px solid #111;
+    border-left-color: rgba(0,0,0,.25);
+    cursor: pointer;
+    z-index: 2;
+    top: -2%;
 }

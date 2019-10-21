@@ -5,6 +5,15 @@
 * @copyright Steven Usher & Brad Vincent 2015
 * @license Released under the GPLv3 license.
 */
+@font-face {
+	font-family: Glyphicons Halflings;
+	src: url("../fonts/glyphicons-halflings-regular.eot");
+	src: url('../fonts/glyphicons-halflings-regular.woff') format('woff'),
+		url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'),
+		url('../fonts/glyphicons-halflings-regular.svg') format('svg');
+
+}
+
 table.footable,
 table.footable-details {
 	position: relative;

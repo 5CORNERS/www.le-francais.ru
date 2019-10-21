@@ -114,7 +114,7 @@
 				{% trans "Member since" %}: {{ post.user.date_joined|date:'d E Y' }}
 			</div>
 			{% if not post.user.is_active %}
-				<div class="label label-warning">{% trans 'blocked' %}</div>
+				<div class="badge badge-warning">{% trans 'blocked' %}</div>
 			{% endif %}
 		</td>
 		<td class="post-content">

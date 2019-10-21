@@ -2,163 +2,150 @@
 {% load postman_tags %}
 {% load svg %}
 {% load notifications %}
-<nav class="navbar navbar-inverse navbar-fixed-top">
-	<div class="container">
+<nav class="navbar fixed-top navbar-dark navbar-expand-lg" id="topMenu" style="background-color: #222;">
+    <div class="container">
 
-		{# Title #}
-		<div class="navbar-header pull-left">
-      <a class="navbar-brand navbar-brand-home" href="/"><span style="font-size: 18px"><i class="fa fa-home fa-3" aria-hidden="true"></i></span></a>
-			<a class="navbar-brand navbar-brand-text" href="/"><span style="font-size: 18px"><i class="fa fa-home fa-3" aria-hidden="true"></i></span>&nbsp;Le-Francais.ru</a>
-		</div>
+        <a class="navbar-brand" href="/"><span style="font-size: 18px"><i
+                class="fa fa-home fa-3" aria-hidden="true"></i></span><span
+                class="d-none d-xl-inline">&nbsp;Le-Francais.ru</span></a>
 
-		{# 'Sticky' (non-collapsing) right-side menu item(s) #}
-		<div class="navbar-header navbar-right pull-right navbar-sticky">
-			<ul class="nav navbar-sticky-ul pull-left">
-				{% if request.user.is_authenticated %}{% postman_unread as unread_count %}
-					<li class="dropdown pull-left" style="cursor: pointer">
-						<a class="dropdown-toggle"
-						   title="{{ request.user.username }}"
-						   data-toggle="dropdown"><span class="username">{{ request.user.username }}</span>
-							{% comment %}{% if unread_count %}<i class="fa fa-envelope"
-							                        aria-hidden="true"
-							                        style="color: inherit;"></i>{% endif %}{% endcomment %}<b
-									class="caret"></b></a>
-						<ul class="dropdown-menu">
-							<li>
-								<a href="{% url 'pybb:edit_profile' %}">Настройки профиля{# TODO l18n #}</a>
-							</li>
-							{% if user.pybb_profile.post_count > 0 %}
-								<li>
-									<a href="{{ request.user.profile.get_absolute_url }}">Мои посты{# TODO l18n Forum activity #}</a>
-								</li>
-							{% endif %}
-							<li>
-								<a href="{% url 'postman:inbox' %}">
-									Личные сообщения{# TODO l18n #}{% if unread_count %}
-									<strong>({{ unread_count }})</strong>{% endif %}
-								</a>
-							</li>
-							<li>
-								<a href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">Пополнить запасы</a>
-							</li>
-							{% if request.user.is_staff %}
-								<li class="divider"></li>
-								<li class="{{ menu_admin }}">
-									<a href="{% url 'admin:index' %}">{% trans "Admin" %}</a>
-								</li>{% endif %}
+        <div class="d-flex flex-row order-2 order-lg-3">
+            <ul class="navbar-nav flex-row" style="align-items: center">
+                {% if request.user.is_authenticated %}
+                    <li class="nav-item dropdown" style="top: -1px;">
+                        <a class="nav-link dropdown-toggle px-2 px-lg-2"
+                           style="cursor: pointer;"
+                           id="userDropdown"
+                           title="{{ request.user.username }}"
+                           data-toggle="dropdown"
+                           aria-expanded="false"
+                           aria-haspopup="true"
+                        ><span class="username d-none d-sm-inline">{{ request.user.username }}</span><i
+                                style="vertical-align: middle"
+                                class="fa fa-user d-sm-none"></i>
+                            {% if unread_count %}
+                                <i class="fa fa-envelope" aria-hidden="true"
+                                   style="color: inherit;"></i>{% endif %}
+                        </a>
+                        <div class="dropdown-menu"
+                             aria-labelledby="userDropdown"
+                             style="position: absolute">
+                            <h6 class="dropdown-header d-sm-none"><span
+                                    style="text-overflow: ellipsis;max-width: 106px;">{{ request.user.username }}</span>
+                            </h6>
+                            <a class="dropdown-item"
+                               href="{% url 'pybb:edit_profile' %}">Настройки
+                                профиля{# TODO l18n #}</a>
+                            {% if user.pybb_profile.post_count > 0 %}
+                                <a class="dropdown-item"
+                                   href="{{ request.user.profile.get_absolute_url }}">Мои
+                                    посты{# TODO l18n Forum activity #}</a>
+                            {% endif %}
+                            <a class="dropdown-item"
+                               href="{% url 'postman:inbox' %}">
+                                Личные сообщения{# TODO l18n #}
+                                {% if unread_count %}
+                                    <strong>({{ unread_count }})</strong>{% endif %}
+                            </a>
+                            <a class="dropdown-item{% if '/payments/' in request.path %} active{% endif %}"
+                               href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">Пополнить
+                                запасы</a>
+                            {% if request.user.is_staff %}
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item"
+                                   href="{% url 'admin:index' %}">{% trans "Admin" %}</a>
+                            {% endif %}
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item"
+                               href="{% url 'account_logout' %}?next={{ request.path }}">Выйти{# TODO l18n #}</a>
+                        </div>
+                    </li>
+                {% else %}
+                    <li class="nav-item dropdown" style="top: -1px;">
+                        <a href="{% url 'account_login' %}?next={{ request.path }}"
+                           class="nav-link dropdown-toggle px-2 px-lg-2"
+                           id="loginDropdown"
+                           role="button"
+                           data-toggle="dropdown"
+                           data-display="static"
+                           aria-expanded="false"
+                           aria-haspopup="true">
+                            Войти
+                            <b class="caret"></b>
+                        </a>
+                        <div class="dropdown-menu"
+                             aria-labelledby="loginDropdown"
+                             style="position: absolute">
+                            <a class="dropdown-item"
+                               href="{% url 'account_login' %}?next={{ request.path }}">{% trans "Login" %}</a>
+                            <a class="dropdown-item"
+                               href="{% url 'account_signup' %}?next={{ request.path }}">Регистрация{# TODO l18n #}</a>
+                        </div>
+                    </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link t-shirt-icon px-2 px-lg-2"
+                       href="http://le-francais.vsemaykishop.ru"
+                       target="_blank">
+                        <i class="fas fa-tshirt"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link coffee-icon swg px-2 px-lg-2"
+                       href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal&s_t={% if request.user.is_authenticated and request.user.show_tickets or request.user.is_authenticated and request.user.low_price %}1{% else %}0{% endif %}"
+                    >
+                        {% if request.user.is_authenticated and request.user.show_tickets or request.user.is_authenticated and request.user.low_price %}
+                            <i class="fas fa-ticket-alt"></i>{% else %}
+                            {% svg 'coffee icon' %}{% endif %}
+                    </a>
+                </li>
+                {% notification_navbar_dropdown %}
+            </ul>
 
-							<li class="divider"></li>
-
-							<li>
-								<a href="{% url 'account_logout' %}?next={{ request.path }}">Выйти{# TODO l18n #}</a>
-							</li>
-						</ul>
-					</li>
-
-				{% else %}
-
-					<li class="dropdown pull-left">
-						<a href="{% url 'account_login' %}?next={{ request.path }}"
-						   class="dropdown-toggle"
-						   data-toggle="dropdown">
-							Войти
-							<b class="caret"></b>
-						</a>
-						<ul class="dropdown-menu">
-							<li>
-								<a href="{% url 'account_login' %}?next={{ request.path }}">{% trans "Login" %}</a>
-							</li>
-							<li>
-								<a href="{% url 'account_signup' %}?next={{ request.path }}">Регистрация{# TODO l18n #}</a>
-							</li>
-						</ul>
-					</li>
-				{% endif %}
-				<li class="pull-left" title="Магазин всяких клёвых чтучек">
-					<a class="t-shirt-icon"
-					   href="http://le-francais.vsemaykishop.ru"
-					   target="_blank">
-						<i class="fas fa-tshirt" style="color: inherit; vertical-align: middle"></i>
-					</a>
-				</li>
-				<li
-						class="pull-left"
-						title="{% if request.user.is_authenticated and request.user.show_tickets or request.user.is_authenticated and request.user.low_price %}Кто возьмет билетов пачку...{% else %}Поблагодарить нас{% endif %}"
-				>
-					<a class="coffee-icon swg"
-					   href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal&s_t={% if request.user.is_authenticated and request.user.show_tickets or request.user.is_authenticated and request.user.low_price %}1{% else %}0{% endif %}"
-					>
-						{% if request.user.is_authenticated and request.user.show_tickets or request.user.is_authenticated and request.user.low_price %}<i class="fas fa-ticket-alt"></i>{% else %}{% svg 'coffee icon' %}{% endif %}
-{#						<span class="nav-mobile-text hidden-sm hidden-md hidden-lg">Угостить кофе</span>#}
-					</a>
-				</li>
-				{% notification_navbar_dropdown %}
-			</ul>
-
-			{# Required bootstrap placeholder for the collapsed menu #}
-		<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-			        aria-expanded="false" aria-controls="navbar">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-
-		</div>
-
-
-	<div class="visible-xs-block clearfix"></div>
-
-
-
-
-		<div class="collapse navbar-collapse navbar-left" id="navbar">
-			<ul class="nav navbar-nav pull-left">
-				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-					<a style="color: rgb(170,170,170)"
-					   onmouseover="this.style.color='white'"
-					   onmouseout="this.style.color='rgb(170,170,170)'"
-					   href="/forum">Форум</a>
-				</li>
-				<li class="dropdown" style="cursor: pointer">
-					<a class="dropdown-toggle" data-toggle="dropdown">Уроки</a>
-					<ul class="dropdown-menu">
-						<li><a href="/lecons/prononciation/">Уроки 1—5</a></li>
-						<li><a href="/lecons_a1/lecon-6/">Уроки 6—59</a></li>
-						<li><a href="/lecons_b2/season_1/lecon-61/">Уроки 61—312</a></li>
-					</ul>
-				</li>
-				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-					<a href="{% url 'conjugation:index' %}">Спряжение глаголов</a>
-				</li>
-				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-					<a href="/faq">FAQ</a>
-				</li>
-				<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-					<a href="/ecoles-francais/ecoles-review/">Французский по скайпу</a>
-				</li>
-				{% comment %}<li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-					<a href="/collecte">Сами мы не местные...</a>
-				</li>{% endcomment %}
+            <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarNavDropdown"
+                    aria-controls="navbarNavDropdown" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
 
 
-				{% comment %}<li>
-					<a class="coffee-icon swg"
-					   href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">
-						{% svg 'coffee icon' %}
-						<span class="nav-mobile-text hidden-sm hidden-md hidden-lg">Угостить кофе</span>
-					</a>
-				</li>{% endcomment %}
-				{% comment %}<li>
-					<a class="t-shirt-icon"
-					   href=""
-					   target="_blank">
-						<i class="fas fa-tshirt" style="color: inherit; vertical-align: middle"></i>
-						<span class="nav-mobile-text hidden-sm hidden-md hidden-lg">Футболки</span>
-					</a>
-				</li>{% endcomment %}
-			</ul>
-		</div>
+        <div class="collapse navbar-collapse order-3 order-lg-2"
+             id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link{% if '/forum/' in request.path %} active{% endif %}"
+                       href="/forum/">Форум</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle{% if '/lecons' in request.path %} active{% endif %}"
+                       id="navbarDropdownLessonsLink" role="button"
+                       data-toggle="dropdown" aria-haspopup="true"
+                       aria-expanded="false" href="#">Уроки</a>
+                    <div class="dropdown-menu"
+                         aria-labelledby="navbarDropdownLessonsLink">
+                        <a class="dropdown-item" href="/lecons/prononciation/">Уроки
+                            1—5</a>
+                        <a class="dropdown-item" href="/lecons_a1/lecon-6/">Уроки
+                            6—59</a>
+                        <a class="dropdown-item"
+                           href="/lecons_b2/season_1/lecon-61/">Уроки
+                            61—312</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if '/conjugaison/' in request.path %} active{% endif %}" href="{% url 'conjugation:index' %}">Спряжение
+                        глаголов</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if '/faq/' in request.path %} active{% endif %}" href="/faq/">FAQ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if '/ecoles-francais/ecoles-review/' in request.path %} active{% endif %}" href="/ecoles-francais/ecoles-review/">Французский
+                        по скайпу</a>
+                </li>
+            </ul>
+        </div>
 
-	</div>
-</nav>
+    </div></nav>

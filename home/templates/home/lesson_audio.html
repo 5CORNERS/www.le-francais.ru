@@ -1,7 +1,7 @@
 {% load static site_tags %}
 <div class="block-audio">
-	<div class="row">
-		<div class="col-md-8">
+	<div class="row lesson-audio">
+		<div class="col-lg-12">
 			<audio onerror="reloadLessonUrl(this)" preload="auto" id="lesson-audio" data-downloadable{% if user.must_pay and self.need_payment or request.GET.test %}{% if not user.is_authenticated or not userlesson %}="empty"{% endif %}{% elif self.need_payment and not user.is_authenticated %}="empty"{% endif %} number="{{ self.lesson_number }}"{% if request.GET.t %} set-time="{{ request.GET.t }}"{% elif request.GET.T %} set-time="{% t2seconds request.GET.T %}"{% endif %}>
 				<source
 					{% if self.audio_material %}
@@ -23,7 +23,7 @@
 					{% endif %} type="audio/mpeg">
 			</audio>
 		</div>
-		<div class="col-md-4">
+		<div class="col-lg-12">
 			<input type="hidden" name="next" value="{{ request.path }}">
 			<!-- button trigger by-me-a-coffee-modals -->
 
@@ -44,7 +44,7 @@
 							 src="{% static "images/buttons/new-button.svg" %}"
 					>
 				{% else %}
-					<button class="coffee-button btn btn-default btn-xs" disabled="disabled" id="coffee-button">
+					<button class="coffee-button btn btn-secondary btn-xs" disabled="disabled" id="coffee-button">
 						<img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}">
 						<div id="coffee-button-text" class="coffee-button-text">Вы уже угощали меня<br>за этот урок :)</div>
 					</button>
@@ -78,7 +78,7 @@
 {#							 src="{% static "images/buttons/new-button.svg" %}"#}
 					>
 				{% else %}
-					<button class="coffee-button btn btn-default btn-xs" disabled="disabled" id="coffee-button">
+					<button class="coffee-button btn btn-disabled btn-xs" disabled="disabled" id="coffee-button">
 						<img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}">
 						<div id="coffee-button-text" class="coffee-button-text">Вы уже угощали меня<br>за этот урок :)</div>
 					</button>

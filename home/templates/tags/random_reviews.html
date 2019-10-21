@@ -1,7 +1,7 @@
 {% load site_tags static %}
 {#TODO: carusel#}
 {% for review in object_list %}
-	<div class="item {% if forloop.first %}active{% endif %}">
+	<div class="carousel-item {% if forloop.first %}active{% endif %}">
 		<a class="page-review"
 		   {% if review.url %}href='{{ review.url }}'{% endif %}
 		   {% if review.external %}target="_blank"
