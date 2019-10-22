@@ -1,24 +1,25 @@
 {% load site_tags static %}
 {#TODO: carusel#}
-{% for review in object_list %}
-	<div class="carousel-item {% if forloop.first %}active{% endif %}">
-		<a class="page-review"
-		   {% if review.url %}href='{{ review.url }}'{% endif %}
-		   {% if review.external %}target="_blank"
-		   rel="nofollow"{% endif %}>
-			<div class="page-review_text">
-				<p style="overflow: auto">
-					<img class="size-full wp-image-1568 alignleft"
-					     src="{% static 'images/5-stars-rating.png' %}"
-					     alt=""
-					     width="97"
-					     height="20">
-				</p>
-				<p>{{ review.text }}</p>
-			</div>
-		</a>
-	</div>
-{% endfor %}
+<div id="carouselReviews" class="carousel slide carousel-fade" data-ride="carousel">
+    {% for review in object_list %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            <a class="page-review"
+               {% if review.url %}href='{{ review.url }}'{% endif %}
+               {% if review.external %}target="_blank"
+               rel="nofollow"{% endif %}>
+                <div class="page-review_text">
+                    <p style="overflow: auto">
+                        <img class="size-full wp-image-1568 alignleft"
+                             src="{% static 'images/5-stars-rating.png' %}"
+                             alt=""
+                             width="97"
+                             height="20">
+                    </p>
+                    <p>{{ review.text }}</p>
+                </div>
+            </a>
+        </div>
+    {% endfor %}</div>
 
 
 
