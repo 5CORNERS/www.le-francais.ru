@@ -108,9 +108,6 @@ td {
     max-width: 70%;
 }
 
-.main > h1 {
-    margin: 20px 0px;
-}
 
 ul.hr {
     margin: 0; /* Обнуляем значение отступов */
@@ -727,6 +724,7 @@ details summary:focus {
 
 details summary::before {
     content: "\25B6";
+    font-family: none;
     padding-right: 0.5em;
 }
 
