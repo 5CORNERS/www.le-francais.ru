@@ -14,10 +14,10 @@ venv
 */__pycache__
 src
 
-media
 node_modules/
 
 forum/dat
 config.txt
 /staticfiles/
 /home/static/components/
+/media/
