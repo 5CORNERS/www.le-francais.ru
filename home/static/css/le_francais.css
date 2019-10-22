@@ -923,7 +923,7 @@ details.no-details:not([open]) summary {
 }
 
 .nav-tabs > .nav-item > .nav-link.active {
-    margin-top: -7px;
+    margin-top: -6px;
     height: 3em;
 }
 
