@@ -24,6 +24,12 @@
     border-bottom-color: #fafbfc;
 }
 
+.dropdown-menu.notify-drop .drop-content {
+    min-height: 280px;
+    max-height: 360px;
+    overflow-y: scroll;
+}
+
 @media (min-width: 360px) {
     .dropdown-menu.notify-drop {
         left: -219px;
@@ -89,12 +95,6 @@
     border-bottom: 1px solid #e2e2e2;
     padding: 5px 15px 10px 15px;
     margin-bottom: 10px;
-}
-
-.dropdown-menu.notify-drop .drop-content {
-    min-height: 280px;
-    max-height: 360px;
-    overflow-y: scroll;
 }
 
 .dropdown-menu.notify-drop .drop-content::-webkit-scrollbar-track {
