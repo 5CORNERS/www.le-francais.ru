@@ -108,6 +108,10 @@ td {
     max-width: 70%;
 }
 
+.main > h1 {
+    margin: 20px 0px;
+}
+
 ul.hr {
     margin: 0; /* Обнуляем значение отступов */
     padding: 8px; /* Значение полей */
