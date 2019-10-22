@@ -254,7 +254,7 @@
 				$menuPlayer.addClass(cssClass.mini).addClass('pull-right');
 				$menuPlayer.attr('number', $menuPlayer.find('audio').attr('number'));
 				$menuPlayer.find('audio').remove();
-				$('.nav.navbar-sticky-ul').prepend($menuPlayer);
+				$('nav.navbar > .container > .d-flex.order-2 > .navbar-nav').append($menuPlayer);
 
 				$menuPlayer.find('.' + cssClass.playPause).on('click', function (e) {
 					e.preventDefault();
