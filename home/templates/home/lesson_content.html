@@ -1,4 +1,4 @@
-{% load site_tags wagtailcore_tags %}
+{% load site_tags wagtailcore_tags le_francais_dictionary %}
 {# self: LessonPage #}
 <div class="row">
     <div class="col-12">{% check_user_lesson request.user self as userlesson %}
@@ -155,6 +155,13 @@
                     </a>
                 </li>
             {% endif %}
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab"
+                   href="#flash-cards" role="tab"
+                   aria-controls="flash-cards">
+                    Словарик
+                </a>
+            </li>
             {% for child_value in self.other_tabs %}
                 {% if not child_value.value.invisible_for_all or user.is_superuser %}
                     {% if not child_value.value.visible_only_if_payed or already_payed %}
@@ -343,6 +350,9 @@
 			</div>
             {% assign pane_class "tab-pane fade" %}
 		{% endif %}
+        <div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
+            {% include_dictionary %}
+        </div>
 
 		{% for child_value in self.other_tabs %}
 			{% if not child_value.value.invisible_for_all or user.is_superuser %}{% if not child_value.value.visible_only_if_payed or already_payed %}<div id="{{ child_value.value.href }}" class="tab-pane fade" role="tabpanel">
