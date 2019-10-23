@@ -16,7 +16,7 @@ from forum.sitemap_generator import ForumSitemap, TopicSitemap
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
 from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls, \
-	activate_urls, modal_urls, meta_urls, service_urls
+	activate_urls, modal_urls, meta_urls, service_urls, urlpatterns as home_urls
 from home.views import MovePostView, AorAddPostView, AorEditPostView, \
     AorTopicView, move_post_processing, favicon, activation_log
 from home.views import change_username, \
@@ -46,7 +46,7 @@ urlpatterns = [
         TemplateView.as_view(template_name='static_sitemap.xml',
                              content_type='application/xml')),
 
-	url(r'^dictionary/', include(dictionary_urls, namespace='dictionary')),
+    url(r'^dictionary/', include(dictionary_urls, namespace='dictionary')),
 
     url(r'^django-admin/', include(admin.site.urls)),
 
@@ -59,11 +59,13 @@ urlpatterns = [
 
     url(r'^import/', include(site_import_urls)),
     url(r'^api/', include(api_urls, namespace='api')),
-	url(r'^api/', include(service_urls)),
+    url(r'^api/', include(service_urls)),
     url(r'^api/', include(notifications_api_urls, namespace='notifications')),
     url(r'^modal/', include(modal_urls, namespace='modal')),
 
     url(r'^payments/', include(payment_urls, namespace='payments')),
+
+    url(r'^home/', include(home_urls, namespace='home')),
 
     url(r'^coffee/', include(coffee_urls)),
     url(r'^activate/', include(activate_urls, namespace='activate')),
