@@ -116,15 +116,6 @@
             setURLs();
         });
     }
-
-    // count app access
-    setTimeout(function () {
-        if (window.innerWidth <= 200) return;
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', '/logview.php?app={{ app_id }}', true);
-        xhr.withCredentials = true;
-        xhr.send(null);
-    }, 1000);
 </script>
 
 
