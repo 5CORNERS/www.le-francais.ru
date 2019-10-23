@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 urlpatterns = [
-    url(r'^login/$', views.ajax_login, name='login')
+    url(r'^learning-apps/(?P<id>.+)/', views.get_learning_apps_iframe, name='get_learning_apps_iframe')
 ]
 
 meta_urls = [
