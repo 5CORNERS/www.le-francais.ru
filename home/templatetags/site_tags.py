@@ -101,6 +101,24 @@ def get_full_path(context):
 
 
 @register.assignment_tag()
+def get_prev_lesson(lesson_number):
+	q = LessonPage.objects.filter(lesson_number__lt=lesson_number).order_by(
+		'-lesson_number')
+	if q.exists():
+		return q.first()
+	return None
+
+
+@register.assignment_tag()
+def get_next_lesson(lesson_number):
+	q = LessonPage.objects.filter(lesson_number__gt=lesson_number).order_by(
+		'lesson_number')
+	if q.exists():
+		return q.first()
+	return None
+
+
+@register.assignment_tag()
 def check_user_lesson(user: User, lesson: LessonPage):
 	if not user.is_authenticated:
 		return False

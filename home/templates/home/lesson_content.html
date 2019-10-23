@@ -354,18 +354,21 @@
 
 <hr>
 <div class="row controls text-center">
-	<div class="col-12">{% assign prev self.get_prev_sibling %}
-	{% assign next self.get_next_sibling %}
-	{% if prev.content_type.name == 'lesson page' %}
-		<a class="float-left btn btn-secondary" href="{{ self.get_prev_sibling.get_url }}"> Предыдущий
-			урок </a>
-	{% endif %}
+    <div class="col-12">
+        <div role="group" class="btn-group">
+            {% get_prev_lesson self.lesson_number as prev_lesson %}
+            <a class="btn btn-outline-secondary{% if not prev_lesson %} disabled{% endif %}" role="button" {% if not next_lesson %} aria-disabled="true" tabindex="-1"{% endif %}
+               href="{{ prev_lesson.get_url }}"
+               style="user-select: auto;">Предыдущий урок</a>
 
-	{% if next.content_type.name == 'lesson page' %}
-		<a class="float-right btn btn-secondary" href="{{ self.get_next_sibling.get_url }}"> Следующий
-			урок </a>
-	{% endif %}
-</div>
+
+            {% get_next_lesson self.lesson_number as next_lesson %}
+            <a class="btn btn-outline-secondary{% if not next_lesson %} disabled{% endif %}" role="button" {% if not next_lesson %} aria-disabled="true" tabindex="-1"{% endif %}
+               href="{{ next_lesson.get_url }}"
+               style="user-select: auto;">Следующий урок</a>
+
+        </div>
+    </div>
 </div>
 {% if self.has_own_topic %}
     <div class="row">
