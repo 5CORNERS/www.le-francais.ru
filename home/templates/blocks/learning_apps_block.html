@@ -1,0 +1,2 @@
+<h4 style='text-align: center;'><b>{% if self.show_lesson_number %}{{ lesson_number }}.{% endif %}{{ self.number }}{% if not self.show_lesson_number %}.{% endif %} {{ self.title }}</b></h4>
+<iframe src="{% url 'home:get_learning_apps_iframe' self.app_id %}" style="width: {{ self.width }}; height: {{ self.height }}"></iframe>
