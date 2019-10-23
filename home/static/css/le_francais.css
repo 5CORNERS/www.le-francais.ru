@@ -953,3 +953,7 @@ details.no-details:not([open]) summary {
 .d-flex .flex-row > .navbar-nav .flex-row > .dropdown-toggle::after {
     vertical-align: 0;
 }
+
+.h1-small {
+    font-size: 1.725rem;
+}
