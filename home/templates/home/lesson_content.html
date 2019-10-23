@@ -308,7 +308,7 @@
 					{% else %}
 						<div>
 							{% for block in self.exercise %}
-								{% include_block block %}
+								{% include_block block with page=self %}
 							{% endfor %}
 						</div>
 					{% endif %}
