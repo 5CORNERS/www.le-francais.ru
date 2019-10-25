@@ -1,6 +1,5 @@
 import json
 from typing import List
-
 from bulk_update.helper import bulk_update
 from django.db import models
 from django.db.models import Count, Q
@@ -9,108 +8,91 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
 # Create your views here.
-from le_francais_dictionary.models import Word, Packet, UserPacket, \
-	UserWordData, UserWordRepetition
+from .models import Word, Packet, UserPacket, \
+    UserWordData, UserWordRepetition
+from .utils import create_repetition
 from home.models import UserLesson
 
 
 # TODO: write get_calendar function
 def get_calendar(request):
-	...
+    ...
 
 
 @csrf_exempt
 def add_packets(request):
-	pks = json.loads(request.body)['packets']
-	packets = list(Packet.objects.filter(id__in=pks))
-	added = []
-	already_exist = []
-	for packet in packets:
-		usr_packet, created = UserPacket.objects.get_or_create(packet=packet,
-		                                                       user=request.user)
-		if created:
-			added.append(usr_packet)
-		else:
-			already_exist.append(usr_packet)
-	return JsonResponse(data=dict(
-		added=[packet.pk for packet in added],
-		already_exist=[packet.pk for packet in already_exist]
-	))
+    pks = json.loads(request.body)['packets']
+    packets = list(Packet.objects.filter(id__in=pks))
+    added = []
+    already_exist = []
+    for packet in packets:
+        usr_packet, created = UserPacket.objects.get_or_create(packet=packet,
+                                                               user=request.user)
+        if created:
+            added.append(usr_packet)
+        else:
+            already_exist.append(usr_packet)
+    return JsonResponse(data=dict(
+        added=[packet.pk for packet in added],
+        already_exist=[packet.pk for packet in already_exist]
+    ))
 
 
 def get_progress(request):
-	last_lesson_number = request.user.latest_lesson_number
-	packets: List[Packet] = Packet.objects.filter(
-		Q(
-			lesson__lesson_number__lte=last_lesson_number if last_lesson_number is not None and last_lesson_number > 10 else 10) | Q(
-			userpacket__user=request.user
-		)
-	)
-	activated_lessons = list(
-		request.user.payed_lessons.all().values_list('id', flat=True))
-	added_packets = Packet.objects.filter(
-		userpacket__user=request.user).values_list('id', flat=True)
-	packets_data = []
-	for packet in packets:
-		packets_data.append(dict(
-			pk=packet.pk,
-			name=packet.name,
-			activated=True if packet.lesson_id in activated_lessons else False,
-			added=True if packet.pk in added_packets else False,
-			wordsCount=packet.words_count,
-			wordsLearned=Word.objects.filter(userdata__user=request.user,
-			                                 userdata__grade=1,
-			                                 packet=packet).count()
-		))
-	return JsonResponse({'packets': packets_data})
+    packets = Packet.objects.prefetch_related('lesson__paid_users', 'userpacket_set').all().order_by('lesson__lesson_number')
+    packets_data = []
+    for packet in packets:
+        packets_data.append(packet.to_dict(user=request.user))
+    return JsonResponse({'packets': packets_data})
 
 
 def get_words(request, packet_id):
-	words = Word.objects.prefetch_related(
-		'wordtranslation_set',
-		'wordtranslation_set__polly',
-		'polly',
-	).order_by('pk').filter(packet_id=packet_id)
-	words_dict = [word.to_dict() for word in words]
-	return JsonResponse({'words': words_dict}, safe=False)
+    words = Word.objects.prefetch_related(
+        'wordtranslation_set',
+        'wordtranslation_set__polly',
+        'polly',
+    ).order_by('pk').filter(packet_id=packet_id)
+    words_dict = [word.to_dict() for word in words]
+    return JsonResponse({'words': words_dict}, safe=False)
 
 
 def get_repetition_words(request):
-	repetitions = UserWordRepetition.objects.prefetch_related(
-		'word',
-		'word__wordtranslation_set',
-		'word__wordtranslation_set__polly',
-		'word__polly').filter(
-		repetition_date__lte=timezone.now())
-	word_dict = [repetition.word.to_dict() for repetition in repetitions]
-	return JsonResponse({'words': word_dict}, safe=False)
+    repetitions = UserWordRepetition.objects.prefetch_related(
+        'word',
+        'word__wordtranslation_set',
+        'word__wordtranslation_set__polly',
+        'word__polly').filter(
+        repetition_date__lte=timezone.now())
+    word_dict = [repetition.word.to_dict() for repetition in repetitions]
+    return JsonResponse({'words': word_dict}, safe=False)
 
 
 def update_words(request):
-	words_data = json.loads(request.body)['words']
-	user_words: List[UserWordData] = []
-	for word in words_data:
-		user_words.append(UserWordData(
-			word_id=word['pk'],
-			user_id=request.user.id,
-			grade=word['grade'],
-			mistakes=word['mistakes'],
-		))
-	user_words = UserWordData.objects.bulk_create(user_words)
-	result = []
-	repetitions = []
-	for user_word in user_words:
-		repetition_datetime = user_word.get_repetition_datetime()
-		if repetition_datetime:
-			repetition, created = UserWordRepetition.objects.get_or_create(
-				user=request.user,
-				word_id=user_word.word_id,
-			)
-			repetition.repetition_date = repetition_datetime.date()
-			repetitions.append(repetition)
-		result.append(dict(
-			pk=user_word.word_id,
-			nextRepetition=repetition_datetime,
-		))
-	bulk_update(repetitions, update_fields=['repetition_date'])
-	return JsonResponse(result, safe=False)
+    words_data = json.loads(request.body)['words']
+    user_words_data: List[UserWordData] = []
+    for word in words_data:
+        user_words_data.append(UserWordData(
+            word_id=word['pk'],
+            user_id=request.user.id,
+            grade=word['grade'],
+            mistakes=word['mistakes'],
+        ))
+    user_words_data = UserWordData.objects.bulk_create(user_words_data)
+    result = []
+    repetitions = []
+    for user_word_data in user_words_data:
+        if user_word_data.grade:
+            repetition = create_repetition(user_word_data)
+            repetition_datetime = repetition.repetition_date
+            repetition_time = repetition.time
+            repetitions.append(repetition)
+        else:
+            repetition_datetime = None
+            repetition_time = None
+        result.append(dict(
+            pk=user_word_data.word_id,
+            nextRepetition=repetition_datetime,
+            repetitionTime=repetition_time
+        ))
+    bulk_update(repetitions, update_fields=['repetition_date'])
+    return JsonResponse(result, safe=False)

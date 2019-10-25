@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 from __future__ import absolute_import, unicode_literals
 
 import os
+import sys
 
 import dj_database_url
 import dj_email_url
@@ -203,9 +204,33 @@ DATABASES = {
     }
 }
 
-db_from_env = dj_database_url.config(conn_max_age=500)
+TESTING = 'test' in sys.argv[1:]
+if TESTING:
+    print('=========================')
+    print('In TEST Mode')
+    print('Disabling Migrations')
+    class DisableMigrations(object):
 
-DATABASES['default'].update(db_from_env)
+        def __contains__(self, item):
+            return True
+
+        def __getitem__(self, item):
+            return None
+
+    MIGRATION_MODULES = DisableMigrations()
+    print('Using Local Test Database')
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5433',
+    }
+    print('=========================\n')
+else:
+    db_from_env = dj_database_url.config(conn_max_age=500)
+    DATABASES['default'].update(db_from_env)
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 20971520
 FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520
