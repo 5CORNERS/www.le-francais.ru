@@ -5,6 +5,22 @@ from typing import List
 from .consts import INITIAL_E_FACTOR, FIRST_REPETITION_DELTA, SECOND_REPETITION_DELTA
 
 
+def create_repetition(user_word_data, save=False):
+	from .models import UserWordRepetition
+	repetition_datetime, time = user_word_data.get_repetition_datetime()
+	if repetition_datetime:
+		repetition, created = UserWordRepetition.objects.get_or_create(
+			user_id=user_word_data.user_id,
+			word_id=user_word_data.word_id,
+			time=time
+		)
+		repetition.repetition_date = repetition_datetime.date()
+		if save:
+			repetition.save()
+		return repetition
+	return None
+
+
 def sm2_response_quality(grade, mistakes):
 	quality = 5
 	if grade == 0:
@@ -34,11 +50,11 @@ def sm2_next_repetition_date(dataset):
 		return None
 	repetition_delta = 1
 	for n, final in enumerate(finals, 1):
-		if n==1:
+		if n == 1:
 			repetition_delta = FIRST_REPETITION_DELTA
-		elif n==2:
+		elif n == 2:
 			repetition_delta = SECOND_REPETITION_DELTA
 		else:
 			repetition_delta = repetition_delta * final[1]
-	return finals[-1][0].datetime + timedelta(days=repetition_delta)
+	return finals[-1][0].datetime + timedelta(days=repetition_delta), n
 
