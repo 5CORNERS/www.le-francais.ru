@@ -11,6 +11,9 @@ from le_francais_dictionary.utils import sm2_response_quality, \
 from polly import const as polly_const
 from polly.models import PollyTask
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 
 class Packet(models.Model):
 	name = models.CharField(max_length=128)
@@ -19,26 +22,47 @@ class Packet(models.Model):
 	def __str__(self):
 		return '{self.name}'.format(self=self)
 
-	def to_dict(self, user=None):
-		return dict(
-			pk=self.pk,
-			name=self.name,
-		)
+	def to_dict(self, user=None) -> dict:
+		"""
+		:param user: user object
+		:type user: User
+		:returns: A dictionary of packet which can be safely turned into json
+		:rtype: dict
+		"""
+		data = {}
+		data['pk'] = self.pk
+		data['name'] = self.name
+		if user and user.is_authenticated:
+			data['activated'] = True if self.lesson.payed(user) else False
+			if self.userpacket_set.filter(user=user).exists():
+				userpacket = self.userpacket_set.filter(user=user).first()
+				data['added'] = True
+				data['wordsLearned'] = userpacket.words_learned
+			else:
+				data['added'] = False
+				data['wordsLearned'] = None
+		return data
 
 	@property
 	def words_count(self):
 		return self.word_set.count()
 
 
-# TODO: migrate all userwords to userpacket
 class UserPacket(models.Model):
 	packet = models.ForeignKey(Packet)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 
+	@property
+	def words_learned(self) -> int:  # TODO
+		return self.packet.word_set.filter(
+			userdata__user=self.user, userdata__grade=1).count()
+
 
 class Word(models.Model):
-	cd_id = models.CharField(null=True, verbose_name='Color Dictionary ID',
-	                         max_length=10)
+	cd_id = models.CharField(
+		null=True,
+		verbose_name='Color Dictionary ID',
+		max_length=10)
 	word = models.CharField(max_length=120, verbose_name='Word')
 	polly = models.ForeignKey(PollyTask, null=True)
 	genre = models.CharField(choices=GENRE_CHOICES, max_length=4, null=True, verbose_name='Gender')
@@ -137,13 +161,14 @@ class UserWordData(models.Model):
 
 	def get_repetition_datetime(self):
 		dataset = UserWordData.objects.filter(word=self.word, user=self.user, datetime__lte=self.datetime)
-		repetition_datetime = sm2_next_repetition_date(dataset)
-		return repetition_datetime
+		repetition_datetime, time = sm2_next_repetition_date(dataset)
+		return repetition_datetime, time
 
 
 class UserWordRepetition(models.Model):
 	word = models.ForeignKey(Word)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	time = models.IntegerField()
 	repetition_date = models.DateField(null=True)
 
 

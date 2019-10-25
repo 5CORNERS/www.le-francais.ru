@@ -8,6 +8,8 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from le_francais_dictionary.views import update_words
+from wagtail.core.models import Page
+from home.models import LessonPage
 from .models import Word, WordTranslation, Packet, UserPacket, UserWordData, UserWordRepetition
 from . import views
 
@@ -26,8 +28,10 @@ class WordUserTestCase(TestCase):
 		self.user = User.objects.create_user(username='user1',
 		                                     email='user1@email.com',
 		                                     password='password')
-		self.packet1 = Packet.objects.create(name='packet1')
-		self.packet2 = Packet.objects.create(name='packet2')
+		self.lesson1 = Page()
+		self.lesson2 = LessonPage.objects.create(slug='lesson2', title='lesson2', lesson_number=2)
+		self.packet1 = Packet.objects.create(name='packet1', lesson=self.lesson1)
+		self.packet2 = Packet.objects.create(name='packet2', lesson=self.lesson2)
 		self.word1 = Word.objects.create(word='word1', packet=self.packet1)
 		self.word2 = Word.objects.create(word='word2', packet=self.packet1)
 		self.word3 = Word.objects.create(word='word3', packet=self.packet2)
@@ -116,8 +120,8 @@ class WordUserTestCase(TestCase):
 		add_packet_request.user = self.user
 		views.add_packets(add_packet_request)
 
-		grades_choices = [0] + [1] * 9
-		mistakes_choices = [0] * 5 + [1] * 2 + [2]
+		grades_choices = [0] * 5 + [1] * 5
+		mistakes_choices = [0] * 5 + [1] * 4 + [2] * 3 + [3] * 2
 		with freeze_time(initial_datetime) as frozen_datetime:
 			for step in range(5):
 				for word in self.packet2.word_set.all():
