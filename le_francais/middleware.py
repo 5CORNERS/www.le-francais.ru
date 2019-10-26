@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.middleware import csrf
-from django_session_header.middleware import SessionHeaderMixin
 from user_sessions.middleware import SessionMiddleware
 
 try:
@@ -14,48 +13,10 @@ except ImportError:
     class MiddlewareMixin(object):
         pass
 
-# This code is from
-# https://github.com/ryanhiebert/django-session-header
 
-
-class SessionHeaderMiddleware(SessionMiddleware):
-    def __init__(self, get_response=None):
-        engine = import_module(settings.SESSION_ENGINE)
-        super(SessionMiddleware, self).__init__(get_response)
-        bases = (SessionHeaderMixin, engine.SessionStore)
-        self.SessionStore = type('SessionStore', bases, {})
-
+class CustomSessionMiddleware(SessionMiddleware):
     def process_request(self, request):
         super().process_request(request)
-        sessionid = request.META.get(u'HTTP_X_SESSIONID')
-        if sessionid:
-            request.session = self.SessionStore(sessionid)
-            request.session.csrf_exempt = True
-
-    def process_response(self, request, response):
-        supr = super()
-        response = supr.process_response(request, response)
-        if request.session.session_key:
-            response['X-SessionID'] = request.session.session_key
-        return response
-
-
-class SessionHeaderMixin(object):
-    def __init__(self, session_key=None):
-        super(SessionHeaderMixin, self).__init__(session_key)
-        self.csrf_exempt = False
-
-
-class CsrfViewMiddleware(csrf.CsrfViewMiddleware):
-    def process_view(self, request, *args, **kwargs):
-        if not request.session.csrf_exempt:
-            supr = super(CsrfViewMiddleware, self)
-            return supr.process_view(request, *args, **kwargs)
-
-
-class CustomSessionMiddleware(SessionHeaderMiddleware):
-    def process_request(self, request):
-        super(SessionHeaderMiddleware, self).process_request(request)
         engine = import_module(settings.SESSION_ENGINE)
         session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME, None)
         if request.META.get('HTTP_CLIENT_IP'):

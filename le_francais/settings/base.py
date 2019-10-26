@@ -249,7 +249,6 @@ AUTHENTICATION_BACKENDS = (
 
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
-    'le_francais.authentication.SessionAuthentication',
 )
 
 # Internationalization
@@ -561,6 +560,4 @@ RECAPTCHA_SCORE_THRESHOLD = 0.5
 
 CORS_ORIGIN_ALLOW_ALL = os.getenv('CORS_ORIGIN_ALLOW_ALL', 'False') == 'True'
 
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    'X-SessionID',
-]
+CORS_ALLOW_HEADERS = list(default_headers)
