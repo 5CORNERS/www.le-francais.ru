@@ -96,3 +96,12 @@ def update_words(request):
         ))
     bulk_update(repetitions, update_fields=['repetition_date'])
     return JsonResponse(result, safe=False)
+
+
+def clear_all(request):
+    for user_packet in UserPacket.objects.filter(user=request.user):
+        user_packet.delete()
+    for user_data in UserWordData.objects.filter(user=request.user):
+        user_data.delete()
+    for user_repetition in UserWordRepetition.objects.filter(user=request.user):
+        user_repetition.delete()
