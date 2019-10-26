@@ -17,6 +17,7 @@ import sys
 
 import dj_database_url
 import dj_email_url
+from corsheaders.defaults import default_headers
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
@@ -560,6 +561,6 @@ RECAPTCHA_SCORE_THRESHOLD = 0.5
 
 CORS_ORIGIN_ALLOW_ALL = os.getenv('CORS_ORIGIN_ALLOW_ALL', 'False') == 'True'
 
-CORS_ALLOW_HEADERS = [
-    'X-SessionID'
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'X-SessionID',
 ]
