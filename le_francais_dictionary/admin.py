@@ -1,6 +1,6 @@
 import csv
 from io import TextIOWrapper
-from typing import List
+from typing import List, Optional, Any
 
 from django.conf.urls import url
 from django.contrib import admin
@@ -54,18 +54,16 @@ class WordAdmin(admin.ModelAdmin):
 
 			words_to_create: List[Word] = []
 			translations_to_create: List[WordTranslation] = []
-			packets_to_create:List[Packet] = []
+			packets_to_create: List[Packet] = []
 
 			packets_count = 1
 			lesson_ids = dict(LessonPage.objects.values_list('lesson_number', 'id'))
 
 			for i, row in enumerate(reader, 1):
-				if i==1:
+				if i == 1:
 					continue
 				if row[1]:
-					if int(row[1]) > 20 and request.POST.get('test', False):
-						continue
-					genre = row[5].split(',')[0] if row[5] else None
+					genre: str = row[5].split(',')[0] if row[5] else None
 					plural = True if row[5].split(',')[
 						                 -1].strip() == 'pl' else False
 					locution = True if 'loc' in row[4] else False
@@ -90,9 +88,9 @@ class WordAdmin(admin.ModelAdmin):
 						id=i,
 						packet_id=packet.id,
 						word=row[2],
-						cd_id=row[0],
+						cd_id=row[0] if row[0] and not isinstance(row[0], float) else None,
 						genre=genre,
-						plural = plural,
+						plural=plural,
 						part_of_speech=part_of_speech
 						)
 					translation = WordTranslation(
