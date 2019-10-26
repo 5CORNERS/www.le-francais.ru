@@ -1,4 +1,4 @@
-{% load site_tags wagtailcore_tags %}
+{% load site_tags wagtailcore_tags le_francais_dictionary %}
 {# self: LessonPage #}
 <div class="row">
     <div class="col-12">{% check_user_lesson request.user self as userlesson %}
@@ -127,6 +127,13 @@
                     </li>
                 {% endif %}
             {% endif %}
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab"
+                   href="#flash-cards" role="tab"
+                   aria-controls="flash-cards">
+                    Словарик
+                </a>
+            </li>
             {% if self.exercise %}
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="tab" href="#exercise"
@@ -343,6 +350,22 @@
 			</div>
             {% assign pane_class "tab-pane fade" %}
 		{% endif %}
+        <div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
+            <h4>Alfa-версия (демо) озвученного словарика. <span title="Важные рекомендации"><a
+                    style="cursor: pointer;color:#337ab7;"
+                    data-toggle="popover"
+                    data-triger="focus"
+                    data-html="true"
+                    data-content='В этой версии пока нет привязки слов к профилю пользователя и, как следствие, пока не реализован механизм интервального повторения — то есть ваши ответы в режиме самопроверки пока не учитываются. Но уже сейчас можно использовать режим авторотации карточек с их озвучкой для запоминания слов.
+
+Вы можете изменять задержку между показом слова и его переводом (на лету на карточке или в настройках), перед показом следующей карточки (в настройках) и направление перевода (в настройках).
+
+После первого прослушивания карточек доступен режим самопроверки. Мы рекомендуем прежде, чем переходить к нему, установить перевод русский -> французский, паузу в 4-5 секунд и сначала в режиме ротации карточек попытаться угадывать французское слово.
+
+Поскольку это пререлизная версия, в ней могут быть ошибки, в том числе и в составе слов. Пожалуйста, пожалуйста! обо всех замеченных косяках пишите <b><a href="/forum/topic/3071/">здесь</a></b>. , Мы также ждем от вас ваши пожелания и отзывы, поэтому не стесняясь, пишите нам!'
+            ><i class="fa fa-info-circle"></i></a></span></h4>
+            {% include_dictionary %}
+        </div>
 
 		{% for child_value in self.other_tabs %}
 			{% if not child_value.value.invisible_for_all or user.is_superuser %}{% if not child_value.value.visible_only_if_payed or already_payed %}<div id="{{ child_value.value.href }}" class="tab-pane fade" role="tabpanel">
