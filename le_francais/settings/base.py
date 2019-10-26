@@ -116,7 +116,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     # 'django.contrib.sessions.middleware.SessionMiddleware',
-    'le_francais.middleware.CustomSessionMiddleware',
+    'le_francais.middleware.SessionHeaderMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -248,6 +248,7 @@ AUTHENTICATION_BACKENDS = (
 
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
+    'le_francais.authentication.SessionAuthentication',
 )
 
 # Internationalization
