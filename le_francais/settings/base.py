@@ -559,3 +559,7 @@ RECAPTCHA_SCORE_THRESHOLD = 0.5
 # Corse Headers settings
 
 CORS_ORIGIN_ALLOW_ALL = os.getenv('CORS_ORIGIN_ALLOW_ALL', 'False') == 'True'
+
+CORS_ALLOW_HEADERS = [
+    'X-SessionID'
+]
