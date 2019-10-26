@@ -1,3 +1,4 @@
+djangorestframework
 dj-database-url==0.4.1
 wagtail==2.1
 dj-email-url
