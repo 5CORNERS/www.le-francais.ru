@@ -209,6 +209,14 @@ class IndexReviews(Orderable):
         FieldPanel('external')
     ]
 
+    @property
+    def word_count(self):
+        return self.text.split(' ').__len__()
+
+    def get_interval(self):
+        interval = self.word_count * 60000 // 201
+        return interval if interval > 3000 else 3000
+
 
 class DefaultPage(Page):
     show_in_sitemap = BooleanField(default=True)

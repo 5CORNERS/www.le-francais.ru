@@ -1,6 +1,7 @@
 import random
 import re
 import string
+from typing import List
 
 from django import template
 from django.conf import settings
@@ -276,9 +277,8 @@ def unwrap(context, blocks):
 
 
 @register.inclusion_tag('tags/random_reviews.html')
-def random_review(count=6):
-	qs = IndexReviews.objects.order_by('?')
-	qs = qs[:count]
+def random_review():
+	qs: List[IndexReviews] = list(IndexReviews.objects.order_by('?')) 
 	return dict(object_list=qs)
 
 
