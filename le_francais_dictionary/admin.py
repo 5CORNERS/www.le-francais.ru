@@ -63,8 +63,6 @@ class WordAdmin(admin.ModelAdmin):
 				if i==1:
 					continue
 				if row[1]:
-					if int(row[1]) > 20 and request.POST.get('test', False):
-						continue
 					genre = row[5].split(',')[0] if row[5] else None
 					plural = True if row[5].split(',')[
 						                 -1].strip() == 'pl' else False
