@@ -100,13 +100,10 @@ def update_words(request):
 
 def clear_all(request):
     result = ''
-    for user_packet in UserPacket.objects.filter(user=request.user):
-        packets_deleted = user_packet.delete()
-        result += str(packets_deleted) + '\n'
-    for user_data in UserWordData.objects.filter(user=request.user):
-        data_deleted = user_data.delete()
-        result += str(data_deleted) + '\n'
-    for user_repetition in UserWordRepetition.objects.filter(user=request.user):
-        repetetions_deleted = user_repetition.delete()
-        result += str(repetetions_deleted) + '\n'
+    packets_deleted = UserPacket.objects.filter(user=request.user).delete()
+    result += str(packets_deleted) + '\n'
+    data_deleted = UserWordData.objects.filter(user=request.user).delete()
+    result += str(data_deleted) + '\n'
+    repetetions_deleted = UserWordRepetition.objects.filter(user=request.user).delete()
+    result += str(repetetions_deleted) + '\n'
     return HttpResponse(status=200, content=result)
