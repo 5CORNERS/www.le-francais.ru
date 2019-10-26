@@ -3,3 +3,5 @@ echo "-----> Compiling SCSS"
 python manage.py compilescss
 echo "-----> Collecting static files"
 python manage.py collectstatic --noinput
+echo "-----> Installing Not deps packages"
+pip install django-session-header --no-dependencies
