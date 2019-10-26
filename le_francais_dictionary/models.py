@@ -43,6 +43,10 @@ class Packet(models.Model):
             else:
                 data['added'] = False
                 data['wordsLearned'] = None
+        else:
+            data['activated'] = None
+            data['added'] = None
+            data['wordsLearned'] = None
         return data
 
     @property
