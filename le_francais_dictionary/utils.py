@@ -58,3 +58,8 @@ def sm2_next_repetition_date(dataset):
 			repetition_delta = repetition_delta * final[1]
 	return finals[-1][0].datetime + timedelta(days=repetition_delta), n
 
+
+def ignore_whitespaces(text):
+	text = ''.join([s.split(')')[-1] for s in text.split('(')])  # ignore parentheses
+	text = re.sub(' +', ' ', text)  # remove multiple whitespaces
+	return text
