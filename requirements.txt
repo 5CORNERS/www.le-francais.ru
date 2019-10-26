@@ -31,8 +31,6 @@ django-annoying
 django-js-reverse
 django-cors-headers
 
-django-session-header --no-dependencies
-
 libsass
 django-compressor
 django-sass-processor
