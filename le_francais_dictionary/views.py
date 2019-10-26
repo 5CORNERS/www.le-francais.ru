@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Count, Q
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 # Create your views here.
 from .models import Word, Packet, UserPacket, \
@@ -99,9 +99,14 @@ def update_words(request):
 
 
 def clear_all(request):
+    result = ''
     for user_packet in UserPacket.objects.filter(user=request.user):
-        user_packet.delete()
+        packets_deleted = user_packet.delete()
+        result += str(packets_deleted) + '\n'
     for user_data in UserWordData.objects.filter(user=request.user):
-        user_data.delete()
+        data_deleted = user_data.delete()
+        result += str(data_deleted) + '\n'
     for user_repetition in UserWordRepetition.objects.filter(user=request.user):
-        user_repetition.delete()
+        repetetions_deleted = user_repetition.delete()
+        result += str(repetetions_deleted) + '\n'
+    return HttpResponse(status=200, content=result)
