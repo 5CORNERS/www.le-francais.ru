@@ -5,9 +5,10 @@ from django.db import models
 from django_bulk_update.manager import BulkUpdateManager
 from typing import Tuple, List
 
-from le_francais_dictionary.consts import GENRE_CHOICES, PARTOFSPEECH_CHOICES
+from le_francais_dictionary.consts import GENRE_CHOICES, PARTOFSPEECH_CHOICES, \
+    PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE
 from le_francais_dictionary.utils import sm2_response_quality, \
-    sm2_next_repetition_date
+    sm2_next_repetition_date, ignore_whitespaces
 from polly import const as polly_const
 from polly.models import PollyTask
 
@@ -71,10 +72,10 @@ class Word(models.Model):
         max_length=10)
     word = models.CharField(max_length=120, verbose_name='Word')
     polly = models.ForeignKey(PollyTask, null=True)
-    genre = models.CharField(choices=GENRE_CHOICES, max_length=4, null=True,
+    genre = models.CharField(choices=GENRE_CHOICES, max_length=10, null=True,
                              verbose_name='Gender')
     part_of_speech = models.CharField(choices=PARTOFSPEECH_CHOICES,
-                                      max_length=6, null=True,
+                                      max_length=10, null=True,
                                       verbose_name='Part of Speech')
     plural = models.BooleanField(default=False, verbose_name='Plural')
     packet = models.ForeignKey(Packet, null=True)
@@ -102,19 +103,31 @@ class Word(models.Model):
         }
 
     def create_polly_task(self):
-        if self.polly is None:
-            polly_task = PollyTask(
-                text=self.word,
-                text_type=polly_const.TEXT_TYPE_TEXT,
-                language_code=polly_const.LANGUAGE_CODE_FR,
-                output_format=polly_const.OUTPUT_FORMAT_MP3,
-                sample_rate=polly_const.SAMPLE_RATE_22050,
-                voice_id=polly_const.VOICE_ID_LEA,
-            )
-            polly_task.create_task('polly-dictionaries/words/', wait=True,
-                                   save=True)
+        text = ignore_whitespaces(self.word)
+        if self.part_of_speech == PARTOFSPEECH_NOUN and self.genre == GENRE_MASCULINE:
+            voice_id = polly_const.VOICE_ID_MATHIEU
+        elif self.part_of_speech == PARTOFSPEECH_NOUN and self.genre == GENRE_FEMININE:
+            voice_id = polly_const.VOICE_ID_CELINE
+        else:
+            voice_id = polly_const.VOICE_ID_LEA
+        if self.polly is None or self.polly.text != text and self.polly.voice_id != voice_id:
+            if not PollyTask.objects.filter(text=text, voice_id=voice_id).exists():
+                polly_task = PollyTask(
+                    text=text,
+                    text_type=polly_const.TEXT_TYPE_TEXT,
+                    language_code=polly_const.LANGUAGE_CODE_FR,
+                    output_format=polly_const.OUTPUT_FORMAT_MP3,
+                    sample_rate=polly_const.SAMPLE_RATE_22050,
+                    voice_id=voice_id,
+                )
+                polly_task.create_task('polly-dictionaries/words/', wait=True,
+                                       save=True)
+            else:
+                polly_task = PollyTask.objects.filter(text=text, voice_id=voice_id).first()
             self.polly = polly_task
             self.save()
+        for translation in self.wordtranslation_set.all():
+            translation.create_polly_task()
 
     def __str__(self):
         return self.word
@@ -139,18 +152,22 @@ class WordTranslation(models.Model):
         }
 
     def create_polly_task(self):
-        if self.polly is None:
-            polly_task = PollyTask(
-                text=self.translation,
-                text_type=polly_const.TEXT_TYPE_TEXT,
-                language_code=polly_const.LANGUAGE_CODE_FR,
-                output_format=polly_const.OUTPUT_FORMAT_MP3,
-                sample_rate=polly_const.SAMPLE_RATE_22050,
-                voice_id=polly_const.VOICE_ID_LEA,
-            )
-            polly_task.create_task('polly-dictionaries/translations/',
-                                   wait=True,
-                                   save=True)
+        text = ignore_whitespaces(self.translation)
+        if self.polly is None or self.polly.text != text:
+            if not PollyTask.objects.filter(text=text).exists():
+                polly_task = PollyTask(
+                    text=text,
+                    text_type=polly_const.TEXT_TYPE_TEXT,
+                    language_code=polly_const.LANGUAGE_CODE_RU,
+                    output_format=polly_const.OUTPUT_FORMAT_MP3,
+                    sample_rate=polly_const.SAMPLE_RATE_22050,
+                    voice_id=polly_const.VOICE_ID_TATYANA,
+                )
+                polly_task.create_task('polly-dictionaries/translations/',
+                                       wait=True,
+                                       save=True)
+            else:
+                polly_task = PollyTask.objects.filter(text=text).first()
             self.polly = polly_task
             self.save()
 
