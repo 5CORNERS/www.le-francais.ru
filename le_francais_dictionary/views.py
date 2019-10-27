@@ -66,7 +66,7 @@ def get_repetition_words(request):
     word_dict = [repetition.word.to_dict() for repetition in repetitions]
     return JsonResponse({'words': word_dict}, safe=False)
 
-
+@csrf_exempt
 def update_words(request):
     words_data = json.loads(request.body)['words']
     user_words_data: List[UserWordData] = []
