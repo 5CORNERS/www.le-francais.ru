@@ -1,3 +1,5 @@
+from django.utils.translation import ugettext_lazy as _
+
 GENRE_FEMININE = 'f'
 GENRE_MASCULINE = 'm'
 GENRE_EPICENE = 'm/f'
@@ -34,3 +36,10 @@ PARTOFSPEECH_CHOICES = [
 INITIAL_E_FACTOR = 2.5
 FIRST_REPETITION_DELTA = 1
 SECOND_REPETITION_DELTA = 6
+
+USER_IS_NOT_AUTHENTICATED_MESSAGE = _('User is not authenticated')
+PACKET_DOES_NOT_EXIST_MESSAGE = _('Packet does not exist')
+PACKET_IS_NOT_ADDED_MESSAGE = _('Packet is not added')
+LESSON_IS_NOT_ACTIVATED_MESSAGE = _('Lesson is not activated')
+WORD_DOES_NOT_EXIST_MESSAGE = _('Word does not exist')
+
