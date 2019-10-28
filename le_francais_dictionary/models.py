@@ -19,6 +19,7 @@ User = get_user_model()
 
 class Packet(models.Model):
     name = models.CharField(max_length=128)
+    demo = models.BooleanField(default=False)
     lesson = models.ForeignKey('home.LessonPage',
                                related_name='dictionary_packets', null=True)
 
@@ -35,6 +36,7 @@ class Packet(models.Model):
         data = {}
         data['pk'] = self.pk
         data['name'] = self.name
+        data['demo'] = self.demo
         if user and user.is_authenticated:
             data['activated'] = True if self.lesson.payed(user) else False
             if self.userpacket_set.filter(user=user).exists():
