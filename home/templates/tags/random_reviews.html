@@ -1,7 +1,13 @@
 {% load site_tags static %}
 {#TODO: carusel#}
 <div id="carouselReviews" class="carousel slide" data-ride="carousel">
-    <div class="carousel-inner">{% for review in object_list %}
+    <div class="carousel-inner">
+        <ol class="carousel-indicators">
+            {% for review in object_list %}
+                 <li data-target="#carouselReviews" data-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}"></li>
+            {% endfor %}
+        </ol>
+        {% for review in object_list %}
         <div class="carousel-item {% if forloop.first %}active{% endif %}"
              data-interval="{{ review.get_interval }}">
             <a class="page-review"
@@ -20,7 +26,7 @@
                 </div>
             </a>
         </div>
-    {% endfor %}
+        {% endfor %}
     </div>
     <a class="carousel-control-prev" href="#carouselReviews"
        role="button" data-slide="prev">
