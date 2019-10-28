@@ -9,14 +9,17 @@ from freezegun import freeze_time
 
 from le_francais_dictionary.views import update_words
 from wagtail.core.models import Page, Site
-from home.models import LessonPage
+from home.models import LessonPage, UserLesson
 from .models import Word, WordTranslation, Packet, UserPacket, UserWordData, \
     UserWordRepetition
 from . import views
+from . import consts
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 
 User = get_user_model()
+
 
 def tick_10_seconds(frozen_time):
     frozen_time.tick(delta=datetime.timedelta(seconds=10))
@@ -28,20 +31,34 @@ class WordUserTestCase(TestCase):
         self.user = User.objects.create_user(username='user1',
                                              email='user1@email.com',
                                              password='password')
-        # FIXME tests stop working because of related lesson pages.
-        # need something to do with fixtures
-        # http://docs.wagtail.io/en/v2.1.1/advanced_topics/testing.html#fixtures
-        # https://django-testing-docs.readthedocs.io/en/latest/fixtures.html
-        self.packet1 = Packet.objects.create(name='packet1',
-                                             lesson=LessonPage.objects.get(lesson_number=1))
-        self.packet2 = Packet.objects.create(name='packet2',
-                                             lesson=LessonPage.objects.get(lesson_number=2))
+        self.root_page = Page.get_root_nodes()[0]
+        self.root_page.add_child(
+            instance=LessonPage(
+                title='lesson1',
+                slug='lesson1',
+                lesson_number=1
+            )
+        )
+        self.root_page.add_child(
+            instance=LessonPage(
+                title='leson2',
+                slug='lesson2',
+                lesson_number=2
+            )
+        )
+        self.packet1 = Packet.objects.create(
+            name='packet1',
+            lesson=LessonPage.objects.get(lesson_number=1),
+            demo=True
+        )
+        self.packet2 = Packet.objects.create(
+            name='packet2',
+            lesson=LessonPage.objects.get(lesson_number=2)
+            )
         self.word1 = Word.objects.create(word='word1', packet=self.packet1)
         self.word2 = Word.objects.create(word='word2', packet=self.packet1)
         self.word3 = Word.objects.create(word='word3', packet=self.packet2)
         self.word4 = Word.objects.create(word='word4', packet=self.packet2)
-        self.translation2 = WordTranslation.objects.create(word=self.word2,
-                                                           translation='translation2')
         self.update_datetime = timezone.now()
 
     def test_add_packets(self):
@@ -51,6 +68,7 @@ class WordUserTestCase(TestCase):
         request = self.factory.post(reverse('dictionary:add_packets'),
                                     data=json.dumps(data),
                                     content_type='application/json')
+        UserLesson.objects.create(user=self.user, lesson=LessonPage.objects.get(lesson_number=2))
         request.user = self.user
         response = views.add_packets(request)
         self.assertDictEqual(
@@ -58,57 +76,61 @@ class WordUserTestCase(TestCase):
             dict(
                 added=[self.packet1.pk, self.packet2.pk],
                 already_exist=[],
+                errors=[],
             ))
 
-    def test_get_progress(self):
-        user_packet = UserPacket.objects.create(packet=self.packet1,
-                                                user=self.user)
-        request = self.factory.get(reverse('dictionary:get_progress'))
-        request.user = self.user
-        response = views.get_progress(request)
-        self.assertJSONEqual(
-            response.content,
-            json.dumps({'packets': [dict(
-                pk=user_packet.packet_id,
-                name=user_packet.packet.name,
-                activated=False,
-                added=True,
-                wordsCount=2,
-                wordsLearned=0
-            )]})
-        )
-
-    def test_get_progress_2(self):
+    def test_add_packets_user_is_not_authenticated(self):
         data = dict(
             packets=[self.packet1.pk, self.packet2.pk]
         )
-        add_packet_request = self.factory.post(
-            reverse('dictionary:add_packets'), data=json.dumps(data),
-            content_type='application/json')
-        add_packet_request.user = self.user
-        views.add_packets(add_packet_request)
+        request = self.factory.post(reverse('dictionary:add_packets'),
+                                    data=json.dumps(data),
+                                    content_type='application/json')
+        request.user = AnonymousUser()
+        response = views.add_packets(request)
+        self.assertDictEqual(
+            json.loads(response.content),
+            dict(
+                added=[],
+                already_exist=[],
+                errors=[
+                    {"packet": self.packet1.pk,
+                     "message": consts.USER_IS_NOT_AUTHENTICATED_MESSAGE},
+                    {"packet": self.packet2.pk,
+                     "message": consts.USER_IS_NOT_AUTHENTICATED_MESSAGE}
+                ],
+            ))
 
-        get_progress_request = self.factory.get(
-            reverse('dictionary:get_progress'))
-        get_progress_request.user = self.user
-        get_progress_response = views.get_progress(get_progress_request)
-        self.assertJSONEqual(
-            get_progress_response.content,
-            json.dumps({'packets': [dict(
-                pk=self.packet1.pk,
-                name=self.packet1.name,
-                activated=False,
-                added=True,
-                wordsCount=2,
-                wordsLearned=0,
-            ), dict(
-                pk=self.packet2.pk,
-                name=self.packet2.name,
-                activated=False,
-                added=True,
-                wordsCount=2,
-                wordsLearned=0,
-            )]})
+    def test_add_packets_packet_do_not_exist_lesson_is_not_activated(self):
+        data = dict(
+            packets=[9999, self.packet2.pk]
+        )
+        request = self.factory.post(reverse('dictionary:add_packets'),
+                                    data=json.dumps(data),
+                                    content_type='application/json')
+        request.user = self.user
+        response = views.add_packets(request)
+        self.assertDictEqual(
+            json.loads(response.content),
+            dict(
+                added=[],
+                already_exist=[],
+                errors=[
+                    {"packet": 9999,
+                     "message": consts.PACKET_DOES_NOT_EXIST_MESSAGE},
+                    {"packet": self.packet2.pk,
+                     "message": consts.LESSON_IS_NOT_ACTIVATED_MESSAGE}
+                ],
+            ))
+
+    def test_get_progress(self):
+        request = self.factory.get(reverse('dictionary:get_progress'))
+        request.user = self.user
+        response = views.get_progress(request)
+        expect = {'packets': [packet.to_dict(self.user) for packet in Packet.objects.all().order_by('lesson__lesson_number')]}
+        self.assertDictEqual(
+            json.loads(response.content),
+            expect,
         )
 
     def test_update_words(self):
