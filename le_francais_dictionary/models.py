@@ -53,6 +53,10 @@ class Packet(models.Model):
         data['wordsCount'] = self.word_set.all().count()
         return data
 
+    def create_polly_task(self):
+        for w in self.word_set.all():
+            w.create_polly_task()
+
     @property
     def words_count(self):
         return self.word_set.count()
