@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Count, Q
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -71,6 +71,9 @@ def get_progress(request):
     for packet in packets:
         result['packets'].append(packet.to_dict(user=request.user))
     return JsonResponse(result)
+
+
+
 
 
 def get_words(request, packet_id):
@@ -190,3 +193,12 @@ def clear_all(request):
     repetetions_deleted = UserWordRepetition.objects.filter(user=request.user).delete()
     result += str(repetetions_deleted) + '\n'
     return HttpResponse(status=200, content=result)
+
+
+def get_packet_progress(request, pk):
+    try:
+        return JsonResponse(
+            Packet.objects.get(pk=pk).to_dict(user=request.user))
+    except Packet.DoesNotExist:
+        return HttpResponseNotFound(
+            PACKET_DOES_NOT_EXIST_MESSAGE)
