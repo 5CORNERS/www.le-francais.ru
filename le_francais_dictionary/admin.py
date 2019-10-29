@@ -130,7 +130,7 @@ class WordAdmin(admin.ModelAdmin):
 
 @admin.register(Packet)
 class PacketAdmin(admin.ModelAdmin):
-	list_display = ['name', 'lesson', 'demo']
+	list_display = ['name', 'lesson', 'demo', '_fully_voiced']
 	ordering = ['lesson__lesson_number', 'name']
 	actions = [create_polly_task]
 	inlines = [WordInline]
