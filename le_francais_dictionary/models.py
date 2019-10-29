@@ -50,6 +50,7 @@ class Packet(models.Model):
             data['activated'] = None
             data['added'] = None
             data['wordsLearned'] = None
+        data['wordsCount'] = self.word_set.all().count()
         return data
 
     @property
