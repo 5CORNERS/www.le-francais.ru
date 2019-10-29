@@ -25,6 +25,11 @@ class WordTranslationInline(admin.TabularInline):
 
 	actions = [create_polly_task]
 
+class WordInline(admin.TabularInline):
+	readonly_fields = ['polly']
+	model = Word
+	actions = [create_polly_task]
+
 @admin.register(Word)
 class WordAdmin(admin.ModelAdmin):
 	change_list_template = 'dictionary/admin/change_list.html'
@@ -121,3 +126,11 @@ class WordAdmin(admin.ModelAdmin):
 		return render(
 			request, 'dictionary/admin/csv_form.html', context
 		)
+
+
+@admin.register(Packet)
+class PacketAdmin(admin.ModelAdmin):
+	list_display = ['name', 'lesson', 'demo']
+	ordering = ['lesson__lesson_number', 'name']
+	actions = [create_polly_task]
+	inlines = [WordInline]
