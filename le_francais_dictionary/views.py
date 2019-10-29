@@ -63,7 +63,7 @@ def add_packets(request):
 
 
 def get_progress(request):
-    result = {'packets': []}
+    result = {'isAuthenticated': request.user.is_authenticated, 'packets': []}
     packets = Packet.objects.prefetch_related(
         'lesson__paid_users',
         'userpacket_set'
