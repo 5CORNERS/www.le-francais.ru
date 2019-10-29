@@ -1,13 +1,13 @@
 from django.conf.urls import url
 
 from le_francais_dictionary.views import get_repetition_words
-from .views import get_words, get_progress, add_packets, update_words, clear_all
-
+from . import views
 urlpatterns = [
-	url('words/([0-9]*)/$', get_words, name='get_words'),
-	url('repetitions/$', get_repetition_words, name='get_repetitions'),
-	url('update-words/$', update_words, name='update_words'),
-	url('progress/$', get_progress, name='get_progress'),
-	url('add-packets/$', add_packets, name='add_packets'),
-	url('clear_all/$', clear_all, name='clear_all'),
+    url('words/([0-9]*)/$', views.get_words, name='get_words'),
+    url('repetitions/$', views.get_repetition_words, name='get_repetitions'),
+    url('update-words/$', views.update_words, name='update_words'),
+    url('progress/$', views.get_progress, name='get_progress'),
+    url('progress/(?P<pk>\d+)/$', views.get_packet_progress, name='get_packet_progress'),
+    url('add-packets/$', views.add_packets, name='add_packets'),
+    url('clear_all/$', views.clear_all, name='clear_all'),
 ]
