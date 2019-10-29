@@ -14,6 +14,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import generic, View
 from django.views.decorators.csrf import csrf_exempt
@@ -38,6 +39,10 @@ from pybb.views import AddPostView, EditPostView, TopicView
 from tinkoff_merchant.models import Payment as TinkoffPayment
 from tinkoff_merchant.services import MerchantAPI
 from .forms import ChangeUsername
+from django.contrib.admin.views.decorators import staff_member_required
+from home.models import UserLesson
+from .models import Payment
+from .utils import message_left
 
 if "mailer" in settings.INSTALLED_APPS:
     from mailer import send_mail
@@ -45,8 +50,8 @@ else:
     from django.core.mail import send_mail
 
 flow = OAuth2WebServerFlow(
-    client_id='499129759772-bqrp9ha0vfibn6t76fdgdmd87khnn2e0.apps.googleusercontent.com',
-    client_secret='CRTqrmLi-116OMgpFOnYS6wH',
+    client_id='',
+    client_secret='',
     scope='https://www.googleapis.com/auth/drive',
     redirect_uri='http://localhost:8000/import/authorized')
 
@@ -127,7 +132,7 @@ def get_navigation_object_from_page(page: Page, current_page_id: int) -> dict:
     }
     if isinstance(page.specific, PageWithSidebar) or isinstance(page.specific,
                                                                 LessonPage) or isinstance(
-            page.specific, ArticlePage):
+        page.specific, ArticlePage):
         menu_title = page.specific.menu_title
         if not isinstance(menu_title, str):
             menu_title = menu_title.decode()
@@ -160,8 +165,9 @@ def get_nav_data(request):
                                             page_id)]
     else:
         nav_items = \
-        get_navigation_object_from_page(Page.objects.get(id=root_id), page_id)[
-            "nodes"]
+            get_navigation_object_from_page(Page.objects.get(id=root_id),
+                                            page_id)[
+                "nodes"]
     return HttpResponse(content=json.dumps(nav_items))
 
 
@@ -221,18 +227,16 @@ def listen_request_check(request):
 @csrf_exempt
 def listen_request_test(request, number):
     return HttpResponse(
-        content='''
-			<pre id="json"></pre>
-			<script>
-				var xhr = new XMLHttpRequest();
-				xhr.open('GET', 'https://files.le-francais.ru/listen_test.php?key={0}&number={1}');
-				xhr.onload = function() {{
-					var data = JSON.parse(JSON.parse(xhr.responseText));
-					document.getElementById("json").innerHTML = JSON.stringify(data, undefined, 2);
-				}}
-				xhr.send()
-			</script>
-			'''.format(request.session.session_key, number)
+        content='''<pre id="json"></pre>
+<script>
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'https://files.le-francais.ru/listen_test.php?key={0}&number={1}');
+xhr.onload = function() {{
+var data = JSON.parse(JSON.parse(xhr.responseText));
+document.getElementById("json").innerHTML = JSON.stringify(data, undefined, 2);
+}}
+xhr.send()
+</script>'''.format(request.session.session_key, number)
     )
 
 
@@ -241,10 +245,6 @@ def get_lesson_url(request):
     return JsonResponse(dict(
         lesson_url='http://192.168.0.27:8080/listen.php?number=' + str(
             lesson_number) + '&key=' + request.session.session_key))
-
-
-from .models import Payment
-from .utils import message_left
 
 
 class GiveMeACoffee(View):
@@ -318,10 +318,6 @@ class ActivateLesson(View):
         return JsonResponse(data)
 
 
-from django.contrib.admin.views.decorators import staff_member_required
-from home.models import UserLesson
-
-
 @staff_member_required
 def activation_log(request):
     all = request.GET.get('all', '')
@@ -343,9 +339,7 @@ def activation_log(request):
     )
 
 
-from django.urls import reverse
-
-
+@csrf_exempt
 def get_coffee_amount(request):
     return JsonResponse(dict(coffee_amount=request.user.cup_amount))
 
@@ -711,7 +705,7 @@ def move_post_processing(request):
     for post in post_list:
         if pybb_util.get_pybb_profile(
                 post.user).autosubscribe and perms.may_subscribe_topic(
-                post.user, new_topic):
+            post.user, new_topic):
             new_topic.subscribers.add(post.user)
 
     old_topic.update_counters()
