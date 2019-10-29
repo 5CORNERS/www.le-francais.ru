@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django_bulk_update.manager import BulkUpdateManager
 from typing import Tuple, List
 
@@ -60,6 +61,15 @@ class Packet(models.Model):
     @property
     def words_count(self):
         return self.word_set.count()
+
+    def _fully_voiced(self):
+        if self.word_set.filter(Q(polly__isnull=True) | Q(
+                wordtranslation__polly__isnull=True)).exists():
+            return False
+        else:
+            return True
+    _fully_voiced.boolean = True
+    fully_voiced = property(_fully_voiced)
 
 
 class UserPacket(models.Model):
