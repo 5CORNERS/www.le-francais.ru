@@ -98,6 +98,7 @@ class WordAdmin(admin.ModelAdmin):
 						word = Word(
 							id=i,
 							word=row[2],
+							packet_id=packet.id,
 							cd_id=row[0] if row[0] and not isinstance(row[0],
 																	  float) else None,
 							genre=genre,
