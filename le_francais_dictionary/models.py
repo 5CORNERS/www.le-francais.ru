@@ -95,6 +95,7 @@ class Word(models.Model):
                                       max_length=10, null=True,
                                       verbose_name='Part of Speech')
     plural = models.BooleanField(default=False, verbose_name='Plural')
+    packet = models.ForeignKey(Packet, null=True, default=None)
     packets = models.ManyToManyField(Packet, related_name='words',
                                      null=True, default=None,
                                      through='WordPacket')
