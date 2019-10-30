@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render
 
 from home.models import LessonPage
 from .forms import DictionaryCsvImportForm
-from .models import Word, WordTranslation, Packet
+from .models import Word, WordTranslation, Packet, WordPacket
 
 
 # Register your models here.
@@ -19,16 +19,18 @@ def create_polly_task(modeladmin: admin.ModelAdmin, request, qs):
 	for p in qs:
 		p.create_polly_task()
 
+
 class WordTranslationInline(admin.TabularInline):
-	readonly_fields = ['polly']
 	model = WordTranslation
-
-	actions = [create_polly_task]
-
-class WordInline(admin.TabularInline):
 	readonly_fields = ['polly']
-	model = Word
-	actions = [create_polly_task]
+	extra = 1
+
+
+class WordInline(admin.StackedInline):
+	model = WordPacket
+	fields = ['word']
+	readonly_fields = ['word']
+	extra = 1
 
 @admin.register(Word)
 class WordAdmin(admin.ModelAdmin):
@@ -60,6 +62,7 @@ class WordAdmin(admin.ModelAdmin):
 			words_to_create: List[Word] = []
 			translations_to_create: List[WordTranslation] = []
 			packets_to_create: List[Packet] = []
+			word_packets_to_create: List[WordPacket] = []
 
 			packets_count = 1
 			lesson_ids = dict(LessonPage.objects.values_list('lesson_number', 'id'))
@@ -88,29 +91,40 @@ class WordAdmin(admin.ModelAdmin):
 						)
 						packets_to_create.append(packet)
 						packets_count += 1
-
-					word = Word(
-						id=i,
-						packet_id=packet.id,
-						word=row[2],
-						cd_id=row[0] if row[0] and not isinstance(row[0], float) else None,
-						genre=genre,
-						plural=plural,
-						part_of_speech=part_of_speech
+					# Check if word already added
+					word = next((x for x in words_to_create if
+					               x.word == row[2]), None)
+					if word is None:
+						word = Word(
+							id=i,
+							word=row[2],
+							cd_id=row[0] if row[0] and not isinstance(row[0],
+																	  float) else None,
+							genre=genre,
+							plural=plural,
+							part_of_speech=part_of_speech
 						)
-					translation = WordTranslation(
-						word_id=i,
-						translation=row[3]
+						translation = WordTranslation(
+							word_id=i,
+							translation=row[3]
+						)
+						words_to_create.append(word)
+						translations_to_create.append(translation)
+					word_packet = WordPacket(
+						word_id=word.id,
+						packet_id=packet.id,
 					)
+					word_packets_to_create.append(word_packet)
 
-					words_to_create.append(word)
-					translations_to_create.append(translation)
 
 			Packet.objects.bulk_create(
 				packets_to_create
 			)
 			Word.objects.bulk_create(
 				words_to_create
+			)
+			WordPacket.objects.bulk_create(
+				word_packets_to_create
 			)
 			WordTranslation.objects.bulk_create(
 				translations_to_create
