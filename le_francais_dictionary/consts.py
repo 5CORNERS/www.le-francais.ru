@@ -42,4 +42,6 @@ PACKET_DOES_NOT_EXIST_MESSAGE = _('Packet does not exist')
 PACKET_IS_NOT_ADDED_MESSAGE = _('Packet is not added')
 LESSON_IS_NOT_ACTIVATED_MESSAGE = _('Lesson is not activated')
 WORD_DOES_NOT_EXIST_MESSAGE = _('Word does not exist')
+TOO_EARLY_MESSAGE = _(
+    'You trying to repeat word, which repetition date has not come yet')
 
