@@ -15,7 +15,8 @@ from .models import Word, Packet, UserPacket, \
 from .utils import create_repetition
 from .consts import PACKET_IS_NOT_ADDED_MESSAGE, \
     PACKET_DOES_NOT_EXIST_MESSAGE, LESSON_IS_NOT_ACTIVATED_MESSAGE, \
-    USER_IS_NOT_AUTHENTICATED_MESSAGE, WORD_DOES_NOT_EXIST_MESSAGE
+    USER_IS_NOT_AUTHENTICATED_MESSAGE, WORD_DOES_NOT_EXIST_MESSAGE, \
+    TOO_EARLY_MESSAGE
 from home.models import UserLesson
 
 
@@ -73,24 +74,20 @@ def get_progress(request):
     return JsonResponse(result)
 
 
-
-
-
 def get_words(request, packet_id):
     result = {
         'words': [],
         'errors': [],
     }
     try:
-        packet = Packet.objects.get(pk=packet_id)
+        packet = Packet.objects.prefetch_related(
+            'words', 'words__polly',
+            'words__wordtranslation_set',
+            'words__wordtranslation_set__polly').get(pk=packet_id)
         if (packet.demo or (
                 request.user.is_authenticated and
                 packet.userpacket_set.filter(user=request.user))):
-            words = Word.objects.prefetch_related(
-                'wordtranslation_set',
-                'wordtranslation_set__polly',
-                'polly',
-            ).order_by('pk').filter(packet=packet)
+            words = packet.words.order_by('pk').all()
             result['words'] = [word.to_dict() for word in words]
         elif not request.user.is_authenticated:
             result['errors'].append(
@@ -127,7 +124,8 @@ def get_repetition_words(request):
             'word__wordtranslation_set__polly',
             'word__polly').filter(
             repetition_date__lte=timezone.now(), user=request.user)
-        result['words'] = [repetition.word.to_dict() for repetition in repetitions]
+        result['words'] = [
+            repetition.word.to_dict() for repetition in repetitions]
     else:
         result['errors'].append(dict(
             message=USER_IS_NOT_AUTHENTICATED_MESSAGE
@@ -146,7 +144,14 @@ def update_words(request):
             word = Word.objects.get(id=word_data['pk'])
             grade = word_data['grade']
             mistakes = word_data['mistakes']
-            if word.packet.userpacket_set.filter(user=request.user):
+            if UserWordRepetition.objects.filter(
+                    word=word, user=request.user,
+                    repetition_date__gt=timezone.now()):
+                errors.append(dict(
+                    pk=word.pk,
+                    message=TOO_EARLY_MESSAGE)
+                )
+            elif word.packets.filter(userpacket__user=request.user).exists():
                 user_words_data.append(UserWordData(
                     word=word,
                     user_id=request.user.id,

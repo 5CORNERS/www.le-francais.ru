@@ -3,10 +3,9 @@ from datetime import datetime
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
-from django_bulk_update.manager import BulkUpdateManager
-from typing import Tuple, List
 
-from le_francais_dictionary.consts import GENRE_CHOICES, PARTOFSPEECH_CHOICES, \
+from le_francais_dictionary.consts import GENRE_CHOICES,\
+    PARTOFSPEECH_CHOICES,\
     PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE
 from le_francais_dictionary.utils import sm2_response_quality, \
     sm2_next_repetition_date, ignore_whitespaces
@@ -34,7 +33,7 @@ class Packet(models.Model):
         :returns: A dictionary of packet which can be safely turned into json
         :rtype: dict
         """
-        data = {}
+        data = dict()
         data['pk'] = self.pk
         data['name'] = self.name
         data['demo'] = self.demo
@@ -51,19 +50,19 @@ class Packet(models.Model):
             data['activated'] = None
             data['added'] = None
             data['wordsLearned'] = None
-        data['wordsCount'] = self.word_set.all().count()
+        data['wordsCount'] = self.words.all().count()
         return data
 
     def create_polly_task(self):
-        for w in self.word_set.all():
+        for w in self.words.all():
             w.create_polly_task()
 
     @property
     def words_count(self):
-        return self.word_set.count()
+        return self.words.all().count()
 
     def _fully_voiced(self):
-        if self.word_set.filter(Q(polly__isnull=True) | Q(
+        if self.words.filter(Q(polly__isnull=True) | Q(
                 wordtranslation__polly__isnull=True)).exists():
             return False
         else:
@@ -78,7 +77,7 @@ class UserPacket(models.Model):
 
     @property
     def words_learned(self) -> int:  # TODO
-        return self.packet.word_set.filter(
+        return self.packet.words.filter(
             userdata__user=self.user, userdata__grade=1).values(
             'word').distinct().__len__()
 
@@ -96,7 +95,9 @@ class Word(models.Model):
                                       max_length=10, null=True,
                                       verbose_name='Part of Speech')
     plural = models.BooleanField(default=False, verbose_name='Plural')
-    packet = models.ForeignKey(Packet, null=True)
+    packets = models.ManyToManyField(Packet, related_name='words',
+                                     null=True, default=None,
+                                     through='WordPacket')
 
     @property
     def polly_url(self):
@@ -116,15 +117,19 @@ class Word(models.Model):
             'translations': [
                 tr.to_dict() for tr in self.wordtranslation_set.all()
             ],
-            'packet': self.packet.pk,
-            'userData': None,
+            'packets': [
+                packet.pk for packet in self.packets.all()
+            ],
+            'userData': None,  # TODO userdata
         }
 
     def create_polly_task(self):
         text = ignore_whitespaces(self.word)
-        if self.part_of_speech == PARTOFSPEECH_NOUN and self.genre == GENRE_MASCULINE:
+        if (self.part_of_speech == PARTOFSPEECH_NOUN and
+                self.genre == GENRE_MASCULINE):
             voice_id = polly_const.VOICE_ID_MATHIEU
-        elif self.part_of_speech == PARTOFSPEECH_NOUN and self.genre == GENRE_FEMININE:
+        elif (self.part_of_speech == PARTOFSPEECH_NOUN and
+              self.genre == GENRE_FEMININE):
             voice_id = polly_const.VOICE_ID_CELINE
         else:
             voice_id = polly_const.VOICE_ID_LEA
@@ -145,6 +150,11 @@ class Word(models.Model):
 
     def __str__(self):
         return self.word
+
+
+class WordPacket(models.Model):
+    word = models.ForeignKey(Word)
+    packet = models.ForeignKey(Packet)
 
 
 class WordTranslation(models.Model):
