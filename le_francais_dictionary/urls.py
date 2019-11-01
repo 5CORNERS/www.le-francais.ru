@@ -10,4 +10,5 @@ urlpatterns = [
     url('progress/(?P<pk>\d+)/$', views.get_packet_progress, name='get_packet_progress'),
     url('add-packets/$', views.add_packets, name='add_packets'),
     url('clear_all/$', views.clear_all, name='clear_all'),
+    url('mark-words/$', views.mark_words, name='mark_words'),
 ]
