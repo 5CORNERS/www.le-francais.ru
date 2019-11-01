@@ -141,7 +141,8 @@ def get_repetition_words(request):
             word__userwordignore__user=request.user
         )
         result['words'] = [
-            repetition.word.to_dict() for repetition in repetitions]
+            repetition.word.to_dict() for repetition in repetitions
+        ]
     else:
         result['errors'].append(dict(
             message=USER_IS_NOT_AUTHENTICATED_MESSAGE
@@ -213,6 +214,8 @@ def clear_all(request):
     result += str(data_deleted) + '\n'
     repetetions_deleted = UserWordRepetition.objects.filter(user=request.user).delete()
     result += str(repetetions_deleted) + '\n'
+    ignores_deleted = UserWordIgnore.objects.filter(user=request.user).delete()
+    result += str(ignores_deleted) + '\n'
     return HttpResponse(status=200, content=result)
 
 
