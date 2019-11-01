@@ -1,6 +1,7 @@
 import json
 from typing import List
 from bulk_update.helper import bulk_update
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count, Q
 from django.utils import timezone
@@ -11,12 +12,12 @@ from django.utils.translation import ugettext_lazy as _
 
 # Create your views here.
 from .models import Word, Packet, UserPacket, \
-    UserWordData, UserWordRepetition
+    UserWordData, UserWordRepetition, UserWordIgnore
 from .utils import create_repetition
 from .consts import PACKET_IS_NOT_ADDED_MESSAGE, \
     PACKET_DOES_NOT_EXIST_MESSAGE, LESSON_IS_NOT_ACTIVATED_MESSAGE, \
     USER_IS_NOT_AUTHENTICATED_MESSAGE, WORD_DOES_NOT_EXIST_MESSAGE, \
-    TOO_EARLY_MESSAGE
+    TOO_EARLY_MESSAGE, NO_LEFT_CUPS_MESSAGE
 from home.models import UserLesson
 
 
@@ -27,7 +28,8 @@ def get_calendar(request):
 
 @csrf_exempt
 def add_packets(request):
-    pks = json.loads(request.body)['packets']
+    data = json.loads(request.body)
+    pks = data['packets']
     packets = []
     result = {'added': [], 'already_exist': [], 'errors': []}
     for pk in pks:
@@ -40,6 +42,17 @@ def add_packets(request):
             ))
     for packet in packets:
         if request.user.is_authenticated:
+            if 'activate' in data.keys() and data['activate']:
+                if not packet.lesson.payed(request.user):
+                    cups_amount = packet.lesson.add_lesson_to_user(
+                        request.user)
+                    if not cups_amount:
+                        result['errors'].append(dict(
+                            packet=packet.pk,
+                            message=NO_LEFT_CUPS_MESSAGE,
+                        ))
+                        result['coffee_amount'] = 0
+                    result['coffee_amount'] = cups_amount
             if (packet.lesson.payed(request.user) or
                     packet.demo):
                 usr_packet, created = UserPacket.objects.get_or_create(
@@ -87,7 +100,8 @@ def get_words(request, packet_id):
         if (packet.demo or (
                 request.user.is_authenticated and
                 packet.userpacket_set.filter(user=request.user))):
-            words = packet.words.order_by('pk').all()
+            words = packet.words.exclude(
+                userwordignore__user=request.user).order_by('pk')
             result['words'] = [word.to_dict() for word in words]
         elif not request.user.is_authenticated:
             result['errors'].append(
@@ -123,7 +137,9 @@ def get_repetition_words(request):
             'word__wordtranslation_set',
             'word__wordtranslation_set__polly',
             'word__polly').filter(
-            repetition_date__lte=timezone.now(), user=request.user)
+            repetition_date__lte=timezone.now(), user=request.user).exclude(
+            word__userwordignore__user=request.user
+        )
         result['words'] = [
             repetition.word.to_dict() for repetition in repetitions]
     else:
@@ -207,3 +223,43 @@ def get_packet_progress(request, pk):
     except Packet.DoesNotExist:
         return HttpResponseNotFound(
             PACKET_DOES_NOT_EXIST_MESSAGE)
+
+
+@csrf_exempt
+def mark_words(request):
+    data = json.loads(request.body)
+    result = {'marked': [], 'errors': []}
+    if request.user.is_authenticated:
+        for pk in data['words']:
+            try:
+                word = Word.objects.get(pk=pk)
+                if not UserWordIgnore.objects.filter(
+                        user=request.user, word_id=pk).exists():
+                    UserWordIgnore.objects.create(
+                        user=request.user,
+                        word=word,
+                    )
+                    result['marked'].append(pk)
+            except Word.DoesNotExist:
+                result['errors'].append(
+                    dict(
+                        pk=pk,
+                        message=WORD_DOES_NOT_EXIST_MESSAGE,
+                    )
+                )
+            except ValidationError as e:
+                for message in e.messages:
+                    result['errors'].append(
+                        dict(
+                            pk=pk,
+                            message=message
+                        )
+                    )
+
+    else:
+        result['errors'].append(
+            dict(
+                message=USER_IS_NOT_AUTHENTICATED_MESSAGE
+            )
+        )
+    return JsonResponse(result, safe=False)

@@ -20,6 +20,7 @@ PARTOFSPEECH_PREPOSITION = 'prep'
 PARTOFSPEECH_INTERJECTION = 'interj'
 PARTOFSPEECH_LOCUTION = 'loc'
 PARTOFSPEECH_PHRASE = 'phrase'
+PARTOFSPEECH_PARTIC = 'partic'
 PARTOFSPEECH_CHOICES = [
     (PARTOFSPEECH_NOUN, 'Noun'),
     (PARTOFSPEECH_PRONOUN, 'Pronoun'),
@@ -31,6 +32,7 @@ PARTOFSPEECH_CHOICES = [
     (PARTOFSPEECH_INTERJECTION, 'Interjection'),
     (PARTOFSPEECH_LOCUTION, 'Locution'),
     (PARTOFSPEECH_PHRASE, 'Phrase'),
+    (PARTOFSPEECH_PARTIC, 'Partic'),
 ]
 
 INITIAL_E_FACTOR = 2.5
@@ -44,4 +46,4 @@ LESSON_IS_NOT_ACTIVATED_MESSAGE = _('Lesson is not activated')
 WORD_DOES_NOT_EXIST_MESSAGE = _('Word does not exist')
 TOO_EARLY_MESSAGE = _(
     'You trying to repeat word, which repetition date has not come yet')
-
+NO_LEFT_CUPS_MESSAGE = _('There are no cups left')
