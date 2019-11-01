@@ -131,7 +131,7 @@ class Word(models.Model):
             repetition = self.userwordrepetition_set.filter(user=user).first()
             if repetition:
                 data['userData'] = dict(
-                    nextRepetitionDate=repetition.date,
+                    nextRepetitionDate=repetition.repetition_date,
                     repetitionTime=repetition.time,
                 )
             else:
