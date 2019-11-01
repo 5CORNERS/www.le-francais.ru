@@ -60,7 +60,8 @@ def sm2_next_repetition_date(dataset):
 	return finals[-1][0].datetime + timedelta(days=repetition_delta), n
 
 
-def ignore_whitespaces(text):
+def format_text2speech(text):
+	# FIXME ignore double parentheses
 	text = ''.join([s.split(')')[-1] for s in text.split('(')])  # ignore parentheses
 	text = re.sub(' +', ' ', text)  # remove multiple whitespaces
 	return text

@@ -8,7 +8,7 @@ from le_francais_dictionary.consts import GENRE_CHOICES,\
     PARTOFSPEECH_CHOICES,\
     PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE
 from le_francais_dictionary.utils import sm2_response_quality, \
-    sm2_next_repetition_date, ignore_whitespaces
+    sm2_next_repetition_date, format_text2speech
 from polly import const as polly_const
 from polly.models import PollyTask
 
@@ -86,16 +86,16 @@ class Word(models.Model):
     cd_id = models.CharField(
         null=True,
         verbose_name='Color Dictionary ID',
-        max_length=10)
+        max_length=10, blank=True)
     word = models.CharField(max_length=120, verbose_name='Word')
-    polly = models.ForeignKey(PollyTask, null=True)
+    polly = models.ForeignKey(PollyTask, null=True, blank=True)
     genre = models.CharField(choices=GENRE_CHOICES, max_length=10, null=True,
-                             verbose_name='Gender')
+                             verbose_name='Gender', blank=True)
     part_of_speech = models.CharField(choices=PARTOFSPEECH_CHOICES,
                                       max_length=10, null=True,
-                                      verbose_name='Part of Speech')
-    plural = models.BooleanField(default=False, verbose_name='Plural')
-    packet = models.ForeignKey(Packet, null=True, default=None)
+                                      verbose_name='Part of Speech', blank=True)
+    plural = models.BooleanField(default=False, verbose_name='Plural', blank=True)
+    packet = models.ForeignKey(Packet, null=True, default=None, blank=True)
     packets = models.ManyToManyField(Packet, related_name='words',
                                      null=True, default=None,
                                      through='WordPacket')
@@ -103,6 +103,10 @@ class Word(models.Model):
     @property
     def polly_url(self):
         return self.polly.url if self.polly else None
+
+    @property
+    def first_translation(self):
+        return self.wordtranslation_set.first()
 
     def get_repetition_date(self, user):
         self.userwordrepetition_set.filter(user=user, word=self)
@@ -125,7 +129,7 @@ class Word(models.Model):
         }
 
     def create_polly_task(self):
-        text = ignore_whitespaces(self.word)
+        text = format_text2speech(self.word)
         if (self.part_of_speech == PARTOFSPEECH_NOUN and
                 self.genre == GENRE_MASCULINE):
             voice_id = polly_const.VOICE_ID_MATHIEU
@@ -159,9 +163,9 @@ class WordPacket(models.Model):
 
 
 class WordTranslation(models.Model):
-    word = models.ForeignKey(Word)
+    word = models.ForeignKey(Word, on_delete=models.CASCADE)
     translation = models.CharField(max_length=120)
-    polly = models.ForeignKey(PollyTask, null=True)
+    polly = models.ForeignKey(PollyTask, null=True, blank=True)
 
     @property
     def polly_url(self):
@@ -177,7 +181,7 @@ class WordTranslation(models.Model):
         }
 
     def create_polly_task(self):
-        text = ignore_whitespaces(self.translation)
+        text = format_text2speech(self.translation)
         polly_task = PollyTask(
             text=text,
             text_type=polly_const.TEXT_TYPE_TEXT,
@@ -194,6 +198,11 @@ class WordTranslation(models.Model):
 
     def __str__(self):
         return self.translation
+
+
+class UserWordIgnore(models.Model):
+    word = models.ForeignKey(Word, on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
 
 
 class UserWordData(models.Model):
