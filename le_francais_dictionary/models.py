@@ -112,7 +112,7 @@ class Word(models.Model):
         self.userwordrepetition_set.filter(user=user, word=self)
 
     def to_dict(self, with_user=False, user=None):
-        return {
+        data = {
             'pk': self.pk,
             'word': self.word,
             'pollyUrl': self.polly_url,
@@ -127,6 +127,16 @@ class Word(models.Model):
             ],
             'userData': None,  # TODO userdata
         }
+        if user and user.is_authenticated:
+            repetition = self.userwordrepetition_set.filter(user=user).first()
+            if repetition:
+                data['userData'] = dict(
+                    nextRepetitionDate=repetition.date,
+                    repetitionTime=repetition.time,
+                )
+            else:
+                data['userData'] = None
+        return data
 
     def create_polly_task(self):
         text = format_text2speech(self.word)

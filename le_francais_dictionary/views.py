@@ -102,7 +102,7 @@ def get_words(request, packet_id):
                 packet.userpacket_set.filter(user=request.user))):
             words = packet.words.exclude(
                 userwordignore__user=request.user).order_by('pk')
-            result['words'] = [word.to_dict() for word in words]
+            result['words'] = [word.to_dict(user=request.user) for word in words]
         elif not request.user.is_authenticated:
             result['errors'].append(
                 dict(
