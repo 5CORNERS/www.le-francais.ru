@@ -78,7 +78,9 @@ class UserPacket(models.Model):
     @property
     def words_learned(self) -> int:  # TODO
         return self.packet.words.filter(
-            userdata__user=self.user, userdata__grade=1).values(
+            Q(userdata__user=self.user, userdata__grade=1)|Q(
+                userwordignore__user=self.user
+            )).values(
             'word').distinct().__len__()
 
 
