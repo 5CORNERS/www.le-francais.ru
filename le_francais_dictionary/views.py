@@ -100,8 +100,10 @@ def get_words(request, packet_id):
         if (packet.demo or (
                 request.user.is_authenticated and
                 packet.userpacket_set.filter(user=request.user))):
-            words = packet.words.exclude(
-                userwordignore__user=request.user).order_by('pk')
+            words = packet.words.order_by('pk')
+            if request.user.is_authenticated:
+                words = words.exclude(
+                userwordignore__user=request.user)
             result['words'] = [word.to_dict(user=request.user) for word in words]
         elif not request.user.is_authenticated:
             result['errors'].append(
