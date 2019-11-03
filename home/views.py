@@ -249,7 +249,7 @@ def get_lesson_url(request):
 
 class GiveMeACoffee(View):
 
-    @method_decorator(require_http_methods(["POST"]))
+    @method_decorator(require_http_methods(["POST"]), csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super(GiveMeACoffee, self).dispatch(request, *args, **kwargs)
 
@@ -288,6 +288,7 @@ class GiveMeACoffee(View):
 
 
 class ActivateLesson(View):
+    @method_decorator(csrf_exempt)
     def post(self, request):
         lesson = LessonPage.objects.get(
             lesson_number=request.POST['lesson_number'])
