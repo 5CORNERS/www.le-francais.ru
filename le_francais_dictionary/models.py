@@ -38,7 +38,8 @@ class Packet(models.Model):
         data['name'] = self.name
         data['demo'] = self.demo
         if user and user.is_authenticated:
-            data['activated'] = True if self.lesson.payed(user) else False
+            data['activated'] = True if self.lesson.payed(user) else (
+                    False or self.demo)
             if self.userpacket_set.filter(user=user).exists():
                 userpacket = self.userpacket_set.filter(user=user).first()
                 data['added'] = True
