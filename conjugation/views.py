@@ -45,7 +45,7 @@ def search(request):
 			return render(request, 'conjugation/verb_not_found.html',
 			              {'search_string': search_string})
 		except ReflexiveVerb.MultipleObjectsReturned:
-			re_verb = ReflexiveVerb.objects.get(infinitive=search_string)
+			re_verb = ReflexiveVerb.objects.filter(infinitive_no_accents=search_string).first()
 		return redirect(re_verb.get_absolute_url())
 
 	try:
@@ -54,7 +54,7 @@ def search(request):
 		return render(request, 'conjugation/verb_not_found.html',
 		              {'search_string': search_string})
 	except Verb.MultipleObjectsReturned:
-		verb = Verb.objects.get(infinitive=search_string)
+		verb = Verb.objects.filter(infinitive_no_accents=search_string).first()
 	return redirect(verb.get_absolute_url())
 
 
