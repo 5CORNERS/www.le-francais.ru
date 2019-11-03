@@ -259,8 +259,17 @@ class GiveMeACoffee(View):
             lesson_page = LessonPage.objects.get(
                 lesson_number=request.POST['lesson_number'])
         except MultiValueDictKeyError:
+            body = json.loads(request.body)
+            try:
+                lesson_number = body['lesson_number']
+            except KeyError:
+                from le_francais_dictionary.models import \
+                    Packet as DictionaryPacket
+                packet_pk = body['packet']
+                lesson_number = DictionaryPacket.objects.get(
+                    pk=packet_pk).lesson.lesson_number
             lesson_page = LessonPage.objects.get(
-                lesson_number=json.loads(request.body)['lesson_number'])
+                lesson_number=lesson_number)
         if request.user.is_authenticated():
             if not lesson_page in request.user.payed_lessons.all():
                 if request.user.cup_amount >= 1:
