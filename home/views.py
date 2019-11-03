@@ -15,6 +15,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.decorators import method_decorator
 from django.views import generic, View
 from django.views.decorators.csrf import csrf_exempt
@@ -249,13 +250,17 @@ def get_lesson_url(request):
 
 class GiveMeACoffee(View):
 
-    @method_decorator(require_http_methods(["POST"]), csrf_exempt)
+    @method_decorator([require_http_methods(["POST"]), csrf_exempt])
     def dispatch(self, request, *args, **kwargs):
         return super(GiveMeACoffee, self).dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        lesson_page = LessonPage.objects.get(
-            lesson_number=request.POST['lesson_number'])
+        try:
+            lesson_page = LessonPage.objects.get(
+                lesson_number=request.POST['lesson_number'])
+        except MultiValueDictKeyError:
+            lesson_page = LessonPage.objects.get(
+                lesson_number=json.loads(request.body)['lesson_number'])
         if request.user.is_authenticated():
             if not lesson_page in request.user.payed_lessons.all():
                 if request.user.cup_amount >= 1:
