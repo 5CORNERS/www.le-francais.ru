@@ -76,9 +76,10 @@ class UserPacket(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
 
     @property
-    def words_learned(self) -> int:  # TODO
+    def words_learned(self) -> int:
         return self.packet.words.filter(
-            userdata__user=self.user, userdata__grade=1).values(
+            userdata__user=self.user, userdata__grade=1).exclude(
+            userwordignore__user=self.user).values(
             'word').distinct().__len__()
 
 
