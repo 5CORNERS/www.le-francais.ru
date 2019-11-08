@@ -160,7 +160,7 @@ def update_words(request):
     errors = []
     for word_data in words_data:
         try:
-            word = Word.objects.get(id=word_data['pk'])
+            word = Word.objects.get(pk=word_data['pk'])
             grade = word_data['grade']
             mistakes = word_data['mistakes']
             if UserWordRepetition.objects.filter(
