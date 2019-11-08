@@ -151,11 +151,11 @@ class Word(models.Model):
             'userData': None,
         }
         if user and user.is_authenticated:
-            repetition = UserWordRepetition.objects.filter(
+            repetition: UserWordRepetition = UserWordRepetition.objects.filter(
                 user=user,
                 word__group_id=self.group_id,
                 word__definition_num=self.definition_num,
-            )
+            ).first()
             if repetition:
                 repetition_time = repetition.time
                 repetition_date = repetition.repetition_date
