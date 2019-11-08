@@ -80,7 +80,7 @@ def get_progress(request):
     result = {'isAuthenticated': request.user.is_authenticated, 'packets': []}
     packets = Packet.objects.prefetch_related(
         'lesson__paid_users',
-        'userpacket_set'
+        'userpacket_set',
     ).all().order_by('lesson__lesson_number')
     for packet in packets:
         result['packets'].append(packet.to_dict(user=request.user))
@@ -104,7 +104,7 @@ def get_words(request, packet_id):
             if request.user.is_authenticated:
                 words = words.exclude(
                 userwordignore__user=request.user)
-            result['words'] = [word.to_dict(user=request.user) for word in words]
+            result['words'] = [word.to_dict(user=request.user, packet=packet) for word in words]
         elif not request.user.is_authenticated:
             result['errors'].append(
                 dict(
