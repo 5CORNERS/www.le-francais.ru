@@ -37,6 +37,7 @@ class Packet(models.Model):
         data = dict()
         data['pk'] = self.pk
         data['name'] = self.name
+        data['lessonNumber'] = self.lesson.lesson_number
         data['demo'] = self.demo
         if user and user.is_authenticated:
             data['activated'] = True if self.lesson.payed(user) else (
