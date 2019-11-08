@@ -4,9 +4,10 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
-from le_francais_dictionary.consts import GENRE_CHOICES,\
-    PARTOFSPEECH_CHOICES,\
-    PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE
+from le_francais_dictionary.consts import GENRE_CHOICES, \
+    PARTOFSPEECH_CHOICES, \
+    PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
+    GRAMMATICAL_NUMBER_CHOICES
 from le_francais_dictionary.utils import sm2_response_quality, \
     sm2_next_repetition_date, format_text2speech
 from polly import const as polly_const
@@ -85,23 +86,39 @@ class UserPacket(models.Model):
             'word').distinct().__len__()
 
 
+class WordGroup(models.Model):
+    pass
+
+
+class UnifiedWord(models.Model):
+    word = models.CharField(max_length=120)
+    translation = models.CharField(max_length=120)
+    definition_num = models.IntegerField(null=True, blank=True, default=None)
+    group = models.ForeignKey('WordGroup', on_delete=models.CASCADE)
+
+
 class Word(models.Model):
-    cd_id = models.CharField(
-        null=True,
+    cd_id = models.IntegerField(
         verbose_name='Color Dictionary ID',
-        max_length=10, blank=True)
+        primary_key=True)
     word = models.CharField(max_length=120, verbose_name='Word')
     polly = models.ForeignKey(PollyTask, null=True, blank=True)
+    # TODO: must be moved to WordTranslation Model
     genre = models.CharField(choices=GENRE_CHOICES, max_length=10, null=True,
                              verbose_name='Gender', blank=True)
     part_of_speech = models.CharField(choices=PARTOFSPEECH_CHOICES,
                                       max_length=10, null=True,
                                       verbose_name='Part of Speech', blank=True)
     plural = models.BooleanField(default=False, verbose_name='Plural', blank=True)
+    grammatical_number = models.CharField(choices=GRAMMATICAL_NUMBER_CHOICES,
+                                          max_length=4, null=True, blank=True)
     packet = models.ForeignKey(Packet, null=True, default=None, blank=True)
     packets = models.ManyToManyField(Packet, related_name='words',
                                      null=True, default=None,
                                      through='WordPacket')
+
+    group = models.ForeignKey('WordGroup', on_delete=models.SET_NULL, null=True)
+    definition_num = models.IntegerField(null=True, blank=True, default=None)
 
     @property
     def polly_url(self):
@@ -114,7 +131,7 @@ class Word(models.Model):
     def get_repetition_date(self, user):
         self.userwordrepetition_set.filter(user=user, word=self)
 
-    def to_dict(self, with_user=False, user=None):
+    def to_dict(self, with_user=False, user=None, packet=None):
         data = {
             'pk': self.pk,
             'word': self.word,
@@ -122,23 +139,28 @@ class Word(models.Model):
             'gender': self.genre,
             'partOfSpeech': self.part_of_speech,
             'plural': self.plural,
+            'grammaticalNumber': self.grammatical_number,
+            'translation': self.wordtranslation_set.get(word=self).to_dict(),
             'translations': [
                 tr.to_dict() for tr in self.wordtranslation_set.all()
             ],
             'packets': [
                 packet.pk for packet in self.packets.all()
             ],
-            'userData': None,  # TODO userdata
+            'userData': None,
         }
         if user and user.is_authenticated:
             repetition = self.userwordrepetition_set.filter(user=user).first()
             if repetition:
-                data['userData'] = dict(
-                    nextRepetitionDate=repetition.repetition_date,
-                    repetitionTime=repetition.time,
-                )
+                repetition_time = repetition.time
+                repetition_date = repetition.repetition_date
             else:
-                data['userData'] = None
+                repetition_time = None
+                repetition_date = None
+            data['userData'] = dict(
+                nextRepetitionDate=repetition_date,
+                repetitionTime=repetition_time,
+            )
         return data
 
     def create_polly_task(self):
@@ -173,12 +195,14 @@ class Word(models.Model):
 class WordPacket(models.Model):
     word = models.ForeignKey(Word)
     packet = models.ForeignKey(Packet)
+    order = models.CharField(max_length=10, null=True)
 
 
 class WordTranslation(models.Model):
     word = models.ForeignKey(Word, on_delete=models.CASCADE)
-    translation = models.CharField(max_length=120)
+    translation = models.CharField(max_length=120, null=False, blank=False)
     polly = models.ForeignKey(PollyTask, null=True, blank=True)
+    packet = models.ForeignKey('Packet', on_delete=models.CASCADE, null=True)
 
     @property
     def polly_url(self):
