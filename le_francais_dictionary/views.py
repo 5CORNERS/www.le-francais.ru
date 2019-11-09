@@ -223,11 +223,11 @@ def clear_all(request):
 
 def get_packet_progress(request, pk):
     try:
-        return JsonResponse(
-            Packet.objects.get(pk=pk).to_dict(user=request.user))
+        result = Packet.objects.get(pk=pk).to_dict(user=request.user)
+        result['isAuthenticated'] = request.user.is_authenticated
+        return JsonResponse(result)
     except Packet.DoesNotExist:
-        return HttpResponseNotFound(
-            PACKET_DOES_NOT_EXIST_MESSAGE)
+        return HttpResponseNotFound(PACKET_DOES_NOT_EXIST_MESSAGE)
 
 
 @csrf_exempt
