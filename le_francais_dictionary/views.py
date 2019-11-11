@@ -143,7 +143,7 @@ def get_repetition_words(request):
             word__userwordignore__user=request.user
         )
         result['words'] = [
-            repetition.word.to_dict() for repetition in repetitions
+            repetition.word.to_dict(user=request.user) for repetition in repetitions
         ]
     else:
         result['errors'].append(dict(
