@@ -7,12 +7,14 @@
 <table class="table table-bordered post post-row
        {% if post.on_moderation %}on-moderation{% endif %}"
        id="post-{{ post.id }}"
+       itemscope
+       itemtype="http://schema.org/DiscussionForumPosting"
 >
 	<thead>
 	<tr>
-		<td class="post-author">
-			<a href="{% url 'pybb:user' post.user.username %}">
-				<span class="post-username">{{ post.user.username }}</span>
+		<td itemprop="author" itemscope itemtype="http://schema.org/Person" class="post-author">
+			<a itemprop="url" href="{% url 'pybb:user' post.user.username %}">
+				<span itemprop="name" class="post-username">{{ post.user.username }}</span>
 			</a>
 		</td>
 		<td class="post-date">
@@ -79,6 +81,8 @@
 				{% endif %}
 			</div>
 			<a class="permalink" href="{{ post.get_absolute_url }}">#</a>
+            <meta itemprop="datePublished" content="{{ post.created|date:"c" }}" />
+            {% if post.updated %}<meta itemprop="dateModified" content="{{ post.updated|date:"c" }}" />{% endif %}
 			{% if request_user_profile.date_show_type == 1 %}{{ post.created }}{% else %}{{ post.created|timesince }} {% trans "ago" %}{% endif %}
 			{% if post.updated %}
 				({% trans "edited" %}
@@ -118,7 +122,9 @@
 			{% endif %}
 		</td>
 		<td class="post-content">
-			{{ post.body_html|safe }}
+            <article itemprop="articleBody">
+                {{ post.body_html|safe }}
+            </article>
 			{% if not user.is_authenticated or request_user_profile.show_signatures %}
 				{% if post_user_profile.signature %}
 					<div class="post-signature">
@@ -127,7 +133,7 @@
 				{% endif %}
 			{% endif %}
 			<ul class="list-inline action-menu">
-				<li class="{% if liked %}selected{% endif %} like-container">
+				<li class="{% if liked %}selected{% endif %} like-container" itemprop="interactionStatistic" itemscope itemtype="http://schema.org/InteractionCounter">
 					<a {% if user.is_authenticated %}href="{% url 'pybb:like_post' post.pk %}"
 					   data-count="{{ post.likes|pybb_likes_count }}"
 					   class="like"
@@ -142,6 +148,8 @@
 						>
 					</a>
 					{% if post.likes|pybb_likes_count > 0 %}<div class='tooltip-who-liked{% if post.likes|pybb_likes_count > 5 %} show-chevrones{% endif %}'>{% who_liked post 5 %}</div>{% endif %}
+                    <meta itemprop="interactionType" content="http://schema.org/LikeAction" />
+                    <meta itemprop="userInteractionCount" content="{{ post.likes|pybb_likes_count }}" />
 				</li>
 			</ul>
 			<div class="post-related">
