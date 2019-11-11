@@ -14,11 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from .models import Word, Packet, UserPacket, \
     UserWordData, UserWordRepetition, UserWordIgnore
 from .utils import create_or_update_repetition
-from .consts import PACKET_IS_NOT_ADDED_MESSAGE, \
-    PACKET_DOES_NOT_EXIST_MESSAGE, LESSON_IS_NOT_ACTIVATED_MESSAGE, \
-    USER_IS_NOT_AUTHENTICATED_MESSAGE, WORD_DOES_NOT_EXIST_MESSAGE, \
-    TOO_EARLY_MESSAGE, NO_LEFT_CUPS_MESSAGE, NO_REPETITION_WORDS_MESSAGE, \
-    NO_REPETITION_WORDS_CODE
+from . import consts
 from home.models import UserLesson
 
 
@@ -39,7 +35,8 @@ def add_packets(request):
         except Packet.DoesNotExist:
             result['errors'].append(dict(
                 packet=pk,
-                message=PACKET_DOES_NOT_EXIST_MESSAGE
+                message=consts.PACKET_DOES_NOT_EXIST_MESSAGE,
+                code=consts.PACKET_DOES_NOT_EXIST_CODE,
             ))
     for packet in packets:
         if request.user.is_authenticated:
@@ -50,7 +47,8 @@ def add_packets(request):
                     if not cups_amount:
                         result['errors'].append(dict(
                             packet=packet.pk,
-                            message=NO_LEFT_CUPS_MESSAGE,
+                            message=consts.NO_CUPS_MESSAGE,
+                            code=consts.NO_CUPS_MESSAGE
                         ))
                         result['coffee_amount'] = 0
                     result['coffee_amount'] = cups_amount
@@ -67,12 +65,14 @@ def add_packets(request):
             else:
                 result['errors'].append(dict(
                     packet=packet.pk,
-                    message=LESSON_IS_NOT_ACTIVATED_MESSAGE
+                    message=consts.LESSON_IS_NOT_ACTIVATED_MESSAGE,
+                    code=consts.LESSON_IS_NOT_ACTIVATED_CODE
                 ))
         else:
             result['errors'].append(dict(
                 packet=packet.pk,
-                message=USER_IS_NOT_AUTHENTICATED_MESSAGE,
+                message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
+                code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
             ))
     return JsonResponse(result)
 
@@ -111,21 +111,24 @@ def get_words(request, packet_id):
         elif not request.user.is_authenticated:
             result['errors'].append(
                 dict(
-                    message=USER_IS_NOT_AUTHENTICATED_MESSAGE
+                    message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
+                    code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
                 )
             )
         elif (not packet.demo
               and not packet.userpacket_set.filter(user=request.user)):
             result['errors'].append(
                 dict(
-                    message=PACKET_IS_NOT_ADDED_MESSAGE
+                    message=consts.PACKET_IS_NOT_ADDED_MESSAGE,
+                    code=consts.PACKET_IS_NOT_ADDED_CODE,
                 )
             )
 
     except Packet.DoesNotExist:
         result['errors'].append(
             dict(
-                message=PACKET_DOES_NOT_EXIST_MESSAGE
+                message=consts.PACKET_DOES_NOT_EXIST_MESSAGE,
+                code=consts.PACKET_DOES_NOT_EXIST_CODE,
             )
         )
     return JsonResponse(result, safe=False)
@@ -150,14 +153,15 @@ def get_repetition_words(request):
         ]
     else:
         result['errors'].append(dict(
-            message=USER_IS_NOT_AUTHENTICATED_MESSAGE
+            message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
+            code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
         ))
 
     if not result['words']:
         result['errors'].append(
             {
-                'code': NO_REPETITION_WORDS_CODE,
-                'message': NO_REPETITION_WORDS_MESSAGE,
+                'code': consts.NO_REPETITION_WORDS_CODE,
+                'message': consts.NO_REPETITION_WORDS_MESSAGE,
             }
         )
 
@@ -179,7 +183,9 @@ def update_words(request):
                     repetition_date__gt=timezone.now()):
                 errors.append(dict(
                     pk=word.pk,
-                    message=TOO_EARLY_MESSAGE)
+                    message=consts.TOO_EARLY_MESSAGE,
+                    code=consts.TOO_EARLY_CODE,
+                )
                 )
             elif word.packets.filter(userpacket__user=request.user).exists():
                 user_words_data.append(UserWordData(
@@ -191,12 +197,14 @@ def update_words(request):
             else:
                 errors.append(dict(
                     pk=word.pk,
-                    message=PACKET_IS_NOT_ADDED_MESSAGE
+                    message=consts.PACKET_IS_NOT_ADDED_MESSAGE,
+                    code=consts.PACKET_IS_NOT_ADDED_CODE,
                 ))
         except Word.DoesNotExist:
             errors.append(dict(
                 pk=word_data['pk'],
-                message=WORD_DOES_NOT_EXIST_MESSAGE
+                message=consts.WORD_DOES_NOT_EXIST_MESSAGE,
+                code=consts.WORD_DOES_NOT_EXIST_CODE,
             ))
     user_words_data = UserWordData.objects.bulk_create(user_words_data)
     words = []
@@ -238,7 +246,7 @@ def get_packet_progress(request, pk):
         result['isAuthenticated'] = request.user.is_authenticated
         return JsonResponse(result)
     except Packet.DoesNotExist:
-        return HttpResponseNotFound(PACKET_DOES_NOT_EXIST_MESSAGE)
+        return HttpResponseNotFound(consts.PACKET_DOES_NOT_EXIST_MESSAGE)
 
 
 @csrf_exempt
@@ -260,7 +268,8 @@ def mark_words(request):
                 result['errors'].append(
                     dict(
                         pk=pk,
-                        message=WORD_DOES_NOT_EXIST_MESSAGE,
+                        message=consts.WORD_DOES_NOT_EXIST_MESSAGE,
+                        code=consts.WORD_DOES_NOT_EXIST_CODE
                     )
                 )
             except ValidationError as e:
@@ -275,7 +284,8 @@ def mark_words(request):
     else:
         result['errors'].append(
             dict(
-                message=USER_IS_NOT_AUTHENTICATED_MESSAGE
+                message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
+                code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
             )
         )
     return JsonResponse(result, safe=False)
