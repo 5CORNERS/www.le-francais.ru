@@ -6,15 +6,15 @@ from typing import List
 from .consts import INITIAL_E_FACTOR, FIRST_REPETITION_DELTA, SECOND_REPETITION_DELTA
 
 
-def create_repetition(user_word_data, save=False):
+def create_or_update_repetition(user_word_data, save=False):
 	from .models import UserWordRepetition
 	repetition_datetime, time = user_word_data.get_repetition_datetime()
 	if repetition_datetime:
 		repetition, created = UserWordRepetition.objects.get_or_create(
 			user_id=user_word_data.user_id,
 			word_id=user_word_data.word_id,
-			time=time
 		)
+		repetition.time=time
 		repetition.repetition_date = repetition_datetime.date()
 		if save:
 			repetition.save()
