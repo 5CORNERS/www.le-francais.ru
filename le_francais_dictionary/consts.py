@@ -56,6 +56,14 @@ INITIAL_E_FACTOR = 2.5
 FIRST_REPETITION_DELTA = 1
 SECOND_REPETITION_DELTA = 6
 
+USER_IS_NOT_AUTHENTICATED_CODE = 10
+PACKET_DOES_NOT_EXIST_CODE = 20
+PACKET_IS_NOT_ADDED_CODE = 30
+LESSON_IS_NOT_ACTIVATED_CODE = 40
+WORD_DOES_NOT_EXIST_CODE = 50
+TOO_EARLY_CODE = 60
+NO_REPETITION_WORDS_CODE = 70
+
 USER_IS_NOT_AUTHENTICATED_MESSAGE = _('User is not authenticated')
 PACKET_DOES_NOT_EXIST_MESSAGE = _('Packet does not exist')
 PACKET_IS_NOT_ADDED_MESSAGE = _('Packet is not added')
@@ -64,3 +72,4 @@ WORD_DOES_NOT_EXIST_MESSAGE = _('Word does not exist')
 TOO_EARLY_MESSAGE = _(
     'You trying to repeat word, which repetition date has not come yet')
 NO_LEFT_CUPS_MESSAGE = _('There are no cups left')
+NO_REPETITION_WORDS_MESSAGE = 'На сегодня нет слов на повторение, но вы не расслабляйтесь :)'
