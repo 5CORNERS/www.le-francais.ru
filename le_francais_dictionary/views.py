@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 # Create your views here.
 from .models import Word, Packet, UserPacket, \
     UserWordData, UserWordRepetition, UserWordIgnore
-from .utils import create_repetition
+from .utils import create_or_update_repetition
 from .consts import PACKET_IS_NOT_ADDED_MESSAGE, \
     PACKET_DOES_NOT_EXIST_MESSAGE, LESSON_IS_NOT_ACTIVATED_MESSAGE, \
     USER_IS_NOT_AUTHENTICATED_MESSAGE, WORD_DOES_NOT_EXIST_MESSAGE, \
@@ -194,7 +194,7 @@ def update_words(request):
     repetitions = []
     for user_word_data in user_words_data:
         if user_word_data.grade:
-            repetition = create_repetition(user_word_data)
+            repetition = create_or_update_repetition(user_word_data)
             repetition_datetime = repetition.repetition_date
             repetition_time = repetition.time
             repetitions.append(repetition)
