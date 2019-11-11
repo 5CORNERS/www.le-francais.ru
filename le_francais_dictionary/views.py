@@ -17,7 +17,8 @@ from .utils import create_or_update_repetition
 from .consts import PACKET_IS_NOT_ADDED_MESSAGE, \
     PACKET_DOES_NOT_EXIST_MESSAGE, LESSON_IS_NOT_ACTIVATED_MESSAGE, \
     USER_IS_NOT_AUTHENTICATED_MESSAGE, WORD_DOES_NOT_EXIST_MESSAGE, \
-    TOO_EARLY_MESSAGE, NO_LEFT_CUPS_MESSAGE
+    TOO_EARLY_MESSAGE, NO_LEFT_CUPS_MESSAGE, NO_REPETITION_WORDS_MESSAGE, \
+    NO_REPETITION_WORDS_CODE
 from home.models import UserLesson
 
 
@@ -151,6 +152,14 @@ def get_repetition_words(request):
         result['errors'].append(dict(
             message=USER_IS_NOT_AUTHENTICATED_MESSAGE
         ))
+
+    if not result['words']:
+        result['errors'].append(
+            {
+                'code': NO_REPETITION_WORDS_CODE,
+                'message': NO_REPETITION_WORDS_MESSAGE,
+            }
+        )
 
     return JsonResponse(result, safe=False)
 
