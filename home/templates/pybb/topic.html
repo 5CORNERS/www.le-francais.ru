@@ -4,6 +4,8 @@
 
 {% block title %}{{ topic }}{% endblock %}
 
+{% block canonical %}<link rel="canonical" href="https://www.le-francais.ru{{ topic.get_absolute_url }}{% if page_obj.number %}?page={{ page_obj.number }}{% endif %}"/>{% endblock %}
+
 {% block extra_style %}
     {{ form.media.css }}
 {% endblock %}
