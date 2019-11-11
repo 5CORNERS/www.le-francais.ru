@@ -77,10 +77,12 @@ def add_packets(request):
 
 
 def get_progress(request):
+    # FIXME prefetch related objects
     result = {'isAuthenticated': request.user.is_authenticated, 'packets': []}
     packets = Packet.objects.prefetch_related(
         'lesson__paid_users',
         'userpacket_set',
+        'word_set',
     ).all().order_by('lesson__lesson_number')
     for packet in packets:
         result['packets'].append(packet.to_dict(user=request.user))
