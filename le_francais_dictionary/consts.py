@@ -71,5 +71,5 @@ LESSON_IS_NOT_ACTIVATED_MESSAGE = _('Lesson is not activated')
 WORD_DOES_NOT_EXIST_MESSAGE = _('Word does not exist')
 TOO_EARLY_MESSAGE = _(
     'You trying to repeat word, which repetition date has not come yet')
-NO_LEFT_CUPS_MESSAGE = _('There are no cups left')
+NO_CUPS_MESSAGE = _('There are no cups left')
 NO_REPETITION_WORDS_MESSAGE = 'На сегодня нет слов на повторение, но вы не расслабляйтесь :)'
