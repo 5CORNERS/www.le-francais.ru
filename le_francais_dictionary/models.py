@@ -7,7 +7,7 @@ from django.db.models import Q
 from le_francais_dictionary.consts import GENRE_CHOICES, \
     PARTOFSPEECH_CHOICES, \
     PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
-    GRAMMATICAL_NUMBER_CHOICES
+    GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE
 from le_francais_dictionary.utils import sm2_response_quality, \
     sm2_next_repetition_date, format_text2speech
 from polly import const as polly_const
@@ -103,7 +103,9 @@ class Word(models.Model):
         verbose_name='Color Dictionary ID',
         primary_key=True)
     word = models.CharField(max_length=120, verbose_name='Word')
+    word_ssml = models.CharField(max_length=200, null=True, default=None)
     polly = models.ForeignKey(PollyTask, null=True, blank=True)
+    _polly_url = models.URLField(max_length=200, null=True, default=None)
     # TODO: must be moved to WordTranslation Model
     genre = models.CharField(choices=GENRE_CHOICES, max_length=10, null=True,
                              verbose_name='Gender', blank=True)
@@ -123,7 +125,10 @@ class Word(models.Model):
 
     @property
     def polly_url(self):
-        return self.polly.url if self.polly else None
+        if not self._polly_url:
+            return self.polly.url if self.polly else None
+        else:
+            return self._polly_url
 
     @property
     def first_translation(self):
@@ -145,9 +150,7 @@ class Word(models.Model):
             'translations': [
                 tr.to_dict() for tr in self.wordtranslation_set.all()
             ],
-            'packets': [
-                packet.pk for packet in self.packets.all()
-            ],
+            'packet': self.packet.pk,
             'userData': None,
         }
         if user and user.is_authenticated:
@@ -168,30 +171,65 @@ class Word(models.Model):
             )
         return data
 
-    def create_polly_task(self):
-        text = format_text2speech(self.word)
-        if (self.part_of_speech == PARTOFSPEECH_NOUN and
+    def create_polly_task(self, local=None):
+        if self.word_ssml:
+            text = self.word_ssml
+            text_type = polly_const.TEXT_TYPE_SSML
+        else:
+            text = format_text2speech(self.word)
+            text_type = polly_const.TEXT_TYPE_TEXT
+        if ((self.part_of_speech == PARTOFSPEECH_NOUN or
+             self.part_of_speech == PARTOFSPEECH_ADJECTIVE) and
                 self.genre == GENRE_MASCULINE):
             voice_id = polly_const.VOICE_ID_MATHIEU
-        elif (self.part_of_speech == PARTOFSPEECH_NOUN and
+        elif ((self.part_of_speech == PARTOFSPEECH_NOUN or
+              self.part_of_speech == PARTOFSPEECH_ADJECTIVE) and
               self.genre == GENRE_FEMININE):
             voice_id = polly_const.VOICE_ID_CELINE
         else:
             voice_id = polly_const.VOICE_ID_LEA
         polly_task = PollyTask(
             text=text,
-            text_type=polly_const.TEXT_TYPE_TEXT,
+            text_type=text_type,
             language_code=polly_const.LANGUAGE_CODE_FR,
             output_format=polly_const.OUTPUT_FORMAT_MP3,
             sample_rate=polly_const.SAMPLE_RATE_22050,
             voice_id=voice_id,
         )
-        polly_task.create_task('polly-dictionaries/words/', wait=False,
+        if local:
+            import os
+            stream = polly_task.get_audio_stream('polly-dictionaries/words-local/')
+            path = 'le_francais_dictionary/local/fr_polly/'
+            if (self.part_of_speech == PARTOFSPEECH_NOUN and
+                    self.genre == GENRE_MASCULINE):
+                genre = 'm'
+            elif (self.part_of_speech == PARTOFSPEECH_NOUN and
+                  self.genre == GENRE_FEMININE):
+                genre = 'f'
+            else:
+                genre = 'z'
+            filename = local
+            if os.path.exists(path+filename):
+                return
+            file = open(path + filename, 'wb')
+            file.write(stream.read())
+            file.close()
+            import eyed3
+            mp3 = eyed3.load(path + filename)
+            mp3.tag.track_num = (str(self.cd_id), None)
+            mp3.tag.title = str(self.word)
+            mp3.tag.artist = str(voice_id)
+            mp3.tag.album = 'Amazon Polly'
+            mp3.tag.save()
+            print(filename)
+            # self.polly = 'https://files.le-francais.ru/dictionnaires/sound/' + filename
+        else:
+            polly_task.create_task('polly-dictionaries/words/', wait=False,
                                save=True)
-        self.polly = polly_task
-        self.save()
-        for translation in self.wordtranslation_set.all():
-            translation.create_polly_task()
+            self.polly = polly_task
+            self.save()
+        # for translation in self.wordtranslation_set.all():
+        #     translation.create_polly_task()
 
     def __str__(self):
         return self.word
@@ -206,15 +244,17 @@ class WordPacket(models.Model):
 class WordTranslation(models.Model):
     word = models.ForeignKey(Word, on_delete=models.CASCADE)
     translation = models.CharField(max_length=120, null=False, blank=False)
+    translations_ssml = models.CharField(max_length=200, null=True, default=None)
     polly = models.ForeignKey(PollyTask, null=True, blank=True)
+    _polly_url = models.URLField(null=True, default=None)
     packet = models.ForeignKey('Packet', on_delete=models.CASCADE, null=True)
 
     @property
     def polly_url(self):
-        if self.polly is None:
-            return None
+        if not self._polly_url:
+            return self.polly.url if self.polly else None
         else:
-            return self.polly.url
+            return self._polly_url
 
     def to_dict(self):
         return {
@@ -237,6 +277,12 @@ class WordTranslation(models.Model):
                                save=True)
         self.polly = polly_task
         self.save()
+
+    def create_custom_audio(self):
+        from os import getenv
+        ftp_login = getenv('FTP_LOGIN', None)
+        ftp_password = getenv('FTP_PASSWORD', None)
+
 
     def __str__(self):
         return self.translation
