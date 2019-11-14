@@ -1,6 +1,6 @@
 import re
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Optional, Any
 
 from unidecode import unidecode
 
@@ -115,9 +115,9 @@ def fr_local_pyttsx3():
 	import os
 	import eyed3
 	CD_ID_ROW = 0
-	STRING_ROW = 1
-	FILENAME_ROW = 2
-	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR_HOM.csv'
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
 	path = 'le_francais_dictionary/local/fr_pyttsx3/'
 	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
 	csv_file = open(csv_path, 'r', encoding='utf-8')
@@ -143,6 +143,9 @@ def fr_local_pyttsx3():
 			to_update.append(word)
 			if os.path.exists(filepath + '.mp3'):
 				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
 				continue
 			engine, voice_name = fr_engine_change_voice(engine, word.genre)
 			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
@@ -310,6 +313,9 @@ def local_fr_googletts(language='FR'):
 					text=string_to_synth
 				)
 			if language == 'FR':
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
 				voice = googletts_get_fr_voice(voices, obj.genre)
 				voice = texttospeech.types.VoiceSelectionParams(
 					language_code='fr-FR',
@@ -344,3 +350,104 @@ def local_fr_googletts(language='FR'):
 	from bulk_update import helper
 	helper.bulk_update(to_update, update_fields=['_polly_url'])
 
+
+import os
+from shutil import copyfile
+def copy_file(src, dest):
+	if os.path.exists(dest):
+		return True
+	elif not os.path.exists(src):
+		return False
+	else:
+		copyfile(src, dest)
+		return True
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 1
+	RU_ROW = 16
+	RU_UNIFIED_ROW = 14
+	FR_ROW = 17
+	FR_UNIFIED_ROW = 15
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - Dictionary.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = '//files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = '//files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['ru_polly_url', 'fr_polly_url'])
+	print(not_existing)
