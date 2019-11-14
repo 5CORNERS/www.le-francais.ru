@@ -188,29 +188,20 @@
 		{% endif %}
 		{% if self.body %}
 			<div id="body" class="{{ pane_class }}" role="tabpanel">
-				{% if user.must_pay and self.need_payment or request.GET.test %}
+				{% if user.must_pay and self.need_payment %}
 					{% if not userlesson %}
 						{% include_30_block self.body 400 %}
-						{% if not user.is_authenticated %}
-							<div class="row">
-								<div class="col-lg-12"><p>Доступ к материалам урока могут получить только зарегистрированные пользователи.</p></div>
-								<div class="col-lg-12"><a href="{% url 'account_login' %}?next={{ request.path }}">
-									<button class="btn btn-primary button-small" href="{% url 'account_login' %}">Войти</button>
-								</a></div>
-							</div>
-						{% else %}
 							<div class="row">
 								<div class="col-lg-12"><p>Пожалуйста, активируйте урок, чтобы получить доступ к его материалам.</p></div>
 								<div class="col-lg-12">
 									<button class="btn btn-primary button-small" onclick="activateLesson('button')">Активировать урок</button>
 								</div>
 							</div>
-						{% endif %}
 					{% else %}
 						{% for block in self.body %}{% include_block block %}{% endfor %}
 					{% endif %}
 				{% else %}
-					{% if self.need_payment and user.must_pay  %}
+					{% if self.need_payment and not user.is_authenticated  %}
 						{% include_30_block self.body 400 %}
 						<div class="row">
 							<div class="col-lg-12"><p>Доступ к материалам урока могут получить только зарегистрированные пользователи.</p></div>
