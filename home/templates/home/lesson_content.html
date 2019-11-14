@@ -350,7 +350,7 @@
 			</div>
             {% assign pane_class "tab-pane fade" %}
 		{% endif %}
-        <div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
+        {% if self.flash_cards_is_included %}<div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
             <h4>Alfa-версия (демо) озвученного словарика. <span title="Важные рекомендации"><a
                     style="cursor: pointer;color:#337ab7;"
                     data-toggle="popover"
@@ -365,7 +365,7 @@
 Поскольку это пререлизная версия, в ней могут быть ошибки, в том числе и в составе слов. Пожалуйста, пожалуйста! обо всех замеченных косяках пишите <b><a href="/forum/topic/3071/">здесь</a></b>. , Мы также ждем от вас ваши пожелания и отзывы, поэтому не стесняясь, пишите нам!'
             ><i class="fa fa-info-circle"></i></a></span></h4>
             {% include_dictionary self %}
-        </div>
+        </div>{% endif %}
 
 		{% for child_value in self.other_tabs %}
 			{% if not child_value.value.invisible_for_all or user.is_superuser %}{% if not child_value.value.visible_only_if_payed or already_payed %}<div id="{{ child_value.value.href }}" class="tab-pane fade" role="tabpanel">
