@@ -96,6 +96,9 @@ class UnifiedWord(models.Model):
     translation = models.CharField(max_length=120)
     definition_num = models.IntegerField(null=True, blank=True, default=None)
     group = models.ForeignKey('WordGroup', on_delete=models.CASCADE)
+    word_polly_url = models.URLField(max_length=200, null=True, default=None)
+    translation_polly_url = models.URLField(max_length=200, null=True,
+                                            default=None)
 
 
 class Word(models.Model):
