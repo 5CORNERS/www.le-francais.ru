@@ -256,6 +256,20 @@ class WordTranslation(models.Model):
         else:
             return self._polly_url
 
+    @property
+    def genre(self):
+        if self.word:
+            return self.word.genre
+        else:
+            return None
+
+    @property
+    def cd_id(self):
+        if self.word:
+            return self.word.cd_id
+        else:
+            return None
+
     def to_dict(self):
         return {
             'translation': self.translation,
