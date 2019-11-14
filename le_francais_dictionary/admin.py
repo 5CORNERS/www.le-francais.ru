@@ -43,8 +43,10 @@ class WordInline(admin.StackedInline):
 
 class ImportTableRow:
 	def __init__(
-			self, i, packet_n, word, unified_word, translation, unified_translation, definition_num=None, cd_id=None,
-			part_of_speech=None, genre=None, rus_voice=None, fr_voice=None,
+			self, i, packet_n, word, unified_word, translation,
+			unified_translation, definition_num=None, cd_id=None,
+			part_of_speech=None, genre=None, ru_voice=None, fr_voice=None,
+			ru_voice_unified=None, fr_voice_unified=None,
 			order=None):
 		"""
 		:type i: int
@@ -77,8 +79,10 @@ class ImportTableRow:
 			self.part_of_speech = 'loc'
 		else:
 			self.part_of_speech = part_of_speech.split(' ')[0]
-		self.rus_voice = rus_voice
+		self.ru_voice = ru_voice
 		self.fr_voice = fr_voice
+		self.ru_voice_unified = ru_voice_unified
+		self.fr_voice_unified = fr_voice_unified
 		self.order = order
 
 
