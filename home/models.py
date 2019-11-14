@@ -427,6 +427,12 @@ class LessonPage(Page):
 
         return user.cup_amount
 
+    def flash_cards_is_included(self):
+        if self.dictionary_packets.exists():
+            return True
+        else:
+            return False
+
     def payed(self, user: User):
         if user.is_authenticated and (self in user.payed_lessons.all() or not user.must_pay):
             return True
