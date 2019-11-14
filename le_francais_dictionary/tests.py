@@ -31,17 +31,17 @@ class WordUserTestCase(TestCase):
         self.user = User.objects.create_user(username='user1',
                                              email='user1@email.com',
                                              password='password')
-        self.root_page = Page.get_root_nodes()[0]
-        self.root_page.add_child(
+        root_page = Page.get_root_nodes()[0]
+        root_page.add_child(
             instance=LessonPage(
                 title='lesson1',
                 slug='lesson1',
                 lesson_number=1
             )
         )
-        self.root_page.add_child(
+        root_page.add_child(
             instance=LessonPage(
-                title='leson2',
+                title='lesson2',
                 slug='lesson2',
                 lesson_number=2
             )
@@ -55,29 +55,79 @@ class WordUserTestCase(TestCase):
             name='packet2',
             lesson=LessonPage.objects.get(lesson_number=2)
             )
-        self.word1 = Word.objects.create(word='word1', packet=self.packet1)
-        self.word2 = Word.objects.create(word='word2', packet=self.packet1)
-        self.word3 = Word.objects.create(word='word3', packet=self.packet2)
-        self.word4 = Word.objects.create(word='word4', packet=self.packet2)
-        self.update_datetime = timezone.now()
+        self.word1 = Word.objects.create(word='word1', packet=self.packet1, cd_id=1)
+        self.word2 = Word.objects.create(word='word2', packet=self.packet1, cd_id=2)
+        self.word3 = Word.objects.create(word='word3', packet=self.packet2, cd_id=3)
+        self.word4 = Word.objects.create(word='word4', packet=self.packet2, cd_id=4)
 
-    def test_add_packets(self):
+    def test_add_demo_packet(self):
         data = dict(
-            packets=[self.packet1.pk, self.packet2.pk]
+            packets=[self.packet1.pk]
         )
+        expecting_response = {
+            'added': [self.packet1.pk],
+            'alreadyExisted': [],
+            'errors': []
+        }
         request = self.factory.post(reverse('dictionary:add_packets'),
                                     data=json.dumps(data),
                                     content_type='application/json')
-        UserLesson.objects.create(user=self.user, lesson=LessonPage.objects.get(lesson_number=2))
         request.user = self.user
         response = views.add_packets(request)
         self.assertDictEqual(
             json.loads(response.content),
-            dict(
-                added=[self.packet1.pk, self.packet2.pk],
-                already_exist=[],
-                errors=[],
-            ))
+            expecting_response
+        )
+        expecting_response = {
+            'added': [],
+            'alreadyExisted': [self.packet1.pk],
+            'errors': []
+        }
+        response = views.add_packets(request)
+        self.assertDictEqual(
+            json.loads(response.content),
+            expecting_response
+        )
+
+    def test_add_normal_packet(self):
+        data = dict(
+            packets=[self.packet2.pk]
+        )
+        expecting_response = {
+            'added': [],
+            'alreadyExisted': [],
+            'errors': [
+                {
+                    'pk': self.packet2.pk,
+                    'message': consts.LESSON_IS_NOT_ACTIVATED_MESSAGE,
+                    'code': consts.LESSON_IS_NOT_ACTIVATED_CODE,
+                }
+            ]
+        }
+        request = self.factory.post(reverse('dictionary:add_packets'),
+                                    data=json.dumps(data),
+                                    content_type='application/json')
+        request.user = self.user
+        response = views.add_packets(request)
+        self.assertDictEqual(
+            json.loads(response.content),
+            expecting_response
+        )
+        # activating lesson2
+        UserLesson.objects.create(
+            user=self.user,
+            lesson=LessonPage.objects.get(slug='lesson2')
+        )
+        expecting_response = {
+            'added': [self.packet2.pk],
+            'alreadyExisted': [],
+            'errors': []
+        }
+        response = views.add_packets(request)
+        self.assertDictEqual(
+            json.loads(response.content),
+            expecting_response
+        )
 
     def test_add_packets_user_is_not_authenticated(self):
         data = dict(
