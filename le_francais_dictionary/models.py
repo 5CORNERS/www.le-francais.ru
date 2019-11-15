@@ -53,19 +53,19 @@ class Packet(models.Model):
             data['activated'] = None
             data['added'] = None
             data['wordsLearned'] = None
-        data['wordsCount'] = self.words.all().count()
+        data['wordsCount'] = self.word_set.all().count()
         return data
 
     def create_polly_task(self):
-        for w in self.words.all():
+        for w in self.word_set.all():
             w.create_polly_task()
 
     @property
     def words_count(self):
-        return self.words.all().count()
+        return self.word_set.all().count()
 
     def _fully_voiced(self):
-        if self.words.filter(Q(polly__isnull=True) | Q(
+        if self.word_set.filter(Q(polly__isnull=True) | Q(
                 wordtranslation__polly__isnull=True)).exists():
             return False
         else:
@@ -80,7 +80,7 @@ class UserPacket(models.Model):
 
     @property
     def words_learned(self) -> int:  # TODO
-        return self.packet.words.filter(
+        return self.packet.word_set.filter(
             Q(userdata__user=self.user, userdata__grade=1)|Q(
                 userwordignore__user=self.user
             )).values(
@@ -119,9 +119,6 @@ class Word(models.Model):
     grammatical_number = models.CharField(choices=GRAMMATICAL_NUMBER_CHOICES,
                                           max_length=4, null=True, blank=True)
     packet = models.ForeignKey(Packet, null=True, default=None, blank=True)
-    packets = models.ManyToManyField(Packet, related_name='words',
-                                     null=True, default=None,
-                                     through='WordPacket')
 
     group = models.ForeignKey('WordGroup', on_delete=models.SET_NULL, null=True, blank=True)
     definition_num = models.IntegerField(null=True, blank=True, default=None)
@@ -238,12 +235,6 @@ class Word(models.Model):
 
     def __str__(self):
         return self.word
-
-
-class WordPacket(models.Model):
-    word = models.ForeignKey(Word)
-    packet = models.ForeignKey(Packet)
-    order = models.CharField(max_length=10, null=True)
 
 
 class WordTranslation(models.Model):

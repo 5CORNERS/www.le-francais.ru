@@ -89,7 +89,7 @@ def fr_local_polly():
 			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
 			filename = unidecode(row[FILENAME])+'.mp3'
 			word.create_polly_task(local=filename)
-			word._polly_url = '//files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
 			to_update.append(word)
 	from django_bulk_update import helper
 	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
@@ -139,7 +139,7 @@ def fr_local_pyttsx3():
 		if word:
 			filename = row[FILENAME_ROW]
 			filepath = path + filename
-			word._polly_url = '//files.le-francais.ru/dictionnaires/sound/FR/' + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename
 			to_update.append(word)
 			if os.path.exists(filepath + '.mp3'):
 				print('!!!ALREADY_EXIST!!!')
@@ -209,7 +209,7 @@ def ru_local_pyttsx3():
 		if translation:
 			filename = row[FILENAME_ROW]
 			filepath = path+filename
-			translation._polly_url = '//files.le-francais.ru/dictionnaires/sound/RU/' + filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename
 			to_update.append(translation)
 			if os.path.exists(filepath+'.mp3'):
 				print('!!!ALREADY_EXIST!!!')
@@ -295,7 +295,7 @@ def local_fr_googletts(language='FR'):
 		filename = row[FILENAME_ROW_INDEX]
 		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
 		if obj:
-			obj._polly_url = '//files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
 			to_update.append(obj)
 			if os.path.exists(mp3_path + filename + '.mp3'):
 				print('!!!ALREADY_EXIST!!!')
@@ -377,8 +377,8 @@ def local_copy_prerecorded():
 	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
 	csv_path = 'le_francais_dictionary/local/Dictionary updated - Dictionary.csv'
 	csv_file = open(csv_path, 'r', encoding='utf-8')
-	ru_url_dir = '//files.le-francais.ru/dictionnaires/sound/RU/'
-	fr_url_dir = '//files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
 	ru_dir = 'D:/Sound/RussianBX3/'
 	fr_dir = 'D:/Sound/SoundF3/'
 	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
@@ -449,5 +449,5 @@ def local_copy_prerecorded():
 	from django_bulk_update import helper
 	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
 	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
-	helper.bulk_update(to_update_unified_words, update_fields=['ru_polly_url', 'fr_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
 	print(not_existing)

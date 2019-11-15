@@ -671,9 +671,15 @@ class MovePostView(TopicView):
         return data
 
 
-def modal_login_required(request):
+def modal_download_login_required(request):
     redirect_url = request.GET.get('redirect_url', '/')
-    return render(request, template_name='modals/login-required.html',
+    return render(request, template_name='modals/download-login-required.html',
+                  context={'next': redirect_url})
+
+
+def modal_content_login_required(request):
+    redirect_url = request.GET.get('redirect_url', '/')
+    return render(request, template_name='modals/content-login-required.html',
                   context={'next': redirect_url})
 
 

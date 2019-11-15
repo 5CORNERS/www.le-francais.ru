@@ -172,7 +172,7 @@
 				$('.audioplayer-download-button').on('click', function (e) {
 					e.preventDefault();
 					$.ajax({
-						url: '{% url 'modal:login_required' %}',
+						url: '{% url 'modal:download_login_required' %}',
 						type: 'GET',
 						data: {
 							redirect_url: '{{ request.path }}'

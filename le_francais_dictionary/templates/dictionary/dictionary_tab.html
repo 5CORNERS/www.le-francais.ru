@@ -1,0 +1,23 @@
+{% load static le_francais_dictionary %}
+<script>
+    function loadFlashCards(packet_id) {
+        $.ajax(Urls['dictionary:get_app'](packet_id),{
+            success: function (data) {
+                $('#dictionary-app').html(data)
+            }
+        })
+    }
+</script>
+<div class="row">
+    <div class="col-12" id="dictionary-app">
+        {% if lesson_page.several_word_packets %}
+            {% get_packets lesson_page as packets %}
+            {% for packet in packets %}
+                <button type="button" class="btn btn-secondary btn-lg" onclick="loadFlashCards({{ packet.id }})">{{ packet.name }}</button>
+            {% endfor %}
+        {% else %}
+            {% get_packets lesson_page as packet %}
+            {% include 'dictionary/dictionary_app.html' with packet_id=packet.id %}
+        {% endif %}
+    </div>
+</div>
