@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render
 
 from home.models import LessonPage
 from .forms import DictionaryCsvImportForm, DictionaryWordFormset
-from .models import Word, WordTranslation, Packet, WordPacket, WordGroup, \
+from .models import Word, WordTranslation, Packet, WordGroup, \
 	UnifiedWord
 
 from django_bulk_update import helper as update_helper
@@ -35,7 +35,7 @@ class WordTranslationInline(admin.TabularInline):
 
 
 class WordInline(admin.StackedInline):
-	model = WordPacket
+	model = Word
 	fields = ['word']
 	readonly_fields = ['word']
 	extra = 1
@@ -167,11 +167,10 @@ class WordAdmin(admin.ModelAdmin):
 			groups: List[WordGroup] = list(WordGroup.objects.prefetch_related('word_set', 'unifiedword_set').all())
 			unified_words: List[UnifiedWord] = list(UnifiedWord.objects.all())
 			words: List[Word] = list(Word.objects.prefetch_related('wordtranslation_set').all())
-			translations: List[WordTranslation] = list(WordTranslation.objects.all())
-			WordPacket.objects.all().delete()
-			word_packets: List[WordPacket] = []
+			translations: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+			l = import_table.rows.__len__()
 			for row in import_table.rows:
-
+				start_time = time.time()
 				# Packets getting or creating
 				packet = next((p for p in packets if p.name == row.packet_name), None)
 				if packet is None:
@@ -217,8 +216,6 @@ class WordAdmin(admin.ModelAdmin):
 						unified_words[index] = unified_word
 				else:
 					group = None
-
-				start_time = time.time()
 				word, index = next(((iw[1], iw[0]) for iw in enumerate(words) if iw[1].cd_id == row.cd_id), (None, None))
 				if word is None:
 					word = Word(
@@ -232,6 +229,7 @@ class WordAdmin(admin.ModelAdmin):
 				word.part_of_speech = row.part_of_speech
 				word.definition_num = row.definition_num
 				word.group = group
+				word.packet_id = packet.id
 				word.order = row.order
 				if index:
 					words[index] = word
@@ -247,33 +245,29 @@ class WordAdmin(admin.ModelAdmin):
 					)
 					return redirect(
 						'admin:le_francais_dictionary_word_changelist')
-				word_packet = WordPacket(
-					word_id=word.cd_id,
-					packet_id=packet.id,
-					order=row.order,
-				)
-				word_packets.append(
-					word_packet
-				)
-				translation = next((t for t in translations if t.word_id == word.cd_id), None)
+				index, translation = next(((it[0], it[1]) for it in enumerate(translations) if it[1].word_id == word.cd_id), (None, None))
 				if translation is None:
 					translation = WordTranslation(
 						word_id=word.cd_id,
 						translation=row.translation,
 						packet=packet
 					)
-					try:
-						translation.clean_fields(exclude=['word', 'packet'])
-					except ValidationError as e:
-						self.message_user(
-							request,
-							'Translation Error in row {row.i}, cd_id={row.cd_id}: {e}'.format(row=row, e=e),
-							level=messages.ERROR,
-						)
-						return redirect(
-							'admin:le_francais_dictionary_word_changelist')
 					translations.append(translation)
-				print("--- %s seconds --- Word {w.word}".format(w=word) % (
+				else:
+					translation.translation = row.translation
+					translation.packet = packet
+					translations[index] = translation
+				try:
+					translation.clean_fields(exclude=['word', 'packet'])
+				except ValidationError as e:
+					self.message_user(
+						request,
+						'Translation Error in row {row.i}, cd_id={row.cd_id}: {e}'.format(row=row, e=e),
+						level=messages.ERROR,
+					)
+					return redirect(
+						'admin:le_francais_dictionary_word_changelist')
+				print("{row.i}/{l} --- %s seconds --- Word {w.word}".format(w=word, row=row, l=l) % (
 							time.time() - start_time))
 			update_helper.bulk_update(
 				[w for w in words if not w._state.adding],
@@ -282,18 +276,17 @@ class WordAdmin(admin.ModelAdmin):
 				[w for w in words if w._state.adding]
 			)
 			update_helper.bulk_update(
-				[uw for uw in unified_words if uw._state.adding]
-			)
-			UnifiedWord.objects.bulk_create(
 				[uw for uw in unified_words if not uw._state.adding]
 			)
-			update_helper.bulk_update(
-				[tr for tr in translations if tr._state.adding]
+			UnifiedWord.objects.bulk_create(
+				[uw for uw in unified_words if uw._state.adding]
 			)
-			WordTranslation.objects.bulk_create(
+			update_helper.bulk_update(
 				[tr for tr in translations if not tr._state.adding]
 			)
-			WordPacket.objects.bulk_create(word_packets)
+			WordTranslation.objects.bulk_create(
+				[tr for tr in translations if tr._state.adding]
+			)
 			self.message_user(request, 'CSV file has been imported')
 			return redirect('admin:le_francais_dictionary_word_changelist')
 		form = DictionaryCsvImportForm()

@@ -132,7 +132,7 @@
                     <a class="nav-link" data-toggle="tab"
                        href="#flash-cards" role="tab"
                        aria-controls="flash-cards">
-                        Словарик
+                        Слова урока
                     </a>
                 </li>
             {% endif %}
@@ -354,6 +354,9 @@
 		{% endif %}
         {% if self.flash_cards_is_included %}
             <div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
+            {% if block_flash_cards %}
+                {% include 'home/content_is_blocked.html' %}
+            {% else %}
             <h4>Alfa-версия (демо) озвученного словарика. <span title="Важные рекомендации"><a
                     style="cursor: pointer;color:#337ab7;"
                     data-toggle="popover"
@@ -368,6 +371,7 @@
 Поскольку это пререлизная версия, в ней могут быть ошибки, в том числе и в составе слов. Пожалуйста, пожалуйста! обо всех замеченных косяках пишите <b><a href="/forum/topic/3071/">здесь</a></b>. , Мы также ждем от вас ваши пожелания и отзывы, поэтому не стесняясь, пишите нам!'
             ><i class="fa fa-info-circle"></i></a></span></h4>
             {% include_dictionary self %}
+            {% endif %}
             </div>
         {% endif %}
 

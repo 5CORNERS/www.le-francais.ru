@@ -4,6 +4,7 @@ from bulk_update.helper import bulk_update
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count, Q
+from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
@@ -97,13 +98,13 @@ def get_words(request, packet_id):
     }
     try:
         packet = Packet.objects.prefetch_related(
-            'words', 'words__polly',
-            'words__wordtranslation_set',
-            'words__wordtranslation_set__polly').get(pk=packet_id)
+            'word_set', 'word_set__polly',
+            'wordtranslation_set',
+            'wordtranslation_set__polly').get(pk=packet_id)
         if (packet.demo or (
                 request.user.is_authenticated and
                 packet.userpacket_set.filter(user=request.user))):
-            words = packet.words.order_by('pk')
+            words = packet.word_set.order_by('order')
             if request.user.is_authenticated:
                 words = words.exclude(
                 userwordignore__user=request.user)
@@ -289,3 +290,14 @@ def mark_words(request):
             )
         )
     return JsonResponse(result, safe=False)
+
+
+def get_app(request, packet_id):
+    if not UserPacket.objects.filter(user=request.user,
+                                     packet_id=packet_id).exists():
+        UserPacket.objects.create(
+            user=request.user,
+            packet_id=packet_id
+        )
+    return render(request, 'dictionary/dictionary_app.html',
+                      {'packet_id': packet_id})

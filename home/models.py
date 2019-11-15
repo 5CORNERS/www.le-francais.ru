@@ -433,6 +433,15 @@ class LessonPage(Page):
         else:
             return False
 
+    def several_word_packets(self):
+        if self.dictionary_packets.all().count() > 1:
+            return True
+        else:
+            return False
+
+    def get_word_packets(self) -> list:
+        return list(self.dictionary_packets.all())
+
     def payed(self, user: User):
         if user.is_authenticated and (self in user.payed_lessons.all() or not user.must_pay):
             return True
@@ -476,6 +485,10 @@ class LessonPage(Page):
         if self.repetition_material:
             if BLOCK_AFTER_REPETITION_MATERIAL >= self.lesson_number or self.payed(user):
                 context['block_repetition_material'] = False
+        context['block_flash_cards'] = True
+        if self.flash_cards_is_included():
+            if BLOCK_AFTER_FLASHCARDS >= self.lesson_number or self.payed(user):
+                context['block_flash_cards'] = False
 
         return context
 
