@@ -106,9 +106,9 @@ class Word(models.Model):
         verbose_name='Color Dictionary ID',
         primary_key=True)
     word = models.CharField(max_length=120, verbose_name='Word')
-    word_ssml = models.CharField(max_length=200, null=True, default=None)
+    word_ssml = models.CharField(max_length=200, null=True, default=None, blank=True)
     polly = models.ForeignKey(PollyTask, null=True, blank=True)
-    _polly_url = models.URLField(max_length=200, null=True, default=None)
+    _polly_url = models.URLField(max_length=200, null=True, default=None, blank=True)
     # TODO: must be moved to WordTranslation Model
     genre = models.CharField(choices=GENRE_CHOICES, max_length=10, null=True,
                              verbose_name='Gender', blank=True)
@@ -123,8 +123,10 @@ class Word(models.Model):
                                      null=True, default=None,
                                      through='WordPacket')
 
-    group = models.ForeignKey('WordGroup', on_delete=models.SET_NULL, null=True)
+    group = models.ForeignKey('WordGroup', on_delete=models.SET_NULL, null=True, blank=True)
     definition_num = models.IntegerField(null=True, blank=True, default=None)
+
+    order = models.IntegerField(null=True, default=None)
 
     @property
     def polly_url(self):
@@ -247,9 +249,9 @@ class WordPacket(models.Model):
 class WordTranslation(models.Model):
     word = models.ForeignKey(Word, on_delete=models.CASCADE)
     translation = models.CharField(max_length=120, null=False, blank=False)
-    translations_ssml = models.CharField(max_length=200, null=True, default=None)
+    translations_ssml = models.CharField(max_length=200, null=True, default=None, blank=True)
     polly = models.ForeignKey(PollyTask, null=True, blank=True)
-    _polly_url = models.URLField(null=True, default=None)
+    _polly_url = models.URLField(null=True, default=None, blank=True)
     packet = models.ForeignKey('Packet', on_delete=models.CASCADE, null=True)
 
     @property
