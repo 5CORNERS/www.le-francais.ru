@@ -196,7 +196,8 @@ def listen_request(request, test=False):
     if request.POST.get('download'):
         LogMessage(
             user=session.user,
-            message='Download Lesson ' + lesson_number
+            type=LogMessage.LESSON_DOWNLOAD,
+            value=lesson.lesson_number
         ).save()
 
     if not lesson.need_payment or not session.user.must_pay:

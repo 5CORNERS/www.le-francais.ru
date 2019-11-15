@@ -221,8 +221,16 @@ class UsedUsernames(models.Model):
 
 
 class LogMessage(models.Model):
+	LESSON_LISTEN = 1
+	LESSON_DOWNLOAD = 2
+	TYPES = [
+		(LESSON_LISTEN, 'Listened Lesson'),
+		(LESSON_DOWNLOAD, 'Downloaded Lesson')
+	]
 	datetime = models.DateTimeField(auto_now_add=True)
 	user = models.ForeignKey('User', related_name='log_messages', null=True)
+	type = models.IntegerField(choices=TYPES, null=True, default=None)
+	value = models.CharField(max_length=100, null=True, default=None)
 	message = models.CharField(max_length=200, null=True)
 
 
