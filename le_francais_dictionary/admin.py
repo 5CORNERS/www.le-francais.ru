@@ -43,22 +43,22 @@ class WordInline(admin.StackedInline):
 
 class ImportTableRow:
 	def __init__(
-			self, i, packet_n, word, unified_word, translation,
+			self, i, lesson_number, packet_name, word, unified_word, translation,
 			unified_translation, definition_num=None, cd_id=None,
 			part_of_speech=None, genre=None, ru_voice=None, fr_voice=None,
 			ru_voice_unified=None, fr_voice_unified=None,
 			order=None):
 		"""
 		:type i: int
-		:type packet_n: str
+		:type lesson_number: str
 		:type word: str
 		:type translation: str
 		"""
 		self.i = i
 		self.cd_id = int(cd_id)
-		self._packet = packet_n
+		self._packet = lesson_number
+		self.packet_name = 'урок ' + packet_name
 		self.lesson_number = get_number(self._packet)
-		self.packet_name = 'урок ' + self._packet
 		self.unified_word = unified_word
 		self.word = word
 		self.translation = translation
@@ -140,20 +140,21 @@ class WordAdmin(admin.ModelAdmin):
 			for i, row in enumerate(csv.reader(csv_file), 1):
 				if i == 1:
 					continue
-				if row[1] and row[2] and row[10]:
+				if row[1] and row[2] and row[14] and row[10]:
 					rows.append(
 						ImportTableRow(
 							i=i,
-							packet_n=row[2],
-							word=row[5],
-							unified_word=row[3],
-							translation=row[10],
-							unified_translation=row[8],
+							lesson_number=row[2],
+							packet_name = row[3],
+							word=row[6],
+							unified_word=row[4],
+							translation=row[14],
+							unified_translation=row[12],
 							cd_id=row[1],
-							part_of_speech=row[11],
-							genre=row[12],
+							part_of_speech=row[15],
+							genre=row[16],
 							order=row[0],
-							definition_num=row[7]
+							definition_num=row[8]
 						)
 					)
 			print("--- %s seconds --- Finished Reading" % (time.time() - start_time))
@@ -162,11 +163,11 @@ class WordAdmin(admin.ModelAdmin):
 				'lesson_number', 'id'
 			))
 			packets = list(Packet.objects.all())
+			WordGroup.objects.all().delete()
 			groups: List[WordGroup] = list(WordGroup.objects.prefetch_related('word_set', 'unifiedword_set').all())
 			unified_words: List[UnifiedWord] = list(UnifiedWord.objects.all())
 			words: List[Word] = list(Word.objects.prefetch_related('wordtranslation_set').all())
-			WordTranslation.objects.all().delete()
-			translations: List[WordTranslation] = []
+			translations: List[WordTranslation] = list(WordTranslation.objects.all())
 			WordPacket.objects.all().delete()
 			word_packets: List[WordPacket] = []
 			for row in import_table.rows:
@@ -183,7 +184,7 @@ class WordAdmin(admin.ModelAdmin):
 					except ValidationError as e:
 						self.message_user(
 							request,
-							'Error in row {row.i}: {e}'.format(row=row, e=e),
+							'Packet: Error in row {row.i}, cd_id={row.cd_id}: {e}'.format(row=row, e=e),
 							level=messages.ERROR,
 						)
 						return redirect(
@@ -222,7 +223,7 @@ class WordAdmin(admin.ModelAdmin):
 				if word is None:
 					word = Word(
 						cd_id=row.cd_id,
-						packet=packet  # obsolete
+						packet=packet  # obsolete # not anymore obsolete
 					)
 				word.word = row.word
 				word.genre = row.genre
@@ -231,6 +232,7 @@ class WordAdmin(admin.ModelAdmin):
 				word.part_of_speech = row.part_of_speech
 				word.definition_num = row.definition_num
 				word.group = group
+				word.order = row.order
 				if index:
 					words[index] = word
 				else:
@@ -240,7 +242,7 @@ class WordAdmin(admin.ModelAdmin):
 				except ValidationError as e:
 					self.message_user(
 						request,
-						'Error in row {row.i}: {e}'.format(row=row, e=e),
+						'Word: Error in row {row.i}, cd_id={row.cd_id}: {e}'.format(row=row, e=e),
 						level=messages.ERROR,
 					)
 					return redirect(
@@ -265,7 +267,7 @@ class WordAdmin(admin.ModelAdmin):
 					except ValidationError as e:
 						self.message_user(
 							request,
-							'Error in row {row.i}: {e}'.format(row=row, e=e),
+							'Translation Error in row {row.i}, cd_id={row.cd_id}: {e}'.format(row=row, e=e),
 							level=messages.ERROR,
 						)
 						return redirect(
@@ -285,7 +287,12 @@ class WordAdmin(admin.ModelAdmin):
 			UnifiedWord.objects.bulk_create(
 				[uw for uw in unified_words if not uw._state.adding]
 			)
-			WordTranslation.objects.bulk_create(translations)
+			update_helper.bulk_update(
+				[tr for tr in translations if tr._state.adding]
+			)
+			WordTranslation.objects.bulk_create(
+				[tr for tr in translations if not tr._state.adding]
+			)
 			WordPacket.objects.bulk_create(word_packets)
 			self.message_user(request, 'CSV file has been imported')
 			return redirect('admin:le_francais_dictionary_word_changelist')
