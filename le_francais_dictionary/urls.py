@@ -11,5 +11,6 @@ urlpatterns = [
     url('^add-packets/$', views.add_packets, name='add_packets'),
     url('^clear_all/$', views.clear_all, name='clear_all'),
     url('^mark-words/$', views.mark_words, name='mark_words'),
+    url('^get-app/([0-9]*)$', views.get_app, name='get_app')
 ]
 
