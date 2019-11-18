@@ -9,15 +9,19 @@
     }
 </script>
 <div class="row">
-    <div class="col-12" id="dictionary-app">
-        {% if lesson_page.several_word_packets %}
-            {% get_packets lesson_page as packets %}
+    {% if lesson_page.several_word_packets %}
+        {% get_packets lesson_page as packets %}
+        <div class="col-12">
             {% for packet in packets %}
-                <button type="button" class="btn btn-secondary btn-lg" onclick="loadFlashCards({{ packet.id }})">{{ packet.name }}</button>
+                <button type="button" class="btn btn-secondary btn-lg"
+                        onclick="loadFlashCards({{ packet.id }})">{{ packet.name }}</button>
             {% endfor %}
-        {% else %}
+        </div>
+        <div class="col-12" id="dictionary-app"></div>
+    {% else %}
+        <div class="col-12" id="dictionary-app">
             {% get_packets lesson_page as packet %}
             {% include 'dictionary/dictionary_app.html' with packet_id=packet.id %}
-        {% endif %}
-    </div>
+        </div>
+    {% endif %}
 </div>
