@@ -1,14 +1,19 @@
 {% load static le_francais_dictionary %}
-<script>
-    function loadFlashCards(packet_id) {
-        $.ajax(Urls['dictionary:get_app'](packet_id),{
-            success: function (data) {
-                $('#dictionary-app').html(data)
-            }
-        })
-    }
-</script>
 <div class="row">
+    {% if not hide_info %}
+        <div class="col-12">
+            <div id="flash-cards-info"
+                 class="alert alert-success alert-dismissible fade show"
+                 role="alert">
+                Dismissible info message about flash-cards
+                <button type="button" data-toggle="tooltip"
+                      title="Больше не показывать" id="hide-flash-cards-info-button" class="close" data-dismiss="alert"
+                        aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    {% endif %}
     {% if lesson_page.several_word_packets %}
         {% get_packets lesson_page as packets %}
         <div class="col-12">
@@ -25,3 +30,16 @@
         </div>
     {% endif %}
 </div>
+<script>
+    function loadFlashCards(packet_id) {
+        $.ajax(Urls['dictionary:get_app'](packet_id),{
+            success: function (data) {
+                $('#dictionary-app').html(data)
+            }
+        })
+    }
+    $('#hide-flash-cards-info-button').on('click', function () {
+        $.cookie('hide_flash_cards_info', 1);
+        $('#hide-flash-cards-info-button').tooltip('hide')
+    })
+</script>
