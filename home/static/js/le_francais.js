@@ -106,6 +106,11 @@ $(document).ready(function () {
     // Change hash for page-reload
     $('.nav-tabs a').on('shown.bs.tab', function (e) {
         history.pushState(null, null, e.target.hash);
+    });
+
+    // Toggle tooltips
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
     })
 });
 

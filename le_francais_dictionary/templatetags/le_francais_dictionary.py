@@ -3,13 +3,13 @@ from django import template
 register = template.Library()
 
 
-@register.inclusion_tag('dictionary/dictionary_tab.html')
-def include_dictionary(lesson_page=None):
+@register.inclusion_tag('dictionary/dictionary_tab.html', takes_context=True)
+def include_dictionary(context, lesson_page=None):
     """
     :type lesson_page: home.models.LessonPage
     """
     if lesson_page:
-        return {'lesson_page': lesson_page}
+        return {'lesson_page': lesson_page, 'hide_info': context['request'].COOKIES.get('hide_flash_cards_info', None)}
 
 @register.assignment_tag()
 def get_packet_id(lesson_page):
