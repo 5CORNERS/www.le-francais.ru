@@ -69,6 +69,10 @@ def format_text2speech(text):
 	return text
 
 
+def clean_filename(filename:str):
+	return filename.strip(' ').strip(' ').replace(' ', '_').replace('__', '_').replace('*', '')
+
+
 def fr_local_polly():
 	CD_ID = 0
 	STRING_FOR_SYNTH = 3
@@ -137,7 +141,7 @@ def fr_local_pyttsx3():
 		word = next(
 			(word for word in words if word.cd_id == cd_id), None)
 		if word:
-			filename = row[FILENAME_ROW]
+			filename = clean_filename(row[FILENAME_ROW])
 			filepath = path + filename
 			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename
 			to_update.append(word)
@@ -207,7 +211,7 @@ def ru_local_pyttsx3():
 		cd_id = int(row[CD_ID_ROW])
 		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
 		if translation:
-			filename = row[FILENAME_ROW]
+			filename = clean_filename(row[FILENAME_ROW])
 			filepath = path+filename
 			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename
 			to_update.append(translation)
@@ -292,7 +296,7 @@ def local_fr_googletts(language='FR'):
 			continue
 		print(i, end='\t')
 		cd_id = int(row[CD_ID_ROW_INDEX])
-		filename = row[FILENAME_ROW_INDEX]
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
 		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
 		if obj:
 			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
@@ -365,10 +369,10 @@ def copy_file(src, dest):
 
 def local_copy_prerecorded():
 	CD_ID_ROW = 1
-	RU_ROW = 16
-	RU_UNIFIED_ROW = 14
-	FR_ROW = 17
-	FR_UNIFIED_ROW = 15
+	RU_ROW = 20
+	RU_UNIFIED_ROW = 18
+	FR_ROW = 21
+	FR_UNIFIED_ROW = 19
 	import os
 	import csv
 	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
