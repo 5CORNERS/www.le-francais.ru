@@ -143,7 +143,7 @@ def fr_local_pyttsx3():
 		if word:
 			filename = clean_filename(row[FILENAME_ROW])
 			filepath = path + filename
-			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
 			to_update.append(word)
 			if os.path.exists(filepath + '.mp3'):
 				print('!!!ALREADY_EXIST!!!')
@@ -213,7 +213,7 @@ def ru_local_pyttsx3():
 		if translation:
 			filename = clean_filename(row[FILENAME_ROW])
 			filepath = path+filename
-			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
 			to_update.append(translation)
 			if os.path.exists(filepath+'.mp3'):
 				print('!!!ALREADY_EXIST!!!')
@@ -363,23 +363,23 @@ def copy_file(src, dest):
 	elif not os.path.exists(src):
 		return False
 	else:
-		copyfile(src, dest)
+		copyfile(src, dest.lower())
 		return True
 
 
 def local_copy_prerecorded():
-	CD_ID_ROW = 1
-	RU_ROW = 20
-	RU_UNIFIED_ROW = 18
-	FR_ROW = 21
-	FR_UNIFIED_ROW = 19
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
 	import os
 	import csv
 	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
 	words_list: List[Word] = list(Word.objects.select_related('group').all())
 	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
 	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
-	csv_path = 'le_francais_dictionary/local/Dictionary updated - Dictionary.csv'
+	csv_path = 'le_francais_dictionary/local/temp.csv'
 	csv_file = open(csv_path, 'r', encoding='utf-8')
 	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
 	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
@@ -413,7 +413,7 @@ def local_copy_prerecorded():
 		word: Word = next(
 			(w for w in words_list if w.cd_id == cd_id), None)
 		if word and filename_fr:
-			word._polly_url = fr_url_dir + filename_fr
+			word._polly_url = fr_url_dir + filename_fr.lower()
 			group_id = word.group_id
 			defenition_num = word.definition_num
 			to_update_words.append(word)
@@ -427,7 +427,7 @@ def local_copy_prerecorded():
 				to_update_unified_words.append(unified_word)
 		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
 		if translation and filename_ru:
-			translation._polly_url = ru_url_dir + filename_ru
+			translation._polly_url = ru_url_dir + filename_ru.lower()
 			to_update_translations.append(translation)
 		if (os.path.exists(ru_result_dir + filename_ru) and
 				os.path.exists(fr_result_dir + filename_fr) and
