@@ -1,8 +1,10 @@
 from datetime import datetime
+from urllib.parse import quote
 
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+from django.utils.http import urlencode, urlquote
 
 from le_francais_dictionary.consts import GENRE_CHOICES, \
     PARTOFSPEECH_CHOICES, \
@@ -99,6 +101,26 @@ class UnifiedWord(models.Model):
     word_polly_url = models.URLField(max_length=200, null=True, default=None)
     translation_polly_url = models.URLField(max_length=200, null=True,
                                             default=None)
+    def ru_filename(self):
+        if self.translation_polly_url:
+            return self.translation_polly_url.rsplit('/', 1)[-1]
+        else:
+            return None
+
+    def fr_filename(self):
+        if self.translation_polly_url:
+            return self.word_polly_url.rsplit('/', 1)[-1]
+        else:
+            return None
+
+
+class EmptyUni:
+    word = None
+    translation = None
+    word_polly_url = None
+    translation_polly_url = None
+    ru_filename = None
+    fr_filename = None
 
 
 class Word(models.Model):
@@ -126,11 +148,26 @@ class Word(models.Model):
     order = models.IntegerField(null=True, default=None)
 
     @property
+    def uni(self):
+        if self.group:
+            return self.group.unifiedword_set.get(definition_num__exact=self.definition_num)
+        else:
+            return EmptyUni()
+
+    @property
+    def filename(self):
+        if self._polly_url:
+            return self._polly_url.rsplit('/', 1)[-1]
+        else:
+            return None
+
+
+    @property
     def polly_url(self):
         if not self._polly_url:
             return self.polly.url if self.polly else None
         else:
-            return self._polly_url
+            return urlquote(self._polly_url, safe='/:')
 
     @property
     def first_translation(self):
@@ -246,11 +283,18 @@ class WordTranslation(models.Model):
     packet = models.ForeignKey('Packet', on_delete=models.CASCADE, null=True)
 
     @property
+    def filename(self):
+        if self._polly_url:
+            return self._polly_url.rsplit('/', 1)[-1]
+        else:
+            return None
+
+    @property
     def polly_url(self):
         if not self._polly_url:
             return self.polly.url if self.polly else None
         else:
-            return self._polly_url
+            return urlquote(self._polly_url, safe='/:')
 
     @property
     def genre(self):
