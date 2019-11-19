@@ -101,12 +101,15 @@ class UnifiedWord(models.Model):
     word_polly_url = models.URLField(max_length=200, null=True, default=None)
     translation_polly_url = models.URLField(max_length=200, null=True,
                                             default=None)
+
+    @property
     def ru_filename(self):
         if self.translation_polly_url:
             return self.translation_polly_url.rsplit('/', 1)[-1]
         else:
             return None
 
+    @property
     def fr_filename(self):
         if self.translation_polly_url:
             return self.word_polly_url.rsplit('/', 1)[-1]
