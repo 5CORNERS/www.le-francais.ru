@@ -21,13 +21,9 @@ class SawMessageView(View):
         if request.POST['action'] == 'make_true':
             if user.saw_message:
                 return HttpResponse(status=403)
-            if user.has_payed():
-                msg_body = MESSAGE_FOR_PAYED
-                user.add_cups(5)
-            else:
-                msg_body = MESSAGE_FOR_NOT_PAYED
-                if user.days_since_joined() > 7:
-                    user.add_cups(1)
+            msg_body = MESSAGE_FOR_NOT_PAYED
+            if user.days_since_joined() > 7:
+                user.add_cups(1)
             if not user.is_staff:
                 EmailMessage(
                     to=[request.user.email],
