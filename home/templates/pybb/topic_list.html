@@ -19,10 +19,15 @@
     </thead>
     <tbody>
     {% for topic in topic_list|pybb_topic_unread:user %}
-        <tr class="topic-row {% if topic.sticky %} sticky {% endif %} {% cycle "odd" "even" %} {% if topic.on_moderation %} on-moderation {% endif %}">
+        <tr
+                class="topic-row {% if topic.sticky %} sticky {% endif %} {% cycle "odd" "even" %} {% if topic.on_moderation %} on-moderation {% endif %}"
+                itemid="{{ topic.get_absolute_url }}"
+                itemscope
+                itemtype="http://schema.org/DiscussionForumPosting"
+        >
             <td class="topic-name{% if topic.unread %} topic-unread{% endif %}">
                 <div class="topic-name-header">
-                    <a href="{{ topic.get_absolute_url }}">{{ topic.name|truncatechars:60 }}</a>
+                    <a href="{{ topic.get_absolute_url }}"><span itemprop="headline">{{ topic.name|truncatechars:60 }}</span></a>
                     {% if topic.sticky %} &nbsp;<span class="badge badge-info">{% trans "Sticky" %}</span> {% endif %}
                     {% if topic.closed %} &nbsp;<span class="badge badge-danger">{% trans "Closed" %}</span> {% endif %}
                 </div>
@@ -49,17 +54,19 @@
                     </ul>
                 {% endwith %}
                 <div class="topic-meta">
-                    {% trans 'Author' %}: <a href="{% url 'pybb:user' topic.user.username %}">{{ topic.user.username }}</a>
+                    {% trans 'Author' %}: <a itemprop="author" itemscope itemtype="http://schema.org/Person" href="{% url 'pybb:user' topic.user.username %}"><span itemprop="name">{{ topic.user.username }}</span></a>
                     {% ifequal request.path '/forum/topic/latest/' %}
                         {% trans 'posted in' %}: <a href="{{ topic.forum.get_absolute_url }}">{{ topic.forum }}</a>
                     {% endifequal %}
                 </div>
             </td>
-            <td class="topic-post-count">
-                {{ topic.post_count }}
+            <td class="topic-post-count" itemprop="interactionStatistic" itemscope itemtype="http://schema.org/InteractionCounter">
+                <link itemprop="interactionType" href="http://schema.org/CommentAction" />
+                <span itemprop="userInteractionCount">{{ topic.post_count }}</span>
             </td>
-            <td class="topic-view-count">
-                {{ topic.views }}
+            <td class="topic-view-count" itemprop="interactionStatistic" itemscope itemtype="http://schema.org/InteractionCounter">
+                <link itemprop="interactionType" href="https://schema.org/ViewAction">
+                <span itemprop="userInteractionCount">{{ topic.views }}</span>
             </td>
             <td class="topic-last-post">
                 {% include "pybb/topic_last_message_info.html" %}

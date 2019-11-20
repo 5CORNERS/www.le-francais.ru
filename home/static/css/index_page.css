@@ -295,3 +295,27 @@ a.page-review:hover {
         padding-right: inherit;
     }
 }
+
+.page-reviews .carousel-control-prev {
+ filter: invert(50%);
+    top: initial !important;
+}
+
+.page-reviews .carousel-control-next {
+  filter: invert(50%);
+    top: initial !important;
+}
+
+.page-reviews .carousel-indicators {
+    filter: invert(50%);
+    bottom: -17px;
+}
+
+.page-reviews .carousel {
+    width: 100% !important;
+}
+
+.page-reviews .carousel-indicators > li {
+    height: 2px;
+    width: 2px;
+}

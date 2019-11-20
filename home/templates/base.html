@@ -79,7 +79,7 @@
 	    <link rel="stylesheet" type="text/css" href="{% static 'lib/footable-bootstrap.v3.1.6/css/footable.bootstrap.min.css' %}">
     {% endblock %}
 		{% get_full_path as full_path %}
-    {% block canonical %}<link rel="canonical" href="{% split_canonical full_path %}{% comment %}https://www.le-francais.ru{{ self.url_path | slice:"5:" }}{% endcomment %}"/>{% endblock %}
+    {% block canonical %}<link rel="canonical" href="{% split_canonical full_path %}"/>{% endblock %}
 
     {% block extra_css %}
         {# Override this in templates to add extra stylesheets #}
