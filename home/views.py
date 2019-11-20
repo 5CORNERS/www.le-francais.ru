@@ -683,6 +683,12 @@ def modal_content_login_required(request):
                   context={'next': redirect_url})
 
 
+def modal_simple_login(request):
+	redirect_url = request.GET.get('redirect_url', '/')
+	return render(request, template_name='modals/simple-login-required.html',
+	              context={'next': redirect_url})
+
+
 class AorAddPostView(AddPostView):
     def get_form_class(self):
         return PostForm
