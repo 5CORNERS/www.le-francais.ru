@@ -1,0 +1,35 @@
+<div class="modal fade"
+     id="listen-login-required-modal"
+     tabindex="-1"
+     role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button class="close"
+				        type="button"
+				        data-dismiss="modal"
+				        aria-label="Close"><span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<!-- Social OAuth Buttons -->{% include 'account/oauth-buttons.html' with next=next %}
+				<hr style="border-top: 2px solid #eee;">
+				<p>Если вы уже зарегистрированы на сайте, зайдите, используя свой адрес e-mail и пароль.</p>
+				<!-- LogIn Form -->{% include 'account/login_form.html' with redirect_field_value=next redirect_field_name="next" %}
+				<p>Если вас нет в Сетях и вы еще не регистрировались на сайте,<br><a
+						href="{% url 'account_signup' %}?next={{ next }}">давайте вам создадим новый аккаунт.</a>
+				</p>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" {# style="float: left" #}
+				        data-dismiss="modal">Закрыть
+				</button>
+				<a href="{% url 'account_login' %}?next={{ next }}">
+					<button class="btn btn-primary button-small"
+					        href="{% url 'account_login' %}">Войти
+					</button>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
