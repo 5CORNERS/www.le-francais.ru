@@ -45,6 +45,32 @@
             {% include 'dictionary/dictionary_app.html' with packet_id=packet.id %}
         </div>
     {% endif %}
+    <div class="col-6">
+        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">Советы</button>
+    </div>
+    <div class="col-6 text-right">
+        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">Благодарности</button>
+    </div>
+    <div class="col-12">
+        <div id="accordion">
+            <div class="card collapse" id="collapseOne" data-parent="#accordion">
+                <div class="card-body">
+                    Советы советы советы.
+                </div>
+            </div>
+            <div class="card collapse" id="collapseTwo" data-parent="#accordion">
+                <div class="card-body">
+                    Клиентскую часть этого приложения написал для нас Алексей
+                    Урсул, фронтенд-програмист, город Новосибирск.
+
+                    Дизайн — Виктория Думова, Санкт-Петербург.
+
+                    Алгоритм метода интервальных повторений SM-2, реализованнй
+                    в приложении — Piotr Wozniak, Poznan.
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script>
     function loadFlashCards(packet_id) {
