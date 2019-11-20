@@ -188,7 +188,7 @@ def update_words(request):
                     code=consts.TOO_EARLY_CODE,
                 )
                 )
-            elif word.packets.filter(userpacket__user=request.user).exists():
+            elif word.packet.userpacket_set.filter(user=request.user).exists():
                 user_words_data.append(UserWordData(
                     word=word,
                     user_id=request.user.id,
