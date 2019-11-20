@@ -18,6 +18,18 @@
             </div>
         </div>
     {% endif %}
+    {% if not user.is_authenticated %}
+        <div class="col-12">
+            <div id="flash-cards-info"
+                 class="alert alert-warning"
+                 role="alert">
+                Незарегистрированные пользователи не могут использовать метод
+                интервальных повторений: нет профиля пользователя — негде
+                хранить слова для повторений. <a href="">Войдите</a> под собой, чтобы
+                использовать весь потенциал приложения.
+            </div>
+        </div>
+    {% endif %}
     {% if lesson_page.several_word_packets %}
         {% get_packets lesson_page as packets %}
         <div class="col-12" style="margin-bottom: 1rem">
