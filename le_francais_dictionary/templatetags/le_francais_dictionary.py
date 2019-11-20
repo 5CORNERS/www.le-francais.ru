@@ -13,7 +13,7 @@ def include_dictionary(context, lesson_page):
     return {'lesson_page': lesson_page,
             'hide_info': context['request'].COOKIES.get(
                 'hide_flash_cards_info', None),
-            'user': context['request'].user}
+            'user': context['request'].user, 'request':context['request']}
 
 @register.assignment_tag()
 def get_packet_id(lesson_page):
