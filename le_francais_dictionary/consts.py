@@ -65,6 +65,7 @@ TOO_EARLY_CODE = 60
 NO_REPETITION_WORDS_CODE = 70
 
 USER_IS_NOT_AUTHENTICATED_MESSAGE = _('User is not authenticated')
+USER_IS_NOT_AUTHENTICATED_REPETITIONS_MESSAGE = 'Незарегистрированные пользователи не могут использовать метод интервальных повторений'
 PACKET_DOES_NOT_EXIST_MESSAGE = _('Packet does not exist')
 PACKET_IS_NOT_ADDED_MESSAGE = _('Packet is not added')
 LESSON_IS_NOT_ACTIVATED_MESSAGE = _('Lesson is not activated')
