@@ -50,7 +50,12 @@
         </div>
     {% endif %}
     <div class="col-6">
-        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">Советы</button>
+        <a href="{% slugurl 'flash-cards' %}">
+            <button class="btn btn-link"{% comment %} data-toggle="collapse"
+                    data-target="#collapseOne" aria-expanded="true"
+                    aria-controls="collapseOne"{% endcomment %}>Советы
+            </button>
+        </a>
     </div>
     <div class="col-6 text-right">
         <button class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">Благодарности</button>
