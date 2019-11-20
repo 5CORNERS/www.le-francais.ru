@@ -29,13 +29,14 @@ def get_packet_id(lesson_page):
 @register.assignment_tag(takes_context=True)
 def get_packets(context, lesson_page):
     """
+    :type context:
     :type lesson_page: home.models.LessonPage
     """
     packets = lesson_page.get_word_packets()
     # FIXME: remove adding packets
-    if context['request'].user.is_authenticated:
+    if context.request.user.is_authenticated:
         for packet in packets:
-            userpacker, created = UserPacket.objects.get_or_create(packet=packet, user=context['request'].user)
+            userpacker, created = UserPacket.objects.get_or_create(packet=packet, user=context.request.user)
     if packets.__len__() > 1:
         return packets
     elif not packets:
