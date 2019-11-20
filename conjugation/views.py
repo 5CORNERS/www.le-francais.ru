@@ -36,25 +36,33 @@ def get_polly_audio_link(request):
 
 @csrf_exempt
 def search(request):
-	search_string = unidecode(switch_keyboard_layout(str(request.POST.get('verb')).strip(' ').lower()))
+	search_string = switch_keyboard_layout(str(request.POST.get('verb')).strip(' ').lower())
+	search_string_formatted = unidecode(search_string)
 
-	if search_string[:2] == "s'" or search_string[:3] == "se ":
+	if search_string_formatted[:2] == "s'" or search_string_formatted[:3] == "se ":
 		try:
-			re_verb = ReflexiveVerb.objects.get(infinitive_no_accents=search_string)
+			re_verb = ReflexiveVerb.objects.get(infinitive_no_accents=search_string_formatted)
 		except ReflexiveVerb.DoesNotExist:
 			return render(request, 'conjugation/verb_not_found.html',
-			              {'search_string': search_string})
+			              {'search_string': search_string_formatted})
 		except ReflexiveVerb.MultipleObjectsReturned:
-			re_verb = ReflexiveVerb.objects.get(infinitive=search_string)
+			try:
+				re_verb = ReflexiveVerb.objects.get(infinitive=search_string).first()
+			except:
+				re_verb = ReflexiveVerb.objects.filter(infinitive_no_accents=search_string_formatted).first()
 		return redirect(re_verb.get_absolute_url())
 
 	try:
-		verb = Verb.objects.get(infinitive_no_accents=search_string)
+		verb = Verb.objects.get(infinitive_no_accents=search_string_formatted)
 	except Verb.DoesNotExist:
 		return render(request, 'conjugation/verb_not_found.html',
-		              {'search_string': search_string})
+		              {'search_string': search_string_formatted})
 	except Verb.MultipleObjectsReturned:
-		verb = Verb.objects.get(infinitive=search_string)
+		try:
+			verb = Verb.objects.get(infinitive=search_string)
+		except:
+			verb = Verb.objects.filter(
+				infinitive_no_accents=search_string_formatted).first()
 	return redirect(verb.get_absolute_url())
 
 
@@ -70,7 +78,10 @@ def verb_page(request, se, feminin, verb, homonym):
 		return render(request, 'conjugation/verb_not_found.html',
 		              {'search_string': word_no_accent})
 	except Verb.MultipleObjectsReturned:
-		verb = Verb.objects.get(infinitive=word_no_accent)
+		try:
+			verb = Verb.objects.get(infinitive=verb)
+		except:
+			verb = Verb.objects.filter(infinitive_no_accents=word_no_accent).first()
 
 	if feminin:
 		feminin = True

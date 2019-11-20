@@ -29,14 +29,19 @@ class Command(BaseCommand):
             default=False,
             dest='jsons'
         )
+        parser.add_argument(
+            '--lesson',
+            dest='lessons',
+            action='append'
+        )
 
     def handle(self, *args, **options):
         table = get_table_dict('home/data/devoirs.csv' if not options[
             'additional'] else 'home/data/devoirs_additional.csv')
         if options['additional']:
-            rewrite_excercises(table, True)
+            rewrite_excercises(table, additional=True, options=options)
         else:
-            rewrite_excercises(table)
+            rewrite_excercises(table, additional=False, options=options)
         if options['jsons']:
             retrieve_jsons(table)
 
@@ -48,11 +53,14 @@ def get_table_dict(p):
     return table_dict
 
 
-def rewrite_excercises(table_dict, additional=False):
+def rewrite_excercises(table_dict, additional, options):
     from home.models import LessonPage
     pages_dict: Dict[int, LessonPage] = {}
     for n in range(len(table_dict['Lesson'])):
         lesson_number = list(table_dict['Lesson'].values())[n]
+        if options['lessons']:
+            if lesson_number not in options['lessons']:
+                continue
         if list(table_dict['Lesson'].values())[n] not in pages_dict.keys():
             pages_dict[lesson_number] = LessonPage.objects.get(
                 lesson_number=lesson_number)

@@ -121,8 +121,8 @@
 				type: "POST",
 				data: {
 					{% if "next" in request.GET %}
-						success_url: "{{ request.GET.next }}?modal_open={{ request.GET.success_modal }}&payment_success=true",
-						fail_url: "{{ request.GET.next }}?modal_open={{ request.GET.fail_modal }}&payment_fail=true",
+						success_url: "{{ request.GET.next }}?modal_open=success-payment-modal&payment_success=true",
+						fail_url: "{{ request.GET.next }}?modal_open=fail-payment-modal&payment_fail=true",
 					{% else %}
 						success_url: "{{ request.path }}?modal_open=success-payment-modal&payment_success=true",
 						fail_url: "{{ request.path }}?modal_open=fail-payment-modal&payment_fail=true",
