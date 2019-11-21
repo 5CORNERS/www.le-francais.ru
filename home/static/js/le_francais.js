@@ -19,6 +19,19 @@ function setNodeState(href, isExpanded) {
     localStorage.setItem("nodesCollapsedState", JSON.stringify(nodesCollapsedState))
 }
 
+function showModal(url, data) {
+    $.ajax({
+        url: url,
+        type: 'GET',
+        data: data,
+        datatype: 'html',
+        success: function (body) {
+            let modal = $(body);
+            modal.modal('show');
+        }
+    })
+}
+
 function addExpandedStateToNavdata(navData) {
     var state = localStorage.getItem("nodesCollapsedState") != null ?
         JSON.parse(localStorage.getItem("nodesCollapsedState")) :
@@ -93,6 +106,11 @@ $(document).ready(function () {
     // Change hash for page-reload
     $('.nav-tabs a').on('shown.bs.tab', function (e) {
         history.pushState(null, null, e.target.hash);
+    });
+
+    // Toggle tooltips
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
     })
 });
 

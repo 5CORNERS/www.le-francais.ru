@@ -16,7 +16,8 @@ from forum.sitemap_generator import ForumSitemap, TopicSitemap
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
 from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls, \
-	activate_urls, modal_urls, meta_urls, service_urls, urlpatterns as home_urls
+	activate_urls, meta_urls, service_urls, urlpatterns as home_urls
+from home.urls import modal_urls
 from home.views import MovePostView, AorAddPostView, AorEditPostView, \
     AorTopicView, move_post_processing, favicon, activation_log
 from home.views import change_username, \

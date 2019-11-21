@@ -49,6 +49,11 @@ class PollyAPI:
 			self._client = boto3.Session(self.access_key_id, self.secret_access_key).client('polly', region_name=settings.AWS_S3_REGION_NAME)
 		return self._client
 
+	def get_audio_stream(self, polly_task):
+		data = polly_task.to_dict()  # type: dict
+		response = self.client.synthesize_speech(**data)
+		return response['AudioStream']
+
 	def start_task(self, polly_task, wait=False, save=True):
 		"""
 		:param polly_task: PollyAudio
