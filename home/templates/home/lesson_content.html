@@ -129,7 +129,7 @@
             {% endif %}
             {% if self.flash_cards_is_included %}
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab"
+                    <a class="nav-link" id="tab-flash-cards" data-toggle="tab"
                        href="#flash-cards" role="tab"
                        aria-controls="flash-cards">
                         Слова урока
@@ -138,7 +138,7 @@
             {% endif %}
             {% if self.exercise %}
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#exercise"
+                    <a class="nav-link"  data-toggle="tab" href="#exercise" id="tab-exercise"
                        role="tab"
                        aria-controls="exercise">
                         Домашка
@@ -149,7 +149,7 @@
                 <li class="nav-item"
                     {% if block_additional_exercise %}style="display: none"{% endif %}>
                     <a class="nav-link" data-toggle="tab"
-                       href="#exercises_de_lecon" role="tab"
+                       href="#exercises_de_lecon" role="tab" id="tab-exercises-de-lesson"
                        aria-controls="exercises_de_lecon">
                         Упражнения с урока
                     </a>
