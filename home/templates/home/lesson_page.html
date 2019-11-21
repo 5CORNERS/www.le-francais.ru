@@ -163,6 +163,9 @@
 						activateLesson('ended')
 					});
 				});
+				$('#tab-flash-cards').removeAttr('data-toggle');
+                $('#tab-exercises-de-lesson').removeAttr('data-toggle');
+                $('#tab-exercise').removeAttr('data-toggle');
 				$('#tab-flash-cards').click(function(e){
 				    e.preventDefault();
                     activateLesson('tab')
