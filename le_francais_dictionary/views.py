@@ -1,16 +1,21 @@
 import json
 from typing import List
 from bulk_update.helper import bulk_update
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count, Q
+from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
+
+from django.utils.translation import ugettext_lazy as _
 
 # Create your views here.
 from .models import Word, Packet, UserPacket, \
-    UserWordData, UserWordRepetition
-from .utils import create_repetition
+    UserWordData, UserWordRepetition, UserWordIgnore
+from .utils import create_or_update_repetition
+from . import consts
 from home.models import UserLesson
 
 
@@ -21,81 +26,206 @@ def get_calendar(request):
 
 @csrf_exempt
 def add_packets(request):
-    pks = json.loads(request.body)['packets']
-    packets = list(Packet.objects.filter(id__in=pks))
-    added = []
-    already_exist = []
+    data = json.loads(request.body)
+    pks = data['packets']
+    packets = []
+    result = {'added': [], 'already_exist': [], 'errors': []}
+    for pk in pks:
+        try:
+            packets.append(Packet.objects.get(pk=pk))
+        except Packet.DoesNotExist:
+            result['errors'].append(dict(
+                packet=pk,
+                message=consts.PACKET_DOES_NOT_EXIST_MESSAGE,
+                code=consts.PACKET_DOES_NOT_EXIST_CODE,
+            ))
     for packet in packets:
-        usr_packet, created = UserPacket.objects.get_or_create(packet=packet,
-                                                               user=request.user)
-        if created:
-            added.append(usr_packet)
+        if request.user.is_authenticated:
+            if 'activate' in data.keys() and data['activate']:
+                if not packet.lesson.payed(request.user):
+                    cups_amount = packet.lesson.add_lesson_to_user(
+                        request.user)
+                    if not cups_amount:
+                        result['errors'].append(dict(
+                            packet=packet.pk,
+                            message=consts.NO_CUPS_MESSAGE,
+                            code=consts.NO_CUPS_MESSAGE
+                        ))
+                        result['coffee_amount'] = 0
+                    result['coffee_amount'] = cups_amount
+            if (packet.lesson.payed(request.user) or
+                    packet.demo):
+                usr_packet, created = UserPacket.objects.get_or_create(
+                    packet=packet,
+                    user=request.user
+                )
+                if created:
+                    result['added'].append(usr_packet.packet_id)
+                else:
+                    result['already_exist'].append(usr_packet.packet_id)
+            else:
+                result['errors'].append(dict(
+                    packet=packet.pk,
+                    message=consts.LESSON_IS_NOT_ACTIVATED_MESSAGE,
+                    code=consts.LESSON_IS_NOT_ACTIVATED_CODE
+                ))
         else:
-            already_exist.append(usr_packet)
-    return JsonResponse(data=dict(
-        added=[packet.pk for packet in added],
-        already_exist=[packet.pk for packet in already_exist]
-    ))
+            result['errors'].append(dict(
+                packet=packet.pk,
+                message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
+                code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
+            ))
+    return JsonResponse(result)
 
 
 def get_progress(request):
-    packets = Packet.objects.prefetch_related('lesson__paid_users', 'userpacket_set').all().order_by('lesson__lesson_number')
-    packets_data = []
+    # FIXME prefetch related objects
+    result = {'isAuthenticated': request.user.is_authenticated, 'packets': []}
+    packets = Packet.objects.prefetch_related(
+        'lesson__paid_users',
+        'userpacket_set',
+        'word_set',
+    ).all().order_by('lesson__lesson_number')
     for packet in packets:
-        packets_data.append(packet.to_dict(user=request.user))
-    return JsonResponse({'packets': packets_data})
+        result['packets'].append(packet.to_dict(user=request.user))
+    return JsonResponse(result)
 
 
 def get_words(request, packet_id):
-    words = Word.objects.prefetch_related(
-        'wordtranslation_set',
-        'wordtranslation_set__polly',
-        'polly',
-    ).order_by('pk').filter(packet_id=packet_id)
-    words_dict = [word.to_dict() for word in words]
-    return JsonResponse({'words': words_dict}, safe=False)
+    result = {
+        'words': [],
+        'errors': [],
+    }
+    try:
+        packet = Packet.objects.prefetch_related(
+            'word_set', 'word_set__polly',
+            'wordtranslation_set',
+            'wordtranslation_set__polly').get(pk=packet_id)
+        if (packet.demo or (
+                request.user.is_authenticated and
+                packet.userpacket_set.filter(user=request.user))):
+            words = packet.word_set.order_by('order')
+            if request.user.is_authenticated:
+                words = words.exclude(
+                userwordignore__user=request.user)
+            result['words'] = [word.to_dict(user=request.user, packet=packet) for word in words]
+        elif not request.user.is_authenticated:
+            result['errors'].append(
+                dict(
+                    message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
+                    code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
+                )
+            )
+        elif (not packet.demo
+              and not packet.userpacket_set.filter(user=request.user)):
+            result['errors'].append(
+                dict(
+                    message=consts.PACKET_IS_NOT_ADDED_MESSAGE,
+                    code=consts.PACKET_IS_NOT_ADDED_CODE,
+                )
+            )
+
+    except Packet.DoesNotExist:
+        result['errors'].append(
+            dict(
+                message=consts.PACKET_DOES_NOT_EXIST_MESSAGE,
+                code=consts.PACKET_DOES_NOT_EXIST_CODE,
+            )
+        )
+    return JsonResponse(result, safe=False)
 
 
 def get_repetition_words(request):
-    repetitions = UserWordRepetition.objects.prefetch_related(
-        'word',
-        'word__wordtranslation_set',
-        'word__wordtranslation_set__polly',
-        'word__polly').filter(
-        repetition_date__lte=timezone.now())
-    word_dict = [repetition.word.to_dict() for repetition in repetitions]
-    return JsonResponse({'words': word_dict}, safe=False)
+    result = {
+        'words': [],
+        'errors': [],
+    }
+    if request.user.is_authenticated:
+        repetitions = UserWordRepetition.objects.prefetch_related(
+            'word',
+            'word__wordtranslation_set',
+            'word__wordtranslation_set__polly',
+            'word__polly').filter(
+            repetition_date__lte=timezone.now(), user=request.user).exclude(
+            word__userwordignore__user=request.user
+        )
+        result['words'] = [
+            repetition.word.to_dict(user=request.user) for repetition in repetitions
+        ]
+    else:
+        result['errors'].append(dict(
+            message=consts.USER_IS_NOT_AUTHENTICATED_INTERVAL_REPEATS_MESSAGE,
+            code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
+        ))
+
+    if not result['words']:
+        result['errors'].append(
+            {
+                'code': consts.NO_REPETITION_WORDS_CODE,
+                'message': consts.NO_REPETITION_WORDS_MESSAGE,
+            }
+        )
+
+    return JsonResponse(result, safe=False)
 
 
+@csrf_exempt
 def update_words(request):
     words_data = json.loads(request.body)['words']
     user_words_data: List[UserWordData] = []
-    for word in words_data:
-        user_words_data.append(UserWordData(
-            word_id=word['pk'],
-            user_id=request.user.id,
-            grade=word['grade'],
-            mistakes=word['mistakes'],
-        ))
+    errors = []
+    for word_data in words_data:
+        try:
+            word = Word.objects.get(pk=word_data['pk'])
+            grade = word_data['grade']
+            mistakes = word_data['mistakes']
+            if UserWordRepetition.objects.filter(
+                    word=word, user=request.user,
+                    repetition_date__gt=timezone.now()):
+                errors.append(dict(
+                    pk=word.pk,
+                    message=consts.TOO_EARLY_MESSAGE,
+                    code=consts.TOO_EARLY_CODE,
+                )
+                )
+            elif word.packet.userpacket_set.filter(user=request.user).exists():
+                user_words_data.append(UserWordData(
+                    word=word,
+                    user_id=request.user.id,
+                    grade=grade,
+                    mistakes=mistakes,
+                ))
+            else:
+                errors.append(dict(
+                    pk=word.pk,
+                    message=consts.PACKET_IS_NOT_ADDED_MESSAGE,
+                    code=consts.PACKET_IS_NOT_ADDED_CODE,
+                ))
+        except Word.DoesNotExist:
+            errors.append(dict(
+                pk=word_data['pk'],
+                message=consts.WORD_DOES_NOT_EXIST_MESSAGE,
+                code=consts.WORD_DOES_NOT_EXIST_CODE,
+            ))
     user_words_data = UserWordData.objects.bulk_create(user_words_data)
-    result = []
+    words = []
     repetitions = []
     for user_word_data in user_words_data:
         if user_word_data.grade:
-            repetition = create_repetition(user_word_data)
+            repetition = create_or_update_repetition(user_word_data)
             repetition_datetime = repetition.repetition_date
             repetition_time = repetition.time
             repetitions.append(repetition)
         else:
             repetition_datetime = None
             repetition_time = None
-        result.append(dict(
+        words.append(dict(
             pk=user_word_data.word_id,
             nextRepetition=repetition_datetime,
             repetitionTime=repetition_time
         ))
     bulk_update(repetitions, update_fields=['repetition_date'])
-    return JsonResponse(result, safe=False)
+    return JsonResponse(dict(words=words, errors=errors), safe=False)
 
 
 def clear_all(request):
@@ -106,4 +236,68 @@ def clear_all(request):
     result += str(data_deleted) + '\n'
     repetetions_deleted = UserWordRepetition.objects.filter(user=request.user).delete()
     result += str(repetetions_deleted) + '\n'
+    ignores_deleted = UserWordIgnore.objects.filter(user=request.user).delete()
+    result += str(ignores_deleted) + '\n'
     return HttpResponse(status=200, content=result)
+
+
+def get_packet_progress(request, pk):
+    try:
+        result = Packet.objects.get(pk=pk).to_dict(user=request.user)
+        result['isAuthenticated'] = request.user.is_authenticated
+        return JsonResponse(result)
+    except Packet.DoesNotExist:
+        return HttpResponseNotFound(consts.PACKET_DOES_NOT_EXIST_MESSAGE)
+
+
+@csrf_exempt
+def mark_words(request):
+    data = json.loads(request.body)
+    result = {'marked': [], 'errors': []}
+    if request.user.is_authenticated:
+        for pk in data['words']:
+            try:
+                word = Word.objects.get(pk=pk)
+                if not UserWordIgnore.objects.filter(
+                        user=request.user, word_id=pk).exists():
+                    UserWordIgnore.objects.create(
+                        user=request.user,
+                        word=word,
+                    )
+                    result['marked'].append(pk)
+            except Word.DoesNotExist:
+                result['errors'].append(
+                    dict(
+                        pk=pk,
+                        message=consts.WORD_DOES_NOT_EXIST_MESSAGE,
+                        code=consts.WORD_DOES_NOT_EXIST_CODE
+                    )
+                )
+            except ValidationError as e:
+                for message in e.messages:
+                    result['errors'].append(
+                        dict(
+                            pk=pk,
+                            message=message
+                        )
+                    )
+
+    else:
+        result['errors'].append(
+            dict(
+                message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
+                code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
+            )
+        )
+    return JsonResponse(result, safe=False)
+
+
+def get_app(request, packet_id):
+    if not UserPacket.objects.filter(user=request.user,
+                                     packet_id=packet_id).exists():
+        UserPacket.objects.create(
+            user=request.user,
+            packet_id=packet_id
+        )
+    return render(request, 'dictionary/dictionary_app.html',
+                      {'packet_id': packet_id})

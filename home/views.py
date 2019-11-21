@@ -14,6 +14,8 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.decorators import method_decorator
 from django.views import generic, View
 from django.views.decorators.csrf import csrf_exempt
@@ -38,6 +40,10 @@ from pybb.views import AddPostView, EditPostView, TopicView
 from tinkoff_merchant.models import Payment as TinkoffPayment
 from tinkoff_merchant.services import MerchantAPI
 from .forms import ChangeUsername
+from django.contrib.admin.views.decorators import staff_member_required
+from home.models import UserLesson
+from .models import Payment
+from .utils import message_left
 
 if "mailer" in settings.INSTALLED_APPS:
     from mailer import send_mail
@@ -45,8 +51,8 @@ else:
     from django.core.mail import send_mail
 
 flow = OAuth2WebServerFlow(
-    client_id='499129759772-bqrp9ha0vfibn6t76fdgdmd87khnn2e0.apps.googleusercontent.com',
-    client_secret='CRTqrmLi-116OMgpFOnYS6wH',
+    client_id='',
+    client_secret='',
     scope='https://www.googleapis.com/auth/drive',
     redirect_uri='http://localhost:8000/import/authorized')
 
@@ -127,7 +133,7 @@ def get_navigation_object_from_page(page: Page, current_page_id: int) -> dict:
     }
     if isinstance(page.specific, PageWithSidebar) or isinstance(page.specific,
                                                                 LessonPage) or isinstance(
-            page.specific, ArticlePage):
+        page.specific, ArticlePage):
         menu_title = page.specific.menu_title
         if not isinstance(menu_title, str):
             menu_title = menu_title.decode()
@@ -160,8 +166,9 @@ def get_nav_data(request):
                                             page_id)]
     else:
         nav_items = \
-        get_navigation_object_from_page(Page.objects.get(id=root_id), page_id)[
-            "nodes"]
+            get_navigation_object_from_page(Page.objects.get(id=root_id),
+                                            page_id)[
+                "nodes"]
     return HttpResponse(content=json.dumps(nav_items))
 
 
@@ -221,18 +228,16 @@ def listen_request_check(request):
 @csrf_exempt
 def listen_request_test(request, number):
     return HttpResponse(
-        content='''
-			<pre id="json"></pre>
-			<script>
-				var xhr = new XMLHttpRequest();
-				xhr.open('GET', 'https://files.le-francais.ru/listen_test.php?key={0}&number={1}');
-				xhr.onload = function() {{
-					var data = JSON.parse(JSON.parse(xhr.responseText));
-					document.getElementById("json").innerHTML = JSON.stringify(data, undefined, 2);
-				}}
-				xhr.send()
-			</script>
-			'''.format(request.session.session_key, number)
+        content='''<pre id="json"></pre>
+<script>
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'https://files.le-francais.ru/listen_test.php?key={0}&number={1}');
+xhr.onload = function() {{
+var data = JSON.parse(JSON.parse(xhr.responseText));
+document.getElementById("json").innerHTML = JSON.stringify(data, undefined, 2);
+}}
+xhr.send()
+</script>'''.format(request.session.session_key, number)
     )
 
 
@@ -243,19 +248,28 @@ def get_lesson_url(request):
             lesson_number) + '&key=' + request.session.session_key))
 
 
-from .models import Payment
-from .utils import message_left
-
-
 class GiveMeACoffee(View):
 
-    @method_decorator(require_http_methods(["POST"]))
+    @method_decorator([require_http_methods(["POST"]), csrf_exempt])
     def dispatch(self, request, *args, **kwargs):
         return super(GiveMeACoffee, self).dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        lesson_page = LessonPage.objects.get(
-            lesson_number=request.POST['lesson_number'])
+        try:
+            lesson_page = LessonPage.objects.get(
+                lesson_number=request.POST['lesson_number'])
+        except MultiValueDictKeyError:
+            body = json.loads(request.body)
+            try:
+                lesson_number = body['lesson_number']
+            except KeyError:
+                from le_francais_dictionary.models import \
+                    Packet as DictionaryPacket
+                packet_pk = body['packet']
+                lesson_number = DictionaryPacket.objects.get(
+                    pk=packet_pk).lesson.lesson_number
+            lesson_page = LessonPage.objects.get(
+                lesson_number=lesson_number)
         if request.user.is_authenticated():
             if not lesson_page in request.user.payed_lessons.all():
                 if request.user.cup_amount >= 1:
@@ -288,6 +302,7 @@ class GiveMeACoffee(View):
 
 
 class ActivateLesson(View):
+    @method_decorator(csrf_exempt)
     def post(self, request):
         lesson = LessonPage.objects.get(
             lesson_number=request.POST['lesson_number'])
@@ -318,10 +333,6 @@ class ActivateLesson(View):
         return JsonResponse(data)
 
 
-from django.contrib.admin.views.decorators import staff_member_required
-from home.models import UserLesson
-
-
 @staff_member_required
 def activation_log(request):
     all = request.GET.get('all', '')
@@ -343,9 +354,7 @@ def activation_log(request):
     )
 
 
-from django.urls import reverse
-
-
+@csrf_exempt
 def get_coffee_amount(request):
     return JsonResponse(dict(coffee_amount=request.user.cup_amount))
 
@@ -662,10 +671,22 @@ class MovePostView(TopicView):
         return data
 
 
-def modal_login_required(request):
+def modal_download_login_required(request):
     redirect_url = request.GET.get('redirect_url', '/')
-    return render(request, template_name='modals/login-required.html',
+    return render(request, template_name='modals/download-login-required.html',
                   context={'next': redirect_url})
+
+
+def modal_content_login_required(request):
+    redirect_url = request.GET.get('redirect_url', '/')
+    return render(request, template_name='modals/content-login-required.html',
+                  context={'next': redirect_url})
+
+
+def modal_simple_login(request):
+	redirect_url = request.GET.get('redirect_url', '/')
+	return render(request, template_name='modals/simple-login-required.html',
+	              context={'next': redirect_url})
 
 
 class AorAddPostView(AddPostView):
@@ -711,7 +732,7 @@ def move_post_processing(request):
     for post in post_list:
         if pybb_util.get_pybb_profile(
                 post.user).autosubscribe and perms.may_subscribe_topic(
-                post.user, new_topic):
+            post.user, new_topic):
             new_topic.subscribers.add(post.user)
 
     old_topic.update_counters()
@@ -775,6 +796,17 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf):
             attr=attr, type=type, href=href, title=title, value=value or None,
             transition=transition
         ))
+    # render flash-cards tab:
+    result.append(dict(
+        attr='flash-cards', type='html', href='flash-cards', title='Слова урока',
+        value=render_to_string('dictionary/dictionary_tab.html', context={
+            'lesson_page': page,
+            'hide_info': request.COOKIES.get(
+                'hide_flash_cards_info', None),
+            'user': request.user,
+            'request':request}, request=request),
+        transition=False
+    ))
     if not page.payed(user):
         for blocked in LESSON_PAGE_BLOCKED_CONTENT:
             for tab in result:
@@ -801,10 +833,10 @@ LESSON_PAGE_BLOCKED_CONTENT = [
     ('resume_populaire', 7),
     ('repetition_material', 8),
     ('exercise', 9),
-    ('flashcards', 10)
+    ('flash-cards', 10)
 ]
 LESSON_PAGE_FIELDS = [
-    # type, page attribute, href, title
+    # type, page attribute, href, title, transition
     ('html', 'comments_for_lesson', 'comments_for_lesson',
      'Комментарии к уроку', False),
     ('html', 'body', 'body', 'Диалог урока', False),

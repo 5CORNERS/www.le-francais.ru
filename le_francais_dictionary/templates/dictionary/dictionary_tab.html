@@ -1,0 +1,151 @@
+{% load static le_francais_dictionary wagtailcore_tags %}
+<h4>Флэш-карты со словами к уроку</h4>
+<div class="row">
+    {% if not hide_info %}
+        <div class="col-12">
+            <div id="flash-cards-info"
+                 class="alert alert-success alert-dismissible fade show"
+                 role="alert">
+                <span style="color:red">ВАЖНО!</span> Узнайте, почему наши
+                карточки помогут вам быстро
+                учить новые слова и какие алгоритмы запоминания лежат в
+                их
+                основе. <a href="{% slugurl 'flash-cards' %}">Читать...
+                »»</a>
+                <button type="button" data-toggle="tooltip"
+                        title="Больше не показывать"
+                        id="hide-flash-cards-info-button" class="close"
+                        data-dismiss="alert"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    {% endif %}
+    {% if not user.is_authenticated %}
+        <div class="col-12">
+            <div id="flash-cards-info"
+                 class="alert alert-warning"
+                 role="alert">
+                Незарегистрированные пользователи не могут использовать метод
+                интервальных повторений: нет профиля пользователя — негде
+                хранить слова для повторений.
+                <a id="dictionary-alert-login"
+                   href="{% url 'account_login' %}?next={{ request.path }}">
+                    Войдите
+                </a>, чтобы
+                использовать весь потенциал приложения.
+            </div>
+        </div>
+    {% endif %}
+    {% if lesson_page.several_word_packets %}
+        {% get_packets lesson_page as packets %}
+        <div class="col-12" style="margin-bottom: 1rem">
+            {% for packet in packets %}
+                <button type="button" class="btn btn-secondary btn-lg"
+                        onclick="loadFlashCards({{ packet.id }})">{{ packet.name }}</button>
+            {% endfor %}
+        </div>
+        <div class="col-12" id="dictionary-app"
+             style="margin-bottom: 1rem"></div>
+    {% else %}
+        <div class="col-12" style="margin-bottom: 1rem" id="dictionary-app">
+            {% get_packets lesson_page as packet %}
+            {% include 'dictionary/dictionary_app.html' with packet_id=packet.id %}
+        </div>
+    {% endif %}
+    <div class="col-12">
+        <hr>
+        <button class="btn btn-link collapse-button" id="collapse-button-one" data-toggle="collapse"
+                data-target="#collapseOne" aria-expanded="true"
+                aria-controls="collapseOne" style="font-weight: bold">Учись
+            студент! (с) ;)&nbsp;<i class="arrows fas fa-arrow-down arrow_down"
+                                 style="vertical-align: bottom;"></i>
+        </button>
+        <button class="btn btn-link collapse-button" id="collapse-button-two" data-toggle="collapse"
+                data-target="#collapseTwo" aria-expanded="true"
+                aria-controls="collapseTwo" style="font-weight: bold">Наши
+            благодарности&nbsp;<i class="arrows fas fa-arrow-down arrow_down"
+                                  style="vertical-align: bottom;"></i>
+        </button>
+    </div>
+    <div class="col-12">
+        <div id="accordion">
+            <div class="card collapse" id="collapseOne"
+                 data-parent="#accordion">
+                <div class="card-body">
+                    <h4>Делюсь опытом</h4>
+                    <p>1-й шаг: ротируйте карточки в режиме «французский →
+                        русский» с интервалом 1-2 c</p>
+                    <p>2-й шаг: в настройках смените направление на «русский →
+                        французский» и, при необходимости, увеличьте паузу так,
+                        чтобы для большинства слов успевать вспоминать
+                        французское
+                        слово раньше, чем оно прозвучит.</p>
+                    <p>3-й шаг: уменьшайте интервал кнопкой на карточке,
+                        усложняя
+                        задачу.</p>
+                    <p>4-й шаг: когда большинство слов вспоминается, переходите
+                        в
+                        ПРОВЕРКУ — там время на припоминание не ограничено.</p>
+                    <p>Используйте подсказку (кнопка с замочной скважиной).
+                        Ваши
+                        ответы используются для вычисления интервала для
+                        следующего
+                        повторения слова.</p>
+
+                    <p>Прочтите о том, почему наши карточки помогут вам быстро
+                        учить новые слова и какие алгоритмы запоминания лежат в
+                        их
+                        основе. <a href="{% slugurl 'flash-cards' %}">Читать...
+                            »»</a></p>
+                </div>
+            </div>
+            <div class="card collapse" id="collapseTwo"
+                 data-parent="#accordion">
+                <div class="card-body">
+                    <p>Клиентскую часть этого приложения написал для нас
+                        <a href="{% slugurl 'contact' %}#alexey_ursul">Алексей
+                            Урсул</a>, фронтенд-программист, город Новосибирск.
+                    </p>
+
+                    <p>Дизайн — <a href="{% slugurl 'contact' %}#vika">Виктория
+                        Думова</a>, графический дизайнер, Санкт-Петербург.</p>
+
+                    <p>Алгоритм метода интервальных повторений SM-2,
+                        реализованннй
+                        в приложении, — Piotr Wozniak, Poznan.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function loadFlashCards(packet_id) {
+        $.ajax(Urls['dictionary:get_app'](packet_id), {
+            success: function (data) {
+                $('#dictionary-app').html(data)
+            }
+        })
+    }
+
+    $('#hide-flash-cards-info-button').on('click', function () {
+        $.cookie('hide_flash_cards_info', 1);
+        $('#hide-flash-cards-info-button').tooltip('hide')
+    });
+    $('#collapse-button-one').click(function (e) {
+        $('#collapse-button-one > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+        $('#collapse-button-two > i').removeClass('fa-arrow-up').addClass('fa-arrow-down');
+    });
+    $('#collapse-button-two').click(function (e) {
+        $('#collapse-button-two > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+        $('#collapse-button-one > i').removeClass('fa-arrow-up').addClass('fa-arrow-down');
+    });
+    $('#dictionary-alert-login').click(function (e) {
+        e.preventDefault();
+        showModal(
+            '{% url 'modal:simple_login_required' %}',
+            {redirect_url: '{{ request.path }}'}
+        )
+    });
+</script>

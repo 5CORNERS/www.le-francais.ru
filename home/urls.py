@@ -38,7 +38,9 @@ payment_urls = [
 ]
 
 modal_urls = [
-    url('^download-login-required/$', view=views.modal_login_required, name='login_required')
+    url('^download-login-required/$', view=views.modal_download_login_required, name='download_login_required'),
+    url('^content-login-required/$', view=views.modal_content_login_required, name='content_login_required'),
+    url('^simple-login-required/$', view=views.modal_simple_login, name='simple_login_required'),
 ]
 
 activate_urls = [

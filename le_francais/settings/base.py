@@ -117,7 +117,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     # 'django.contrib.sessions.middleware.SessionMiddleware',
-    'le_francais.middleware.CustomSessionMiddleware',
+    'le_francais.middleware.SessionHeaderMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -209,16 +209,16 @@ TESTING = 'test' in sys.argv[1:]
 if TESTING:
     print('=========================')
     print('In TEST Mode')
-    print('Disabling Migrations')
-    class DisableMigrations(object):
-
-        def __contains__(self, item):
-            return True
-
-        def __getitem__(self, item):
-            return None
-
-    MIGRATION_MODULES = DisableMigrations()
+    # print('Disabling Migrations')
+    # class DisableMigrations(object):
+    #
+    #     def __contains__(self, item):
+    #         return True
+    #
+    #     def __getitem__(self, item):
+    #         return None
+    #
+    # MIGRATION_MODULES = DisableMigrations()
     print('Using Local Test Database')
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -249,6 +249,7 @@ AUTHENTICATION_BACKENDS = (
 
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
+    'le_francais.authentication.SessionAuthentication',
 )
 
 # Internationalization
@@ -529,7 +530,7 @@ PAY54_TEST_ENABLE = False
 
 # Js Reverse settings
 
-JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['notifications', 'api']
+JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['notifications', 'api', 'dictionary']
 JS_REVERSE_OUTPUT_PATH = 'home/static/django_js_reverse/js/'
 
 # Logging settings
@@ -560,4 +561,6 @@ RECAPTCHA_SCORE_THRESHOLD = 0.5
 
 CORS_ORIGIN_ALLOW_ALL = os.getenv('CORS_ORIGIN_ALLOW_ALL', 'False') == 'True'
 
-CORS_ALLOW_HEADERS = list(default_headers)
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'X-SessionID',
+]
