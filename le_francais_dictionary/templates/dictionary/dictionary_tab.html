@@ -51,7 +51,11 @@
     {% else %}
         <div class="col-12" style="margin-bottom: 1rem" id="dictionary-app">
             {% get_packets lesson_page as packet %}
-            {% include 'dictionary/dictionary_app.html' with packet_id=packet.id %}
+            <div id="app" data-packet-pk="{{ packet.id }}"></div>
+            <script src="{% static '/dictionary/js/app.125993c7.js' %}"></script>
+            <script src="{% static '/dictionary/js/chunk-vendors.0c2dcad5.js' %}"></script>
+            <link href="{% static '/dictionary/css/app.6a77fc21.css' %}"  rel="stylesheet" type="text/css">
+            <link href="{% static '/dictionary/css/chunk-vendors.c7c67c91.css' %}" rel="stylesheet" type="text/css">
         </div>
     {% endif %}
     <div class="col-12">
