@@ -49,15 +49,12 @@
             {% include 'dictionary/dictionary_app.html' with packet_id=packet.id %}
         </div>
     {% endif %}
-    <div class="col-6">
-        <a href="{% slugurl 'flash-cards' %}">
-            <button class="btn btn-link" data-toggle="collapse"
-                    data-target="#collapseOne" aria-expanded="true"
-                    aria-controls="collapseOne">Советы
-            </button>
-        </a>
-    </div>
-    <div class="col-6 text-right">
+    <div class="col-12">
+        <hr>
+        <button class="btn btn-link" data-toggle="collapse"
+                data-target="#collapseOne" aria-expanded="true"
+                aria-controls="collapseOne">Советы
+        </button>
         <button class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">Благодарности</button>
     </div>
     <div class="col-12">
