@@ -41,6 +41,15 @@
                     </a>
                 </li>
             {% endif %}
+            {% if self.flash_cards_is_included %}
+                <li class="nav-item">
+                    <a class="nav-link" id="tab-flash-cards" data-toggle="tab"
+                       href="#flash-cards" role="tab"
+                       aria-controls="flash-cards">
+                        Слова урока
+                    </a>
+                </li>
+            {% endif %}
             {% if self.repetition_material %}
                 {% if self.need_payment %}
                     {% if not user.is_authenticated %}
@@ -126,15 +135,6 @@
                         </a>
                     </li>
                 {% endif %}
-            {% endif %}
-            {% if self.flash_cards_is_included %}
-                <li class="nav-item">
-                    <a class="nav-link" id="tab-flash-cards" data-toggle="tab"
-                       href="#flash-cards" role="tab"
-                       aria-controls="flash-cards">
-                        Слова урока
-                    </a>
-                </li>
             {% endif %}
             {% if self.exercise %}
                 <li class="nav-item">
@@ -238,6 +238,15 @@
 			</div>
 			{% assign pane_class "tab-pane fade" %}
 		{% endif %}
+        {% if self.flash_cards_is_included %}
+            <div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
+            {% if block_flash_cards %}
+                {% include 'home/content_is_blocked.html' %}
+            {% else %}
+                {% include_dictionary self %}
+            {% endif %}
+            </div>
+        {% endif %}
 		{% if self.repetition_material %}
 			{% if self.need_payment %}
 				{% if not user.is_authenticated %}
@@ -343,15 +352,6 @@
 			</div>
             {% assign pane_class "tab-pane fade" %}
 		{% endif %}
-        {% if self.flash_cards_is_included %}
-            <div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
-            {% if block_flash_cards %}
-                {% include 'home/content_is_blocked.html' %}
-            {% else %}
-                {% include_dictionary self %}
-            {% endif %}
-            </div>
-        {% endif %}
 		{% for child_value in self.other_tabs %}
 			{% if not child_value.value.invisible_for_all or user.is_superuser %}{% if not child_value.value.visible_only_if_payed or already_payed %}<div id="{{ child_value.value.href }}" class="tab-pane fade" role="tabpanel">
 				{% for block in child_value.value.body %}{% include_block block %}{% endfor %}
