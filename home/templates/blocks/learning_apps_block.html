@@ -2,4 +2,4 @@
     {% if self.show_lesson_number %}{{ page.lesson_number }}.{% endif %}{{ self.number }}{% if not self.show_lesson_number %}.{% endif %} {{ self.title }}</b></h4>
 <iframe src="{% url 'home:get_learning_apps_iframe' self.app_id %}"
         style="border:0;width: {{ self.width }}; height: {{ self.height }}"
-        webkitallowfullscreen=true" mozallowfullscreen="true"></iframe>
+        webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>

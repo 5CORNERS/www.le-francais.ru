@@ -163,6 +163,21 @@
 						activateLesson('ended')
 					});
 				});
+				$('#tab-flash-cards').removeAttr('data-toggle');
+                $('#tab-exercises-de-lesson').removeAttr('data-toggle');
+                $('#tab-exercise').removeAttr('data-toggle');
+				$('#tab-flash-cards').click(function(e){
+				    e.preventDefault();
+                    activateLesson('tab')
+                });
+				$('#tab-exercises-de-lesson').click(function(e){
+				    e.preventDefault();
+                    activateLesson('tab')
+                });
+				$('#tab-exercise').click(function(e){
+				    e.preventDefault();
+                    activateLesson('tab')
+                });
 			{% endif %}
 		</script>
 	{% else %}
@@ -172,7 +187,7 @@
 				$('.audioplayer-download-button').on('click', function (e) {
 					e.preventDefault();
 					$.ajax({
-						url: '{% url 'modal:login_required' %}',
+						url: '{% url 'modal:download_login_required' %}',
 						type: 'GET',
 						data: {
 							redirect_url: '{{ request.path }}'
@@ -360,13 +375,13 @@
         outline: -webkit-focus-ring-color auto 5px;
 		}
 
-		.activate-button{
+		.new-svg-button.activate-button{
 			height: 32.5px;
 			margin-top: 1rem;
 			margin-bottom: 1rem;
 		}
 
-		.activated {
+		.new-svg-button.activated {
 			cursor: not-allowed;
 			-webkit-filter: none !important;
 			        filter: none !important;
