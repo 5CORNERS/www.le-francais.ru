@@ -798,7 +798,7 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf):
         ))
     # render flash-cards tab:
     result.append(dict(
-        attr=None, type='html', href='flash-cards', title='Слова урока',
+        attr='flash-cards', type='html', href='flash-cards', title='Слова урока',
         value=render_to_string('dictionary/dictionary_tab.html', context={
             'lesson_page': page,
             'hide_info': request.COOKIES.get(
@@ -833,7 +833,7 @@ LESSON_PAGE_BLOCKED_CONTENT = [
     ('resume_populaire', 7),
     ('repetition_material', 8),
     ('exercise', 9),
-    ('flashcards', 10)
+    ('flash-cards', 10)
 ]
 LESSON_PAGE_FIELDS = [
     # type, page attribute, href, title, transition
