@@ -6,9 +6,11 @@
             <div id="flash-cards-info"
                  class="alert alert-success alert-dismissible fade show"
                  role="alert">
-                <span style="color:red">ВАЖНО!</span> Узнайте, почему наши карточчки помогут вам
+                <span style="color:red">ВАЖНО!</span> Узнайте, почему наши
+                карточчки помогут вам
                 быстро запоминать новые слова и какой алгоритм действий мы
-                рекомендуем. <a href="{% slugurl 'flash-cards' %}">Читать... »»</a>
+                рекомендуем. <a href="{% slugurl 'flash-cards' %}">Читать...
+                »»</a>
                 <button type="button" data-toggle="tooltip"
                         title="Больше не показывать"
                         id="hide-flash-cards-info-button" class="close"
@@ -27,7 +29,8 @@
                 Незарегистрированные пользователи не могут использовать метод
                 интервальных повторений: нет профиля пользователя — негде
                 хранить слова для повторений.
-                <a id="dictionary-alert-login" href="{% url 'account_login' %}?next={{ request.path }}">
+                <a id="dictionary-alert-login"
+                   href="{% url 'account_login' %}?next={{ request.path }}">
                     Войдите
                 </a>
                 под собой, чтобы
@@ -43,7 +46,8 @@
                         onclick="loadFlashCards({{ packet.id }})">{{ packet.name }}</button>
             {% endfor %}
         </div>
-        <div class="col-12" id="dictionary-app" style="margin-bottom: 1rem"></div>
+        <div class="col-12" id="dictionary-app"
+             style="margin-bottom: 1rem"></div>
     {% else %}
         <div class="col-12" style="margin-bottom: 1rem" id="dictionary-app">
             {% get_packets lesson_page as packet %}
@@ -56,11 +60,15 @@
                 data-target="#collapseOne" aria-expanded="true"
                 aria-controls="collapseOne">Советы
         </button>
-        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">Благодарности</button>
+        <button class="btn btn-link" data-toggle="collapse"
+                data-target="#collapseTwo" aria-expanded="true"
+                aria-controls="collapseTwo">Благодарности
+        </button>
     </div>
     <div class="col-12">
         <div id="accordion">
-            <div class="card collapse" id="collapseOne" data-parent="#accordion">
+            <div class="card collapse" id="collapseOne"
+                 data-parent="#accordion">
                 <div class="card-body">
                     <p>1-й шаг: ротируйте карточки в режиме «французский →
                         русский» с интервалом 1-2 c</p>
@@ -84,16 +92,20 @@
                     <p>Прочтите о том, почему наши карточчки помогут вам быстро
                         учить новые слова и какие алгоритмы запоминания лежат в
                         их
-                        основе. <a href="{% slugurl 'flash-cards' %}">Читать... »»</a></p>
+                        основе. <a href="{% slugurl 'flash-cards' %}">Читать...
+                            »»</a></p>
                 </div>
             </div>
-            <div class="card collapse" id="collapseTwo" data-parent="#accordion">
+            <div class="card collapse" id="collapseTwo"
+                 data-parent="#accordion">
                 <div class="card-body">
                     <p>Клиентскую часть этого приложения написал для нас
-                        Алексей
-                        Урсул, фронтенд-програмист, город Новосибирск.</p>
+                        <a href="{% slugurl 'contact' %}#alexey_ursul">Алексей
+                            Урсул</a>, фронтенд-програмист, город Новосибирск.
+                    </p>
 
-                    <p>Дизайн — Виктория Думова, Санкт-Петербург.</p>
+                    <p>Дизайн — <a href="{% slugurl 'contact' %}#vika">Виктория
+                        Думова</a>, Санкт-Петербург.</p>
 
                     <p>Алгоритм метода интервальных повторений SM-2,
                         реализованннй
@@ -105,12 +117,13 @@
 </div>
 <script>
     function loadFlashCards(packet_id) {
-        $.ajax(Urls['dictionary:get_app'](packet_id),{
+        $.ajax(Urls['dictionary:get_app'](packet_id), {
             success: function (data) {
                 $('#dictionary-app').html(data)
             }
         })
     }
+
     $('#hide-flash-cards-info-button').on('click', function () {
         $.cookie('hide_flash_cards_info', 1);
         $('#hide-flash-cards-info-button').tooltip('hide')
