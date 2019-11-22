@@ -240,11 +240,10 @@
 		{% endif %}
         {% if self.flash_cards_is_included %}
             <div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
-            {% if block_flash_cards %}
-                {% include 'home/content_is_blocked.html' %}
-            {% else %}
-                {% include_dictionary self %}
-            {% endif %}
+                <div id="lazy-flash-cards col-12">
+                    <div class="alert alert-primary">Пожалуйста, дождитесь загрузки приложения. При медленном
+                        соединении это может занять некторое время...</div>
+                </div>
             </div>
         {% endif %}
 		{% if self.repetition_material %}
