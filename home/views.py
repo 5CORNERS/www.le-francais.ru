@@ -810,7 +810,7 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf):
     if not page.payed(user):
         for blocked in LESSON_PAGE_BLOCKED_CONTENT:
             for tab in result:
-                if tab['attr'] == blocked[0]:
+                if tab['href'] == blocked[0] and page.lesson_number > blocked[1]:
                     tab['value'] = render_to_string(
                         'home/content_is_blocked.html', request=request)
     return result
