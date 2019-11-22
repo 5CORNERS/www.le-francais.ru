@@ -778,35 +778,37 @@ def render_wagtail_blocks(stream_field):
     return ''.join([str(block) for block in stream_field])
 
 
-def json_default_tabs(page: LessonPage, user, request, render_pdf):
+def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
     result = []
     for type, attr, href, title, transition in LESSON_PAGE_FIELDS:
-        if type is 'html':
-            value = render_wagtail_blocks(getattr(page, attr))
-        elif type is 'pdf':
-            url = getattr(page, attr)
-            if render_pdf:
-                value = render_to_string('blocks/document_viewer.html',
-                                         context={'document_url': url})
+        if tab_id is None or tab_id == href:
+            if type is 'html':
+                value = render_wagtail_blocks(getattr(page, attr))
+            elif type is 'pdf':
+                url = getattr(page, attr)
+                if render_pdf:
+                    value = render_to_string('blocks/document_viewer.html',
+                                             context={'document_url': url})
+                else:
+                    value = url
             else:
-                value = url
-        else:
-            value = None
-        result.append(dict(
-            attr=attr, type=type, href=href, title=title, value=value or None,
-            transition=transition
-        ))
+                value = None
+            result.append(dict(
+                attr=attr, type=type, href=href, title=title, value=value or None,
+                transition=transition
+            ))
     # render flash-cards tab:
-    result.append(dict(
-        attr='flash-cards', type='html', href='flash-cards', title='Слова урока',
-        value=render_to_string('dictionary/dictionary_tab.html', context={
-            'lesson_page': page,
-            'hide_info': request.COOKIES.get(
-                'hide_flash_cards_info', None),
-            'user': request.user,
-            'request':request}, request=request),
-        transition=False
-    ))
+    if tab_id is None or tab_id == 'flash-cards':
+        result.append(dict(
+            attr='flash-cards', type='html', href='flash-cards', title='Слова урока',
+            value=render_to_string('dictionary/dictionary_tab.html', context={
+                'lesson_page': page,
+                'hide_info': request.COOKIES.get(
+                    'hide_flash_cards_info', None),
+                'user': request.user,
+                'request':request}, request=request),
+            transition=False
+        ))
     if not page.payed(user):
         for blocked in LESSON_PAGE_BLOCKED_CONTENT:
             for tab in result:
@@ -853,10 +855,14 @@ LESSON_PAGE_FIELDS = [
 ]
 
 
-def lesson_page_to_json(page: LessonPage, render_pdf, user, request):
-    json_tabs = json_default_tabs(page, user, request,
-                                  render_pdf) + json_other_tabs(
-        page.other_tabs)
+def lesson_page_to_json(page: LessonPage, render_pdf, user, request, tab_id=None):
+    if not tab_id:
+        json_tabs = json_default_tabs(page, user, request,
+                                      render_pdf) + json_other_tabs(
+            page.other_tabs)
+    else:
+        json_tabs = json_default_tabs(page, user, request,
+                                      render_pdf, tab_id)
     data = {
         'tabs': json_tabs
     }
@@ -869,12 +875,12 @@ PAGE_STREAMFIELDS = [('commentsForLesson', 'comments_for_lesson'),
                      ('resumePopulaire', 'resume_populaire')]
 
 
-def get_lesson_content(request, n, render_pdf):
+def get_lesson_content(request, n, render_pdf, tab_id=None):
     render_pdf = bool(render_pdf)
     page: LessonPage = LessonPage.objects.get(lesson_number=n)
     return JsonResponse(
         lesson_page_to_json(page, render_pdf, user=request.user,
-                            request=request), safe=False)
+                            request=request, tab_id=tab_id), safe=False)
 
 
 def get_learning_apps_iframe(request, id):
