@@ -6,6 +6,7 @@
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 {% block extra_head %}
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="{% static 'js/lessons.min.js' %}"></script>
 	{% advert_head page %}
 {% endblock %}
 
@@ -204,31 +205,6 @@
 		{% endif %}
 	{% endif %}
 	<script>
-		function reloadPage(lesson_number) {
-			$.ajax({
-				type: 'GET',
-				url: Urls['api:get_lesson_content'](lesson_number, 1),
-				success: function (r) {
-					r.tabs.forEach(function (tab, i) {
-						if (tab.value != null) {
-						  let navLink = $(`a.nav-link[href="#${tab.href}"]`);
-							navLink.html(tab.title);
-							if (tab.transition){
-							  $(document).on('hidden.bs.modal', function () {
-							    navLink.parent().fadeIn(500);
-								  navLink.css({"background-color":"#90ee90", "color":"#003e73", "transition":"background-color 0.5s ease"});
-							    setTimeout(function(){
-							    navLink.css({"background-color":"#ffffff", "color":"", "transition":"background-color 10s ease"});
-							  },500)
-                })
-							}
-							$(`div.tab-pane#${tab.href}`).html(tab.value);
-						}
-					});
-					$('[data-toggle="popover"]').popover()
-				}
-			})
-		}
 		function getSuccessButton() {
 			let new_button = $(
 				"<button" +
