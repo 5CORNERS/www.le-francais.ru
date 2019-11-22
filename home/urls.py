@@ -26,7 +26,7 @@ service_urls = [
 ]
 api_urls = [
     url(r'^nav/$', views.get_nav_data),
-	url(r'^get_lesson_content/(?P<n>.+?)/(?P<render_pdf>.)/$', views.get_lesson_content, name='get_lesson_content')
+	url(r'^get_lesson_content/(?P<n>.+?)/(?P<render_pdf>.)/(?P<tab_id>.+?)/$', views.get_lesson_content, name='get_lesson_content')
 ]
 
 payment_urls = [
