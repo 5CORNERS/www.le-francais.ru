@@ -240,11 +240,8 @@
 		{% endif %}
         {% if self.flash_cards_is_included %}
             <div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
-            {% if block_flash_cards %}
-                {% include 'home/content_is_blocked.html' %}
-            {% else %}
-                {% include_dictionary self %}
-            {% endif %}
+                <div id="lazy-flash-cards">
+                </div>
             </div>
         {% endif %}
 		{% if self.repetition_material %}
