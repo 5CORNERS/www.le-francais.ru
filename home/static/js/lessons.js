@@ -1,8 +1,16 @@
-function reloadPage(lesson_number, tab_id=0) {
+function reloadPage(lesson_number, tabID=0) {
 			$.ajax({
 				type: 'GET',
-				url: Urls['api:get_lesson_content'](lesson_number, 1, tab_id),
+				url: Urls['api:get_lesson_content'](lesson_number, 1, tabID),
+				beforeSend: function() {
+					if (tabID) {
+						$(`#lazy-${tabID}`).html('Подождите, идёт загрузка...')
+					}
+				},
 				success: function (r) {
+					if (tabID) {
+						$(`#lazy-${tabID}`).hide()
+					}
 					r.tabs.forEach(function (tab, i) {
 						if (tab.value != null) {
 						  let navLink = $(`a.nav-link[href="#${tab.href}"]`);
@@ -21,13 +29,13 @@ function reloadPage(lesson_number, tab_id=0) {
 					});
 					$('[data-toggle="popover"]').popover()
 				}
-			})
+			});
 		}
 
 
 $(document).ready(function () {
     $('a#tab-flash-cards').one('show.bs.tab', function () {
-        reloadPage(LESSON_NUMBER, 'flash-cards')
+        reloadPage(LESSON_NUMBER, 'flash-cards');
     });
 });
 
