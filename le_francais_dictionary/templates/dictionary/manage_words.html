@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load bootstrap4 static%}
+{% block extra_js %}
+    <script type="text/javascript" src="{% static 'dictionary/js/user-table.js' %}"></script>
+{% endblock %}
+{% block content %}
+<div class="col">
+    <div class="row">
+        <div class="col filter">
+            <form id="filterWordsForm" method="post">
+                {% csrf_token %}
+                {% bootstrap_form form layout='inline' %}
+                {% buttons %}
+                    <button type="submit" class="btn btn-primary mb-2">Submit</button>
+                {% endbuttons %}
+            </form>
+        </div>
+        <div class="col words-footable">
+            <div class="table-responsive">
+                <table class="table" id="wordsTable"></table>
+            </div>
+            <button style="display: none" type="button" class="btn btn-primary mb-2" id="startApp">Submit</button>
+        </div>
+    </div>
+</div>
+
+{% if get_table%}<script>var getTable = $.parseJSON("{{ get_table|escapejs }}")</script>{% endif %}
+    <script>var csrf="{{ csrf_token }}"</script>
+{% endblock %}
