@@ -100,7 +100,7 @@ def get_words(request, packet_id):
     }
     if int(packet_id) == 99999999:
         standalone_packet = UserStandalonePacket.objects.get(user=request.user)
-        words = Word.objects.filter(pk__in=standalone_packet.packets)
+        words = Word.objects.filter(pk__in=standalone_packet.words)
         result['words'] = [word.to_dict(user=request.user) for word in words]
     else:
         try:
