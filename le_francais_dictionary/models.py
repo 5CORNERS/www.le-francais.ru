@@ -2,6 +2,7 @@ from datetime import datetime
 from urllib.parse import quote
 
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Q
 from django.utils.http import urlencode, urlquote
@@ -179,7 +180,7 @@ class Word(models.Model):
     def get_repetition_date(self, user):
         self.userwordrepetition_set.filter(user=user, word=self)
 
-    def to_dict(self, with_user=False, user=None, packet=None):
+    def to_dict(self, with_user=False, user=None):
         data = {
             'pk': self.pk,
             'word': self.word,
@@ -372,6 +373,33 @@ class UserWordRepetition(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     time = models.IntegerField()
     repetition_date = models.DateField(null=True)
+
+
+class UserStandalonePacket(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    words = ArrayField(
+        models.IntegerField(),
+        size=150, blank=True, null=True
+    )
+
+    def to_dict(self, user=None) -> dict:
+        """
+        :param user: user object
+        :type user: User
+        :returns: A dictionary of packet which can be safely turned into json
+        :rtype: dict
+        """
+        data = dict()
+        data['pk'] = 99999999
+        data['name'] = 'Пользовательский пакет'
+        data['lessonNumber'] = None
+        data['demo'] = True
+        if user and user.is_authenticated:
+            data['activated'] = True
+            data['added'] = True
+        data['wordsCount'] = self.words.__len__()
+        return data
+
 
 
 class Example(models.Model):

@@ -1,6 +1,7 @@
 import json
 from typing import List
 from bulk_update.helper import bulk_update
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count, Q
@@ -12,8 +13,9 @@ from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
 from django.utils.translation import ugettext_lazy as _
 
 # Create your views here.
+from le_francais_dictionary.forms import WordsManagementFilterForm
 from .models import Word, Packet, UserPacket, \
-    UserWordData, UserWordRepetition, UserWordIgnore
+    UserWordData, UserWordRepetition, UserWordIgnore, UserStandalonePacket
 from .utils import create_or_update_repetition
 from . import consts
 from home.models import UserLesson
@@ -96,42 +98,47 @@ def get_words(request, packet_id):
         'words': [],
         'errors': [],
     }
-    try:
-        packet = Packet.objects.prefetch_related(
-            'word_set', 'word_set__polly',
-            'wordtranslation_set',
-            'wordtranslation_set__polly').get(pk=packet_id)
-        if (packet.demo or (
-                request.user.is_authenticated and
-                packet.userpacket_set.filter(user=request.user))):
-            words = packet.word_set.order_by('order')
-            if request.user.is_authenticated:
-                words = words.exclude(
-                userwordignore__user=request.user)
-            result['words'] = [word.to_dict(user=request.user, packet=packet) for word in words]
-        elif not request.user.is_authenticated:
-            result['errors'].append(
-                dict(
-                    message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
-                    code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
+    if int(packet_id) == 99999999:
+        standalone_packet = UserStandalonePacket.objects.get(user=request.user)
+        words = Word.objects.filter(pk__in=standalone_packet.packets)
+        result['words'] = [word.to_dict(user=request.user) for word in words]
+    else:
+        try:
+            packet = Packet.objects.prefetch_related(
+                'word_set', 'word_set__polly',
+                'wordtranslation_set',
+                'wordtranslation_set__polly').get(pk=packet_id)
+            if (packet.demo or (
+                    request.user.is_authenticated and
+                    packet.userpacket_set.filter(user=request.user))):
+                words = packet.word_set.order_by('order')
+                if request.user.is_authenticated:
+                    words = words.exclude(
+                    userwordignore__user=request.user)
+                result['words'] = [word.to_dict(user=request.user, packet=packet) for word in words]
+            elif not request.user.is_authenticated:
+                result['errors'].append(
+                    dict(
+                        message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
+                        code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
+                    )
                 )
-            )
-        elif (not packet.demo
-              and not packet.userpacket_set.filter(user=request.user)):
-            result['errors'].append(
-                dict(
-                    message=consts.PACKET_IS_NOT_ADDED_MESSAGE,
-                    code=consts.PACKET_IS_NOT_ADDED_CODE,
+            elif (not packet.demo
+                  and not packet.userpacket_set.filter(user=request.user)):
+                result['errors'].append(
+                    dict(
+                        message=consts.PACKET_IS_NOT_ADDED_MESSAGE,
+                        code=consts.PACKET_IS_NOT_ADDED_CODE,
+                    )
                 )
-            )
 
-    except Packet.DoesNotExist:
-        result['errors'].append(
-            dict(
-                message=consts.PACKET_DOES_NOT_EXIST_MESSAGE,
-                code=consts.PACKET_DOES_NOT_EXIST_CODE,
+        except Packet.DoesNotExist:
+            result['errors'].append(
+                dict(
+                    message=consts.PACKET_DOES_NOT_EXIST_MESSAGE,
+                    code=consts.PACKET_DOES_NOT_EXIST_CODE,
+                )
             )
-        )
     return JsonResponse(result, safe=False)
 
 
@@ -242,6 +249,11 @@ def clear_all(request):
 
 
 def get_packet_progress(request, pk):
+    if int(pk) == 99999999:
+        packet = UserStandalonePacket.objects.get(user=request.user)
+        result = packet.to_dict(user=request.user)
+        result['isAuthenticated'] = request.user.is_authenticated
+        return JsonResponse(result)
     try:
         result = Packet.objects.get(pk=pk).to_dict(user=request.user)
         result['isAuthenticated'] = request.user.is_authenticated
@@ -301,3 +313,30 @@ def get_app(request, packet_id):
         )
     return render(request, 'dictionary/dictionary_app.html',
                       {'packet_id': packet_id})
+
+
+@login_required
+def manage_words(request):
+    if request.method == 'POST':
+        form = WordsManagementFilterForm(request.user, request.POST)
+        get_table = form.footable_words()
+        if request.is_ajax():
+            return JsonResponse(get_table, safe=False)
+    else:
+        form = WordsManagementFilterForm(request.user)
+        get_table = None
+    return render(request, 'dictionary/manage_words.html',
+                  {'form': form, 'get_table': json.dumps(get_table)})
+
+@csrf_exempt
+@login_required
+def start_app(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        ids = data['ids']
+        standalone_packet, created = UserStandalonePacket.objects.get_or_create(user=request.user)
+        standalone_packet.packets = [int(pk) for pk in ids]
+        standalone_packet.save()
+        return JsonResponse({'message': 'OK'}, status=200)
+    else:
+        return render(request, 'dictionary/dictionary_app_standalone.html')
