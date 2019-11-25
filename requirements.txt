@@ -53,6 +53,8 @@ Pillow
 -e git+https://github.com/5CORNERS/pybbm.git#egg=pybbm
 -e git+https://github.com/AntonDumov/django-recaptcha3.git#egg=django-recaptcha3
 
+git+git://github.com/zostera/django-bootstrap4.git@d3e77d458c00ef97facd35997deaea7b8e311d9e
+
 pymorphy2
 pymorphy2-dicts
 DAWG-Python
