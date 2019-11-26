@@ -11,7 +11,7 @@ class DictionaryCsvImportForm(forms.Form):
 class WordsManagementFilterForm(forms.Form):
 	def __init__(self, user, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		packets = Packet.objects.filter(Q(demo=True)|Q(userpacket__user=user)).distinct().order_by('lesson__lesson_number', 'name')
+		packets = Packet.objects.filter(Q(demo=True)|Q(lesson__payment__user=user)).distinct().order_by('lesson__lesson_number', 'name')
 		self.user=user
 		self.fields['packets'] = forms.MultipleChoiceField(choices=[(o.id, str(o.name)) for o in packets])
 		self.fields['show_only_learned'] = forms.BooleanField(label='Только выученные', required=False, initial=True)

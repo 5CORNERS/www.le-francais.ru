@@ -107,10 +107,8 @@ def get_words(request, packet_id):
             packet = Packet.objects.prefetch_related(
                 'word_set', 'word_set__polly',
                 'wordtranslation_set',
-                'wordtranslation_set__polly').get(pk=packet_id)
-            if (packet.demo or (
-                    request.user.is_authenticated and
-                    packet.userpacket_set.filter(user=request.user))):
+                'wordtranslation_set__polly', 'lesson').get(pk=packet_id)
+            if packet.demo or packet.is_activated(request.user):
                 words = packet.word_set.order_by('order')
                 if request.user.is_authenticated:
                     words = words.exclude(
@@ -124,11 +122,11 @@ def get_words(request, packet_id):
                     )
                 )
             elif (not packet.demo
-                  and not packet.userpacket_set.filter(user=request.user)):
+                  and not packet.is_activated(request.user)):
                 result['errors'].append(
                     dict(
-                        message=consts.PACKET_IS_NOT_ADDED_MESSAGE,
-                        code=consts.PACKET_IS_NOT_ADDED_CODE,
+                        message=consts.LESSON_IS_NOT_ACTIVATED_MESSAGE,
+                        code=consts.LESSON_IS_NOT_ACTIVATED_CODE,
                     )
                 )
 
@@ -183,7 +181,7 @@ def update_words(request):
     errors = []
     for word_data in words_data:
         try:
-            word = Word.objects.get(pk=word_data['pk'])
+            word = Word.objects.select_related('packet').get(pk=word_data['pk'])
             grade = word_data['grade']
             mistakes = word_data['mistakes']
             if UserWordRepetition.objects.filter(
@@ -195,7 +193,7 @@ def update_words(request):
                     code=consts.TOO_EARLY_CODE,
                 )
                 )
-            elif word.packet.userpacket_set.filter(user=request.user).exists():
+            elif word.packet.is_activated(request.user) or word.packet.demo:
                 user_words_data.append(UserWordData(
                     word=word,
                     user_id=request.user.id,
@@ -205,8 +203,8 @@ def update_words(request):
             else:
                 errors.append(dict(
                     pk=word.pk,
-                    message=consts.PACKET_IS_NOT_ADDED_MESSAGE,
-                    code=consts.PACKET_IS_NOT_ADDED_CODE,
+                    message=consts.LESSON_IS_NOT_ACTIVATED_MESSAGE,
+                    code=consts.LESSON_IS_NOT_ACTIVATED_CODE,
                 ))
         except Word.DoesNotExist:
             errors.append(dict(

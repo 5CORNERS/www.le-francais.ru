@@ -43,13 +43,12 @@ class Packet(models.Model):
         data['lessonNumber'] = self.lesson.lesson_number
         data['demo'] = self.demo
         if user and user.is_authenticated:
-            data['activated'] = True if self.lesson.payed(user) else (
-                    False or self.demo)
-            if self.userpacket_set.filter(user=user).exists():
-                userpacket = self.userpacket_set.filter(user=user).first()
+            if self.lesson.payed(user):
+                data['activated'] = True
                 data['added'] = True
-                data['wordsLearned'] = userpacket.words_learned
+                data['wordsLearned'] = self.words_learned(user)
             else:
+                data['activated'] = False
                 data['added'] = False
                 data['wordsLearned'] = None
         else:
@@ -67,6 +66,12 @@ class Packet(models.Model):
     def words_count(self):
         return self.word_set.all().count()
 
+    def is_activated(self, user) -> bool:
+        if self.lesson.payed(user):
+            return True
+        else:
+            return False
+
     def _fully_voiced(self):
         if self.word_set.filter(Q(polly__isnull=True) | Q(
                 wordtranslation__polly__isnull=True)).exists():
@@ -75,6 +80,13 @@ class Packet(models.Model):
             return True
     _fully_voiced.boolean = True
     fully_voiced = property(_fully_voiced)
+
+    def words_learned(self, user) -> int:
+        return self.word_set.filter(
+            Q(userdata__user=user, userdata__grade=1) | Q(
+                userwordignore__user=user
+            )).values(
+            'word').distinct().__len__()
 
 
 class UserPacket(models.Model):
