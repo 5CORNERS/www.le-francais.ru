@@ -17,7 +17,7 @@
                       class="form-inline">
                     <label class="sr-only"
                            for="{{ form.packets.auto_id }}">{{ form.packets.label }}</label>
-                    <select multiple class="mb-2 mr-sm-2 selectpicker"
+                    <select actionsBox="true" multiple class="mb-2 mr-sm-2 selectpicker"
                             name="{{ form.packets.html_name }}"
                             id="{{ form.packets.auto_id }}" required>
                         {% for choice in form.fields.packets.choices %}
@@ -26,13 +26,17 @@
                     </select>
                     <div class="form-check mb-2 mr-sm-2">
                         <input class="form-check-input" type="checkbox"
-                               id="{{ form.show_only_learned.auto_id }}">
+                               id="{{ form.show_only_learned.auto_id }}"
+                               name="{{ form.show_only_learned.html_name }}"
+                        >
                         <label class="form-check-label"
                                for="{{ form.show_only_learned.auto_id }}">{{ form.show_only_learned.label }}</label>
                     </div>
                     <div class="form-check mb-2 mr-sm-2">
                         <input class="form-check-input" type="checkbox"
-                               id="{{ form.show_deleted.auto_id }}">
+                               id="{{ form.show_deleted.auto_id }}"
+                               name="{{ form.show_deleted.html_name }}"
+                        >
                         <label class="form-check-label"
                                for="{{ form.show_deleted.auto_id }}">{{ form.show_deleted.label }}</label>
                     </div>
