@@ -190,7 +190,16 @@ class Word(models.Model):
         return self.wordtranslation_set.first()
 
     def get_repetition_date(self, user):
-        self.userwordrepetition_set.filter(user=user, word=self)
+        try:
+            return self.userwordrepetition_set.filter(user=user).repetition_date
+        except:
+            return None
+
+    def repetitions_count(self, user):
+        try:
+            return  self.userwordrepetition_set.get(user=user).time
+        except:
+            return 0
 
     def to_dict(self, with_user=False, user=None):
         data = {

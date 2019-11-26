@@ -319,7 +319,7 @@ def manage_words(request):
         form = WordsManagementFilterForm(request.user, request.POST)
         get_table = form.footable_words()
         if request.is_ajax():
-            return JsonResponse(get_table, safe=False)
+            return JsonResponse({'table': get_table, 'errors': form.errors}, safe=False)
     else:
         form = WordsManagementFilterForm(request.user)
         get_table = None
