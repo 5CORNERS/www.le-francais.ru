@@ -40,11 +40,14 @@ class WordsManagementFilterForm(forms.Form):
 	def footable_words(self):
 		if self.is_valid():
 			data = self.cleaned_data
-			query = Word.objects.prefetch_related('userwordrepetition_set', 'userdata', 'userwordignore_set', 'wordtranslation_set').filter(packet_id__in=data['packets'])
+			query = Word.objects.prefetch_related(
+				'userwordrepetition_set', 'userdata', 'userwordignore_set',
+				'wordtranslation_set',
+			).filter(packet_id__in=data['packets'])
 			if data['show_only_learned']:
-				query.filter(userdata__user=self.user)
+				query = query.filter(userdata__user=self.user, userdata__grade=1)
 			if not data['show_deleted']:
-				query.exclude(userwordignore__user=self.user)
+				query = query.exclude(userwordignore__user=self.user)
 			return dict(
 				columns=[
 					{key: col[i] for (i, key) in enumerate(self.COLUMNS_ATTRS)
