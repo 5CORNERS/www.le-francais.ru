@@ -565,3 +565,5 @@ CORS_ORIGIN_ALLOW_ALL = os.getenv('CORS_ORIGIN_ALLOW_ALL', 'False') == 'True'
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'X-SessionID',
 ]
+
+NOTIFICATIONS_AUTO_CHECK_NEW = os.getenv('NOTIFICATIONS_AUTO_CHECK_NEW', '1') == '1'
