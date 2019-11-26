@@ -1,4 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
-{% include 'dictionary/dictionary_app.html' with packet_id='99999999' %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">{% include 'dictionary/dictionary_app.html' with packet_id='99999999' %}</div>
+        </div>
+    </div>
 {% endblock %}

@@ -1,8 +1,32 @@
 var ft;
 var $globalCheckbox;
 var $table = $('#wordsTable');
+var style = getComputedStyle(document.body);
+function getStars(rating) {
+
+  // Round to nearest half
+  rating = Math.round(rating * 2) / 2;
+  let output = [];
+
+  // Append all the filled whole stars
+  for (var i = rating; i >= 1; i--)
+    output.push(`<i class="fas fa-star" aria-hidden="true" style="color:${style.getPropertyValue('--blue')};"></i>&nbsp;`);
+
+  // If there is a half a star, append it
+  if (i == .5) output.push(`<i class="fas fa-star-half-alt" aria-hidden="true" style="color:${style.getPropertyValue('--blue')};"></i>&nbsp;`);
+
+  // Fill the empty stars
+  for (let i = (5 - rating); i >= 1; i--)
+    output.push(`<i class="far fa-star" aria-hidden="true" style="color:${style.getPropertyValue('--blue')};"></i>&nbsp;`);
+
+  return output.join('');
+
+}
 
 function fillTable(wordsData) {
+    wordsData.rows.forEach(function (item, index, array) {
+        wordsData.rows[index].repetitions = getStars(item.repetitions)
+    });
     if (!ft) {
         ft = FooTable.init('#wordsTable', wordsData);
     } else {
@@ -18,9 +42,11 @@ function fillTable(wordsData) {
             }
         });
         ft.loadRows(wordsData.rows);
+        return
     }
     //On Global Checkbox Toggle, set all rows' checkbox to checked and toggle _selection values
-    $table.on('change', '.global-checkbox', function () {
+    $table.on('change', '.global-checkbox', function (ev) {
+        ev.preventDefault();
         var newValues = {};
         if ($(this).prop("checked")) {
             newValues._selection = 'True';
@@ -35,7 +61,8 @@ function fillTable(wordsData) {
         ft.draw();
     });
     //On Single Row Checkbox Toggle
-    $table.on('click', '.row-checkbox', function () {
+    $table.on('click', '.row-checkbox', function (ev) {
+        ev.preventDefault();
         $globalCheckbox = $table.find('.global-checkbox').eq(0);
         var newValues = {};
         var row = $(this).closest('tr').data('__FooTableRow__');
@@ -68,7 +95,7 @@ $(document).ready(function () {
             type: 'POST',
             data: form.serialize(),
             success: function (r) {
-                fillTable(r);
+                fillTable(r.table);
             }
         })
     });

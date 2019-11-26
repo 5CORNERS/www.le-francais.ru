@@ -1,29 +1,59 @@
 {% extends 'base.html' %}
-{% load bootstrap4 static%}
+{% load bootstrap4 static %}
 {% block extra_js %}
-    <script type="text/javascript" src="{% static 'dictionary/js/user-table.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'dictionary/js/user-table.js' %}"></script>
+{% endblock %}
+{% block extra_head %}
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
 {% endblock %}
 {% block content %}
-<div class="col">
-    <div class="row">
-        <div class="col filter">
-            <form id="filterWordsForm" method="post">
-                {% csrf_token %}
-                {% bootstrap_form form layout='inline' %}
-                {% buttons %}
-                    <button type="submit" class="btn btn-primary mb-2">Submit</button>
-                {% endbuttons %}
-            </form>
-        </div>
-        <div class="col words-footable">
-            <div class="table-responsive">
-                <table class="table" id="wordsTable"></table>
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12 filter mt-2">
+                <form id="filterWordsForm" method="post"
+                      class="form-inline">
+                    <label class="sr-only"
+                           for="{{ form.packets.auto_id }}">{{ form.packets.label }}</label>
+                    <select multiple class="mb-2 mr-sm-2 selectpicker"
+                            name="{{ form.packets.html_name }}"
+                            id="{{ form.packets.auto_id }}" required>
+                        {% for choice in form.fields.packets.choices %}
+                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-check mb-2 mr-sm-2">
+                        <input class="form-check-input" type="checkbox"
+                               id="{{ form.show_only_learned.auto_id }}">
+                        <label class="form-check-label"
+                               for="{{ form.show_only_learned.auto_id }}">{{ form.show_only_learned.label }}</label>
+                    </div>
+                    <div class="form-check mb-2 mr-sm-2">
+                        <input class="form-check-input" type="checkbox"
+                               id="{{ form.show_deleted.auto_id }}">
+                        <label class="form-check-label"
+                               for="{{ form.show_deleted.auto_id }}">{{ form.show_deleted.label }}</label>
+                    </div>
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary mb-2">Submit
+                    </button>
+                </form>
             </div>
-            <button style="display: none" type="button" class="btn btn-primary mb-2" id="startApp">Submit</button>
+            <div class="col-12 words-footable">
+                <div class="table-responsive">
+                    <table class="table" id="wordsTable"></table>
+                </div>
+                <button style="display: none" type="button"
+                        class="btn btn-primary mb-2" id="startApp">Submit
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-{% if get_table%}<script>var getTable = $.parseJSON("{{ get_table|escapejs }}")</script>{% endif %}
-    <script>var csrf="{{ csrf_token }}"</script>
+    {% if get_table %}
+        <script>var getTable = $.parseJSON("{{ get_table|escapejs }}")</script>
+    {% endif %}
+    <script>var csrf = "{{ csrf_token }}"</script>
 {% endblock %}
