@@ -43,7 +43,7 @@
                                for="{{ form.show_deleted.auto_id }}">{{ form.show_deleted.label }}</label>
                     </div>
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-primary mb-2">Submit
+                    <button type="submit" class="btn btn-primary mb-2">Загрузить
                     </button>
                 </form>
             </div>
@@ -52,8 +52,12 @@
                     <table class="table" id="wordsTable"></table>
                 </div>
                 <button style="display: none" type="button"
-                        class="btn btn-primary mb-2" id="startApp">Submit
+                        class="btn btn-primary mb-2 undertable" id="startApp">Начать
                 </button>
+                <button style="display: none" type="button"
+                        class="btn btn-warning mb-2 undertable" id="markWords">Удалить</button>
+{#                <button style="display: none" type="button"#}
+{#                        class="btn btn-default mb-2 undertable" id="forgetWords">Удалить</button>#}
             </div>
         </div>
     </div>
