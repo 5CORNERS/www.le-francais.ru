@@ -139,6 +139,17 @@ class EmptyUni:
     fr_filename = None
 
 
+UNRELATED = [
+	'un ',
+	'une ',
+	'le ',
+	'la ',
+	'des ',
+	'les ',
+	'l\'',
+]
+
+
 class Word(models.Model):
     cd_id = models.IntegerField(
         verbose_name='Color Dictionary ID',
@@ -164,6 +175,20 @@ class Word(models.Model):
     order = models.IntegerField(null=True, default=None)
 
     _e_factor = None
+    _unrelated = None
+
+    @property
+    def unrelated_mistakes(self):
+	    if self._unrelated is not None:
+		    return self._unrelated
+	    else:
+		    result = 0
+		    for u in UNRELATED:
+			    result += self.word.count(u) * len(u)
+		    self._unrelated = result
+		    return self.unrelated_mistakes
+
+
     @property
     def uni(self):
         if self.group:
