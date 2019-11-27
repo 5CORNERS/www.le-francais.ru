@@ -239,15 +239,33 @@ class Word(models.Model):
 
     def repetitions_count(self, user):
         try:
-            return  self.userwordrepetition_set.get(user=user).time
+            return  self.userwordrepetition_set.get(user=user).time or 0
         except:
-            return 0
+            return None
 
     def get_difficulty_5(self, user):
         if self.e_factor(user):
             return -((self.e_factor(user) - 1.3) - 5)
         else:
             return None
+
+    def get_difficulty_10(self, user):
+        if self.e_factor(user):
+            return -((self.e_factor(user) - 1.3)*2 - 10)
+        else:
+            return None
+
+    def get_difficulty_20(self, user):
+        if self.e_factor(user):
+            return -((self.e_factor(user) - 1.3)*4 - 20)
+        else:
+            return None
+
+    def is_marked(self, user):
+        if self.userwordignore_set.filter(user=user).exists():
+            return True
+        else:
+            return False
 
     def to_dict(self, with_user=False, user=None):
         data = {
