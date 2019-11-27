@@ -24,8 +24,11 @@ def create_or_update_repetition(user_word_data, save=False):
 	return None
 
 
-def sm2_response_quality(grade, mistakes):
+def sm2_response_quality(grade, mistakes, unrelated_mistakes):
 	quality = 5
+	mistakes = mistakes - unrelated_mistakes
+	if mistakes < 0:
+		mistakes = 0
 	if grade == 0:
 		quality = 3
 	if mistakes:
@@ -41,11 +44,25 @@ def sm2_new_e_factor(response_quality:int, last_e_factor:float=None) -> float:
 	return result
 
 
+def sm2_current_e_factor(dataset):
+	e_factor = 2.5
+	finals = []
+	for user_data in sorted(dataset, key=lambda x: x.id, reverse=False):
+		response_quality = sm2_response_quality(user_data.grade,
+		                                        user_data.mistakes, user_data.word.unrelated_mistakes)
+		e_factor = sm2_new_e_factor(response_quality, e_factor)
+		if user_data.grade == 1:
+			finals.append((user_data, e_factor))
+	if not finals:
+		return None
+	return finals[-1][1]
+
+
 def sm2_next_repetition_date(dataset):
 	e_factor = 2.5
 	finals = []
 	for user_data in sorted(dataset, key=lambda x: x.id, reverse=False):
-		response_quality = sm2_response_quality(user_data.grade, user_data.mistakes)
+		response_quality = sm2_response_quality(user_data.grade, user_data.mistakes, user_data.word.unrelated_mistakes)
 		e_factor = sm2_new_e_factor(response_quality, e_factor)
 		if user_data.grade == 1:
 			finals.append((user_data, e_factor))
