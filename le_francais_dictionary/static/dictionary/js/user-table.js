@@ -23,10 +23,32 @@ function getSignal(n) {
     return `<i class="signal signal-${n}"></i>`
 }
 
+function getBars(rating) {
+    rating = Math.round(rating);
+    let output = [];
+    for (let i = 0; i<rating; i++){
+        if(i<5){
+            output.push(`<span style="color:${style.getPropertyValue('--danger')}">|</span>`)
+        }else if(i<15){
+            output.push(`<span style="color:${style.getPropertyValue('--warning')}">|</span>`)
+        }else{
+            output.push(`<span style="color:${style.getPropertyValue('--success')}">|</span>`)
+        }
+    }
+    for (let i= 20 - rating; i >= 0; i--){
+        output.push(`<span style="color:#a2a9b0">|</span>`)
+    }
+    return output.join('')
+
+}
+
 function fillTable(wordsData) {
     wordsData.rows.forEach(function (item, index, array) {
-        wordsData.rows[index].difficulty = getStars(item.difficulty);
+        wordsData.rows[index].difficulty = getBars(item.difficulty);
         wordsData.rows[index].repetitions = getSignal(item.repetitions);
+        if (item.deleted === 'true'){
+            wordsData.rows[index].style = {'text-decoration': 'line-through'}
+        }
     });
     if (!ft) {
         ft = FooTable.init('#wordsTable', wordsData);
@@ -83,22 +105,26 @@ function fillTable(wordsData) {
         }
         row.val(newValues, true);
     });
-    $('#startApp').show()
+    $('.undertable').show()
+}
+
+function updateTable() {
+    let form = $('#filterWordsForm');
+    let url = Urls['dictionary:manage_words']();
+
+    $.ajax(url, {
+        type: 'POST',
+        data: form.serialize(),
+        success: function (r) {
+            fillTable(r.table);
+        }
+    })
 }
 
 $(document).ready(function () {
     $('#filterWordsForm').submit(function (ev) {
         ev.preventDefault();
-        let form = $(this);
-        let url = Urls['dictionary:manage_words']();
-
-        $.ajax(url, {
-            type: 'POST',
-            data: form.serialize(),
-            success: function (r) {
-                fillTable(r.table);
-            }
-        })
+        updateTable();
     });
     if (getTable) {
         fillTable(getTable)
@@ -116,5 +142,31 @@ $(document).ready(function () {
                 window.location.href=Urls['dictionary:standalone']()
             }
         })
-    })
+    });
+    $('#markWords').on('click', function () {
+       $.ajax(Urls['dictionary:mark_words'](), {
+            type: 'POST',
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify({
+                'words': ft.rows.array.filter(row => row.value._selection === "True").map(row => row.value.id)
+            }),
+            success: function (r) {
+                updateTable()
+            }
+        })
+    });
+    // $('#forgetWords').on('click', function () {
+    //     $.ajax(Urls['dictionary:mark_words'](), {
+    //         type: 'POST',
+    //         contentType: "application/json",
+    //         dataType: "json",
+    //         data: JSON.stringify({
+    //             'words': ft.rows.array.filter(row => row.value._selection === "True").map(row => row.value.id)
+    //         }),
+    //         success: function (r) {
+    //             updateTable()
+    //         }
+    //     })
+    // });
 });
