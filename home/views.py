@@ -800,7 +800,7 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
     # render flash-cards tab:
     if tab_id is None or tab_id == 'flash-cards':
         result.append(dict(
-            attr='flash-cards', type='html', href='flash-cards', title='Слова урока',
+            attr='flash-cards', type='html', href='flash-cards', title='Карточки со словами',
             value=render_to_string('dictionary/dictionary_tab.html', context={
                 'lesson_page': page,
                 'hide_info': request.COOKIES.get(
