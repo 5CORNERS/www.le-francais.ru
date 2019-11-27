@@ -383,10 +383,10 @@ class UserWordData(models.Model):
     mistakes = models.IntegerField()
 
     def response_quality(self):
-        return sm2_response_quality(self.grade, self.mistakes)
+        return sm2_response_quality(self.grade, self.mistakes, self.word.unrelated_mistakes)
 
     def get_repetition_datetime(self):
-        dataset = UserWordData.objects.filter(word=self.word, user=self.user,
+        dataset = UserWordData.objects.select_related('word').filter(word=self.word, user=self.user,
                                               datetime__lte=self.datetime)
         repetition_datetime, time = sm2_next_repetition_date(dataset)
         return repetition_datetime, time
