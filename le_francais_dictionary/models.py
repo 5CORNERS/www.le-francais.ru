@@ -12,7 +12,7 @@ from le_francais_dictionary.consts import GENRE_CHOICES, \
     PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
     GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE
 from le_francais_dictionary.utils import sm2_response_quality, \
-    sm2_next_repetition_date, format_text2speech
+    sm2_next_repetition_date, format_text2speech, sm2_current_e_factor
 from polly import const as polly_const
 from polly.models import PollyTask
 
@@ -163,6 +163,7 @@ class Word(models.Model):
 
     order = models.IntegerField(null=True, default=None)
 
+    _e_factor = None
     @property
     def uni(self):
         if self.group:
@@ -189,6 +190,22 @@ class Word(models.Model):
     def first_translation(self):
         return self.wordtranslation_set.first()
 
+    def e_factor(self, user):
+        if self._e_factor is None:
+            data = self.userdata.filter(user=user).order_by('-datetime').first()
+            if data:
+                self._e_factor = data.get_e_factor()
+                return self._e_factor
+            else:
+                self._e_factor = False
+                return None
+        else:
+            if self._e_factor:
+                return self._e_factor
+            else:
+                return None
+
+
     def get_repetition_date(self, user):
         try:
             return self.userwordrepetition_set.filter(user=user).repetition_date
@@ -200,6 +217,12 @@ class Word(models.Model):
             return  self.userwordrepetition_set.get(user=user).time
         except:
             return 0
+
+    def get_difficulty_5(self, user):
+        if self.e_factor(user):
+            return -((self.e_factor(user) - 1.3) - 5)
+        else:
+            return None
 
     def to_dict(self, with_user=False, user=None):
         data = {
@@ -380,10 +403,15 @@ class UserWordData(models.Model):
     mistakes = models.IntegerField()
 
     def response_quality(self):
-        return sm2_response_quality(self.grade, self.mistakes)
+        return sm2_response_quality(self.grade, self.mistakes, self.word.unrelated_mistakes)
+
+    def get_e_factor(self):
+        dataset = UserWordData.objects.select_related('word').filter(word=self.word, user=self.user,
+                                              datetime__lte=self.datetime)
+        return sm2_current_e_factor(dataset)
 
     def get_repetition_datetime(self):
-        dataset = UserWordData.objects.filter(word=self.word, user=self.user,
+        dataset = UserWordData.objects.select_related('word').filter(word=self.word, user=self.user,
                                               datetime__lte=self.datetime)
         repetition_datetime, time = sm2_next_repetition_date(dataset)
         return repetition_datetime, time

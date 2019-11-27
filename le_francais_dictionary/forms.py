@@ -11,6 +11,20 @@ class DictionaryCsvImportForm(forms.Form):
 from operator import attrgetter, methodcaller
 
 
+def value(p_value, o):
+	return p_value(o) if callable(p_value) else p_value
+
+
+def row(name, o, p_value, p_sort_value=None, p_filter_value=None):
+	result = dict()
+	result['value'] = value(p_value, o)
+	if p_sort_value:
+		result['sort-value'] = value(p_sort_value, o)
+	if p_filter_value:
+		result['filter-value'] = value(p_filter_value, o)
+	return {name: result}
+
+
 class WordsManagementFilterForm(forms.Form):
 
 	def __init__(self, user, *args, **kwargs):
@@ -20,20 +34,19 @@ class WordsManagementFilterForm(forms.Form):
 		self.fields['packets'] = forms.MultipleChoiceField(choices=[(o.id, str(o.name)) for o in packets])
 		self.fields['show_only_learned'] = forms.BooleanField(label='Только выученные', required=False, initial=True)
 		self.fields['show_deleted'] = forms.BooleanField(label='Показывать удаленные', required=False, initial=False)
-		# name, title, visible, sortable, filterable, p_attribute
+		self.fields['']
+		# name, title, visible, sortable, filterable, p_filter_value, p_sort_value, p_value
 		self.COLUMNS_ATTRS = [
 			'name', 'title', 'visible', 'sortable', 'filterable',
 		]
 		self.COLUMNS = [
-			('_selection', 'Selection', False, False, False, 'False'),
-			('_checkbox', "<input type='checkbox' class='global-checkbox'>",
-			 True, False, False, '<input type="checkbox" class="row-checkbox">'),
-			('id', None, False, False, False, attrgetter('pk')),
-			('word', 'Слово', True, True, True, attrgetter('word')),
-			('translation', 'Перевод', True, True, True,
-			 attrgetter('first_translation.translation')),
-			('repetitions', 'Повторений', True, True, True,
-			 methodcaller('repetitions_count', self.user))
+			('_selection', 'Selection', False, False, False, None, None, 'False'),
+			('_checkbox', None, "<input type='checkbox' class='global-checkbox'>", True, False, False, None, None, '<input type="checkbox" class="row-checkbox">'),
+			('id', None, False, False, False, None, None, attrgetter('pk')),
+			('word', 'Слово', True, True, True, None, None, attrgetter('word')),
+			('translation', 'Перевод', True, True, True,  None, None, attrgetter('first_translation.translation')),
+			('repetitions', 'Повторений', True, True, True, None, None, methodcaller('repetitions_count', self.user)),
+			('difficulty', 'Сложность', True, True, True,  None, methodcaller('e_factor', self.user), methodcaller('get_difficulty_5', self.user))
 		]
 
 

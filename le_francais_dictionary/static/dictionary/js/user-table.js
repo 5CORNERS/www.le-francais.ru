@@ -2,30 +2,31 @@ var ft;
 var $globalCheckbox;
 var $table = $('#wordsTable');
 var style = getComputedStyle(document.body);
+
 function getStars(rating) {
 
-  // Round to nearest half
   rating = Math.round(rating * 2) / 2;
   let output = [];
 
-  // Append all the filled whole stars
   for (var i = rating; i >= 1; i--)
     output.push(`<i class="fas fa-star" aria-hidden="true" style="color:${style.getPropertyValue('--blue')};"></i>&nbsp;`);
 
-  // If there is a half a star, append it
-  if (i == .5) output.push(`<i class="fas fa-star-half-alt" aria-hidden="true" style="color:${style.getPropertyValue('--blue')};"></i>&nbsp;`);
+  if (i === .5) output.push(`<i class="fas fa-star-half-alt" aria-hidden="true" style="color:${style.getPropertyValue('--blue')};"></i>&nbsp;`);
 
-  // Fill the empty stars
   for (let i = (5 - rating); i >= 1; i--)
     output.push(`<i class="far fa-star" aria-hidden="true" style="color:${style.getPropertyValue('--blue')};"></i>&nbsp;`);
 
   return output.join('');
+}
 
+function getSignal(n) {
+    return `<i class="signal signal-${n}"></i>`
 }
 
 function fillTable(wordsData) {
     wordsData.rows.forEach(function (item, index, array) {
-        wordsData.rows[index].repetitions = getStars(item.repetitions)
+        wordsData.rows[index].difficulty = getStars(item.difficulty);
+        wordsData.rows[index].repetitions = getSignal(item.repetitions);
     });
     if (!ft) {
         ft = FooTable.init('#wordsTable', wordsData);

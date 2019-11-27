@@ -48,6 +48,7 @@ django-htmlmin
 brotlipy
 django-inline-svg
 Pillow
+django-npm
 
 -e git+https://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26#egg=django_pure_pagination
 -e git+https://github.com/5CORNERS/pybbm.git#egg=pybbm
