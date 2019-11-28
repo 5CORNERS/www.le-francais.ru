@@ -44,7 +44,7 @@ function getBars(rating) {
 
 function fillTable(wordsData) {
     wordsData.rows.forEach(function (item, index, array) {
-        wordsData.rows[index].difficulty = getBars(item.difficulty);
+        wordsData.rows[index].difficulty = getStars(item.difficulty);
         wordsData.rows[index].repetitions = getSignal(item.repetitions);
         if (item.deleted === 'true'){
             wordsData.rows[index].style = {'text-decoration': 'line-through'}
