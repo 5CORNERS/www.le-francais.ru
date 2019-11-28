@@ -216,6 +216,7 @@ def update_words(request):
     words = []
     repetitions = []
     for user_word_data in user_words_data:
+        e_factor = user_word_data.get_e_factor()
         if user_word_data.grade:
             repetition = create_or_update_repetition(user_word_data)
             repetition_datetime = repetition.repetition_date
@@ -227,7 +228,8 @@ def update_words(request):
         words.append(dict(
             pk=user_word_data.word_id,
             nextRepetition=repetition_datetime,
-            repetitionTime=repetition_time
+            repetitionTime=repetition_time,
+            e_factor=e_factor
         ))
     bulk_update(repetitions, update_fields=['repetition_date'])
     return JsonResponse(dict(words=words, errors=errors), safe=False)
