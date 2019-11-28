@@ -463,7 +463,7 @@ class UserWordData(models.Model):
 class UserWordRepetition(models.Model):
     word = models.ForeignKey(Word)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    time = models.IntegerField()
+    time = models.IntegerField(null=True, default=None)
     repetition_date = models.DateField(null=True)
 
 
