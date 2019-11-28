@@ -59,6 +59,7 @@ class WordUserTestCase(TestCase):
         self.word2 = Word.objects.create(word='word2', packet=self.packet1, cd_id=2)
         self.word3 = Word.objects.create(word='word3', packet=self.packet2, cd_id=3)
         self.word4 = Word.objects.create(word='word4', packet=self.packet2, cd_id=4)
+        self.good = [self.word1, self.word3]
 
     def test_add_demo_packet(self):
         data = dict(
@@ -186,18 +187,21 @@ class WordUserTestCase(TestCase):
     def test_update_words(self):
         initial_datetime = datetime.datetime(1, 1, 1, 12, 0, 0)
 
+        UserLesson.objects.create(
+            user=self.user,
+            lesson=LessonPage.objects.get(slug='lesson2')
+        )
+
         update_words_url = reverse('dictionary:update_words')
         data = dict(
             packets=[self.packet2.pk]
         )
-        add_packet_request = self.factory.post(
-            reverse('dictionary:add_packets'), data=json.dumps(data),
-            content_type='application/json')
-        add_packet_request.user = self.user
-        views.add_packets(add_packet_request)
 
-        grades_choices = [0] * 5 + [1] * 5
-        mistakes_choices = [0] * 5 + [1] * 4 + [2] * 3 + [3] * 2
+        good_grades_choices = [0] * 1 + [1] * 9
+        bad_grades_choices = [0] * 5 + [1] * 5
+        good_mistakes_choices = [0] * 10 + [1] * 2 + [2] * 2 + [3] * 1 + [4]  + [5] + [6] + [7]
+        bad_mistakes_choices = [0] * 1 + [1] * 10 + [2] * 6 + [3] * 4 + [
+            4] * 2 + [5] * 2 + [6] * 1 + [7] * 1
         with freeze_time(initial_datetime) as frozen_datetime:
             for step in range(5):
                 for word in self.packet2.word_set.all():
@@ -206,8 +210,12 @@ class WordUserTestCase(TestCase):
                     while remembering:
                         frozen_datetime.tick(
                             delta=datetime.timedelta(seconds=10))
-                        grade = random.choice(grades_choices)
-                        mistakes = random.choice(mistakes_choices)
+                        if word in self.good:
+                            grade = random.choice(good_grades_choices)
+                            mistakes = random.choice(good_mistakes_choices)
+                        else:
+                            grade = random.choice(bad_grades_choices)
+                            mistakes = random.choice(bad_mistakes_choices)
                         data = {
                             'words': [
                                 {
@@ -224,6 +232,8 @@ class WordUserTestCase(TestCase):
                         )
                         request.user = self.user
                         response = views.update_words(request)
+                        response_data = (json.loads(response.content))
+                        print(word, grade, response_data[0]['e_factor'])
                         if grade:
                             remembering = False
                 passing = True

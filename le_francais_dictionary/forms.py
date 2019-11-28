@@ -46,7 +46,7 @@ class WordsManagementFilterForm(forms.Form):
 			('word', 'Слово', True, True, True, None, None, attrgetter('word')),
 			('translation', 'Перевод', True, True, True,  None, None, attrgetter('first_translation.translation')),
 			('repetitions', 'Повторений', True, True, True, None, None, methodcaller('repetitions_count', self.user)),
-			('difficulty', 'Сложность', True, True, True,  None, methodcaller('e_factor', self.user), methodcaller('get_difficulty_20', self.user))
+			('difficulty', 'Сложность', True, True, True,  None, methodcaller('e_factor', self.user), methodcaller('get_difficulty_5', self.user))
 		]
 
 

@@ -51,8 +51,7 @@ def sm2_current_e_factor(dataset):
 		response_quality = sm2_response_quality(user_data.grade,
 		                                        user_data.mistakes, user_data.word.unrelated_mistakes)
 		e_factor = sm2_new_e_factor(response_quality, e_factor)
-		if user_data.grade == 1:
-			finals.append((user_data, e_factor))
+		finals.append((user_data, e_factor))
 	if not finals:
 		return None
 	return finals[-1][1]
