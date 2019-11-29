@@ -25,6 +25,7 @@ django-user-sessions
 django-cron
 django-braces
 APScheduler==3.0.0
+regex
 
 django-user-agents
 django-annoying
