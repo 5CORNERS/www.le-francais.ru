@@ -307,6 +307,47 @@ def mark_words(request):
         )
     return JsonResponse(result, safe=False)
 
+@csrf_exempt
+def unmark_words(request):
+    data = json.loads(request.body)
+    result = {'unmarked': [], 'errors': []}
+    if request.user.is_authenticated:
+        for pk in data['words']:
+            try:
+                word = Word.objects.get(pk=pk)
+                if UserWordIgnore.objects.filter(
+                        user=request.user, word_id=pk).exists():
+                    UserWordIgnore.objects.get(
+                        user=request.user,
+                        word=word,
+                    ).delete()
+                    result['unmarked'].append(pk)
+            except Word.DoesNotExist:
+                result['errors'].append(
+                    dict(
+                        pk=pk,
+                        message=consts.WORD_DOES_NOT_EXIST_MESSAGE,
+                        code=consts.WORD_DOES_NOT_EXIST_CODE
+                    )
+                )
+            except ValidationError as e:
+                for message in e.messages:
+                    result['errors'].append(
+                        dict(
+                            pk=pk,
+                            message=message
+                        )
+                    )
+
+    else:
+        result['errors'].append(
+            dict(
+                message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
+                code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
+            )
+        )
+    return JsonResponse(result, safe=False)
+
 
 def get_app(request, packet_id):
     if not UserPacket.objects.filter(user=request.user,
@@ -321,6 +362,11 @@ def get_app(request, packet_id):
 
 @login_required
 def manage_words(request):
+    star_choices = [None]
+    c = 0
+    for i in range(11):
+        star_choices.append(c)
+        c = c+0.5
     if request.method == 'POST':
         form = WordsManagementFilterForm(request.user, request.POST)
         get_table = form.footable_words()
@@ -330,7 +376,7 @@ def manage_words(request):
         form = WordsManagementFilterForm(request.user)
         get_table = None
     return render(request, 'dictionary/manage_words.html',
-                  {'form': form, 'get_table': json.dumps(get_table)})
+                  {'form': form, 'get_table': json.dumps(get_table), 'star_choices': star_choices})
 
 @csrf_exempt
 @login_required

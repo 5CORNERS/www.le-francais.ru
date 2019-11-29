@@ -44,8 +44,8 @@ class WordsManagementFilterForm(forms.Form):
 			('deleted', 'Удалено', False, False, False, None, None, methodcaller('is_marked', self.user)),
 			('word', 'Слово', True, True, True, None, None, attrgetter('word')),
 			('translation', 'Перевод', True, True, True,  None, None, attrgetter('first_translation.translation')),
-			('repetitions', 'Повторений', True, True, True, None, None, methodcaller('repetitions_count', self.user)),
-			('difficulty', 'Оценка', True, True, True,  None, None, methodcaller('mean_quality', self.user))
+			('repetitions', 'Повторений', True, True, True, methodcaller('repetitions_count', self.user), None, methodcaller('repetitions_count', self.user)),
+			('difficulty', 'Оценка', True, True, True,  methodcaller('mean_quality', self.user), None, methodcaller('mean_quality', self.user))
 		]
 
 
@@ -65,7 +65,11 @@ class WordsManagementFilterForm(forms.Form):
 				columns=[
 					{key: col[i] for (i, key) in enumerate(self.COLUMNS_ATTRS)
 					 if col[i] != None} for col in self.COLUMNS],
-				rows=[{(col[0]): dict(value=(col[-1] if isinstance(col[-1], str) else col[-1](word)), options=dict()) for col in self.COLUMNS} for word in list(query)],
+				rows=[{(col[0]): dict(
+					value=(col[-1] if isinstance(col[-1], str) else col[-1](word)),
+					options=(dict(
+						filterValue=col[-3] if isinstance(col[-3], str) else col[-3](word))
+				if col[-3] else dict() )) for col in self.COLUMNS} for word in list(query)],
 			)
 		else:
 			return None
