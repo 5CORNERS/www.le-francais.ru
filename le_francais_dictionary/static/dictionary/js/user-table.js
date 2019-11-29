@@ -62,9 +62,9 @@ function fillTable(wordsData) {
         wordsData.rows[index].difficulty.value = getStars(item.difficulty.value);
         wordsData.rows[index].repetitions.value = getSignal(item.repetitions.value);
         wordsData.rows[index]._checkbox.options = {'id': wordsData.rows[index].id.value};
-        if (item.deleted === 'true'){
-            wordsData.rows[index].word.options.classes = 'deleted';
-            wordsData.rows[index].translation.options.classes = 'deleted';
+        if (item.deleted.value){
+            wordsData.rows[index].word.options.classes = ['deleted'];
+            wordsData.rows[index].translation.options.classes = ['deleted'];
         }
     });
     if (!ft) {
