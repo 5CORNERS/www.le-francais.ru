@@ -194,7 +194,7 @@
 					{% for tense in table.moods.0.tenses %}
 						<div class="col-12 col-md-6 col-lg-6 col-xl-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}"
 						     {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-							<div class="tense_name"><h4>{{ tense.name.upper }}
+							<div class="tense_name"><h5>{{ tense.name.upper }}
 								{% if not tense.is_empty %}<a class="link-play-pause"
 								                              style="cursor: pointer; margin: -2px 0;"><span
 										style="height: 19px"
@@ -208,7 +208,7 @@
 										data-tense="{{ tense.tense_name }}"
 								></span></a>{% endif %}{% comment %}<img
 		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
-                            >{% endcomment %}</h4></div>
+                            >{% endcomment %}</h5></div>
 							<p class="person">{% for person in tense.persons %}
 								<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}
 									<r class="tab-content">{% for form in person.forms %}
@@ -230,7 +230,7 @@
 							<div class="col-12 col-md-6 col-lg-6 col-xl-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}"
 									{% if tense.is_in_short_list %}
 									 style="display: none"{% endif %}>
-								<div class="tense_name"><h4>{{ tense.name.upper }}
+								<div class="tense_name"><h5>{{ tense.name.upper }}
 									{% if not tense.is_empty %}<a class="link-play-pause"
 									                              style="cursor: pointer; margin: -2px 0;"><span
 											style="height: 19px"
@@ -244,7 +244,7 @@
 											data-tense="{{ tense.tense_name }}"
 									></span></a>{% endif %}{% comment %}<img
 		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
-                            >{% endcomment %}</h4></div>
+                            >{% endcomment %}</h5></div>
 								<p class="person">{% for person in tense.persons %}
 									<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}
 										<r class="tab-content">{% for form in person.forms %}
@@ -259,7 +259,7 @@
 			<div class="col-12 col-md-12 col-lg-6">
 				<div class="row emploi">
 					<div class="col-12">
-						<h3 style="margin-top: 6px">Коротко о главном</h3>
+						<h3>Коротко о главном</h3>
 						<p>{{ v.employs | safe }}</p>
 					</div>
 				</div>
