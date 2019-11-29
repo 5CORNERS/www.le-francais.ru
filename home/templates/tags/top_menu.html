@@ -42,6 +42,10 @@
                                     посты{# TODO l18n Forum activity #}</a>
                             {% endif %}
                             <a class="dropdown-item"
+                               href="{% url 'dictionary:manage_words' %}">
+                                Мои слова
+                            </a>
+                            <a class="dropdown-item"
                                href="{% url 'postman:inbox' %}">
                                 Личные сообщения{# TODO l18n #}
                                 {% if unread_count %}
