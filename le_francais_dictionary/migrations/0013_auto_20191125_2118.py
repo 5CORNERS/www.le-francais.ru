@@ -9,7 +9,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('le_francais_dictionary', '0011_userstandalonepacket'),
+        ('le_francais_dictionary', '0012_userstandalonepacket'),
     ]
 
     operations = [

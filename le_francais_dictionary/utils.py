@@ -1,4 +1,5 @@
 import re
+import statistics
 from datetime import datetime, timedelta
 from typing import List, Optional, Any
 
@@ -24,16 +25,28 @@ def create_or_update_repetition(user_word_data, save=False):
 	return None
 
 
-def sm2_response_quality(grade, mistakes, unrelated_mistakes):
-	quality = 5
-	mistakes = mistakes - unrelated_mistakes
-	if mistakes < 0:
-		mistakes = 0
-	if grade == 0:
-		quality = 3
-	if mistakes:
-		quality = quality - mistakes
-	return quality if quality > 0 else 1
+def mistakes_grade(mistakes, word):
+	ratio = word.mistake_ratio(mistakes)
+	if ratio == 0:
+		return 0
+	elif ratio < 0.4:
+		return 1
+	elif ratio < 0.7:
+		return 2
+	else:
+		return 3
+
+def sm2_response_quality(data, zeros_dataset):
+	q = 5
+	mistakes = data.mistakes - data.word.unrelated_mistakes
+	if zeros_dataset.__len__() >= 2:
+		q = 0
+	elif zeros_dataset.__len__() == 1:
+		q = 2
+	q = q - mistakes_grade(mistakes, data.word)
+	return q if q > 0 else 0
+
+
 
 
 def sm2_new_e_factor(response_quality:int, last_e_factor:float=None) -> float:
@@ -41,37 +54,53 @@ def sm2_new_e_factor(response_quality:int, last_e_factor:float=None) -> float:
 	result = last_e_factor + (0.1-(5-response_quality)*(0.08+(5-response_quality)*0.02))
 	if result < 1.3:
 		result = 1.3
+	elif result > 2.5:
+		result = 2.5
 	return result
 
 
-def sm2_current_e_factor(dataset):
+def sm2_e_factor_and_quality(dataset) -> (float, int, float):
 	e_factor = 2.5
 	finals = []
-	for user_data in sorted(dataset, key=lambda x: x.id, reverse=False):
-		response_quality = sm2_response_quality(user_data.grade,
-		                                        user_data.mistakes, user_data.word.unrelated_mistakes)
-		e_factor = sm2_new_e_factor(response_quality, e_factor)
-		finals.append((user_data, e_factor))
+	qualities = []
+	zeros_dataset = []
+	for data in sorted(dataset, key=lambda x: x.datetime, reverse=False):
+		if data.grade:
+			response_quality = sm2_response_quality(data, zeros_dataset)
+			qualities.append(response_quality)
+			e_factor = sm2_new_e_factor(response_quality, e_factor)
+			if response_quality < 3:
+				finals = []
+			finals.append((data, e_factor, response_quality))
+			zeros_dataset = []
+		else:
+			zeros_dataset.append(data)
 	if not finals:
-		return None
-	return finals[-1][1]
+		return None, None, None
+	return finals[-1][1], finals[-1][2], statistics.mean(qualities)
 
 
 def sm2_next_repetition_date(dataset):
 	e_factor = 2.5
 	finals = []
-	for user_data in sorted(dataset, key=lambda x: x.id, reverse=False):
-		response_quality = sm2_response_quality(user_data.grade, user_data.mistakes, user_data.word.unrelated_mistakes)
-		e_factor = sm2_new_e_factor(response_quality, e_factor)
-		if user_data.grade == 1:
-			finals.append((user_data, e_factor))
+	zeros_dataset = []
+	for data in sorted(dataset, key=lambda x: x.datetime, reverse=False):
+		if data.grade:
+			response_quality = sm2_response_quality(data, zeros_dataset)
+			e_factor = sm2_new_e_factor(response_quality, e_factor)
+			zeros_dataset = []
+			if response_quality < 3:
+				finals = []
+			finals.append((data, e_factor, response_quality))
+		else:
+			zeros_dataset.append(data)
 	if not finals:
 		return None
 	repetition_delta = 1
-	for n, final in enumerate(finals, 1):
-		if n == 1:
+	for n, final in enumerate(finals, 0):
+		if n == 0:
 			repetition_delta = FIRST_REPETITION_DELTA
-		elif n == 2:
+		elif n == 1:
 			repetition_delta = SECOND_REPETITION_DELTA
 		else:
 			repetition_delta = repetition_delta * final[1]

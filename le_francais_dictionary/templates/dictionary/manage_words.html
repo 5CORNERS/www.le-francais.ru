@@ -2,6 +2,8 @@
 {% load bootstrap4 static sass_tags %}
 {% block extra_js %}
     <script type="text/javascript"
+        src="{% static 'components/simple-checkbox-table/dist/jquery.simple-checkbox-table.min.js' %}"></script>
+    <script type="text/javascript"
             src="{% static 'dictionary/js/user-table.js' %}"></script>
 {% endblock %}
 {% block extra_head %}
@@ -48,7 +50,7 @@
                 </form>
             </div>
             <div class="col-12 words-footable">
-                <div class="table-responsive">
+                <div class="table-responsive table-responsive-sm">
                     <table class="table" id="wordsTable"></table>
                 </div>
                 <button style="display: none" type="button"
