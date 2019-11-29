@@ -2,6 +2,21 @@ var ft;
 var $globalCheckbox;
 var $table = $('#wordsTable');
 var style = getComputedStyle(document.body);
+var checked_ids = [];
+
+(function($, F){
+
+    // Extend the Row.$create method to add an id attribute to each <tr>.
+    F.Row.extend("$create", function(){
+        // call the original method
+        this._super();
+        // get the current row values
+        var values = this.val();
+        // then add whatever attributes are required
+        this.$el.attr({"data-id": values["id"]});
+    });
+
+})(jQuery, FooTable);
 
 function getStars(rating) {
 
@@ -44,66 +59,37 @@ function getBars(rating) {
 
 function fillTable(wordsData) {
     wordsData.rows.forEach(function (item, index, array) {
-        wordsData.rows[index].difficulty = getStars(item.difficulty);
-        wordsData.rows[index].repetitions = getSignal(item.repetitions);
+        wordsData.rows[index].difficulty.value = getStars(item.difficulty.value);
+        wordsData.rows[index].repetitions.value = getSignal(item.repetitions.value);
+        wordsData.rows[index]._checkbox.options = {'id': wordsData.rows[index].id.value};
         if (item.deleted === 'true'){
-            wordsData.rows[index].style = {'text-decoration': 'line-through'}
+            wordsData.rows[index].word.options.classes = 'deleted';
+            wordsData.rows[index].translation.options.classes = 'deleted';
         }
     });
     if (!ft) {
         ft = FooTable.init('#wordsTable', wordsData);
     } else {
-        $globalCheckbox = $table.find('.global-checkbox').eq(0);
-        let data = wordsData.rows;
-        data.forEach(function (item, index, array) {
-            if ($globalCheckbox.prop('checked')) {
-                data[index]._selection = 'True';
-                data[index]._checkbox = '<input type="checkbox" class="row-checkbox" checked >';
-            } else {
-                data[index]._selection = 'False';
-                data[index]._checkbox = '<input type="checkbox" class="row-checkbox">';
-            }
-        });
         ft.loadRows(wordsData.rows);
         return
     }
-    //On Global Checkbox Toggle, set all rows' checkbox to checked and toggle _selection values
-    $table.on('change', '.global-checkbox', function (ev) {
-        ev.preventDefault();
-        var newValues = {};
-        if ($(this).prop("checked")) {
-            newValues._selection = 'True';
-            newValues._checkbox = '<input type="checkbox" class="row-checkbox" checked>';
-        } else {
-            newValues._selection = 'False';
-            newValues._checkbox = '<input type="checkbox" class="row-checkbox">';
-        }
-        $.each(ft.rows.all, function (index, values) {
-            ft.rows.update(index, newValues, false);
-        });
-        ft.draw();
-    });
-    //On Single Row Checkbox Toggle
-    $table.on('click', '.row-checkbox', function (ev) {
-        ev.preventDefault();
-        $globalCheckbox = $table.find('.global-checkbox').eq(0);
-        var newValues = {};
-        var row = $(this).closest('tr').data('__FooTableRow__');
-        if ($(this).prop('checked')) {
-            //Prepare Values
-            newValues._selection = 'True';
-            newValues._checkbox = '<input type="checkbox" class="row-checkbox" checked>';
-        } else {
-            //Prepare Values
-            newValues._selection = 'False';
-            newValues._checkbox = '<input type="checkbox" class="row-checkbox">';
-
-            //Toggle globalCheckbox if checked
-            if ($globalCheckbox.prop('checked')) {
-                $globalCheckbox.prop('checked', false);
+    $table.on('postdraw.ft.table', function (e) {
+        $table.simpleCheckboxTable({
+            onCheckedStateChanged: function ($checkbox) {
+                $checkbox.each(
+                    function () {
+                        let id = $(this).parent().parent().data('id');
+                        let i = checked_ids.indexOf(id);
+                        if(i === -1 && this.checked){
+                            checked_ids.push(id)
+                        }else if(i > -1 && !this.checked){
+                            checked_ids.splice(i, 1)
+                        }
+                        console.log(id, checked_ids)
+                    }
+                )
             }
-        }
-        row.val(newValues, true);
+        })
     });
     $('.undertable').show()
 }
@@ -135,7 +121,7 @@ $(document).ready(function () {
             contentType: "application/json",
             dataType: "json",
             data: JSON.stringify({
-                ids: ft.rows.array.filter(row => row.value._selection === "True").map(row => row.value.id),
+                ids: checked_ids,
                 csrfmiddlewaretoken: csrf,
             }),
             success: function (r) {
@@ -149,7 +135,7 @@ $(document).ready(function () {
             contentType: "application/json",
             dataType: "json",
             data: JSON.stringify({
-                'words': ft.rows.array.filter(row => row.value._selection === "True").map(row => row.value.id)
+                'words': checked_ids
             }),
             success: function (r) {
                 updateTable()
