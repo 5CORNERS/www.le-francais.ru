@@ -1,3 +1,6 @@
+import re
+import statistics
+import string
 from datetime import datetime
 from urllib.parse import quote
 
@@ -6,13 +9,14 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Q
 from django.utils.http import urlencode, urlquote
+from regex import regex
 
 from le_francais_dictionary.consts import GENRE_CHOICES, \
     PARTOFSPEECH_CHOICES, \
     PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
     GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE
 from le_francais_dictionary.utils import sm2_response_quality, \
-    sm2_next_repetition_date, format_text2speech, sm2_current_e_factor
+    sm2_next_repetition_date, format_text2speech, sm2_e_factor_and_quality
 from polly import const as polly_const
 from polly.models import PollyTask
 
@@ -139,15 +143,30 @@ class EmptyUni:
     fr_filename = None
 
 
-UNRELATED = [
+UNRELEVANT_STARTS = [
+    'une ',
 	'un ',
-	'une ',
 	'le ',
 	'la ',
 	'des ',
 	'les ',
 	'l\'',
 ]
+
+UNRELEVANT_ENDS = [
+    ' + infinitive', ' + infinitif', ' + subjonctif', ' de', ' que', ' par', ' à',
+    ' pour', ' à quelque chose', ' de quelque chose',
+    ' quelqu\'un à quelque chose', ' à quelqu\'un', ' qch/qqn', ' qqn', ' qqn/qch',
+    ' qqn de+inf', ' de qch', ' qch à', ' qch', ' à qn de qch'
+]
+
+def del_ends(s):
+    s = s.rstrip('!?., ')
+    for end in UNRELEVANT_ENDS:
+        if s.endswith(' ' + end):
+            s.replace(' ' + end, '')
+            s = del_ends(s)
+    return s
 
 
 class Word(models.Model):
@@ -176,17 +195,55 @@ class Word(models.Model):
 
     _e_factor = None
     _unrelated = None
+    _last_user_data = {}
+
+    def mistake_ratio(self, mistakes):
+        word = self.word
+        p1 = regex.compile(r"(?P<un>\L<unrelevants>)",
+                          unrelevants=[unr for unr in
+                                       UNRELEVANT_STARTS + UNRELEVANT_ENDS])
+        _s_word = regex.sub(p1, '(\g<un>)', word)
+        _s_user = ''
+        c = 0
+        for i in range(mistakes):
+            try:
+                if word[c] == ' ':
+                    _s_user += ' '
+                    c += 1
+                _s_user += word[c]
+                c += 1
+            except IndexError:
+                break
+        for i, char in enumerate(_s_word):
+            if char in ['(', ')'] and len(_s_user) > i and _s_user[i]!=char:
+                _s_user = _s_user[:i] + char + _s_user[i:]
+        p2 = regex.compile(r"\(.+?(\)|$)")
+        s_word = regex.sub(p2, '', _s_word)
+        s_user = regex.sub(p2, '', _s_user)
+        return len(s_user)/len(s_word)
+
+
+    @property
+    def real_len(self):
+        s = self.word
+        re.sub(r'', '', s)
+        s = ''.join(
+            s.translate(str.maketrans("()[]", "💲" * 4)).split('💲')[::2])
+        s = del_ends(s)
+        return len(s)
 
     @property
     def unrelated_mistakes(self):
-	    if self._unrelated is not None:
-		    return self._unrelated
-	    else:
-		    result = 0
-		    for u in UNRELATED:
-			    result += self.word.count(u) * len(u)
-		    self._unrelated = result
-		    return self.unrelated_mistakes
+        if self._unrelated is not None:
+            return self._unrelated
+        else:
+            result = 0
+        for u in UNRELEVANT_STARTS:
+            if self.word.startswith(u):
+                result = len(u)
+                break
+        self._unrelated = result
+        return self.unrelated_mistakes
 
 
     @property
@@ -215,20 +272,23 @@ class Word(models.Model):
     def first_translation(self):
         return self.wordtranslation_set.first()
 
+    def last_user_data(self, user):
+	    if not user.pk in self._last_user_data:
+		    self._last_user_data[user.pk] = self.userdata.filter(
+			    user=user).order_by('-datetime').first()
+	    return self._last_user_data[user.pk]
+
     def e_factor(self, user):
-        if self._e_factor is None:
-            data = self.userdata.filter(user=user).order_by('-datetime').first()
-            if data:
-                self._e_factor = data.get_e_factor()
-                return self._e_factor
-            else:
-                self._e_factor = False
-                return None
-        else:
-            if self._e_factor:
-                return self._e_factor
-            else:
-                return None
+	    if self.last_user_data(user):
+		    return self.last_user_data(user).e_factor
+	    else:
+		    return None
+
+    def mean_quality(self, user):
+	    if self.last_user_data(user):
+		    return self.last_user_data(user).mean_quality
+	    else:
+		    return None
 
 
     def get_repetition_date(self, user):
@@ -244,8 +304,8 @@ class Word(models.Model):
             return None
 
     def get_difficulty_5(self, user):
-        if self.e_factor(user):
-            return -((self.e_factor(user) - 1.3) - 5)
+        if self.mean_quality(user):
+            return 5 - self.mean_quality(user)
         else:
             return None
 
@@ -445,17 +505,50 @@ class UserWordData(models.Model):
     grade = models.IntegerField()
     mistakes = models.IntegerField()
 
-    def response_quality(self):
-        return sm2_response_quality(self.grade, self.mistakes, self.word.unrelated_mistakes)
+    _e_factor = -1
+    _quality = -1
+    _mean_quality = -1
+    _user_word_dataset = None
+
+    @property
+    def user_word_dataset(self):
+        if self._user_word_dataset is None:
+            self._user_word_dataset = list(UserWordData.objects.select_related('word', 'user').filter(
+                word=self.word, user=self.user,
+                datetime__lte=self.datetime).order_by('datetime'))
+        return self._user_word_dataset
+
+    @property
+    def e_factor(self):
+        if self._e_factor is -1:
+            if self.grade:
+                dataset = self.user_word_dataset
+                self._e_factor, self._quality, self._mean_quality = sm2_e_factor_and_quality(dataset)
+            else:
+                self._e_factor, self._quality = None, None
+        return self._e_factor
+
+    @property
+    def mean_quality(self):
+        if self._e_factor is -1:
+            if self.grade:
+                dataset = self.user_word_dataset
+                self._e_factor, self._quality, self._mean_quality = sm2_e_factor_and_quality(
+                    dataset)
+        return self._mean_quality
+
+    @property
+    def quality(self):
+        if self._quality is -1:
+            dataset = self.user_word_dataset
+            self._e_factor, self._quality, self._mean_quality = sm2_e_factor_and_quality(dataset)
+        return self._quality
 
     def get_e_factor(self):
-        dataset = UserWordData.objects.select_related('word').filter(word=self.word, user=self.user,
-                                              datetime__lte=self.datetime)
-        return sm2_current_e_factor(dataset)
+        return self.e_factor
 
     def get_repetition_datetime(self):
-        dataset = UserWordData.objects.select_related('word').filter(word=self.word, user=self.user,
-                                              datetime__lte=self.datetime)
+        dataset = self.user_word_dataset
         repetition_datetime, time = sm2_next_repetition_date(dataset)
         return repetition_datetime, time
 

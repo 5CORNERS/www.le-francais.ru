@@ -1,5 +1,7 @@
 .signal { display: block; content: ' '; background-size: 28px 28px; height: 28px; width: 28px; }
 
+.signal-null { background-image: url('../img/signal-bars-null.svg'); }
+
 .signal-0 { background-image: url("../img/signal-bars-0.svg"); }
 
 .signal-1 { background-image: url("../img/signal-bars-1.svg"); }

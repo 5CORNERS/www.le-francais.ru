@@ -39,14 +39,13 @@ class WordsManagementFilterForm(forms.Form):
 			'name', 'title', 'visible', 'sortable', 'filterable',
 		]
 		self.COLUMNS = [
-			('_selection', 'Selection', False, False, False, None, None, 'False'),
-			('_checkbox', "<input type='checkbox' class='global-checkbox'>", True, False, False, None, None, '<input type="checkbox" class="row-checkbox">'),
+			('_checkbox', "<input type='checkbox'>", True, False, False, None, None, '<input type="checkbox">'),
 			('id', 'ID', False, False, False, None, None, attrgetter('pk')),
 			('deleted', 'Удалено', False, False, False, None, None, methodcaller('is_marked', self.user)),
 			('word', 'Слово', True, True, True, None, None, attrgetter('word')),
 			('translation', 'Перевод', True, True, True,  None, None, attrgetter('first_translation.translation')),
 			('repetitions', 'Повторений', True, True, True, None, None, methodcaller('repetitions_count', self.user)),
-			('difficulty', 'Сложность', True, True, True,  None, methodcaller('e_factor', self.user), methodcaller('get_difficulty_5', self.user))
+			('difficulty', 'Оценка', True, True, True,  None, None, methodcaller('mean_quality', self.user))
 		]
 
 
@@ -66,7 +65,7 @@ class WordsManagementFilterForm(forms.Form):
 				columns=[
 					{key: col[i] for (i, key) in enumerate(self.COLUMNS_ATTRS)
 					 if col[i] != None} for col in self.COLUMNS],
-				rows=[{(col[0]):(col[-1] if isinstance(col[-1], str) else col[-1](word)) for col in self.COLUMNS} for word in list(query)],
+				rows=[{(col[0]): dict(value=(col[-1] if isinstance(col[-1], str) else col[-1](word)), options=dict()) for col in self.COLUMNS} for word in list(query)],
 			)
 		else:
 			return None

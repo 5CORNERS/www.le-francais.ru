@@ -197,14 +197,18 @@ class WordUserTestCase(TestCase):
             packets=[self.packet2.pk]
         )
 
-        good_grades_choices = [0] * 1 + [1] * 9
+        s_good = []
+        s_bad = []
+
+        good_grades_choices = [1]
         bad_grades_choices = [0] * 5 + [1] * 5
-        good_mistakes_choices = [0] * 10 + [1] * 2 + [2] * 2 + [3] * 1 + [4]  + [5] + [6] + [7]
-        bad_mistakes_choices = [0] * 1 + [1] * 10 + [2] * 6 + [3] * 4 + [
-            4] * 2 + [5] * 2 + [6] * 1 + [7] * 1
+        good_mistakes_choices = [0]
+        bad_mistakes_choices = [0] * 5 + [1] * 10 + [2] * 5 + [3] * 2
+        learning = True
+        words = list(self.packet2.word_set.all())
         with freeze_time(initial_datetime) as frozen_datetime:
-            for step in range(5):
-                for word in self.packet2.word_set.all():
+            while learning:
+                for i, word in reversed(list(enumerate(words))):
                     frozen_datetime.tick(delta=datetime.timedelta(seconds=10))
                     remembering = True
                     while remembering:
@@ -216,6 +220,7 @@ class WordUserTestCase(TestCase):
                         else:
                             grade = random.choice(bad_grades_choices)
                             mistakes = random.choice(bad_mistakes_choices)
+                        mistakes_ratio = word.mistake_ratio(mistakes)
                         data = {
                             'words': [
                                 {
@@ -232,14 +237,35 @@ class WordUserTestCase(TestCase):
                         )
                         request.user = self.user
                         response = views.update_words(request)
-                        response_data = (json.loads(response.content))
-                        print(word, grade, response_data[0]['e_factor'])
+                        response_data = (json.loads(response.content))['words'][0]
+                        e_factor = response_data['e_factor']
+                        quality = response_data['quality']
+                        mean_quality = response_data['mean_quality']
+                        times = response_data['repetitionTime']
+                        today = datetime.datetime.today().strftime('%Y/%m/%d')
+                        if word in self.good:
+                            s_good.append([today,times,grade,mistakes_ratio,e_factor,quality, mean_quality])
+                        else:
+                            s_bad.append([today,times,grade,mistakes_ratio,e_factor,quality, mean_quality])
+                        if response_data['repetitionTime'] == 5:
+                            words.pop(i)
                         if grade:
                             remembering = False
                 passing = True
+                if not words:
+                    learning = False
                 while passing:
                     if UserWordRepetition.objects.filter(
                             repetition_date__gt=timezone.now()):
                         frozen_datetime.tick(delta=datetime.timedelta(days=1))
                     else:
                         passing = False
+        col_width = max(
+            len(str(word)) for row in s_good for word in row) + 2  # padding
+        for row in s_good:
+            print("".join(str(word).ljust(col_width) for word in row))
+
+        col_width = max(
+            len(str(word)) for row in s_bad for word in row) + 2  # padding
+        for row in s_bad:
+            print("".join(str(word).ljust(col_width) for word in row))
