@@ -221,7 +221,8 @@
 				{% for mood in table.moods|slice:'1:' %}
 					<div class="row mood_name">
 						<div class="col-12">
-							<div><h2>{{ mood.name | safe }}</h2></div>
+							<div><h2>{% if mood.name == 'Subjonctif' %}
+                                <a title="Что такое Subjonctif — самое доступное объяснение в Рунете" href="/oh-la-la/subjonctif/?utm_campaign=conjugeur&utm_medium=button&utm_source=subjonctif">{{ mood.name | safe }}</a>{% else %}{{ mood.name | safe }}{% endif %}</h2></div>
 						</div>
 					</div>
 					<div class="row tenses">
