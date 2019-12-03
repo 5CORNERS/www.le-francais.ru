@@ -34,22 +34,22 @@ class WordsManagementFilterForm(forms.Form):
 		self.fields['packets'] = forms.MultipleChoiceField(choices=[(o.id, str(o.name)) for o in packets])
 		self.fields['show_only_learned'] = forms.BooleanField(label='Только выученные', required=False, initial=True)
 		self.fields['show_deleted'] = forms.BooleanField(label='Показывать удаленные', required=False, initial=False)
-		# name, title, visible, sortable, filterable, p_filter_value, p_sort_value, p_value
+		# name, title, type, visible, sortable, filterable, p_filter_value, p_sort_value, p_value
 		self.COLUMNS_ATTRS = [
-			'name', 'title', 'visible', 'sortable', 'filterable',
+			'name', 'title', 'type', 'visible', 'sortable', 'filterable',
 		]
 		self.COLUMNS = [
-			('_checkbox', "<input type='checkbox'>", True, False, False, None, None, '<input type="checkbox">'),
-			('id', 'ID', False, False, False, None, None, attrgetter('pk')),
-			('deleted', 'Удалено', False, False, False, None, None, methodcaller('is_marked', self.user)),
-			('word', 'Слово', True, True, True, None, None, attrgetter('word')),
-			('translation', 'Перевод', True, True, True,  None, None, attrgetter('first_translation.translation')),
-			('repetitions', 'Повторений', True, True, True, methodcaller('repetitions_count', self.user), None, methodcaller('repetitions_count', self.user)),
-			('difficulty', 'Оценка', True, True, True,  methodcaller('mean_quality', self.user), None, methodcaller('mean_quality', self.user))
+			# ('_checkbox', "<input type='checkbox'>",'text',  True, False, False, None, None, '<input type="checkbox">'),
+			('id', 'ID', None, False, False, False, None, None, attrgetter('pk')),
+			('deleted', 'Удалено', None, False, False, False, None, None, methodcaller('is_marked', self.user)),
+			('word', 'Слово', None, True, True, True, None, None, attrgetter('word')),
+			('translation', 'Перевод', None, True, True, True,  None, None, attrgetter('first_translation.translation')),
+			('repetitions', '<i class="lamp-icon" title="На сколько вы продвинулись в запоминании слова"></i>', None, True, True, True, methodcaller('repetitions_count', self.user), None, methodcaller('repetitions_count', self.user)),
+			('stars', 'Оценка <button class="btn funnel-filter-button" id="starsFilterContainer"></button>', 'cell-stars', True, True, True,  methodcaller('mean_quality_filter_value', self.user), methodcaller('mean_quality_filter_value', self.user), methodcaller('mean_quality', self.user)),
 		]
 
 
-	def footable_words(self):
+	def table_dict(self):
 		if self.is_valid():
 			data = self.cleaned_data
 			query = Word.objects.prefetch_related(
@@ -62,17 +62,33 @@ class WordsManagementFilterForm(forms.Form):
 				query = query.exclude(userwordignore__user=self.user)
 			query = query.distinct().order_by('order')
 			return dict(
-				columns=[
-					{key: col[i] for (i, key) in enumerate(self.COLUMNS_ATTRS)
-					 if col[i] != None} for col in self.COLUMNS],
-				rows=[{(col[0]): dict(
-					value=(col[-1] if isinstance(col[-1], str) else col[-1](word)),
-					options=(dict(
-						filterValue=col[-3] if isinstance(col[-3], str) else col[-3](word))
-				if col[-3] else dict() )) for col in self.COLUMNS} for word in list(query)],
+				columns=[dict(
+					id=column[0],
+					title=column[1],
+					visible=column[3]
+				) for column in self.COLUMNS],
+				rows=[dict(
+					id=word.pk,
+					cells=[dict(
+						id=column[0],
+						value=column[-1] if not callable(column[-1]) else column[-1](word),
+						filter_value=column[-3] if not callable(column[-3]) else column[-3](word),
+						visible=column[3],
+						cls=column[2],
+					) for column in self.COLUMNS]
+				) for word in list(query)],
+				empty='Мои слова',
 			)
 		else:
-			return None
+			return dict(
+				columns_dicts=[dict(
+					id=column[0],
+					title=column[1],
+					visible=column[2]
+				) for column in self.COLUMNS],
+				rows=[],
+				empty= 'Мои слова',
+			)
 
 
 class DictionaryWordForm(forms.Form):

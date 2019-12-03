@@ -193,9 +193,11 @@ class Word(models.Model):
 
     order = models.IntegerField(null=True, default=None)
 
-    _e_factor = None
-    _unrelated = None
-    _last_user_data = {}
+    def __init__(self, *args, **kwargs):
+        super(Word, self).__init__(*args, **kwargs)
+        self._e_factor = None
+        self._unrelated = None
+        self._last_user_data = {}
 
     def mistake_ratio(self, mistakes):
         word = self.word
@@ -286,10 +288,16 @@ class Word(models.Model):
 
     def mean_quality(self, user):
 	    if self.last_user_data(user):
-		    return self.last_user_data(user).mean_quality
+		    return float(round(self.last_user_data(user).mean_quality * 2) / 2)
 	    else:
 		    return None
 
+    def mean_quality_filter_value(self, user):
+        q = self.mean_quality(user)
+        if q is not None:
+            return str(float(q)).replace('.', '@')
+        else:
+            return 'None'
 
     def get_repetition_date(self, user):
         try:
@@ -505,10 +513,13 @@ class UserWordData(models.Model):
     grade = models.IntegerField()
     mistakes = models.IntegerField()
 
-    _e_factor = -1
-    _quality = -1
-    _mean_quality = -1
-    _user_word_dataset = None
+    def __init__(self, *args, **kwargs):
+        super(UserWordData, self).__init__(*args, **kwargs)
+        self._e_factor = -1
+        self._quality = -1
+        self._mean_quality = -1
+        self._user_word_dataset = None
+
 
     @property
     def user_word_dataset(self):
@@ -530,7 +541,7 @@ class UserWordData(models.Model):
 
     @property
     def mean_quality(self):
-        if self._e_factor is -1:
+        if self._mean_quality is -1:
             if self.grade:
                 dataset = self.user_word_dataset
                 self._e_factor, self._quality, self._mean_quality = sm2_e_factor_and_quality(

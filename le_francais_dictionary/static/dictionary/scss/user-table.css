@@ -1,4 +1,4 @@
-.signal { display: block; content: ' '; background-size: 28px 28px; height: 28px; width: 28px; }
+.signal { display: block; content: ' '; background-size: 22px 22px; height: 22px; width: 22px; background-repeat: no-repeat; }
 
 .signal-null { background-image: url("../img/signal-bars-null.svg"); }
 
@@ -15,3 +15,11 @@
 .signal-5 { background-image: url("../img/signal-bars-5.svg"); }
 
 .deleted { text-decoration: line-through; }
+
+.footable-filtering { display: none; }
+
+.funnel-filter-button { display: inline-block; content: ' '; background-size: 24px 15px; height: 17px; width: 16px; background-image: url(../img/filter-0.svg); background-repeat: no-repeat; }
+
+.lamp-icon { display: block; content: ' '; background-size: 24px 26px; height: 26px; width: 22px; background-image: url(../img/lamp.svg); background-repeat: no-repeat; }
+
+.cell-stars { font-size: 0.8rem; }
