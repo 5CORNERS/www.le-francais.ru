@@ -4,11 +4,14 @@
     <script type="text/javascript"
         src="{% static 'components/simple-checkbox-table/dist/jquery.simple-checkbox-table.min.js' %}"></script>
     <script type="text/javascript"
-        src="{% static 'components/ComboStars/src/jquery.combostars.min.js' %}"></script>
-    <script type="text/javascript"
             src="{% static 'dictionary/js/user-table.js' %}"></script>
 {% endblock %}
 {% block extra_head %}
+    <link rel="stylesheet"
+            href="{% static 'lib/datatables/datatables.min.css' %}">
+    <script src="{% static 'lib/datatables/datatables.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/jquery-datatables-checkboxes-1.2.11/css/dataTables.checkboxes.css' %}">
+    <script src="{% static 'lib/jquery-datatables-checkboxes-1.2.11/js/dataTables.checkboxes.min.js' %}"></script>
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
     <link rel="stylesheet"
@@ -52,8 +55,8 @@
                 </form>
             </div>
             <div class="col-12 words-footable">
-                <div class="table-responsive table-responsive-sm">
-                    <table class="table" id="wordsTable"></table>
+                <div class="table-responsive">
+                    {% include 'dictionary/words_table.html' with table=table %}
                 </div>
                 <button style="display: none" type="button"
                         class="btn btn-primary mb-2 undertable" id="startApp">Загрузить карточки
@@ -65,9 +68,8 @@
             </div>
         </div>
     </div>
-
-    {% if get_table %}
-        <script>var getTable = $.parseJSON("{{ get_table|escapejs }}")</script>
-    {% endif %}
-    <script>var csrf = "{{ csrf_token }};"</script>
+    <script>
+        var csrf = "{{ csrf_token }}";
+        var starFilterHtml = `<select data-noneSelectedText="Оценка" multiple class="selectpicker" data-sanitize="false" id="starFilter" name="star_filter">{% for choice in star_choices %}<option class="{% if not forloop.first %}star-choice{% endif %}" value="{{ choice.0 }}" data-content="{{ choice.1 }}">{{ choice.0 }}</option>{% endfor %}</select>`;
+    </script>
 {% endblock %}

@@ -1,0 +1,21 @@
+{% load le_francais_dictionary %}
+<table class="table .table-bordered" id="wordsTable">
+    <thead>
+    <tr>
+        <th></th>
+        {% for column in table.columns %}
+            <th {% if not column.visible %}style="display: none;" {% endif %}id="{{ column.id }}">{{ column.title|safe }}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in table.rows %}
+        <tr id="{{ row.id }}">
+            <td></td>
+            {% for cell in row.cells %}
+                <td {% if cell.cls %}class="{{ cell.cls }}"{% endif %} {% if not cell.visible %}style="display: none;" {% endif %}{% if cell.order_value %}data-order='{{ cell.order_value }}' {% endif %}{% if cell.filter_value %}data-filter="{{ cell.filter_value }}" {% endif %}>{% if cell.id == 'stars' %}{% rating2stars cell.value %}{% elif cell.id == 'repetitions' %}{% repetitions2bars cell.value %}{% else %}{{ cell.value|safe }}{% endif %}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
