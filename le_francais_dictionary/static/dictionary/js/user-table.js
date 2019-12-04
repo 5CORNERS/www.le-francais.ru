@@ -34,6 +34,7 @@ function updateTable() {
                 },
                 'searching': false,
                 'ordering':  false,
+                'paging': false,
                 initComplete: function () {
                     dt = this;
                     // adding star filter
@@ -44,7 +45,6 @@ function updateTable() {
                             'noneSelectedText': "Оценка",
                             'selectedTextFormat': 'static',
                             'header': 'Оценка',
-                            'mobile': true,
                         }).on('change', function () {
                             let pattern = $(this).find(':selected').map(function () {
                                 return $(this).text()
