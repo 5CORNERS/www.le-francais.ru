@@ -394,7 +394,7 @@ def manage_words(request):
 def start_app(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        ids = data['ids']
+        ids = data['words']
         standalone_packet, created = UserStandalonePacket.objects.get_or_create(user=request.user)
         standalone_packet.words = [int(pk) for pk in ids]
         standalone_packet.save()
