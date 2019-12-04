@@ -59,7 +59,11 @@ def sm2_new_e_factor(response_quality:int, last_e_factor:float=None) -> float:
 	return result
 
 
-def sm2_e_factor_and_quality(dataset) -> (float, int, float):
+def sm2_ef_q_mq(dataset) -> (float, int, float):
+	"""
+	Returns final e_factor, quality and mean quality for given user_data set
+	:param dataset: list of UserData objects
+	"""
 	e_factor = 2.5
 	finals = []
 	qualities = []

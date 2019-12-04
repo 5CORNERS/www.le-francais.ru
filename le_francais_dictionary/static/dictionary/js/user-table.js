@@ -21,20 +21,59 @@ function updateTable() {
                 $selectStars.remove();
             }
             $table.DataTable({
+                'dom':
+                    /*"<'row'<'col-sm-12 col-md-6'f>>" + */"<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-12 col-md-12'i><'col-sm-12 col-md-5'l><'col-sm-12 col-md-7'p>>",
                 'columnDefs': [
                     {
                         'targets': 0,
+                        'render': function (data, type, row, meta) {
+                            if (type === 'display') {
+                                data = '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>';
+                            }
+
+                            return data;
+                        },
                         'checkboxes': {
-                            'selectRow': true
+                            'selectRow': true,
+                            'selectAllRender': '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
                         }
                     }
                 ],
-                'select': {
-                    'style': 'multi+shift'
-                },
-                'searching': false,
+                'select': 'multi+shift',
+                'searching': true,
                 'ordering':  false,
-                'paging': false,
+                'paging': true,
+                "pageLength": 50,
+                "lengthMenu": [ [50, 100, 250, 500, -1], [50, 100, 250, 500, "Все"] ],
+                "language": {
+                    "processing": "Подождите...",
+                    "search": "Поиск:",
+                    "lengthMenu": "Показывать: _MENU_",
+                    "info": "Слова с _START_ до _END_ из _TOTAL_",
+                    "infoEmpty": "Слова с 0 до 0 из 0",
+                    "infoFiltered": "(отфильтровано из _MAX_ записей)",
+                    "infoPostFix": "",
+                    "loadingRecords": "Загрузка слов...",
+                    "zeroRecords": "Слова отсутствуют.",
+                    "emptyTable": "В таблице отсутствуют данные",
+                    "paginate": {
+                        "first": "Первая",
+                        "previous": "Предыдущая",
+                        "next": "Следующая",
+                        "last": "Последняя"
+                    },
+                    "aria": {
+                        "sortAscending": ": активировать для сортировки столбца по возрастанию",
+                        "sortDescending": ": активировать для сортировки столбца по убыванию"
+                    },
+                    "select": {
+                        "rows": {
+                            "_": "Выбрано слов: %d",
+                            "0": "Кликните по слову для выбора",
+                            "1": "Выбрано одно слово"
+                        }
+                    }
+                },
                 initComplete: function () {
                     dt = this;
                     // adding star filter
@@ -43,20 +82,37 @@ function updateTable() {
                         $(column.header()).empty();
                         $(starFilterHtml).appendTo($(column.header())).selectpicker({
                             'noneSelectedText': "Оценка",
-                            'selectedTextFormat': 'static',
                             'header': 'Оценка',
+                            'selectedTextFormat': 'count > 1',
                         }).on('change', function () {
                             let pattern = $(this).find(':selected').map(function () {
                                 return $(this).text()
                             }).get().join('|');
-                            column.search(pattern, true, false).draw();
+                            if (pattern === ''){
+                                dt.api().column(-1).search(pattern, false, true).draw();
+                            }else {
+                                pattern = `^${pattern}$`;
+                                dt.api().column(-1).search(pattern, true, false).draw();
+                            }
                         });
                         $selectStars = $('#starFilter');
                     });
                 }
             })
         }
-    })
+    });
+
+    $('.undertable').show()
+}
+
+function get_selected(dt){
+    let rows_selected = dt.api().column(0).checkboxes.selected();
+    let ids = [];
+    $.each(rows_selected, function(index, rowId){
+         // Create a hidden element
+        ids.push(rowId)
+      });
+    return ids
 }
 
 $(document).ready(function () {
@@ -70,13 +126,43 @@ $(document).ready(function () {
             contentType: "application/json",
             dataType: "json",
             data: JSON.stringify({
-                ids: checked_ids,
+                words: get_selected(dt),
                 csrfmiddlewaretoken: csrf,
             }),
             success: function (r) {
                 window.location.href = Urls['dictionary:standalone']()
             }
         })
+    });
+    $('#markWords').on('click', function () {
+        var rows_selected = dt.api().column(0).checkboxes.selected();
+       $.ajax(Urls['dictionary:mark_words'](), {
+           type: 'POST',
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify({
+                words: get_selected(dt),
+                csrfmiddlewaretoken: csrf,
+            }),
+            success: function (r) {
+                updateTable()
+            }
+       })
+    });
+    $('#unmarkWords').on('click', function () {
+        var rows_selected = dt.api().column(0).checkboxes.selected();
+       $.ajax(Urls['dictionary:unmark_words'](), {
+           type: 'POST',
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify({
+                words: get_selected(dt),
+                csrfmiddlewaretoken: csrf,
+            }),
+            success: function (r) {
+                updateTable()
+            }
+       })
     });
     // Handle form submission event
     $('#main-frm').on('submit', function (e) {
@@ -97,30 +183,4 @@ $(document).ready(function () {
         // Prevent actual form submission
         e.preventDefault();
     });
-    $('#markWords').on('click', function () {
-        $.ajax(Urls['dictionary:mark_words'](), {
-            type: 'POST',
-            contentType: "application/json",
-            dataType: "json",
-            data: JSON.stringify({
-                'words': checked_ids
-            }),
-            success: function (r) {
-                updateTable()
-            }
-        })
-    });
-    // $('#forgetWords').on('click', function () {
-    //     $.ajax(Urls['dictionary:mark_words'](), {
-    //         type: 'POST',
-    //         contentType: "application/json",
-    //         dataType: "json",
-    //         data: JSON.stringify({
-    //             'words': ft.rows.array.filter(row => row.value._selection === "True").map(row => row.value.id)
-    //         }),
-    //         success: function (r) {
-    //             updateTable()
-    //         }
-    //     })
-    // });
 });
