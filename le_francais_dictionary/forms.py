@@ -34,11 +34,9 @@ class WordsManagementFilterForm(forms.Form):
 
 	def __init__(self, user, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		packets = Packet.objects.filter(Q(demo=True)|Q(lesson__payment__user=user)).distinct().order_by('lesson__lesson_number', 'name')
+		self.packets = Packet.objects.filter(Q(word__userdata__user=user)|Q(lesson__payment__user=user)).distinct().order_by('lesson__lesson_number', 'name')
 		self.user=user
-		self.fields['packets'] = forms.MultipleChoiceField(choices=[(o.id, str(o.name)) for o in packets])
-		self.fields['show_only_learned'] = forms.BooleanField(label='Только выученные', required=False, initial=True)
-		self.fields['show_deleted'] = forms.BooleanField(label='Показывать исключенные', required=False, initial=False)
+		self.fields['packets'] = forms.MultipleChoiceField(choices=[(o.id, str(o.name)) for o in self.packets])
 		# name, title, type, visible, sortable, filterable, p_filter_value, p_sort_value, p_value
 		self.COLUMNS_ATTRS = [
 			'name', 'title', 'type', 'visible', 'sortable', 'filterable',
@@ -46,7 +44,7 @@ class WordsManagementFilterForm(forms.Form):
 		self.COLUMNS = [
 			# ('_checkbox', "<input type='checkbox'>",'text',  True, False, False, None, None, '<input type="checkbox">'),
 			('id', 'ID', None, False, False, False, None, None, attrgetter('pk')),
-			('deleted', 'Удалено', None, False, False, False, None, None, methodcaller('is_marked', self.user)),
+			('deleted', 'Удалено', None, False, False, False, methodcaller('is_marked', self.user), None, methodcaller('is_marked', self.user)),
 			('word', 'Слово', None, True, True, True, None, None, attrgetter('word')),
 			('translation', 'Перевод', None, True, True, True,  None, None, attrgetter('first_translation.translation')),
 			('repetitions', '<i class="lamp-icon" title="На сколько вы продвинулись в запоминании слова"></i>', None, True, True, True, methodcaller('repetitions_count', self.user), None, methodcaller('repetitions_count', self.user)),
@@ -68,10 +66,6 @@ class WordsManagementFilterForm(forms.Form):
 				'userwordrepetition_set', 'userdata', 'userwordignore_set',
 				'wordtranslation_set',
 			).filter(packet_id__in=data['packets'])
-			if data['show_only_learned']:
-				query = query.filter(userdata__user=self.user, userdata__grade=1)
-			if not data['show_deleted']:
-				query = query.exclude(userwordignore__user=self.user)
 			# time = datetime.now()
 			words = list(query.distinct().order_by('order'))
 			translations = list(WordTranslation.objects.filter(word__in = words))
@@ -126,13 +120,13 @@ class WordsManagementFilterForm(forms.Form):
 			return result
 		else:
 			return dict(
-				columns_dicts=[dict(
+				columns=[dict(
 					id=column[0],
 					title=column[1],
-					visible=column[2]
+					visible=column[3]
 				) for column in self.COLUMNS],
 				rows=[],
-				empty= 'Мои слова',
+				empty= 'Выберете урок из выпадающего списка (можно выбрать несколько)' if self.packets else 'Выберете урок из выпадающего списка (можно выбрать несколько)',
 			)
 
 
