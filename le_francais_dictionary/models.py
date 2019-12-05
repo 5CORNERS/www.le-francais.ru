@@ -200,6 +200,7 @@ class Word(models.Model):
 		self._is_marked = {}
 		self._repetitions_count = {}
 		self._first_translation = None
+		self._repetitions = {}
 
 	def mistake_ratio(self, mistakes):
 		word = self.word
@@ -303,6 +304,19 @@ class Word(models.Model):
 		else:
 			return 'None'
 
+	def repetition(self, user):
+		if not user.pk in self._repetitions.keys():
+			repetition = UserWordRepetition.objects.filter(
+				user=user,
+				word__group_id=self.group_id,
+				word__definition_num=self.definition_num,
+			).first()
+			if repetition:
+				self._repetitions[user.pk] = repetition
+			else:
+				self._repetitions[user.pk] = None
+		return self._repetitions[user.pk]
+
 	def get_repetition_date(self, user):
 		try:
 			return self.userwordrepetition_set.filter(user=user).repetition_date
@@ -343,6 +357,11 @@ class Word(models.Model):
 		return self._is_marked[user.pk]
 
 	def to_dict(self, with_user=False, user=None):
+		translation = self.first_translation
+		if translation:
+			translation_dict = translation.to_dict()
+		else:
+			translation_dict = None
 		data = {
 			'pk': self.pk,
 			'word': self.word,
@@ -351,19 +370,13 @@ class Word(models.Model):
 			'partOfSpeech': self.part_of_speech,
 			'plural': self.plural,
 			'grammaticalNumber': self.grammatical_number,
-			'translation': self.wordtranslation_set.get(word=self).to_dict(),
-			'translations': [
-				tr.to_dict() for tr in self.wordtranslation_set.all()
-			],
+			'translation': translation_dict,
+			'translations': [translation_dict],
 			'packet': self.packet.pk,
 			'userData': None,
 		}
 		if user and user.is_authenticated:
-			repetition: UserWordRepetition = UserWordRepetition.objects.filter(
-				user=user,
-				word__group_id=self.group_id,
-				word__definition_num=self.definition_num,
-			).first()
+			repetition: UserWordRepetition = self.repetition(user)
 			if repetition:
 				repetition_time = repetition.time
 				repetition_date = repetition.repetition_date

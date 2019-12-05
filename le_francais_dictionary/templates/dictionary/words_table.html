@@ -10,12 +10,12 @@
         </tr>
     </thead>
     <tbody>
-    {% for row in table.rows %}
+    {% if table.rows %}{% for row in table.rows %}
         <tr id="{{ row.id }}" {% if row.cells.1.value %}class="deleted" {% endif %}>
             <td>{{ row.id }}</td>
             {% for cell in row.cells %}
                 <td {% if cell.cls %}class="{{ cell.cls }}"{% endif %}
-                    {% if not cell.visible %}style="display: none;" {% endif %}{% if cell.order_value %}data-order='{{ cell.order_value }}' {% endif %}{% if cell.filter_value %}data-filter="{{ cell.filter_value }}" {% endif %}>
+                    {% if not cell.visible %}style="display: none;" {% endif %}{% if cell.order_value %}data-order='{{ cell.order_value }}' {% endif %}{% if cell.filter_value != None %}data-filter="{{ cell.filter_value }}" {% endif %}>
                     {% if cell.id == 'stars' %}
                         {% rating2stars cell.value %}{% elif cell.id == 'repetitions' %}
                         {% repetitions2bars cell.value %}{% else %}
@@ -23,5 +23,11 @@
             {% endfor %}
         </tr>
     {% endfor %}
+    {% else %}
+        <tr>
+            <td colspan="5" style="text-align: center">
+                <h5 style="margin: 1rem auto"><b>{{ table.empty }}</b></h5></td>
+        </tr>
+    {% endif %}
     </tbody>
 </table>
