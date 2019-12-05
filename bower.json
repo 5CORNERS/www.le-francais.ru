@@ -8,7 +8,5 @@
     "Font-Awesome": "https://github.com/FortAwesome/Font-Awesome.git#*",
     "simple-checkbox-table": "https://github.com/toshiyukihina/jquery-simple-checkbox-table.git#*",
     "ComboStars": "https://github.com/parsonsj/ComboStars.git#*",
-    "datatables.net-bs4": "^3.2.2",
-    "datatables.net-responsive-bs4": "^2.2.3"
   }
 }
