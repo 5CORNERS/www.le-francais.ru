@@ -6,6 +6,59 @@ var style = getComputedStyle(document.body);
 var checked_ids = [];
 
 
+function showDeleted(checked) {
+    if (checked) {
+        let pattern = '^True|False$';
+        dt.api().column(2).search(pattern, true, false).draw()
+    } else {
+        let pattern = '^False$';
+        dt.api().column(2).search(pattern, true, false).draw()
+    }
+}
+
+
+function emptyTable(s) {
+    $table.find('tbody').empty().html(
+        '<tr>' +
+        '<td colspan="5" style="text-align:center">' +
+        s +
+        '</td>' +
+        '</tr>');
+}
+
+
+function errorLoading() {
+    emptyTable(
+        '<div class="row">' +
+        '<div class="col-12">' +
+        '<h5 style="margin:1rem">' +
+        'Ошибка :(' +
+        '</h5>' +
+        '</div> ' +
+        '</div>'
+    )
+}
+
+
+function tableReloading() {
+    $table.find('tbody').empty().html(
+        '<tr>' +
+        '<td colspan="5" style="text-align:center">' +
+        '<div class="row">' +
+        '<div class="col-12">' +
+        '<h5 style="margin:1rem">' +
+        'Загружаем слова...' +
+        '</h5>' +
+        '</div>' +
+        '<div class="col-12">' +
+        '<img src="/static/images/loading_icon.gif">' +
+        '</div>' +
+        '</div>' +
+        '</td>' +
+        '</tr>'
+    )
+}
+
 function updateTable() {
     let form = $('#filterWordsForm');
     let url = Urls['dictionary:manage_words']();
@@ -97,12 +150,20 @@ function updateTable() {
                         });
                         $selectStars = $('#starFilter');
                     });
+                    showDeleted($('#showDeleted')[0].checked);
+                    $('#showDeleted').on('change', function (e) {
+                        e.preventDefault();
+                        showDeleted(this.checked)
+                    })
                 }
             })
-        }
+        },
+        error: errorLoading,
+        beforeSend: tableReloading,
     });
 
-    $('.undertable').show()
+    $('.undertable').show();
+    $('.uppertable').show();
 }
 
 function get_selected(dt){
@@ -129,9 +190,12 @@ $(document).ready(function () {
                 words: get_selected(dt),
                 csrfmiddlewaretoken: csrf,
             }),
+            error: errorLoading,
             success: function (r) {
                 window.location.href = Urls['dictionary:standalone']()
-            }
+            },
+            beforeSend: emptyTable('')
+
         })
     });
     $('#markWords').on('click', function () {
@@ -146,7 +210,9 @@ $(document).ready(function () {
             }),
             success: function (r) {
                 updateTable()
-            }
+            },
+           error: errorLoading,
+           beforeSend: tableReloading,
        })
     });
     $('#unmarkWords').on('click', function () {
@@ -161,7 +227,9 @@ $(document).ready(function () {
             }),
             success: function (r) {
                 updateTable()
-            }
+            },
+           error: errorLoading,
+           beforeSend: tableReloading,
        })
     });
     // Handle form submission event

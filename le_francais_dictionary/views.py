@@ -16,7 +16,8 @@ from django.utils.translation import ugettext_lazy as _
 # Create your views here.
 from le_francais_dictionary.forms import WordsManagementFilterForm
 from .models import Word, Packet, UserPacket, \
-    UserWordData, UserWordRepetition, UserWordIgnore, UserStandalonePacket
+    UserWordData, UserWordRepetition, UserWordIgnore, UserStandalonePacket, \
+    WordTranslation
 from .utils import create_or_update_repetition
 from . import consts
 from home.models import UserLesson
@@ -102,6 +103,43 @@ def get_words(request, packet_id):
     if int(packet_id) == 99999999:
         standalone_packet = UserStandalonePacket.objects.get(user=request.user)
         words = Word.objects.filter(pk__in=standalone_packet.words)
+        translations = list(
+            WordTranslation.objects.filter(word__in=words))
+        ignored = list(UserWordIgnore.objects.filter(user=request.user,
+                                                     word__in=words))
+        user_data = list(UserWordData.objects.filter(user=request.user,
+                                                     word__in=words).order_by(
+            '-datetime'))
+        user_repetitions = list(
+            UserWordRepetition.objects.filter(user=request.user,
+                                              word__in=words))
+        for word in words:
+            word_user_data = [ud for ud in user_data if
+                              ud.word_id == word.pk]
+            if word_user_data:
+                last_word_user_data = word_user_data[0]
+                last_word_user_data._user_word_dataset = word_user_data
+                word._last_user_data[
+                    request.user.pk] = last_word_user_data
+            else:
+                word._last_user_data[request.user.pk] = None
+            if word.pk in [i.word_id for i in ignored]:
+                word._is_marked[request.user.pk] = True
+            else:
+                word._is_marked[request.user.pk] = False
+            user_word_repetitions = [uwr for uwr in user_repetitions if
+                                     uwr.word_id == word.pk]
+            if user_word_repetitions:
+                word._repetitions_count[request.user.pk] = \
+                    user_word_repetitions[0].time
+            else:
+                word._repetitions_count[request.user.pk] = None
+            word_translations = [wt for wt in translations if
+                                 wt.word_id == word.pk]
+            if word_translations:
+                word._first_translation = word_translations[0]
+            else:
+                word._first_translation = None
         result['words'] = [word.to_dict(user=request.user) for word in words]
     else:
         try:
@@ -110,10 +148,10 @@ def get_words(request, packet_id):
                 'wordtranslation_set',
                 'wordtranslation_set__polly', 'lesson').get(pk=packet_id)
             if packet.demo or packet.is_activated(request.user):
-                words = packet.word_set.order_by('order')
+                words = packet.word_set.select_related('packet').order_by('order')
                 if request.user.is_authenticated:
-                    words = words.exclude(
-                    userwordignore__user=request.user)
+                    words = list(words.exclude(
+                    userwordignore__user=request.user))
                 result['words'] = [word.to_dict(user=request.user, packet=packet) for word in words]
             elif not request.user.is_authenticated:
                 result['errors'].append(
