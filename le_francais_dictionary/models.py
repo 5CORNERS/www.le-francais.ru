@@ -528,7 +528,7 @@ class UserWordIgnore(models.Model):
 
 class UserWordData(models.Model):
 	word = models.ForeignKey(Word, related_name='userdata')
-	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='flash_cards_data')
 	datetime = models.DateTimeField(auto_now_add=True)
 	grade = models.IntegerField()
 	mistakes = models.IntegerField()
