@@ -131,7 +131,7 @@ class User(AbstractUser):
 
 	@property
 	def has_words_or_lessons(self) -> bool:
-		if self.userworddata_set().all().exists():
+		if self.flash_cards_data.all().exists():
 			return True
 		elif self.payed_lessons.all().exists():
 			return True
