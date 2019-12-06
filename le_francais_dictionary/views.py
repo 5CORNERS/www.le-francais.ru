@@ -1,10 +1,12 @@
 import json
 from typing import List
 from bulk_update.helper import bulk_update
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count, Q
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
@@ -12,8 +14,10 @@ from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
 from django.utils.translation import ugettext_lazy as _
 
 # Create your views here.
+from le_francais_dictionary.forms import WordsManagementFilterForm
 from .models import Word, Packet, UserPacket, \
-    UserWordData, UserWordRepetition, UserWordIgnore
+	UserWordData, UserWordRepetition, UserWordIgnore, UserStandalonePacket, \
+	WordTranslation, prefetch_words_data
 from .utils import create_or_update_repetition
 from . import consts
 from home.models import UserLesson
@@ -96,42 +100,46 @@ def get_words(request, packet_id):
         'words': [],
         'errors': [],
     }
-    try:
-        packet = Packet.objects.prefetch_related(
-            'word_set', 'word_set__polly',
-            'wordtranslation_set',
-            'wordtranslation_set__polly').get(pk=packet_id)
-        if (packet.demo or (
-                request.user.is_authenticated and
-                packet.userpacket_set.filter(user=request.user))):
-            words = packet.word_set.order_by('order')
-            if request.user.is_authenticated:
-                words = words.exclude(
-                userwordignore__user=request.user)
-            result['words'] = [word.to_dict(user=request.user, packet=packet) for word in words]
-        elif not request.user.is_authenticated:
-            result['errors'].append(
-                dict(
-                    message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
-                    code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
+    if int(packet_id) == 99999999:
+        standalone_packet = UserStandalonePacket.objects.get(user=request.user)
+        words = Word.objects.filter(pk__in=standalone_packet.words)
+        words = prefetch_words_data(words, request.user)
+        result['words'] = [word.to_dict(user=request.user) for word in words]
+    else:
+        try:
+            packet = Packet.objects.prefetch_related(
+                'word_set', 'word_set__polly',
+                'wordtranslation_set',
+                'wordtranslation_set__polly', 'lesson').get(pk=packet_id)
+            if packet.demo or packet.is_activated(request.user):
+                words = packet.word_set.select_related('packet').order_by('order')
+                if request.user.is_authenticated:
+                    words = list(words.exclude(
+                    userwordignore__user=request.user))
+                result['words'] = [word.to_dict(user=request.user, packet=packet) for word in words]
+            elif not request.user.is_authenticated:
+                result['errors'].append(
+                    dict(
+                        message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
+                        code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
+                    )
                 )
-            )
-        elif (not packet.demo
-              and not packet.userpacket_set.filter(user=request.user)):
-            result['errors'].append(
-                dict(
-                    message=consts.PACKET_IS_NOT_ADDED_MESSAGE,
-                    code=consts.PACKET_IS_NOT_ADDED_CODE,
+            elif (not packet.demo
+                  and not packet.is_activated(request.user)):
+                result['errors'].append(
+                    dict(
+                        message=consts.LESSON_IS_NOT_ACTIVATED_MESSAGE,
+                        code=consts.LESSON_IS_NOT_ACTIVATED_CODE,
+                    )
                 )
-            )
 
-    except Packet.DoesNotExist:
-        result['errors'].append(
-            dict(
-                message=consts.PACKET_DOES_NOT_EXIST_MESSAGE,
-                code=consts.PACKET_DOES_NOT_EXIST_CODE,
+        except Packet.DoesNotExist:
+            result['errors'].append(
+                dict(
+                    message=consts.PACKET_DOES_NOT_EXIST_MESSAGE,
+                    code=consts.PACKET_DOES_NOT_EXIST_CODE,
+                )
             )
-        )
     return JsonResponse(result, safe=False)
 
 
@@ -176,7 +184,7 @@ def update_words(request):
     errors = []
     for word_data in words_data:
         try:
-            word = Word.objects.get(pk=word_data['pk'])
+            word = Word.objects.select_related('packet').get(pk=word_data['pk'])
             grade = word_data['grade']
             mistakes = word_data['mistakes']
             if UserWordRepetition.objects.filter(
@@ -188,7 +196,7 @@ def update_words(request):
                     code=consts.TOO_EARLY_CODE,
                 )
                 )
-            elif word.packet.userpacket_set.filter(user=request.user).exists():
+            elif word.packet.is_activated(request.user) or word.packet.demo:
                 user_words_data.append(UserWordData(
                     word=word,
                     user_id=request.user.id,
@@ -198,8 +206,8 @@ def update_words(request):
             else:
                 errors.append(dict(
                     pk=word.pk,
-                    message=consts.PACKET_IS_NOT_ADDED_MESSAGE,
-                    code=consts.PACKET_IS_NOT_ADDED_CODE,
+                    message=consts.LESSON_IS_NOT_ACTIVATED_MESSAGE,
+                    code=consts.LESSON_IS_NOT_ACTIVATED_CODE,
                 ))
         except Word.DoesNotExist:
             errors.append(dict(
@@ -211,6 +219,9 @@ def update_words(request):
     words = []
     repetitions = []
     for user_word_data in user_words_data:
+        e_factor = user_word_data.e_factor
+        quality = user_word_data.quality
+        mean_quality = user_word_data.mean_quality
         if user_word_data.grade:
             repetition = create_or_update_repetition(user_word_data)
             repetition_datetime = repetition.repetition_date
@@ -222,7 +233,10 @@ def update_words(request):
         words.append(dict(
             pk=user_word_data.word_id,
             nextRepetition=repetition_datetime,
-            repetitionTime=repetition_time
+            repetitionTime=repetition_time,
+            e_factor=e_factor,
+            quality=quality,
+            mean_quality=mean_quality
         ))
     bulk_update(repetitions, update_fields=['repetition_date'])
     return JsonResponse(dict(words=words, errors=errors), safe=False)
@@ -242,6 +256,11 @@ def clear_all(request):
 
 
 def get_packet_progress(request, pk):
+    if int(pk) == 99999999:
+        packet = UserStandalonePacket.objects.get(user=request.user)
+        result = packet.to_dict(user=request.user)
+        result['isAuthenticated'] = request.user.is_authenticated
+        return JsonResponse(result)
     try:
         result = Packet.objects.get(pk=pk).to_dict(user=request.user)
         result['isAuthenticated'] = request.user.is_authenticated
@@ -291,6 +310,47 @@ def mark_words(request):
         )
     return JsonResponse(result, safe=False)
 
+@csrf_exempt
+def unmark_words(request):
+    data = json.loads(request.body)
+    result = {'unmarked': [], 'errors': []}
+    if request.user.is_authenticated:
+        for pk in data['words']:
+            try:
+                word = Word.objects.get(pk=pk)
+                if UserWordIgnore.objects.filter(
+                        user=request.user, word_id=pk).exists():
+                    UserWordIgnore.objects.get(
+                        user=request.user,
+                        word=word,
+                    ).delete()
+                    result['unmarked'].append(pk)
+            except Word.DoesNotExist:
+                result['errors'].append(
+                    dict(
+                        pk=pk,
+                        message=consts.WORD_DOES_NOT_EXIST_MESSAGE,
+                        code=consts.WORD_DOES_NOT_EXIST_CODE
+                    )
+                )
+            except ValidationError as e:
+                for message in e.messages:
+                    result['errors'].append(
+                        dict(
+                            pk=pk,
+                            message=message
+                        )
+                    )
+
+    else:
+        result['errors'].append(
+            dict(
+                message=consts.USER_IS_NOT_AUTHENTICATED_MESSAGE,
+                code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
+            )
+        )
+    return JsonResponse(result, safe=False)
+
 
 def get_app(request, packet_id):
     if not UserPacket.objects.filter(user=request.user,
@@ -300,4 +360,46 @@ def get_app(request, packet_id):
             packet_id=packet_id
         )
     return render(request, 'dictionary/dictionary_app.html',
-                      {'packet_id': packet_id})
+                      {'packet_id': packet_id, 'mode': 'learn'})
+
+
+@login_required
+def manage_words(request):
+    star_choices = [
+        ('None', 'Непройденные'),
+        ('0@0', '<i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i>'),
+        ('0@5', '<i class="fas fa-star-half-alt" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i>'),
+        ('1@0', '<i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i>'),
+        ('1@5', '<i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star-half-alt" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i>'),
+        ('2@0', '<i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i>'),
+        ('2@5', '<i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star-half-alt" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i>'),
+        ('3@0', '<i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i>'),
+        ('3@5', '<i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star-half-alt" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i>'),
+        ('4@0', '<i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i>'),
+        ('4@5', '<i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star-half-alt" aria-hidden="true" style="color: #ffc107;"></i>'),
+        ('5@0', '<i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i>'),
+    ]
+    if request.method == 'POST':
+        form = WordsManagementFilterForm(request.user, request.POST)
+        table = form.table_dict()
+        table_html = render_to_string('dictionary/words_table.html', {'table': table}, request)
+        if request.is_ajax():
+            return JsonResponse({'table': table_html, 'errors': form.errors}, safe=False)
+    else:
+        form = WordsManagementFilterForm(request.user)
+        table = form.table_dict()
+    return render(request, 'dictionary/manage_words.html',
+                  {'form': form, 'table':table, 'star_choices': star_choices})
+
+@csrf_exempt
+@login_required
+def start_app(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        ids = data['words']
+        standalone_packet, created = UserStandalonePacket.objects.get_or_create(user=request.user)
+        standalone_packet.words = [int(pk) for pk in ids]
+        standalone_packet.save()
+        return JsonResponse({'message': 'OK'}, status=200)
+    else:
+        return render(request, 'dictionary/dictionary_app_standalone.html')

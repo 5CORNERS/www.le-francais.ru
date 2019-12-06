@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load bootstrap4 static sass_tags %}
+{% block extra_js %}
+    <script type="text/javascript"
+        src="{% static 'components/simple-checkbox-table/dist/jquery.simple-checkbox-table.min.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'dictionary/js/user-table.js' %}"></script>
+{% endblock %}
+{% block extra_head %}
+{#    <link rel="stylesheet"#}
+{#            href="{% static 'lib/datatables/datatables.css' %}">#}
+{#    <script src="{% static 'lib/datatables/datatables.js' %}"></script>#}
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/b-1.6.1/fh-3.1.6/sl-1.3.1/datatables.min.css"/>
+
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/b-1.6.1/fh-3.1.6/sl-1.3.1/datatables.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://gyrocode.github.io/jquery-datatables-checkboxes/1.2.10/css/dataTables.checkboxes.css">
+    <script src="https://gyrocode.github.io/jquery-datatables-checkboxes/1.2.10/js/dataTables.checkboxes.min.js"></script>
+
+    <link rel="stylesheet" src="https://cdnjs.cloudflare.com/ajax/libs/awesome-bootstrap-checkbox/0.3.7/awesome-bootstrap-checkbox.css">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/i18n/defaults-ru_RU.min.js"></script>
+    <link rel="stylesheet" href="{% sass_src 'dictionary/scss/user-table.scss' %}">
+{% endblock %}
+{% block content %}
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12 filter1 mt-2">
+                <form id="filterWordsForm" method="post"
+                      class="form-inline mb-2">
+                    <label class="sr-only"
+                           for="{{ form.packets.auto_id }}">{{ form.packets.label }}</label>
+                    <select data-none-selected-text="Выберите уроки" multiple class="mb-2 mr-sm-2 selectpicker"
+                            name="{{ form.packets.html_name }}"
+                            id="{{ form.packets.auto_id }}" required>
+                        {% for choice in form.fields.packets.choices %}
+                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                        {% endfor %}
+                    </select>
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary mb-2 ml-2">Получить список слов
+                    </button>
+                </form>
+            </div>
+            <div class="col-12 words-footable">
+                <div class="card card-body bg-light uppertable" style="display: none">
+{#                        <div class="form-check-inline mb-2 mr-sm-2">#}
+{#                            <input class="form-check-input" type="checkbox"#}
+{#                                   id="showOnlyLearned"#}
+{#                                   checked#}
+{#                            >#}
+{#                            <label class="form-check-label"#}
+{#                                   for="showOnlyLearned">Только#}
+{#                                выученные</label>#}
+{#                        </div>#}
+                        <div class="form-check-inline mb-2 mr-sm-2">
+                            <input class="form-check-input" type="checkbox"
+                                   id="showDeleted"
+                                   checked
+                            >
+                            <label class="form-check-label"
+                                   for="showDeleted">Показывать
+                                исключенные</label>
+                        </div>
+                </div>
+                <div class="table-responsive">
+                    {% include 'dictionary/words_table.html' with table=table %}
+                </div>
+                <button style="display: none" type="button"
+                        class="btn btn-primary mb-2 undertable" id="startApp">Загрузить карточки
+                </button>
+                <button style="display: none" type="button"
+                        class="btn btn-warning mb-2 undertable" id="markWords">Добавить в исключенные</button>
+                <button style="display: none" type="button"
+                        class="btn btn-success mb-2 undertable" id="unmarkWords">Убрать из исключенных</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        var csrf = "{{ csrf_token }}";
+        var starFilterHtml = `<select data-noneSelectedText="Оценка" multiple class="selectpicker" data-sanitize="false" id="starFilter" name="star_filter">{% for choice in star_choices %}<option class="{% if not forloop.first %}star-choice{% endif %}" value="{{ choice.0 }}" data-content="{{ choice.1 }}">{{ choice.0 }}</option>{% endfor %}</select>`;
+    </script>
+{% endblock %}
