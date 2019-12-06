@@ -1,5 +1,7 @@
 import datetime
 import json
+
+from django.conf import settings
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render
@@ -16,6 +18,9 @@ def notification_list_to_dict(notifications: list):
 	return [notification.to_dict() for notification in notifications]
 
 
+NOTIFICATIONS_AUTO_CHECK_NEW = getattr(settings, 'NOTIFICATIONS_AUTO_CHECK_NEW', True)
+
+
 @require_GET
 def get_notifications(request):
 	user = request.user
@@ -30,7 +35,7 @@ def get_notifications(request):
 @require_GET
 def get_new_notifications_count(request):
 	user = request.user
-	if not user.is_authenticated:
+	if not user.is_authenticated or not NOTIFICATIONS_AUTO_CHECK_NEW:
 		return HttpResponse(0, status=200)
 	new_notifications = Notification.objects.prefetch_related().filter(
         to_all=False,
@@ -65,6 +70,8 @@ def get_drop_content_html(request):
 @csrf_exempt
 @require_POST
 def has_new_notifications(request):
+	if not NOTIFICATIONS_AUTO_CHECK_NEW:
+		return JsonResponse({'hasNewNotifications': False}, status=200)
 	user_check = request.user.check_notifications
 	try:
 		data:dict = json.loads(request.body)
@@ -75,6 +82,8 @@ def has_new_notifications(request):
 	except KeyError:
 		raise SuspiciousOperation('Invalid JSON')
 	return JsonResponse({'hasNewNotifications': False}, status=200)
+
+
 @require_GET
 def check_notification(request, pk):
 	user = request.user

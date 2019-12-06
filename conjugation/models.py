@@ -15,8 +15,67 @@ class PollyAudio(models.Model):
 	polly = models.ForeignKey('polly.PollyTask', null=True)
 
 
+TYPE_CHOICES = (
+	('translation', 'Перевод'),
+	('example', 'Пример использования'),
+	('collocation', 'Устойчивое выражение'),
+	('idiom', 'Идиоматическое выражение'),
+	('none', 'Не выбрано')
+)
+
+STATUS_CHOICES = (
+	('', ''),
+	('', ''),
+	('', ''),
+)
+
+
 class Translation(models.Model):
 	verb = models.OneToOneField('conjugation.Verb', primary_key=True)
+	fr_word = models.CharField(max_length=100, blank=True)
+	fr_tag = models.OneToOneField('FrTag', null=True)
+	ru_word = models.CharField(max_length=800, null=True, default=None)
+	ru_tags = models.ManyToManyField('RuTag')
+	type = models.CharField(choices=TYPE_CHOICES, max_length=10, null=True, default=None)
+	status = models.CharField(choices=STATUS_CHOICES, max_length=10, null=True, default=None)
+	order = models.IntegerField(help_text='Поле для сортировки', default=0, blank=True)
+
+	class Meta:
+		ordering = ['order', 'verb']
+
+	comment = models.CharField(max_length=1000, null=True)
+
+	children = models.ManyToManyField('self', through='ChildrenRelation', symmetrical=False)
+
+
+class ChildrenRelation(models.Model):
+	translation = models.ForeignKey('Translation', related_name='parent')
+	child = models.ForeignKey('Translation', related_name='child')
+	order = models.IntegerField()
+
+
+class Tag(models.Model):
+	tag = models.CharField(max_length=100)
+
+	def __str__(self):
+		return self.tag
+
+	class Meta:
+		abstract = True
+
+
+class FrTag(Tag):
+	pass
+
+
+class RuTag(Tag):
+	word_normalise = models.CharField(max_length=100)
+
+	def save(self, *args, **kwargs):
+		morph = pymorphy2.MorphAnalyzer()
+		self.word_normalise = ''.join(morph.parse(word)[0].normal_form for word in self.tag.split())
+		super(RuTag, self).save(*args, **kwargs)
+
 
 
 class Regle(models.Model):

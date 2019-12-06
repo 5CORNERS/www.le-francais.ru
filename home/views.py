@@ -799,14 +799,25 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
             ))
     # render flash-cards tab:
     if tab_id is None or tab_id == 'flash-cards':
+        has_words_or_lessons = None
+        if user.is_authenticated:
+            has_words_or_lessons = user.has_words_or_lessons
         result.append(dict(
             attr='flash-cards', type='html', href='flash-cards', title='Карточки со словами',
             value=render_to_string('dictionary/dictionary_tab.html', context={
                 'lesson_page': page,
                 'hide_info': request.COOKIES.get(
                     'hide_flash_cards_info', None),
+                'hide_my_words_alert_auth': request.COOKIES.get(
+                    'hide_my_words_alert_auth', None
+                ),
+                'hide_my_words_alert_not_auth': request.COOKIES.get(
+                    'hide_my_words_alert_not_auth', None
+                ),
                 'user': request.user,
-                'request':request}, request=request),
+                'request':request,
+                'has_words_or_lessons': has_words_or_lessons,
+            }, request=request),
             transition=False
         ))
     if not page.payed(user):

@@ -1,13 +1,18 @@
 from re import sub
 
+from dal import autocomplete
 from django.db.models import Q
+from django.forms import modelformset_factory
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from unidecode import unidecode
 
-from conjugation.models import Verb, ReflexiveVerb, PollyAudio
+from conjugation import forms
+from conjugation.models import Verb, ReflexiveVerb, PollyAudio, Translation, \
+	FrTag, RuTag
 from polly.models import PollyTask
 from .consts import *
 from .polly import *
@@ -349,3 +354,87 @@ class Person:
 
 	def __str__(self):
 		return self.person_name
+
+
+class TranslationUpdateView(View):
+	"""For adding translations and phrasems to a verb and editing them."""
+
+	def get(self, request, pk):
+		verb = Verb.objects.get(id=pk)
+		main_formset = modelformset_factory(
+			Translation, form=forms.VerbMainForm,
+			extra=0,
+		)
+		examples_formset = modelformset_factory(
+			Translation,
+			form=forms.VerbExampleForm,
+			extra=0,
+		)
+		collocations_formset = modelformset_factory(
+			Translation,
+			form=forms.VerbCollocationForm,
+			extra=0,
+		)
+		idioms_formset = modelformset_factory(
+			Translation,
+			form=forms.VerbIdiomForm,
+			extra=0,
+		)
+		return render(
+			request,
+			'conjugation/verb_translation_update.html',
+			{
+				'formsets': [
+					('main', main_formset(initial=[{'fr_verb': verb, 'order': 0}],
+					                      prefix='main')),
+					('examples', examples_formset(
+						initial=[{'fr_verb': verb, 'order': 0}],
+						prefix='examples')),
+					('collocations', collocations_formset(
+						initial=[{'fr_verb': verb, 'order': 0}],
+						prefix='collocations')),
+					('idioms', idioms_formset(
+						initial=[{'fr_verb': verb, 'order': 0}], prefix='idioms'))
+				],
+				'verb': verb
+			}
+		)
+
+
+class FrVerbAutocomplete(autocomplete.Select2QuerySetView):
+	def get_queryset(self):
+		if not self.request.user.is_authenticated():
+			return Verb.objects.none()
+
+		qs = Verb.objects.all()
+
+		if self.q:
+			qs = qs.filter(infinitive_no_accents__istartswith=self.q)
+
+		return qs
+
+
+class FrTagAutocomplete(autocomplete.Select2QuerySetView):
+	def get_queryset(self):
+		if not self.request.user.is_authenticated():
+			return FrTag.objects.none()
+		qs = FrTag.objects.all()
+
+		if self.q:
+			qs = qs.filter(tag__istartswith=self.q)
+
+		return qs
+
+
+class TranslationTagAutocomplete(autocomplete.Select2QuerySetView):
+
+	def get_queryset(self):
+		if not self.request.user.is_authenticated():
+			return RuTag.objects.none()
+
+		qs = RuTag.objects.all()
+
+		if self.q:
+			qs = qs.filter(tag__istartswith=self.q)
+
+		return qs

@@ -129,6 +129,26 @@ class User(AbstractUser):
 			return True
 		return False
 
+	@property
+	def has_lessons(self) -> bool:
+		if self.payed_lessons.all().exists():
+			return True
+		else:
+			return False
+
+	def has_words(self) -> bool:
+		if self.flash_cards_data.all().exists():
+			return True
+		else:
+			return False
+
+	@property
+	def has_words_or_lessons(self) -> bool:
+		if self.has_words or self.has_lessons:
+			return True
+		else:
+			return False
+
 	def last_payment(self):
 		try:
 			return TinkoffPayment.objects.filter(
@@ -165,6 +185,7 @@ class User(AbstractUser):
 	@property
 	def latest_lesson_number(self):
 		return self.payed_lessons.aggregate(Max('lesson_number'))['lesson_number__max']
+
 	payed_lessons = models.ManyToManyField(
 		'home.LessonPage',
 		through='home.UserLesson',
