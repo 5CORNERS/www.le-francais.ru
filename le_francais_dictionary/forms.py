@@ -4,7 +4,9 @@ from django import forms
 from django.db.models import Q
 from typing import List
 
-from le_francais_dictionary.models import Packet, UserWordRepetition, Word, UserWordData, UserWordIgnore, WordTranslation
+from le_francais_dictionary.models import Packet, UserWordRepetition, Word, \
+	UserWordData, UserWordIgnore, WordTranslation, WordGroup, \
+	prefetch_words_data
 
 from .utils import sm2_ef_q_mq
 
@@ -34,7 +36,10 @@ class WordsManagementFilterForm(forms.Form):
 
 	def __init__(self, user, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.packets = Packet.objects.filter(Q(word__userdata__user=user)|Q(lesson__payment__user=user)).distinct().order_by('lesson__lesson_number', 'name')
+		if self.user.has_lessons:
+			self.packets = Packet.objects.filter(Q(demo=True)|Q(lesson__payment__user=user)).distinct().order_by('lesson__lesson_number', 'name')
+		else:
+			self.packets = Packet.objects.filter(Q(word__userdata__user=user)|Q(lesson__payment__user=user)).distinct().order_by('lesson__lesson_number', 'name')
 		self.user=user
 		self.fields['packets'] = forms.MultipleChoiceField(choices=[(o.id, str(o.name)) for o in self.packets])
 		# name, title, type, visible, sortable, filterable, p_filter_value, p_sort_value, p_value
@@ -64,40 +69,11 @@ class WordsManagementFilterForm(forms.Form):
 			data = self.cleaned_data
 			query = Word.objects.prefetch_related(
 				'userwordrepetition_set', 'userdata', 'userwordignore_set',
-				'wordtranslation_set',
+				'wordtranslation_set', 'group'
 			).filter(packet_id__in=data['packets'])
 			# time = datetime.now()
 			words = list(query.distinct().order_by('order'))
-			translations = list(WordTranslation.objects.filter(word__in = words))
-			ignored = list(UserWordIgnore.objects.filter(user=self.user, word__in=words))
-			user_data = list(UserWordData.objects.filter(user=self.user, word__in=words).order_by('-datetime'))
-			user_repetitions = list(UserWordRepetition.objects.filter(user=self.user, word__in=words))
-			# print('Query:\t', datetime.now() - time)
-			# time = datetime.now()
-			for word in words:
-				word_user_data = [ud for ud in user_data if ud.word_id == word.pk]
-				if word_user_data:
-					last_word_user_data = word_user_data[0]
-					last_word_user_data._user_word_dataset = word_user_data
-					word._last_user_data[self.user.pk] = last_word_user_data
-				else:
-					word._last_user_data[self.user.pk] = None
-				if word.pk in [i.word_id for i in ignored]:
-					word._is_marked[self.user.pk] = True
-				else:
-					word._is_marked[self.user.pk] = False
-				user_word_repetitions = [uwr for uwr in user_repetitions if uwr.word_id == word.pk]
-				if user_word_repetitions:
-					word._repetitions_count[self.user.pk] = user_word_repetitions[0].time
-				else:
-					word._repetitions_count[self.user.pk] = None
-				word_translations = [wt for wt in translations if wt.word_id == word.pk]
-				if word_translations:
-					word._first_translation = word_translations[0]
-				else:
-					word._first_translation = None
-			# print('Caching:\t',datetime.now() - time)
-			# time = datetime.now()
+			words = prefetch_words_data(words, self.user)
 			result = dict(
 				columns=[dict(
 					id=column[0],
@@ -114,7 +90,8 @@ class WordsManagementFilterForm(forms.Form):
 						cls=column[2],
 					) for column in self.COLUMNS]
 				) for word in words],
-				empty='Мои слова',
+				empty='Выберите уроки (можно одновременно выбирать несколько) и нажмите на кнопку «Получить список слов».',
+				empty_body='',
 			)
 			# print('Result:\t', datetime.now() - time)
 			return result
@@ -126,7 +103,19 @@ class WordsManagementFilterForm(forms.Form):
 					visible=column[3]
 				) for column in self.COLUMNS],
 				rows=[],
-				empty= 'Выберете урок из выпадающего списка (можно выбрать несколько)' if self.packets else 'Выберете урок из выпадающего списка (можно выбрать несколько)',
+				empty_header= 'Выберите уроки (можно одновременно выбирать несколько) '
+				              'и нажмите на кнопку «Получить список слов».',
+				empty_body='''<p>После получения списка вы можете делать
+					выборку слов для изучения в соответствии с их оценкой
+					(оценка отражает то, насколько успешно вы вспоминали
+				    слово при самопроверках). Имеет смысл выбирать слова
+				    с низким оценками.</p>
+				    <p>Не делайте слишком большую выборку. Проигрывание очень
+				    длинного списка слов теряет практический смысл,
+				    кроме того, загрузка его в словарь для произношения
+				    займёт заметное время.</p>
+				    <p>Мы рекомендуем ограничиваться примерно ста 
+				    пятьдесятью словами — больше не желательно.</p>''',
 			)
 
 
