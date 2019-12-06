@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load bootstrap static %}
+
+{% block extra_js %}
+	{{ form.media }}
+{% endblock %}
+
+{% block content %}
+	{{ translation_formset.management_form }}
+	{{ translation_formset.non_form_errors }}
+
+	{% for translation_form in translation_formset.forms %}
+		{{ translation_form }}
+
+		{% if translation_form.nested %}
+			{{ translation_form.nested.management_form }}
+			{{ translation_form.non_form_errors }}
+
+			{% for nested_form in translation_form.nested.forms %}
+				{{ nested_form }}
+			{% endfor %}
+		{% endif %}
+
+	{% endfor %}
+{% endblock %}
