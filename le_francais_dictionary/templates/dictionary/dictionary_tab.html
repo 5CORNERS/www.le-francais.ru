@@ -22,6 +22,56 @@
             </div>
         </div>
     {% endif %}
+    {% if request.user.is_authenticated %}
+        {% if not hide_my_words_alert_auth %}
+            <div class="col-12">
+                <div id="flashCardsMyWordsAuthInfo"
+                     class="alert alert-success alert-dismissible fade show"
+                     role="alert">
+                    Вы можете управлять списками своих слов и
+                    формировать из них произвольные выборки для
+                    прослушивания в разделе персонального
+                    меню <a href="{% url 'dictionary:my_words' %}">Мои
+                    слова</a>.{% if not has_words_or_lessons %}<br>Чтобы начать
+                    это делать, необходимо запомнить и проверить хотябы одно
+                    слово{% endif %}
+                    <button type="button" data-toggle="tooltip"
+                            title="Больше не показывать"
+                            id="hide-flash-cards-info-my-words-auth-button"
+                            class="close"
+                            data-dismiss="alert"
+                            aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if not hide_my_words_alert_not_auth %}
+            <div class="col-12">
+                <div id="flashCardsMyWordsAuthNotAuthInfo"
+                     class="alert alert-success alert-dismissible fade show"
+                     role="alert">
+                    Вы можете управлять списками своих слов и
+                    формировать из них произвольные выборки для
+                    прослушивания в разделе персонального
+                    меню <a href="{% url 'dictionary:my_words' %}">Мои
+                    слова</a>.<br>
+                    Управлять списками своих слов могут только
+                    <a href="{% url 'account_login' %}?next={{ request.path }}">зарегистрированные</a>
+                    пользователи.
+                    <button type="button" data-toggle="tooltip"
+                            title="Больше не показывать"
+                            id="hideFlashCardsInfoMyWordsNotAuthButton"
+                            class="close"
+                            data-dismiss="alert"
+                            aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
     {% if not user.is_authenticated %}
         <div class="col-12">
             <div id="flash-cards-info"
@@ -49,7 +99,7 @@
     {% else %}
         <div class="col-12" style="margin-bottom: 1rem" id="dictionary-app">
             {% get_packets lesson_page as packet %}
-            {% include 'dictionary/dictionary_app.html' with packet_id=packet.id %}
+            {% include 'dictionary/dictionary_app.html' with packet_id=packet.id mode='learn' %}
         </div>
     {% endif %}
     <div class="col-12">
@@ -97,6 +147,16 @@
                         их
                         основе. <a href="{% slugurl 'flash-cards' %}">Читать...
                             »»</a></p>
+
+                    <p><b>P.S.</b> Вы можете управлять списками своих слов и
+                        формировать из них произвольные выборки для
+                        прослушивания в разделе персонального
+                        меню {% if request.user.is_authenticated %}
+                            <a href="{% url 'dictionary:my_words' %}">Мои
+                                слова</a>{% else %}(управлять списками своих
+                            слов могут только зарегистрированные
+                            пользователи){% endif %}.
+                    </p>
                 </div>
             </div>
             <div class="card collapse" id="collapseTwo"
@@ -126,7 +186,14 @@
             }
         })
     }
-
+    $('#hideFlashCardsInfoMyWordsNotAuthButton').on('click', function () {
+        $.cookie('hide_my_words_alert_not_auth', 1);
+        $('#hide-flash-cards-info-button').tooltip('hide')
+    });
+    $('#hideFlashCardsInfoMyWordsAuthButton').on('click', function () {
+        $.cookie('hide_my_words_alert_auth', 1);
+        $('#hide-flash-cards-info-button').tooltip('hide')
+    });
     $('#hide-flash-cards-info-button').on('click', function () {
         $.cookie('hide_flash_cards_info', 1);
         $('#hide-flash-cards-info-button').tooltip('hide')

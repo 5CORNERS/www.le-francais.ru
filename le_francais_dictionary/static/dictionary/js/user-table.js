@@ -61,7 +61,7 @@ function tableReloading() {
 
 function updateTable() {
     let form = $('#filterWordsForm');
-    let url = Urls['dictionary:manage_words']();
+    let url = Urls['dictionary:my_words']();
 
     $.ajax(url, {
         type: 'POST',
@@ -182,7 +182,7 @@ $(document).ready(function () {
         updateTable();
     });
     $('#startApp').on('click', function () {
-        $.ajax(Urls['dictionary:standalone'](), {
+        $.ajax(Urls['dictionary:app'](), {
             type: 'POST',
             contentType: "application/json",
             dataType: "json",
@@ -192,7 +192,7 @@ $(document).ready(function () {
             }),
             error: errorLoading,
             success: function (r) {
-                window.location.href = Urls['dictionary:standalone']()
+                window.location.href = Urls['dictionary:app']()
             },
             beforeSend: emptyTable('')
 
