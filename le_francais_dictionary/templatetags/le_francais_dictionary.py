@@ -43,3 +43,22 @@ def get_packets(context, lesson_page):
         return None
     else:
         return packets[0]
+
+@register.inclusion_tag('dictionary/tags/rating2stars.html')
+def rating2stars(rating):
+    if rating is None:
+        return {'stars': None}
+    rating = round(rating * 2) / 2
+    integer, decimal  = divmod(rating, 1)
+    stars = []
+    for i in range(int(integer)):
+        stars.append('full')
+    if decimal:
+        stars.append('half')
+    for i in range(5 - len(stars)):
+        stars.append('hollow')
+    return {'rating': rating, 'stars': stars}
+
+@register.inclusion_tag('dictionary/tags/repetitions2bars.html')
+def repetitions2bars(count):
+    return {'count':count}

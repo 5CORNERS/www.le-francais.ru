@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load bootstrap static %}
+
+{% block title %}Editing translations for {{ verb.infinitive }}{% endblock %}
+{% block extra_head %}
+	<script type="text/javascript"
+	        src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+{% endblock extra_head %}
+{% block extra_js %}
+	{{ formsets.1.1.media }}
+	{% for prefix, formset in formsets %}
+		<script>
+			var {{ prefix }}_form_num = 0;
+				$('#add_{{ prefix }}').on('click', function () {
+					++{{ prefix }}_form_num;
+					$('#{{ prefix }}_formset').append($('#{{ prefix }}_empty_form').html().replace(/__prefix__/g, {{ prefix }}_form_num));
+					$('#{{ prefix }}_add_items').val({{ prefix }}_form_num);
+					$('#id_{{ prefix }}-'+{{ prefix }}_form_num+'-fr_verb').val({{ verb.id }});
+				});
+		</script>
+	{% endfor %}
+{% endblock extra_js %}
+
+{% block content %}
+	<div class="container">
+		<h1>Editing translations for
+			<a href="{{ verb.get_absolute_url }}">{{ verb.infinitive }}</a></h1>
+
+		<form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+			{% for prefix, formset in formsets %}
+				<h2>{{ prefix }}</h2>
+				<div id="{{ prefix }}_formset">
+					{{ formset.management_form }}
+					{{ formset|bootstrap }}
+				</div>
+				<div id="{{ prefix }}_empty_form" style="display: none;">
+					{{ formset.empty_form|bootstrap }}
+				</div>
+				<input type="hidden"
+				       value="0"
+				       name="{{ prefix }}_add_items"
+				       id="{{ prefix }}_add_items">
+				<input type="button" id="add_{{ prefix }}" value="Add new {{ prefix }}">
+				<hr>
+			{% endfor %}
+			<div>
+				<input type="submit" value="Update">
+				&nbsp; &nbsp;
+				<a href="{{ publisher.get_absolute_url }}">Cancel</a>
+			</div>
+		</form>
+	</div>
+{% endblock content %}

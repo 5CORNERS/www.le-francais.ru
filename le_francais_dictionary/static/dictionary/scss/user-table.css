@@ -1,0 +1,43 @@
+.signal { display: block; content: ' '; background-size: 22px 22px; height: 22px; width: 22px; background-repeat: no-repeat; }
+
+.signal-null { background-image: url("../img/signal-bars-null.svg"); }
+
+.signal-0 { background-image: url("../img/signal-bars-0.svg"); }
+
+.signal-1 { background-image: url("../img/signal-bars-1.svg"); }
+
+.signal-2 { background-image: url("../img/signal-bars-2.svg"); }
+
+.signal-3 { background-image: url("../img/signal-bars-3.svg"); }
+
+.signal-4 { background-image: url("../img/signal-bars-4.svg"); }
+
+.signal-5 { background-image: url("../img/signal-bars-5.svg"); }
+
+.deleted { text-decoration: line-through; }
+
+.footable-filtering { display: none; }
+
+.funnel-filter-button { display: inline-block; content: ' '; background-size: 24px 15px; height: 17px; width: 16px; background-image: url(../img/filter-0.svg); background-repeat: no-repeat; }
+
+.lamp-icon { display: block; content: ' '; background-size: 24px 26px; height: 26px; width: 22px; background-image: url(../img/lamp.svg); background-repeat: no-repeat; }
+
+.cell-stars { font-size: 0.8rem; }
+
+table.dataTable tbody > tr.selected, table.dataTable tbody > tr > .selected { background-color: #428bca4d; color: #212529; }
+
+table.dataTable.stripe tbody > tr.odd.selected, table.dataTable.stripe tbody > tr.odd > .selected, table.dataTable.display tbody > tr.odd.selected, table.dataTable.display tbody > tr.odd > .selected { background-color: #337ab759; }
+
+table.dataTable.hover tbody > tr.selected:hover, table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover, table.dataTable.display tbody > tr > .selected:hover { color: white; background-color: #0271d0; }
+
+table.dataTable.hover tbody > tr.selected:hover, table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover, table.dataTable.display tbody > tr > .selected:hover { color: white; background-color: #0271d0; }
+
+.table-responsive { min-height: 440px; }
+
+.dataTables_length { padding-top: 0.55rem; }
+
+@media screen and (max-width: 767px) { div.dataTables_wrapper div.dataTables_length, div.dataTables_wrapper div.dataTables_filter, div.dataTables_wrapper div.dataTables_info, div.dataTables_wrapper div.dataTables_paginate { text-align: center; } }
+
+tr.selected .fa-star, tr.selected .fa-star-half-alt { color: #dda601 !important; }
+
+table .filter-option-inner-inner { font-weight: bold; }

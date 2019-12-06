@@ -59,6 +59,7 @@ class WordUserTestCase(TestCase):
         self.word2 = Word.objects.create(word='word2', packet=self.packet1, cd_id=2)
         self.word3 = Word.objects.create(word='word3', packet=self.packet2, cd_id=3)
         self.word4 = Word.objects.create(word='word4', packet=self.packet2, cd_id=4)
+        self.good = [self.word1, self.word3]
 
     def test_add_demo_packet(self):
         data = dict(
@@ -186,28 +187,40 @@ class WordUserTestCase(TestCase):
     def test_update_words(self):
         initial_datetime = datetime.datetime(1, 1, 1, 12, 0, 0)
 
+        UserLesson.objects.create(
+            user=self.user,
+            lesson=LessonPage.objects.get(slug='lesson2')
+        )
+
         update_words_url = reverse('dictionary:update_words')
         data = dict(
             packets=[self.packet2.pk]
         )
-        add_packet_request = self.factory.post(
-            reverse('dictionary:add_packets'), data=json.dumps(data),
-            content_type='application/json')
-        add_packet_request.user = self.user
-        views.add_packets(add_packet_request)
 
-        grades_choices = [0] * 5 + [1] * 5
-        mistakes_choices = [0] * 5 + [1] * 4 + [2] * 3 + [3] * 2
+        s_good = []
+        s_bad = []
+
+        good_grades_choices = [1]
+        bad_grades_choices = [0] * 5 + [1] * 5
+        good_mistakes_choices = [0]
+        bad_mistakes_choices = [0] * 5 + [1] * 10 + [2] * 5 + [3] * 2
+        learning = True
+        words = list(self.packet2.word_set.all())
         with freeze_time(initial_datetime) as frozen_datetime:
-            for step in range(5):
-                for word in self.packet2.word_set.all():
+            while learning:
+                for i, word in reversed(list(enumerate(words))):
                     frozen_datetime.tick(delta=datetime.timedelta(seconds=10))
                     remembering = True
                     while remembering:
                         frozen_datetime.tick(
                             delta=datetime.timedelta(seconds=10))
-                        grade = random.choice(grades_choices)
-                        mistakes = random.choice(mistakes_choices)
+                        if word in self.good:
+                            grade = random.choice(good_grades_choices)
+                            mistakes = random.choice(good_mistakes_choices)
+                        else:
+                            grade = random.choice(bad_grades_choices)
+                            mistakes = random.choice(bad_mistakes_choices)
+                        mistakes_ratio = word.mistake_ratio(mistakes)
                         data = {
                             'words': [
                                 {
@@ -224,12 +237,35 @@ class WordUserTestCase(TestCase):
                         )
                         request.user = self.user
                         response = views.update_words(request)
+                        response_data = (json.loads(response.content))['words'][0]
+                        e_factor = response_data['e_factor']
+                        quality = response_data['quality']
+                        mean_quality = response_data['mean_quality']
+                        times = response_data['repetitionTime']
+                        today = datetime.datetime.today().strftime('%Y/%m/%d')
+                        if word in self.good:
+                            s_good.append([today,times,grade,mistakes_ratio,e_factor,quality, mean_quality])
+                        else:
+                            s_bad.append([today,times,grade,mistakes_ratio,e_factor,quality, mean_quality])
+                        if response_data['repetitionTime'] == 5:
+                            words.pop(i)
                         if grade:
                             remembering = False
                 passing = True
+                if not words:
+                    learning = False
                 while passing:
                     if UserWordRepetition.objects.filter(
                             repetition_date__gt=timezone.now()):
                         frozen_datetime.tick(delta=datetime.timedelta(days=1))
                     else:
                         passing = False
+        col_width = max(
+            len(str(word)) for row in s_good for word in row) + 2  # padding
+        for row in s_good:
+            print("".join(str(word).ljust(col_width) for word in row))
+
+        col_width = max(
+            len(str(word)) for row in s_bad for word in row) + 2  # padding
+        for row in s_bad:
+            print("".join(str(word).ljust(col_width) for word in row))

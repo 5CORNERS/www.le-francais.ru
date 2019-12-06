@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
     'django.contrib.postgres',
     'bootstrapform',
+    'bootstrap4',
     'django.core.mail',
 
     'annoying',
@@ -274,6 +275,7 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'sass_processor.finders.CssFinder',
+    'npm.finders.NpmFinder',
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -286,6 +288,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
 WHITENOISE_MAX_AGE = 31557600
+
+WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
 # Sass Processor settings
 
@@ -564,3 +568,5 @@ CORS_ORIGIN_ALLOW_ALL = os.getenv('CORS_ORIGIN_ALLOW_ALL', 'False') == 'True'
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'X-SessionID',
 ]
+
+NOTIFICATIONS_AUTO_CHECK_NEW = os.getenv('NOTIFICATIONS_AUTO_CHECK_NEW', '1') == '1'
