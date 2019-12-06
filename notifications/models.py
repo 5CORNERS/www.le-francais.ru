@@ -94,7 +94,9 @@ class Notification(models.Model):
 
 
 class CheckNotifications(models.Model):
-	user = AutoOneToOneField(settings.AUTH_USER_MODEL, primary_key=True, on_delete=models.CASCADE, related_name='check_notifications')
+	user = AutoOneToOneField(settings.AUTH_USER_MODEL, primary_key=True,
+	                         on_delete=models.CASCADE,
+	                         related_name='check_notifications')
 	has_new_notifications = models.BooleanField(default=True)
 	last_update = models.DateTimeField(auto_now=True)
 
@@ -125,12 +127,21 @@ class NotificationUser(models.Model):
 
 def check_users(sender, instance, **kwargs):
 	if isinstance(instance, Notification) and instance.to_all:
-		CheckNotifications.objects.all().exclude(user=instance.excpt).update(has_new_notifications=True)
+		CheckNotifications.objects.all().exclude(user=instance.excpt).update(
+			has_new_notifications=True)
 	elif isinstance(instance, NotificationUser):
 		instance.user.check_notifications.has_new_notifications = True
 		instance.user.check_notifications.save()
 
 
+def clean_post(post: str) -> str:
+	result = ''
+	for line in post.splitlines():
+		if not line.startswith('>') and not line == '':
+			result += line + ' '
+	limit = 50
+	tail = len(result) > limit and '...' or ''
+	return result[:50] + tail
 
 
 def create_pybb_post_notification(sender, instance: Post, **kwargs):
@@ -140,7 +151,7 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 			category=Notification.REPLYES,
 			data=dict(
 				username=str(instance.user),
-				post_name=str(instance),
+				post_name=clean_post(instance.body),
 				post_url=instance.get_absolute_url(),
 				topic_name=str(instance.topic),
 				topic_url=instance.topic.get_absolute_url()
