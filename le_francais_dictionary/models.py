@@ -632,6 +632,10 @@ def prefetch_words_data(words, user):
 	groups_words_repetitions = list(
 		UserWordRepetition.objects.prefetch_related('word__group').filter(
 			user=user, word__in=groups_words).order_by('-time'))
+	groups_user_data = list(
+		UserWordData.objects.prefetch_related('word__group').filter(
+			user=user, word__in=groups_words).order_by('-datetime')
+	)
 	translations = list(WordTranslation.objects.filter(word__in=words))
 	ignored = list(
 		UserWordIgnore.objects.filter(user=user, word__in=words))
@@ -641,15 +645,6 @@ def prefetch_words_data(words, user):
 	user_repetitions = list(
 		UserWordRepetition.objects.filter(user=user, word__in=words))
 	for word in words:
-		word_user_data = [ud for ud in user_data if
-		                  ud.word_id == word.pk]
-		if word_user_data:
-			last_word_user_data = word_user_data[0]
-			last_word_user_data._user_word_dataset = word_user_data
-			word._last_user_data[user.pk] = last_word_user_data
-		else:
-			word._last_user_data[user.pk] = None
-
 		group = next(
 			(group for group in groups if group.pk == word.group_id),
 			None)
@@ -662,6 +657,15 @@ def prefetch_words_data(words, user):
 					group_repetition
 			else:
 				word._repetitions[user.pk] = None
+			group_user_data = next(
+				(ud for ud in groups_user_data if ud.word.group_id == group.pk), None
+			)
+			if group_user_data:
+				last_word_user_data = group_user_data
+				last_word_user_data._user_word_dataset = group_user_data
+				word._last_user_data[user.pk] = last_word_user_data
+			else:
+				word._last_user_data[user.pk] = None
 		else:
 			user_word_repetitions = [uwr for uwr in user_repetitions if
 			                         uwr.word_id == word.pk]
@@ -670,6 +674,14 @@ def prefetch_words_data(words, user):
 					user_word_repetitions[0]
 			else:
 				word._repetitions[user.pk] = None
+			word_user_data = [ud for ud in user_data if
+			                  ud.word_id == word.pk]
+			if word_user_data:
+				last_word_user_data = word_user_data[0]
+				last_word_user_data._user_word_dataset = word_user_data
+				word._last_user_data[user.pk] = last_word_user_data
+			else:
+				word._last_user_data[user.pk] = None
 
 		if word.pk in [i.word_id for i in ignored]:
 			word._is_marked[user.pk] = True
