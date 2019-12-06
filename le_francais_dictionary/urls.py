@@ -13,7 +13,7 @@ urlpatterns = [
     url('^mark-words/$', views.mark_words, name='mark_words'),
     url('^unmark-words/$', views.unmark_words, name='unmark_words'),
     url('^get-app/([0-9]*)$', views.get_app, name='get_app'),
-    url('^manage/words/$', views.manage_words, name='manage_words'),
-    url('^standalone/$', views.start_app, name='standalone'),
+    url('^my-words/$', views.manage_words, name='my_words'),
+    url('^app/$', views.start_app, name='app'),
 ]
 
