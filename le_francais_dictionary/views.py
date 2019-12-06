@@ -396,7 +396,7 @@ def get_app(request, packet_id):
             packet_id=packet_id
         )
     return render(request, 'dictionary/dictionary_app.html',
-                      {'packet_id': packet_id})
+                      {'packet_id': packet_id, 'mode': 'learn'})
 
 
 @login_required
