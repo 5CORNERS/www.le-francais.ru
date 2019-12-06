@@ -130,10 +130,21 @@ class User(AbstractUser):
 		return False
 
 	@property
-	def has_words_or_lessons(self) -> bool:
+	def has_lessons(self) -> bool:
+		if self.payed_lessons.all().exists():
+			return True
+		else:
+			return False
+
+	def has_words(self) -> bool:
 		if self.flash_cards_data.all().exists():
 			return True
-		elif self.payed_lessons.all().exists():
+		else:
+			return False
+
+	@property
+	def has_words_or_lessons(self) -> bool:
+		if self.has_words or self.has_lessons:
 			return True
 		else:
 			return False

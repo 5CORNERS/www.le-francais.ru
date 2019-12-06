@@ -318,18 +318,19 @@ class Word(models.Model):
 		return self._repetitions[user.pk]
 
 	def get_repetition_date(self, user):
-		try:
-			return self.userwordrepetition_set.filter(user=user).repetition_date
-		except:
+		repetition = self.repetition(user)
+		if repetition:
+			return repetition.repetition_date
+		else:
 			return None
 
 	def repetitions_count(self, user):
-		if not user.pk in self._repetitions_count.keys():
-			try:
-				self._repetitions_count[user.pk] = self.userwordrepetition_set.get(user=user).time or 0
-			except:
-				self._repetitions_count[user.pk] = None
-		return self._repetitions_count[user.pk]
+		repetition = self.repetition(user)
+		if repetition:
+			return repetition.time
+		else:
+			return None
+	
 	def get_difficulty_5(self, user):
 		if self.mean_quality(user):
 			return 5 - self.mean_quality(user)
@@ -623,3 +624,61 @@ class Example(models.Model):
 	example = models.CharField(max_length=200)
 	translation = models.CharField(max_length=200)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
+
+
+def prefetch_words_data(words, user):
+	groups = list(WordGroup.objects.filter(word__in=words))
+	groups_words = list(Word.objects.filter(group__in=groups))
+	groups_words_repetitions = list(
+		UserWordRepetition.objects.prefetch_related('word__group').filter(
+			user=user, word__in=groups_words).order_by('-time'))
+	translations = list(WordTranslation.objects.filter(word__in=words))
+	ignored = list(
+		UserWordIgnore.objects.filter(user=user, word__in=words))
+	user_data = list(
+		UserWordData.objects.select_related('word').filter(user=user, word__in=words).order_by(
+			'-datetime'))
+	user_repetitions = list(
+		UserWordRepetition.objects.filter(user=user, word__in=words))
+	for word in words:
+		word_user_data = [ud for ud in user_data if
+		                  ud.word_id == word.pk]
+		if word_user_data:
+			last_word_user_data = word_user_data[0]
+			last_word_user_data._user_word_dataset = word_user_data
+			word._last_user_data[user.pk] = last_word_user_data
+		else:
+			word._last_user_data[user.pk] = None
+
+		group = next(
+			(group for group in groups if group.pk == word.group_id),
+			None)
+		if group:
+			group_repetition = next(
+				(rep for rep in groups_words_repetitions if
+				 rep.word.group_id == group.pk), None)
+			if group_repetition:
+				word._repetitions[user.pk] = \
+					group_repetition
+			else:
+				word._repetitions[user.pk] = None
+		else:
+			user_word_repetitions = [uwr for uwr in user_repetitions if
+			                         uwr.word_id == word.pk]
+			if user_word_repetitions:
+				word._repetitions[user.pk] = \
+					user_word_repetitions[0]
+			else:
+				word._repetitions[user.pk] = None
+
+		if word.pk in [i.word_id for i in ignored]:
+			word._is_marked[user.pk] = True
+		else:
+			word._is_marked[user.pk] = False
+		word_translations = [wt for wt in translations if
+		                     wt.word_id == word.pk]
+		if word_translations:
+			word._first_translation = word_translations[0]
+		else:
+			word._first_translation = None
+	return words
