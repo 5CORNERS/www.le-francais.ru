@@ -32,7 +32,7 @@ function errorLoading() {
         '<div class="row">' +
         '<div class="col-12">' +
         '<h5 style="margin:1rem">' +
-        'Ошибка :(' +
+        'Не удалось получить список слов :(' +
         '</h5>' +
         '</div> ' +
         '</div>'
