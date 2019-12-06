@@ -657,12 +657,11 @@ def prefetch_words_data(words, user):
 					group_repetition
 			else:
 				word._repetitions[user.pk] = None
-			group_user_data = next(
-				(ud for ud in groups_user_data if ud.word.group_id == group.pk), None
-			)
-			if group_user_data:
-				last_word_user_data = group_user_data
-				last_word_user_data._user_word_dataset = group_user_data
+			# don't really sure about this
+			group_user_dataset = [ud for ud in groups_user_data if ud.word.group_id == group.pk]
+			if group_user_dataset:
+				last_word_user_data = group_user_dataset[0]
+				last_word_user_data._user_word_dataset = group_user_dataset
 				word._last_user_data[user.pk] = last_word_user_data
 			else:
 				word._last_user_data[user.pk] = None
