@@ -889,6 +889,8 @@ PAGE_STREAMFIELDS = [('commentsForLesson', 'comments_for_lesson'),
 def get_lesson_content(request, n, render_pdf, tab_id=None):
     render_pdf = bool(render_pdf)
     page: LessonPage = LessonPage.objects.get(lesson_number=n)
+    if tab_id == '0':
+        tab_id = 0
     return JsonResponse(
         lesson_page_to_json(page, render_pdf, user=request.user,
                             request=request, tab_id=tab_id), safe=False)
