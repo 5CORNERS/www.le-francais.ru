@@ -153,7 +153,7 @@
 				}
 			}
 
-			{% if not userlesson %}
+			{% if not userlesson and request.user.must_pay %}
 				window.addEventListener('lessonPlayerReady', function () {
 					let downloadButton = $('.audioplayer-download-button')[0];
 					downloadButton.addEventListener('click', function () {
