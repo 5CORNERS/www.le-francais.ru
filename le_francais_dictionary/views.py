@@ -116,7 +116,7 @@ def get_words(request, packet_id):
                 if request.user.is_authenticated:
                     words = list(words.exclude(
                     userwordignore__user=request.user))
-                result['words'] = [word.to_dict(user=request.user, packet=packet) for word in words]
+                result['words'] = [word.to_dict(user=request.user) for word in words]
             elif not request.user.is_authenticated:
                 result['errors'].append(
                     dict(
