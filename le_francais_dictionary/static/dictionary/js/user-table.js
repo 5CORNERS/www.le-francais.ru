@@ -182,7 +182,19 @@ $(document).ready(function () {
         updateTable();
     });
     $('#startApp').on('click', function () {
-        $.ajax(Urls['dictionary:app'](), {
+        ids=get_selected(dt);
+        if(ids.length === 0){
+            $('#startApp').popover({
+                'content': "Вы не выбрали ни одного слова",
+                'placement': 'top',
+                'trigger': 'manual',
+            }).popover('show');
+            setTimeout(function () {
+                $('#startApp').popover('hide').popover('dispose')
+            }, 2000)
+        }else{
+            $('#startApp').popover('dispose');
+            $.ajax(Urls['dictionary:app'](), {
             type: 'POST',
             contentType: "application/json",
             dataType: "json",
@@ -197,6 +209,7 @@ $(document).ready(function () {
             beforeSend: emptyTable('')
 
         })
+}
     });
     $('#markWords').on('click', function () {
         var rows_selected = dt.api().column(0).checkboxes.selected();
