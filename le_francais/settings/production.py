@@ -5,8 +5,6 @@ from .base import *
 DEBUG = False
 STATICFILES_STORAGE = 'le_francais.storage.WhiteNoiseStaticFilesStorage'
 
-# Django Email settings
-
 
 try:
 	from .local import *
