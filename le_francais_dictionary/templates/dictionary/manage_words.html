@@ -2,18 +2,14 @@
 {% load bootstrap4 static sass_tags %}
 {% block extra_js %}
     <script type="text/javascript"
-        src="{% static 'components/simple-checkbox-table/dist/jquery.simple-checkbox-table.min.js' %}"></script>
+        src="{% static 'components/js/jquery.simple-checkbox-table.js' %}"></script>
     <script type="text/javascript"
             src="{% static 'dictionary/js/user-table.js' %}"></script>
 {% endblock %}
 {% block extra_head %}
-{#    <link rel="stylesheet"#}
-{#            href="{% static 'lib/datatables/datatables.css' %}">#}
-{#    <script src="{% static 'lib/datatables/datatables.js' %}"></script>#}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/b-1.6.1/fh-3.1.6/sl-1.3.1/datatables.min.css"/>
 
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/b-1.6.1/fh-3.1.6/sl-1.3.1/datatables.min.css"/>
-
-<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/b-1.6.1/fh-3.1.6/sl-1.3.1/datatables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/b-1.6.1/fh-3.1.6/sl-1.3.1/datatables.min.js"></script>
 
 
     <link rel="stylesheet" href="https://gyrocode.github.io/jquery-datatables-checkboxes/1.2.10/css/dataTables.checkboxes.css">

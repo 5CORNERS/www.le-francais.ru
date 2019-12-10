@@ -19,8 +19,8 @@
 		var LESSON_NUMBER = {{ self.lesson_number }};
 	</script>
 	{% check_user_lesson request.user self as userlesson %}
-	<script async type="text/javascript"
-	        src="{% static 'components/bootstrap-treeview-le-francais/dist/bootstrap-treeview.min.js' %}"></script>
+	<script type="text/javascript"
+            src="{% static 'components/js/bootstrap-treeview.min.js' %}"></script>
 	{% if self.need_payment %}
 		<script>
 			{% if user.is_authenticated %}let saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
@@ -332,7 +332,7 @@
 
 {% block extra_css %}
 	<link rel="stylesheet" href="{% static 'css/lesson.css' %}">
-	<link rel="stylesheet" href="{% static 'components/bootstrap-treeview-le-francais/dist/bootstrap-treeview.min.css' %}">
+    <link rel="stylesheet" href="{% static 'components/css/bootstrap-treeview.css' %}">
 	<style>
 		.new-svg-button {
 			cursor: pointer;
