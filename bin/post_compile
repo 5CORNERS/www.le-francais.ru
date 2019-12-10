@@ -2,6 +2,6 @@ cd "$1" || exit 1
 echo "-----> Compiling SCSS"
 python manage.py compilescss
 echo "-----> Collecting static files"
-python manage.py collectstatic --noinput -i node_modules
+python manage.py collectstatic --noinput -i static_src
 echo "-----> Installing Not deps packages"
 pip install django-session-header --no-dependencies

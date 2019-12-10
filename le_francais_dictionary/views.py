@@ -162,7 +162,7 @@ def get_repetition_words(request):
         ]
     else:
         result['errors'].append(dict(
-            message=consts.USER_IS_NOT_AUTHENTICATED_INTERVAL_REPEATS_MESSAGE,
+            message=consts.USER_IS_NOT_AUTHENTICATED_REPETITIONS_MESSAGE,
             code=consts.USER_IS_NOT_AUTHENTICATED_CODE,
         ))
 
