@@ -13,7 +13,395 @@
  * limitations under the License.
  */
 
-@import url(pdf_viewer.css);
+.textLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  opacity: 0.2;
+  line-height: 1.0;
+}
+
+.textLayer > span {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  -webkit-transform-origin: 0% 0%;
+          transform-origin: 0% 0%;
+}
+
+.textLayer .highlight {
+  margin: -1px;
+  padding: 1px;
+
+  background-color: rgb(180, 0, 170);
+  border-radius: 4px;
+}
+
+.textLayer .highlight.begin {
+  border-radius: 4px 0px 0px 4px;
+}
+
+.textLayer .highlight.end {
+  border-radius: 0px 4px 4px 0px;
+}
+
+.textLayer .highlight.middle {
+  border-radius: 0px;
+}
+
+.textLayer .highlight.selected {
+  background-color: rgb(0, 100, 0);
+}
+
+.textLayer ::-moz-selection { background: rgb(0,0,255); }
+
+.textLayer ::selection { background: rgb(0,0,255); }
+
+.textLayer .endOfContent {
+  display: block;
+  position: absolute;
+  left: 0px;
+  top: 100%;
+  right: 0px;
+  bottom: 0px;
+  z-index: -1;
+  cursor: default;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+.textLayer .endOfContent.active {
+  top: 0px;
+}
+
+
+.annotationLayer section {
+  position: absolute;
+}
+
+.annotationLayer .linkAnnotation > a,
+.annotationLayer .buttonWidgetAnnotation.pushButton > a {
+  position: absolute;
+  font-size: 1em;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.annotationLayer .linkAnnotation > a:hover,
+.annotationLayer .buttonWidgetAnnotation.pushButton > a:hover {
+  opacity: 0.2;
+  background: #ff0;
+  box-shadow: 0px 2px 10px #ff0;
+}
+
+.annotationLayer .textAnnotation img {
+  position: absolute;
+  cursor: pointer;
+}
+
+.annotationLayer .textWidgetAnnotation input,
+.annotationLayer .textWidgetAnnotation textarea,
+.annotationLayer .choiceWidgetAnnotation select,
+.annotationLayer .buttonWidgetAnnotation.checkBox input,
+.annotationLayer .buttonWidgetAnnotation.radioButton input {
+  background-color: rgba(0, 54, 255, 0.13);
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  font-size: 9px;
+  height: 100%;
+  margin: 0;
+  padding: 0 3px;
+  vertical-align: top;
+  width: 100%;
+}
+
+.annotationLayer .choiceWidgetAnnotation select option {
+  padding: 0;
+}
+
+.annotationLayer .buttonWidgetAnnotation.radioButton input {
+  border-radius: 50%;
+}
+
+.annotationLayer .textWidgetAnnotation textarea {
+  font: message-box;
+  font-size: 9px;
+  resize: none;
+}
+
+.annotationLayer .textWidgetAnnotation input[disabled],
+.annotationLayer .textWidgetAnnotation textarea[disabled],
+.annotationLayer .choiceWidgetAnnotation select[disabled],
+.annotationLayer .buttonWidgetAnnotation.checkBox input[disabled],
+.annotationLayer .buttonWidgetAnnotation.radioButton input[disabled] {
+  background: none;
+  border: 1px solid transparent;
+  cursor: not-allowed;
+}
+
+.annotationLayer .textWidgetAnnotation input:hover,
+.annotationLayer .textWidgetAnnotation textarea:hover,
+.annotationLayer .choiceWidgetAnnotation select:hover,
+.annotationLayer .buttonWidgetAnnotation.checkBox input:hover,
+.annotationLayer .buttonWidgetAnnotation.radioButton input:hover {
+  border: 1px solid #000;
+}
+
+.annotationLayer .textWidgetAnnotation input:focus,
+.annotationLayer .textWidgetAnnotation textarea:focus,
+.annotationLayer .choiceWidgetAnnotation select:focus {
+  background: none;
+  border: 1px solid transparent;
+}
+
+.annotationLayer .buttonWidgetAnnotation.checkBox input:checked:before,
+.annotationLayer .buttonWidgetAnnotation.checkBox input:checked:after,
+.annotationLayer .buttonWidgetAnnotation.radioButton input:checked:before {
+  background-color: #000;
+  content: '';
+  display: block;
+  position: absolute;
+}
+
+.annotationLayer .buttonWidgetAnnotation.checkBox input:checked:before,
+.annotationLayer .buttonWidgetAnnotation.checkBox input:checked:after {
+  height: 80%;
+  left: 45%;
+  width: 1px;
+}
+
+.annotationLayer .buttonWidgetAnnotation.checkBox input:checked:before {
+  -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+}
+
+.annotationLayer .buttonWidgetAnnotation.checkBox input:checked:after {
+  -webkit-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+}
+
+.annotationLayer .buttonWidgetAnnotation.radioButton input:checked:before {
+  border-radius: 50%;
+  height: 50%;
+  left: 30%;
+  top: 20%;
+  width: 50%;
+}
+
+.annotationLayer .textWidgetAnnotation input.comb {
+  font-family: monospace;
+  padding-left: 2px;
+  padding-right: 0;
+}
+
+.annotationLayer .textWidgetAnnotation input.comb:focus {
+  /*
+   * Letter spacing is placed on the right side of each character. Hence, the
+   * letter spacing of the last character may be placed outside the visible
+   * area, causing horizontal scrolling. We avoid this by extending the width
+   * when the element has focus and revert this when it loses focus.
+   */
+  width: 115%;
+}
+
+.annotationLayer .buttonWidgetAnnotation.checkBox input,
+.annotationLayer .buttonWidgetAnnotation.radioButton input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  padding: 0;
+}
+
+.annotationLayer .popupWrapper {
+  position: absolute;
+  width: 20em;
+}
+
+.annotationLayer .popup {
+  position: absolute;
+  z-index: 200;
+  max-width: 20em;
+  background-color: #FFFF99;
+  box-shadow: 0px 2px 5px #888;
+  border-radius: 2px;
+  padding: 6px;
+  margin-left: 5px;
+  cursor: pointer;
+  font: message-box;
+  font-size: 9px;
+  word-wrap: break-word;
+}
+
+.annotationLayer .popup > * {
+  font-size: 9px;
+}
+
+.annotationLayer .popup h1 {
+  display: inline-block;
+}
+
+.annotationLayer .popup span {
+  display: inline-block;
+  margin-left: 5px;
+}
+
+.annotationLayer .popup p {
+  border-top: 1px solid #333;
+  margin-top: 2px;
+  padding-top: 2px;
+}
+
+.annotationLayer .highlightAnnotation,
+.annotationLayer .underlineAnnotation,
+.annotationLayer .squigglyAnnotation,
+.annotationLayer .strikeoutAnnotation,
+.annotationLayer .freeTextAnnotation,
+.annotationLayer .lineAnnotation svg line,
+.annotationLayer .squareAnnotation svg rect,
+.annotationLayer .circleAnnotation svg ellipse,
+.annotationLayer .polylineAnnotation svg polyline,
+.annotationLayer .polygonAnnotation svg polygon,
+.annotationLayer .caretAnnotation,
+.annotationLayer .inkAnnotation svg polyline,
+.annotationLayer .stampAnnotation,
+.annotationLayer .fileAttachmentAnnotation {
+  cursor: pointer;
+}
+
+.pdfViewer .canvasWrapper {
+  overflow: hidden;
+}
+
+.pdfViewer .page {
+  direction: ltr;
+  width: 816px;
+  height: 1056px;
+  margin: 1px auto -8px auto;
+  position: relative;
+  overflow: visible;
+  border: 9px solid transparent;
+  background-clip: content-box;
+  -webkit-border-image: url(images/shadow.png) 9 9 repeat;
+       -o-border-image: url(images/shadow.png) 9 9 repeat;
+          border-image: url(images/shadow.png) 9 9 repeat;
+  background-color: white;
+}
+
+.pdfViewer.removePageBorders .page {
+  margin: 0px auto 10px auto;
+  border: none;
+}
+
+.pdfViewer.singlePageView {
+  display: inline-block;
+}
+
+.pdfViewer.singlePageView .page {
+  margin: 0;
+  border: none;
+}
+
+.pdfViewer.scrollHorizontal, .pdfViewer.scrollWrapped, .spread {
+  margin-left: 3.5px;
+  margin-right: 3.5px;
+  text-align: center;
+}
+
+.pdfViewer.scrollHorizontal, .spread {
+  white-space: nowrap;
+}
+
+.pdfViewer.removePageBorders,
+.pdfViewer.scrollHorizontal .spread,
+.pdfViewer.scrollWrapped .spread {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.spread .page,
+.pdfViewer.scrollHorizontal .page,
+.pdfViewer.scrollWrapped .page,
+.pdfViewer.scrollHorizontal .spread,
+.pdfViewer.scrollWrapped .spread {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.spread .page,
+.pdfViewer.scrollHorizontal .page,
+.pdfViewer.scrollWrapped .page {
+  margin-left: -3.5px;
+  margin-right: -3.5px;
+}
+
+.pdfViewer.removePageBorders .spread .page,
+.pdfViewer.removePageBorders.scrollHorizontal .page,
+.pdfViewer.removePageBorders.scrollWrapped .page {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.pdfViewer .page canvas {
+  margin: 0;
+  display: block;
+}
+
+.pdfViewer .page canvas[hidden] {
+  display: none;
+}
+
+.pdfViewer .page .loadingIcon {
+  position: absolute;
+  display: block;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: url('images/loading-icon.gif') center no-repeat;
+}
+
+.pdfPresentationMode .pdfViewer {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.pdfPresentationMode .pdfViewer .page,
+.pdfPresentationMode .pdfViewer .spread {
+  display: block;
+}
+
+.pdfPresentationMode .pdfViewer .page,
+.pdfPresentationMode .pdfViewer.removePageBorders .page {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pdfPresentationMode:-ms-fullscreen .pdfViewer .page {
+  margin-bottom: 100% !important;
+}
+
+.pdfPresentationMode:-webkit-full-screen .pdfViewer .page {
+  margin-bottom: 100%;
+  border: 0;
+}
+
+.pdfPresentationMode:-moz-full-screen .pdfViewer .page {
+  margin-bottom: 100%;
+  border: 0;
+}
+
+.pdfPresentationMode:fullscreen .pdfViewer .page {
+  margin-bottom: 100%;
+  border: 0;
+}
 
 :root {
   --sidebar-width: 200px;
@@ -62,6 +450,42 @@ select {
   background-color: #000;
 }
 
+#viewerContainer.pdfPresentationMode:-webkit-full-screen {
+  top: 0px;
+  border-top: 2px solid transparent;
+  background-color: #000;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: none;
+  -webkit-user-select: none;
+          user-select: none;
+}
+
+#viewerContainer.pdfPresentationMode:-moz-full-screen {
+  top: 0px;
+  border-top: 2px solid transparent;
+  background-color: #000;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: none;
+  -moz-user-select: none;
+       user-select: none;
+}
+
+#viewerContainer.pdfPresentationMode:-ms-fullscreen {
+  top: 0px;
+  border-top: 2px solid transparent;
+  background-color: #000;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: none;
+  -ms-user-select: none;
+      user-select: none;
+}
+
 #viewerContainer.pdfPresentationMode:fullscreen {
   top: 0px;
   border-top: 2px solid transparent;
@@ -70,11 +494,38 @@ select {
   height: 100%;
   overflow: hidden;
   cursor: none;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+.pdfPresentationMode:-webkit-full-screen a:not(.internalLink) {
+  display: none;
+}
+
+.pdfPresentationMode:-moz-full-screen a:not(.internalLink) {
+  display: none;
+}
+
+.pdfPresentationMode:-ms-fullscreen a:not(.internalLink) {
+  display: none;
 }
 
 .pdfPresentationMode:fullscreen a:not(.internalLink) {
   display: none;
+}
+
+.pdfPresentationMode:-webkit-full-screen .textLayer > span {
+  cursor: none;
+}
+
+.pdfPresentationMode:-moz-full-screen .textLayer > span {
+  cursor: none;
+}
+
+.pdfPresentationMode:-ms-fullscreen .textLayer > span {
+  cursor: none;
 }
 
 .pdfPresentationMode:fullscreen .textLayer > span {
@@ -103,15 +554,20 @@ select {
   z-index: 100;
   border-top: 1px solid #333;
 
-  transition-duration: 200ms;
-  transition-timing-function: ease;
+  -webkit-transition-duration: 200ms;
+
+          transition-duration: 200ms;
+  -webkit-transition-timing-function: ease;
+          transition-timing-function: ease;
 }
 html[dir='ltr'] #sidebarContainer {
+  -webkit-transition-property: left;
   transition-property: left;
   left: -200px;
   left: calc(-1 * var(--sidebar-width));
 }
 html[dir='rtl'] #sidebarContainer {
+  -webkit-transition-property: right;
   transition-property: right;
   right: -200px;
   right: calc(-1 * var(--sidebar-width));
@@ -123,9 +579,13 @@ html[dir='rtl'] #sidebarContainer {
 
 #outerContainer.sidebarResizing #sidebarContainer {
   /* Improve responsiveness and avoid visual glitches when the sidebar is resized. */
-  transition-duration: 0s;
+  -webkit-transition-duration: 0s;
+          transition-duration: 0s;
   /* Prevent e.g. the thumbnails being selected when the sidebar is resized. */
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
 }
 
 #outerContainer.sidebarMoving #sidebarContainer,
@@ -177,8 +637,10 @@ html[dir='rtl'] #sidebarContent {
   outline: none;
 }
 #viewerContainer:not(.pdfPresentationMode) {
-  transition-duration: 200ms;
-  transition-timing-function: ease;
+  -webkit-transition-duration: 200ms;
+          transition-duration: 200ms;
+  -webkit-transition-timing-function: ease;
+          transition-timing-function: ease;
 }
 html[dir='ltr'] #viewerContainer {
   box-shadow: inset 1px 0 0 hsla(0,0%,100%,.05);
@@ -189,15 +651,18 @@ html[dir='rtl'] #viewerContainer {
 
 #outerContainer.sidebarResizing #viewerContainer {
   /* Improve responsiveness and avoid visual glitches when the sidebar is resized. */
-  transition-duration: 0s;
+  -webkit-transition-duration: 0s;
+          transition-duration: 0s;
 }
 
 html[dir='ltr'] #outerContainer.sidebarOpen #viewerContainer:not(.pdfPresentationMode) {
+  -webkit-transition-property: left;
   transition-property: left;
   left: 200px;
   left: var(--sidebar-width);
 }
 html[dir='rtl'] #outerContainer.sidebarOpen #viewerContainer:not(.pdfPresentationMode) {
+  -webkit-transition-property: right;
   transition-property: right;
   right: 200px;
   right: var(--sidebar-width);
@@ -219,6 +684,8 @@ html[dir='rtl'] #outerContainer.sidebarOpen #viewerContainer:not(.pdfPresentatio
   width: 100%;
   height: 32px;
   background-color: #424242; /* fallback */
+  background-image: url(images/texture.png),
+                    -webkit-gradient(linear, left top, left bottom, from(hsla(0,0%,30%,.99)), to(hsla(0,0%,25%,.95)));
   background-image: url(images/texture.png),
                     linear-gradient(hsla(0,0%,30%,.99), hsla(0,0%,25%,.95));
 }
@@ -255,6 +722,8 @@ html[dir='rtl'] #sidebarResizer {
   height: 32px;
   background-color: #474747; /* fallback */
   background-image: url(images/texture.png),
+                    -webkit-gradient(linear, left top, left bottom, from(hsla(0,0%,32%,.99)), to(hsla(0,0%,27%,.95)));
+  background-image: url(images/texture.png),
                     linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95));
 }
 html[dir='ltr'] #toolbarContainer, .findbar, .secondaryToolbar {
@@ -290,7 +759,13 @@ html[dir='rtl'] #toolbarContainer, .findbar, .secondaryToolbar {
   height: 100%;
   background-color: #ddd;
   overflow: hidden;
+  -webkit-transition: width 200ms;
   transition: width 200ms;
+}
+
+@-webkit-keyframes progressIndeterminate {
+  0% { left: -142px; }
+  100% { left: 0; }
 }
 
 @keyframes progressIndeterminate {
@@ -300,6 +775,7 @@ html[dir='rtl'] #toolbarContainer, .findbar, .secondaryToolbar {
 
 #loadingBar .progress.indeterminate {
   background-color: #999;
+  -webkit-transition: none;
   transition: none;
 }
 
@@ -315,7 +791,9 @@ html[dir='rtl'] #toolbarContainer, .findbar, .secondaryToolbar {
                                         #999 45px, #ddd 55px,
                                         #ddd 95px, #bbb 100px);
 
-  animation: progressIndeterminate 950ms linear infinite;
+  -webkit-animation: progressIndeterminate 950ms linear infinite;
+
+          animation: progressIndeterminate 950ms linear infinite;
 }
 
 .findbar, .secondaryToolbar {
@@ -353,7 +831,10 @@ html[dir='rtl'] .findbar {
 }
 
 .findbar label {
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
 }
 
 #findInput {
@@ -361,6 +842,15 @@ html[dir='rtl'] .findbar {
 }
 #findInput::-webkit-input-placeholder {
   color: hsl(0, 0%, 75%);
+}
+#findInput::-moz-placeholder {
+  font-style: italic;
+}
+#findInput:-ms-input-placeholder {
+  font-style: italic;
+}
+#findInput::-ms-input-placeholder {
+  font-style: italic;
 }
 #findInput::placeholder {
   font-style: italic;
@@ -472,7 +962,8 @@ html[dir='ltr'] .doorHangerRight:before {
 #toolbarViewerMiddle {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
 }
 
 html[dir='ltr'] #toolbarViewerLeft,
@@ -546,6 +1037,7 @@ html[dir='rtl'] .splitToolbarButton > .toolbarButton {
 .splitToolbarButton.toggled > .toolbarButton,
 .toolbarButton.textButton {
   background-color: hsla(0,0%,0%,.12);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(hsla(0,0%,100%,.05)), to(hsla(0,0%,100%,0)));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   border: 1px solid hsla(0,0%,0%,.35);
@@ -553,9 +1045,12 @@ html[dir='rtl'] .splitToolbarButton > .toolbarButton {
   box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
               0 0 1px hsla(0,0%,100%,.15) inset,
               0 1px 0 hsla(0,0%,100%,.05);
+  -webkit-transition-property: background-color, border-color, box-shadow;
   transition-property: background-color, border-color, box-shadow;
-  transition-duration: 150ms;
-  transition-timing-function: ease;
+  -webkit-transition-duration: 150ms;
+          transition-duration: 150ms;
+  -webkit-transition-timing-function: ease;
+          transition-timing-function: ease;
 
 }
 .splitToolbarButton > .toolbarButton:hover,
@@ -612,9 +1107,12 @@ html[dir='rtl'] .splitToolbarButtonSeparator {
   padding: 12px 0;
   margin: 1px 0;
   box-shadow: 0 0 0 1px hsla(0,0%,100%,.03);
+  -webkit-transition-property: padding;
   transition-property: padding;
-  transition-duration: 10ms;
-  transition-timing-function: ease;
+  -webkit-transition-duration: 10ms;
+          transition-duration: 10ms;
+  -webkit-transition-timing-function: ease;
+          transition-timing-function: ease;
 }
 
 .toolbarButton,
@@ -628,12 +1126,18 @@ html[dir='rtl'] .splitToolbarButtonSeparator {
   color: hsla(0,0%,100%,.8);
   font-size: 12px;
   line-height: 14px;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
   /* Opera does not support user-select, use <... unselectable="on"> instead */
   cursor: default;
+  -webkit-transition-property: background-color, border-color, box-shadow;
   transition-property: background-color, border-color, box-shadow;
-  transition-duration: 150ms;
-  transition-timing-function: ease;
+  -webkit-transition-duration: 150ms;
+          transition-duration: 150ms;
+  -webkit-transition-timing-function: ease;
+          transition-timing-function: ease;
 }
 
 html[dir='ltr'] .toolbarButton,
@@ -654,6 +1158,7 @@ html[dir='rtl'] .dropdownToolbarButton {
 .secondaryToolbarButton:hover,
 .secondaryToolbarButton:focus {
   background-color: hsla(0,0%,0%,.12);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(hsla(0,0%,100%,.05)), to(hsla(0,0%,100%,0)));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   border: 1px solid hsla(0,0%,0%,.35);
@@ -668,28 +1173,36 @@ html[dir='rtl'] .dropdownToolbarButton {
 .dropdownToolbarButton:hover:active,
 .secondaryToolbarButton:hover:active {
   background-color: hsla(0,0%,0%,.2);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(hsla(0,0%,100%,.05)), to(hsla(0,0%,100%,0)));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   border-color: hsla(0,0%,0%,.35) hsla(0,0%,0%,.4) hsla(0,0%,0%,.45);
   box-shadow: 0 1px 1px hsla(0,0%,0%,.1) inset,
               0 0 1px hsla(0,0%,0%,.2) inset,
               0 1px 0 hsla(0,0%,100%,.05);
+  -webkit-transition-property: background-color, border-color, box-shadow;
   transition-property: background-color, border-color, box-shadow;
-  transition-duration: 10ms;
-  transition-timing-function: linear;
+  -webkit-transition-duration: 10ms;
+          transition-duration: 10ms;
+  -webkit-transition-timing-function: linear;
+          transition-timing-function: linear;
 }
 
 .toolbarButton.toggled,
 .splitToolbarButton.toggled > .toolbarButton.toggled,
 .secondaryToolbarButton.toggled {
   background-color: hsla(0,0%,0%,.3);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(hsla(0,0%,100%,.05)), to(hsla(0,0%,100%,0)));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   border-color: hsla(0,0%,0%,.4) hsla(0,0%,0%,.45) hsla(0,0%,0%,.5);
   box-shadow: 0 1px 1px hsla(0,0%,0%,.1) inset,
               0 0 1px hsla(0,0%,0%,.2) inset,
               0 1px 0 hsla(0,0%,100%,.05);
+  -webkit-transition-property: background-color, border-color, box-shadow;
   transition-property: background-color, border-color, box-shadow;
-  transition-duration: 10ms;
-  transition-timing-function: linear;
+  -webkit-transition-duration: 10ms;
+          transition-duration: 10ms;
+  -webkit-transition-timing-function: linear;
+          transition-timing-function: linear;
 }
 
 .toolbarButton.toggled:hover:active,
@@ -1027,12 +1540,13 @@ html[dir='rtl'] .verticalToolbarSeparator {
 .toolbarField {
   padding: 3px 6px;
   margin: 4px 0 4px 0;
+  border: 1px solid transparent;
   border-radius: 2px;
   background-color: hsla(0,0%,100%,.09);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(hsla(0,0%,100%,.05)), to(hsla(0,0%,100%,0)));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
-  border-width: 1px;
-  border-style: solid;
+  border: 1px solid hsla(0,0%,0%,.35);
   border-color: hsla(0,0%,0%,.32) hsla(0,0%,0%,.38) hsla(0,0%,0%,.42);
   box-shadow: 0 1px 0 hsla(0,0%,0%,.05) inset,
               0 1px 0 hsla(0,0%,100%,.05);
@@ -1040,9 +1554,12 @@ html[dir='rtl'] .verticalToolbarSeparator {
   font-size: 12px;
   line-height: 14px;
   outline-style: none;
+  -webkit-transition-property: background-color, border-color, box-shadow;
   transition-property: background-color, border-color, box-shadow;
-  transition-duration: 150ms;
-  transition-timing-function: ease;
+  -webkit-transition-duration: 150ms;
+          transition-duration: 150ms;
+  -webkit-transition-timing-function: ease;
+          transition-timing-function: ease;
 }
 
 .toolbarField[type=checkbox] {
@@ -1089,7 +1606,10 @@ html[dir='rtl'] .verticalToolbarSeparator {
   font-size: 12px;
   line-height: 14px;
   text-align: left;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
   cursor: default;
 }
 
@@ -1153,6 +1673,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing > .thumbnailImage,
 a:focus > .thumbnail > .thumbnailSelectionRing,
 .thumbnail:hover > .thumbnailSelectionRing {
   background-color: hsla(0,0%,100%,.15);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(hsla(0,0%,100%,.05)), to(hsla(0,0%,100%,0)));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
@@ -1168,6 +1689,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
 
 .thumbnail.selected > .thumbnailSelectionRing {
   background-color: hsla(0,0%,100%,.3);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(hsla(0,0%,100%,.05)), to(hsla(0,0%,100%,0)));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
@@ -1184,7 +1706,10 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
   bottom: 0;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
 }
 
 #outlineView {
@@ -1217,7 +1742,10 @@ html[dir='rtl'] .outlineItem > .outlineItems {
   color: hsla(0,0%,100%,.8);
   font-size: 13px;
   line-height: 15px;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
   white-space: normal;
 }
 
@@ -1283,6 +1811,7 @@ html[dir='rtl'] .outlineItemToggler::before {
 .outlineItem > a:hover,
 .attachmentsItem > button:hover {
   background-color: hsla(0,0%,100%,.02);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(hsla(0,0%,100%,.05)), to(hsla(0,0%,100%,0)));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
@@ -1294,6 +1823,7 @@ html[dir='rtl'] .outlineItemToggler::before {
 
 .outlineItem.selected {
   background-color: hsla(0,0%,100%,.08);
+  background-image: -webkit-gradient(linear, left top, left bottom, from(hsla(0,0%,100%,.05)), to(hsla(0,0%,100%,0)));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
@@ -1312,6 +1842,7 @@ html[dir='rtl'] .outlineItemToggler::before {
 /* TODO: file FF bug to support ::-moz-selection:window-inactive
    so we can override the opaque grey background when the window is inactive;
    see https://bugzilla.mozilla.org/show_bug.cgi?id=706209 */
+::-moz-selection { background: rgba(0,0,255,0.3); }
 ::selection { background: rgba(0,0,255,0.3); }
 
 #errorWrapper {
@@ -1378,7 +1909,14 @@ html[dir='rtl'] .outlineItemToggler::before {
   line-height: 14px;
   background-color: #474747; /* fallback */
   background-image: url(images/texture.png),
+                    -webkit-gradient(linear, left top, left bottom, from(hsla(0,0%,32%,.99)), to(hsla(0,0%,27%,.95)));
+  background-image: url(images/texture.png),
                     linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95));
+  box-shadow: inset 1px 0 0 hsla(0,0%,100%,.08),
+              inset 0 1px 1px hsla(0,0%,0%,.15),
+              inset 0 -1px 0 hsla(0,0%,100%,.05),
+              0 1px 0 hsla(0,0%,0%,.15),
+              0 1px 1px hsla(0,0%,0%,.1);
   border: 1px solid hsla(0,0%,0%,.5);
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
@@ -1537,6 +2075,7 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
 
 .grab-to-pan-grab {
   cursor: url("images/grab.cur"), move !important;
+  cursor: -webkit-grab !important;
   cursor: grab !important;
 }
 .grab-to-pan-grab *:not(input):not(textarea):not(button):not(select):not(:link) {
@@ -1545,6 +2084,7 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
 .grab-to-pan-grab:active,
 .grab-to-pan-grabbing {
   cursor: url("images/grabbing.cur"), move !important;
+  cursor: -webkit-grabbing !important;
   cursor: grabbing !important;
 
   position: fixed;
@@ -1566,15 +2106,17 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
   display: none;
 }
 
-@media screen and (min-resolution: 1.1dppx) {
+@media screen and (-webkit-min-device-pixel-ratio: 1.1), screen and (min-resolution: 1.1dppx) {
   /* Rules for Retina screens */
   .toolbarButton::before {
-    transform: scale(0.5);
+    -webkit-transform: scale(0.5);
+            transform: scale(0.5);
     top: -5px;
   }
 
   .secondaryToolbarButton::before {
-    transform: scale(0.5);
+    -webkit-transform: scale(0.5);
+            transform: scale(0.5);
     top: -4px;
   }
 
@@ -1748,7 +2290,8 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
   }
 
   .outlineItemToggler::before {
-    transform: scale(0.5);
+    -webkit-transform: scale(0.5);
+            transform: scale(0.5);
     top: -1px;
     content: url(images/treeitem-expanded@2x.png);
   }
@@ -1842,7 +2385,8 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
     margin: auto;
     left: auto;
     position: inherit;
-    transform: none;
+    -webkit-transform: none;
+            transform: none;
   }
 }
 
