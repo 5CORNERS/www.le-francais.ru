@@ -1752,7 +1752,7 @@ var PDFViewerApplication = {
 exports.PDFViewerApplication = PDFViewerApplication;
 var validateFileURL;
 {
-  var HOSTED_VIEWER_ORIGINS = ['null', 'http://mozilla.github.io', 'https://mozilla.github.io'];
+  var HOSTED_VIEWER_ORIGINS = ['null', 'https://files.le-francais.ru', 'http://files.le-francais.ru'];
 
   validateFileURL = function validateFileURL(file) {
     if (file === undefined) {
