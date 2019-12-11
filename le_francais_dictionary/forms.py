@@ -37,12 +37,18 @@ class WordsManagementFilterForm(forms.Form):
 	def __init__(self, user, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.user=user
-		if self.user.has_lessons:
-			self.packets = Packet.objects.filter(Q(demo=True)|Q(lesson__payment__user=user)).distinct().order_by('lesson__lesson_number', 'name')
-		elif not self.user.must_pay:
-			self.packets = Packet.objects.all().order_by('lesson__lesson_number', 'name')
+		if not self.user.must_pay:
+			self.packets = Packet.objects.all().order_by(
+				'lesson__lesson_number', 'name')
+		elif self.user.has_lessons:
+			self.packets = Packet.objects.filter(Q(demo=True) | Q(
+				lesson__payment__user=user)).distinct().order_by(
+				'lesson__lesson_number', 'name')
 		else:
-			self.packets = Packet.objects.filter(Q(word__userdata__user=user)|Q(lesson__payment__user=user)).distinct().order_by('lesson__lesson_number', 'name')
+			self.packets = Packet.objects.filter(
+				Q(word__userdata__user=user) | Q(
+					lesson__payment__user=user)).distinct().order_by(
+				'lesson__lesson_number', 'name')
 		self.fields['packets'] = forms.MultipleChoiceField(choices=[(o.id, str(o.name)) for o in self.packets])
 		# name, title, type, visible, sortable, filterable, p_filter_value, p_sort_value, p_value
 		self.COLUMNS_ATTRS = [
