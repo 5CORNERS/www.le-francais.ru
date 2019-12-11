@@ -108,3 +108,8 @@ table .filter-option-inner-inner{
   font-weight: bold;
   color: #212529;
 }
+
+div.dataTables_wrapper div.dataTables_info {
+    padding-top: 0 !important;
+    white-space: nowrap;
+}
