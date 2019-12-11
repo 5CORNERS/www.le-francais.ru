@@ -96,9 +96,10 @@ class ImportTable:
 @admin.register(Word)
 class WordAdmin(admin.ModelAdmin):
 	change_list_template = 'dictionary/admin/change_list.html'
-	list_display = ['cd_id', 'word', 'genre', 'part_of_speech', 'plural']
-	ordering = ['cd_id']
-	list_filter = ['genre', 'part_of_speech', 'plural']
+	list_display = ['cd_id', 'word', 'packet', 'genre', 'part_of_speech', 'plural']
+	search_fields = ['cd_id', 'word']
+	ordering = ['order']
+	list_filter = ['packet']
 	list_select_related = []
 	readonly_fields = ['polly']
 	inlines = [WordTranslationInline]
