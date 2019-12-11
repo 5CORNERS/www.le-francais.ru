@@ -75,7 +75,15 @@ function updateTable() {
             }
             $table.DataTable({
                 'dom':
-                    /*"<'row'<'col-sm-12 col-md-6'f>>" + */"<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-12 col-md-12'i><'col-sm-12 col-md-5'l><'col-sm-12 col-md-7'p>>",
+                    "<'row'" +
+                        "<'col-sm-12 mb-2'tr>" +
+                    ">" +
+                    "<'row'" +
+                        "<'#alert.col-12'>" +
+                        "<'#info.col-12'i>" +
+                        "<'col-sm-12 col-md-5'l>" +
+                        "<'col-sm-12 col-md-7'p>" +
+                    ">",
                 'columnDefs': [
                     {
                         'targets': 0,
@@ -147,13 +155,15 @@ function updateTable() {
                                 pattern = `^${pattern}$`;
                                 dt.api().column(-1).search(pattern, true, false).draw();
                             }
+                            add_selected_filtered_alert(dt)
                         });
                         $selectStars = $('#starFilter');
                     });
                     showDeleted($('#showDeleted')[0].checked);
                     $('#showDeleted').on('change', function (e) {
                         e.preventDefault();
-                        showDeleted(this.checked)
+                        showDeleted(this.checked);
+                        add_selected_filtered_alert(dt)
                     })
                 }
             })
@@ -166,14 +176,45 @@ function updateTable() {
     $('.uppertable').show();
 }
 
-function get_selected(dt){
+function add_selected_filtered_alert(dt){
+    if (get_selected(dt).sort().join(',') !== get_filtered(dt).sort().join(',')){
+        $('#alert').html(
+            '<div class="alert alert-info d-flex flex-row" role="alert">' +
+                '<i class="fas fa-fw fa-info-circle mr-3 mt-1"></i>' +
+                '<div>' +
+                    'К выбранным, но скрытым фильтрами элементам действия не применяются.' +
+                '</div>' +
+            '</div>'
+        ).show()
+    }else{
+        $('#alert').hide()
+    }
+}
+
+function get_selected(dt) {
     let rows_selected = dt.api().column(0).checkboxes.selected();
-    let ids = [];
-    $.each(rows_selected, function(index, rowId){
-         // Create a hidden element
-        ids.push(rowId)
-      });
-    return ids
+    let selected_ids = [];
+    $.each(rows_selected, function (index, rowId) {
+        selected_ids.push(rowId)
+    });
+    return selected_ids
+}
+
+function get_selected_filtered(dt){
+    let selected_ids = get_selected(dt);
+    let filtered_ids = get_filtered(dt);
+    let selected_filtered_ids = [];
+    selected_ids.forEach(function (value) {
+        if(filtered_ids.includes(value)){
+            selected_filtered_ids.push(value)
+        }
+    });
+    return selected_filtered_ids
+}
+
+function get_filtered(dt){
+    let filtered_ids = dt.api().rows({search:"applied"}).data().pluck(0).toArray();
+    return filtered_ids
 }
 
 $(document).ready(function () {
@@ -182,7 +223,7 @@ $(document).ready(function () {
         updateTable();
     });
     $('#startApp').on('click', function () {
-        ids=get_selected(dt);
+        let ids=get_selected_filtered(dt);
         if(ids.length === 0){
             $('#startApp').popover({
                 'content': "Вы не выбрали ни одного слова",
@@ -199,7 +240,7 @@ $(document).ready(function () {
             contentType: "application/json",
             dataType: "json",
             data: JSON.stringify({
-                words: get_selected(dt),
+                words: ids,
                 csrfmiddlewaretoken: csrf,
             }),
             error: errorLoading,
@@ -212,13 +253,12 @@ $(document).ready(function () {
 }
     });
     $('#markWords').on('click', function () {
-        var rows_selected = dt.api().column(0).checkboxes.selected();
        $.ajax(Urls['dictionary:mark_words'](), {
            type: 'POST',
             contentType: "application/json",
             dataType: "json",
             data: JSON.stringify({
-                words: get_selected(dt),
+                words: get_selected_filtered(dt),
                 csrfmiddlewaretoken: csrf,
             }),
             success: function (r) {
@@ -235,7 +275,7 @@ $(document).ready(function () {
             contentType: "application/json",
             dataType: "json",
             data: JSON.stringify({
-                words: get_selected(dt),
+                words: get_selected_filtered(dt),
                 csrfmiddlewaretoken: csrf,
             }),
             success: function (r) {
