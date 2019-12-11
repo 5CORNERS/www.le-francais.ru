@@ -147,15 +147,15 @@ class WordAdmin(admin.ModelAdmin):
 							i=i,
 							lesson_number=row[2],
 							packet_name = row[3],
-							word=row[6],
+							word=row[5],
 							unified_word=row[4],
-							translation=row[14],
-							unified_translation=row[12],
+							translation=row[8],
+							unified_translation=row[7],
 							cd_id=row[1],
-							part_of_speech=row[15],
-							genre=row[16],
+							part_of_speech=row[9],
+							genre=row[10],
 							order=row[0],
-							definition_num=row[8]
+							definition_num=row[6]
 						)
 					)
 			print("--- %s seconds --- Finished Reading" % (time.time() - start_time))
