@@ -1752,7 +1752,13 @@ var PDFViewerApplication = {
 exports.PDFViewerApplication = PDFViewerApplication;
 var validateFileURL;
 {
-  var HOSTED_VIEWER_ORIGINS = ['null', 'https://files.le-francais.ru', 'http://files.le-francais.ru'];
+  var HOSTED_VIEWER_ORIGINS = [
+      'null',
+      'https://files.le-francais.ru',
+      'http://files.le-francais.ru',
+      "https://www.le-francais.ru",
+      "https://le-francais-staging.herokuapp.com",
+  ];
 
   validateFileURL = function validateFileURL(file) {
     if (file === undefined) {
