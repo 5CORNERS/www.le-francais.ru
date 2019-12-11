@@ -383,10 +383,10 @@ class LessonPage(Page):
     other_tabs = StreamField([('tab', TabBlock())], blank=True)
     @property
     def summary_full_url(self):
-        return '//files.le-francais.ru' + self.summary
+        return '//files.le-francais.ru' + self.summary if self.summary else None
     @property
     def repetition_material_full_url(self):
-        return '//files.le-francais.ru' + self.repetition_material
+        return '//files.le-francais.ru' + self.repetition_material if self.repetition_material else None
 
     def get_lesson_number(self):
         return self.slug.split("lecon-", 1)[1]
