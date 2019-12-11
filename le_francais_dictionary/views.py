@@ -238,7 +238,7 @@ def update_words(request):
             quality=quality,
             mean_quality=mean_quality
         ))
-    bulk_update(repetitions, update_fields=['repetition_date', 'repetition_time'])
+    bulk_update(repetitions, update_fields=['repetition_date', 'time'])
     return JsonResponse(dict(words=words, errors=errors), safe=False)
 
 
