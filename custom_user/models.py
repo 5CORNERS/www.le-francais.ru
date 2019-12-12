@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Q, Max
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from tinkoff_merchant.models import Payment as TinkoffPayment
@@ -236,6 +237,10 @@ class User(AbstractUser):
 
 	def get_all_payments(self):
 		return list(TinkoffPayment.objects.filter(customer_key=self.id))
+
+	def get_user_datetime(self):
+		tz = self.timezone or 'UTC'
+		return timezone.make_naive(timezone.now(), pytz.timezone(tz))
 
 
 from django.db import models

@@ -402,4 +402,14 @@ def start_app(request):
         standalone_packet.save()
         return JsonResponse({'message': 'OK'}, status=200)
     else:
-        return render(request, 'dictionary/dictionary_app_standalone.html')
+        return render(request, 'dictionary/dictionary_app_standalone.html', {
+	        'packet_id': 99999999,
+	        'mode': 'learn'
+        })
+
+
+def start_app_repeat(request):
+	return render(request, 'dictionary/dictionary_app_standalone.html', {
+		'packet_id': 99999999,
+		'mode': 'repeat'
+	})

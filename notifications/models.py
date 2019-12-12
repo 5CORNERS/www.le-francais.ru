@@ -29,11 +29,13 @@ class Notification(models.Model):
 	REPLYES = 'RP'
 	MESSAGES = 'MG'
 	TOPICS = 'TP'
+	INTERVAL_REPETITIONS = 'IR'
 	CATEGORIES_CHOICES = [
 		(LIKES, 'Likes'),
 		(REPLYES, 'Replyes'),
 		(MESSAGES, 'Messages'),
-		(TOPICS, 'Topics')
+		(TOPICS, 'Topics'),
+		(INTERVAL_REPETITIONS, 'Interval Repetitions')
 	]
 	title = models.CharField(max_length=50)
 	# field was removed
@@ -58,7 +60,9 @@ class Notification(models.Model):
 
 	to_all = models.BooleanField(default=False)
 	excpt = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
+	push_time = models.DateTimeField(null=True)
 
+	# TODO check this
 	@property
 	def text(self):
 		try:

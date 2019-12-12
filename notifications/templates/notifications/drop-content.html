@@ -5,7 +5,7 @@
 		var CHECK_URL = '{{ check_list_url }}';
 	</script>
 	{% if new_notifications %}
-        <div class="row">
+        <div class="row flex-fill">
             <div class="col-12 notify-drop-title">
                 Новые
             </div>
@@ -14,7 +14,7 @@
 			{% include 'notifications/notification.html' with notify=notify %}
 		{% endfor %}{% endif %}
 	{% if old_notifications %}
-        <div class="row">
+        <div class="row flex-fill">
             <div class="col-12 notify-drop-title">
                 Просмотренные
             </div>
