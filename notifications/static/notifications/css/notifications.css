@@ -35,6 +35,9 @@
             min-height: 280px;
             max-height: 560px;
     }
+    .dropdown-menu.notify-drop {
+        max-height: 560px;
+}
 }
 
 @media (min-height: 720px) {
@@ -42,6 +45,9 @@
             min-height: 280px;
             max-height: 660px;
     }
+    .dropdown-menu.notify-drop {
+        max-height: 660px;
+}
 }
 
 @media (min-width: 360px) {
