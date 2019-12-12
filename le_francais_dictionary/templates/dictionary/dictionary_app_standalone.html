@@ -2,7 +2,7 @@
 {% block content %}
     <div class="container mt-4">
         <div class="row">
-            <div class="col-12">{% include 'dictionary/dictionary_app.html' with packet_id='99999999' mode='learn' %}</div>
+            <div class="col-12">{% include 'dictionary/dictionary_app.html' with packet_id=packet_id mode=mode %}</div>
         </div>
     </div>
 {% endblock %}

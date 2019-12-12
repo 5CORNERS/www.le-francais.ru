@@ -1,3 +1,4 @@
+pytz
 dj-database-url==0.4.1
 wagtail==2.1
 dj-email-url
@@ -16,6 +17,7 @@ oauth2client==4.0.0
 django-allauth==0.37.0
 social-auth-core
 social-auth-app-django
+
 markdown==2.6.11
 urllib3
 pymdown-extensions==5.0.0
@@ -23,6 +25,7 @@ django-mailer==1.2.6
 django-comments-xtd
 django-user-sessions
 django-cron
+django-timezone-field>=3.1, <4.0
 django-braces
 APScheduler==3.0.0
 regex

@@ -15,5 +15,6 @@ urlpatterns = [
     url('^get-app/([0-9]*)$', views.get_app, name='get_app'),
     url('^my-words/$', views.manage_words, name='my_words'),
     url('^app/$', views.start_app, name='app'),
+    url('^app/reviews$', views.start_app_repeat, name='app_repeat')
 ]
 
