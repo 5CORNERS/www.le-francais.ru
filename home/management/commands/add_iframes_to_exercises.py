@@ -32,7 +32,8 @@ class Command(BaseCommand):
         parser.add_argument(
             '--lesson',
             dest='lessons',
-            action='append'
+            action='append',
+            type=int,
         )
 
     def handle(self, *args, **options):
