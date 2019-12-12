@@ -14,17 +14,18 @@
     "bootstrap": "^4.4.1",
     "bootstrap-select": "^1.13.12",
     "bootstrap-treeview": "github:AntonDumov/bootstrap-treeview#1.2.1",
-    "jquery": "^3.4.1",
-    "jquery.simple-checkbox-table": "github:toshiyukihina/jquery-simple-checkbox-table",
-    "popper.js": "^1.16.0",
     "bower": "^1.8.8",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
     "gulp-minify-css": "^1.2.4",
     "gulp-sass": "^4.0.2",
     "gulp-uglify": "^3.0.2",
+    "jquery": "^3.4.1",
+    "jquery.simple-checkbox-table": "github:toshiyukihina/jquery-simple-checkbox-table",
+    "js-cookie": "^2.2.1",
+    "moment": "^2.24.0",
+    "popper.js": "^1.16.0",
     "webpack-stream": "^5.2.1"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
