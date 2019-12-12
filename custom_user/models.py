@@ -53,6 +53,12 @@ class User(AbstractUser):
 		},
 	)
 
+	timezone = models.CharField(
+		max_length=32,
+		verbose_name='timezone',
+		null=True
+	)
+
 	from django.core.serializers.json import DjangoJSONEncoder
 	from django.contrib.postgres.fields import JSONField
 

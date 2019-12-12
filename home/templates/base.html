@@ -57,6 +57,9 @@
 {% endblock %}
 {% block bootstrap_js %}
     <script src="{% static 'components/js/jquery.js' %}"></script>
+    <script src="{% static "components/js/moment.js" %}"></script>
+    <script src="{% static "components/js/js.cookie.js" %}"></script>
+    <script src="{% static 'js/csrf.min.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
     <script src="{% static 'components/js/bootstrap.js' %}" crossorigin="anonymous"></script>
     <script type="text/javascript" src="{% static 'lib/footable-bootstrap.v3.1.6/js/footable.js' %}"></script>
@@ -261,6 +264,40 @@
 	      })
 	    </script>
 	{% endif %}
+    <script>
+        // Send user timezone
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        $(document).ready(function () {
+            if (!Cookies.get('timezone_checked')) {
+                $.ajax(Urls['custom_user:update_timezone'](), {
+                    type: 'post',
+                    data: tz,
+                    headers: {"X-CSRFToken": csrftoken},
+                    dataType: 'json',
+                    success: function (r) {
+                        if (r.success) {
+                            Cookies.set(
+                                'timezone_checked',
+                                "1",
+                                {
+                                    'expires': moment().endOf('day').toDate()
+                                }
+                            )
+                        }
+                    }
+                });
+            } else {
+                Cookies.set(
+                    'timezone_checked',
+                    "1",
+                    {
+                        'expires': moment().add(1, 'h').toDate()
+                    }
+                )
+            }
+            $.ajax()
+        })
+    </script>
 {% endblock %}
 {% block extra_js %}
     {# Override this in templates to add extra javascript #}
