@@ -187,15 +187,15 @@
         })
     }
     $('#hideFlashCardsInfoMyWordsNotAuthButton').on('click', function () {
-        $.cookie('hide_my_words_alert_not_auth', 1);
+        Cookies.set('hide_my_words_alert_not_auth', 1);
         $('#hide-flash-cards-info-button').tooltip('hide')
     });
     $('#hideFlashCardsInfoMyWordsAuthButton').on('click', function () {
-        $.cookie('hide_my_words_alert_auth', 1);
+        Cookies.set('hide_my_words_alert_auth', 1);
         $('#hide-flash-cards-info-button').tooltip('hide')
     });
     $('#hide-flash-cards-info-button').on('click', function () {
-        $.cookie('hide_flash_cards_info', 1);
+        Cookies.set('hide_flash_cards_info', 1);
         $('#hide-flash-cards-info-button').tooltip('hide')
     });
     $('#collapse-button-one').click(function (e) {

@@ -943,14 +943,14 @@
 
 
 		function showBottomMessage() {
-			if ($.cookie('bottom_message') == null && uHP === false) {
+			if (Cookies.get('bottom_message') == null && uHP === false) {
 				$('#bottom-message').slideDown(1000);
 			}
 		}
 
 		function toggleBottomMessage() {
 			$('#bottom-message').slideUp(1000);
-			$.cookie('bottom_message', 'true', {expires: 1, path: '/'});
+			Cookies.set('bottom_message', 'true', {expires: 1, path: '/'});
 		}
 	</script>{% endif %}
 {% endblock %}
