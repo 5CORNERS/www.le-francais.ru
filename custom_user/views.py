@@ -4,6 +4,7 @@ from datetime import datetime
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.mail import EmailMessage
+from django.http import JsonResponse
 from django.shortcuts import HttpResponse, render
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -80,3 +81,12 @@ class AdminCommands(View):
                 user.must_pay = True
             user.save()
         return render(request, template_name='custom_user/admin_commands.html')
+
+
+def update_timezone(request):
+    if request.user.is_authenticated:
+	    request.user.timezone = request.body.decode()
+	    request.user.save()
+	    return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})

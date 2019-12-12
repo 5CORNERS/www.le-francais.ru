@@ -28,6 +28,8 @@ gulp.task('js', () => {
         'node_modules/bootstrap-treeview/dist/bootstrap-treeview.min.js',
         'node_modules/bootstrap-select/dist/js/bootstrap-select.js',
         'node_modules/jquery.simple-checkbox-table/dist/jquery.simple-checkbox-table.js',
+        'node_modules/moment/moment.js',
+        'node_modules/js-cookie/src/js.cookie.js',
         'src/js/**/*.js'
     ])
         .pipe(uglify())
