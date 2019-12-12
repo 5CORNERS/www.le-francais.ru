@@ -693,3 +693,9 @@ def prefetch_words_data(words, user):
 		else:
 			word._first_translation = None
 	return words
+
+
+class UserDayRepetition(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	date = models.DateField()
+
