@@ -52,3 +52,20 @@ coffee_urls = [
     url('^get_amount/$', views.get_coffee_amount, name='get_amount'),
     url('^', views.GiveMeACoffee.as_view(), name='give_me_a_coffee'),
 ]
+
+favicon_urls = [
+    url('^browserconfig.xml$', views.redirect2static('favicon/browserconfig.xml'), name='browserconfig.xml'),
+    url('^site.webmanifest$', views.redirect2static('favicon/site.webmanifest'), name='site.webmanifest'),
+    url('^favicon-16x16.png$', views.redirect2static('favicon/favicon-16x16.png'), name='favicon-16x16.png'),
+    url('^favicon-32x32.png$', views.redirect2static('favicon/favicon-32x32.png'), name='favicon-32x32.png'),
+    url('^safari-pinned-tab.svg$', views.redirect2static('favicon/safari-pinned-tab.svg'), name='safari-pinned-tab.svg'),
+    url('^mstile-70x70.png$', views.redirect2static('favicon/mstile-70x70.png'), name='mstile-70x70.png'),
+    url('^apple-touch-icon.png$', views.redirect2static('favicon/apple-touch-icon.png'), name='apple-touch-icon.png'),
+    url('^mstile-150x150.png$', views.redirect2static('favicon/mstile-150x150.png'), name='mstile-150x150.png'),
+    url('^mstile-310x150.png$', views.redirect2static('favicon/mstile-310x150.png'), name='mstile-310x150.png'),
+    url('^favicon-194x194.png$', views.redirect2static('favicon/favicon-194x194.png'), name='favicon-194x194.png'),
+    url('^mstile-310x310.png$', views.redirect2static('favicon/mstile-310x310.png'), name='mstile-310x310.png'),
+    url('^android-chrome-192x192.png$', views.redirect2static('favicon/android-chrome-192x192.png'), name='android-chrome-192x192.png'),
+    url('^favicon.ico$', views.redirect2static('favicon/favicon.ico'), name='favicon.ico'),
+    url('^android-chrome-512x512.png$', views.redirect2static('favicon/android-chrome-512x512.png'), name='android-chrome-512x512.png'),
+]

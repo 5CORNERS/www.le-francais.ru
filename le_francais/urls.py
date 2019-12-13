@@ -16,7 +16,8 @@ from forum.sitemap_generator import ForumSitemap, TopicSitemap
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
 from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls, \
-	activate_urls, meta_urls, service_urls, urlpatterns as home_urls
+    activate_urls, meta_urls, service_urls, urlpatterns as home_urls, \
+    favicon_urls
 from home.urls import modal_urls
 from home.views import MovePostView, AorAddPostView, AorEditPostView, \
     AorTopicView, move_post_processing, favicon, activation_log
@@ -33,8 +34,6 @@ extra = getattr(settings, setting_name('TRAILING_SLASH'), True) and '/' or ''
 urlpatterns = [
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
     url(r'^ads\.txt$', TemplateView.as_view(template_name='ads.txt', content_type='text/plain')),
-
-    url(r'^favicon\.ico$', favicon),
 
     url('^sitemap\.xml$', sitemap, {'sitemaps': {
         'forum': ForumSitemap,
@@ -99,6 +98,7 @@ urlpatterns = [
 
     url(r'^le_nombres/', include('le_nombres.urls')),
     url(r'^', include(meta_urls, namespace='meta')),
+    url(r'^', include(favicon_urls, namespace='favicon')),
     url(r'^', include('social_django.urls'.format(extra), namespace='social')),
     url(r'', include('user_sessions.urls', 'user_sessions')),
     url(r'^new-users-redirect-url/', TemplateView.as_view(template_name='account/change_username_new.html')),
