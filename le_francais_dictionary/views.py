@@ -179,14 +179,20 @@ def get_repetition_words(request):
 
 @csrf_exempt
 def update_words(request):
-    words_data = json.loads(request.body)['words']
+    data = json.loads(request.body)
+    if isinstance(data, dict):
+        words_data: List[dict] = data.get('words', [])
+    else:
+        # FIXME return error if wrong json format
+        words_data: List[dict] = []
     user_words_data: List[UserWordData] = []
     errors = []
     for word_data in words_data:
         try:
             word = Word.objects.select_related('packet').get(pk=word_data['pk'])
-            grade = word_data['grade']
-            mistakes = word_data['mistakes']
+            grade = word_data.get('grade')
+            mistakes = word_data.get('mistakes')
+            delay = word_data.get('delay')
             if UserWordRepetition.objects.filter(
                     word=word, user=request.user,
                     repetition_date__gt=timezone.now()):
@@ -202,6 +208,7 @@ def update_words(request):
                     user_id=request.user.id,
                     grade=grade,
                     mistakes=mistakes,
+                    delay=delay,
                 ))
             else:
                 errors.append(dict(

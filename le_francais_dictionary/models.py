@@ -533,6 +533,7 @@ class UserWordData(models.Model):
 	datetime = models.DateTimeField(auto_now_add=True)
 	grade = models.IntegerField()
 	mistakes = models.IntegerField()
+	delay = models.IntegerField(null=True)
 
 	def __init__(self, *args, **kwargs):
 		super(UserWordData, self).__init__(*args, **kwargs)
@@ -590,6 +591,10 @@ class UserWordRepetition(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	time = models.IntegerField(null=True, default=None)
 	repetition_date = models.DateField(null=True)
+
+
+class UserDayRepetition(models.Model):
+	...
 
 
 class UserStandalonePacket(models.Model):
@@ -693,9 +698,3 @@ def prefetch_words_data(words, user):
 		else:
 			word._first_translation = None
 	return words
-
-
-class UserDayRepetition(models.Model):
-	user = models.ForeignKey(User, on_delete=models.CASCADE)
-	date = models.DateField()
-
