@@ -35,9 +35,6 @@
 {#	<link rel="shortcut icon"#}
 {#	      type="image/png"#}
 {#	      href="{% static 'images/favicon.ico' %}"/>#}
-{#	<title>{% block title %}Французский язык -#}
-{#		{% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}#}
-{#		{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>#}
 {#	<link rel="icon" href="{% static 'favicon/favicon.ico' %}">#}
 {#	<link rel="apple-touch-icon"#}
 {#	      sizes="57x57"#}
@@ -87,6 +84,9 @@
     <meta name="theme-color" content="#337ab7">{% endblock %}
 
 	<meta name="description" content="{% block description %}{% endblock %}"/>
+	<title>{% block title %}Французский язык -
+{% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}
+{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>
 
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 
