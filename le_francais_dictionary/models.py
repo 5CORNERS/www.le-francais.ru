@@ -1,22 +1,18 @@
 import re
-import statistics
-import string
-from datetime import datetime
-from urllib.parse import quote
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Q
-from django.utils.http import urlencode, urlquote
+from django.utils.http import urlquote
 from regex import regex
 
 from le_francais_dictionary.consts import GENRE_CHOICES, \
 	PARTOFSPEECH_CHOICES, \
 	PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
 	GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE
-from le_francais_dictionary.utils import sm2_response_quality, \
-	sm2_next_repetition_date, format_text2speech, sm2_ef_q_mq
+from le_francais_dictionary.utils import sm2_next_repetition_date, \
+	format_text2speech, sm2_ef_q_mq
 from polly import const as polly_const
 from polly.models import PollyTask
 
