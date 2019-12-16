@@ -587,6 +587,7 @@ class UserWordRepetition(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 	time = models.IntegerField(null=True, default=None)
 	repetition_date = models.DateField(null=True)
+	repetition_datetime = models.DateTimeField(null=True)
 
 
 class UserDayRepetition(models.Model):
