@@ -147,7 +147,7 @@
                     <a class="nav-link{% if '/faq/' in request.path %} active{% endif %}" href="/faq/">FAQ</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link{% if '/ecoles-francais/ecoles-review/' in request.path %} active{% endif %}" href="/ecoles-francais/ecoles-review/">Французский
+                    <a class="nav-link{% if '/ecoles-francais/ecoles-review/' in request.path %} active{% endif %}" href="{% slugurl 'ecoles-review' %}">Французский
                         по скайпу</a>
                 </li>
             </ul>
