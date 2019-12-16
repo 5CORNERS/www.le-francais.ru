@@ -588,20 +588,28 @@ class UserWordData(models.Model):
 
 class UserWordRepetition(models.Model):
 	word = models.ForeignKey(Word)
-	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 	time = models.IntegerField(null=True, default=None)
 	repetition_date = models.DateField(null=True)
 
 
 class UserDayRepetition(models.Model):
-	...
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+	words_qty = models.IntegerField(null=True)
+	repetitions = ArrayField(
+		models.PositiveSmallIntegerField(),
+		blank=True, default=[]
+
+	)
+	date = models.DateField(null=True)
+	success = models.NullBooleanField(null=True)
 
 
 class UserStandalonePacket(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	words = ArrayField(
 		models.IntegerField(),
-		size=150, blank=True, null=True
+		blank=True, null=True
 	)
 
 	def to_dict(self, user=None) -> dict:

@@ -3,22 +3,50 @@ import statistics
 from datetime import datetime, timedelta
 from typing import List, Optional, Any
 
+import pytz
+from django.utils import timezone
 from unidecode import unidecode
 
 from .consts import INITIAL_E_FACTOR, FIRST_REPETITION_DELTA, \
 	SECOND_REPETITION_DELTA, GENRE_MASCULINE, GENRE_FEMININE
 
 
-def create_or_update_repetition(user_word_data, save=False):
+def create_or_update_repetition(user_word_data, save=False, user=None):
+	"""
+	:rtype: le_francais_dictionary.models.UserWordRepetition
+	:type user_word_data: le_francais_dictionary.models.UserWordData
+	:param user_word_data: UserWordData, for which would be created (or updated
+	repetition object)
+	:param save: saved repetition object after creating or updating
+	:param user: user object with timezone field
+	"""
+	from .models import UserDayRepetition
 	from .models import UserWordRepetition
 	repetition_datetime, time = user_word_data.get_repetition_datetime()
+	if user is None:
+		user = user_word_data.user
+	user_repetition_date = timezone.make_naive(
+		value=repetition_datetime,
+		timezone=pytz.timezone(user.timezone or 'UTC')
+	).date()
 	if repetition_datetime:
 		repetition, created = UserWordRepetition.objects.get_or_create(
 			user_id=user_word_data.user_id,
 			word_id=user_word_data.word_id,
 		)
+		if (created or
+		repetition.time != time or
+		repetition.repetition_date != repetition_datetime.date()):
+			day_repetition, created = UserDayRepetition.objects.get_or_create(
+				user_id=user_word_data.user_id,
+				date=user_repetition_date
+			)
+			if (day_repetition.repetitions is None or
+					not repetition.pk in day_repetition.repetitions):
+				day_repetition.repetitions.append(repetition.pk)
+				day_repetition.save()
 		repetition.time=time
-		repetition.repetition_date = repetition_datetime.date()
+		repetition.repetition_date = user_repetition_date
 		if save:
 			repetition.save()
 		return repetition
