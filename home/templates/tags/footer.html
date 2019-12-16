@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n wagtailcore_tags %}
 <footer class="footer">
     <nav class="navbar navbar-dark bg-dark">
         <div class="container">
@@ -11,7 +11,7 @@
 					    <a href="/changements">Что происходит?</a>
 				    </li>
                     <li class="{% if calling_page.url == menuitem.url %}{% endif %}">
-                        <a href="/repetiteurs/">Репетиторы</a>
+                        <a href="{% slugurl 'cours' %}">Учебник С.Синицына</a>
                     </li>
                     <li>
                         <a href="/qui-est-la">Кто&nbsp;здесь?!&nbsp;&#169;</a>
