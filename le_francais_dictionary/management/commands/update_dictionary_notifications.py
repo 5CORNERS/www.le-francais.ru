@@ -13,6 +13,7 @@ def update_notifications():
 		if day_repetitions:
 			notification.content_object = day_repetitions.first()
 			notification.data['qty'] = len(day_repetitions.first().repetitions)
+			notification.save()
 
 
 class Command(BaseCommand):
