@@ -8,9 +8,9 @@ from le_francais_dictionary.utils import create_or_update_repetition
 def update_repetitions():
 	repetitions = UserWordRepetition.objects.all()
 	for r in repetitions:
-		user_word_data = r.word.last_user_data(r.user)
-		create_or_update_repetition(user_word_data)
-	bulk_update(repetitions, update_fields=['time', 'repetition_date'])
+		r.update(save=False)
+		print(r)
+	bulk_update(repetitions, update_fields=['time', 'repetition_date', 'repetition_datetime'])
 
 
 class Command(BaseCommand):
