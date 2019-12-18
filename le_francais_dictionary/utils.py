@@ -13,40 +13,44 @@ from .consts import INITIAL_E_FACTOR, FIRST_REPETITION_DELTA, \
 
 def create_or_update_repetition(user_word_data, save=False, user=None):
 	"""
-	:rtype: le_francais_dictionary.models.UserWordRepetition
-	:type user_word_data: le_francais_dictionary.models.UserWordData
+	create UserWordRepetition object and update UserDayRepetition
+	object with aware of user timezone.
 	:param user_word_data: UserWordData, for which would be created (or updated
+	:type user_word_data: le_francais_dictionary.models.UserWordData
 	repetition object)
 	:param save: saved repetition object after creating or updating
 	:param user: user object with timezone field
+	:rtype: le_francais_dictionary.models.UserWordRepetition
 	"""
 	from .models import UserDayRepetition
 	from .models import UserWordRepetition
-	repetition_datetime, time = user_word_data.get_repetition_datetime()
-	if user is None:
-		user = user_word_data.user
-	user_repetition_date = timezone.make_naive(
-		value=repetition_datetime,
-		timezone=pytz.timezone(user.timezone or 'UTC')
-	).date()
+	repetition_datetime, time = user_word_data.get_repetition_datetime_and_time()
 	if repetition_datetime:
+		if user is None:
+			user = user_word_data.user
+		repetition_datetime = timezone.make_aware(
+			timezone.make_naive(repetition_datetime, user.pytz_timezone).replace(
+				hour=0, minute=0, second=0, microsecond=0),
+			user.pytz_timezone)
 		repetition, created = UserWordRepetition.objects.get_or_create(
 			user_id=user_word_data.user_id,
 			word_id=user_word_data.word_id,
 		)
-		if (created or
-		repetition.time != time or
-		repetition.repetition_date != repetition_datetime.date()):
+		if (
+				created or
+				repetition.time != time or
+				repetition.repetition_datetime != repetition_datetime
+		):
 			day_repetition, created = UserDayRepetition.objects.get_or_create(
 				user_id=user_word_data.user_id,
-				date=user_repetition_date
+				datetime=repetition_datetime
 			)
 			if (day_repetition.repetitions is None or
 					not repetition.pk in day_repetition.repetitions):
 				day_repetition.repetitions.append(repetition.pk)
 				day_repetition.save()
-		repetition.time=time
-		repetition.repetition_date = user_repetition_date
+		repetition.time = time
+		repetition.repetition_datetime = repetition_datetime
 		if save:
 			repetition.save()
 		return repetition
@@ -127,7 +131,7 @@ def sm2_next_repetition_date(dataset):
 		else:
 			zeros_dataset.append(data)
 	if not finals:
-		return None
+		return None, None
 	repetition_delta = 1
 	for n, final in enumerate(finals, 0):
 		if n == 0:

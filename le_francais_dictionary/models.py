@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 from django.utils.http import urlquote
 from regex import regex
 
@@ -276,6 +277,10 @@ class Word(models.Model):
 		return self._first_translation
 
 	def last_user_data(self, user):
+		"""
+		Returns:
+			UserWordData:
+		"""
 		if not user.pk in self._last_user_data:
 			self._last_user_data[user.pk] = self.userdata.filter(
 				user=user).order_by('-datetime').first()
@@ -313,10 +318,10 @@ class Word(models.Model):
 				self._repetitions[user.pk] = None
 		return self._repetitions[user.pk]
 
-	def get_repetition_date(self, user):
+	def get_repetition_datetime(self, user):
 		repetition = self.repetition(user)
 		if repetition:
-			return repetition.repetition_date
+			return repetition.repetition_datetime
 		else:
 			return None
 
@@ -376,12 +381,12 @@ class Word(models.Model):
 			repetition: UserWordRepetition = self.repetition(user)
 			if repetition:
 				repetition_time = repetition.time
-				repetition_date = repetition.repetition_date
+				repetition_datetime = repetition.repetition_datetime
 			else:
 				repetition_time = None
-				repetition_date = None
+				repetition_datetime = None
 			data['userData'] = dict(
-				nextRepetitionDate=repetition_date,
+				nextRepetitionDate=repetition_datetime,
 				repetitionTime=repetition_time,
 			)
 		return data
@@ -576,7 +581,8 @@ class UserWordData(models.Model):
 	def get_e_factor(self):
 		return self.e_factor
 
-	def get_repetition_datetime(self):
+	# FIXME method can return None
+	def get_repetition_datetime_and_time(self):
 		dataset = self.user_word_dataset
 		repetition_datetime, time = sm2_next_repetition_date(dataset)
 		return repetition_datetime, time
@@ -586,8 +592,19 @@ class UserWordRepetition(models.Model):
 	word = models.ForeignKey(Word)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 	time = models.IntegerField(null=True, default=None)
-	repetition_date = models.DateField(null=True)
+	repetition_date = models.DateField(null=True) # obsolete
 	repetition_datetime = models.DateTimeField(null=True)
+
+	def update(self, save):
+		last_data = self.word.last_user_data(user=self.user)
+		datetime, self.time = last_data.get_repetition_datetime_and_time()
+		datetime = timezone.make_aware(timezone.make_naive(datetime, self.user.pytz_timezone).replace(hour=0, minute=0, second=0, microsecond=0), self.user.pytz_timezone)
+		self.repetition_datetime, self.repetition_date = datetime, datetime.date()
+		if save:
+			self.save()
+
+	def __str__(self):
+		return f'{self.user} -- {self.word} -- {self.repetition_datetime}'
 
 
 class UserDayRepetition(models.Model):
@@ -599,7 +616,11 @@ class UserDayRepetition(models.Model):
 
 	)
 	date = models.DateField(null=True)
+	datetime = models.DateTimeField(null=True)
 	success = models.NullBooleanField(null=True)
+
+	def __str__(self):
+		return f'{self.datetime} -- {self.user}'
 
 
 class UserStandalonePacket(models.Model):
