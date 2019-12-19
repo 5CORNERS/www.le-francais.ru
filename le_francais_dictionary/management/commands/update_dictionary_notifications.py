@@ -18,13 +18,23 @@ def update_notifications():
 	notifications = Notification.objects.filter(category=Notification.INTERVAL_REPETITIONS)
 	for notification in notifications:
 		user_notification = notification.notificationuser_set.first()
-		day_repetitions = UserDayRepetition.objects.filter(repetitions__contains=[notification.object_id], user=user_notification.user)
-		if day_repetitions:
-			notification.content_object = day_repetitions.first()
-			quantity = len(day_repetitions.first().repetitions)
+		day_repetitions = UserDayRepetition.objects.filter(
+			user=user_notification.user,
+			datetime__day=notification.datetime_creation.day
+		)
+		day_repetition = day_repetitions.order_by('datetime').first()
+		if day_repetitions.count() > 1:
+			print(f'ERROR! User {user_notification.user} have more than one day repetition on {notification.datetime_creation.date()}'
+			      f'Using first day repetition {day_repetition}')
+		elif day_repetitions.count() == 0:
+			print(f'ERROR! User {user_notification.user} has no day reptitions on {notification.datetime_creation.date()}'
+			      f'Skipping this notification {notification.pk}')
+		if day_repetition:
+			notification.content_object = day_repetition
+			quantity = len(day_repetition.repetitions)
 			notification.data['qty'] = message(quantity)
 			notification.save()
-			print(day_repetitions)
+			print(day_repetition)
 
 
 class Command(BaseCommand):
