@@ -32,7 +32,7 @@ def create_notifications():
 				category=Notification.INTERVAL_REPETITIONS,
 				data=dict(
 					url=reverse('dictionary:app_repeat'),
-					qty=len(r.repetitions)
+					quantity_message=len(r.repetitions)
 				),
 				click_url=reverse('dictionary:app_repeat'),
 				content_object=r,
