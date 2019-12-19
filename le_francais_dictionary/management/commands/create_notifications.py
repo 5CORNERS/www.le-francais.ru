@@ -24,7 +24,7 @@ def create_notifications():
 		datetime__day=timezone.now().day, datetime__hour=timezone.now().hour)
 	for r in now_repetitions:
 		try:
-			notification = Notification(
+			notification, created = Notification.objects.get_or_create(
 				image=NotificationImage.objects.get_or_create(
 					url=profile.avatar_url
 				)[0],
@@ -37,7 +37,6 @@ def create_notifications():
 				click_url=reverse('dictionary:app_repeat'),
 				content_object=r,
 			)
-			notification.save()
 			NotificationUser.objects.get_or_create(
 				notification=notification,
 				user=r.user
