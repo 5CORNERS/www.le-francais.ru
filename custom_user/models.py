@@ -242,6 +242,17 @@ class User(AbstractUser):
 		tz = self.timezone or 'UTC'
 		return timezone.make_naive(timezone.now(), pytz.timezone(tz))
 
+	@property
+	def user_datetime(self):
+		return self.get_user_datetime()
+
+	def get_pytz_timezone(self):
+		return pytz.timezone(self.timezone or 'UTC')
+
+	@property
+	def pytz_timezone(self):
+		return self.get_pytz_timezone()
+
 
 from django.db import models
 
