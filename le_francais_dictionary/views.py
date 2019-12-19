@@ -154,7 +154,7 @@ def get_repetition_words(request):
             'word__wordtranslation_set',
             'word__wordtranslation_set__polly',
             'word__polly').filter(
-            repetition_date__lte=timezone.now(), user=request.user).exclude(
+            repetition_datetime__lte=timezone.now(), user=request.user).exclude(
             word__userwordignore__user=request.user
         )
         result['words'] = [
@@ -195,7 +195,7 @@ def update_words(request):
             delay = word_data.get('delay')
             if UserWordRepetition.objects.filter(
                     word=word, user=request.user,
-                    repetition_date__gt=timezone.now()):
+                    repetition_datetime__gt=timezone.now()): # FIXME user timezone
                 errors.append(dict(
                     pk=word.pk,
                     message=consts.TOO_EARLY_MESSAGE,
@@ -231,7 +231,7 @@ def update_words(request):
         mean_quality = user_word_data.mean_quality
         if user_word_data.grade:
             repetition = create_or_update_repetition(user_word_data)
-            repetition_datetime = repetition.repetition_date
+            repetition_datetime = repetition.repetition_datetime
             repetition_time = repetition.time
             repetitions.append(repetition)
         else:
