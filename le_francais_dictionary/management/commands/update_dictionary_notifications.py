@@ -23,19 +23,21 @@ def update_notifications():
 			datetime__day=notification.datetime_creation.day
 		)
 		day_repetition = day_repetitions.order_by('datetime').first()
-		if day_repetitions.count() > 1:
-			print(f'ERROR! User {user_notification.user} have more than one day repetition on {notification.datetime_creation.date()}\n'
-			      f'Using first day repetition {day_repetition}')
+		if day_repetitions.count() != 0:
+			if day_repetitions.count() > 1:
+				print(f'ERROR! User {user_notification.user} have more than one day repetition on {notification.datetime_creation.date()}\n'
+				      f'Using first day repetition {day_repetition}')
 			notification.content_object = day_repetition
 			quantity = len(day_repetition.repetitions)
 			notification.data['quantity_message'] = 'появилось ' + message(quantity)
 			notification.save()
 			print(day_repetition)
-		elif day_repetitions.count() == 0:
+		else:
 			print(f'ERROR! User {user_notification.user} has no day repetitions on {notification.datetime_creation.date()}\n'
 			      f'Adding neutral quantity message')
 			notification.data['quantity_message'] = 'появились новые слова'
 			notification.save()
+
 
 
 class Command(BaseCommand):
