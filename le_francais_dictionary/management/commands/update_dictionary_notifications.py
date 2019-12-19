@@ -35,6 +35,7 @@ def update_notifications():
 			print(f'ERROR! User {user_notification.user} has no day repetitions on {notification.datetime_creation.date()}\n'
 			      f'Adding neutral quantity message')
 			notification.data['quantity_message'] = 'появились новые слова'
+			notification.save()
 
 
 class Command(BaseCommand):
