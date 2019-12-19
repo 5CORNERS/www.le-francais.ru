@@ -201,7 +201,9 @@ function forceLower(strInput) {
 }
 
 $(function () {
-  $('[data-toggle="popover"]').popover()
+  $('[data-toggle="popover"]').popover({
+      boundary: 'viewport'
+  })
 });
 
 $('video').each(function () {this.controls = true});
