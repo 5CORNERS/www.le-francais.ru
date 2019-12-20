@@ -31,7 +31,7 @@
 		<script async="async" src="https://www.googletagservices.com/tag/js/gpt.js"></script>
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <title>{% block title %}{% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>
+    <title>{% block title %}{% if self.seo_title %}{{ self.seo_title }}{% elif self.title %}{{ self.title }}{% else %}Французский язык{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>
 
 {#    <link rel="icon" href="{% static 'favicon/favicon.ico' %}">#}
 {#    <link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicon/apple-icon-57x57.png' %}">#}
