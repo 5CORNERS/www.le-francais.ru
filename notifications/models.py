@@ -14,6 +14,8 @@ from postman.models import Message
 from custom_user.models import User
 from pybb.models import Post, Like, Topic
 from pybb.models import Post, Like
+
+from le_francais_dictionary.models import UserDayRepetition
 from . import consts
 
 
@@ -286,3 +288,7 @@ post_delete.connect(delete_pybb_topic_notification, Topic)
 
 post_save.connect(check_users, NotificationUser)
 post_save.connect(check_users, Notification)
+
+
+def create_dictionary_notifications(sender, instance: UserDayRepetition, **kwargs):
+	...
