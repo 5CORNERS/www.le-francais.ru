@@ -30,6 +30,7 @@ def message(n, form1=' новое слово', form2=' новых слова', f
         return '{0} {1}'.format(str(n), form5)
 
 
+# TODO move it to notifications app
 def create_notifications():
 	profile = Profile.objects.get(pk=727)
 	now_repetitions = UserDayRepetition.objects.filter(
