@@ -1,6 +1,7 @@
 import datetime
 import pytz
 from bulk_update.helper import bulk_update
+from django.contrib.contenttypes.models import ContentType
 from django.core.management import BaseCommand
 
 from django.urls import reverse
@@ -35,7 +36,8 @@ def create_notifications():
 					quantity_message=len(r.repetitions)
 				),
 				click_url=reverse('dictionary:app_repeat'),
-				content_object=r,
+				content_type=ContentType.objects.get_for_model(r),
+				object_id=r.pk
 			)
 			NotificationUser.objects.get_or_create(
 				notification=notification,
