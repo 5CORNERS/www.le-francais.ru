@@ -9,10 +9,11 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models.signals import post_save, post_delete
+from django.urls import reverse
 from postman.models import Message
 
 from custom_user.models import User
-from pybb.models import Post, Like, Topic
+from pybb.models import Post, Like, Topic, Profile
 from pybb.models import Post, Like
 
 from le_francais_dictionary.models import UserDayRepetition
@@ -290,5 +291,24 @@ post_save.connect(check_users, NotificationUser)
 post_save.connect(check_users, Notification)
 
 
-def create_dictionary_notifications(sender, instance: UserDayRepetition, **kwargs):
-	...
+def create_dictionary_notification(sender, instance: UserDayRepetition, **kwargs):
+	image_url = Profile.objects.get(pk=727).avatar_url
+	from le_francais_dictionary.utils import message
+	notification, created = Notification.objects.get_or_create(
+		image=NotificationImage.objects.get_or_create(
+			url=image_url
+		)[0],
+		title='Доступны новые слова для повторения',
+		category=Notification.INTERVAL_REPETITIONS,
+		data=dict(
+			url=reverse('dictionary:app_repeat'),
+			quantity_message=message(len(instance.repetitions))
+		),
+		click_url=reverse('dictionary:app_repeat'),
+		content_type=ContentType.objects.get_for_model(UserDayRepetition),
+		object_id=instance.pk
+	)
+	NotificationUser.objects.get_or_create(
+		notification=notification,
+		user=instance.user
+	)
