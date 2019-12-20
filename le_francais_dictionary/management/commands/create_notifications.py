@@ -19,6 +19,17 @@ class Command(BaseCommand):
 		create_notifications()
 
 
+def message(n, form1=' новое слово', form2=' новых слова', form5=' новых слов'):
+    n10 = n % 10
+    n100 = n % 100
+    if n10 == 1 and n100 != 11:
+        return '{0} {1}'.format(str(n), form1)
+    elif n10 in [2, 3, 4] and n100 not in [12, 13, 14]:
+        return '{0} {1}'.format(str(n), form2)
+    else:
+        return '{0} {1}'.format(str(n), form5)
+
+
 def create_notifications():
 	profile = Profile.objects.get(pk=727)
 	now_repetitions = UserDayRepetition.objects.filter(
@@ -33,7 +44,7 @@ def create_notifications():
 				category=Notification.INTERVAL_REPETITIONS,
 				data=dict(
 					url=reverse('dictionary:app_repeat'),
-					quantity_message=len(r.repetitions)
+					quantity_message=message(len(r.repetitions))
 				),
 				click_url=reverse('dictionary:app_repeat'),
 				content_type=ContentType.objects.get_for_model(r),
