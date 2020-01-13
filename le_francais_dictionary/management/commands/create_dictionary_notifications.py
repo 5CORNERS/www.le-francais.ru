@@ -11,8 +11,7 @@ class Command(BaseCommand):
 
 
 def create_notifications():
-	now_repetitions = UserDayRepetition.objects.filter(
-		datetime__day=timezone.now().day, datetime__hour=timezone.now().hour)
+	now_repetitions = UserDayRepetition.objects.filter(datetime__lte=timezone.now()).exclude(repetitions__len=0)
 	for r in now_repetitions:
 		try:
 			create_dictionary_notification(UserDayRepetition, r)

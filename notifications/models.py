@@ -87,6 +87,7 @@ class Notification(models.Model):
 			Text=self.text,
 			ClickUrl=self.click_url,
 			ImageBase64=self.image.base64,
+			pk=self.pk,
 		)
 		return data
 
@@ -96,6 +97,7 @@ class Notification(models.Model):
 			html=self.text,
 			url=self.click_url,
 			datetime=self.datetime_creation,
+			pk=self.pk,
 		)
 		return data
 
@@ -292,7 +294,11 @@ post_save.connect(check_users, Notification)
 
 
 def create_dictionary_notification(sender, instance: UserDayRepetition, **kwargs):
-	image_url = Profile.objects.get(pk=727).avatar_url
+	try:
+		site_forum_profile = Profile.objects.get(pk=727).avatar_url
+		image_url = Profile.objects.get(pk=727).avatar_url
+	except Profile.DoesNotExist:
+		image_url = 'https://www.le-francais.ru/static/images/cat_logo.png'
 	from le_francais_dictionary.utils import message
 	notification, created = Notification.objects.get_or_create(
 		image=NotificationImage.objects.get_or_create(
@@ -308,6 +314,8 @@ def create_dictionary_notification(sender, instance: UserDayRepetition, **kwargs
 		content_type=ContentType.objects.get_for_model(UserDayRepetition),
 		object_id=instance.pk
 	)
+	if created:
+		print(f'Created Notification {notification.datetime_creation} -- {len(instance.repetitions)}')
 	NotificationUser.objects.get_or_create(
 		notification=notification,
 		user=instance.user
