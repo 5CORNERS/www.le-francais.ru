@@ -9,7 +9,7 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 		for repetition in UserWordRepetition.objects.all():
 			if repetition.repetition_datetime is None:
-				repetition.update(save=True)
+				repetition.update_repetition(save=True)
 			day_repetition, created = UserDayRepetition.objects.get_or_create(
 				user=repetition.user,
 				datetime=repetition.repetition_datetime

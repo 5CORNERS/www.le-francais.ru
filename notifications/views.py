@@ -55,7 +55,7 @@ def get_new_notifications(request):
 	notifications = Notification.objects \
 		.order_by('datetime_creation') \
 		.filter(notificationuser__user=user,
-	            notificationuser__check_datetime=None)
+	            notificationuser__check_datetime=None).exclude(active=False)
 	data = {'notification_list': notification_list_to_dict(notifications)}
 	return JsonResponse(data)
 

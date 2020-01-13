@@ -18,7 +18,6 @@ from le_francais_dictionary.forms import WordsManagementFilterForm
 from .models import Word, Packet, UserPacket, \
 	UserWordData, UserWordRepetition, UserWordIgnore, UserStandalonePacket, \
 	WordTranslation, prefetch_words_data
-from .utils import create_or_update_repetition
 from . import consts
 from home.models import UserLesson
 
@@ -149,13 +148,13 @@ def get_repetition_words(request):
         'errors': [],
     }
     if request.user.is_authenticated:
-        repetitions = UserWordRepetition.objects.prefetch_related(
-            'word',
-            'word__wordtranslation_set',
-            'word__wordtranslation_set__polly',
-            'word__polly').filter(
-            repetition_datetime__lte=timezone.now(), user=request.user).exclude(
-            word__userwordignore__user=request.user
+        # FIXME for some reason this query
+        #  do not exclude repetitions with > 5 time
+        repetitions = UserWordRepetition.objects.prefetch_related('word').filter(
+            repetition_datetime__lte=timezone.now(), user=request.user)
+        repetitions = repetitions.exclude(
+            word__userwordignore__user=request.user,
+            time__gte=5
         )
         result['words'] = [
             repetition.word.to_dict(user=request.user) for repetition in repetitions
@@ -224,16 +223,14 @@ def update_words(request):
             ))
     user_words_data = UserWordData.objects.bulk_create(user_words_data)
     words = []
-    repetitions = []
     for user_word_data in user_words_data:
         e_factor = user_word_data.e_factor
         quality = user_word_data.quality
         mean_quality = user_word_data.mean_quality
         if user_word_data.grade:
-            repetition = create_or_update_repetition(user_word_data)
+            repetition = user_word_data.update_or_create_repetition()
             repetition_datetime = repetition.repetition_datetime
             repetition_time = repetition.time
-            repetitions.append(repetition)
         else:
             repetition_datetime = None
             repetition_time = None
@@ -245,7 +242,6 @@ def update_words(request):
             quality=quality,
             mean_quality=mean_quality
         ))
-    bulk_update(repetitions, update_fields=['repetition_datetime', 'time'])
     return JsonResponse(dict(words=words, errors=errors), safe=False)
 
 
