@@ -13,7 +13,7 @@ from le_francais_dictionary.consts import GENRE_CHOICES, \
 	PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
 	GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE
 from le_francais_dictionary.utils import sm2_next_repetition_date, \
-	format_text2speech, sm2_ef_q_mq
+	format_text2speech, sm2_ef_q_mq, create_or_update_repetition
 from polly import const as polly_const
 from polly.models import PollyTask
 
@@ -452,7 +452,7 @@ class Word(models.Model):
 		#     translation.create_polly_task()
 
 	def __str__(self):
-		return self.word
+		return f'Word:{self.cd_id} {self.word}'
 
 
 class WordTranslation(models.Model):
@@ -543,6 +543,10 @@ class UserWordData(models.Model):
 		self._mean_quality = -1
 		self._user_word_dataset = None
 
+	def __str__(self):
+		return f'UserWordData: {self.user} -- {self.word} -- G/M/D: {self.grade}/' \
+		       f'{self.mistakes}/{self.delay} -- Datetime: {self.datetime}'
+
 
 	@property
 	def user_word_dataset(self):
@@ -587,6 +591,26 @@ class UserWordData(models.Model):
 		repetition_datetime, time = sm2_next_repetition_date(dataset)
 		return repetition_datetime, time
 
+	def get_tz_aware_repetition_datetime_and_time(self) -> (datetime, int):
+		repetition_datetime, time = self.get_repetition_datetime_and_time()
+		if repetition_datetime is None:
+			return None, None
+		user = self.user
+		repetition_datetime = timezone.make_aware(
+			timezone.make_naive(
+				repetition_datetime, user.pytz_timezone
+			).replace(
+				hour=0, minute=0, second=0, microsecond=0),
+			user.pytz_timezone)
+		return repetition_datetime, time
+
+	def update_or_create_repetition(self):
+		repetition_datetime, time = self.get_tz_aware_repetition_datetime_and_time()
+		if repetition_datetime:
+			return create_or_update_repetition(
+				self.user_id, self.word_id, repetition_datetime, time)
+		return None
+
 
 class UserWordRepetition(models.Model):
 	word = models.ForeignKey(Word)
@@ -595,7 +619,7 @@ class UserWordRepetition(models.Model):
 	repetition_date = models.DateField(null=True) # obsolete
 	repetition_datetime = models.DateTimeField(null=True)
 
-	def update(self, save):
+	def update_repetition(self, save):
 		last_data = self.word.last_user_data(user=self.user)
 		datetime, self.time = last_data.get_repetition_datetime_and_time()
 		datetime = timezone.make_aware(timezone.make_naive(datetime, self.user.pytz_timezone).replace(hour=0, minute=0, second=0, microsecond=0), self.user.pytz_timezone)
@@ -604,7 +628,7 @@ class UserWordRepetition(models.Model):
 			self.save()
 
 	def __str__(self):
-		return f'{self.user} -- {self.word} -- {self.repetition_datetime}'
+		return f'{self.user} -- {self.word} -- {self.repetition_datetime} -- {self.time}'
 
 
 class UserDayRepetition(models.Model):

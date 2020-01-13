@@ -11,50 +11,45 @@ from .consts import INITIAL_E_FACTOR, FIRST_REPETITION_DELTA, \
 	SECOND_REPETITION_DELTA, GENRE_MASCULINE, GENRE_FEMININE
 
 
-def create_or_update_repetition(user_word_data, save=False, user=None):
-	"""
-	create UserWordRepetition object and update UserDayRepetition
-	object with aware of user timezone.
-	:param user_word_data: UserWordData, for which would be created (or updated
-	:type user_word_data: le_francais_dictionary.models.UserWordData
-	repetition object)
-	:param save: saved repetition object after creating or updating
-	:param user: user object with timezone field
-	:rtype: le_francais_dictionary.models.UserWordRepetition
-	"""
+def create_or_update_repetition(user_id, word_id, repetition_datetime, time):
 	from .models import UserDayRepetition
 	from .models import UserWordRepetition
-	repetition_datetime, time = user_word_data.get_repetition_datetime_and_time()
-	if repetition_datetime:
-		if user is None:
-			user = user_word_data.user
-		repetition_datetime = timezone.make_aware(
-			timezone.make_naive(repetition_datetime, user.pytz_timezone).replace(
-				hour=0, minute=0, second=0, microsecond=0),
-			user.pytz_timezone)
-		repetition, created = UserWordRepetition.objects.get_or_create(
-			user_id=user_word_data.user_id,
-			word_id=user_word_data.word_id,
-		)
-		if (
-				created or
-				repetition.time != time or
-				repetition.repetition_datetime != repetition_datetime
-		):
-			day_repetition, created = UserDayRepetition.objects.get_or_create(
-				user_id=user_word_data.user_id,
-				datetime=repetition_datetime
-			)
-			if (day_repetition.repetitions is None or
-					not repetition.pk in day_repetition.repetitions):
-				day_repetition.repetitions.append(repetition.pk)
-				day_repetition.save()
-		repetition.time = time
-		repetition.repetition_datetime = repetition_datetime
-		if save:
-			repetition.save()
-		return repetition
-	return None
+	repetition, repetition_created = UserWordRepetition.objects.get_or_create(
+		user_id=user_id,
+		word_id=word_id,
+	)
+	repetition.repetition_datetime = repetition_datetime
+	repetition.time = time
+	repetition.save()
+	if not repetition_created:
+		for old_day_repetitions in UserDayRepetition.objects.filter(
+				repetitions__contains=[repetition.pk]):
+			old_day_repetitions.repetitions.remove(repetition.pk)
+			old_day_repetitions.save()
+	day_repetitions, day_repetition_created = UserDayRepetition.objects.get_or_create(
+		user_id=user_id,
+		datetime=repetition_datetime
+	)
+	if day_repetition_created:
+		day_repetitions.repetitions = []
+	if (day_repetitions.repetitions is None or
+			not repetition.pk in day_repetitions.repetitions):
+		day_repetitions.repetitions.append(repetition.pk)
+	if not day_repetition_created:
+		to_remove = list(UserWordRepetition.objects.filter(
+			pk__in=day_repetitions.repetitions
+		).exclude(
+			repetition_datetime__exact=repetition_datetime
+		).exclude(pk=repetition.pk).distinct().values_list('pk',
+		                                                   flat=True))
+		if to_remove:
+			day_repetitions.repetitions = [
+				x for x in day_repetitions.repetitions if
+				x not in to_remove
+			]
+	day_repetitions.save()
+	return repetition
+
 
 
 def message(n, form1=' новое слово', form2=' новых слова', form5=' новых слов'):
