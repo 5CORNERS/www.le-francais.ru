@@ -1,7 +1,7 @@
 import re
 
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
@@ -331,7 +331,7 @@ class Word(models.Model):
 			return repetition.time
 		else:
 			return None
-	
+
 	def get_difficulty_5(self, user):
 		if self.mean_quality(user):
 			return 5 - self.mean_quality(user)
@@ -679,6 +679,72 @@ class Example(models.Model):
 	example = models.CharField(max_length=200)
 	translation = models.CharField(max_length=200)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
+
+
+class VerbPacket(models.Model):
+	name = models.CharField(max_length=32)
+
+
+class Verb(models.Model):
+	verb = models.CharField(max_length=64)
+	translation = models.CharField(max_length=64, null=True)
+	packet = models.ForeignKey(VerbPacket, null=True, on_delete=models.SET_NULL)
+	polly = models.ForeignKey(PollyTask, null=True, on_delete=models.SET_NULL, related_name='dictionary_verb_set')
+	audio_url = models.URLField(null=True)
+	translation_polly = models.ForeignKey(PollyTask, null=True,
+	                                      on_delete=models.SET_NULL,
+	                                      related_name='dictionary_verb_translation_set')
+	translation_audio_url = models.URLField(null=True)
+
+	def to_dict(self):
+		polly_url = self.audio_url if self.audio_url else self.polly.url
+		if self.translation_audio_url:
+			translation_polly_url = self.translation_audio_url
+		else:
+			translation_polly_url = self.translation_polly.url
+		has_translation = True if self.translation else False
+		forms = []
+		for form in self.verbform_set.all().order_by('order'):
+			forms.append(form.to_dict())
+		return {
+			"verb": self.verb,
+			"pollyUrl": polly_url,
+			"translation": self.translation,
+			"tr_pollyUrl": translation_polly_url,
+			"isTranslation": has_translation,
+			"forms": forms,
+			"packet": self.packet_id
+		}
+
+
+
+
+class VerbForm(models.Model):
+	verb = models.ForeignKey(Verb, on_delete=models.CASCADE)
+	order = models.PositiveSmallIntegerField(null=True)
+	form = models.CharField(max_length=64)
+	translation = models.CharField(max_length=64)
+	polly = models.ForeignKey(PollyTask, null=True, on_delete=models.SET_NULL,
+	                          related_name='dictionary_verb_form_set')
+	audio_url = models.URLField(null=True)
+	translation_polly = models.ForeignKey(PollyTask, null=True,
+	                                      on_delete=models.SET_NULL,
+	                                      related_name='dictionary_verb_form_translation_set')
+	translation_audio_url = models.URLField(null=True)
+
+	def to_dict(self):
+		polly_url = self.audio_url if self.audio_url else self.polly.url
+		if self.translation_audio_url:
+			translation_polly_url = self.translation_audio_url
+		else:
+			translation_polly_url = self.translation_polly.url
+		return {
+			"form": self.form,
+			"pollyUrl": polly_url,
+			"translation": self.translation,
+			"tr_pollyUrl": translation_polly_url,
+		}
+
 
 
 def prefetch_words_data(words, user):
