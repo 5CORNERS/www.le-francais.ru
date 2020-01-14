@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template import defaultfilters
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -57,10 +58,19 @@ def get_log(request:HttpRequest, year, month):
     payments = list(Payment.objects.select_related('receipt').filter(
         Q(status='CONFIRMED') | Q(status='AUTHORIZED'), update_date__year=int(year), update_date__month=int(month)).order_by('update_date'))
     s = ''
+    today_income = 0
+    total_income = 0
     for p in payments:
         for item in p.items():
             s += '{date}\t{amount}\tTinkoff\t{type}\t{closest_activation}\t{email}\n'.format(
-                date=defaultfilters.date(p.update_date, "Y-m-d H:i"), amount=p.amount/100, email=p.email(), closest_activation=p.closest_activation,
+                date=defaultfilters.date(p.update_date, "Y-m-d H:i"), amount=int(p.amount/100), email=p.email(), closest_activation=p.closest_activation,
                 type=item.category.split('_')[0]
             )
+        total_income += int(p.amount/100)
+        if p.update_date.day == timezone.now().day:
+            today_income += int(p.amount/100)
+    s += f'----------------------------\n'
+    s += f'Today Income: {today_income}\n'
+    s += f'Total Income: {total_income}\n'
+    s += f'Average Daily: {total_income/timezone.now().day}'
     return HttpResponse(s, status=200, content_type='text/plain')
