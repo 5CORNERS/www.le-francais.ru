@@ -16,8 +16,8 @@ from django.utils.translation import ugettext_lazy as _
 # Create your views here.
 from le_francais_dictionary.forms import WordsManagementFilterForm
 from .models import Word, Packet, UserPacket, \
-	UserWordData, UserWordRepetition, UserWordIgnore, UserStandalonePacket, \
-	WordTranslation, prefetch_words_data
+    UserWordData, UserWordRepetition, UserWordIgnore, UserStandalonePacket, \
+    WordTranslation, prefetch_words_data, VerbPacket, WordGroup
 from . import consts
 from home.models import UserLesson
 
@@ -189,18 +189,21 @@ def update_words(request):
     for word_data in words_data:
         try:
             word = Word.objects.select_related('packet').get(pk=word_data['pk'])
+            if word.group is not None:
+                new_word = Word.objects.filter(userdata__user=request.user, group=word.group).order_by('-userwordrepetition__time')
+                if new_word.exists() and new_word.first() != word:
+                    word = new_word.first()
             grade = word_data.get('grade')
             mistakes = word_data.get('mistakes')
             delay = word_data.get('delay')
             if UserWordRepetition.objects.filter(
                     word=word, user=request.user,
-                    repetition_datetime__gt=timezone.now()): # FIXME user timezone
+                    repetition_datetime__gt=timezone.now()):
                 errors.append(dict(
                     pk=word.pk,
                     message=consts.TOO_EARLY_MESSAGE,
                     code=consts.TOO_EARLY_CODE,
-                )
-                )
+                ))
             elif word.packet.is_activated(request.user) or word.packet.demo:
                 user_words_data.append(UserWordData(
                     word=word,

@@ -13,7 +13,7 @@ from le_francais_dictionary.views import update_words
 from wagtail.core.models import Page, Site
 from home.models import LessonPage, UserLesson
 from .models import Word, WordTranslation, Packet, UserPacket, UserWordData, \
-    UserWordRepetition
+    UserWordRepetition, WordGroup
 from . import views
 from . import consts
 
@@ -319,7 +319,6 @@ class WordUserTestCase(TestCase):
 
 class FlashCardsTestCase(TestCase):
     def setUp(self):
-        from .utils import FIRST_REPETITION_DELTA, SECOND_REPETITION_DELTA
         self.factory = RequestFactory()
         self.user = User.objects.create_user(username='testuser',
                                              email='testuser@test.com',
@@ -435,3 +434,65 @@ class FlashCardsTestCase(TestCase):
                                        f'{[UserWordRepetition.objects.get(pk=x).word for x in notifications[0].content_object.repetitions]}\n'
                                        f'{repetition_words}')
                 repeat_words(repetition_words)
+
+
+class FlashCardsGroupWordsTestCase(TestCase):
+    def setUp(self) -> None:
+        self.factory = RequestFactory()
+        self.user = User.objects.create_user(username='testuser',
+                                             email='testuser@test.com',
+                                             password='testpassword',
+                                             timezone='Europe/Moscow')
+        self.packet1, next_pk = create_test_word_packet(1, 1, 0)
+        self.packet2, next_pk = create_test_word_packet(2, 1, next_pk)
+        self.word_group = WordGroup.objects.create()
+        word1 = self.packet1.word_set.first()
+        word1.group = self.word_group
+        word1.save()
+        self.word1 = word1
+        word2 = self.packet2.word_set.first()
+        word2.group = self.word_group
+        word2.save()
+        self.word2 = word2
+        UserLesson.objects.create(user=self.user, lesson=self.packet1.lesson)
+        UserLesson.objects.create(user=self.user, lesson=self.packet2.lesson)
+
+    def test1(self):
+        with freeze_time(datetime.datetime(1,1,1,0,0,0)) as freeze_datetime:
+            update_words_request_word1 = self.factory.post(
+                path=reverse('dictionary:update_words'),
+                data=json.dumps({
+                    "words":[
+                        {
+                            "pk":self.word1.pk,
+                            "grade":1,
+                            "mistakes": 0,
+                            "delay": 3000
+                        }
+                    ]
+                }),
+                content_type='application/json'
+            )
+            update_words_request_word1.user = self.user
+            word1_response = views.update_words(update_words_request_word1)
+            freeze_datetime.tick(datetime.timedelta(seconds=10))
+            update_words_request_word2 = self.factory.post(
+                path=reverse('dictionary:update_words'),
+                data=json.dumps({
+                    "words": [
+                        {
+                            "pk": self.word2.pk,
+                            "grade": 1,
+                            "mistakes": 0,
+                            "delay": 3000
+                        }
+                    ]
+                }),
+                content_type='application/json'
+            )
+            update_words_request_word2.user = self.user
+            word2_response = views.update_words(update_words_request_word2)
+            self.assertEqual(json.loads(word2_response.content)['errors'][0]['code'], consts.TOO_EARLY_CODE)
+            freeze_datetime.tick(delta=datetime.timedelta(days=1))
+            word2_response = views.update_words(update_words_request_word2)
+            self.assertEqual(json.loads(word2_response.content)['words'][0]['repetitionTime'], 1)
