@@ -419,3 +419,21 @@ def start_app_repeat(request):
 		'packet_id': 99999999,
 		'mode': 'repeat'
 	})
+
+
+def get_verbs(request, packet_id):
+    result = {
+        "verbs": [],
+        "errors": []
+    }
+    try:
+        packet = VerbPacket.objects.get(pk=packet_id)
+    except VerbPacket.DoesNotExist:
+        result['errors'].append({
+            "message":consts.PACKET_DOES_NOT_EXIST_MESSAGE,
+            "code":consts.PACKET_DOES_NOT_EXIST_CODE,
+        })
+        return JsonResponse(result, status=404)
+    for verb in packet.verb_set.all():
+        result['verbs'].append(verb.to_dict())
+    return JsonResponse(result, status=200)
