@@ -89,6 +89,9 @@ class Packet(models.Model):
 			)).values(
 			'word').distinct().__len__()
 
+	class Meta:
+		ordering = ['lesson__lesson_number']
+
 
 class UserPacket(models.Model):
 	packet = models.ForeignKey(Packet)
