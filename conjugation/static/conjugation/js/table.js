@@ -3,8 +3,8 @@ let audio = undefined;
 
 let ua = window.navigator.userAgent;
 let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
-let webkit = !!ua.match(/WebKit/i);
-let iOSSafari = iOS && webkit && !ua.match(/CriOS/i);
+let is_webkit = !!ua.match(/WebKit/i);
+let iOSSafari = iOS && is_webkit && !ua.match(/CriOS/i);
 
 const NORMAL_CLASS = 'fa-volume-down';
 const LOADING_CLASS = 'fa-spinner fa-pulse';
@@ -19,6 +19,7 @@ function changeClassTo(icon, c) {
 	}
 	$(icon).addClass(c)
 }
+
 
 function pollyListen(icon, key) {
 	if (IS_REFLEXIVE === 'False' && icon.attributes['data-mood'].value === 'indicative' && icon.attributes['data-tense'].value === 'present' && AUDIO_URL !== 'None') {

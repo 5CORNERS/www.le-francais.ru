@@ -7,13 +7,15 @@
 {% load static conjugation_tags %}
 {% block extra_head %}
     <script src="{% static "lib/jquery-ui-1.12.1.custom/jquery-ui.min.js" %}"></script>
+    <script src="{% static "conjugation/js/conjugation.js" %}"></script>
     <link rel="stylesheet" href="{% static "lib/jquery-ui-1.12.1.custom/jquery-ui.min.css" %}">
     {% conjugation_advertisement_head 'lf_fr_conjindex_rsb_01' %}
 {% endblock %}
+{% block webmanifest %}<link rel="manifest" href="{% static 'conjugation/meta/site.webmanifest' %}">{% endblock %}
 {% block extra_css %}
     <style>
         .ui-autocomplete-loading {
-            background: white url("{% static 'images/ui-anim_basic_16x16.gif' %}") right center no-repeat;
+            background: white url("{% static 'conjugation/images/ui-anim_basic_16x16.gif' %}") right center no-repeat;
         }
     </style>
     <style>

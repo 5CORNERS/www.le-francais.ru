@@ -109,12 +109,12 @@
 		<script>
 			const CONJ_POLLY_URL = '{% url 'conjugation:polly' %}';
 			const CSRF_TOKEN = '{{ csrf_token }}';
-			const AUDIO_URL = '{{ v.audio_url }}'
-			const IS_REFLEXIVE = '{{ v.reflexive }}'
+			const AUDIO_URL = '{{ v.audio_url }}';
+			const IS_REFLEXIVE = '{{ v.reflexive }}';
 		</script>
 		<script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
 {#    <script async src="{% static 'components/bootstrap/dist/js/bootstrap.min.js' %}"></script>#}
-		<script src="{% static 'js/conjugation.min.js' %}"></script>
+		<script src="{% static 'conjugation/js/table.min.js' %}"></script>
     <script>
 				if (window.localStorage.getItem('long_list')){
 					see_more()
