@@ -15,6 +15,10 @@
             "type": "image/png"
         }
     ],
+    "serviceworker": {
+        "src": "../js/conjugation-sw.js",
+        "scope": "/conjugaison/",
+    },
     "theme_color": "#337ab7",
     "background_color": "#337ab7",
     "display": "standalone",

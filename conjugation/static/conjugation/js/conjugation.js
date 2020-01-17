@@ -14,10 +14,17 @@ if ('serviceWorker' in navigator) {
 
 let deferredPrompt;
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  // Stash the event so it can be triggered later.
+var isTooSoon = true;
+window.addEventListener("beforeinstallprompt", function(e) {
   deferredPrompt = e;
-
+  if (isTooSoon) {
+    deferredPrompt.preventDefault(); // Prevents prompt display
+    // Prompt later instead:
+    setTimeout(function() {
+      isTooSoon = false;
+      deferredPrompt.prompt(); // Throws if called more than once or default not prevented
+    }, 10000);
+  }
 });
 
 window.addEventListener('appinstalled', (evt) => {
