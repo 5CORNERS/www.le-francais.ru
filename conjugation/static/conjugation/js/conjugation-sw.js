@@ -5,6 +5,16 @@ var urlsToCache = [
     '/static/conjugation/js/conjugation.min.js',
     '/static/conjugation/images/ui-anim_basic_16x16.gif',
     '/static/lib/jquery-ui-1.12.1.custom/jquery-ui.min.css',
+    '/static/js/le_francais.min.js',
+    '/static/css/le_francais.min.css',
+    '/static/components/css/bootstrap.css',
+    '/static/components/css/bootstrap-select.css',
+    '/static/components/css/bootstrap-treeview.css',
+    '/static/components/css/font-awesome.css',
+    '/static/components/js/bootstrap.js',
+    '/static/components/js/bootstrap-select.js',
+    '/static/components/js/bootstrap-treeview.min.js',
+    '/static/components/js/jquery.js',
 ];
 self.addEventListener('install', function (event) {
     event.waitUntil(
