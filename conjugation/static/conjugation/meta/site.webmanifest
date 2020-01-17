@@ -17,7 +17,7 @@
     ],
     "serviceworker": {
         "src": "../js/conjugation-sw.js",
-        "scope": "/conjugaison/",
+        "scope": "/conjugaison/"
     },
     "theme_color": "#337ab7",
     "background_color": "#337ab7",
