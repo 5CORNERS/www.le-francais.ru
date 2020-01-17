@@ -7,6 +7,8 @@ var urlsToCache = [
     '/static/lib/jquery-ui-1.12.1.custom/jquery-ui.min.css',
     '/static/js/le_francais.min.js',
     '/static/css/le_francais.min.css',
+    '/android-chrome-192x192.png',
+    '/android-chrome-512x512.png',
     '/static/components/css/bootstrap.css',
     '/static/components/css/bootstrap-select.css',
     '/static/components/css/bootstrap-treeview.css',
