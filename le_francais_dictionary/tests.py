@@ -13,7 +13,7 @@ from le_francais_dictionary.views import update_words
 from wagtail.core.models import Page, Site
 from home.models import LessonPage, UserLesson
 from .models import Word, WordTranslation, Packet, UserPacket, UserWordData, \
-    UserWordRepetition, WordGroup, UserWordIgnore
+    UserWordRepetition, WordGroup, UserWordIgnore, UserDayRepetition
 from . import views
 from . import consts
 
@@ -166,7 +166,7 @@ class FlashCardsTestCase(TestCase):
                 words_for_repetition = return_words_object_from_json(repetition_words_data)
                 return words_for_repetition
 
-            while UserWordRepetition.objects.filter(time__lte=5).exists():
+            while UserWordRepetition.objects.filter(time__lt=5).exists():
                 notifications = []
                 print('++++++++++++++++++++++++')
                 print('Waiting for notification')
@@ -284,3 +284,46 @@ class FlashCardsIgnoreTestCase(TestCase):
         get_repetitions_response = views.get_repetition_words(get_repetitions_request)
         data = json.loads(get_repetitions_response.content)
         self.assertTrue(not self.ignored_word.pk in [d['pk'] for d in data['words']], 'get_repetitions returning ignored word')
+
+    def test3(self):
+        with freeze_time(datetime.datetime.min) as freeze_datetime:
+            word2 = self.packet1.word_set.filter(userwordignore__user=self.user).first()
+            update_words_request = self.factory.post(
+                path=reverse('dictionary:update_words'),
+                data=json.dumps(
+                    {
+                        'words': [
+                            {
+                                'pk': word2.pk,
+                                'grade': 1,
+                                'mistakes': 0,
+                                'delay': 0
+                            }
+                        ]
+                    }
+                ),
+                content_type='application/json')
+            update_words_request.user=self.user
+            update_words_response = views.update_words(update_words_request)
+            mark_words_request = self.factory.post(
+                path=reverse('dictionary:mark_words'),
+                data=json.dumps(
+                    {
+                        'words': [word2.pk]
+                    }
+                ),
+                content_type='application/json'
+            )
+            mark_words_request.user = self.user
+            mark_words_response = views.mark_words(mark_words_request)
+            freeze_datetime.tick(datetime.timedelta(days=2))
+            get_repetitions_request = self.factory.get(
+                path=reverse('dictionary:get_repetitions'))
+            get_repetitions_request.user = self.user
+            get_repetitions_response = views.get_repetition_words(
+                get_repetitions_request)
+            data = json.loads(get_repetitions_response.content)
+            repeat_words_pks = [word_data['pk'] for word_data in data['words']]
+            self.assertNotIn(word2.pk, repeat_words_pks, 'Marked word getting in repeat words')
+            self.assertNotIn(self.ignored_word, repeat_words_pks, 'WTF')
+            self.assertFalse(UserDayRepetition.objects.filter(pk=word2.pk).exists(), 'Marked word staying in the y repetition')
