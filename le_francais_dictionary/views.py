@@ -17,7 +17,8 @@ from django.utils.translation import ugettext_lazy as _
 from le_francais_dictionary.forms import WordsManagementFilterForm
 from .models import Word, Packet, UserPacket, \
     UserWordData, UserWordRepetition, UserWordIgnore, UserStandalonePacket, \
-    WordTranslation, prefetch_words_data, VerbPacket, WordGroup
+    WordTranslation, prefetch_words_data, VerbPacket, WordGroup, \
+    UserDayRepetition
 from . import consts
 from home.models import UserLesson
 
@@ -148,8 +149,6 @@ def get_repetition_words(request):
         'errors': [],
     }
     if request.user.is_authenticated:
-        # FIXME for some reason this query
-        #  do not exclude repetitions with > 5 time
         words = Word.objects.filter(
             userwordrepetition__repetition_datetime__lte=timezone.now(),
             userwordrepetition__user=request.user,
@@ -294,6 +293,16 @@ def mark_words(request):
                         word=word,
                     )
                     result['marked'].append(pk)
+                    repetitions = UserWordRepetition.objects.filter(word=word, user=request.user)
+                    user_day_repetitions = UserDayRepetition.objects.filter(repetitions__overlap=[r.pk for r in repetitions])
+                    for user_day_repetition in user_day_repetitions:
+                        changed = False
+                        for i, r_pk in reversed(list(enumerate(user_day_repetition.repetitions))):
+                            if r_pk in [r.pk for r in repetitions]:
+                                user_day_repetition.repetitions.pop(i)
+                                changed = True
+                        if changed:
+                            user_day_repetition.save()
             except Word.DoesNotExist:
                 result['errors'].append(
                     dict(
