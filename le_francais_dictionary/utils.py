@@ -26,28 +26,29 @@ def create_or_update_repetition(user_id, word_id, repetition_datetime, time):
 				repetitions__contains=[repetition.pk]):
 			old_day_repetitions.repetitions.remove(repetition.pk)
 			old_day_repetitions.save()
-	day_repetitions, day_repetition_created = UserDayRepetition.objects.get_or_create(
-		user_id=user_id,
-		datetime=repetition_datetime
-	)
-	if day_repetition_created:
-		day_repetitions.repetitions = []
-	if (day_repetitions.repetitions is None or
-			not repetition.pk in day_repetitions.repetitions):
-		day_repetitions.repetitions.append(repetition.pk)
-	if not day_repetition_created:
-		to_remove = list(UserWordRepetition.objects.filter(
-			pk__in=day_repetitions.repetitions
-		).exclude(
-			repetition_datetime__exact=repetition_datetime
-		).exclude(pk=repetition.pk).distinct().values_list('pk',
-		                                                   flat=True))
-		if to_remove:
-			day_repetitions.repetitions = [
-				x for x in day_repetitions.repetitions if
-				x not in to_remove
-			]
-	day_repetitions.save()
+	if repetition.time < 5:
+		day_repetitions, day_repetition_created = UserDayRepetition.objects.get_or_create(
+			user_id=user_id,
+			datetime=repetition_datetime
+		)
+		if day_repetition_created:
+			day_repetitions.repetitions = []
+		if (day_repetitions.repetitions is None or
+				not repetition.pk in day_repetitions.repetitions):
+			day_repetitions.repetitions.append(repetition.pk)
+		if not day_repetition_created:
+			to_remove = list(UserWordRepetition.objects.filter(
+				pk__in=day_repetitions.repetitions
+			).exclude(
+				repetition_datetime__exact=repetition_datetime
+			).exclude(pk=repetition.pk).distinct().values_list('pk',
+			                                                   flat=True))
+			if to_remove:
+				day_repetitions.repetitions = [
+					x for x in day_repetitions.repetitions if
+					x not in to_remove
+				]
+		day_repetitions.save()
 	return repetition
 
 
