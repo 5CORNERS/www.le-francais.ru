@@ -192,7 +192,9 @@ def update_words(request):
         try:
             word = Word.objects.select_related('packet').get(pk=word_data['pk'])
             if word.group is not None:
-                new_word = Word.objects.filter(userdata__user=request.user, group=word.group).order_by('-userwordrepetition__time')
+                new_word = Word.objects.filter(
+                    userdata__user=request.user, group=word.group
+                ).order_by('-userwordrepetition__time')
                 if new_word.exists() and new_word.first() != word:
                     word = new_word.first()
             grade = word_data.get('grade')
