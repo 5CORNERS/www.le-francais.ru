@@ -176,6 +176,8 @@ class FlashCardsTestCase(TestCase):
                     frozen_datetime.tick(datetime.timedelta(hours=1))
                     call_command('create_dictionary_notifications')
                     self.failIf(isinstance(notifications, list) and len(notifications) > 1, 'Created more than one notifications')
+                notification_repetitions = [UserWordRepetition.objects.get(pk=pk) for pk in notifications[0].content_object.repetitions]
+                print(f'Notifications words: {notification_repetitions}')
                 print(timezone.now())
                 repetition_words = get_repetition_words()
                 self.assertTrue(len(repetition_words) > 0, 'No repetitions while notification has come')
