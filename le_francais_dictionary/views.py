@@ -150,14 +150,16 @@ def get_repetition_words(request):
     if request.user.is_authenticated:
         # FIXME for some reason this query
         #  do not exclude repetitions with > 5 time
-        repetitions = UserWordRepetition.objects.prefetch_related('word').filter(
-            repetition_datetime__lte=timezone.now(), user=request.user)
-        repetitions = repetitions.exclude(
-            word__userwordignore__user=request.user,
-            time__gte=5
-        )
+        words = Word.objects.filter(
+            userwordrepetition__repetition_datetime__lte=timezone.now(),
+            userwordrepetition__user=request.user,
+            userwordrepetition__time__lt=5
+        ).exclude(
+            userwordignore__user=request.user
+        ).distinct()
+        words = prefetch_words_data(list(words), user=request.user)
         result['words'] = [
-            repetition.word.to_dict(user=request.user) for repetition in repetitions
+            word.to_dict() for word in words
         ]
     else:
         result['errors'].append(dict(
