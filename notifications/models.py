@@ -10,13 +10,14 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.urls import reverse
+from django.utils import timezone
 from postman.models import Message
 
 from custom_user.models import User
 from pybb.models import Post, Like, Topic, Profile
 from pybb.models import Post, Like
 
-from le_francais_dictionary.models import UserDayRepetition
+from le_francais_dictionary.models import UserDayRepetition, UserWordRepetition
 from . import consts
 
 
@@ -300,6 +301,11 @@ def create_dictionary_notification(sender, instance: UserDayRepetition, **kwargs
 	except Profile.DoesNotExist:
 		image_url = 'https://www.le-francais.ru/static/images/cat_logo.png'
 	from le_francais_dictionary.utils import message
+	all_repetitions_count = UserWordRepetition.objects.filter(user=instance.user, repetition_datetime__lte=timezone.now()).count()
+	if all_repetitions_count != len(instance.repetitions):
+		all_message = f' Всего их {all_repetitions_count}'
+	else:
+		all_message = ''
 	notification, created = Notification.objects.get_or_create(
 		image=NotificationImage.objects.get_or_create(
 			url=image_url
@@ -308,7 +314,8 @@ def create_dictionary_notification(sender, instance: UserDayRepetition, **kwargs
 		category=Notification.INTERVAL_REPETITIONS,
 		data=dict(
 			url=reverse('dictionary:app_repeat'),
-			quantity_message=message(len(instance.repetitions))
+			quantity_message=message(len(instance.repetitions)),
+			all=all_message
 		),
 		click_url=reverse('dictionary:app_repeat'),
 		content_type=ContentType.objects.get_for_model(UserDayRepetition),
