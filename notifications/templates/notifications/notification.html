@@ -1,6 +1,6 @@
 {% load notifications %}
 <li class="notify row"
-    data-url="{{ notify.click_url }}"
+    data-url="{{ notify.get_click_url }}"
     data-datetime="{{ notify.datetime_creation }}"
     data-check_datetime="{% get_check_datetime notify request.user %}"
     data-pk="{{ notify.pk }}">
