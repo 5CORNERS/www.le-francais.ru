@@ -43,7 +43,7 @@ class Notification(models.Model):
 		(INTERVAL_REPETITIONS, 'Interval Repetitions')
 	]
 	title = models.CharField(max_length=50)
-	# key = models.UUIDField(default=uuid.uuid4, editable=False)
+	key = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 	# field was removed
 	# text = models.CharField(max_length=100)
 	click_url = models.URLField()
