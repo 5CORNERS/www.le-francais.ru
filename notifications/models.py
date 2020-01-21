@@ -1,5 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 import ast
+import json
 import uuid
 from datetime import datetime
 
@@ -78,6 +79,15 @@ class Notification(models.Model):
 			self.data = ast.literal_eval(self.data)
 			return self.text
 
+	def get_click_url(self):
+		return reverse('notifications:view', args=[self.key])
+
+	def get_1st_btn_url(self):
+		return self.get_click_url() + '?button=1'
+
+	def get_2nd_btn_url(self):
+		return self.get_click_url() + '?button=2'
+
 	def check_datetime(self, user):
 		try:
 			return self.notificationuser_set.get(user=user).check_datetime
@@ -88,17 +98,17 @@ class Notification(models.Model):
 		data = dict(
 			Title=self.title,
 			Text=self.text,
-			ClickUrl=self.click_url,
+			ClickUrl=self.get_click_url(),
 			ImageBase64=self.image.base64,
 			pk=self.pk,
 		)
-		return data
+		return json.loads(data)
 
 	def to_dict(self):
 		data = dict(
 			image=self.image.url,
 			html=self.text,
-			url=self.click_url,
+			url=self.get_click_url(),
 			datetime=self.datetime_creation,
 			pk=self.pk,
 		)
