@@ -37,7 +37,7 @@ class Notification(models.Model):
 	INTERVAL_REPETITIONS = 'IR'
 	CATEGORIES_CHOICES = [
 		(LIKES, 'Likes'),
-		(REPLYES, 'Replyes'),
+		(REPLYES, 'Replies'),
 		(MESSAGES, 'Messages'),
 		(TOPICS, 'Topics'),
 		(INTERVAL_REPETITIONS, 'Interval Repetitions')
