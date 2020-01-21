@@ -133,8 +133,9 @@ class NotificationUser(models.Model):
 	status = models.CharField(max_length=16, null=True, default=None)
 
 	def check_as_viewed(self):
-		self.check_datetime = timezone.now()
-		self.save()
+		if not self.check_datetime:
+			self.check_datetime = timezone.now()
+			self.save()
 
 
 def check_users(sender, instance, **kwargs):
