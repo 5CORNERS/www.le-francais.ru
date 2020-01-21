@@ -2,6 +2,7 @@ from django.conf.urls import url
 from .views import *
 
 urlpatterns = [
+    url(r'^view/(?P<uuid>[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/$', view_notification, name='view'),
     url(r'^get_notifications/$', get_notifications, name='get'),
     url(r'^get_new_notifications/$', get_new_notifications, name='get_new'),
     url(r'^get_new_notifications_count/$', get_new_notifications_count, name='get_new_count'),

@@ -3,7 +3,7 @@ import json
 
 from django.conf import settings
 from django.db.models import Q
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -19,6 +19,26 @@ def notification_list_to_dict(notifications: list):
 
 
 NOTIFICATIONS_AUTO_CHECK_NEW = getattr(settings, 'NOTIFICATIONS_AUTO_CHECK_NEW', True)
+
+
+@require_GET
+def view_notification(request, uuid):
+	notification = Notification.objects.get(key=uuid)
+	notification_user, created = NotificationUser.objects.get_or_create(
+		notification=notification,
+		user=request.user,
+	)
+	notification_user.check_as_viewed()
+	if 'button' in request.GET.keys():
+		if request.GET['button'] == '1':
+			redirect_to = notification.url_1st_bt
+		elif request.GET['button'] == '2':
+			redirect_to = notification.url_2nd_bt
+		else:
+			redirect_to = notification.click_url
+	else:
+		redirect_to = notification.click_url
+	return HttpResponseRedirect(redirect_to)
 
 
 @require_GET
