@@ -135,6 +135,7 @@ class NotificationUser(models.Model):
 	notification = models.ForeignKey('Notification', on_delete=models.CASCADE)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	check_datetime = models.DateTimeField(null=True, default=None)
+	visit_datetime = models.DateTimeField(null=True, default=None)
 
 	success = models.NullBooleanField(null=True, default=None)
 	error_description = models.CharField(max_length=300, null=True,
@@ -145,6 +146,11 @@ class NotificationUser(models.Model):
 	def check_as_viewed(self):
 		if not self.check_datetime:
 			self.check_datetime = timezone.now()
+			self.save()
+
+	def check_as_visited(self):
+		if not self.visit_datetime:
+			self.visit_datetime = timezone.now()
 			self.save()
 
 
