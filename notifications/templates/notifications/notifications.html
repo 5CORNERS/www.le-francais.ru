@@ -1,18 +1,22 @@
 {% load static %}
 <li class="nav-item dropdown notify-dropdown float-right" title="Уведомления">
-	<a href="#"
-	   class="nav-link px-2 px-lg-2"
-	   data-toggle="dropdown"
-	   role="button"
-	   aria-haspopup="true"
-	   aria-expanded="true">
-		<i class="fas fa-bell notify-icon"></i>
-		<span class="notify-badge" id="notify-badge-nav" {% if not new_notifications %}style="display: none" {% endif %}>{{ new_notifications|length }}</span>
-	</a>
+    <a href="#"
+       class="nav-link px-2 px-lg-2"
+       data-toggle="dropdown"
+       role="button"
+       aria-haspopup="true"
+       aria-expanded="true">
+        <i class="fas fa-bell notify-icon"></i>
+        <span class="notify-badge" id="notify-badge-nav"
+              {% if not new_notifications %}style="display: none" {% endif %}>{{ new_notifications|length }}</span>
+    </a>
 
-	<ul class="dropdown-menu notify-drop" style="position: absolute">
+    <ul class="dropdown-menu notify-drop" style="position: absolute">
         {% include 'notifications/drop-content.html' with has_notifications=has_notification authenticated=authenticated new_notifications=new_notifications old_notifications=old_notifications login_url=login_url %}
-	</ul>
+    </ul>
 </li>
-<link type="text/css" rel="stylesheet" href="{% static 'notifications/css/notifications.min.css' %}">
-{% if authenticated%}<script type="text/javascript" src="{% static 'notifications/js/notifications.min.js' %}"></script>{% endif %}
+<link type="text/css" rel="stylesheet"
+      href="{% static 'notifications/css/notifications.min.css' %}">
+{% if authenticated %}
+    <script type="text/javascript"
+            src="{% static 'notifications/js/notifications.min.js' %}"></script>{% endif %}
