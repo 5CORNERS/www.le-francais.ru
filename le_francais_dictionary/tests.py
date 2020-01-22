@@ -23,6 +23,16 @@ from django.contrib.auth.models import AnonymousUser
 User = get_user_model()
 SEED = 30
 
+def get_repetitions_pks(testcase):
+    get_repetitions_request = testcase.factory.get(
+        reverse('dictionary:get_repetitions'))
+    get_repetitions_request.user = testcase.user
+    get_repetitions_response = views.get_repetition_words(
+        get_repetitions_request)
+    pks = [word_data['pk'] for word_data in
+           json.loads(get_repetitions_response.content)['words']]
+    return pks
+
 def random_string(string_length=10) -> str:
     """Generate a random string of fixed length """
     letters = string.ascii_lowercase
@@ -56,9 +66,9 @@ def create_test_word_packet(lesson_number, quantity, starting_pk):
 
 def random_answer(quality=None):
     # random.seed(SEED)
-    grade = random.choice([1] * 8 + [0] * 2)
+    grade = random.choice([1] * 95 + [0] * 5)
     # random.seed(SEED)
-    mistakes = random.choice([0]*70 + [1]*20 + [2]*10)
+    mistakes = random.choice([0]*90 + [1]*8 + [2]*2)
     # random.seed(SEED)
     delay = random.random() * 10000
     return grade, mistakes, delay
@@ -187,6 +197,21 @@ class FlashCardsTestCase(TestCase):
                                        f'{[UserWordRepetition.objects.get(pk=x).word for x in notifications[0].content_object.repetitions]}\n'
                                        f'{repetition_words}')
                 repeat_words(repetition_words)
+
+    def test2(self):
+        with freeze_time(datetime.datetime.min) as freeze_datetime:
+            repetition = UserWordRepetition.objects.create(
+                user=self.user,
+                word=self.packet.word_set.first(),
+                repetition_datetime=timezone.now().replace(day=timezone.now().day + 1),
+                time=1
+            )
+            pks = get_repetitions_pks(self)
+            self.assertNotIn(repetition.word_id, pks)
+            freeze_datetime.tick(datetime.timedelta(days=2))
+            pks = get_repetitions_pks(self)
+            self.assertIn(repetition.word_id, pks)
+
 
 
 class FlashCardsGroupWordsTestCase(TestCase):
