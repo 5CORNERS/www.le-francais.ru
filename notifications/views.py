@@ -22,13 +22,13 @@ NOTIFICATIONS_AUTO_CHECK_NEW = getattr(settings, 'NOTIFICATIONS_AUTO_CHECK_NEW',
 
 
 @require_GET
-def view_notification(request, uuid):
-	notification = Notification.objects.get(key=uuid)
+def view_notification(request, key):
+	notification = Notification.objects.get(key=key)
 	notification_user, created = NotificationUser.objects.get_or_create(
 		notification=notification,
 		user=request.user,
 	)
-	notification_user.check_as_viewed()
+	notification_user.check_as_visited()
 	if 'button' in request.GET.keys():
 		if request.GET['button'] == '1':
 			redirect_to = notification.url_1st_bt
