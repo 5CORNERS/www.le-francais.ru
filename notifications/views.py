@@ -116,12 +116,17 @@ def check_notification(request, pk):
 @require_POST
 def check_notifications(request):
 	pks = list(map(int, request.POST.get('pks', '').split(',')))
-	notifyes = Notification.objects.prefetch_related(
+	notifications = Notification.objects.prefetch_related(
 		'notificationuser_set').filter(pk__in=pks)
-	for notify in notifyes:
-		notification_user, created = notify.notificationuser_set.get_or_create(
-			user=request.user
+	for notification in notifications:
+		notification_user, created = NotificationUser.objects.get_or_create(
+			user=request.user,
+			notification=notification
 		)
-	NotificationUser.objects.filter(notification_id__in=notifyes).update(
-		check_datetime=timezone.now())
+	NotificationUser.objects.filter(
+		notification_id__in=notifications,
+		user=request.user,
+	).update(
+		check_datetime=timezone.now()
+	)
 	return HttpResponse('OK', status=200)
