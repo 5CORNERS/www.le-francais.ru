@@ -463,4 +463,4 @@ def get_repetition_words_count(request):
     result = {
         'count': count
     }
-    JsonResponse(result, status=200)
+    return JsonResponse(result, status=200)
