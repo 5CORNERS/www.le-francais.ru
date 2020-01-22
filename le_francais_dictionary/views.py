@@ -450,3 +450,17 @@ def get_verbs(request, packet_id):
     for verb in packet.verb_set.all():
         result['verbs'].append(verb.to_dict())
     return JsonResponse(result, status=200)
+
+
+def get_repetition_words_count(request):
+    count = Word.objects.filter(
+            userwordrepetition__repetition_datetime__lte=timezone.now(),
+            userwordrepetition__user=request.user,
+            userwordrepetition__time__lt=5
+        ).exclude(
+            userwordignore__user=request.user
+        ).distinct().count()
+    result = {
+        'count': count
+    }
+    JsonResponse(result, status=200)
