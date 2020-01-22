@@ -53,7 +53,7 @@ def create_or_update_repetition(user_id, word_id, repetition_datetime, time):
 
 
 
-def message(n, form1=' новое слово', form2=' новых слова', form5=' новых слов'):
+def message(n, form1='новое слово', form2='новых слова', form5='новых слов'):
     n10 = n % 10
     n100 = n % 100
     if n10 == 1 and n100 != 11:
