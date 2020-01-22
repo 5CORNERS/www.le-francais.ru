@@ -5,7 +5,7 @@ from . import views
 urlpatterns = [
     url('^words/([0-9]+)/$', views.get_words, name='get_words'),
     url('^repeat-words/$', views.get_repetition_words, name='get_repetitions'),
-    url('^repeat-words/count/$', views.get_repetition_words_count, name='get_repetitions_count')
+    url('^repeat-words/count/$', views.get_repetition_words_count, name='get_repetitions_count'),
     url('^update-words/$', views.update_words, name='update_words'),
     url('^progress/$', views.get_progress, name='get_progress'),
     url('^progress/(?P<pk>\d+)/$', views.get_packet_progress, name='get_packet_progress'),
