@@ -63,6 +63,7 @@ LESSON_IS_NOT_ACTIVATED_CODE = 40
 WORD_DOES_NOT_EXIST_CODE = 50
 TOO_EARLY_CODE = 60
 NO_REPETITION_WORDS_CODE = 70
+UNKNOWN_ERROR_CODE = 0
 
 USER_IS_NOT_AUTHENTICATED_MESSAGE = _('User is not authenticated')
 USER_IS_NOT_AUTHENTICATED_REPETITIONS_MESSAGE = 'Незарегистрированные пользователи не могут использовать метод интервальных повторений'

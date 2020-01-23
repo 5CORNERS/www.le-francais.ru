@@ -141,6 +141,11 @@ def get_words(request, packet_id):
                     code=consts.PACKET_DOES_NOT_EXIST_CODE,
                 )
             )
+        except Exception as e:
+            result['errors'].append(dict(
+                message=f'Unknown Error: {e.__doc__}',
+                code=consts.UNKNOWN_ERROR_CODE
+            ))
     return JsonResponse(result, safe=False)
 
 
@@ -227,6 +232,12 @@ def update_words(request):
                 pk=word_data['pk'],
                 message=consts.WORD_DOES_NOT_EXIST_MESSAGE,
                 code=consts.WORD_DOES_NOT_EXIST_CODE,
+            ))
+        except Exception as e:
+            errors.append(dict(
+                pk=word_data['pk'],
+                message=f'Unknown Error: {e.__doc__}',
+                code = consts.UNKNOWN_ERROR_CODE,
             ))
     user_words_data = UserWordData.objects.bulk_create(user_words_data)
     words = []
