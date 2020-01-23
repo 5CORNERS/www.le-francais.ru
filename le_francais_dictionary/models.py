@@ -315,7 +315,7 @@ class Word(models.Model):
 				user=user,
 				word__group_id=self.group_id,
 				word__definition_num=self.definition_num,
-			).first()
+			).order_by('-repetition_datetime').first()
 			if repetition:
 				self._repetitions[user.pk] = repetition
 			else:

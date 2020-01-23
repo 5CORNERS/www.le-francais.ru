@@ -163,6 +163,9 @@ def get_repetition_words(request):
             userwordignore__user=request.user
         ).distinct()
         words = prefetch_words_data(list(words), user=request.user)
+        for i, word in reversed(list(enumerate(words))):
+            if word.repetition(request.user) and word.repetition(request.user).repetition_datetime > timezone.now():
+                words.pop(i)
         result['words'] = [
             word.to_dict() for word in words
         ]
@@ -207,7 +210,7 @@ def update_words(request):
             delay = word_data.get('delay')
             if UserWordRepetition.objects.filter(
                     word=word, user=request.user,
-                    repetition_datetime__gt=timezone.now()):
+                    repetition_datetime__gt=timezone.now()).exists():
                 errors.append(dict(
                     pk=word.pk,
                     message=consts.TOO_EARLY_MESSAGE,
@@ -465,14 +468,20 @@ def get_verbs(request, packet_id):
 
 
 def get_repetition_words_count(request):
-    count = Word.objects.filter(
-            userwordrepetition__repetition_datetime__lte=timezone.now(),
-            userwordrepetition__user=request.user,
-            userwordrepetition__time__lt=5
-        ).exclude(
-            userwordignore__user=request.user
-        ).distinct().count()
+    # FIXME can be done with one query
+    words = Word.objects.filter(
+        userwordrepetition__repetition_datetime__lte=timezone.now(),
+        userwordrepetition__user=request.user,
+        userwordrepetition__time__lt=5
+    ).exclude(
+        userwordignore__user=request.user
+    ).distinct()
+    words = prefetch_words_data(list(words), user=request.user)
+    for i, word in reversed(list(enumerate(words))):
+        if word.repetition(request.user) and word.repetition(
+                request.user).repetition_datetime > timezone.now():
+            words.pop(i)
     result = {
-        'count': count
+        'count': len(words)
     }
     return JsonResponse(result, status=200)
