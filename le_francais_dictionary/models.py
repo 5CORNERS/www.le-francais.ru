@@ -107,7 +107,8 @@ class UserPacket(models.Model):
 
 
 class WordGroup(models.Model):
-	pass
+	def __str__(self):
+		return f'{[w.word for w in self.word_set.all().order_by("order")]}'
 
 
 class UnifiedWord(models.Model):
@@ -747,6 +748,9 @@ class VerbForm(models.Model):
 			"translation": self.translation,
 			"tr_pollyUrl": translation_polly_url,
 		}
+
+	class Meta:
+		ordering = ['order']
 
 
 
