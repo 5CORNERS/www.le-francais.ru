@@ -24,7 +24,7 @@ titles = [('NOL', 'order'),
 
 def to_tsv(to_tsv_dict):
 	keys =  to_tsv_dict[0].keys()
-	with open('le_francais_dictionary/local/csv_table', 'w', encoding='utf-8') as csv_file:
+	with open('le_francais_dictionary/local/csv_table.csv', 'w', encoding='utf-8') as csv_file:
 		dict_writer = csv.DictWriter(csv_file, keys, delimiter='\t')
 		dict_writer.writeheader()
 		dict_writer.writerows(to_tsv_dict)
