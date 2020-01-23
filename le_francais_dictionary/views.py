@@ -100,7 +100,8 @@ def get_words(request, packet_id):
         'words': [],
         'errors': [],
     }
-    if int(packet_id) == 99999999:
+    packet_id = int(packet_id)
+    if packet_id == 99999999:
         standalone_packet = UserStandalonePacket.objects.get(user=request.user)
         words = Word.objects.filter(pk__in=standalone_packet.words)
         words = prefetch_words_data(words, request.user)
