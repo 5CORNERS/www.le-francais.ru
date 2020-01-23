@@ -12,7 +12,7 @@ from django.shortcuts import redirect, render
 from home.models import LessonPage
 from .forms import DictionaryCsvImportForm, DictionaryWordFormset
 from .models import Word, WordTranslation, Packet, WordGroup, \
-	UnifiedWord
+	UnifiedWord, Verb, VerbForm
 
 from django_bulk_update import helper as update_helper
 import time
@@ -316,3 +316,19 @@ class PacketAdmin(admin.ModelAdmin):
 	ordering = ['lesson__lesson_number', 'name']
 	actions = [create_polly_task]
 	inlines = [WordInline]
+
+
+@admin.register(WordGroup)
+class GroupAdmin(admin.ModelAdmin):
+	inlines = [WordInline]
+
+
+class VerbFormInline(admin.TabularInline):
+	model = VerbForm
+	fk_name = 'verb'
+	extra = 1
+
+
+@admin.register(Verb)
+class VerbAdmin(admin.ModelAdmin):
+	inlines = [VerbFormInline]
