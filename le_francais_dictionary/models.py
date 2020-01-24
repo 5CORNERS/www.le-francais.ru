@@ -309,13 +309,19 @@ class Word(models.Model):
 		else:
 			return 'None'
 
-	def repetition(self, user):
+	def get_repetition(self, user):
 		if not user.pk in self._repetitions.keys():
-			repetition = UserWordRepetition.objects.filter(
-				user=user,
-				word__group_id=self.group_id,
-				word__definition_num=self.definition_num,
-			).order_by('-repetition_datetime').first()
+			if self.group:
+				repetition = UserWordRepetition.objects.filter(
+					user=user,
+					word__group_id=self.group_id,
+					word__definition_num=self.definition_num,
+				).order_by('-repetition_datetime').first()
+			else:
+				repetition = UserWordRepetition.objects.filter(
+					user=user,
+					word=self,
+				).order_by('-repetition_datetime').first()
 			if repetition:
 				self._repetitions[user.pk] = repetition
 			else:
@@ -323,14 +329,14 @@ class Word(models.Model):
 		return self._repetitions[user.pk]
 
 	def get_repetition_datetime(self, user):
-		repetition = self.repetition(user)
+		repetition = self.get_repetition(user)
 		if repetition:
 			return repetition.repetition_datetime
 		else:
 			return None
 
 	def repetitions_count(self, user):
-		repetition = self.repetition(user)
+		repetition = self.get_repetition(user)
 		if repetition:
 			return repetition.time
 		else:
@@ -382,7 +388,7 @@ class Word(models.Model):
 			'userData': None,
 		}
 		if user and user.is_authenticated:
-			repetition: UserWordRepetition = self.repetition(user)
+			repetition: UserWordRepetition = self.get_repetition(user)
 			if repetition:
 				repetition_time = repetition.time
 				repetition_datetime = repetition.repetition_datetime
