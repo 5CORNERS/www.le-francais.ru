@@ -320,7 +320,7 @@ def create_dictionary_notification(sender, instance: UserDayRepetition, **kwargs
 	except Profile.DoesNotExist:
 		image_url = 'https://www.le-francais.ru/static/images/cat_logo.png'
 	from le_francais_dictionary.utils import message
-	all_repetitions_count = UserWordRepetition.objects.filter(user=instance.user, repetition_datetime__lte=timezone.now()).count()
+	all_repetitions_count = get_repetition_words_query(instance.user).count()
 	if all_repetitions_count != len(instance.repetitions):
 		all_message = f' (всего их {all_repetitions_count})'
 	else:
