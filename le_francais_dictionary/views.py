@@ -18,7 +18,7 @@ from le_francais_dictionary.forms import WordsManagementFilterForm
 from .models import Word, Packet, UserPacket, \
     UserWordData, UserWordRepetition, UserWordIgnore, UserStandalonePacket, \
     WordTranslation, prefetch_words_data, VerbPacket, WordGroup, \
-    UserDayRepetition
+    UserDayRepetition, get_repetition_words_query
 from . import consts
 from home.models import UserLesson
 
@@ -155,13 +155,7 @@ def get_repetition_words(request):
         'errors': [],
     }
     if request.user.is_authenticated:
-        words = Word.objects.filter(
-            userwordrepetition__repetition_datetime__lte=timezone.now(),
-            userwordrepetition__user=request.user,
-            userwordrepetition__time__lt=5
-        ).exclude(
-            userwordignore__user=request.user
-        ).distinct()
+        words = get_repetition_words_query(request.user)
         words = prefetch_words_data(list(words), user=request.user)
         for i, word in reversed(list(enumerate(words))):
             if word.get_repetition(request.user) and word.get_repetition(request.user).repetition_datetime > timezone.now():
@@ -469,19 +463,8 @@ def get_verbs(request, packet_id):
 
 def get_repetition_words_count(request):
     # FIXME can be done with one query
-    words = Word.objects.filter(
-        userwordrepetition__repetition_datetime__lte=timezone.now(),
-        userwordrepetition__user=request.user,
-        userwordrepetition__time__lt=5
-    ).exclude(
-        userwordignore__user=request.user
-    ).distinct()
-    words = prefetch_words_data(list(words), user=request.user)
-    for i, word in reversed(list(enumerate(words))):
-        if word.get_repetition(request.user) and word.get_repetition(
-                request.user).repetition_datetime > timezone.now():
-            words.pop(i)
+    words = get_repetition_words_query(request.user)
     result = {
-        'count': len(words)
+        'count': words.count()
     }
     return JsonResponse(result, status=200)

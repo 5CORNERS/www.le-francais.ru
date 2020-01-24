@@ -759,6 +759,15 @@ class VerbForm(models.Model):
 		ordering = ['order']
 
 
+def get_repetition_words_query(user):
+	return Word.objects.filter(
+		userwordrepetition__repetition_datetime__lte=timezone.now(),
+		userwordrepetition__user=user,
+		userwordrepetition__time__lt=5
+	).exclude(
+		userwordignore__user=user
+	).distinct()
+
 
 def prefetch_words_data(words, user):
 	groups = list(WordGroup.objects.filter(word__in=words))
