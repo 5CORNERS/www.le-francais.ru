@@ -164,7 +164,7 @@ def get_repetition_words(request):
         ).distinct()
         words = prefetch_words_data(list(words), user=request.user)
         for i, word in reversed(list(enumerate(words))):
-            if word.repetition(request.user) and word.repetition(request.user).repetition_datetime > timezone.now():
+            if word.get_repetition(request.user) and word.get_repetition(request.user).repetition_datetime > timezone.now():
                 words.pop(i)
         result['words'] = [
             word.to_dict() for word in words
@@ -478,7 +478,7 @@ def get_repetition_words_count(request):
     ).distinct()
     words = prefetch_words_data(list(words), user=request.user)
     for i, word in reversed(list(enumerate(words))):
-        if word.repetition(request.user) and word.repetition(
+        if word.get_repetition(request.user) and word.get_repetition(
                 request.user).repetition_datetime > timezone.now():
             words.pop(i)
     result = {
