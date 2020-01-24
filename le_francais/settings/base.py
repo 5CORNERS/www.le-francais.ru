@@ -403,6 +403,7 @@ BASE_URL = 'www.le-francais.ru'
 
 ALLOWED_HOSTS = [
     'hidden-refuge-27954-bs-4.herokuapp.com',
+    'testserver',
     'www.le-francais.ru',
     'le-francais.ru',
     'localhost',
