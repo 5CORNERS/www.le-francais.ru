@@ -52,8 +52,12 @@ def query_notifications(request):
 		if notification_user is not None:
 			if notification_user.is_viewed():
 				notification._is_viewed[user.pk] = True
+			else:
+				notification._is_viewed[user.pk] = False
 			if notification_user.is_visited():
 				notification._is_visited[user.pk] = True
+			else:
+				notification._is_visited[user.pk] = False
 		else:
 			notification._is_viewed[user.pk] = False
 			notification._is_visited[user.pk] = False
