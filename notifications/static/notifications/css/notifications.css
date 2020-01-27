@@ -133,6 +133,14 @@
     background-color: #fafafa;
 }
 
+.dropdown-menu.notify-drop .drop-content > li.not-visited {
+    background-color: #bfd8ed;
+}
+
+.dropdown-menu.notify-drop .drop-content > li.not-visited:hover {
+    background-color: #a0c1dc;
+}
+
 .dropdown-menu.notify-drop .drop-content > li:after {
     content: "";
     clear: both;
@@ -171,6 +179,7 @@
 .dropdown-menu.notify-drop .drop-content > li a {
     font-size: 12px;
     font-weight: normal;
+    color: #003b7a;
 }
 
 .dropdown-menu.notify-drop .drop-content > li {
