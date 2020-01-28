@@ -69,7 +69,7 @@ def query_notifications(request):
 		authenticated=True,
 		old_notifications=[
 			n.to_dict(user) for n in notifications if
-			(n.datetime_creation > time_threshold or not n.is_viewed(user))],
+			(n.datetime_creation > time_threshold and not n.is_viewed(user))],
 		new_notifications=[
 			n.to_dict(user) for n in notifications if not n.is_viewed(user)
 		],
