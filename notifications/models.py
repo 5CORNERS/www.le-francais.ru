@@ -19,7 +19,8 @@ from custom_user.models import User
 from pybb.models import Post, Like, Topic, Profile
 from pybb.models import Post, Like
 
-from le_francais_dictionary.models import UserDayRepetition, UserWordRepetition
+from le_francais_dictionary.models import UserDayRepetition, \
+	UserWordRepetition, get_repetition_words_query
 from . import consts
 
 
