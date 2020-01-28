@@ -1,0 +1,6 @@
+{% extends './base.html' %}
+{% block text %}
+    <b>{{ username }}</b> оценил(а) Ваш пост
+    <a href='{{ post_url }}'>"{{ post_name }}"</a> в теме
+    <a href='{{ topic_url }}'>"{{ topic_name }}"</a>.
+{% endblock %}

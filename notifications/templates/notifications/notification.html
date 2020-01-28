@@ -5,14 +5,5 @@
     data-check_datetime="{{ notify.view_datetime }}"
     data-visit_datetime="{{ notify.visit_datetime }}"
     data-pk="{{ notify.pk }}">
-	<div class="col-2">
-		<div class="notify-img">
-			<img src="{{ notify.image_url }}"
-			     height="10px" alt="">
-		</div>
-	</div>
-	<div class="col-10">
-		<div class="notify-text">{{ notify.html|safe }}</div>
-		<p class="time">{{ notify.datetime|timesince }} назад</p>
-	</div>
+	{{ notify.get_html }}
 </li>
