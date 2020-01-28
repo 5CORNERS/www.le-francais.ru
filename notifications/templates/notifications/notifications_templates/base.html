@@ -2,7 +2,7 @@
     <div class="col-2">
         <div class="notify-img">
             {% block img %}
-                <img src="{{ self.image_url }}" height="10px" alt="">
+                <img src="{{ self.image.url }}" height="10px" alt="">
             {% endblock %}
         </div>
     </div>
@@ -10,6 +10,6 @@
 {% block data_div %}
     <div class="col-10">
         <div class="notify-text">{% block text %}{{ self.html|safe }}{% endblock %}</div>
-        <p class="time">{% block time %}{{ self.datetime|timesince }} назад{% endblock %}</p>
+        <p class="time">{% block time %}{{ self.datetime_creation|timesince }} назад{% endblock %}</p>
     </div>
 {% endblock %}

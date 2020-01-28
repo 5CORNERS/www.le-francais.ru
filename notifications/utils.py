@@ -58,6 +58,8 @@ def query_notifications(request):
 				notification._is_visited[user.pk] = True
 			else:
 				notification._is_visited[user.pk] = False
+			notification._view_datetimes[user.pk] = notification_user.check_datetime
+			notification._visit_datetimes[user.pk] = notification_user.visit_datetime
 		else:
 			notification._is_viewed[user.pk] = False
 			notification._is_visited[user.pk] = False
