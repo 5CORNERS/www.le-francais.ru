@@ -12,6 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models.signals import post_save, post_delete
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.baseconv import base64
@@ -137,6 +138,12 @@ class Notification(models.Model):
 			self.data = ast.literal_eval(self.data)
 			return self.text
 
+	def get_html(self):
+		return render_to_string(
+			f'notifications/notifications_templates/{self.category}.html',
+			context=dict(**self.data, self=self)
+		)
+
 	def get_click_url(self):
 		return reverse('notifications:view', args=[self.key])
 
@@ -164,13 +171,14 @@ class Notification(models.Model):
 
 	def to_dict(self, user):
 		data = dict(
+			self=self,
 			is_visited=self.is_visited(user),
 			is_viewed=self.is_viewed(user),
 			visit_datetime=self.get_visit_datetime(user),
 			view_datetime=self.get_view_datetime(user),
 			image_url=self.image.url,
-			html=self.text,
 			url=self.get_click_url(),
+			html=self.get_html(),
 			datetime=self.datetime_creation,
 			pk=self.pk,
 		)
@@ -216,12 +224,12 @@ class NotificationUser(models.Model):
 			self.save()
 
 	def is_visited(self):
-		if self.visit_datetime:
+		if self.visit_datetime is not None:
 			return True
 		return False
 
 	def is_viewed(self):
-		if self.check_datetime:
+		if self.check_datetime is not None:
 			return True
 		return False
 

@@ -1,5 +1,5 @@
 {% extends './base.html' %}
 {% block text %}
     <b>{{ sender }}</b> отправил(а) вам личное сообщение "
-    <a href='{{ message_url }}'>{{ message }}</a>"
+    <a href='{{ self.get_click_url }}'>{{ message }}</a>"
 {% endblock %}
