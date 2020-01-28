@@ -1,6 +1,6 @@
 {% extends './base.html' %}
 {% block text %}
     <b>{{ username }}</b> ответил(а)
-    <a href='{{ post_url }}'>"{{ post_name }}"</a> в теме
-    <a href='{{ topic_url }}'>"{{ topic_name }}"</a>, на которую вы подписаны.
+    <a href='{{ self.get_click_url }}'>"{{ post_name }}"</a> в теме
+    <b>"{{ topic_name }}"</b>, на которую вы подписаны.
 {% endblock %}
