@@ -1,0 +1,5 @@
+{% extends './base.html' %}
+{% block text %}
+    <b>{{ author }}</b> создал(а) новую тему "
+    <a href='{{ topic_url }}'>{{ name }}</a>".
+{% endblock %}
