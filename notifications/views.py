@@ -14,8 +14,8 @@ from notifications.utils import query_notifications
 from .models import Notification, NotificationUser, CheckNotifications
 
 
-def notification_list_to_dict(notifications: list):
-	return [notification.to_dict() for notification in notifications]
+def notification_list_to_dict(notifications: list, user):
+	return [notification.to_dict(user) for notification in notifications]
 
 
 NOTIFICATIONS_AUTO_CHECK_NEW = getattr(settings, 'NOTIFICATIONS_AUTO_CHECK_NEW', True)
@@ -76,7 +76,7 @@ def get_new_notifications(request):
 		.order_by('datetime_creation') \
 		.filter(notificationuser__user=user,
 	            notificationuser__check_datetime=None).exclude(active=False)
-	data = {'notification_list': notification_list_to_dict(notifications)}
+	data = {'notification_list': notification_list_to_dict(notifications, user)}
 	return JsonResponse(data)
 
 
