@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from tinkoff_merchant.models import Payment as TinkoffPayment
+from tinkoff_merchant.models import Payment as TinkoffPayment, Payment
 from tinkoff_merchant.models import ReceiptItem
 from tinkoff_merchant.signals import payment_confirm, payment_refund
 
@@ -253,6 +253,55 @@ class User(AbstractUser):
 	def pytz_timezone(self):
 		return self.get_pytz_timezone()
 
+	# Statistics fields in admin interface
+	@property
+	def recent_login(self):
+		session = self.session_set.order_by('-last_activity').first()
+		if session:
+			last_activity = session.last_activity
+		else:
+			last_activity = None
+		return last_activity
+
+	@property
+	def likes_count(self):
+		return self.pybb_profile.like_set.all().count()
+
+	@property
+	def posts_count(self):
+		return self.posts.all().count()
+
+	@property
+	def has_orders(self):
+		had_orders = Payment.objects.filter(customer_key=self.pk).exists()
+		if had_orders:
+			return True
+
+	@property
+	def payments_amount(self):
+		payment_amount = 0
+		if self.has_orders:
+			for payment in Payment.objects.filter(customer_key=self.pk).filter(
+					Q(status='CONFIRMED') | Q(status='AUTHORIZED')):
+				payment_amount += payment.amount / 100
+		return payment_amount
+
+	@property
+	def last_payment_datetime(self):
+		last_payment = Payment.objects.order_by('-update_date').filter(
+			customer_key=self.pk).filter(Q(status='CONFIRMED') | Q(status='AUTHORIZED')).first()
+		if last_payment:
+			return last_payment.update_date
+		else:
+			return None
+
+	def activated_lesson_after_last_payment(self):
+		user_lesson = self.payment.select_related('lesson').filter(date__gt=self.last_payment_datetime).order_by(
+			'date').first()
+		if user_lesson:
+			return user_lesson.lesson.lesson_number
+		else:
+			return None
 
 from django.db import models
 
@@ -264,9 +313,16 @@ class UsedUsernames(models.Model):
 
 
 class LogMessage(models.Model):
+	DOWNLOAD = 1
+	LISTEN = 2
+	TYPES_CHOICES = [
+		(DOWNLOAD, 'Download'),
+		(LISTEN, 'listen')
+	]
 	datetime = models.DateTimeField(auto_now_add=True)
 	user = models.ForeignKey('User', related_name='log_messages', null=True)
 	message = models.CharField(max_length=200, null=True)
+	type = models.IntegerField(choices=TYPES_CHOICES, null=True)
 
 
 @receiver(payment_confirm)

@@ -4,13 +4,14 @@ from datetime import datetime
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.mail import EmailMessage
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import HttpResponse, render
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 
 from custom_user.consts import MESSAGE_FOR_NOT_PAYED, MESSAGE_FOR_PAYED
-from custom_user.models import User
+from custom_user.models import User, LogMessage
 
 
 class SawMessageView(View):
@@ -90,3 +91,18 @@ def update_timezone(request):
 	    return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
+
+
+@csrf_exempt
+def add_log_message(request):
+    data = json.loads(request.body)
+    message = data['message']
+    type = data['type']
+    if not type in [choice[0] for choice in LogMessage.TYPES_CHOICES]:
+        return HttpResponseBadRequest
+    LogMessage.objects.create(
+        user=request.user,
+        type=type,
+        message=message
+    )
+    return JsonResponse({'success': True})
