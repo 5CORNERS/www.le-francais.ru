@@ -1,0 +1,6 @@
+{% extends './base.html' %}
+{% block text %}
+    У вас появилось {{ quantity_message }} для повторения{{ all }}.
+    <a href='{{ self.get_click_url }}'>Перейдите по ссылке</a> для их
+    пересмотра.
+{% endblock %}
