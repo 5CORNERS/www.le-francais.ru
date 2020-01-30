@@ -305,7 +305,7 @@ def create_pybb_like_notification(sender, instance: Like, **kwargs):
 		notification.category = notification.LIKES
 		notification.data = dict(username=instance.profile.get_display_name(),
 		                         post_url=instance.post.get_absolute_url(),
-		                         post_name=str(instance.post),
+		                         post_name=clean_post(instance.post.body),
 		                         topic_url=instance.post.topic.get_absolute_url(),
 		                         topic_name=str(instance.post.topic))
 		notification.click_url = instance.post.get_absolute_url()
