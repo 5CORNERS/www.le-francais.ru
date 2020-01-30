@@ -4,6 +4,7 @@ import json
 import uuid
 from datetime import datetime
 
+import requests
 from annoying.fields import AutoOneToOneField
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -11,8 +12,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models.signals import post_save, post_delete
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.baseconv import base64
 from postman.models import Message
 
 from custom_user.models import User
@@ -27,9 +30,13 @@ from . import consts
 # Create your models here.
 
 class NotificationImage(models.Model):
-	url = models.URLField()
+	url = models.URLField(null=False, blank=False)
 	base64 = models.BinaryField(null=True, default=None)
 
+	# def save(self, *args, **kwargs):
+	# 	if self.base64 is None:
+	# 		self.base64 = base64.b64encode(requests.get(self.url).content)
+	# 	super(NotificationImage, self).save(*args, **kwargs)
 
 class Notification(models.Model):
 	LIKES = 'LK'
@@ -70,6 +77,57 @@ class Notification(models.Model):
 	excpt = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
 	push_time = models.DateTimeField(null=True)
 
+	def __init__(self, *args, **kwargs):
+		super(Notification, self).__init__(*args, **kwargs)
+		self._is_viewed = {}
+		self._is_visited = {}
+		self._view_datetimes = {}
+		self._visit_datetimes = {}
+
+	def is_visited(self, user):
+		if not user.pk in self._is_visited.keys():
+			notification_user = self.notificationuser_set.filter(
+				user=user
+			)
+			if notification_user.exists() and notification_user.first().is_visited():
+				self._is_visited[user.pk] = True
+			else:
+				self._is_visited[user.pk] = False
+		return self._is_visited[user.pk]
+
+	def is_viewed(self, user):
+		if not user.pk in self._is_viewed.keys():
+			notification_user = self.notificationuser_set.filter(
+				user=user
+			)
+			if notification_user.exists() and notification_user.first().is_viewed():
+				self._is_viewed[user.pk] = True
+			else:
+				self._is_viewed[user.pk] = False
+		return self._is_viewed[user.pk]
+
+	def get_view_datetime(self, user):
+		if not user.pk in self._view_datetimes.keys():
+			notification_user = self.notificationuser_set.filter(
+				user=user
+			)
+			if notification_user.exists():
+				self._view_datetimes[user.pk] = notification_user.first().check_datetime
+			else:
+				self._view_datetimes[user.pk] = None
+		return self._view_datetimes[user.pk]
+
+	def get_visit_datetime(self, user):
+		if not user.pk in self._visit_datetimes.keys():
+			notification_user = self.notificationuser_set.filter(
+				user=user
+			)
+			if notification_user.exists():
+				self._visit_datetimes[user.pk] = notification_user.first().visit_datetime
+			else:
+				self._visit_datetimes[user.pk] = None
+		return self._visit_datetimes[user.pk]
+
 	# TODO check this
 	@property
 	def text(self):
@@ -79,6 +137,12 @@ class Notification(models.Model):
 		except TypeError:
 			self.data = ast.literal_eval(self.data)
 			return self.text
+
+	def get_html(self):
+		return render_to_string(
+			f'notifications/notifications_templates/{self.category}.html',
+			context=dict(**self.data, self=self)
+		)
 
 	def get_click_url(self):
 		return reverse('notifications:view', args=[self.key])
@@ -95,7 +159,7 @@ class Notification(models.Model):
 		except NotificationUser.DoesNotExist:
 			return None
 
-	def to_json(self):
+	def to_push_json(self):
 		data = dict(
 			Title=self.title,
 			Text=self.text,
@@ -105,11 +169,16 @@ class Notification(models.Model):
 		)
 		return json.loads(data)
 
-	def to_dict(self):
+	def to_dict(self, user):
 		data = dict(
-			image=self.image.url,
-			html=self.text,
+			self=self,
+			is_visited=self.is_visited(user),
+			is_viewed=self.is_viewed(user),
+			visit_datetime=self.get_visit_datetime(user),
+			view_datetime=self.get_view_datetime(user),
+			image_url=self.image.url,
 			url=self.get_click_url(),
+			html=self.get_html(),
 			datetime=self.datetime_creation,
 			pk=self.pk,
 		)
@@ -153,6 +222,16 @@ class NotificationUser(models.Model):
 		if not self.visit_datetime:
 			self.visit_datetime = timezone.now()
 			self.save()
+
+	def is_visited(self):
+		if self.visit_datetime is not None:
+			return True
+		return False
+
+	def is_viewed(self):
+		if self.check_datetime is not None:
+			return True
+		return False
 
 
 def check_users(sender, instance, **kwargs):

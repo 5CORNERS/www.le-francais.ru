@@ -1,17 +1,11 @@
 {% load notifications %}
-<li class="notify row"
-    data-url="{{ notify.get_click_url }}"
-    data-datetime="{{ notify.datetime_creation }}"
-    data-check_datetime="{% get_check_datetime notify request.user %}"
-    data-pk="{{ notify.pk }}">
-	<div class="col-2">
-		<div class="notify-img">
-			<img src="{{ notify.image.url }}"
-			     height="10px" alt="">
-		</div>
-	</div>
-	<div class="col-10">
-		<div class="notify-text">{{ notify.text|safe }}</div>
-		<p class="time">{{ notify.datetime_creation|timesince }} назад</p>
-	</div>
+<li class="notify row{% if not notify.is_visited %} not-visited{% endif %}"
+    data-url="{{ notify.url }}"
+    data-datetime="{{ notify.datetime }}"
+    data-check_datetime="{{ notify.view_datetime }}"
+    data-visit_datetime="{{ notify.visit_datetime }}"
+    data-pk="{{ notify.pk }}"
+    title=""
+>
+	{{ notify.html }}
 </li>
