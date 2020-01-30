@@ -169,7 +169,7 @@ class Notification(models.Model):
 		)
 		return json.loads(data)
 
-	def to_dict(self, user):
+	def to_dict(self, user, add_self=True):
 		data = dict(
 			self=self,
 			is_visited=self.is_visited(user),
@@ -182,6 +182,8 @@ class Notification(models.Model):
 			datetime=self.datetime_creation,
 			pk=self.pk,
 		)
+		if not add_self:
+			data.pop('self')
 		return data
 
 
