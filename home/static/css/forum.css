@@ -617,7 +617,7 @@
     margin: 0 0 20px;
     padding: 10px 20px;
     border-left: 5px solid #eee;
-    font-size: 13px
+    font-size: 1rem
 }
 
 .block-forum blockquote p:last-child, .block-forum blockquote ul:last-child, .block-forum blockquote ol:last-child {
