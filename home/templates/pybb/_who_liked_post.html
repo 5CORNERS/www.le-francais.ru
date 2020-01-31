@@ -1,0 +1,8 @@
+<div class="tooltip-who-liked-container{% if likes|length > n %} show-chevrones{% endif %}">
+	<span class="fas fa-chevron-left"></span>{% for like in likes %}
+	<div class="tooltip-like-entry" title="{{ like.profile.get_display_name }}">
+		{% include 'pybb/_small_avatar.html' with profile=like.profile %}
+		{% comment %}<div class="tooltip-like-entry-name">{{ like.profile.get_display_name }}</div>{% endcomment %}
+	</div>{% endfor %}
+	<span class="fas fa-chevron-right"></span>
+</div>
