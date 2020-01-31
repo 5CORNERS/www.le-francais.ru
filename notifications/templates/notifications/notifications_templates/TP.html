@@ -1,4 +1,12 @@
 {% extends './base.html' %}
+{% load forum_tags %}
+{% block img %}
+    {% if self.image.url != '/static/pybb/img/default_avatar.jpg' %}
+        <img src="{{ self.image.url }}" height="10px" alt="">
+    {% else %}
+        {% avinit_initials author 45 %}
+    {% endif %}
+{% endblock %}
 {% block text %}
     <b>{{ author }}</b> создал(а) новую тему "
     <a href='{{ self.get_click_url }}'>{{ name }}</a>".
