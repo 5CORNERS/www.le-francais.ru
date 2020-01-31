@@ -1,4 +1,4 @@
-{% load pybb_tags %}
+{% load pybb_tags forum_tags %}
 <div class="avatar" >
     {% if profile.avatar %}
         {% if 'sorl.thumbnail'|check_app_installed %}
@@ -9,7 +9,7 @@
             <img src="{{ profile.avatar.url }}" alt="{{ profile.user.username }} avatar" width="{{ PYBB_AVATAR_WIDTH }}" height="{{ PYBB_AVATAR_HEIGHT }}" style="max-width: {{ PYBB_AVATAR_WIDTH }}px;"/>
         {% endif %}
     {% else %}
-        <img src="{{ profile.avatar_url }}" alt="default avatar" width="{{ PYBB_AVATAR_WIDTH }}" height="{{ PYBB_AVATAR_HEIGHT }}" style="max-width: {{ PYBB_AVATAR_WIDTH }}px;"/>
+        {% avinit_initials profile.user.username 80 %}
     {% endif %}
     </a>
 </div>
