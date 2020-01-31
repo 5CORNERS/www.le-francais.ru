@@ -9,7 +9,7 @@
             <img src="{{ profile.avatar.url }}" alt="{{ profile.user.username }} avatar" width="{{ PYBB_AVATAR_WIDTH }}" height="{{ PYBB_AVATAR_HEIGHT }}" style="max-width: {{ PYBB_AVATAR_WIDTH }}px;"/>
         {% endif %}
     {% else %}
-        {% avinit_initials profile.user.username 80 %}
+        {% avinit_initials profile.user.username PYBB_AVATAR_WIDTH %}
     {% endif %}
     </a>
 </div>
