@@ -1,7 +1,8 @@
 from django import template
 from django.db.models import Max
-
 from pybb.models import Topic
+
+from home.utils import get_svg_avatar
 
 register = template.Library()
 
@@ -24,3 +25,8 @@ def top_topics(count=50, *args, **kwargs):
 	qs = qs.order_by('-post_count')
 	qs = qs[:count]
 	return dict(object_list=qs, **{'to_end': False})
+
+
+@register.inclusion_tag('pybb/_avinit.html')
+def avinit_initials(username, size):
+	return {'svg':get_svg_avatar(username, width=str(size), height=str(size), radius=str(size/2), **{'font-size':str(size/2)})}
