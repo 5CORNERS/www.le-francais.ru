@@ -7192,7 +7192,7 @@ kbd {
     border-radius: 50%;
 }
 
-.tooltip-like-entry > .avatar > img {
+.tooltip-like-entry > .avatar > img, .tooltip-like-entry > .avatar > svg {
     display: inline;
     margin: 0 auto;
     height: 100%;
