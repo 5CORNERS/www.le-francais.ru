@@ -275,40 +275,21 @@
 	      })
 	    </script>
 	{% endif %}
-    <script>
+    {% if request.user.is_authenticated %}<script>
         // Send user timezone
+        const user_tz = '{{ request.user.timezone }}';
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         $(document).ready(function () {
-            if (!Cookies.get('timezone_checked')) {
+            if (user_tz !== tz){
                 $.ajax(Urls['custom_user:update_timezone'](), {
                     type: 'post',
                     data: tz,
                     headers: {"X-CSRFToken": csrftoken},
                     dataType: 'json',
-                    success: function (r) {
-                        if (r.success) {
-                            Cookies.set(
-                                'timezone_checked',
-                                "1",
-                                {
-                                    'expires': moment().endOf('day').toDate()
-                                }
-                            )
-                        }
-                    }
                 });
-            } else {
-                Cookies.set(
-                    'timezone_checked',
-                    "1",
-                    {
-                        'expires': moment().add(1, 'h').toDate()
-                    }
-                )
             }
-            $.ajax()
         })
-    </script>
+    </script>{% endif %}
 {% endblock %}
 {% block extra_js %}
     {# Override this in templates to add extra javascript #}
