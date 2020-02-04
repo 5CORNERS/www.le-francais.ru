@@ -219,10 +219,10 @@ class Verb(models.Model):
 					elif isinstance(endings, list):
 						forms = []
 						for ending in endings:
-							forms.append(self.main_part() + ending)
+							forms.append(self.main_part + ending)
 						self._conjugations[mood][tense][person] = forms
 					else:
-						self._conjugations[mood][tense][person] = self.main_part() + endings
+						self._conjugations[mood][tense][person] = self.main_part + endings
 		if self.pp_invariable:
 			for i in range(1, 3):
 				self._conjugations['participle']['past-participle'][i] = self._conjugations['participle']['past-participle'][0]
