@@ -6,8 +6,8 @@ from django.db import migrations, models
 
 def complete_main_part(apps, schema_editor):
 	Verb = apps.get_model('conjugation', 'Verb')
-	for verb in Verb.objects.all():
-		verb.main_part = verb.get_main_part()
+	for verb in Verb.objects.select_related('template').all():
+		verb.main_part = verb.infinitive.rsplit(verb.template.name.split(':')[1], 1)[0]
 		verb.save(update_fields=['main_part'])
 
 
