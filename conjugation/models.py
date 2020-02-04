@@ -149,6 +149,8 @@ class Verb(models.Model):
 
 	audio_url = models.URLField(default=None, null=True)
 
+	main_part = models.CharField(max_length=64)
+
 	def employs(self):
 		s = ""
 		s += '<b>' + self.infinitive + "</b> — "
@@ -186,7 +188,7 @@ class Verb(models.Model):
 	def __str__(self):
 		return self.infinitive
 
-	def main_part(self):
+	def get_main_part(self):
 		return self.infinitive.rsplit(self.template.infinitive_ending(), 1)[0]
 
 	def get_infinitive_no_accents(self):
