@@ -27,7 +27,7 @@ def fix_position(table_positions, table_v):
         return "0"
 
     real_positions = []
-    main_part_len = len(table_v.main_part())
+    main_part_len = len(table_v.main_part)
 
     table_positions = table_positions.split(',')
     for table_pos in table_positions:
