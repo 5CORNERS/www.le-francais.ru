@@ -150,6 +150,7 @@ class Verb(models.Model):
 	audio_url = models.URLField(default=None, null=True)
 
 	main_part = models.CharField(max_length=64)
+	main_part_no_accents = models.CharField(max_length=64)
 
 	def employs(self):
 		s = ""
