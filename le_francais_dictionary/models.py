@@ -693,10 +693,15 @@ class Example(models.Model):
 
 class VerbPacket(models.Model):
 	name = models.CharField(max_length=32)
+	lesson = models.ForeignKey('home.LessonPage', on_delete=models.SET_NULL, null=True)
 
 
 class Verb(models.Model):
 	verb = models.CharField(max_length=64)
+	type = models.IntegerField(choices=[
+		(0, 'affirmative'),
+		(1, 'negative'),
+	], default=0)
 	translation = models.CharField(max_length=64, null=True)
 	packet = models.ForeignKey(VerbPacket, null=True, on_delete=models.SET_NULL)
 	polly = models.ForeignKey(PollyTask, null=True, on_delete=models.SET_NULL, related_name='dictionary_verb_set')
@@ -707,11 +712,13 @@ class Verb(models.Model):
 	translation_audio_url = models.URLField(null=True)
 
 	def to_dict(self):
-		polly_url = self.audio_url if self.audio_url else self.polly.url
+		polly_url = self.audio_url if self.audio_url else self.polly.url if self.polly else None
 		if self.translation_audio_url:
 			translation_polly_url = self.translation_audio_url
-		else:
+		elif self.translation_polly:
 			translation_polly_url = self.translation_polly.url
+		else:
+			translation_polly_url = None
 		has_translation = True if self.translation else False
 		forms = []
 		for form in self.verbform_set.all().order_by('order'):
@@ -720,7 +727,7 @@ class Verb(models.Model):
 			"verb": self.verb,
 			"pollyUrl": polly_url,
 			"translation": self.translation,
-			"tr_pollyUrl": translation_polly_url,
+			"trPollyUrl": translation_polly_url,
 			"isTranslation": has_translation,
 			"forms": forms,
 			"packet": self.packet_id
@@ -730,10 +737,12 @@ class Verb(models.Model):
 
 
 class VerbForm(models.Model):
-	verb = models.ForeignKey(Verb, on_delete=models.CASCADE)
+	verb = models.ForeignKey(Verb, on_delete=models.CASCADE, null=True)
 	order = models.PositiveSmallIntegerField(null=True)
-	form = models.CharField(max_length=64)
-	translation = models.CharField(max_length=64)
+	form = models.CharField(max_length=64, null=True)
+	is_shown = models.BooleanField(default=1)
+	form_to_show = models.CharField(max_length=64, null=True)
+	translation = models.CharField(max_length=64, null=True)
 	polly = models.ForeignKey(PollyTask, null=True, on_delete=models.SET_NULL,
 	                          related_name='dictionary_verb_form_set')
 	audio_url = models.URLField(null=True)
@@ -743,16 +752,20 @@ class VerbForm(models.Model):
 	translation_audio_url = models.URLField(null=True)
 
 	def to_dict(self):
-		polly_url = self.audio_url if self.audio_url else self.polly.url
+		polly_url = self.audio_url if self.audio_url else self.polly.url if self.polly else None
 		if self.translation_audio_url:
 			translation_polly_url = self.translation_audio_url
-		else:
+		elif self.translation_polly:
 			translation_polly_url = self.translation_polly.url
+		else:
+			translation_polly_url = None
 		return {
 			"form": self.form,
+			"isShown": self.is_shown,
+			"formToShow": self.form_to_show,
 			"pollyUrl": polly_url,
 			"translation": self.translation,
-			"tr_pollyUrl": translation_polly_url,
+			"trPollyUrl": translation_polly_url,
 		}
 
 	class Meta:
