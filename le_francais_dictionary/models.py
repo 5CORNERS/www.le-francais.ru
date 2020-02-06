@@ -761,8 +761,8 @@ class VerbForm(models.Model):
 			translation_polly_url = None
 		return {
 			"form": self.form,
-			"isShown": self.is_shown,
-			"formToShow": self.form_to_show,
+			"isShownOnDrill": self.is_shown,
+			"formToShowOnDrill": self.form_to_show,
 			"pollyUrl": polly_url,
 			"translation": self.translation,
 			"trPollyUrl": translation_polly_url,
