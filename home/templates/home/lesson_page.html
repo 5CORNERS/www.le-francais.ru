@@ -97,6 +97,8 @@
 					url: '{% url "activate:activate_lesson" %}',
 					data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'lesson_number': '{{ self.lesson_number }}'},
 					datatype: 'json',
+                    cache: false,
+                    headers: {"cache-control": "no-cache"},
 					success: function (r) {
 						if (r.result === 'SUCCESS') {
 							window.location.href = window.location.pathname + "?" + $.param({'modal_open': 'lesson-activated-modal'});
@@ -268,41 +270,46 @@
 
 		}
 		function giveMeCoffee() {
-		  $('.modal').modal('hide');
-			$.ajax({
-				type: "POST",
-				url: "{% url 'give_me_a_coffee' %}",
-				data: {
-					'lesson_number': {{ self.lesson_number }},
-					'user_email': "{{ request.user }}",
-					'csrfmiddlewaretoken': "{{ csrf_token }}"
-				},
-				datatype: "json",
-				success: function (response) {
-					if (response.result === 'SUCCESS') {
-						playCoffeeSound();
-						$('#give-me-a-coffee-success-message').html(response.description);
-						$('#give-me-a-coffee-complete-modal').modal('show');
-						getSuccessButton();
-						reloadPage(LESSON_NUMBER);
-					}
-					else if (response.result === 'ALREADY') {
-						$('#give-me-a-coffee-fail-message').html(response.description);
-						$('#give-me-a-coffee-fail-modal').modal('show');
-						getSuccessButton();
-						reloadPage(LESSON_NUMBER)
-					}
-					else {
-						$('#give-me-a-coffee-fail-message').html(response.description);
-						$('#give-me-a-coffee-fail-modal').modal('show');
-					}
-				},
-				error: function (response, error) {
-					$('#give-me-a-coffee-fail-message').html(error);
-					$('#give-me-a-coffee-fail-modal').modal('show');
-				},
-			});
-		}
+            $('.modal').modal('hide');
+            let ua = window.navigator.userAgent;
+            let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+            let is_webkit = !!ua.match(/WebKit/i);
+            let iOSSafari = iOS && is_webkit && !ua.match(/CriOS/i);
+            $.ajax({
+                type: "POST",
+                url: "{% url 'give_me_a_coffee' %}",
+                data: {
+                    'lesson_number': {{ self.lesson_number }},
+                    'user_email': "{{ request.user }}",
+                    'csrfmiddlewaretoken': "{{ csrf_token }}"
+                },
+                datatype: "json",
+                cache: false,
+                async: !iOSSafari,
+                headers: {"cache-control": "no-cache"},
+                success: function (response) {
+                    if (response.result === 'SUCCESS') {
+                        playCoffeeSound();
+                        $('#give-me-a-coffee-success-message').html(response.description);
+                        $('#give-me-a-coffee-complete-modal').modal('show');
+                        getSuccessButton();
+                        reloadPage(LESSON_NUMBER);
+                    } else if (response.result === 'ALREADY') {
+                        $('#give-me-a-coffee-fail-message').html(response.description);
+                        $('#give-me-a-coffee-fail-modal').modal('show');
+                        getSuccessButton();
+                        reloadPage(LESSON_NUMBER)
+                    } else {
+                        $('#give-me-a-coffee-fail-message').html(response.description);
+                        $('#give-me-a-coffee-fail-modal').modal('show');
+                    }
+                },
+                error: function (response, error) {
+                    $('#give-me-a-coffee-fail-message').html(error);
+                    $('#give-me-a-coffee-fail-modal').modal('show');
+                },
+            });
+        }
 	</script>
 
 	{% if request.GET.modal_open %}
