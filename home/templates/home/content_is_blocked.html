@@ -20,7 +20,7 @@
 				 data-toggle="modal"
 				 data-target="#give-me-a-coffee-modal"
 				{% elif request.user.is_authenticated and not request.user.has_coffee %}
-				 onclick="location.href='{% url 'check_amount' %}?next={{ request.path }}&s_t=0';"
+				 onclick="location.href='{% url 'coffee:check_amount' %}?next={{ request.path }}&s_t=0';"
 				{% elif not request.user.is_authenticated %}
 				 data-toggle="modal"
 				 data-target="#give-me-a-coffee-modal"
