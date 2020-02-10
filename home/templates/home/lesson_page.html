@@ -18,6 +18,7 @@
 	<script>
     const CSRF_TOKEN = '{{ csrf_token }}';
     const LESSON_NUMBER = {% if self.lesson_number %}{{ self.lesson_number }}{% else %}null{% endif %};
+    const NEED_PAYMENT = {% if self.need_payment %}true{% else %}false;
     const IS_AUTHENTICATED = {% if request.user.is_athenticated %}true{% else %}false{% endif %};
         {% if request.user.is_authenticated %}
             var saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
