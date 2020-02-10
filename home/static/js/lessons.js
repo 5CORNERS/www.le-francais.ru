@@ -46,171 +46,172 @@ $(document).ready(function () {
         reloadPage(LESSON_NUMBER, 'flash-cards');
     });
 
-    function reloadLessonUrl() {
-        $.ajax({
-            type: 'POST',
-            url: '/api/get_lesson_url/',
-            data: {
-                'csrfmiddlewaretoken': CSRF_TOKEN,
-                'lesson_number': LESSON_NUMBER
-            },
-            datatype: 'json',
-            success: function (r) {
-                if (r.status === 200) {
-                    let audio = $('#lesson-audio')[0];
-                    let audioTime = audio.currentTime;
-                    audio.src(r.lesson_url);
-                    audio.load();
-                    audio.currentTime = audioTime;
-                    audio.play();
-                } else {
-                }
-            }
-        })
-    }
-
-    function errHandle(a) {
-        console.log("Error " + a.error.code + "; details: " + a.error.message);
-    }
-
-    function sawProceed() {
-        activateLesson('saw');
-        setTimeout(activateLesson('proceed'), 1000);
-    }
-
-    function showMinusCups() {
-        $('#activated-dismiss-button').hide();
-        $('#activated-unsofficiant-cups-button').hide();
-        $('.minus-cups').show();
-    }
-
-    function showUnsMinusCups() {
-        $('#activated-dismiss-button').hide();
-        $('#activated-unsofficiant-cups-button').hide();
-        $('.unsofficiant-cups-credit').show();
-    }
-
-    activateSounds = ['composter-01.mp3', 'composter-02.mp3', 'composter-03.mp3', 'composter-04.mp3'];
-
-    function playActivateSound() {
-        let index = Math.floor(Math.random() * 1000) % 4;
-        console.log(index);
-        let src = ('https://files.le-francais.ru/sound/' + activateSounds[index]);
-        let audio = $('<audio class="sound-player" autoplay="autoplay" style="display:none;">'
-            + '<source src="' + src + '" />'
-            + '<embed src="' + src + '" hidden="true" autostart="true" loop="false"/>'
-            + '</audio>'
-        ).appendTo('body');
-        audio[0].play();
-    }
-
-    function activate() {
-        $('.success-message').hide();
-        $('.fail-message').hide();
-        $('.minus-cups').hide();
-        $('.unsofficiant-cups-credit').hide()
-        $('.waiting-message').show();
-        playActivateSound();
-        $('#lesson-activated-modal').modal('show');
-        $.ajax({
-            type: 'POST',
-            async: false,
-            url: '{% url "activate:activate_lesson" %}',
-            data: {
-                'csrfmiddlewaretoken': "{{ csrf_token }}",
-                'lesson_number': '{{ self.lesson_number }}'
-            },
-            datatype: 'json',
-            success: function (r) {
-                if (r.result === 'SUCCESS') {
-                    window.location.href = window.location.pathname + "?" + $.param({'modal_open': 'lesson-activated-modal'});
-                } else if (r.result === 'ZERO_CUPS') {
-                    $('.waiting-message').hide();
-                    $('.unsofficiant-cups').show();
-                    if ((cups_amount < 0) && (cups_credit === 0)) {
-                        showUnsMinusCups()
-                    }
-                } else if (r.result === 'ALREADY') {
-                    $('.waiting-message').hide();
-                    $('.already-activated').show();
-
-                } else if (r.result === 'NOT_AUTH') {
-                    $('.waiting-message').hide();
-                    $('.login-need').show();
-                }
-            }
-        });
-    }
-
-    function disableActivButton() {
-        let button = $('#activate-button');
-        button.removeClass('btn-primary').addClass('btn-success');
-        button.disabled = true;
-    }
-
-    function activateLesson(state) {
-        switch (state) {
-            case 'tab':
-            case 'download':
-            case 'ended':
-                let audio = $('#lesson-audio')[0];
-                localStorage['lecon-{{ self.lesson_number }}'] = audio.duration - 5;
-                if (IS_AUTHENTICATED) {
-                    $('#listen-login-required-modal').modal('show');
-                } else {
-                    if (saw_message) {
-                        $('#lesson-not-activated-simple-modal').modal('show')
+    if (NEED_PAYMENT) {
+        function reloadLessonUrl() {
+            $.ajax({
+                type: 'POST',
+                url: '/api/get_lesson_url/',
+                data: {
+                    'csrfmiddlewaretoken': CSRF_TOKEN,
+                    'lesson_number': LESSON_NUMBER
+                },
+                datatype: 'json',
+                success: function (r) {
+                    if (r.status === 200) {
+                        let audio = $('#lesson-audio')[0];
+                        let audioTime = audio.currentTime;
+                        audio.src(r.lesson_url);
+                        audio.load();
+                        audio.currentTime = audioTime;
+                        audio.play();
                     } else {
-                        $('#lesson-not-activated-details-continue-modal').modal('show')
                     }
                 }
-                break;
-            case 'button':
-                if (saw_message) {
-                    activateLesson('proceed')
-                } else {
-                    $('#lesson-not-activated-details-activate-modal').modal('show')
-                }
-                break;
-            case 'saw':
-                sawMessage('make_true');
-                break;
-            case 'proceed':
-                if (userlesson) {
-                    activate();
-                }
-                break;
+            })
         }
-    }
 
-    if (!userlesson && must_pay) {
-        window.addEventListener('lessonPlayerReady', function () {
-            let downloadButton = $('.audioplayer-download-button')[0];
-            downloadButton.addEventListener('click', function () {
-                activateLesson('download');
+        function errHandle(a) {
+            console.log("Error " + a.error.code + "; details: " + a.error.message);
+        }
+
+        function sawProceed() {
+            activateLesson('saw');
+            setTimeout(activateLesson('proceed'), 1000);
+        }
+
+        function showMinusCups() {
+            $('#activated-dismiss-button').hide();
+            $('#activated-unsofficiant-cups-button').hide();
+            $('.minus-cups').show();
+        }
+
+        function showUnsMinusCups() {
+            $('#activated-dismiss-button').hide();
+            $('#activated-unsofficiant-cups-button').hide();
+            $('.unsofficiant-cups-credit').show();
+        }
+
+        activateSounds = ['composter-01.mp3', 'composter-02.mp3', 'composter-03.mp3', 'composter-04.mp3'];
+
+        function playActivateSound() {
+            let index = Math.floor(Math.random() * 1000) % 4;
+            console.log(index);
+            let src = ('https://files.le-francais.ru/sound/' + activateSounds[index]);
+            let audio = $('<audio class="sound-player" autoplay="autoplay" style="display:none;">'
+                + '<source src="' + src + '" />'
+                + '<embed src="' + src + '" hidden="true" autostart="true" loop="false"/>'
+                + '</audio>'
+            ).appendTo('body');
+            audio[0].play();
+        }
+
+        function activate() {
+            $('.success-message').hide();
+            $('.fail-message').hide();
+            $('.minus-cups').hide();
+            $('.unsofficiant-cups-credit').hide()
+            $('.waiting-message').show();
+            playActivateSound();
+            $('#lesson-activated-modal').modal('show');
+            $.ajax({
+                type: 'POST',
+                async: false,
+                url: '{% url "activate:activate_lesson" %}',
+                data: {
+                    'csrfmiddlewaretoken': "{{ csrf_token }}",
+                    'lesson_number': '{{ self.lesson_number }}'
+                },
+                datatype: 'json',
+                success: function (r) {
+                    if (r.result === 'SUCCESS') {
+                        window.location.href = window.location.pathname + "?" + $.param({'modal_open': 'lesson-activated-modal'});
+                    } else if (r.result === 'ZERO_CUPS') {
+                        $('.waiting-message').hide();
+                        $('.unsofficiant-cups').show();
+                        if ((cups_amount < 0) && (cups_credit === 0)) {
+                            showUnsMinusCups()
+                        }
+                    } else if (r.result === 'ALREADY') {
+                        $('.waiting-message').hide();
+                        $('.already-activated').show();
+
+                    } else if (r.result === 'NOT_AUTH') {
+                        $('.waiting-message').hide();
+                        $('.login-need').show();
+                    }
+                }
             });
-            let lessonAudio = $('#lesson-audio')[0];
-            lessonAudio.addEventListener('ended', function () {
-                activateLesson('ended')
+        }
+
+        function disableActivButton() {
+            let button = $('#activate-button');
+            button.removeClass('btn-primary').addClass('btn-success');
+            button.disabled = true;
+        }
+
+        function activateLesson(state) {
+            switch (state) {
+                case 'tab':
+                case 'download':
+                case 'ended':
+                    let audio = $('#lesson-audio')[0];
+                    localStorage['lecon-{{ self.lesson_number }}'] = audio.duration - 5;
+                    if (IS_AUTHENTICATED) {
+                        $('#listen-login-required-modal').modal('show');
+                    } else {
+                        if (saw_message) {
+                            $('#lesson-not-activated-simple-modal').modal('show')
+                        } else {
+                            $('#lesson-not-activated-details-continue-modal').modal('show')
+                        }
+                    }
+                    break;
+                case 'button':
+                    if (saw_message) {
+                        activateLesson('proceed')
+                    } else {
+                        $('#lesson-not-activated-details-activate-modal').modal('show')
+                    }
+                    break;
+                case 'saw':
+                    sawMessage('make_true');
+                    break;
+                case 'proceed':
+                    if (userlesson) {
+                        activate();
+                    }
+                    break;
+            }
+        }
+
+        if (!userlesson && must_pay) {
+            window.addEventListener('lessonPlayerReady', function () {
+                let downloadButton = $('.audioplayer-download-button')[0];
+                downloadButton.addEventListener('click', function () {
+                    activateLesson('download');
+                });
+                let lessonAudio = $('#lesson-audio')[0];
+                lessonAudio.addEventListener('ended', function () {
+                    activateLesson('ended')
+                });
             });
-        });
-        $('#tab-flash-cards').removeAttr('data-toggle');
-        $('#tab-exercises-de-lesson').removeAttr('data-toggle');
-        $('#tab-exercise').removeAttr('data-toggle');
-        $('#tab-flash-cards').click(function (e) {
-            e.preventDefault();
-            activateLesson('tab')
-        });
-        $('#tab-exercises-de-lesson').click(function (e) {
-            e.preventDefault();
-            activateLesson('tab')
-        });
-        $('#tab-exercise').click(function (e) {
-            e.preventDefault();
-            activateLesson('tab')
-        });
-
-
+            $('#tab-flash-cards').removeAttr('data-toggle');
+            $('#tab-exercises-de-lesson').removeAttr('data-toggle');
+            $('#tab-exercise').removeAttr('data-toggle');
+            $('#tab-flash-cards').click(function (e) {
+                e.preventDefault();
+                activateLesson('tab')
+            });
+            $('#tab-exercises-de-lesson').click(function (e) {
+                e.preventDefault();
+                activateLesson('tab')
+            });
+            $('#tab-exercise').click(function (e) {
+                e.preventDefault();
+                activateLesson('tab')
+            });
+        }
+    } else {
         if (userlesson && LESSON_NUMBER > 5) {
             $(window).one('lessonPlayerReady', function () {
                 $('.audioplayer-download-button').on('click', function (e) {
