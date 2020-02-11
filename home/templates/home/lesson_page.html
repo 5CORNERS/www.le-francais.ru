@@ -18,14 +18,14 @@
 	<script>
     const CSRF_TOKEN = '{{ csrf_token }}';
     const LESSON_NUMBER = {% if self.lesson_number %}{{ self.lesson_number }}{% else %}null{% endif %};
-    const NEED_PAYMENT = {% if self.need_payment %}true{% else %}false;
+    const NEED_PAYMENT = {% if self.need_payment %}true{% else %}false{% endif %};
     const IS_AUTHENTICATED = {% if request.user.is_athenticated %}true{% else %}false{% endif %};
         {% if request.user.is_authenticated %}
             var saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
             var cups_amount = {% if request.user.cup_amount %}{{ request.user.cup_amount }}{% else %}null{% endif %};
             var cups_credit = {% if request.user.cup_credit %}{{ request.user.cup_credit }}{% else %}null{% endif %};
             const must_pay = {% if request.user.must_pay %}true{% else %}false{% endif %};
-            {% check_user_lesson request.user self as userlesson %};
+            {% check_user_lesson request.user self as userlesson %}
             const userlesson = {% if userlesson %}true{% else %}false{% endif %};
         {% endif %}
     const COFFEE_SOUND_URL = '{% static 'snd/coffee.mp3' %}';
@@ -594,7 +594,7 @@
 						<div class="modal-body">
 							<div id="activated-message-waiting" class="waiting-message" style="display: none">
 								<p>Пожалуйста, подождите, это займёт несколько секунд.</p>
-								<img style="width:100%;" src="{% static 'images/loading_icon.gif' %}"></div>
+								<img alt="Загрузка" style="width:100%;" src="{% static 'images/loading_icon.gif' %}"></div>
 							<div id="activated-message-success" class="success-message" style="display: none">
 								<p>У вас в запасе уроков: <span id="activated-message-ticket-count">ХХХ</span>.</p>
 								<p class="unsofficiant-cups-credit" style="display: none"> Вы исчерпали кредит в 3 урока.</p>
