@@ -507,7 +507,7 @@
 							</div>
 							<div class="modal-footer">
 								{% if user.days_since_joined > 7 %}
-									<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
+									<button data-dismiss="modal" data-saw-proceed="true" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
 								{% endif %}
 								<a type="button" data-activate-lesson="saw"  class="btn btn-primary" id="lesson-not-activated-continue-button"
 								   href="{% url 'payments:payments' %}?next={{ request.path }}&open_modal=description">Поддержать</a>
@@ -547,7 +547,7 @@
 
 							</div>
 							<div class="modal-footer">
-								<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
+								<button data-dismiss="modal" data-saw-proceed="true" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
 							</div>
 						{% else %}
 							<div class="modal-header" style="text-align: center"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h3>Пожалуйста, прочтите это!</h3></div>
@@ -577,7 +577,7 @@
 							</div>
 							<div class="modal-footer">
 							{% if user.days_since_joined > 7 %}
-								<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
+								<button data-dismiss="modal" data-saw-proceed="true" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
 							{% else %}
 								<a type="button" data-activate-lesson="saw" class="btn btn-primary" href="{% url 'payments:payments' %}?next={{ request.path }}&s_t=1" id="lesson-not-activated-activate-button">Поддержать</a>
 							{% endif %}
