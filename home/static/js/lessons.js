@@ -156,13 +156,13 @@ $(document).ready(function () {
                 case 'ended':
                     let audio = $('#lesson-audio')[0];
                     localStorage['lecon-{{ self.lesson_number }}'] = audio.duration - 5;
-                    if (IS_AUTHENTICATED) {
+                    if (!IS_AUTHENTICATED) {
                         $('#listen-login-required-modal').modal('show');
                     } else {
                         if (saw_message) {
-                            $('#lesson-not-activated-simple-modal').modal('show')
+                            $('#lesson-not-activated-simple-modal').modal('show');
                         } else {
-                            $('#lesson-not-activated-details-continue-modal').modal('show')
+                            $('#lesson-not-activated-details-continue-modal').modal('show');
                         }
                     }
                     break;
