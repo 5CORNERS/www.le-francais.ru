@@ -18,15 +18,15 @@
 	<script>
     const CSRF_TOKEN = '{{ csrf_token }}';
     const LESSON_NUMBER = {% if self.lesson_number %}{{ self.lesson_number }}{% else %}null{% endif %};
-    const NEED_PAYMENT = {% if self.need_payment %}true{% else %}false{% endif %};
-    const IS_AUTHENTICATED = {% if request.user.is_athenticated %}true{% else %}false{% endif %};
+    const NEED_PAYMENT = {% if self.need_payment %}!0{% else %}!1{% endif %};
+    const IS_AUTHENTICATED = {% if request.user.is_athenticated %}!0{% else %}!1{% endif %};
         {% if request.user.is_authenticated %}
-            var saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
+            var saw_message = {% if request.user.saw_message %}!0{% else %}!1{% endif %};
             var cups_amount = {% if request.user.cup_amount %}{{ request.user.cup_amount }}{% else %}null{% endif %};
             var cups_credit = {% if request.user.cup_credit %}{{ request.user.cup_credit }}{% else %}null{% endif %};
-            const must_pay = {% if request.user.must_pay %}true{% else %}false{% endif %};
+            const must_pay = {% if request.user.must_pay %}!0{% else %}!1{% endif %};
             {% check_user_lesson request.user self as userlesson %}
-            const userlesson = {% if userlesson %}true{% else %}false{% endif %};
+            const userlesson = {% if userlesson %}!0{% else %}!1{% endif %};
         {% endif %}
     const COFFEE_SOUND_URL = '{% static 'snd/coffee.mp3' %}';
     const BY_ME_A_COFFEE_SVG = '{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}';
@@ -468,7 +468,7 @@
 
 							</div>
 							<div class="modal-footer">
-								<button data-dismiss="modal" onclick="activateLesson('saw')" id="lesson-not-activated-continue-button" class="btn btn-secondary">Продолжить</button>
+								<button data-dismiss="modal" data-activate-lesson="saw"  id="lesson-not-activated-continue-button" class="btn btn-secondary">Продолжить</button>
 							</div>
 						{% else %}
 							<div class="modal-header" style="text-align: center">
@@ -502,7 +502,7 @@
 								{% if user.days_since_joined > 7 %}
 									<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
 								{% endif %}
-								<a type="button" onclick="activateLesson('saw')" class="btn btn-primary" id="lesson-not-activated-continue-button"
+								<a type="button" data-activate-lesson="saw"  class="btn btn-primary" id="lesson-not-activated-continue-button"
 								   href="{% url 'payments:payments' %}?next={{ request.path }}&open_modal=description">Поддержать</a>
 							</div>
 						{% endif %}
@@ -572,7 +572,7 @@
 							{% if user.days_since_joined > 7 %}
 								<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
 							{% else %}
-								<a type="button" onclick="activateLesson('saw')" class="btn btn-primary" href="{% url 'payments:payments' %}?next={{ request.path }}&s_t=1" id="lesson-not-activated-activate-button">Поддержать</a>
+								<a type="button" data-activate-lesson="saw" class="btn btn-primary" href="{% url 'payments:payments' %}?next={{ request.path }}&s_t=1" id="lesson-not-activated-activate-button">Поддержать</a>
 							{% endif %}
 							</div>
 						{% endif %}

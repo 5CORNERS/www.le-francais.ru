@@ -109,21 +109,21 @@ $(document).ready(function () {
             $('.success-message').hide();
             $('.fail-message').hide();
             $('.minus-cups').hide();
-            $('.unsofficiant-cups-credit').hide()
+            $('.unsofficiant-cups-credit').hide();
             $('.waiting-message').show();
-            playActivateSound();
             $('#lesson-activated-modal').modal('show');
             $.ajax({
                 type: 'POST',
                 async: false,
-                url: '{% url "activate:activate_lesson" %}',
+                url: Urls['activate:activate_lesson'](),
                 data: {
-                    'csrfmiddlewaretoken': "{{ csrf_token }}",
-                    'lesson_number': '{{ self.lesson_number }}'
+                    'csrfmiddlewaretoken': CSRF_TOKEN,
+                    'lesson_number': LESSON_NUMBER
                 },
                 datatype: 'json',
                 success: function (r) {
                     if (r.result === 'SUCCESS') {
+                        playActivateSound();
                         window.location.href = window.location.pathname + "?" + $.param({'modal_open': 'lesson-activated-modal'});
                     } else if (r.result === 'ZERO_CUPS') {
                         $('.waiting-message').hide();
@@ -177,7 +177,7 @@ $(document).ready(function () {
                     sawMessage('make_true');
                     break;
                 case 'proceed':
-                    if (userlesson) {
+                    if (!userlesson) {
                         activate();
                     }
                     break;
@@ -194,6 +194,9 @@ $(document).ready(function () {
                 lessonAudio.addEventListener('ended', function () {
                     activateLesson('ended')
                 });
+            });
+            $('[data-activate-lesson]').click(function () {
+                activateLesson($(this).data('activate-lesson'))
             });
             $('#tab-flash-cards').removeAttr('data-toggle');
             $('#tab-exercises-de-lesson').removeAttr('data-toggle');
