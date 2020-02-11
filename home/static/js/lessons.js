@@ -79,6 +79,8 @@ $(document).ready(function () {
             setTimeout(activateLesson('proceed'), 1000);
         }
 
+        $('[data-saw-proceed]').on('click', sawProceed);
+
         function showMinusCups() {
             $('#activated-dismiss-button').hide();
             $('#activated-unsofficiant-cups-button').hide();
@@ -274,7 +276,7 @@ $(document).ready(function () {
             case 'get_state': {
                 $.ajax({
                     type: "POST",
-                    url: "{% url 'custom_user:saw_message' %}",
+                    url: Urls['custom_user:saw_message'](),
                     data: {
                         'csrfmiddlewaretoken': CSRF_TOKEN,
                         'action': 'get_state'
