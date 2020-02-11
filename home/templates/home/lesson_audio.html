@@ -53,13 +53,15 @@
 					<img
 							class="new-svg-button activate-button{% if userlesson %} activated{% endif %}"
 							src="{% if userlesson %}{% static 'images/buttons/activated.svg' %}{% else %}{% static 'images/buttons/activate.svg' %}{% endif %}"
-							onclick="activateLesson('button')"
+                            data-activate-lesson="button"
+
 					>
 				{% else %}
 					<img
 							class="new-svg-button activate-button{% if userlesson %} activated{% endif %}"
 							src="{% if userlesson %}{% static 'images/buttons/activated.svg' %}{% else %}{% static 'images/buttons/activate.svg' %}{% endif %}"
-							onclick="activateLesson('button')"
+                            data-activate-lesson="button"
+
 					>
 				{% endif %}
 			{% else %}
