@@ -36,7 +36,7 @@
 							 data-toggle="modal"
 							 data-target="#give-me-a-coffee-modal"
 							{% elif user.is_authenticated and not user.has_coffee %}
-							 onclick="location.href='{% url 'check_amount' %}?next={{ request.path }}&s_t=1';"
+							 onclick="location.href='{% url 'coffee:check_amount' %}?next={{ request.path }}&s_t=1';"
 							{% elif not user.is_authenticated %}
 							 data-toggle="modal"
 							 data-target="#give-me-a-coffee-modal"
@@ -53,13 +53,15 @@
 					<img
 							class="new-svg-button activate-button{% if userlesson %} activated{% endif %}"
 							src="{% if userlesson %}{% static 'images/buttons/activated.svg' %}{% else %}{% static 'images/buttons/activate.svg' %}{% endif %}"
-							onclick="activateLesson('button')"
+                            data-activate-lesson="button"
+
 					>
 				{% else %}
 					<img
 							class="new-svg-button activate-button{% if userlesson %} activated{% endif %}"
 							src="{% if userlesson %}{% static 'images/buttons/activated.svg' %}{% else %}{% static 'images/buttons/activate.svg' %}{% endif %}"
-							onclick="activateLesson('button')"
+                            data-activate-lesson="button"
+
 					>
 				{% endif %}
 			{% else %}
@@ -69,7 +71,7 @@
 							 data-toggle="modal"
 							 data-target="#give-me-a-coffee-modal"
 							{% elif user.is_authenticated and not user.has_coffee %}
-							 onclick="location.href='{% url 'check_amount' %}?next={{ request.path }}&s_t=0';"
+							 onclick="location.href='{% url 'coffee:check_amount' %}?next={{ request.path }}&s_t=0';"
 							{% elif not user.is_authenticated %}
 							 data-toggle="modal"
 							 data-target="#give-me-a-coffee-modal"

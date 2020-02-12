@@ -16,302 +16,30 @@
 
 {% block extra_js %}
 	<script>
-		var LESSON_NUMBER = {{ self.lesson_number }};
+    const CSRF_TOKEN = '{{ csrf_token }}';
+    const LESSON_NUMBER = {% if self.lesson_number %}{{ self.lesson_number }}{% else %}null{% endif %};
+    const NEED_PAYMENT = {% if self.need_payment %}true{% else %}false{% endif %};
+    const IS_AUTHENTICATED = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
+    var saw_message, cups_amount, cups_credit, must_pay, userlesson
+    {% if request.user.is_authenticated %}
+        saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
+        cups_amount = {% if request.user.cup_amount %}{{ request.user.cup_amount }}{% else %}null{% endif %};
+        cups_credit = {% if request.user.cup_credit %}{{ request.user.cup_credit }}{% else %}null{% endif %};
+        must_pay = {% if request.user.must_pay %}true{% else %}false{% endif %};
+        {% check_user_lesson request.user self as userlesson %}
+        userlesson = {% if userlesson %}true{% else %}false{% endif %};
+    {% else %}
+        saw_message = undefined;
+        cups_amount = undefined;
+        cups_credit = undefined;
+        must_pay = undefined;
+        userlesson = undefined;
+    {% endif %}
+    const COFFEE_SOUND_URL = '{% static 'snd/coffee.mp3' %}';
+    const BY_ME_A_COFFEE_SVG = '{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}';
 	</script>
-	{% check_user_lesson request.user self as userlesson %}
 	<script type="text/javascript"
             src="{% static 'components/js/bootstrap-treeview.min.js' %}"></script>
-	{% if self.need_payment %}
-		<script>
-			{% if user.is_authenticated %}let saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
-			let cups_amount = {{ request.user.cup_amount }};
-			let cups_credit = {{ request.user.cup_credit }};
-			{% endif %}
-
-			function reloadLessonUrl() {
-				$.ajax({
-					type: 'POST',
-					url: '/api/get_lesson_url/',
-					data: {
-						'csrfmiddlewaretoken': "{{ csrf_token }}",
-						'lesson_number': '{{ self.lesson_number }}'
-					},
-					datatype: 'json',
-					success: function (r) {
-						if (r.status === 200){
-							let audio = $('#lesson-audio')[0];
-							let audioTime = audio.currentTime;
-							audio.src(r.lesson_url);
-							audio.load();
-							audio.currentTime = audioTime;
-							audio.play();
-						}
-						else {}
-					}
-				})
-			}
-			function errHandle(a){
-				console.log("Error " + a.error.code + "; details: " + a.error.message);
-			}
-
-			function sawProceed(){
-				activateLesson('saw');
-				setTimeout(activateLesson('proceed'), 1000);
-			}
-
-			function showMinusCups(){
-				$('#activated-dismiss-button').hide();
-				$('#activated-unsofficiant-cups-button').hide();
-				$('.minus-cups').show();
-			}
-			function showUnsMinusCups(){
-				$('#activated-dismiss-button').hide();
-				$('#activated-unsofficiant-cups-button').hide();
-				$('.unsofficiant-cups-credit').show();
-			}
-
-			activateSounds = ['composter-01.mp3','composter-02.mp3','composter-03.mp3','composter-04.mp3'];
-
-			function playActivateSound(){
-				let index = Math.floor(Math.random() * 1000) % 4;
-				console.log(index);
-        let src = ('https://files.le-francais.ru/sound/' + activateSounds[index]);
-				let audio = $('<audio class="sound-player" autoplay="autoplay" style="display:none;">'
-					+ '<source src="' + src + '" />'
-					+ '<embed src="' + src + '" hidden="true" autostart="true" loop="false"/>'
-					+ '</audio>'
-				).appendTo('body');
-				audio[0].play();
-			}
-			function activate() {
-				$('.success-message').hide();
-				$('.fail-message').hide();
-				$('.minus-cups').hide();
-				$('.unsofficiant-cups-credit').hide()
-				$('.waiting-message').show();
-				playActivateSound();
-				$('#lesson-activated-modal').modal('show');
-				$.ajax({
-					type: 'POST',
-					async: false,
-					url: '{% url "activate:activate_lesson" %}',
-					data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'lesson_number': '{{ self.lesson_number }}'},
-					datatype: 'json',
-                    cache: false,
-                    headers: {"cache-control": "no-cache"},
-					success: function (r) {
-						if (r.result === 'SUCCESS') {
-							window.location.href = window.location.pathname + "?" + $.param({'modal_open': 'lesson-activated-modal'});
-						} else if (r.result === 'ZERO_CUPS') {
-							$('.waiting-message').hide();
-							$('.unsofficiant-cups').show();
-							if ((cups_amount < 0) && (cups_credit === 0)) {
-								showUnsMinusCups()
-							}
-						} else if (r.result === 'ALREADY') {
-							$('.waiting-message').hide();
-							$('.already-activated').show();
-
-						} else if (r.result === 'NOT_AUTH') {
-							$('.waiting-message').hide();
-							$('.login-need').show();
-						}
-					}
-				});
-			}
-			function disableActivButton() {
-				let button = $('#activate-button');
-				button.removeClass('btn-primary').addClass('btn-success');
-				button.disabled = true;
-			}
-			function activateLesson(state) {
-				switch (state) {
-					case 'tab':
-					case 'download':
-					case 'ended':
-						let audio = $('#lesson-audio')[0];
-						localStorage['lecon-{{ self.lesson_number }}'] = audio.duration - 5;
-					{% if not request.user.is_authenticated %}
-						$('#listen-login-required-modal').modal('show');
-					{% else %}
-						if (saw_message){
-							$('#lesson-not-activated-simple-modal').modal('show')
-						}else{
-							$('#lesson-not-activated-details-continue-modal').modal('show')
-						}
-					{% endif %}
-						break;
-					case 'button':
-						if(saw_message){activateLesson('proceed')}else{$('#lesson-not-activated-details-activate-modal').modal('show')}
-						break;
-					case 'saw':
-						sawMessage('make_true');
-						break;
-					case 'proceed':
-					{% if not userlesson %}
-						activate();
-					{% endif %}
-						break;
-				}
-			}
-
-			{% if not userlesson and request.user.must_pay %}
-				window.addEventListener('lessonPlayerReady', function () {
-					let downloadButton = $('.audioplayer-download-button')[0];
-					downloadButton.addEventListener('click', function () {
-						activateLesson('download');
-					});
-					let lessonAudio = $('#lesson-audio')[0];
-					lessonAudio.addEventListener('ended', function () {
-						activateLesson('ended')
-					});
-				});
-				$('#tab-flash-cards').removeAttr('data-toggle');
-                $('#tab-exercises-de-lesson').removeAttr('data-toggle');
-                $('#tab-exercise').removeAttr('data-toggle');
-				$('#tab-flash-cards').click(function(e){
-				    e.preventDefault();
-                    activateLesson('tab')
-                });
-				$('#tab-exercises-de-lesson').click(function(e){
-				    e.preventDefault();
-                    activateLesson('tab')
-                });
-				$('#tab-exercise').click(function(e){
-				    e.preventDefault();
-                    activateLesson('tab')
-                });
-			{% endif %}
-		</script>
-	{% else %}
-		{% if not request.user.is_authenticated and self.lesson_number > 5 %}
-		<script>
-			$(window).one('lessonPlayerReady', function () {
-				$('.audioplayer-download-button').on('click', function (e) {
-					e.preventDefault();
-					$.ajax({
-						url: '{% url 'modal:download_login_required' %}',
-						type: 'GET',
-						data: {
-							redirect_url: '{{ request.path }}'
-						},
-						datatype: 'html',
-						success: function (data) {
-							let modal = $(data);
-							modal.modal('show');
-						}
-					})
-				})
-			})
-		</script>
-		{% endif %}
-	{% endif %}
-	<script>
-		function getSuccessButton() {
-			let new_button = $(
-				"<button" +
-				" class='coffee-button btn btn-success btn-xs'" +
-				" disabled='disabled'" +
-				" id='coffee-button'" +
-				">" +
-				"<img" +
-				" id='coffee-button-image'" +
-				" class='coffee-button-image'" +
-				" src='{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}'>" +
-				"<div" +
-				" id='coffee-button-text'" +
-				" class='coffee-button-text'>" +
-				"Вы уже угощали меня<br>за этот урок :)" +
-				"</div>" +
-				"</button>");
-			$("#coffee-button").replaceWith(new_button);
-		}
-		function playCoffeeSound() {
-			let coffeeAudio = new Audio('{% static 'snd/coffee.mp3' %}');
-			coffeeAudio.play();
-		}
-		function showActivateMessage() {
-			if (sawMessage()) {
-				$('#lesson-not-activated-subsequent-modal').show()
-			} else {
-				$('#lesson-not-activated-first-modal').show()
-			}
-		}
-		function sawMessage(val) {
-			switch (val) {
-				case 'get_state': {
-					$.ajax({
-						type: "POST",
-						url: "{% url 'custom_user:saw_message' %}",
-						data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'action': 'get_state'},
-						success: function (r) {
-							if (r.status === 200) {
-								return true
-							}
-						}
-					});
-					break
-				}
-				case 'make_true': {
-					saw_message = true;
-					$.ajax({
-						type: "POST",
-						async: false,
-						url: "{% url 'custom_user:saw_message' %}",
-						data: {'csrfmiddlewaretoken': "{{ csrf_token }}", 'action': 'make_true'},
-						success: function (r) {
-							if (r.status === 200) {
-								return true
-							}
-						}
-					})
-				}
-			}
-
-		}
-		function giveMeCoffee() {
-            $('.modal').modal('hide');
-            let ua = window.navigator.userAgent;
-            let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
-            let is_webkit = !!ua.match(/WebKit/i);
-            let iOSSafari = iOS && is_webkit && !ua.match(/CriOS/i);
-            $.ajax({
-                type: "POST",
-                url: "{% url 'give_me_a_coffee' %}",
-                data: {
-                    'lesson_number': {{ self.lesson_number }},
-                    'user_email': "{{ request.user }}",
-                    'csrfmiddlewaretoken': "{{ csrf_token }}"
-                },
-                datatype: "json",
-                cache: false,
-                async: !iOSSafari,
-                headers: {"cache-control": "no-cache"},
-                success: function (response) {
-                    if (response.result === 'SUCCESS') {
-                        playCoffeeSound();
-                        $('#give-me-a-coffee-success-message').html(response.description);
-                        $('#give-me-a-coffee-complete-modal').modal('show');
-                        getSuccessButton();
-                        reloadPage(LESSON_NUMBER);
-                    } else if (response.result === 'ALREADY') {
-                        $('#give-me-a-coffee-fail-message').html(response.description);
-                        $('#give-me-a-coffee-fail-modal').modal('show');
-                        getSuccessButton();
-                        reloadPage(LESSON_NUMBER)
-                    } else {
-                        $('#give-me-a-coffee-fail-message').html(response.description);
-                        $('#give-me-a-coffee-fail-modal').modal('show');
-                    }
-                },
-                error: function (response, error) {
-                    $('#give-me-a-coffee-fail-message').html(error);
-                    $('#give-me-a-coffee-fail-modal').modal('show');
-                },
-            });
-        }
-	</script>
-
 	{% if request.GET.modal_open %}
 		{% with modal_id=request.GET.modal_open %}
 			<script>
@@ -455,7 +183,7 @@
 						</div>
 						<div class="modal-footer" style="text-align: center">
 							<p>
-								<button type="button" class="btn btn-primary coffee-proceed" onclick="giveMeCoffee()" id="give-me-a-coffee-proceed">OUI !</button>
+								<button type="button" class="btn btn-primary coffee-proceed" id="give-me-a-coffee-proceed">OUI !</button>
 							</p>
 							<p>Каждый раз, когда вы нажимаете эту кнопку, я получаю уведомление на телефон :)</p>
 						</div>
@@ -632,7 +360,7 @@
 										}
 										$.ajax({
 											type: "POST",
-											url: "{% url 'get_amount' %}",
+											url: "{% url 'coffee:get_amount' %}",
 											data: {'csrfmiddlewaretoken': "{{ csrf_token }}"},
 											datatype: "json",
 											success: function (response) {
@@ -655,7 +383,7 @@
 						{% endif %}
 					</div>
 					<div class="modal-footer" style="text-align: center">
-						{% if not request.user.saw_message %}<button type="button" class="btn btn-primary ten-s-success coffee-proceed" onclick="giveMeCoffee()" id="give-me-a-coffee-after-payment-proceed" data-dismiss="modal"{% if not user.has_coffee %}
+						{% if not request.user.saw_message %}<button type="button" class="btn btn-primary ten-s-success coffee-proceed" id="give-me-a-coffee-after-payment-proceed" data-dismiss="modal"{% if not user.has_coffee %}
 						        style="display: none"{% endif %}>OUI !
 						</button>{% endif %}
 						<button type="button" class="btn btn-primary ten-s-fail" id="ten-seconds-failure-dismiss-button" data-dismiss="modal" style="display: none">Закрыть</button>
@@ -675,7 +403,7 @@
 						<p>:(</p>
 					</div>
 					<div class="modal-footer">
-						<a href="{% url 'payments:payments' %}" type="button" class="btn btn-primary">Повторить</a>
+						<a href="{% url 'payments:payments' %}" type="button" class="btn btn-primary">Повторить</a>{% comment %}TODO:next attribute{% endcomment %}
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">В другой раз</button>
 					</div>
 				</div>
@@ -747,7 +475,7 @@
 
 							</div>
 							<div class="modal-footer">
-								<button data-dismiss="modal" onclick="activateLesson('saw')" id="lesson-not-activated-continue-button" class="btn btn-secondary">Продолжить</button>
+								<button data-dismiss="modal" data-activate-lesson="saw"  id="lesson-not-activated-continue-button" class="btn btn-secondary">Продолжить</button>
 							</div>
 						{% else %}
 							<div class="modal-header" style="text-align: center">
@@ -779,9 +507,9 @@
 							</div>
 							<div class="modal-footer">
 								{% if user.days_since_joined > 7 %}
-									<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
+									<button data-dismiss="modal" data-saw-proceed="true" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
 								{% endif %}
-								<a type="button" onclick="activateLesson('saw')" class="btn btn-primary" id="lesson-not-activated-continue-button"
+								<a type="button" data-activate-lesson="saw"  class="btn btn-primary" id="lesson-not-activated-continue-button"
 								   href="{% url 'payments:payments' %}?next={{ request.path }}&open_modal=description">Поддержать</a>
 							</div>
 						{% endif %}
@@ -819,7 +547,7 @@
 
 							</div>
 							<div class="modal-footer">
-								<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
+								<button data-dismiss="modal" data-saw-proceed="true" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
 							</div>
 						{% else %}
 							<div class="modal-header" style="text-align: center"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h3>Пожалуйста, прочтите это!</h3></div>
@@ -849,9 +577,9 @@
 							</div>
 							<div class="modal-footer">
 							{% if user.days_since_joined > 7 %}
-								<button data-dismiss="modal" onclick="sawProceed()" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
+								<button data-dismiss="modal" data-saw-proceed="true" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
 							{% else %}
-								<a type="button" onclick="activateLesson('saw')" class="btn btn-primary" href="{% url 'payments:payments' %}?next={{ request.path }}&s_t=1" id="lesson-not-activated-activate-button">Поддержать</a>
+								<a type="button" data-activate-lesson="saw" class="btn btn-primary" href="{% url 'payments:payments' %}?next={{ request.path }}&s_t=1" id="lesson-not-activated-activate-button">Поддержать</a>
 							{% endif %}
 							</div>
 						{% endif %}
@@ -873,7 +601,7 @@
 						<div class="modal-body">
 							<div id="activated-message-waiting" class="waiting-message" style="display: none">
 								<p>Пожалуйста, подождите, это займёт несколько секунд.</p>
-								<img style="width:100%;" src="{% static 'images/loading_icon.gif' %}"></div>
+								<img alt="Загрузка" style="width:100%;" src="{% static 'images/loading_icon.gif' %}"></div>
 							<div id="activated-message-success" class="success-message" style="display: none">
 								<p>У вас в запасе уроков: <span id="activated-message-ticket-count">ХХХ</span>.</p>
 								<p class="unsofficiant-cups-credit" style="display: none"> Вы исчерпали кредит в 3 урока.</p>
