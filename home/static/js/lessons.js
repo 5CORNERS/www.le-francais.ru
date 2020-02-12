@@ -40,6 +40,33 @@ function reloadPage(lesson_number, tabID = 0) {
     });
 }
 
+function reloadLessonUrl() {
+    $.ajax({
+        type: 'POST',
+        url: '/api/get_lesson_url/',
+        data: {
+            'csrfmiddlewaretoken': CSRF_TOKEN,
+            'lesson_number': LESSON_NUMBER
+        },
+        datatype: 'json',
+        success: function (r) {
+            if (r.status === 200) {
+                let audio = $('#lesson-audio')[0];
+                let audioTime = audio.currentTime;
+                audio.src(r.lesson_url);
+                audio.load();
+                audio.currentTime = audioTime;
+                audio.play();
+            } else {
+            }
+        }
+    })
+}
+
+function errHandle(a) {
+            console.log("Error " + a.error.code + "; details: " + a.error.message);
+        }
+
 
 $(document).ready(function () {
     $('a#tab-flash-cards').one('show.bs.tab', function () {
@@ -47,33 +74,6 @@ $(document).ready(function () {
     });
 
     if (NEED_PAYMENT) {
-        function reloadLessonUrl() {
-            $.ajax({
-                type: 'POST',
-                url: '/api/get_lesson_url/',
-                data: {
-                    'csrfmiddlewaretoken': CSRF_TOKEN,
-                    'lesson_number': LESSON_NUMBER
-                },
-                datatype: 'json',
-                success: function (r) {
-                    if (r.status === 200) {
-                        let audio = $('#lesson-audio')[0];
-                        let audioTime = audio.currentTime;
-                        audio.src(r.lesson_url);
-                        audio.load();
-                        audio.currentTime = audioTime;
-                        audio.play();
-                    } else {
-                    }
-                }
-            })
-        }
-
-        function errHandle(a) {
-            console.log("Error " + a.error.code + "; details: " + a.error.message);
-        }
-
         function sawProceed() {
             activateLesson('saw');
             setTimeout(activateLesson('proceed'), 1000);
@@ -217,7 +217,7 @@ $(document).ready(function () {
             });
         }
     } else {
-        if (userlesson && LESSON_NUMBER > 5) {
+        if (!IS_AUTHENTICATED && LESSON_NUMBER > 5) {
             $(window).one('lessonPlayerReady', function () {
                 $('.audioplayer-download-button').on('click', function (e) {
                     e.preventDefault();
