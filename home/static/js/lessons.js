@@ -73,6 +73,11 @@ $(document).ready(function () {
         reloadPage(LESSON_NUMBER, 'flash-cards');
     });
 
+    let ua = window.navigator.userAgent;
+    let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+    let is_webkit = !!ua.match(/WebKit/i);
+    var iOSSafari = iOS && is_webkit && !ua.match(/CriOS/i);
+
     if (NEED_PAYMENT) {
         function sawProceed() {
             activateLesson('saw');
@@ -116,13 +121,15 @@ $(document).ready(function () {
             $('#lesson-activated-modal').modal('show');
             $.ajax({
                 type: 'POST',
-                async: false,
                 url: Urls['activate:activate_lesson'](),
                 data: {
                     'csrfmiddlewaretoken': CSRF_TOKEN,
                     'lesson_number': LESSON_NUMBER
                 },
                 datatype: 'json',
+                cache: false,
+                headers: { "cache-control": "no-cache" },
+                async: !iOSSafari,
                 success: function (r) {
                     if (r.result === 'SUCCESS') {
                         playActivateSound();
@@ -311,10 +318,6 @@ $(document).ready(function () {
 
 
     function giveMeCoffee() {
-        let ua = window.navigator.userAgent;
-        let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
-        let is_webkit = !!ua.match(/WebKit/i);
-        let iOSSafari = iOS && is_webkit && !ua.match(/CriOS/i);
         $('.modal').modal('hide');
         $.ajax({
             type: "POST",
