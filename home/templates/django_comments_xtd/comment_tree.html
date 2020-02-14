@@ -9,20 +9,20 @@
 <li class="media">{% else %}<div class="media">{% endif %}
   <a name="c{{ item.comment.id }}"></a>
   <div class="media-left"></div>
-  <div class="media-body" {% if item.comment.level != 0%}style="border-left: 1px #d5d5d5 solid; padding-left: 3px"{% endif %}>
+  <div class="media-body" {% if item.comment.level != 0%}style="border-left: 17px #d5d5d5 solid; padding-left: 3px"{% endif %}>
     <div class="comment">
       <div class="media-heading">
         {% include "comments/comment_avatar.html" with profile=item.comment.user.pybb_profile PYBB_AVATAR_WIDTH=24 PYBB_AVATAR_HEIGHT=24 %}{{ item.comment.submit_date|localize }}&nbsp;-&nbsp;{% if item.comment.url and not item.comment.is_removed %}<a href="{{ item.comment.url }}" target="_new">{% endif %}{{ item.comment.user_name }}{% if item.comment.url %}</a>{% endif %}{% if item.comment.user and item.comment.user|has_permission:"django_comments.can_moderate" %}&nbsp;<span class="badge badge-default">{% trans "moderator" %}</span>{% endif %}&nbsp;&nbsp;<a class="permalink" title="{% trans 'comment permalink' %}" href="{% get_comment_permalink item.comment %}">#</a>
         {% if not item.comment.is_removed %}
         <div class="float-right">
           {% if allow_flagging and item.flagged %}
-          <span class="glyphicon glyphicon-flag text-danger" title="{% trans 'comment flagged' %}"></span>
+          <span class="fa fa-flag text-danger" title="{% trans 'comment flagged' %}"></span>
           {% elif allow_flagging %}
           <a class="mutedlink" href="{% url 'comments-flag' item.comment.pk %}">
-            <span class="glyphicon glyphicon-flag" title="{% trans 'flag comment' %}"></span></a>
+            <span class="fa fa-flag" title="{% trans 'flag comment' %}"></span></a>
           {% endif %}
           {% if perms.comments.can_moderate %}
-          <a class="mutedlink" href="{% url 'comments-delete' item.comment.pk %}"><span class="glyphicon glyphicon-trash" title="{% trans 'remove comment' %}"></span></a>
+          <a class="mutedlink" href="{% url 'comments-delete' item.comment.pk %}"><span class="fa fa-trash" title="{% trans 'remove comment' %}"></span></a>
           {% if item.flagged_count %}
           <span class="badge badge-warning" title="{% blocktrans count counter=item.flagged_count %}A user has flagged this comment as inappropriate.{% plural %}{{ counter }} users have flagged this comment as inappropriate.{% endblocktrans %}">{{ item.flagged_count }}</span>
           {% endif %}
