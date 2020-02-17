@@ -1,9 +1,9 @@
 {% load user_agents %}
-<form id="search" action="{% url 'conjugation:search' %}" method="post">
+<form id="search" action="{% url 'conjugation:search' %}" method="get">
 	<div class="input-group {% if request|is_mobile %}input-group{% else %}input-group-lg{% endif %}">
 		<input onkeyup="return forceLower(this);"
 		       placeholder="Начните вводить глагол, не заботясь о диакритике и раскладке"
-		       name="verb"
+		       name="q"
 		       type="text"
 		       id="search-verb"
 		       size="30"
