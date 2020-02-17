@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.urls import reverse
@@ -99,7 +101,10 @@ class Template(models.Model):
 
 
 class Verb(models.Model):
-	_conjugations = None
+	def __init__(self, *args, **kwargs):
+		super(Verb, self).__init__(*args, **kwargs)
+		self._conjugations = None
+		self._conjugations_no_html = None
 
 	count = models.IntegerField(default=0)
 	infinitive = models.CharField(max_length=100)
@@ -234,6 +239,37 @@ class Verb(models.Model):
 			self.construct_conjugations()
 		return self._conjugations
 
+	@property
+	def conjugations_no_html(self):
+		if self._conjugations_no_html is None:
+			d = {}
+			cleanr = re.compile('<.*?>')
+			for mood in self.conjugations.keys():
+				d[mood] = {}
+				for tense in self.conjugations[mood].keys():
+					d[mood][tense] = []
+					for i, person in enumerate(self.conjugations[mood][tense]):
+						if person is None:
+							d[mood][tense].append(None)
+							continue
+						if isinstance(person, list):
+							d[mood][tense].append([])
+							for j, form in enumerate(person):
+								d[mood][tense][i].append(re.sub(cleanr, '', form))
+						else:
+							d[mood][tense].append(re.sub(cleanr, '', person))
+			self._conjugations_no_html = d
+		return self._conjugations_no_html
+
+
+	def find_form(self, f):
+		f = unidecode(f)
+		for mood, tense, form, n in self:
+			if form and unidecode(form) == f:
+				return mood, tense, form, n
+		return None
+
+
 	def get_all(self):
 		result = []
 
@@ -252,6 +288,32 @@ class Verb(models.Model):
 			for reflexive in refs:
 				result.append((self, gender, reflexive))
 		return result
+
+	@property
+	def forms_html(self):
+		return self.__iter__(True)
+
+	@property
+	def forms(self):
+		return self.__iter__(False)
+
+	def __iter__(self, html=False):
+		from .utils import flatten
+		iter_list = []
+		mood_tenses = flatten(self.conjugations_no_html).keys()
+		for mood_tense in mood_tenses:
+			mood, tense = mood_tense.split('_')
+			if html:
+				persons = self.conjugations[mood][tense]
+			else:
+				persons = self.conjugations_no_html[mood][tense]
+			for i, person in enumerate(persons):
+				if isinstance(person, list):
+					for j, form in enumerate(person):
+						iter_list.append((mood, tense, form, j))
+				else:
+					iter_list.append((mood, tense, person, None))
+		return iter(iter_list)
 
 
 

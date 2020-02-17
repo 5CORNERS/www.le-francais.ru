@@ -3,7 +3,7 @@ from re import sub
 from dal import autocomplete
 from django.db.models import Q
 from django.forms import modelformset_factory
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -39,35 +39,59 @@ def get_polly_audio_link(request):
 	return JsonResponse(data={key: {'url': polly_audio.polly.url}})
 
 
-@csrf_exempt
-def search(request):
-	search_string = switch_keyboard_layout(str(request.POST.get('verb')).strip(' ').lower())
-	search_string_formatted = unidecode(search_string)
-
-	if search_string_formatted[:2] == "s'" or search_string_formatted[:3] == "se ":
-		try:
-			re_verb = ReflexiveVerb.objects.get(infinitive_no_accents=search_string_formatted)
-		except ReflexiveVerb.DoesNotExist:
-			return render(request, 'conjugation/verb_not_found.html',
-			              {'search_string': search_string_formatted})
-		except ReflexiveVerb.MultipleObjectsReturned:
-			try:
-				re_verb = ReflexiveVerb.objects.get(infinitive=search_string).first()
-			except:
-				re_verb = ReflexiveVerb.objects.filter(infinitive_no_accents=search_string_formatted).first()
-		return redirect(re_verb.get_absolute_url())
-
+def search_verb(s, reflexive=None):
+	s_unaccent = unidecode(s)
+	verb = None
 	try:
-		verb = Verb.objects.get(infinitive_no_accents=search_string_formatted)
+		verb = Verb.objects.get(infinitive_no_accents=s_unaccent)
 	except Verb.DoesNotExist:
-		return render(request, 'conjugation/verb_not_found.html',
-		              {'search_string': search_string_formatted})
+		try:
+			verbs_for_search = list(Verb.objects.raw(
+				f"SELECT * FROM conjugation_verb "
+				f"WHERE position(main_part_no_accents in '{s_unaccent}')=1 "
+				f"ORDER BY CHAR_LENGTH (main_part) DESC"
+			))
+			for searching_verb in verbs_for_search:
+				form = searching_verb.find_form(s)
+				if form is not None:
+					verb = searching_verb
+					break
+			if verb is None:
+				raise Verb.DoesNotExist
+		except Verb.DoesNotExist:
+			return None
 	except Verb.MultipleObjectsReturned:
 		try:
-			verb = Verb.objects.get(infinitive=search_string)
-		except:
+			verb = Verb.objects.get(infinitive=s)
+		except Verb.DoesNotExist:
 			verb = Verb.objects.filter(
-				infinitive_no_accents=search_string_formatted).first()
+				infinitive_no_accents=s_unaccent).first()
+			if verb is None:
+				return None
+	if reflexive and (verb.can_reflexive or verb.reflexive_only):
+		return verb.reflexiveverb
+	else:
+		return verb
+
+
+
+@csrf_exempt
+def search(request):
+	if request.method == 'post':
+		search_string = switch_keyboard_layout(str(request.POST.get('q')).strip(' ').lower())
+	else:
+		search_string = switch_keyboard_layout(str(request.GET.get('q')).strip(' ').lower())
+	reflexive = True
+	if search_string.find("s'") == 0:
+		search_string = search_string[2:]
+	elif search_string.find("se ") == 0:
+		search_string = search_string[3:]
+	else:
+		reflexive = False
+	verb = search_verb(search_string, reflexive)
+	if verb is None:
+		return render(request, 'conjugation/verb_not_found.html',
+		              {'search_string': search_string})
 	return redirect(verb.get_absolute_url())
 
 

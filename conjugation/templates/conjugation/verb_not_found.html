@@ -89,18 +89,20 @@
     </script>
 {% endblock %}
 
+{% block title %}Спряжение французских глаголов — глагол {{ search_string }} не найден{% endblock %}
+
 {% block content %}
-    <div class="container-fluid">
-    <div class="row main_row">
-    <div class="col-md-12 col-lg-9 main">
-        <div class="row">
+    <div class="container">
+    <div class="row first_row">
+    <div class="col-md-12 col-lg-12 main">
+        <div class="row mb-3">
             <div class="col-12">
                 {% include 'conjugation/verb_form.html' %}
             </div>
         </div>
         <div class="row">
             <div class="col-12">
-                Не могу найти глагол {{ search_string }}
+                <p class="h3">Не могу найти глагол {{ search_string }}</p>
             </div>
         </div>
         <div class="row">
