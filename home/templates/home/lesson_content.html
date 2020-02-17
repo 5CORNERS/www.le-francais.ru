@@ -74,7 +74,8 @@
                         <li class="nav-item">
                             <a class="nav-link" style="cursor: pointer"
                                data-toggle="tab"
-                               onclick="activateLesson('tab')" role="tab"
+                               data-activate-lesson="tab"
+                                role="tab"
                                aria-controls="body">
                                 Материал для повторения
                             </a>
@@ -112,7 +113,8 @@
                         {% else %}
                             <li class="nav-item">
                                 <a style="cursor: pointer" class="nav-link"
-                                   onclick="activateLesson('tab')">
+                                   data-activate-lesson="tab"
+                                   >
                                     Доп. информация
                                 </a>
                             </li>
@@ -196,7 +198,7 @@
 							<div class="row">
 								<div class="col-lg-12"><p>Пожалуйста, активируйте урок, чтобы получить доступ к его материалам.</p></div>
 								<div class="col-lg-12">
-									<button class="btn btn-primary button-small" onclick="activateLesson('button')">Активировать урок</button>
+									<button class="btn btn-primary button-small" data-activate-lesson="button" >Активировать урок</button>
 								</div>
 							</div>
 					{% else %}
@@ -298,7 +300,7 @@
 						{% include_30_block self.mail_archive 40 %}
 						<div class="row">
 							<div class="col-lg-12"><p>Пожалуйста, активируйте урок, чтобы получить доступ к его материалам.</p></div>
-							<div class="col-lg-12"><button class="btn btn-primary button-small" onclick="activateLesson('button')">Активировать урок</button></div>
+							<div class="col-lg-12"><button class="btn btn-primary button-small" data-activate-lesson="button" >Активировать урок</button></div>
 						</div>
 					{% else %}
 						{% for block in self.mail_archive %}

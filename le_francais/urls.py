@@ -67,7 +67,7 @@ urlpatterns = [
 
     url(r'^home/', include(home_urls, namespace='home')),
 
-    url(r'^coffee/', include(coffee_urls)),
+    url(r'^coffee/', include(coffee_urls, namespace='coffee')),
     url(r'^activate/', include(activate_urls, namespace='activate')),
 
     url(r'^accounts/', include('custom_user.urls', namespace='custom_user')),
