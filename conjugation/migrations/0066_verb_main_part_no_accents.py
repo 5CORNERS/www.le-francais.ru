@@ -10,6 +10,7 @@ def fill_main_part_no_accents(apps, schema):
     Verb = apps.get_model('conjugation', 'Verb')
     for verb in Verb.objects.all():
         verb.main_part_no_accents = unidecode(verb.main_part)
+        verb.save(update_fields=['main_part_no_accents'])
 
 class Migration(migrations.Migration):
 
