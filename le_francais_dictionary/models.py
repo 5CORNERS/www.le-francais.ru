@@ -1,5 +1,7 @@
 import re
 
+from polly.const import LANGUAGE_CODE_FR, LANGUAGE_CODE_RU
+from .tts import google_cloud_tts, amazon_polly_tts
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models
@@ -733,6 +735,27 @@ class Verb(models.Model):
 			"packet": self.packet_id
 		}
 
+	def to_voice(self):
+		self.audio_url = amazon_polly_tts(
+			self.verb,
+			filename=self.verb.replace(' ', '_'),
+			language=LANGUAGE_CODE_FR,
+			genre='f',
+			file_id=str(self.pk),
+			file_title=self.verb
+		)
+		self.translation_audio_url = google_cloud_tts(
+			self.translation,
+			filename=self.translation.replace(' ', '_'),
+			language=LANGUAGE_CODE_RU,
+			genre='m',
+			file_id=str(self.pk),
+			file_title=self.translation
+		)
+		self.save(update_fields=['audio_url', 'translation_audio_url'])
+		for form in self.verbform_set.all():
+			form.to_voice()
+
 
 
 
@@ -767,6 +790,30 @@ class VerbForm(models.Model):
 			"translation": self.translation,
 			"trPollyUrl": translation_polly_url,
 		}
+
+	def to_voice(self):
+		s = self.form
+		if VerbForm.objects.filter(verb=self.verb, is_shown=True).order_by('order').last() == self:
+			s += '.'
+		else:
+			s += ','
+		self.audio_url = amazon_polly_tts(
+			s,
+			filename=self.form.replace(' ', '_'),
+			language=LANGUAGE_CODE_FR,
+			genre='f',
+			file_id=str(self.pk),
+			file_title=self.form
+		)
+		self.translation_audio_url = google_cloud_tts(
+			self.translation,
+			filename=self.translation.replace(' ', '_'),
+			language=LANGUAGE_CODE_RU,
+			genre='m',
+			file_id=str(self.pk),
+			file_title=self.translation
+		)
+		self.save(update_fields=['audio_url', 'translation_audio_url'])
 
 	class Meta:
 		ordering = ['order']
