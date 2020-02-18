@@ -34,46 +34,9 @@ function updateBadge() {
 }
 
 
-window.setBadgeUpdater = function (timing) {
-    let badgeUpdaterInternal = {
-        interval: timing,
-        stopTime: undefined,
-        callback: function () {
-            ifHasNewNotification(updateBadge)
-        },
-        stopped: false,
-        runLoop: function () {
-            if (badgeUpdaterInternal.stopped) return;
-            badgeUpdaterInternal.callback.call(this);
-            badgeUpdaterInternal.loop()
-        },
-        stop: function () {
-            if (!this.stopped) {
-                this.stopped = true;
-                window.clearTimeout(this.timeout);
-                this.stopTime = Date.now();
-            }
-        },
-        start: function (firstRun = undefined) {
-            this.stopped = false;
-            if (Date.now() - this.stopTime > this.interval) {
-                this.callback.call(this)
-            } else if (firstRun) {
-                this.callback.call(this)
-            }
-            return this.loop();
-        },
-        loop: function () {
-            this.timeout = window.setTimeout(this.runLoop, this.interval);
-            return this;
-        }
-    };
-    return badgeUpdaterInternal.start(true)
-};
-
 $(document).ready(function () {
     $('.notify-dropdown .nav-link').on('click', get_drop_content);
-    var badgeUpdater = setBadgeUpdater(60000);
+    var badgeUpdater = setIntervalRun(60000, ifHasNewNotification, updateBadge);
     var notificationsUpdateDatetime = 0;
     document.addEventListener('visibilitychange', function () {
         if (document.visibilityState === 'visible') {
