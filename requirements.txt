@@ -18,6 +18,7 @@ django-allauth==0.37.0
 social-auth-core
 social-auth-app-django
 mutagen
+pysftp
 markdown==2.6.11
 urllib3
 pymdown-extensions==5.0.0
