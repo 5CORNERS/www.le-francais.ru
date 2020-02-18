@@ -10,6 +10,42 @@ function getPageId() {
     return $('meta[name="page-id"]').attr("data-value")
 }
 
+window.setIntervalRun = function (interval, callbackFunction, args) {
+    let internal = {
+        interval: interval,
+        stopTime: undefined,
+        callback: function () {
+            callbackFunction(args)
+        },
+        stopped: false,
+        runLoop: function () {
+            if (internal.stopped) return;
+            internal.callback.call(this);
+            internal.loop()
+        },
+        stop: function () {
+            if (!this.stopped) {
+                this.stopped = true;
+                window.clearTimeout(this.timeout);
+                this.stopTime = Date.now();
+            }
+        },
+        start: function (firstRun = undefined) {
+            this.stopped = false;
+            if (Date.now() - this.stopTime > this.interval) {
+                this.callback.call(this)
+            } else if (firstRun) {
+                this.callback.call(this)
+            }
+            return this.loop();
+        },
+        loop: function () {
+            this.timeout = window.setTimeout(this.runLoop, this.interval);
+            return this;
+        }
+    };
+    return internal.start(true)
+};
 
 function setNodeState(href, isExpanded) {
     var nodesCollapsedState = localStorage.getItem("nodesCollapsedState") != null ?
