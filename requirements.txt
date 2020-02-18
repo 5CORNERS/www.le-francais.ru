@@ -42,6 +42,7 @@ django-sass-processor
 
 django-storages
 boto3
+eyed3
 django-bulk-update
 django-autocomplete-light==3.2.10
 django-simple-captcha
