@@ -59,7 +59,110 @@ function tableReloading() {
     )
 }
 
-function updateTable() {
+let tableFilters = {
+    beforeLoad:{},
+    afterLoad:{},
+    selectAfterFilter:{},
+};
+let savingFiltersEnabled = true;
+
+function toggle(elm, checked){
+    if (checked !== elm.prop('checked')) {
+        elm.click();
+  }
+}
+
+function select(elm, value){
+    if (value !== elm.val()){
+        elm.val(value);
+        elm.change()
+    }
+}
+
+function saveFilters(process, filterIds, filterAttrs){
+    if (!savingFiltersEnabled){
+        return
+    }
+    $.each(filterIds, function (i, filterId) {
+        tableFilters[process][filterId] = {};
+        tableFilters[process][filterId]['attrs'] = {};
+        let elem = $('#' + filterId);
+        $.each(filterAttrs, function (i, attributeName) {
+            let attributeValue = elem.attr(attributeName);
+            if (!attributeValue) {
+                attributeValue = null
+            }
+            tableFilters[process][filterId]['attrs'][attributeName] = attributeValue
+        });
+        if (elem.val()) {
+            tableFilters[process][filterId]['value'] = elem.val()
+        } else {
+            tableFilters[process][filterId]['value'] = undefined
+        }
+        if (typeof elem.prop('checked') !== 'undefined') {
+            tableFilters[process][filterId]['checked'] = elem.prop('checked')
+        } else {
+            tableFilters[process][filterId]['checked'] = undefined
+        }
+    })
+    pushFilters()
+}
+
+function pushFilters() {
+    $.ajax(Urls['dictionary:save_filters'](), {
+        method: 'POST',
+        data: JSON.stringify({
+            filters: tableFilters
+        }),
+        contentType: "application/json",
+        dataType: "json",
+    })
+}
+
+
+function getFilters(){
+    $.ajax(Urls['dictionary:get_filters'](),{
+        method: 'POST',
+        dataType: 'json',
+        async: false,
+        success: function (r) {
+            tableFilters = r
+        },
+        statusCode: {
+            404: function () {}
+        }
+    })
+}
+
+
+function applyFilters(process, filters){
+    $.each(filters[process], function (id, filter) {
+        let elm = $('#' + id);
+        $.each(filter.attrs, function (attributeName, attributeValue) {
+            elm.attr(attributeName, attributeValue)
+        });
+        if (typeof filter.value !== "undefined"){
+            select(elm, filter.value)
+        }
+        if (typeof filter.checked !== 'undefined'){
+            toggle(elm, filter.checked);
+        }
+    });
+}
+
+
+function loadAndFilter(){
+    savingFiltersEnabled = false;
+    getFilters();
+    applyFilters('beforeLoad', tableFilters);
+    updateTable(function () {
+        applyFilters('afterLoad', tableFilters);
+        applyFilters('selectAfterFilter', tableFilters);
+        savingFiltersEnabled = true;
+    });
+}
+
+function updateTable(afterInit=undefined) {
     let form = $('#filterWordsForm');
     let url = Urls['dictionary:my_words']();
 
@@ -89,14 +192,14 @@ function updateTable() {
                         'targets': 0,
                         'render': function (data, type, row, meta) {
                             if (type === 'display') {
-                                data = '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>';
+                                data = `<div class="checkbox"><input type="checkbox" id="checkbox-select-${data}" class="dt-checkboxes"><label></label></div>`;
                             }
 
                             return data;
                         },
                         'checkboxes': {
                             'selectRow': true,
-                            'selectAllRender': '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
+                            'selectAllRender': '<div class="checkbox"><input type="checkbox" id="checkbox-select-all" class="dt-checkboxes"><label></label></div>'
                         }
                     }
                 ],
@@ -137,6 +240,8 @@ function updateTable() {
                 },
                 initComplete: function () {
                     dt = this;
+                    let $dt = $(dt)
+                    saveFilters('beforeLoad', ['id_packets'], []);
                     // adding star filter
                     this.api().columns(-1).every(function () {
                         var column = this;
@@ -146,6 +251,7 @@ function updateTable() {
                             'header': 'Оценка',
                             'selectedTextFormat': 'count > 1',
                         }).on('change', function () {
+                            saveFilters('afterLoad', [this.id], []);
                             let pattern = $(this).find(':selected').map(function () {
                                 return $(this).text()
                             }).get().join('|');
@@ -162,9 +268,21 @@ function updateTable() {
                     showDeleted($('#showDeleted')[0].checked);
                     $('#showDeleted').on('change', function (e) {
                         e.preventDefault();
+                        saveFilters('afterLoad', [this.id], ['checked']);
                         showDeleted(this.checked);
                         add_selected_filtered_alert(dt)
-                    })
+                    });
+                    $dt.on("select.dt.dtCheckboxes deselect.dt.dtCheckboxes", function(e, api, type, indexes) {
+                        tableFilters.selectAfterFilter = {};
+                        let filterIds = [];
+                        $.each(get_selected_filtered(dt), function (i, value) {
+                            filterIds.push(`checkbox-select-${value}`)
+                        });
+                        saveFilters('selectAfterFilter', filterIds, ['checked'])
+                    });
+                    if (afterInit !== undefined) {
+                        afterInit()
+                    }
                 }
             })
         },
@@ -304,4 +422,5 @@ $(document).ready(function () {
         // Prevent actual form submission
         e.preventDefault();
     });
+    $('#getAndApplyFilters').on('click', loadAndFilter)
 });
