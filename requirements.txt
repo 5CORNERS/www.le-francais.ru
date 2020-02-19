@@ -42,6 +42,8 @@ django-sass-processor
 
 django-storages
 boto3
+google-cloud-texttospeech
+eyed3
 django-bulk-update
 django-autocomplete-light==3.2.10
 django-simple-captcha
@@ -50,6 +52,7 @@ django-postman==3.5.1
 django-crispy-forms
 django-registration
 django-htmlmin
+pydub
 brotlipy
 django-inline-svg
 Pillow
