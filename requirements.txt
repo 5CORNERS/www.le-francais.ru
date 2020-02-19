@@ -52,6 +52,7 @@ django-postman==3.5.1
 django-crispy-forms
 django-registration
 django-htmlmin
+pydub
 brotlipy
 django-inline-svg
 Pillow
