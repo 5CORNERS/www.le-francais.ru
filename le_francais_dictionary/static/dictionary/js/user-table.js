@@ -119,12 +119,12 @@ let loadFilterButton = {
     init: function () {
         this.$button = $('#getAndApplyFilters');
         this.$button.on('click', loadAndFilter);
-        this.getFilters();
         this.readyText = 'Повторить последнюю выборку';
         this.loadingText = `<i class="fa fa-sync fa-spin"></i>${this.readyText}`;
         this.savingText = `<i class="fa fa-sync fa-spin"></i>${this.readyText}`;
         this.savedText = this.readyText;
-        this.errorText = `<i class="fa fa-exclamation-triangle"></i>${this.readyText}`
+        this.errorText = `<i class="fa fa-exclamation-triangle"></i>${this.readyText}`;
+        this.getFilters();
     },
     disable: function () {
         this.$button.attr('disabled', '').addClass('disabled')
