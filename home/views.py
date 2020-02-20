@@ -203,7 +203,8 @@ def listen_request(request, test=False):
     if request.POST.get('download'):
         LogMessage(
             user=session.user,
-            message='Download Lesson ' + lesson_number
+            message='Download Lesson ' + lesson_number,
+            type=2,
         ).save()
 
     if not lesson.need_payment or not session.user.must_pay:
