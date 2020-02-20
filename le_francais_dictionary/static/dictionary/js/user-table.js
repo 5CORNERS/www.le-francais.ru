@@ -112,15 +112,15 @@ let loadFilterButton = {
             },
         })
     },
-    readyText: 'Повторить последнюю выборку',
-    loadingText: `<i class="fa fa-sync fa-spin"></i>${this.readyText}`,
-    savingText: `<i class="fa fa-sync fa-spin"></i>${this.readyText}`,
-    savedText: this.readyText,
-    errorText: `<i class="fa fa-exclamation-triangle"></i>${this.readyText}`,
     init: function () {
         this.$button = $('#getAndApplyFilters');
         this.$button.on('click', loadAndFilter);
         this.getFilters();
+        this.readyText = 'Повторить последнюю выборку';
+        this.loadingText = `<i class="fa fa-sync fa-spin"></i>${this.readyText}`;
+        this.savingText = `<i class="fa fa-sync fa-spin"></i>${this.readyText}`;
+        this.savedText = this.readyText;
+        this.errorText = `<i class="fa fa-exclamation-triangle"></i>${this.readyText}`
     },
     disable: function () {
         this.$button.attr('disabled', '').addClass('disabled')
