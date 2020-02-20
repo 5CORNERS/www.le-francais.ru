@@ -71,11 +71,13 @@ let savingFiltersEnabled = true;
 let loadFilterButton = {
     $button: {},
     getFilters: function(){
-        this.setStateLoading();
         $.ajax(Urls['dictionary:get_filters'](), {
             method: 'POST',
             dataType: 'json',
             async: false,
+            beforeSend: function () {
+                loadFilterButton.setStateLoading();
+            },
             statusCode: {
                 200: function (r) {
                     tableFilters = r;
@@ -96,7 +98,6 @@ let loadFilterButton = {
         })
     },
     saveFilters: function(){
-        this.setStateSaving();
         $.ajax(Urls['dictionary:save_filters'](), {
             method: 'POST',
             data: JSON.stringify({
@@ -104,6 +105,9 @@ let loadFilterButton = {
             }),
             contentType: "application/json",
             dataType: "json",
+            beforeSend: function () {
+                loadFilterButton.setStateSaving();
+            },
             success: function(r){
                 loadFilterButton.afterSavingFilters()
             },
