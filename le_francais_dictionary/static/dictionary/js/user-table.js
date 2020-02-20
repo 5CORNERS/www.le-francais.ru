@@ -59,12 +59,112 @@ function tableReloading() {
     )
 }
 
-let tableFilters = {
+let tableFiltersInit = {
     beforeLoad:{},
     afterLoad:{},
     selectAfterFilter:{},
 };
+let tableFilters = tableFiltersInit.valueOf();
+let tableFiltersLoaded = false;
 let savingFiltersEnabled = true;
+
+let loadFilterButton = {
+    $button: {},
+    getFilters: function(){
+        this.setStateLoading();
+        $.ajax(Urls['dictionary:get_filters'](), {
+            method: 'POST',
+            dataType: 'json',
+            async: false,
+            statusCode: {
+                200: function (r) {
+                    tableFilters = r;
+                    tableFiltersLoaded = true;
+                },
+                404: function () {
+                    tableFilters = tableFiltersInit.valueOf();
+                    tableFiltersLoaded = false;
+                },
+                500: function () {
+                    tableFilters = tableFiltersInit.valueOf();
+                    tableFiltersLoaded = false;
+                }
+            },
+            complete: function () {
+                loadFilterButton.afterGetFilters()
+            },
+        })
+    },
+    saveFilters: function(){
+        this.setStateSaving();
+        $.ajax(Urls['dictionary:save_filters'](), {
+            method: 'POST',
+            data: JSON.stringify({
+                filters: tableFilters
+            }),
+            contentType: "application/json",
+            dataType: "json",
+            success: function(r){
+                loadFilterButton.afterSavingFilters()
+            },
+            error: function (r) {
+                loadFilterButton.afterSavingError();
+            },
+        })
+    },
+    readyText: 'Повторить последнюю выборку',
+    loadingText: `<i class="fa fa-sync fa-spin"></i>${this.readyText}`,
+    savingText: `<i class="fa fa-sync fa-spin"></i>${this.readyText}`,
+    savedText: this.readyText,
+    errorText: `<i class="fa fa-exclamation-triangle"></i>${this.readyText}`,
+    init: function () {
+        this.$button = $('#getAndApplyFilters');
+        this.$button.on('click', loadAndFilter);
+        this.getFilters();
+    },
+    disable: function () {
+        this.$button.attr('disabled', '').addClass('disabled')
+    },
+    setText: function (text) {
+        this.$button.empty().html(text)
+    },
+    setStateReady: function () {
+        this.setText(this.readyText)
+    },
+    setStateSaving: function () {
+        this.setText(this.savingText)
+    },
+    setStateSaved: function () {
+        this.setText(this.savedText)
+    },
+    setStateLoading: function () {
+        this.setText(this.loadingText)
+    },
+    setStateNoFilters: function () {
+        this.setText(this.readyText);
+        this.disable()
+    },
+    afterGetFilters() {
+        if (!tableFiltersLoaded){
+            loadFilterButton.setStateNoFilters()
+        }else{
+            loadFilterButton.setStateReady()
+        }
+    },
+    afterSavingFilters() {
+        this.setStateSaved();
+    },
+    afterSavingError() {
+        this.setStateError(function () {
+            loadFilterButton.saveFilters()
+        });
+    },
+    setStateError(callback) {
+        this.setText(this.errorText);
+        setTimeout(callback, 2000)
+    }
+};
+
 
 function toggle(elm, checked){
     if (checked !== elm.prop('checked')) {
@@ -104,34 +204,8 @@ function saveFilters(process, filterIds, filterAttrs){
         } else {
             tableFilters[process][filterId]['checked'] = undefined
         }
-    })
-    pushFilters()
-}
-
-function pushFilters() {
-    $.ajax(Urls['dictionary:save_filters'](), {
-        method: 'POST',
-        data: JSON.stringify({
-            filters: tableFilters
-        }),
-        contentType: "application/json",
-        dataType: "json",
-    })
-}
-
-
-function getFilters(){
-    $.ajax(Urls['dictionary:get_filters'](),{
-        method: 'POST',
-        dataType: 'json',
-        async: false,
-        success: function (r) {
-            tableFilters = r
-        },
-        statusCode: {
-            404: function () {}
-        }
-    })
+    });
+    loadFilterButton.saveFilters()
 }
 
 
@@ -153,7 +227,7 @@ function applyFilters(process, filters){
 
 function loadAndFilter(){
     savingFiltersEnabled = false;
-    getFilters();
+    loadFilterButton.getFilters();
     applyFilters('beforeLoad', tableFilters);
     updateTable(function () {
         applyFilters('afterLoad', tableFilters);
@@ -244,7 +318,7 @@ function updateTable(afterInit=undefined) {
                     saveFilters('beforeLoad', ['id_packets'], []);
                     // adding star filter
                     this.api().columns(-1).every(function () {
-                        var column = this;
+                        let column = this;
                         $(column.header()).empty();
                         $(starFilterHtml).appendTo($(column.header())).selectpicker({
                             'noneSelectedText': "Оценка",
@@ -405,9 +479,8 @@ $(document).ready(function () {
     });
     // Handle form submission event
     $('#main-frm').on('submit', function (e) {
-        var form = this;
-
-        var rows_selected = dt.api().column(0).checkboxes.selected();
+        let form = this;
+        let rows_selected = dt.api().column(0).checkboxes.selected();
 
         // Iterate over all selected checkboxes
         $.each(rows_selected, function (index, rowId) {
@@ -422,5 +495,7 @@ $(document).ready(function () {
         // Prevent actual form submission
         e.preventDefault();
     });
-    $('#getAndApplyFilters').on('click', loadAndFilter)
+
+    loadFilterButton.init();
+
 });
