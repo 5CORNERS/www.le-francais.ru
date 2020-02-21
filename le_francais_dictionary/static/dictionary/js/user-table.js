@@ -138,7 +138,7 @@ let loadFilterButton = {
             applyFilters('afterLoad', tableFilters);
             applyFilters('selectAfterFilter', tableFilters);
             savingFiltersEnabled = true;
-        });
+        }, -1); // FIXME: find a way to select checkboxes on hidden pages
         loadFilterButton.setStateNoFilters()
     },
     loadAndFilter: function () {
@@ -242,7 +242,7 @@ function applyFilters(process, filters){
 }
 
 
-function updateTable(afterInit=undefined) {
+function updateTable(afterInit=undefined, initialPageLength=50) {
     let form = $('#filterWordsForm');
     let url = Urls['dictionary:my_words']();
 
@@ -287,7 +287,7 @@ function updateTable(afterInit=undefined) {
                 'searching': true,
                 'ordering':  false,
                 'paging': true,
-                "pageLength": 50,
+                "pageLength": initialPageLength,
                 "lengthMenu": [ [50, 100, 250, 500, -1], [50, 100, 250, 500, "Все"] ],
                 "language": {
                     "processing": "Подождите...",
