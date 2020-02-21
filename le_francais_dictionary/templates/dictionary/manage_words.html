@@ -27,9 +27,9 @@
 {% block content %}
     <div class="container mt-4">
         <div class="row">
-            <div class="col-12 d-flex filter1 mt-2">
+            <div class="col-12 filter1 mt-2">
                 <form id="filterWordsForm" method="post"
-                      class="form-inline mb-2 mr-auto">
+                      class="form-inline mb-2 d-flex">
                     <label class="sr-only"
                            for="{{ form.packets.auto_id }}">{{ form.packets.label }}</label>
                     <select data-none-selected-text="Выберите уроки" multiple class="mb-2 mr-sm-2 selectpicker"
@@ -42,8 +42,8 @@
                     {% csrf_token %}
                     <button type="submit" class="btn btn-primary mb-2 ml-2">Получить список слов
                     </button>
+                <button class="btn btn-info mb-2 ml-2 ml-lg-auto text-truncate" id="getAndApplyFilters">Повторить последнюю выборку</button>
                 </form>
-                <button class="btn btn-primary mb-2 ml-2 float-xl-right" id="getAndApplyFilters">Загрузить сохраненные фильтры</button>
             </div>
             <div class="col-12 words-footable">
                 <div class="card card-body bg-light uppertable" style="display: none">
