@@ -377,7 +377,7 @@ def create_pybb_topic_notification(sender, instance: Topic, **kwargs):
 	)
 
 
-def delete_pybb_topic_notification(sender, instance: Topic, **kwargs):
+def delete_pybb_notification(sender, instance: Topic, **kwargs):
 	Notification.objects.filter(
 		content_type=ContentType.objects.get_for_model(sender),
 		object_id=instance.pk,
@@ -385,11 +385,12 @@ def delete_pybb_topic_notification(sender, instance: Topic, **kwargs):
 
 
 post_save.connect(create_pybb_post_notification, Post)
+post_delete.connect(delete_pybb_notification, Post)
 post_save.connect(create_pybb_like_notification, Like)
 post_delete.connect(delete_pybb_like_notification, Like)
 post_save.connect(create_postman_notification, Message)
 post_save.connect(create_pybb_topic_notification, Topic)
-post_delete.connect(delete_pybb_topic_notification, Topic)
+post_delete.connect(delete_pybb_notification, Topic)
 
 post_save.connect(check_users, NotificationUser)
 post_save.connect(check_users, Notification)
