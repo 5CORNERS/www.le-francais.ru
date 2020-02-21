@@ -196,7 +196,7 @@ function select(elm, value){
     }
 }
 
-function saveFilters(process, filterIds, filterAttrs){
+function saveFilters(process, filterIds, filterAttrs, value=undefined, checked=undefined){
     if (!savingFiltersEnabled){
         return
     }
@@ -213,11 +213,15 @@ function saveFilters(process, filterIds, filterAttrs){
         });
         if (elem.val()) {
             tableFilters[process][filterId]['value'] = elem.val()
+        }else if(typeof value !== 'undefined') {
+            tableFilters[process][filterId]['value'] = value
         } else {
             tableFilters[process][filterId]['value'] = undefined
         }
         if (typeof elem.prop('checked') !== 'undefined') {
             tableFilters[process][filterId]['checked'] = elem.prop('checked')
+        }else if(typeof checked !== 'undefined') {
+            tableFilters[process][filterId]['checked'] = checked
         } else {
             tableFilters[process][filterId]['checked'] = undefined
         }
@@ -359,7 +363,7 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                             $.each(get_selected_filtered(dt), function (i, value) {
                                 filterIds.push(`checkbox-select-${value}`)
                             });
-                            saveFilters('selectAfterFilter', filterIds, ['checked'])
+                            saveFilters('selectAfterFilter', filterIds, ['checked'], 'on', true)
                         }
                     });
                     if (afterInit !== undefined) {
