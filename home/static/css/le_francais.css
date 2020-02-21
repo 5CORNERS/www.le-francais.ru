@@ -957,3 +957,8 @@ details.no-details:not([open]) summary {
 .h1-small {
     font-size: 1.725rem;
 }
+
+button:disabled {
+  cursor: not-allowed;
+  pointer-events: all !important;
+}
