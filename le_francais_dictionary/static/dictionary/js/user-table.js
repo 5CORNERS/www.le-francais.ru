@@ -69,15 +69,28 @@ let tableFiltersLoaded = false;
 let savingFiltersEnabled = true;
 
 let loadFilterButton = {
-    $button: {},
-    getFilters: function(){
+    init: function () {
+        this.$button = $('#getAndApplyFilters');
+        this.$button.on('click', this.loadAndFilter);
+        this.readyText = 'Повторить последнюю выборку';
+        this.loadingText = `<i class="fa fa-sync fa-spin"></i> ${this.readyText}`;
+        this.savingText = `<i class="fa fa-sync fa-spin"></i> ${this.readyText}`;
+        this.savedText = this.readyText;
+        this.errorText = `<i class="fa fa-exclamation-triangle text-danger"></i> ${this.readyText}`;
+        this.setStateLoading();
+        this.getFilters(function () {
+            if (!tableFiltersLoaded) {
+                loadFilterButton.setStateNoFilters();
+            } else {
+                loadFilterButton.setStateReady();
+            }
+        });
+    },
+    getFilters: function(complete, args=[]){
         $.ajax(Urls['dictionary:get_filters'](), {
             method: 'POST',
             dataType: 'json',
             async: false,
-            beforeSend: function () {
-                loadFilterButton.setStateLoading();
-            },
             statusCode: {
                 200: function (r) {
                     tableFilters = r;
@@ -93,8 +106,8 @@ let loadFilterButton = {
                 }
             },
             complete: function () {
-                loadFilterButton.afterGetFilters()
-            },
+                complete(...args)
+            }
         })
     },
     saveFilters: function(){
@@ -108,23 +121,29 @@ let loadFilterButton = {
             beforeSend: function () {
                 loadFilterButton.setStateSaving();
             },
-            success: function(r){
-                loadFilterButton.afterSavingFilters()
-            },
-            error: function (r) {
-                loadFilterButton.afterSavingError();
+            statusCode:{
+                200: function () {
+                    loadFilterButton.afterSavingFilters()
+                },
+                500: function () {
+                    loadFilterButton.afterSavingError();
+                },
             },
         })
     },
-    init: function () {
-        this.$button = $('#getAndApplyFilters');
-        this.$button.on('click', loadAndFilter);
-        this.readyText = 'Повторить последнюю выборку';
-        this.loadingText = `<i class="fa fa-sync fa-spin"></i>${this.readyText}`;
-        this.savingText = `<i class="fa fa-sync fa-spin"></i>${this.readyText}`;
-        this.savedText = this.readyText;
-        this.errorText = `<i class="fa fa-exclamation-triangle"></i>${this.readyText}`;
-        this.getFilters();
+    filter: function () {
+        savingFiltersEnabled = false;
+        applyFilters('beforeLoad', tableFilters);
+        updateTable(function () {
+            applyFilters('afterLoad', tableFilters);
+            applyFilters('selectAfterFilter', tableFilters);
+            savingFiltersEnabled = true;
+        });
+        loadFilterButton.setStateNoFilters()
+    },
+    loadAndFilter: function () {
+        loadFilterButton.setStateLoading();
+        loadFilterButton.getFilters(loadFilterButton.filter);
     },
     disable: function () {
         this.$button.attr('disabled', '').addClass('disabled')
@@ -139,7 +158,8 @@ let loadFilterButton = {
         this.setText(this.savingText)
     },
     setStateSaved: function () {
-        this.setText(this.savedText)
+        this.setText(this.savedText);
+        this.disable();
     },
     setStateLoading: function () {
         this.setText(this.loadingText)
@@ -147,13 +167,6 @@ let loadFilterButton = {
     setStateNoFilters: function () {
         this.setText(this.readyText);
         this.disable()
-    },
-    afterGetFilters() {
-        if (!tableFiltersLoaded){
-            loadFilterButton.setStateNoFilters()
-        }else{
-            loadFilterButton.setStateReady()
-        }
     },
     afterSavingFilters() {
         this.setStateSaved();
@@ -228,17 +241,6 @@ function applyFilters(process, filters){
     });
 }
 
-
-function loadAndFilter(){
-    savingFiltersEnabled = false;
-    loadFilterButton.getFilters();
-    applyFilters('beforeLoad', tableFilters);
-    updateTable(function () {
-        applyFilters('afterLoad', tableFilters);
-        applyFilters('selectAfterFilter', tableFilters);
-        savingFiltersEnabled = true;
-    });
-}
 
 function updateTable(afterInit=undefined) {
     let form = $('#filterWordsForm');
@@ -351,12 +353,14 @@ function updateTable(afterInit=undefined) {
                         add_selected_filtered_alert(dt)
                     });
                     $dt.on("select.dt.dtCheckboxes deselect.dt.dtCheckboxes", function(e, api, type, indexes) {
-                        tableFilters.selectAfterFilter = {};
-                        let filterIds = [];
-                        $.each(get_selected_filtered(dt), function (i, value) {
-                            filterIds.push(`checkbox-select-${value}`)
-                        });
-                        saveFilters('selectAfterFilter', filterIds, ['checked'])
+                        if (savingFiltersEnabled) {
+                            tableFilters.selectAfterFilter = {};
+                            let filterIds = [];
+                            $.each(get_selected_filtered(dt), function (i, value) {
+                                filterIds.push(`checkbox-select-${value}`)
+                            });
+                            saveFilters('selectAfterFilter', filterIds, ['checked'])
+                        }
                     });
                     if (afterInit !== undefined) {
                         afterInit()
