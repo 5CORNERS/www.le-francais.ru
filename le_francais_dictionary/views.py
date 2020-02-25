@@ -476,6 +476,8 @@ def get_filters(request):
         userpacket= UserStandalonePacket.objects.get(user=user)
     except UserStandalonePacket.DoesNotExist:
         return HttpResponseNotFound()
+    if userpacket.filters is None:
+        return HttpResponseNotFound()
     return JsonResponse(
         userpacket.filters, status=200
     )
