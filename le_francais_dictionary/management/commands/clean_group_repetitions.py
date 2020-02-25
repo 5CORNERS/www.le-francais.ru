@@ -18,5 +18,5 @@ def check_user(user:User):
 
 class Command(BaseCommand):
 	def handle(self, *args, **options):
-		for user in User.objects.filter(flash_cards_data__isnull=False, username='Ириса').distinct():
+		for user in User.objects.filter(flash_cards_data__isnull=False).distinct():
 			check_user(user)
