@@ -661,7 +661,7 @@ class UserDayRepetition(models.Model):
 
 class UserStandalonePacket(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
-	filters = JSONField(default=dict, null=True)
+	filters = JSONField(default=None, null=True)
 	words = ArrayField(
 		models.IntegerField(),
 		blank=True, null=True
