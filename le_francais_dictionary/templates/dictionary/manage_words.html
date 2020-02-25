@@ -25,9 +25,18 @@
     <link rel="stylesheet" href="{% sass_src 'dictionary/scss/user-table.scss' %}">
 {% endblock %}
 {% block content %}
-    <div class="container mt-4">
+    <div class="container">
         <div class="row">
-            <div class="col-12 filter1 mt-2">
+            <div class="col-12 filter1">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Французский
+                            язык</a></li>
+                        <li class="breadcrumb-item active"><a
+                                href="{% url 'dictionary:my_words' %}">Мои
+                            слова</a></li>
+                    </ol>
+                </nav>
                 <form id="filterWordsForm" method="post"
                       class="form-inline mb-2 d-flex">
                     <label class="sr-only"
