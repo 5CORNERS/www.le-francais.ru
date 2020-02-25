@@ -631,6 +631,7 @@ class UserWordRepetition(models.Model):
 	repetition_date = models.DateField(null=True) # obsolete
 	repetition_datetime = models.DateTimeField(null=True)
 
+	# FIXME: check for group words
 	def update_repetition(self, save):
 		last_data = self.word.last_user_data(user=self.user)
 		datetime, self.time = last_data.get_repetition_datetime_and_time()
