@@ -59,7 +59,194 @@ function tableReloading() {
     )
 }
 
-function updateTable() {
+let tableFiltersInit = {
+    beforeLoad:{},
+    afterLoad:{},
+    selectAfterFilter:{},
+};
+let tableFilters = tableFiltersInit.valueOf();
+let tableFiltersLoaded = false;
+let savingFiltersEnabled = true;
+
+let loadFilterButton = {
+    init: function () {
+        this.$button = $('#getAndApplyFilters');
+        this.$button.on('click', this.loadAndFilter);
+        this.readyText = 'Повторить последнюю выборку';
+        this.loadingText = `<i class="fa fa-sync fa-spin"></i> ${this.readyText}`;
+        this.savingText = `<i class="fa fa-sync fa-spin"></i> ${this.readyText}`;
+        this.savedText = this.readyText;
+        this.errorText = `<i class="fa fa-exclamation-triangle text-danger"></i> ${this.readyText}`;
+        this.setStateLoading();
+        this.getFilters(function () {
+            if (!tableFiltersLoaded) {
+                loadFilterButton.setStateNoFilters();
+            } else {
+                loadFilterButton.setStateReady();
+            }
+        });
+    },
+    getFilters: function(complete, args=[]){
+        $.ajax(Urls['dictionary:get_filters'](), {
+            method: 'POST',
+            dataType: 'json',
+            async: false,
+            statusCode: {
+                200: function (r) {
+                    tableFilters = r;
+                    tableFiltersLoaded = true;
+                },
+                404: function () {
+                    tableFilters = tableFiltersInit.valueOf();
+                    tableFiltersLoaded = false;
+                },
+                500: function () {
+                    tableFilters = tableFiltersInit.valueOf();
+                    tableFiltersLoaded = false;
+                }
+            },
+            complete: function () {
+                complete(...args)
+            }
+        })
+    },
+    saveFilters: function(){
+        $.ajax(Urls['dictionary:save_filters'](), {
+            method: 'POST',
+            data: JSON.stringify({
+                filters: tableFilters
+            }),
+            contentType: "application/json",
+            dataType: "json",
+            beforeSend: function () {
+                loadFilterButton.setStateSaving();
+            },
+            statusCode:{
+                200: function () {
+                    loadFilterButton.afterSavingFilters()
+                },
+                500: function () {
+                    loadFilterButton.afterSavingError();
+                },
+            },
+        })
+    },
+    filter: function () {
+        savingFiltersEnabled = false;
+        applyFilters('beforeLoad', tableFilters);
+        updateTable(function () {
+            applyFilters('afterLoad', tableFilters);
+            applyFilters('selectAfterFilter', tableFilters);
+            savingFiltersEnabled = true;
+        }, -1); // FIXME: find a way to select checkboxes on hidden pages
+        loadFilterButton.setStateNoFilters()
+    },
+    loadAndFilter: function () {
+        loadFilterButton.setStateLoading();
+        loadFilterButton.getFilters(loadFilterButton.filter);
+    },
+    disable: function () {
+        this.$button.attr('disabled', '').addClass('disabled')
+    },
+    setText: function (text) {
+        this.$button.empty().html(text)
+    },
+    setStateReady: function () {
+        this.setText(this.readyText)
+    },
+    setStateSaving: function () {
+        this.setText(this.savingText)
+    },
+    setStateSaved: function () {
+        this.setText(this.savedText);
+        this.disable();
+    },
+    setStateLoading: function () {
+        this.setText(this.loadingText)
+    },
+    setStateNoFilters: function () {
+        this.setText(this.readyText);
+        this.disable()
+    },
+    afterSavingFilters() {
+        this.setStateSaved();
+    },
+    afterSavingError() {
+        this.setStateError(function () {
+            loadFilterButton.saveFilters()
+        });
+    },
+    setStateError(callback) {
+        this.setText(this.errorText);
+        setTimeout(callback, 2000)
+    }
+};
+
+
+function toggle(elm, checked){
+    if (checked !== elm.prop('checked')) {
+        elm.click();
+  }
+}
+
+function select(elm, value){
+    if (value !== elm.val()){
+        elm.val(value);
+        elm.change()
+    }
+}
+
+function saveFilters(process, filterIds, filterAttrs, value=undefined, checked=undefined){
+    if (!savingFiltersEnabled){
+        return
+    }
+    $.each(filterIds, function (i, filterId) {
+        tableFilters[process][filterId] = {};
+        tableFilters[process][filterId]['attrs'] = {};
+        let elem = $('#' + filterId);
+        $.each(filterAttrs, function (i, attributeName) {
+            let attributeValue = elem.attr(attributeName);
+            if (!attributeValue) {
+                attributeValue = null
+            }
+            tableFilters[process][filterId]['attrs'][attributeName] = attributeValue
+        });
+        if (elem.val()) {
+            tableFilters[process][filterId]['value'] = elem.val()
+        }else if(typeof value !== 'undefined') {
+            tableFilters[process][filterId]['value'] = value
+        } else {
+            tableFilters[process][filterId]['value'] = undefined
+        }
+        if (typeof elem.prop('checked') !== 'undefined') {
+            tableFilters[process][filterId]['checked'] = elem.prop('checked')
+        }else if(typeof checked !== 'undefined') {
+            tableFilters[process][filterId]['checked'] = checked
+        } else {
+            tableFilters[process][filterId]['checked'] = undefined
+        }
+    });
+    loadFilterButton.saveFilters()
+}
+
+
+function applyFilters(process, filters){
+    $.each(filters[process], function (id, filter) {
+        let elm = $('#' + id);
+        $.each(filter.attrs, function (attributeName, attributeValue) {
+            elm.attr(attributeName, attributeValue)
+        });
+        if (typeof filter.value !== "undefined"){
+            select(elm, filter.value)
+        }
+        if (typeof filter.checked !== 'undefined'){
+            toggle(elm, filter.checked);
+        }
+    });
+}
+
+
+function updateTable(afterInit=undefined, initialPageLength=50) {
     let form = $('#filterWordsForm');
     let url = Urls['dictionary:my_words']();
 
@@ -89,14 +276,14 @@ function updateTable() {
                         'targets': 0,
                         'render': function (data, type, row, meta) {
                             if (type === 'display') {
-                                data = '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>';
+                                data = `<div class="checkbox"><input type="checkbox" id="checkbox-select-${data}" class="dt-checkboxes"><label></label></div>`;
                             }
 
                             return data;
                         },
                         'checkboxes': {
                             'selectRow': true,
-                            'selectAllRender': '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
+                            'selectAllRender': '<div class="checkbox"><input type="checkbox" id="checkbox-select-all" class="dt-checkboxes"><label></label></div>'
                         }
                     }
                 ],
@@ -104,7 +291,7 @@ function updateTable() {
                 'searching': true,
                 'ordering':  false,
                 'paging': true,
-                "pageLength": 50,
+                "pageLength": initialPageLength,
                 "lengthMenu": [ [50, 100, 250, 500, -1], [50, 100, 250, 500, "Все"] ],
                 "language": {
                     "processing": "Подождите...",
@@ -137,15 +324,18 @@ function updateTable() {
                 },
                 initComplete: function () {
                     dt = this;
+                    let $dt = $(dt)
+                    saveFilters('beforeLoad', ['id_packets'], []);
                     // adding star filter
                     this.api().columns(-1).every(function () {
-                        var column = this;
+                        let column = this;
                         $(column.header()).empty();
                         $(starFilterHtml).appendTo($(column.header())).selectpicker({
                             'noneSelectedText': "Оценка",
                             'header': 'Оценка',
                             'selectedTextFormat': 'count > 1',
                         }).on('change', function () {
+                            saveFilters('afterLoad', [this.id], []);
                             let pattern = $(this).find(':selected').map(function () {
                                 return $(this).text()
                             }).get().join('|');
@@ -162,9 +352,23 @@ function updateTable() {
                     showDeleted($('#showDeleted')[0].checked);
                     $('#showDeleted').on('change', function (e) {
                         e.preventDefault();
+                        saveFilters('afterLoad', [this.id], ['checked']);
                         showDeleted(this.checked);
                         add_selected_filtered_alert(dt)
-                    })
+                    });
+                    $dt.on("select.dt.dtCheckboxes deselect.dt.dtCheckboxes", function(e, api, type, indexes) {
+                        if (savingFiltersEnabled) {
+                            tableFilters.selectAfterFilter = {};
+                            let filterIds = [];
+                            $.each(get_selected_filtered(dt), function (i, value) {
+                                filterIds.push(`checkbox-select-${value}`)
+                            });
+                            saveFilters('selectAfterFilter', filterIds, ['checked'], 'on', true)
+                        }
+                    });
+                    if (afterInit !== undefined) {
+                        afterInit()
+                    }
                 }
             })
         },
@@ -287,9 +491,8 @@ $(document).ready(function () {
     });
     // Handle form submission event
     $('#main-frm').on('submit', function (e) {
-        var form = this;
-
-        var rows_selected = dt.api().column(0).checkboxes.selected();
+        let form = this;
+        let rows_selected = dt.api().column(0).checkboxes.selected();
 
         // Iterate over all selected checkboxes
         $.each(rows_selected, function (index, rowId) {
@@ -304,4 +507,7 @@ $(document).ready(function () {
         // Prevent actual form submission
         e.preventDefault();
     });
+
+    loadFilterButton.init();
+
 });
