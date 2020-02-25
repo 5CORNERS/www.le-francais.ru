@@ -260,9 +260,9 @@ body {
 }
 
 .breadcrumb > li + li:before {
-    padding: 0 5px;
-    color: #707070;
-    content: ">\00a0";
+    padding: 0 5px !important;
+    color: #707070 !important;
+    content: ">\00a0" !important;
 }
 
 .breadcrumb > li {
@@ -956,4 +956,9 @@ details.no-details:not([open]) summary {
 
 .h1-small {
     font-size: 1.725rem;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  pointer-events: all !important;
 }
