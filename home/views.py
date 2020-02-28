@@ -203,7 +203,7 @@ def listen_request(request, test=False):
     if request.POST.get('download'):
         LogMessage(
             user=session.user,
-            message='Download Lesson ' + lesson_number,
+            message=str(lesson_number),
             type=2,
         ).save()
 
