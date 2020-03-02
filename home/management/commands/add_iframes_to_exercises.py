@@ -1,9 +1,11 @@
+import os
 import re
 from pathlib import Path
 
 from django.core.management import BaseCommand
 from typing import Dict
 
+from ._private import query_yes_no
 from .mail_archive import html_to_block
 import math
 import pandas
@@ -30,6 +32,12 @@ class Command(BaseCommand):
             dest='jsons'
         )
         parser.add_argument(
+            '--jsons-rewrite',
+            action='store_true',
+            default=False,
+            dest='jsons_rewrite'
+        )
+        parser.add_argument(
             '--lesson',
             dest='lessons',
             action='append',
@@ -37,14 +45,19 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        rewrite = False
+        if options['jsons_rewrite']:
+            rewrite = query_yes_no(
+                'You want to rewrite jsons files (already existed files wil be deleted)',
+                'no')
         table = get_table_dict('home/data/devoirs.csv' if not options[
             'additional'] else 'home/data/devoirs_additional.csv')
         if options['additional']:
             rewrite_excercises(table, additional=True, options=options)
         else:
             rewrite_excercises(table, additional=False, options=options)
-        if options['jsons']:
-            retrieve_jsons(table)
+        if options['jsons'] or options['jsons_rewrite']:
+            retrieve_jsons(table, rewrite)
 
 
 def get_table_dict(p):
@@ -106,20 +119,25 @@ def rewrite_excercises(table_dict, additional, options):
     return
 
 
-def retrieve_jsons(table_dict):
+def retrieve_jsons(table_dict, rewrite=False):
     iframes = []
     for n in range(len(table_dict['Lesson'])):
         iframes.append(table_dict['HTML'][n])
     for iframe in iframes:
-        get_json(get_id(iframe))
+        get_json(get_id(iframe), rewrite)
 
 
 def get_id(iframe):
     return iframe.split('?v=')[1].split('\"')[0]
 
 
-def get_json(id):
+def get_json(id, rewrite=False):
     file = Path('home/data/exercises/' + id + '.json')
+    if rewrite:
+        try:
+            os.remove(file)
+        except OSError:
+            pass
     if not file.is_file():
         url = 'https://learningapps.org/data?jsonp=1&id={0}&version=38'.format(
             id)
