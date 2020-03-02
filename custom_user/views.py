@@ -108,6 +108,7 @@ def add_log_message(request):
         user=request.user,
         type=type,
         message=message,
-        value=value
+        value=value,
+        session_key=request.session.session_key
     )
     return JsonResponse({'success': True})
