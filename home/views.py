@@ -205,6 +205,7 @@ def listen_request(request, test=False):
             user=session.user,
             message=str(lesson_number),
             type=2,
+            session_key=request.session.session_key
         ).save()
 
     if not lesson.need_payment or not session.user.must_pay:
