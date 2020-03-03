@@ -26,7 +26,8 @@ class ArticleLink(StructBlock):
 			context['title'] = value['page'].title
 			if value['page'].specific.reference_title:
 				context['title'] = value['page'].specific.reference_title
-			context['image_src'] = value['page'].specific.reference_image.file.url
+			if value['page'].specific.reference_image:
+				context['image_src'] = value['page'].specific.reference_image.file.url
 			context['description'] = value['page'].specific.subtitle
 			context['url'] = value['page'].url_path
 		if value['image']:
