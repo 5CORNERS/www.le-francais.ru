@@ -40,5 +40,5 @@ class ArticleLink(StructBlock):
 		return context
 
 	class Meta:
-		template = 'blocks/article_media_link.html'
+		template = 'blocks/article_media_li.html'
 
