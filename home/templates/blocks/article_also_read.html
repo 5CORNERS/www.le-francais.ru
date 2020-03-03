@@ -1,6 +1,14 @@
 {% load wagtailcore_tags %}
-<ul class="list-unstyled">
-    {% for media_link in self %}
-        {% include_block media_link %}
-    {% endfor %}
-</ul>
+<hr>
+<div class="row d-flex">
+    <div class="col-12">
+        <h4 class="mb-3 text-primary">Читайте также</h4>
+        <ul class="list-unstyled">
+            {% for media_link in self %}
+                {% include_block media_link %}
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<hr>
+
