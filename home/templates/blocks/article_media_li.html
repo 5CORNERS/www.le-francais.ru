@@ -1,9 +1,12 @@
-<li class="media mb-2">
-    <div style="height: 64px;width: 64px" class="mr-3 overflow-hidden">
-        <img src="{{ image_src }}" alt="">
-    </div>
-    <div class="media-body">
-        <h5 class="mt-0 mb-1">{{ title }}</h5>
-        {{ description }}
-    </div>
-</li>
+<a class="card-link d-flex text-reset" href="{{ url }}">
+    <li class="media mb-2">
+        <div style="max-height: {{ images_size }}px;max-width: {{ images_size }}px"
+             class="mr-3 overflow-hidden">
+            <img src="{{ image_src }}" alt="">
+        </div>
+        <div class="media-body">
+            <h5 class="mt-0 mb-1">{{ title }}</h5>
+            {{ description }}
+        </div>
+    </li>
+</a>
