@@ -30,5 +30,5 @@ class CollapseBlock(NestedCollapseBlock):
 		('paragraph', RichTextBlock()),
 		('image', ImageChooserBlock()),
 		('floating_image', FloatingImageBlock()),
-		# ('nested_collapse', NestedCollapseBlock()), TODO: Nested block doesn't work
+		('nested_collapse', NestedCollapseBlock()),
 	], required=True)

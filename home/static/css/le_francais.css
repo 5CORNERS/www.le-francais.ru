@@ -997,15 +997,17 @@ button.collapsed{
 }
 
 .collapse-arrow:after{
-    color: var(--primary);
+    color: var(--secondary);
     content: "\f062";
     font-family: 'Font Awesome 5 Free';
     font-weight: 900;
+    font-size: small;
 }
 
 .collapsed.collapse-arrow:after{
-    color: var(--primary);
+    color: var(--secondary);
     content: "\f063";
     font-family: 'Font Awesome 5 Free';
     font-weight: 900;
+    font-size: small;
 }
