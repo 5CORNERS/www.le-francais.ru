@@ -33,6 +33,7 @@ from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
 from home.blocks.AlsoReadBlock import AlsoReadBlock
 from tinkoff_merchant.signals import payment_confirm, payment_refund
+from .blocks.BootstrapCalloutBlock import BootstrapCalloutBlock
 from .blocks.CollapseBlock import CollapseBlock
 from .blocks.FloatingImageBlock import FloatingImageBlock
 from .pay54 import Pay34API
@@ -273,6 +274,7 @@ class PageWithSidebar(Page):
         ('read_also', AlsoReadBlock()),
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
     ], blank=True)
 
     def get_nav_root(self) -> Page:
@@ -329,6 +331,7 @@ class LessonPage(Page):
         ('post', PostBlock()),
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
     ], null=True, blank=True)
 
     body = StreamField([
@@ -342,6 +345,7 @@ class LessonPage(Page):
         ('post', PostBlock()),
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
     ], blank=True)
 
     dictionary = StreamField([
@@ -359,6 +363,7 @@ class LessonPage(Page):
         ('post', PostBlock()),
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
     ], null=True, blank=True)
 
     mail_archive = StreamField([
@@ -375,6 +380,7 @@ class LessonPage(Page):
         ('post', PostBlock()),
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
     ], null=True, blank=True)
 
     exercise = StreamField([
@@ -577,6 +583,7 @@ class ArticlePage(Page):
         ('read_also', AlsoReadBlock()),
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
     ], blank=True)
     without_sightbar = BooleanField(default=False)
 
