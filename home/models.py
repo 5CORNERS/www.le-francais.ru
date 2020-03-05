@@ -33,6 +33,7 @@ from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
 from home.blocks.AlsoReadBlock import AlsoReadBlock
 from tinkoff_merchant.signals import payment_confirm, payment_refund
+from .blocks.FloatImageBlock import FloatingImageBlock
 from .pay54 import Pay34API
 from .utils import message
 
@@ -268,7 +269,8 @@ class PageWithSidebar(Page):
          ),
         ('post', PostBlock()),
         ('choosen_reviews', ChoosenReviews()),
-        ('read_also', AlsoReadBlock())
+        ('read_also', AlsoReadBlock()),
+        ('floating_image', FloatingImageBlock()),
     ], blank=True)
 
     def get_nav_root(self) -> Page:
@@ -322,7 +324,8 @@ class LessonPage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
-        ('post', PostBlock())
+        ('post', PostBlock()),
+        ('floating_image', FloatingImageBlock()),
     ], null=True, blank=True)
 
     body = StreamField([
@@ -334,6 +337,7 @@ class LessonPage(Page):
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('post', PostBlock()),
+        ('floating_image', FloatingImageBlock()),
     ], blank=True)
 
     dictionary = StreamField([
@@ -348,7 +352,8 @@ class LessonPage(Page):
             ('word', RichTextBlock(required=True)),
             ('translation', RichTextBlock(required=True))
         ]), template="blocks/transcriptions.html")),
-        ('post', PostBlock())
+        ('post', PostBlock()),
+        ('floating_image', FloatingImageBlock()),
     ], null=True, blank=True)
 
     mail_archive = StreamField([
@@ -362,7 +367,8 @@ class LessonPage(Page):
             ('word', RichTextBlock(required=True)),
             ('translation', RichTextBlock(required=True))
         ]), template="blocks/transcriptions.html")),
-        ('post', PostBlock())
+        ('post', PostBlock()),
+        ('floating_image', FloatingImageBlock()),
     ], null=True, blank=True)
 
     exercise = StreamField([
@@ -382,6 +388,7 @@ class LessonPage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
+        ('floating_image', FloatingImageBlock()),
     ], verbose_name='Народный конспект', null=True, blank=True)
     other_tabs = StreamField([('tab', TabBlock())], blank=True)
     @property
@@ -560,7 +567,8 @@ class ArticlePage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
-        ('read_also', AlsoReadBlock())
+        ('read_also', AlsoReadBlock()),
+        ('floating_image', FloatingImageBlock()),
     ], blank=True)
     without_sightbar = BooleanField(default=False)
 

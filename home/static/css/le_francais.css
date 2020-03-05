@@ -962,3 +962,32 @@ button:disabled {
   cursor: not-allowed;
   pointer-events: all !important;
 }
+
+.leftimg {
+    float: left; /* Выравнивание по левому краю */
+    margin: 5px 15px 3px 0; /* Отступы вокруг картинки */
+}
+
+.rightimg {
+    float: right; /* Выравнивание по правому краю  */
+    margin: 5px 0 3px 10px; /* Отступы вокруг картинки */
+}
+
+.block_widescreen {
+    display: inherit;
+}
+
+.block_smallscreen {
+    display: none;
+}
+
+@media (max-width: 400px) {
+    .block_widescreen {
+        display: none;
+    }
+
+    .block_smallscreen {
+        display: inherit;
+        width: 100%;
+    }
+}
