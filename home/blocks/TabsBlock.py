@@ -4,7 +4,9 @@ from wagtail.core.blocks.stream_block import StreamBlock
 from wagtail.images.blocks import ImageChooserBlock
 
 from home.blocks.AudioBlock import AudioBlock
+from home.blocks.CollapseBlock import CollapseBlock
 from home.blocks.DocumentViewerBlock import DocumentViewerBlock
+from home.blocks.FloatingImageBlock import FloatingImageBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
 from home.blocks.ForumBlocks import TopicBlock, PostBlock
 
@@ -31,6 +33,8 @@ class TabBlock(blocks.StructBlock):
         ('video', VideoPlayerBlock()),
         ('topic', TopicBlock()),
         ('post', PostBlock()),
+        ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
     ])
 
     # class Meta:

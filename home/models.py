@@ -33,7 +33,8 @@ from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
 from home.blocks.AlsoReadBlock import AlsoReadBlock
 from tinkoff_merchant.signals import payment_confirm, payment_refund
-from .blocks.FloatImageBlock import FloatingImageBlock
+from .blocks.CollapseBlock import CollapseBlock
+from .blocks.FloatingImageBlock import FloatingImageBlock
 from .pay54 import Pay34API
 from .utils import message
 
@@ -271,6 +272,7 @@ class PageWithSidebar(Page):
         ('choosen_reviews', ChoosenReviews()),
         ('read_also', AlsoReadBlock()),
         ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
     ], blank=True)
 
     def get_nav_root(self) -> Page:
@@ -326,6 +328,7 @@ class LessonPage(Page):
         ('video', VideoPlayerBlock()),
         ('post', PostBlock()),
         ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
     ], null=True, blank=True)
 
     body = StreamField([
@@ -338,6 +341,7 @@ class LessonPage(Page):
         ('video', VideoPlayerBlock()),
         ('post', PostBlock()),
         ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
     ], blank=True)
 
     dictionary = StreamField([
@@ -354,6 +358,7 @@ class LessonPage(Page):
         ]), template="blocks/transcriptions.html")),
         ('post', PostBlock()),
         ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
     ], null=True, blank=True)
 
     mail_archive = StreamField([
@@ -369,6 +374,7 @@ class LessonPage(Page):
         ]), template="blocks/transcriptions.html")),
         ('post', PostBlock()),
         ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
     ], null=True, blank=True)
 
     exercise = StreamField([
@@ -389,6 +395,7 @@ class LessonPage(Page):
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
     ], verbose_name='Народный конспект', null=True, blank=True)
     other_tabs = StreamField([('tab', TabBlock())], blank=True)
     @property
@@ -521,7 +528,7 @@ LessonPage.content_panels = Page.content_panels + [
     StreamFieldPanel('exercise'),
     StreamFieldPanel('additional_exercise'),
     StreamFieldPanel('resume_populaire'),
-    StreamFieldPanel('other_tabs')
+    StreamFieldPanel('other_tabs'),
 ]
 LessonPage.promote_panels = LessonPage.promote_panels + [
     FieldPanel('menu_title'),
@@ -569,6 +576,7 @@ class ArticlePage(Page):
         ('video', VideoPlayerBlock()),
         ('read_also', AlsoReadBlock()),
         ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
     ], blank=True)
     without_sightbar = BooleanField(default=False)
 
