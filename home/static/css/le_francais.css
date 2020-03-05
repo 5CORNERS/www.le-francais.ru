@@ -1011,3 +1011,62 @@ button.collapsed{
     font-weight: 900;
     font-size: small;
 }
+
+
+
+	.bs-callout {
+		padding: 15px;
+		border: 1px solid #eee;
+		border-left-width: 5px;
+		border-radius: 4px;
+		margin: 10px 0 10px 0px;
+                .shadow-sm
+                .rounded
+	}
+
+	.bs-callout-warning {
+		border-left-color: var(--warning);
+	// background-color: #fefbed;
+	}
+	.bs-callout-warning h4 {
+		color: var(--warning);
+        background-color: #fefbedab;
+	}
+	.bs-callout-success {
+		border-left-color: var(--success);
+	// background-color: #efffe8;
+	}
+
+	.bs-callout-success h4 {
+		color: var(--success);
+	}
+
+	.bs-callout-secondary {
+		border-left-color: var(--secondary);
+		background-color: #e9ecef;
+	}
+	.bs-callout-secondary h4 {
+		color: var(--secondary);
+	}
+
+	.bs-callout-primary {
+		border-left-color: var(--primary);
+	}
+	.bs-callout-primary h4 {
+		color: var(--primary);
+	}
+
+    .bs-callout-info {
+        border-left-color: var(--info);
+    }
+    .bs-callout-info h4 {
+        color: var(--info)
+    }
+
+	.bs-callout.disabled {
+		opacity: 0.4;
+	}
+
+	.table-responsive.no_margin_p p {
+    margin: 0.2rem;
+	}
