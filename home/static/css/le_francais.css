@@ -991,3 +991,21 @@ button:disabled {
         width: 100%;
     }
 }
+
+button.collapsed{
+    content: "Свернуть";
+}
+
+.collapse-arrow:after{
+    color: var(--primary);
+    content: "\f062";
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+}
+
+.collapsed.collapse-arrow:after{
+    color: var(--primary);
+    content: "\f063";
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+}

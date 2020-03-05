@@ -1,0 +1,20 @@
+{% load wagtailcore_tags %}
+<p>
+    <button class="btn btn-light collapse-arrow collapsed"
+            type="button"
+            data-toggle="collapse"
+            data-target="#{{ id }}"
+            aria-expanded="false"
+            aria-controls="{{ id }}"
+            style="width: 100%;
+            user-select: auto;"
+    >{{ value.heading }}
+    </button>
+</p>
+<div class="border border-warning collapse"
+     id="{{ id }}"
+     style="padding: 10px; margin-bottom: 16px;"
+>{% for block in value.content %}
+    {% include_block block %}
+{% endfor %}
+</div>
