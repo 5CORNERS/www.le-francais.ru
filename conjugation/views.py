@@ -39,9 +39,10 @@ def get_polly_audio_link(request):
 	return JsonResponse(data={key: {'url': polly_audio.polly.url}})
 
 
-def search_verb(s, reflexive=None):
+def search_verbs(s, reflexive=None, return_first=False):
 	s_unaccent = unidecode(s)
 	verb = None
+	verbs = []
 	try:
 		verb = Verb.objects.get(infinitive_no_accents=s_unaccent)
 	except Verb.DoesNotExist:
@@ -55,24 +56,34 @@ def search_verb(s, reflexive=None):
 				form = searching_verb.find_form(s)
 				if form is not None:
 					verb = searching_verb
-					break
+					verbs.append((verb, form))
+					if return_first:
+						break
 			if verb is None:
 				raise Verb.DoesNotExist
 		except Verb.DoesNotExist:
-			return None
+			if return_first:
+				return None, None
+			else:
+				return [(None, None)]
 	except Verb.MultipleObjectsReturned:
 		try:
-			verb = Verb.objects.get(infinitive=s)
+			verbs.append((Verb.objects.get(infinitive=s), None))
 		except Verb.DoesNotExist:
-			verb = Verb.objects.filter(
-				infinitive_no_accents=s_unaccent).first()
-			if verb is None:
-				return None
-	if reflexive and (verb.can_reflexive or verb.reflexive_only):
-		return verb.reflexiveverb
+			verbs.append((Verb.objects.filter(
+				infinitive_no_accents=s_unaccent).first(), None))
+			if not verbs:
+				if return_first:
+					return None, None
+				else:
+					return [(None, None)]
+	for i, (v, f) in enumerate(verbs):
+		if reflexive and (v.can_reflexive or v.reflexive_only):
+			verbs[i] = v.reflexiveverb
+	if return_first:
+		return verbs[0]
 	else:
-		return verb
-
+		return verbs
 
 
 @csrf_exempt
@@ -88,7 +99,7 @@ def search(request):
 		search_string = search_string[3:]
 	else:
 		reflexive = False
-	verb = search_verb(search_string, reflexive)
+	verb, form = search_verbs(search_string, reflexive, return_first=True)
 	if verb is None:
 		return render(request, 'conjugation/verb_not_found.html',
 		              {'search_string': search_string})
@@ -158,17 +169,17 @@ def get_autocomplete_list(request):
 		verb_class = ReflexiveVerb
 	else:
 		verb_class = Verb
-	q_startswith = verb_class.objects.filter(infinitive_no_accents__startswith=term)
+	query_startswith = verb_class.objects.filter(infinitive_no_accents__startswith=term)
 
-	if q_startswith.__len__() == 0:
+	if query_startswith.__len__() == 0:
 		term = switch_keyboard_layout(_term)
-		q_startswith = verb_class.objects.filter(infinitive_no_accents__startswith=term)
+		query_startswith = verb_class.objects.filter(infinitive_no_accents__startswith=term)
 
-	if q_startswith.__len__() < list_len:
-		q_contains = verb_class.objects.filter(infinitive_no_accents__contains=term).difference(q_startswith)
-		q = list(q_startswith) + list(q_contains)
+	if query_startswith.__len__() < list_len:
+		query_contains = verb_class.objects.filter(infinitive_no_accents__contains=term).difference(query_startswith)
+		q = list(query_startswith) + list(query_contains)
 	else:
-		q = q_startswith
+		q = query_startswith
 
 	autocomplete_list = []
 	term_len = term.__len__()
@@ -181,6 +192,16 @@ def get_autocomplete_list(request):
 
 		autocomplete_list.append(
 			dict(url=v.get_absolute_url(), verb=v.infinitive, html=html))
+	if len([a for a in autocomplete_list if a['verb'].startswith(term)]) < 5:
+		form_verbs = search_verbs(term, False, False)
+		for v, f in form_verbs:
+			if f:
+				(mood, tense, form, n) = f
+				autocomplete_list.append(dict(
+					url=v.get_absolute_url(),
+					verb=v.infinitive,
+					html=f'{v.infinitive}({form})'
+				))
 	return JsonResponse(autocomplete_list, safe=False)
 
 
