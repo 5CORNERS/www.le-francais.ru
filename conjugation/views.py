@@ -200,7 +200,7 @@ def get_autocomplete_list(request):
 				autocomplete_list.append(dict(
 					url=v.get_absolute_url(),
 					verb=v.infinitive,
-					html=f'{v.infinitive}({form})'
+					html=f'{v.infinitive} <b>({form})</b>'
 				))
 	return JsonResponse(autocomplete_list, safe=False)
 
