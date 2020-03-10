@@ -1,6 +1,6 @@
 {% load wagtailcore_tags wagtailimages_tags home_wagtail_tags %}
 {% image value.image width-200 as tmp_image %}
-<div align="center" class="{{ value.float }} block_widescreen">
+<div class="{{ value.float }} block_widescreen">
     <figure class="figure" style="max-width: {{ value.width_large }}px;"><img src="{{ tmp_image.url }}" alt="{{ tmp_image.alt }}"
             class="figure-img"
             style="max-width: {{ value.width_large }}px;">
