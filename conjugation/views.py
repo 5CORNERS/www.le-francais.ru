@@ -45,6 +45,7 @@ def search_verbs(s, reflexive=None, return_first=False):
 	verbs = []
 	try:
 		verb = Verb.objects.get(infinitive_no_accents=s_unaccent)
+		verbs.append((verb, None))
 	except Verb.DoesNotExist:
 		try:
 			verbs_for_search = list(Verb.objects.raw(
