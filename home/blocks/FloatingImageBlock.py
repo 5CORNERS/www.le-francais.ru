@@ -13,7 +13,6 @@ class FloatingImageBlock(StructBlock):
 	])
 	content = StreamBlock(
 		[
-			('text', TextBlock()),
 			('html', RawHTMLBlock()),
 			('paragraph', RichTextBlock())
 		], required=True
