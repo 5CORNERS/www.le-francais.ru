@@ -1,10 +1,11 @@
 from wagtail.core.blocks import StreamBlock, StructBlock, RichTextBlock, \
-	RawHTMLBlock, TextBlock, ChoiceBlock, IntegerBlock
+	RawHTMLBlock, TextBlock, ChoiceBlock, IntegerBlock, CharBlock
 from wagtail.images.blocks import ImageChooserBlock
 
 
 class FloatingImageBlock(StructBlock):
 	image = ImageChooserBlock(required=True)
+	image_caption = CharBlock(required=False, help_text='Подпись под картинкой')
 	width_large = IntegerBlock(required=True, default=200)
 	width_small = IntegerBlock(required=True, default=200)
 	float = ChoiceBlock(choices=[
