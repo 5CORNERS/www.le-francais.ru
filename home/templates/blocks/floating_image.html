@@ -1,14 +1,23 @@
 {% load wagtailcore_tags wagtailimages_tags home_wagtail_tags %}
+{% image value.image width-200 as tmp_image %}
 <div align="center" class="{{ value.float }} block_widescreen">
-    {% do_image value.image value.lg_image_attr %}<br>
-    {% if value.image_caption %}<span style="font-weight:normal; font-size: xx-small;">{{ value.image_caption }}</span>{% endif %}
+    <figure class="figure" style="max-width: {{ value.width_large }}px;"><img src="{{ tmp_image.url }}" alt="{{ tmp_image.alt }}"
+            class="figure-img"
+            style="max-width: {{ value.width_large }}px;">
+        {% if value.image_caption %}
+            <figcaption
+                    class="figure-caption">{{ value.image_caption }}</figcaption>{% endif %}
+    </figure>
 </div>
 {% for block in value.content %}
     {% include_block block %}
 {% endfor %}
 <div align="center" class="block_smallscreen">
-    <p>
-        {% do_image value.image value.sm_image_attr %}
-        {% if value.image_caption %}<span style="font-weight:normal; font-size: xx-small;">{{ value.image_caption }}</span>{% endif %}
-    </p>
+    <figure class="figure"><img src="{{ tmp_image.url }}" alt="{{ tmp_image.alt }}"
+            class="figure-img"
+            style="max-width: {{ value.width_small }}px;">
+        {% if value.image_caption %}
+            <figcaption
+                    class="figure-caption">{{ value.image_caption }}</figcaption>{% endif %}
+    </figure>
 </div>
