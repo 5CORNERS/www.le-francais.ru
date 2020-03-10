@@ -1,6 +1,7 @@
 {% load wagtailcore_tags wagtailimages_tags home_wagtail_tags %}
 <div align="center" class="{{ value.float }} block_widescreen">
     {% do_image value.image value.lg_image_attr %}<br>
+    {% if value.caption %}<span style="font-weight:normal; font-size: xx-small;">{{ value.caption }}</span>{% endif %}
 </div>
 {% for block in value.content %}
     {% include_block block %}
@@ -8,5 +9,6 @@
 <div align="center" class="block_smallscreen">
     <p>
         {% do_image value.image value.sm_image_attr %}
+        {% if value.caption %}<span style="font-weight:normal; font-size: xx-small;">{{ value.caption }}</span>{% endif %}
     </p>
 </div>
