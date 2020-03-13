@@ -132,8 +132,8 @@ def verb_page(request, se, feminin, verb, homonym):
 def get_autocomplete_list(request):
 	list_len = 50
 	_term = request.GET['term'].lower()
-	term = unidecode(_term)
-	term = switch_keyboard_layout(term)
+	term = switch_keyboard_layout(_term)
+	term = unidecode(term)
 	reflexive = False
 	s = term
 	if term[:3] == 'se ' or term[:2] == "s'":
