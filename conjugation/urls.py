@@ -1,8 +1,10 @@
 from django.conf.urls import url
+from django.views.generic import TemplateView
 
 from . import views
 
 urlpatterns = [
+	url(r'site\.webmanifest', TemplateView.as_view(template_name='conjugation/site.webmanifest'), name='webmanifest'),
 	url(
 		r'verbs_autocomplete/.{0,50}?/$',
 		views.get_autocomplete_list,
