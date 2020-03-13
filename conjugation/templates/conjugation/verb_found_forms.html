@@ -24,7 +24,7 @@
             <tbody>
             {% for form in found_forms %}
                 <tr>
-                    <td><a href="{{ url }}">{{ form.infinitive }}</a></td>
+                    <td><a href="{{ form.url }}">{{ form.infinitive }}</a></td>
                     <td class="tenses">{{ form.conjugation|safe }}</td>
                     <td>{{ form.mood }} {{ form.tense }}</td>
                     <td>{{ form.person }}</td>
