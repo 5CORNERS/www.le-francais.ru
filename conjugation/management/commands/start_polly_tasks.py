@@ -1,7 +1,7 @@
 from django.core.management import BaseCommand
 
 from conjugation.models import Verb, PollyAudio
-from conjugation.views import Table, Mood, Tense
+from conjugation.table import Table, Mood, Tense
 from conjugation.polly import *
 
 
