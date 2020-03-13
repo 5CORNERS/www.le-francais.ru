@@ -1070,3 +1070,11 @@ button.collapsed{
 	.table-responsive.no_margin_p p {
     margin: 0.2rem;
 	}
+
+a.no-color {
+    color: inherit;
+}
+
+a.no-decoration {
+    text-decoration: inherit;
+}
