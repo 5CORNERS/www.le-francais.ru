@@ -18,13 +18,15 @@ var urlsToCache = [
     '/static/components/js/bootstrap-treeview.min.js',
     '/static/components/js/jquery.js',
 ];
+
 self.addEventListener('install', function (event) {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(function (cache) {
+        caches.delete(CACHE_NAME).then(function () {
+            caches.open(CACHE_NAME).then(function (cache) {
                 console.log('Opened cache');
                 return cache.addAll(urlsToCache);
             })
+        })
     );
 });
 
