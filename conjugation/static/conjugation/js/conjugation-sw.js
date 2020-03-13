@@ -1,6 +1,5 @@
 var CACHE_NAME = 'le_francais-conjugation-cache-v1';
 var urlsToCache = [
-    '/conjugaison/',
     '/static/conjugation/css/conjugation.min.css',
     '/static/conjugation/js/conjugation.min.js',
     '/static/conjugation/images/ui-anim_basic_16x16.gif',
