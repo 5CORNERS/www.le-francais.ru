@@ -9,7 +9,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {
-                navigator.serviceWorker.register('{% static 'conjugation/js/conjugation-sw.min.js' %}', {
+                navigator.serviceWorker.register('{% static 'conjugation/js/conjugation-sw.js' %}', {
                     'scope': '/conjugaison/'
                 }).then(function (registration) {
                     // Registration was successful
