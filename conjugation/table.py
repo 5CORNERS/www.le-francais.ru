@@ -47,7 +47,7 @@ class Table:
 			if mood.mood_name == mood_name:
 				for tense in mood.tenses:
 					# FIXME: names in formulas and base should be the same
-					if tense.tense_name == tense_name or f'{mood.mood_name}-{tense.tense_name}' == tense_name or tense_name.split('-')[-1] == tense.tense_name:
+					if tense.tense_name == tense_name or f'{mood.mood_name}-{tense.tense_name}' == tense_name or tense.tense_name in tense_name.split('-'):
 						person = tense.persons[person]
 						return f'{person.part_0}{person.forms[form]}{person.part_2}'
 		return None
