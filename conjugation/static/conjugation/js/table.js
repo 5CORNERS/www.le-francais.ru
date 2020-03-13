@@ -55,13 +55,33 @@ function pollyListen(icon, key) {
 	}
 }
 
+function see_less() {
+	$.each($(".in_short_list"), function (i, v) {
+		v.style.display = "none";
+	});
+	$("#more_tab").removeClass("active");
+	$("#less_tab").addClass("active");
+	$("#more_tab>a").html('Полная').removeClass("active");
+	$("#less_tab>a").html('Сокращённая версия').addClass("active");
+	window.localStorage.setItem('long_list', 'false');
+}
+
+function see_more() {
+	$.each($(".in_short_list"), function (i, v) {
+		v.style.display = "block";
+	});
+	$("#more_tab").addClass("active");
+	$("#more_tab>a").html('Полная версия').addClass("active");
+	$("#less_tab").removeClass("active");
+	$("#less_tab>a").html('Сокращённая').removeClass("active");
+	window.localStorage.setItem('long_list', 'true');
+}
+
+
 $(document).ready(function () {
-	/*setTimeout(function () {
-		let blue_arrow = $(".blue_arrow");
-		blue_arrow.each(function () {
-			this.style.display = "none";
-		})
-	}, 5000);*/
+	if (window.localStorage.getItem('long_list') === 'true') {
+		see_more()
+	}
 	$('.play-pause-icon').each(function () {
 		$(this).addClass(NORMAL_CLASS);
 		this.addEventListener('click', function () {
