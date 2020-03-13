@@ -54,9 +54,8 @@ self.addEventListener('fetch', function (event) {
                             response.status !== 200 ||
                             response.type !== 'basic' ||
                             event.request.method !== 'GET' ||
-                            event.request.url.includes('/conjugation/') &&
-                            event.request.url.includes('/conjugaison/') &&
-                            !event.request.url.includes('/static/')
+                            event.request.url.includes('/api/') ||
+                            (event.request.url.includes('/conjugation/') || event.request.url.includes('/conjugaison/')) && !event.request.url.includes('/static/')
                         ) {
                             return response;
                         }
