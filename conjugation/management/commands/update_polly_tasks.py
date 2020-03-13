@@ -2,7 +2,7 @@ from django.core.management import BaseCommand
 
 from conjugation.models import PollyAudio
 from conjugation.polly import PollyAPI
-from conjugation.views import Tense
+from conjugation.table import Tense
 from conjugation.polly import COMPLETED, FAILED
 
 

@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from conjugation.models import Template as T, Verb as V
-from conjugation.views import Person
+from conjugation.table import Person
 import re
 
 RED_ENDINGS = {

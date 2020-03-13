@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from conjugation.models import Verb
-from conjugation.views import Table
+from conjugation.table import Table
 
 
 class Command(BaseCommand):
