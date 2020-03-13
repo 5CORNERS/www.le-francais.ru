@@ -6,6 +6,21 @@
     <script src="{% static "lib/jquery-ui-1.12.1.custom/jquery-ui.min.js" %}"></script>
     <script src="{% static "conjugation/js/conjugation.js" %}"></script>
     <link rel="stylesheet" href="{% static 'conjugation/css/conjugation.min.css' %}">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('{% static 'conjugation/js/conjugation-sw.min.js' %}', {
+                    'scope': '/conjugaison/'
+                }).then(function (registration) {
+                    // Registration was successful
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function (err) {
+                    // registration failed :(
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
 {% endblock %}
 
 {% block title %}Спряжение французских глаголов — от создателей
