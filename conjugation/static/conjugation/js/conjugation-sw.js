@@ -44,7 +44,8 @@ self.addEventListener('fetch', function (event) {
                             response.type !== 'basic' ||
                             event.request.method !== 'GET' ||
                             event.request.url.includes('/api/') &&
-                            !event.request.url.includes('/static/')
+                            !event.request.url.includes('/static/') &&
+                            !event.request.url.includes('/verbs_autocomplete/')
                         ) {
                             return response;
                         }
