@@ -1,5 +1,5 @@
 (function() {
-	['app.638a14d5.js', 'chunk-vendors.61a3befe.js'].forEach(function (src) {
+	['app.6e2061fb.js', 'chunk-vendors.61a3befe.js'].forEach(function (src) {
 		let script = document.createElement("script");
 		script.setAttribute("src", `/static/dictionary/js/${src}`);
 		script.setAttribute("type", "text/javascript");
