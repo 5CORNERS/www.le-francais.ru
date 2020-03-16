@@ -82,6 +82,25 @@ $(document).ready(function () {
 	if (window.localStorage.getItem('long_list') === 'true') {
 		see_more()
 	}
+
+	// TODO: change form on hashchange
+	let url = location.href.replace(/\/$/, "");
+	if(location.hash){
+		const hash = url.split('#');
+		$(`.verb-form-pill a[data-target=".${hash[1]}"]`).tab('show');
+	}
+
+	$('.verb-form-pill a[data-toggle="pill"]').on("click", function () {
+		let newUrl;
+		const hash = $(this).attr('data-target').replace(/\./, '#');
+		if (hash === '#form0') {
+			newUrl = url.split('#')[0]
+		}else{
+			newUrl = url.split('#')[0] + hash
+		}
+		history.replaceState(null, null, newUrl)
+	});
+
 	$('.play-pause-icon').each(function () {
 		$(this).addClass(NORMAL_CLASS);
 		this.addEventListener('click', function () {

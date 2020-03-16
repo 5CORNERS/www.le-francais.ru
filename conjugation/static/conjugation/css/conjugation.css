@@ -143,3 +143,9 @@ h4 {
     padding-top: 5px;
     border-top: 1px solid #dee2e6;
 }
+
+.ui-menu-item.verb-autocomplete-item {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
