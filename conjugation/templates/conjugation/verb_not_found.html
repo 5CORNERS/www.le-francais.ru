@@ -11,16 +11,21 @@
 {% endblock %}
 
 {% block first_row_content %}
-    <p class="h3">Мы не нашли глагола «{{ search_string }}» по точному совпадению. :(</p>
-    {% if autocomplete_list %}<p>Вот список глаголов, которые начинаются с этих букв или содержат их
+
+    {% if autocomplete_list %}
+        <p>Мы не нашли глагола «{{ search_string }}» по точному совпадению. :(</p>
+        <p>Вот список глаголов, которые начинаются с этих букв или содержат их
         в середине или же в одной из форм спряжения — возможно, то, что Вы
         ищете, окажется среди них (если список большой, он ограничен
         пятьюдесятью записями наиболее частозапрашиваемых глаголов).</p>
-    <ul class="">
+        <ul class="">
         {% for autocomplete_item in autocomplete_list %}
             <li class="{% if autocomplete_item.isInfinitive %}is-infinitive{% else %}is-not-infinitive{% endif %}">
                 <a class="no-color ui-menu-item-wrapper" href="{{ autocomplete_item.url }}">{{ autocomplete_item.html|safe }}</a>
             </li>
         {% endfor %}
-    </ul>{% endif %}
+    </ul>{% else %}
+        <p>Мы не нашли глагол «{{ search_string }}» ни по точному, ни по
+            частичному совпадению. Похоже, здесь какая-то опечатка.</p>
+    {% endif %}
 {% endblock %}
