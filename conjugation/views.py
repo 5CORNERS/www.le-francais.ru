@@ -58,13 +58,17 @@ def search(request):
 			conjugation = Table(
 				verb, 0, reflexive).get_conjugation(
 				form[1], form[2], form[3], form[4] or 0)
+			if form[2] in PERSONS.keys():
+				persons_keys = PERSONS[form[2]]
+			else:
+				persons_keys = PERSONS['other']
 			found_forms.append(dict(
 				url=verb.get_absolute_url(),
 				infinitive=verb.infinitive,
 				conjugation=conjugation,
 				mood=next((mood[1] for mood in MOODS if form[1] == mood[0]), ''),
 				tense=next((tense[1] for tense in TENSES if form[2] == tense[0]), ''),
-				person=next((person[1] for person in PERSONS if form[3] == person[0]), '')
+				person=next((person[1] for person in persons_keys if form[3] == person[0]), '')
 			))
 	if len(found_forms) > 1:
 		return render(request, 'conjugation/verb_found_forms.html',
