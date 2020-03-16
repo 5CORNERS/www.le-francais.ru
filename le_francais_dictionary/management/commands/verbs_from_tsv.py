@@ -46,10 +46,10 @@ class Command(BaseCommand):
 					packet.name = packet_name
 					packet.save()
 				form_to_show:str = row['CONJUGATION']
-				if form_to_show.find('il') == 0:
-					form_to_show ='il (elle, on)' + form_to_show[2:]
-				elif form_to_show.find('ils') == 0:
+				if form_to_show.find('ils') == 0:
 					form_to_show = 'ils (elles)' + form_to_show[3:]
+				elif form_to_show.find('il') == 0:
+					form_to_show ='il (elle, on)' + form_to_show[2:]
 				verb_form, verb_form_created = VerbForm.objects.get_or_create(
 					id=int(row['ID']),
 				)

@@ -17,7 +17,8 @@ oauth2client==4.0.0
 django-allauth==0.37.0
 social-auth-core
 social-auth-app-django
-
+mutagen
+pysftp
 markdown==2.6.11
 urllib3
 pymdown-extensions==5.0.0
@@ -41,6 +42,8 @@ django-sass-processor
 
 django-storages
 boto3
+google-cloud-texttospeech
+eyed3
 django-bulk-update
 django-autocomplete-light==3.2.10
 django-simple-captcha
@@ -49,6 +52,7 @@ django-postman==3.5.1
 django-crispy-forms
 django-registration
 django-htmlmin
+pydub
 brotlipy
 django-inline-svg
 Pillow

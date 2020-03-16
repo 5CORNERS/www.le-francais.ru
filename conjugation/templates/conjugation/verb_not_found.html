@@ -1,116 +1,26 @@
-{% extends 'base.html' %}
+{% extends 'conjugation/_base.html' %}
 {% load static conjugation_tags%}
-{% block extra_head %}
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+{% block title %}Спряжение французских глаголов — глагол «{{ search_string }}» не найден{% endblock %}
+
+{% block head_advertisments %}
+    {% conjugation_advertisement_head "lf_fr_conj_rsb_01" %}
 {% endblock %}
-{% block extra_css %}
-    <style>
-        .col-fixed-210{
-            width: 210px;
-            height: 100%;
-            position: absolute;
-            z-index: 1;
-        }
-        .col-offset-210{
-            padding-left: 225px;
-            z-index: 0;
-        }
-        .row {
-            margin-bottom: 0.5em;
-        }
-
-{#        .row-eq-height {#}
-{#            display: -webkit-box;#}
-{#            display: -webkit-flex;#}
-{#            display: -ms-flexbox;#}
-{#            display: flex;#}
-{#        }#}
-
-        .tenses i {
-            font-style: normal;
-            color: #337ab7;
-            font-weight: bold;
-        {#            font-weight: bold#}
-        }
-
-        .tenses b {
-            color: #d83131;
-            font-weight: bold
-        }
-
-        .tab-content > .active {
-            display: inline;
-        }
-
-        .tenses .block {
-            border-color: #ddd;
-        }
-
-        .tenses .block {
-            margin: 0 0 20px 0;
-            padding: 10px;
-            border-width: 1px;
-            border-style: solid;
-            border-radius: 4px;
-        }
-        .person {
-            font-size: 0.9em;
-        }
-    </style>
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <style>
-        .ui-autocomplete-loading {
-            background: white url("{% static 'images/ui-anim_basic_16x16.gif' %}") right center no-repeat;
-        }
-    </style>
-{% endblock %}
-{% block extra_js %}
-    <script>
-        {% comment %}$(function () {
-            $("#verb").autocomplete({
-                source: "/conjugation/verbs_autocomplete/",
-                minLength: 2
-            });
-        });{% endcomment %}
-        $("#search-verb")["autocomplete"]({
-            source: "{% url 'conjugation:autocomplete' %}",
-            minLength: 1,
-            focus: function (event, ui) {
-                $("#search-verb").val(ui.item["verb"]);
-                return false;
-            },
-            select: function (event, ui) {
-                event.preventDefault();
-                window.location.href = ui.item['url'];
-            }
-        })["data"]("ui-autocomplete")["_renderItem"] = function (a, b) {
-            return $("<li>")["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
-        };
-    </script>
+{% block first_row_sidebar %}
+    {% conjugation_advertisement_body "lf_fr_conj_rsb_01" %}
 {% endblock %}
 
-{% block title %}Спряжение французских глаголов — глагол {{ search_string }} не найден{% endblock %}
-
-{% block content %}
-    <div class="container">
-    <div class="row first_row">
-    <div class="col-md-12 col-lg-12 main">
-        <div class="row mb-3">
-            <div class="col-12">
-                {% include 'conjugation/verb_form.html' %}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12">
-                <p class="h3">Не могу найти глагол {{ search_string }}</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12">
-                {% include 'conjugation/feedback.html' %}
-            </div>
-        </div>
-    </div>
-    </div>
-    </div>
+{% block first_row_content %}
+    <p class="h3">Мы не нашли глагола «{{ search_string }}» по точному совпадению. :(</p>
+    {% if autocomplete_list %}<p>Вот список глаголов, которые начинаются с этих букв или содержат их
+        в середине или же в одной из форм спряжения — возможно, то, что Вы
+        ищете, окажется среди них (если список большой, он ограничен
+        пятьюдесятью записями наиболее частозапрашиваемых глаголов).</p>
+    <ul class="">
+        {% for autocomplete_item in autocomplete_list %}
+            <li class="{% if autocomplete_item.isInfinitive %}is-infinitive{% else %}is-not-infinitive{% endif %}">
+                <a class="no-color ui-menu-item-wrapper" href="{{ autocomplete_item.url }}">{{ autocomplete_item.html|safe }}</a>
+            </li>
+        {% endfor %}
+    </ul>{% endif %}
 {% endblock %}

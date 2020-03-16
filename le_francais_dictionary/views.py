@@ -468,3 +468,25 @@ def get_repetition_words_count(request):
         'count': words.count()
     }
     return JsonResponse(result, status=200)
+
+@csrf_exempt
+def get_filters(request):
+    user = request.user
+    try:
+        userpacket= UserStandalonePacket.objects.get(user=user)
+    except UserStandalonePacket.DoesNotExist:
+        return HttpResponseNotFound()
+    if userpacket.filters is None:
+        return HttpResponseNotFound()
+    return JsonResponse(
+        userpacket.filters, status=200
+    )
+
+@csrf_exempt
+def save_filters(request):
+    data = json.loads(request.body)
+    filters = data['filters']
+    userpacket, created = UserStandalonePacket.objects.get_or_create(user=request.user)
+    userpacket.filters = filters
+    userpacket.save()
+    return HttpResponse(status=200)

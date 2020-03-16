@@ -10,7 +10,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseNotFound
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.template.loader import render_to_string
@@ -27,7 +27,7 @@ from wagtail.contrib.sitemaps.sitemap_generator import \
     Sitemap as WagtailSitemap
 from wagtail.core.models import Page
 
-from custom_user.models import LogMessage
+from custom_user.models import LogMessage, User
 from home.models import PageWithSidebar, LessonPage, ArticlePage, BackUrls, \
     DefaultPage, IndexPage
 from home.src.site_import import import_content
@@ -203,7 +203,9 @@ def listen_request(request, test=False):
     if request.POST.get('download'):
         LogMessage(
             user=session.user,
-            message='Download Lesson ' + lesson_number
+            message=str(lesson_number),
+            type=2,
+            session_key=request.session.session_key
         ).save()
 
     if not lesson.need_payment or not session.user.must_pay:
@@ -337,20 +339,35 @@ class ActivateLesson(View):
 def activation_log(request):
     all = request.GET.get('all', '')
     cups = request.GET.get('cups', '')
+    tickets = request.GET.get('tickets', '')
+    username = request.GET.get('user', '')
+    email = request.GET.get('email', '')
     start = -100
     if all == 'true':
         start = 0
-    need_payment = True
-    if cups:
-        need_payment = False
+    if not cups and not tickets:
+        return HttpResponseRedirect(
+            reverse('activation_log') + '?cups=true&tickets=true&all=true')
+    user = None
+    try:
+        if username:
+            user = User.objects.get(username=username)
+        elif email:
+            user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return HttpResponseNotFound()
+    query = UserLesson.objects.select_related('user').select_related(
+        'lesson').filter(remains__isnull=False, user__is_staff=False).order_by('date')
+    if cups and not tickets:
+        query = query.filter(lesson__need_payment=False)
+    elif not cups and tickets:
+        query = query.filter(lesson__need_payment=True)
+    if user:
+        query = query.filter(user=user)
     return render(
         request,
         template_name='home/activate_log.html',
-        context={'activations': list(
-            UserLesson.objects.select_related('user').select_related(
-                'lesson').filter(remains__isnull=False, user__is_staff=False,
-                                 lesson__need_payment=need_payment).order_by(
-                'date'))[start:]}
+        context={'activations': list(query)[start:]}
     )
 
 

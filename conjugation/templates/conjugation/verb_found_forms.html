@@ -1,0 +1,41 @@
+{% extends 'conjugation/_base.html' %}
+{% load conjugation_tags %}
+
+{% block head_advertisments %}
+    {% conjugation_advertisement_head "lf_fr_conj_rsb_01" %}
+{% endblock %}
+
+{% block page_title %}{% endblock %}
+
+{% block first_row_content %}
+    <p>
+        Мы не нашли глагола «{{ search_string }}» в форме инфинитива, но он есть в форме спряжения — возможно, вы искали это:
+    </p>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+            <tr>
+                <td>Инфинитив</td>
+                <td>Спряжение</td>
+                <td>Время</td>
+                <td>Лицо, число</td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for form in found_forms %}
+                <tr>
+                    <td><a href="{{ form.url }}">{{ form.infinitive }}</a></td>
+                    <td class="tenses">{{ form.conjugation|safe }}</td>
+                    <td>{{ form.mood }} {{ form.tense }}</td>
+                    <td>{{ form.person }}</td>
+                </tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block first_row_sidebar %}
+    {% conjugation_advertisement_body "lf_fr_conj_rsb_01" %}
+{% endblock %}
+
+{% block second_row %}{% comment %}Leave second row empty{% endcomment %}{% endblock %}

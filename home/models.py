@@ -5,7 +5,7 @@ import datetime
 from django.conf import settings
 from django.db.models import CharField, SmallIntegerField, OneToOneField, \
     IntegerField, BooleanField, SET_NULL, ForeignKey, URLField, \
-    Model
+    Model, ImageField
 from django.db.models.fields import TextField, DateTimeField
 from django.dispatch import receiver
 from django.forms import CheckboxInput
@@ -20,6 +20,7 @@ from wagtail.core.blocks import RichTextBlock, RawHTMLBlock, ListBlock, \
 from wagtail.core.fields import StreamField
 from wagtail.core.models import Page, Orderable
 from wagtail.images.blocks import ImageChooserBlock
+from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.snippets.models import register_snippet
 
 from custom_user.models import User
@@ -30,7 +31,11 @@ from home.blocks.ForumBlocks import PostBlock
 from home.blocks.Reviews import ChoosenReviews
 from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
+from home.blocks.AlsoReadBlock import AlsoReadBlock
 from tinkoff_merchant.signals import payment_confirm, payment_refund
+from .blocks.BootstrapCalloutBlock import BootstrapCalloutBlock
+from .blocks.CollapseBlock import CollapseBlock
+from .blocks.FloatingImageBlock import FloatingImageBlock
 from .pay54 import Pay34API
 from .utils import message
 
@@ -265,7 +270,11 @@ class PageWithSidebar(Page):
         ]), template="blocks/transcriptions.html")
          ),
         ('post', PostBlock()),
-        ('choosen_reviews', ChoosenReviews())
+        ('choosen_reviews', ChoosenReviews()),
+        ('read_also', AlsoReadBlock()),
+        ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
     ], blank=True)
 
     def get_nav_root(self) -> Page:
@@ -319,7 +328,10 @@ class LessonPage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
-        ('post', PostBlock())
+        ('post', PostBlock()),
+        ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
     ], null=True, blank=True)
 
     body = StreamField([
@@ -331,6 +343,9 @@ class LessonPage(Page):
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('post', PostBlock()),
+        ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
     ], blank=True)
 
     dictionary = StreamField([
@@ -345,7 +360,10 @@ class LessonPage(Page):
             ('word', RichTextBlock(required=True)),
             ('translation', RichTextBlock(required=True))
         ]), template="blocks/transcriptions.html")),
-        ('post', PostBlock())
+        ('post', PostBlock()),
+        ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
     ], null=True, blank=True)
 
     mail_archive = StreamField([
@@ -359,7 +377,10 @@ class LessonPage(Page):
             ('word', RichTextBlock(required=True)),
             ('translation', RichTextBlock(required=True))
         ]), template="blocks/transcriptions.html")),
-        ('post', PostBlock())
+        ('post', PostBlock()),
+        ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
     ], null=True, blank=True)
 
     exercise = StreamField([
@@ -379,6 +400,8 @@ class LessonPage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
+        ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
     ], verbose_name='Народный конспект', null=True, blank=True)
     other_tabs = StreamField([('tab', TabBlock())], blank=True)
     @property
@@ -511,7 +534,7 @@ LessonPage.content_panels = Page.content_panels + [
     StreamFieldPanel('exercise'),
     StreamFieldPanel('additional_exercise'),
     StreamFieldPanel('resume_populaire'),
-    StreamFieldPanel('other_tabs')
+    StreamFieldPanel('other_tabs'),
 ]
 LessonPage.promote_panels = LessonPage.promote_panels + [
     FieldPanel('menu_title'),
@@ -542,6 +565,13 @@ class ArticlePage(Page):
     is_selectable = BooleanField(default=True)
     reference_title = TextField(null=True, blank=True)
     subtitle = TextField(null=True, blank=True)
+    reference_image = ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        blank=True,
+        on_delete=SET_NULL,
+        related_name='+'
+    )
     body = StreamField([
         ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
@@ -550,6 +580,10 @@ class ArticlePage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
+        ('read_also', AlsoReadBlock()),
+        ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
     ], blank=True)
     without_sightbar = BooleanField(default=False)
 
@@ -568,6 +602,7 @@ class ArticlePage(Page):
 ArticlePage.content_panels = ArticlePage.content_panels + [
     FieldPanel('without_sightbar'),
     FieldPanel('reference_title'),
+    ImageChooserPanel('reference_image'),
     FieldPanel('subtitle'),
     StreamFieldPanel('body'),
 ]

@@ -1,10 +1,14 @@
 import re
+from typing import List, Any, Tuple
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.urls import reverse
 from unidecode import unidecode
+
+from .consts import MOODS, TENSES
 from .polly import TEXT_TYPES, LANGUAGE_CODES, OUTPUT_FORMATS, SAMPLE_RATES, VOICE_IDS, TASK_STATUSES, PARAMS
+from .utils import index_tuple
 
 VOWELS_LIST = ['a', 'ê', 'é', 'è', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
 
@@ -264,10 +268,38 @@ class Verb(models.Model):
 
 	def find_form(self, f):
 		f = unidecode(f)
-		for mood, tense, form, n in self:
+		for mood, tense, person, form, n in self:
 			if form and unidecode(form) == f:
 				return mood, tense, form, n
 		return None
+
+	def find_forms(self, s, exact=False) -> list:
+		"""
+		Finds all forms which starts with the search string and returns
+		list of tuples containing form itself and names of the mood and
+		tense of the form
+		:param exact: if True find only exact match forms
+		:type s: str
+		:param s: search string
+		:rtype: List[Tuple[str, str, str, int, int]]
+		:return: list of tuples (form, mood, tense, person, n)
+			WHERE
+			str form is founded form of the verb
+			str mood is name of the mood
+			str tense is name of the tense
+			int person is name of the person
+			int n is number of form or None
+		"""
+		forms: List[Tuple[str, str, str, str, int]] = []
+		for mood, tense, person, form, n in self:
+			if form and ((
+				not exact and unidecode(form).startswith(unidecode(s))) or (
+				exact and unidecode(form) == unidecode(s)
+			)):
+				forms.append((form, mood, tense, person, n))
+		forms.sort(key=lambda x: (
+		index_tuple(MOODS, x[1]), index_tuple(TENSES, x[2])))
+		return forms
 
 
 	def get_all(self):
@@ -310,9 +342,9 @@ class Verb(models.Model):
 			for i, person in enumerate(persons):
 				if isinstance(person, list):
 					for j, form in enumerate(person):
-						iter_list.append((mood, tense, form, j))
+						iter_list.append((mood, tense, i, form, j))
 				else:
-					iter_list.append((mood, tense, person, None))
+					iter_list.append((mood, tense, i, person, None))
 		return iter(iter_list)
 
 

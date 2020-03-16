@@ -1,0 +1,6 @@
+{% load wagtailcore_tags %}
+<ul class="list-unstyled">
+    {% for media_link in self %}
+        {% include_block media_link %}
+    {% endfor %}
+</ul>

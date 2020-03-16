@@ -86,7 +86,7 @@ img {
     height: auto;
 }
 
-iframe {
+iframe:not([width]) {
     width: 100%;
     max-width: 100%;
 }
@@ -260,9 +260,9 @@ body {
 }
 
 .breadcrumb > li + li:before {
-    padding: 0 5px;
-    color: #707070;
-    content: ">\00a0";
+    padding: 0 5px !important;
+    color: #707070 !important;
+    content: ">\00a0" !important;
 }
 
 .breadcrumb > li {
@@ -956,4 +956,125 @@ details.no-details:not([open]) summary {
 
 .h1-small {
     font-size: 1.725rem;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  pointer-events: all !important;
+}
+
+.leftimg {
+    float: left; /* Выравнивание по левому краю */
+    margin: 5px 15px 3px 0; /* Отступы вокруг картинки */
+}
+
+.rightimg {
+    float: right; /* Выравнивание по правому краю  */
+    margin: 5px 0 3px 10px; /* Отступы вокруг картинки */
+}
+
+.block_widescreen {
+    display: inherit;
+}
+
+.block_smallscreen {
+    display: none;
+}
+
+@media (max-width: 400px) {
+    .block_widescreen {
+        display: none;
+    }
+
+    .block_smallscreen {
+        display: inherit;
+        width: 100%;
+    }
+}
+
+button.collapsed{
+    content: "Свернуть";
+}
+
+.collapse-arrow:after{
+    color: var(--secondary);
+    content: "\f062";
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    font-size: small;
+}
+
+.collapsed.collapse-arrow:after{
+    color: var(--secondary);
+    content: "\f063";
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    font-size: small;
+}
+
+
+
+	.bs-callout {
+		padding: 15px;
+		border: 1px solid #eee;
+		border-left-width: 5px;
+		border-radius: 4px;
+		margin: 10px 0 10px 0px;
+                .shadow-sm
+                .rounded
+	}
+
+	.bs-callout-warning {
+		border-left-color: var(--warning);
+	// background-color: #fefbed;
+	}
+	.bs-callout-warning h4 {
+		color: var(--warning);
+        background-color: #fefbedab;
+	}
+	.bs-callout-success {
+		border-left-color: var(--success);
+	// background-color: #efffe8;
+	}
+
+	.bs-callout-success h4 {
+		color: var(--success);
+	}
+
+	.bs-callout-secondary {
+		border-left-color: var(--secondary);
+		background-color: #e9ecef;
+	}
+	.bs-callout-secondary h4 {
+		color: var(--secondary);
+	}
+
+	.bs-callout-primary {
+		border-left-color: var(--primary);
+	}
+	.bs-callout-primary h4 {
+		color: var(--primary);
+	}
+
+    .bs-callout-info {
+        border-left-color: var(--info);
+    }
+    .bs-callout-info h4 {
+        color: var(--info)
+    }
+
+	.bs-callout.disabled {
+		opacity: 0.4;
+	}
+
+	.table-responsive.no_margin_p p {
+    margin: 0.2rem;
+	}
+
+a.no-color {
+    color: inherit;
+}
+
+a.no-decoration {
+    text-decoration: inherit;
 }

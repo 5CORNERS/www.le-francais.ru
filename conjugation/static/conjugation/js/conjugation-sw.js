@@ -1,6 +1,5 @@
 var CACHE_NAME = 'le_francais-conjugation-cache-v1';
 var urlsToCache = [
-    '/conjugaison/',
     '/static/conjugation/css/conjugation.min.css',
     '/static/conjugation/js/conjugation.min.js',
     '/static/conjugation/images/ui-anim_basic_16x16.gif',
@@ -18,15 +17,18 @@ var urlsToCache = [
     '/static/components/js/bootstrap-treeview.min.js',
     '/static/components/js/jquery.js',
 ];
+
 self.addEventListener('install', function (event) {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(function (cache) {
+        caches.delete(CACHE_NAME).then(function () {
+            caches.open(CACHE_NAME).then(function (cache) {
                 console.log('Opened cache');
                 return cache.addAll(urlsToCache);
             })
+        })
     );
 });
+
 
 self.addEventListener('fetch', function (event) {
     event.respondWith(
@@ -41,9 +43,9 @@ self.addEventListener('fetch', function (event) {
                             response.status !== 200 ||
                             response.type !== 'basic' ||
                             event.request.method !== 'GET' ||
-                            !event.request.url.includes('/conjugation/') &&
-                            !event.request.url.includes('/conjugaison/') &&
-                            !event.request.url.includes('/static/')
+                            event.request.url.includes('/api/') ||
+                            !event.request.url.includes('/static/') &&
+                            !event.request.url.includes('/verbs_autocomplete/')
                         ) {
                             return response;
                         }

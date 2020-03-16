@@ -98,11 +98,17 @@ def add_log_message(request):
     data = json.loads(request.body)
     message = data['message']
     type = data['type']
+    if 'value' in data.keys():
+        value = data['value']
+    else:
+        value = None
     if not type in [choice[0] for choice in LogMessage.TYPES_CHOICES]:
         return HttpResponseBadRequest
     LogMessage.objects.create(
         user=request.user,
         type=type,
-        message=message
+        message=message,
+        value=value,
+        session_key=request.session.session_key
     )
     return JsonResponse({'success': True})

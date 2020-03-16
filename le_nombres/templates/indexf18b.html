@@ -133,7 +133,7 @@ les nombres</a></span>
     {% if request|is_pc %}
         <!--startDefaultVersion-->
 
-        <audio id="player" autoplay>
+        <audio id="player">
             <source src="{% static 'snd/numbers.m4a' %}"/>
             <source src="{% static 'snd/numbers.ogg' %}" type="audio/ogg"/>
             Whoops, we thought your browser supported HTML5 audio and it doesn't. <a
@@ -144,7 +144,7 @@ les nombres</a></span>
     {% else %}
         <!--startMobileVersion-->
 
-        <audio id="player" autoplay="true">
+        <audio id="player">
             <source src="{% static 'snd/numbers.m4a' %}" type="audio/mp4">
         </audio>
         <button class="centered" onclick="launch()" id="launch_button">Begin!</button>
