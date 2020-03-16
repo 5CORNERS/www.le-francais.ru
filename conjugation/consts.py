@@ -85,14 +85,35 @@ TENSES = [
 	('present-participle', 'présent'),
 	('past-participle', 'passé'),
 ]
-PERSONS = [
-    (0, 'форма \u00abя\u00bb'),
-    (1, 'форма \u00abты\u00bb'),
-    (2, 'форма \u00abон\u00bb'),
-    (3, 'форма \u00abмы\u00bb'),
-    (4, 'форма \u00abвы\u00bb'),
-    (5, 'форма \u00abони\u00bb'),
-]
+
+PERSONS = {
+    'infinitive-present':[
+        (0, '—')
+    ],
+    'imperative-present': [
+        (0, 'форма \u00abты\u00bb'),
+        (1, 'форма \u00abмы\u00bb'),
+        (2, 'форма \u00abвы\u00bb'),
+    ],
+    'past-participle': [
+        (0, 'м. р., ед. ч.'),
+        (1, 'м. р., мн. ч.'),
+        (2, 'ж. р., ед. ч.'),
+        (3, 'ж. р., мн. ч.'),
+    ],
+    'present-participle': [
+        (0, '—')
+    ],
+    'other': [
+        (0, 'форма \u00abя\u00bb'),
+        (1, 'форма \u00abты\u00bb'),
+        (2, 'форма \u00abон\u00bb'),
+        (3, 'форма \u00abмы\u00bb'),
+        (4, 'форма \u00abвы\u00bb'),
+        (5, 'форма \u00abони\u00bb'),
+    ]
+}
+
 TEMPLATE_NAME = {
     'indicative': "Indicatif",
     'present': "Présent",
