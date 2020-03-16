@@ -357,22 +357,22 @@ FORMULAS = {
     'participle': {
         'present': {
             1: {
-                'person_I_S': (((("",),), (VERB_PRESENT_PARTICIPLE,), (("",),),),),  # (TODO person name?,)
+                'singular': (((("",),), (VERB_PRESENT_PARTICIPLE,), (("",),),),), 
             },
             2: {
-                'person_I_S': (((("",),), (VERB_PRESENT_PARTICIPLE,), (("",),),),),  # (TODO person name?,)
+                'singular': (((("",),), (VERB_PRESENT_PARTICIPLE,), (("",),),),), 
             },
         },
         'past': {
             1: {
-                'person_I_S': (((("",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
-                'person_I_P': (((("",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
-                'person_II_S': (((("ayant ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),  # (TODO person name?,)
+                'singular': (((("",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
+                'plural': (((("",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
+                'compose': (((("ayant ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),), 
             },
             2: {
-                'person_I_S': (((("",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
-                'person_I_P': (((("",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
-                'person_II_S': (((("étant ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),  # (TODO person name?,)
+                'singular': (((("",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
+                'plural': (((("",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
+                'compose': (((("étant ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),), 
             }
         }
     },
@@ -650,18 +650,18 @@ FORMULAS_PASSIVE = {
     'participle': {
         'present': {
             1: {
-                'person_I_S': (((("se ", "s'",), ("se ", "se ",),), (VERB_PRESENT_PARTICIPLE, VERB_PRESENT_PARTICIPLE,), (("",),),),)},
+                'singular': (((("se ", "s'",), ("se ", "se ",),), (VERB_PRESENT_PARTICIPLE, VERB_PRESENT_PARTICIPLE,), (("",),),),)},
             2: {
-                'person_I_S': (((("se ", "s'",), ("se ", "se ",),), (VERB_PRESENT_PARTICIPLE, VERB_PRESENT_PARTICIPLE,), (("",),),),)}},
+                'singular': (((("se ", "s'",), ("se ", "se ",),), (VERB_PRESENT_PARTICIPLE, VERB_PRESENT_PARTICIPLE,), (("",),),),)}},
         'past': {
             1: {
-                'person_I_S': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
-                'person_I_P': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
-                'person_II_S': (((("s'<i>étant</i> ", "s'<i>étant</i> ",), ("s'<i>étant</i> ", "s'<i>étant</i> ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),)},
+                'singular': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
+                'plural': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
+                'compose': (((("s'<i>étant</i> ", "s'<i>étant</i> ",), ("s'<i>étant</i> ", "s'<i>étant</i> ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),)},
             2: {
-                'person_I_S': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
-                'person_I_P': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
-                'person_II_S': (((("s'<i>étant</i> ", "s'<i>étant</i> ",), ("s'<i>étant</i> ", "s'<i>étant</i> ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),)}}},
+                'singular': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
+                'plural': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
+                'compose': (((("s'<i>étant</i> ", "s'<i>étant</i> ",), ("s'<i>étant</i> ", "s'<i>étant</i> ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),)}}},
     'infinitive': {
         'present': {
             1: {
@@ -919,18 +919,18 @@ FORMULAS_PASSIVE_X = {
     'participle': {
         'present': {
             1: {
-                'person_I_S': (((("se ", "s'",), ("se ", "se ",),), (VERB_PRESENT_PARTICIPLE, VERB_PRESENT_PARTICIPLE,), (("",),),),)},
+                'singular': (((("se ", "s'",), ("se ", "se ",),), (VERB_PRESENT_PARTICIPLE, VERB_PRESENT_PARTICIPLE,), (("",),),),)},
             2: {
-                'person_I_S': (((("se ", "s'",), ("se ", "se ",),), (VERB_PRESENT_PARTICIPLE, VERB_PRESENT_PARTICIPLE,), (("",),),),)}},
+                'singular': (((("se ", "s'",), ("se ", "se ",),), (VERB_PRESENT_PARTICIPLE, VERB_PRESENT_PARTICIPLE,), (("",),),),)}},
         'past': {
             1: {
-                'person_I_S': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
-                'person_I_P': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
-                'person_II_S': (((("s'<i>étant</i> ", "s'<i>étant</i> ",), ("s'<i>étant</i> ", "s'<i>étant</i> ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),)},
+                'singular': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
+                'plural': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
+                'compose': (((("s'<i>étant</i> ", "s'<i>étant</i> ",), ("s'<i>étant</i> ", "s'<i>étant</i> ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),)},
             2: {
-                'person_I_S': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
-                'person_I_P': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
-                'person_II_S': (((("s'<i>étant</i> ", "s'<i>étant</i> ",), ("s'<i>étant</i> ", "s'<i>étant</i> ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),)}}},
+                'singular': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),),
+                'plural': ((((" ", "",), (" ", "",),), (VERB_PAST_PARTICIPLE_P_M, VERB_PAST_PARTICIPLE_P_F,), (("",),),),),
+                'compose': (((("s'<i>étant</i> ", "s'<i>étant</i> ",), ("s'<i>étant</i> ", "s'<i>étant</i> ",),), (VERB_PAST_PARTICIPLE_S_M, VERB_PAST_PARTICIPLE_S_F,), (("",),),),)}}},
     'infinitive': {
         'present': {
             1: {
