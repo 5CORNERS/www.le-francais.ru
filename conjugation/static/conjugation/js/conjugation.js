@@ -46,6 +46,9 @@ $(window).ready(function () {
     select: function (event, ui) {
       event.preventDefault();
       window.location.href = ui.item['url'];
+    },
+    open: function () {
+      $('.ui-menu').width($('#search-verb').innerWidth())
     }
   })["data"]("ui-autocomplete")["_renderItem"] = function (a, b) {
     let liClass = '';
@@ -54,6 +57,6 @@ $(window).ready(function () {
     }else if(!b['isInfinitive']){
       liClass = 'is-not-infinitive'
     }
-    return $(`<li class='${liClass}'>`)["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
+    return $(`<li class='verb-autocomplete-item ${liClass}'>`)["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
   };
 });

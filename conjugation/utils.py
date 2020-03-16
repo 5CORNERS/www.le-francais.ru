@@ -58,14 +58,18 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50):
 				r_html = f"se <b>{first_form[:len(s)]}</b>{first_form[len(s):]}"
 				first_form = f"se {first_form}"
 		if first_form != verb.infinitive:
-			html = f'{verb.infinitive} (<b>{first_form[:len(s)]}</b>{first_form[len(s):]})'
+			forms_html = ', '.join(
+				[f'<b>{f[0][:len(s)]}</b>{f[0][len(s):]}' for f in forms_list])
+			html = f'{verb.infinitive} ({forms_html})'
+			url =  f'{verb.get_absolute_url()}#form{forms_list[0][4] or 0}'
 		else:
+			url = verb.get_absolute_url()
 			if cur_reflexive:
 				html = r_html
 			else:
 				html = f'<b>{verb.infinitive[:len(s)]}</b>{verb.infinitive[len(s):]}'
 		autocomplete_list.append(dict(
-			url=verb.get_absolute_url(),
+			url=url,
 			verb=verb.infinitive,
 			html=html,
 			isInfinitive=is_infinitive
