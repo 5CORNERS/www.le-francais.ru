@@ -106,6 +106,14 @@
     {% block extra_head %}
 
     {% endblock %}
+
+    {% block head_advertisments %}
+
+    {% endblock %}
+
+    {% block site_js %}
+        <script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
+    {% endblock %}
 </head>
 
 <body class="{% block body_class %}{% endblock %}" data-spy="scroll" data-target="#myScrollspy" data-offset="15">
@@ -177,7 +185,6 @@
 
 {# Global javascript #}
 {% block js %}
-	<script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
 	<script async src="{% static 'lib/audio/audioplayer.min.js' %}"></script>
 	<script>
 	(function(document, history, location) {

@@ -1,5 +1,6 @@
 from datetime import timedelta, datetime
 import pytz
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.mail import send_mail
 from django.db import models
@@ -11,7 +12,6 @@ from django.utils.translation import ugettext_lazy as _
 from tinkoff_merchant.models import Payment as TinkoffPayment, Payment
 from tinkoff_merchant.models import ReceiptItem
 from tinkoff_merchant.signals import payment_confirm, payment_refund
-
 
 class CustomUserManager(UserManager):
 	def _create_user(self, username, email, password, **extra_fields):
@@ -313,8 +313,8 @@ class UsedUsernames(models.Model):
 
 
 class LogMessage(models.Model):
-	DOWNLOAD = 1
-	LISTEN = 2
+	LISTEN = 1
+	DOWNLOAD = 2
 	TYPES_CHOICES = [
 		(DOWNLOAD, 'Download'),
 		(LISTEN, 'listen')
@@ -322,7 +322,9 @@ class LogMessage(models.Model):
 	datetime = models.DateTimeField(auto_now_add=True)
 	user = models.ForeignKey('User', related_name='log_messages', null=True)
 	message = models.CharField(max_length=200, null=True)
+	value = models.IntegerField(null=True)
 	type = models.IntegerField(choices=TYPES_CHOICES, null=True)
+	session_key = models.CharField(max_length=40 ,null=True)
 
 
 @receiver(payment_confirm)

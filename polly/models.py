@@ -32,6 +32,6 @@ class PollyTask(models.Model):
 		api = PollyAPI(output_s3_key_prefix=output_s3_key_prefix)
 		api.start_task(self, wait, save)
 
-	def get_audio_stream(self, output_s3_key_prefix):
-		api = PollyAPI(output_s3_key_prefix=output_s3_key_prefix)
+	def get_audio_stream(self):
+		api = PollyAPI()
 		return api.get_audio_stream(self)

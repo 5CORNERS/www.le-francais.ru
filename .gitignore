@@ -24,3 +24,4 @@ config.txt
 /home/data/
 home/data/devoirs.csv
 *.log
+/temp/

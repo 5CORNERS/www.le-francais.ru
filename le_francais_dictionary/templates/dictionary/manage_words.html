@@ -25,11 +25,20 @@
     <link rel="stylesheet" href="{% sass_src 'dictionary/scss/user-table.scss' %}">
 {% endblock %}
 {% block content %}
-    <div class="container mt-4">
+    <div class="container">
         <div class="row">
-            <div class="col-12 filter1 mt-2">
+            <div class="col-12 filter1">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Французский
+                            язык</a></li>
+                        <li class="breadcrumb-item active"><a
+                                href="{% url 'dictionary:my_words' %}">Мои
+                            слова</a></li>
+                    </ol>
+                </nav>
                 <form id="filterWordsForm" method="post"
-                      class="form-inline mb-2">
+                      class="form-inline mb-2 d-flex">
                     <label class="sr-only"
                            for="{{ form.packets.auto_id }}">{{ form.packets.label }}</label>
                     <select data-none-selected-text="Выберите уроки" multiple class="mb-2 mr-sm-2 selectpicker"
@@ -42,6 +51,7 @@
                     {% csrf_token %}
                     <button type="submit" class="btn btn-primary mb-2 ml-2">Получить список слов
                     </button>
+                <button class="btn btn-info mb-2 ml-2 ml-lg-auto text-truncate" id="getAndApplyFilters">Повторить последнюю выборку</button>
                 </form>
             </div>
             <div class="col-12 words-footable">

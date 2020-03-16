@@ -1,78 +1,12 @@
-{% extends 'base.html' %}
+{% extends 'conjugation/_base.html' %}
+{% load static conjugation_tags %}
 
 {% block title %}Спряжение французских глаголов — от создателей le-français.ru{% endblock %}
 {% block description %}Лучший в рунете спрягатель французских глаголов с базой 7000+ слов. В отличие от всех, мы подсвечиваем РЕАЛЬНЫЕ окончания глаголов и чередующиеся буквы. Для всех глаголов описаны особенности их спряжения и варианты
     употребления.{% endblock %}
 
-{% load static conjugation_tags %}
-{% block extra_head %}
-    <script src="{% static "lib/jquery-ui-1.12.1.custom/jquery-ui.min.js" %}"></script>
-    <script src="{% static "conjugation/js/conjugation.js" %}"></script>
-    <link rel="stylesheet" href="{% static "lib/jquery-ui-1.12.1.custom/jquery-ui.min.css" %}">
+{% block head_advertisments %}
     {% conjugation_advertisement_head 'lf_fr_conjindex_rsb_01' %}
-{% endblock %}
-{% block webmanifest %}<link rel="manifest" href="{% static 'conjugation/meta/site.webmanifest' %}">{% endblock %}
-{% block extra_css %}
-    <style>
-        .ui-autocomplete-loading {
-            background: white url("{% static 'conjugation/images/ui-anim_basic_16x16.gif' %}") right center no-repeat;
-        }
-    </style>
-    <style>
-        .row-flex {
-            display: -webkit-box;
-            display: -moz-box;
-            display: -ms-flexbox;
-            display: -webkit-flex;
-            display: flex;
-
-            -webkit-flex-flow: row wrap;
-            flex-wrap: wrap;
-        }
-        .col-flex{
-            margin: 0 -1px;
-        }
-
-
-        .block {
-            padding-bottom: 20px;
-        }
-
-        .block > .block-head {
-            color: #337ab7;
-        }
-
-        .block > .block-head > h4 {
-            font-weight: 700;
-        }
-
-        .block > .block-text {
-        }
-    </style>
-{% endblock %}
-{% block extra_js %}
-    <script>
-        {% comment %}$(function () {
-            $("#verb").autocomplete({
-                source: "/conjugation/verbs_autocomplete/",
-                minLength: 2
-            });
-        });{% endcomment %}
-        $("#search-verb")["autocomplete"]({
-            source: "{% url 'conjugation:autocomplete' %}",
-            minLength: 1,
-            focus: function (event, ui) {
-                $("#search-verb").val(ui.item["verb"]);
-                return false;
-            },
-            select: function (event, ui) {
-                event.preventDefault();
-                window.location.href = ui.item['url'];
-            }
-        })["data"]("ui-autocomplete")["_renderItem"] = function (a, b) {
-            return $("<li>")["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
-        };
-    </script>
 {% endblock %}
 
 {% block content %}
@@ -91,7 +25,9 @@
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <h4 style="color: #337ab7; margin-bottom: 25px">Вы находитесь на странице лучшего в рунете спрягателя французских глаголов. Vous êtes le bienvenu !</h4>
+                        <h4 style="color: #337ab7; margin-bottom: 25px">Вы
+                            находитесь на странице лучшего в рунете спрягателя
+                            французских глаголов. Vous êtes le bienvenu&nbsp;!</h4>
                     </div>
                 </div>
                 <div class="row d-sm-none d-md-none d-lg-none d-xl-flex">
@@ -106,55 +42,128 @@
                     <div class="col-12">
                         <div class="row row-flex">
                             <div class="col-12 col-md-6 col-lg-4 col-flex block">
-                                <div class="block-head"><h4>7000+ французских глаголов</h4></div>
-                                <div class="block-text">Помимо их спряжения, мы даем им характеристики — насколько глагол частоупотребим, переходный он или нет, с каким вспомогательным глаголом спрягается в составных временах, какой он
-                                    группы,
-                                    может ли иметь возвратную форму; также отмечены дефективные, безличные, книжные или устаревшие глаголы, а также имеющие локальное хождение в отдельных франкоговорящих регионах.
+                                <div class="block-head"><h4>7000+ французских
+                                    глаголов</h4></div>
+                                <div class="block-text">Помимо их спряжения, мы
+                                    даем им характеристики — насколько глагол
+                                    частоупотребим, переходный он или нет, с
+                                    каким вспомогательным глаголом спрягается в
+                                    составных временах, какой он группы, может
+                                    ли иметь возвратную форму; также отмечены
+                                    дефективные, безличные, книжные или
+                                    устаревшие глаголы, а также имеющие
+                                    локальное хождение в отдельных
+                                    франкоговорящих регионах.
                                 </div>
                             </div>
                             <div class="col-12 col-md-6 col-lg-4 col-flex block">
-                                <div class="block-head"><h4>Выделение РЕАЛЬНЫХ окончаний</h4></div>
-                                <div class="block-text">Мы подкрашиваем <b>реальные окончания глаголов</b>, а не его изменяемую часть из шаблонов спряжения, как это делают все остальные спрягалки — так вы скорее запомните все формы глаголов, потому что в этих окончаниях есть закономерность, и мы вам ее показываем.</div>
+                                <div class="block-head"><h4>Выделение РЕАЛЬНЫХ
+                                    окончаний</h4></div>
+                                <div class="block-text">Мы подкрашиваем <b>реальные
+                                    окончания глаголов</b>, а не его изменяемую
+                                    часть из шаблонов спряжения, как это делают
+                                    все остальные — так вы скорее
+                                    запомните все формы глаголов, потому что в
+                                    этих окончаниях есть закономерность, и мы
+                                    вам ее показываем.
+                                </div>
                             </div>
 
                             <div class="col-12 col-md-6 col-lg-4 col-flex block">
-                                <div class="block-head"><h4>Озвученные спряжения</h4></div>
-                                <div class="block-text">Ко всем глаголам — ещё раз: <b>ко всем семи тысячам французских глаголов</b> мы прилагаем озвучание ВСЕХ форм спряжения ВО ВСЕХ временах. Это придаёт ещё больше ускорения в изучении французских глаголов.</div>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-4 col-flex block">
-                                <div class="block-head"><h4>Умная строка поиска</h4></div>
-                                <div class="block-text">Не заморачивайтесь диакритическими знаками и даже (sic!) <b>раскладкой клавиатуры</b> при вводе глагола. Пара секунд — и мы найдем для вас целый список глаголов, содержащих
-                                    указанные буквы. Выбирайте!
+                                <div class="block-head"><h4>Озвученные
+                                    спряжения</h4></div>
+                                <div class="block-text">Ко всем глаголам — ещё
+                                    раз: <b>ко всем семи тысячам французских
+                                        глаголов</b> мы прилагаем озвучание
+                                    ВСЕХ форм спряжения ВО ВСЕХ временах. Это
+                                    придаёт ещё больше ускорения в изучении
+                                    французских глаголов.
                                 </div>
                             </div>
                             <div class="col-12 col-md-6 col-lg-4 col-flex block">
-                                <div class="block-head"><h4>Сокращенный список «некнижных» времен</h4></div>
-                                <div class="block-text">Мы предлагаем два списка времен: сокращенный (по умолчанию) и полный. Сокращенный список примерно на треть короче — в него не вошли те времена, которые не употребляются в устной
-                                    речи[1]. В
-                                    таком списке гораздо легче ориентироваться.
+                                <div class="block-head"><h4>Умная строка
+                                    поиска</h4></div>
+                                <div class="block-text">Не заморачивайтесь
+                                    диакритическими знаками и даже (sic!) <b>раскладкой
+                                        клавиатуры</b> при вводе глагола. Пара
+                                    секунд — и мы найдем для вас целый список
+                                    глаголов, содержащих указанные буквы.
+                                    Выбирайте!
                                 </div>
                             </div>
                             <div class="col-12 col-md-6 col-lg-4 col-flex block">
-                                <div class="block-head"><h4>Подсветка «беглых» букв</h4></div>
-                                <div class="block-text">Мы подкрашиваем «беглые» буквы, которые появляются и исчезают у основы глагола в разных лицах и числах и влияют на его произношение.</div>
+                                <div class="block-head"><h4>Поиск по всем
+                                    формам глаголов</h4></div>
+                                <div class="block-text">Мы найдем для вас
+                                    глагол, даже если вы не помните или не
+                                    знаете его инфинитива. Введите его в любой
+                                    известной вам форме спряжения, и мы
+                                    предложим на выбор список глаголов, в
+                                    которых встречается такое написание хотя бы
+                                    в одном из времен.
+                                </div>
                             </div>
                             <div class="col-12 col-md-6 col-lg-4 col-flex block">
-                                <div class="block-head"><h4>Специальный цвет окончаний</h4></div>
-                                <div class="block-text">Мы подобрали цвет окончаний (правильнее сказать, их спектральную яркость) таким образом, чтбы вы, проговаривая про себя спряжение глагола, вынуждены были акцентироваться на окончании и лишний раз его запоминали.</div>
+                                <div class="block-head"><h4>Подсветка «беглых»
+                                    букв</h4></div>
+                                <div class="block-text">Мы подкрашиваем
+                                    «беглые» буквы, которые появляются и
+                                    исчезают у основы глагола в разных лицах и
+                                    числах и влияют на его произношение.
+                                </div>
                             </div>
                             <div class="col-12 col-md-6 col-lg-4 col-flex block">
-                                <div class="block-head"><h4>Возвратные формы глаголов</h4></div>
-                                <div class="block-text">Если это применимо, мы предлагаем спряжение возвратной формы глагола.</div>
+                                <div class="block-head"><h4>Сокращенный список
+                                    «некнижных» времен</h4></div>
+                                <div class="block-text">Мы предлагаем два
+                                    списка времен: сокращенный (по умолчанию) и
+                                    полный. Сокращенный список примерно на
+                                    треть короче — в него не вошли те времена,
+                                    которые не употребляются в устной речи[1].
+                                    В таком списке гораздо легче
+                                    ориентироваться.
+                                </div>
                             </div>
                             <div class="col-12 col-md-6 col-lg-4 col-flex block">
-                                <div class="block-head"><h4>Спряжение в мужском и женском родах</h4></div>
-                                <div class="block-text">Для всех глаголов, кроме дефективных, можно посмотреть их спряжение и в мужском, и в женском роде. И не думайте, что там меняется только местоимение — бывает, что и не только :)</div>
+                                <div class="block-head"><h4>Возвратные формы
+                                    глаголов</h4></div>
+                                <div class="block-text">Если это применимо, мы
+                                    предлагаем спряжение возвратной формы
+                                    глагола.
+                                </div>
                             </div>
                             <div class="col-12 col-md-6 col-lg-4 col-flex block">
-                                <div class="block-head"><h4>Непрерывное улучшение</h4></div>
-                                <div class="block-text">То, что вы видите — это вресия 1.2. И мы продолжаем работу, и в будущем здесь появятся новые фишки. Мы делаем все, чтобы учить спряжение французских глаголов стало для вас
-                                    удовольствием!
-                                    :)
+                                <div class="block-head"><h4>Спряжение в мужском
+                                    и женском родах</h4></div>
+                                <div class="block-text">Для всех глаголов,
+                                    кроме дефективных, можно посмотреть их
+                                    спряжение и в мужском, и в женском роде. И
+                                    не думайте, что там меняется только
+                                    местоимение — бывает, что и не только :)
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-4 col-flex block">
+                                <div class="block-head"><h4>Специальный цвет
+                                    окончаний</h4></div>
+                                <div class="block-text">Мы подобрали цвет
+                                    окончаний (правильнее сказать, их
+                                    спектральную яркость) таким образом, чтбы
+                                    вы, проговаривая про себя спряжение
+                                    глагола, вынуждены были акцентироваться на
+                                    окончании и лишний раз его запоминали.
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-4 col-flex block">
+                                <div class="block-head"><h4>Непрерывное
+                                    улучшение</h4></div>
+                                <div class="block-text">То, что вы видите — это
+                                    уже версия 2.0. Мы добавили в нашу
+                                    спрягалку поиск глаголов не только по
+                                    инфинитивам, но и по любой форме спряжения.
+                                    И мы продолжаем работу, и в будущем здесь
+                                    появятся новые фишки. Мы делаем все, чтобы
+                                    учить спряжение французских глаголов стало
+                                    для вас удовольствием! :)
                                 </div>
                             </div>
                         </div>
