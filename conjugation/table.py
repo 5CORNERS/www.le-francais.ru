@@ -49,7 +49,8 @@ class Table:
 					# FIXME: names in formulas and base should be the same
 					if tense.tense_name == tense_name or f'{mood.mood_name}-{tense.tense_name}' == tense_name or tense.tense_name in tense_name.split('-'):
 						person = tense.persons[person]
-						return f'{person.part_0}{person.forms[form]}{person.part_2}'
+						conjugation = f'{person.part_0}{person.forms[form]}{person.part_2}'
+						return conjugation if conjugation != '-' else None
 		return None
 
 class Mood:
@@ -148,7 +149,9 @@ class Person:
 
 		pronoun = -1 if v.infnitive_first_letter_is_vowel() else 0
 		etre = 2 if not self.v.conjugated_with_avoir and self.v.conjugated_with_etre else 1
-		if self.v.is_impersonal and self.person_name != "person_III_S":
+		if self.v.is_impersonal and (
+				self.person_name != "person_III_S" and not (self.person_name == 'singular' and gender == 0) and self.person_name != 'compose'
+		):
 			self.all_empty()
 		elif empty:
 			self.all_empty()

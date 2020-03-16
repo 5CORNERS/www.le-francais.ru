@@ -55,21 +55,28 @@ def search(request):
 	found_forms = []
 	for verb, forms in  search_verbs_with_forms(search_string, exact=True):
 		for form in forms:
+			gender = 0
+			person_index = form[3]
+			if form[2] == 'past-participle':
+				if person_index in [2, 3]:
+					person_index -= 2
+					gender = -1
 			conjugation = Table(
-				verb, 0, reflexive).get_conjugation(
-				form[1], form[2], form[3], form[4] or 0)
+				verb, gender, reflexive).get_conjugation(
+				form[1], form[2], person_index, form[4] or 0)
 			if form[2] in PERSONS.keys():
 				persons_keys = PERSONS[form[2]]
 			else:
 				persons_keys = PERSONS['other']
-			found_forms.append(dict(
-				url=verb.get_absolute_url(),
-				infinitive=verb.infinitive,
-				conjugation=conjugation,
-				mood=next((mood[1] for mood in MOODS if form[1] == mood[0]), ''),
-				tense=next((tense[1] for tense in TENSES if form[2] == tense[0]), ''),
-				person=next((person[1] for person in persons_keys if form[3] == person[0]), '')
-			))
+			if conjugation:
+				found_forms.append(dict(
+					url=verb.get_absolute_url(),
+					infinitive=verb.infinitive,
+					conjugation=conjugation,
+					mood=next((mood[1] for mood in MOODS if form[1] == mood[0]), ''),
+					tense=next((tense[1] for tense in TENSES if form[2] == tense[0]), ''),
+					person=next((person[1] for person in persons_keys if form[3] == person[0]), '')
+				))
 	if len(found_forms) > 1:
 		return render(request, 'conjugation/verb_found_forms.html',
 		              {'search_string': search_string, 'found_forms': found_forms})

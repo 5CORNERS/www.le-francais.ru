@@ -234,7 +234,7 @@ class Verb(models.Model):
 					else:
 						self._conjugations[mood][tense][person] = self.main_part + endings
 		if self.pp_invariable:
-			for i in range(1, 3):
+			for i in range(1, 4):
 				self._conjugations['participle']['past-participle'][i] = self._conjugations['participle']['past-participle'][0]
 
 	@property
