@@ -1,8 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
-    <div class="container mt-4">
+    <div class="container">
         <div class="row">
-            <div class="col-12">{% include 'dictionary/dictionary_app.html' with packet_id=packet_id mode=mode %}</div>
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Французский
+                            язык</a></li>
+                        <li class="breadcrumb-item"><a
+                                href="{% url 'dictionary:my_words' %}">Мои
+                            слова</a></li>
+                        <li class="breadcrumb-item active"><a
+                                href="{% url 'dictionary:app' %}">Карточки со
+                            словами</a>
+                    </ol>
+                </nav>
+                {% include 'dictionary/dictionary_app.html' with packet_id=packet_id mode=mode %}
+            </div>
         </div>
     </div>
 {% endblock %}

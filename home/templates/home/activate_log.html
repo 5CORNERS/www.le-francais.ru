@@ -3,7 +3,16 @@
 {% block content %}
 	<div class="container">
 		<div class="row">
-			<div class="col-12"><table>
+			<div class="col-12">
+                <ul>
+                    <li>all=true -- полный список (иначе только последние 100)</li>
+                    <li>cups=true -- активации чашками</li>
+                    <li>tickets=true -- активации билетиками</li>
+                    <li>cups=true&tickets=true -- все активации (и чашки, и билетики)</li>
+                    <li>user=[username] -- фильтрация по никнейму</li>
+                    <li>email=[email]  -- фильтрация по email'у</li>
+                </ul>
+                <table>
 			{% for ul in activations %}
 				<tr>
 					<td>{% timezone 'Europe/Moscow' %}{{ ul.date|date:'Y-m-d'}} </td>

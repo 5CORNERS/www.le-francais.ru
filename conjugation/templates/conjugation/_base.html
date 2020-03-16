@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static "lib/jquery-ui-1.12.1.custom/jquery-ui.min.css" %}">
+    <script src="{% static "lib/jquery-ui-1.12.1.custom/jquery-ui.min.js" %}"></script>
+    <script src="{% static "conjugation/js/conjugation.js" %}"></script>
+    <link rel="stylesheet" href="{% static 'conjugation/css/conjugation.min.css' %}">
+{% endblock %}
+
+{% block title %}Спряжение французских глаголов — от создателей
+    le-français.ru{% endblock %}
+{% block title_suffix %}{% endblock %}
+
+{% block description %}Лучший в рунете спрягатель французских глаголов с базой
+    7000+ слов. В отличие от всех, мы подсвечиваем РЕАЛЬНЫЕ окончания глаголов
+    и чередующиеся буквы. Для всех глаголов описаны особенности их спряжения и
+    варианты
+    употребления.{% endblock %}
+
+{% block webmanifest %}
+    <link rel="manifest" href="{% url 'conjugation:webmanifest' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row first_row">
+            {% block first_row %}
+                <div class="col-12 col-md-12 col-lg-6">
+                    <div class="row">
+                        <div class="col-12">
+                            {% include 'conjugation/verb_form.html' %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <h1 class="title">{% block page_title %}{% endblock %}</h1>
+                        </div>
+                    </div>
+                    {% block first_row_content %}
+
+                    {% endblock %}
+                </div>
+                <div class="col-12 col-md-12 col-lg-6">
+                    {% block first_row_sidebar %}
+
+                    {% endblock %}
+                </div>
+            {% endblock %}
+        </div>
+        <div class="row">
+            {% block second_row %}
+                <div class="col-12 col-md-12 col-lg-6">
+                    {% block second_row_content %}
+
+                    {% endblock %}
+                </div>
+                <div class="col-12 col-md-12 col-lg-6">
+                    {% block second_row_sidebar %}
+
+                    {% endblock %}
+                </div>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

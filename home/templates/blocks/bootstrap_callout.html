@@ -1,0 +1,8 @@
+{% load wagtailcore_tags %}
+
+<div class="bs-callout {{ value.color }}">
+    {% if value.heading %}{% if value.heading_color %}<h4>{{ value.heading }}</h4>{% else %}<h5>{{ value.heading }}</h5>{% endif %}{% endif %}
+    {% for block in value.text %}
+        {% include_block block %}
+    {% endfor %}
+</div>
