@@ -138,6 +138,19 @@ h4 {
     color: var(--blue);
 }
 
+.ui-state-active{
+     border:0 !important;
+    background: #8bb8df !important;
+}
+
+.ui-state-active > b {
+    color: var(--white);
+}
+
+a.ui-menu-item-wrapper{
+    text-decoration: none !important;
+}
+
 .is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive {
     margin-top: 5px;
     padding-top: 5px;
