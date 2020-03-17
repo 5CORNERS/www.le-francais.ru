@@ -141,6 +141,7 @@ h4 {
 .ui-state-active{
      border:0 !important;
     background: #8bb8df !important;
+    margin: 0 !important;
 }
 
 .ui-state-active > b {
@@ -149,6 +150,8 @@ h4 {
 
 a.ui-menu-item-wrapper{
     text-decoration: none !important;
+    display: block;
+    width: 100%;
 }
 
 .is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive {
