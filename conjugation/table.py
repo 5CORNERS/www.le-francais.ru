@@ -150,7 +150,7 @@ class Person:
 		pronoun = -1 if v.infnitive_first_letter_is_vowel() else 0
 		etre = 2 if not self.v.conjugated_with_avoir and self.v.conjugated_with_etre else 1
 		if self.v.is_impersonal and (
-				self.person_name != "person_III_S" and not (self.person_name == 'singular' and gender == 0) and self.person_name != 'compose'
+				self.person_name != "person_III_S" and not (self.person_name == 'singular' and gender == 0) and self.person_name != 'compose' and self.mood_name != 'infinitive' and self.mood_name != 'gerund'
 		):
 			self.all_empty()
 		elif empty:
