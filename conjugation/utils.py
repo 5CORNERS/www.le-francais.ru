@@ -194,3 +194,25 @@ def switch_keyboard_layout(s: str):
 	for n in range(LAYOUT_EN.__len__()):
 		s = s.replace(LAYOUT_RU[n], LAYOUT_EN[n])
 	return s
+
+
+def autocomplete_infinitive_levenshtein(s, reflexive, limit):
+	from .models import Verb
+	autocomplete_list = []
+	verbs = Verb.objects.raw('''
+	SELECT levenshtein_less_equal(%s, v.infinitive_no_accents,1,1,1, 12), v.infinitive, v.*
+	FROM conjugation_verb v 
+	ORDER BY levenshtein_less_equal, v.count LIMIT %s''', [s, limit])
+	for verb in verbs:
+		if reflexive and verb.can_reflexive or verb.reflexive_only:
+			verb = verb.reflexiveverb
+		elif reflexive and not (verb.can_reflexive or verb.reflexive_only):
+			continue
+		html = verb.infinitive
+		autocomplete_list.append(dict(
+			url=verb.get_absolute_url(),
+			verb=verb.infinitive,
+			html=html,
+			isInfinitive=True,
+		))
+	return autocomplete_list

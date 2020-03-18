@@ -8,7 +8,7 @@ from django.views.decorators.http import require_http_methods
 from unidecode import unidecode
 
 from conjugation import forms
-from conjugation.models import Verb, ReflexiveVerb, PollyAudio, Translation, \
+from conjugation.models import Verb, PollyAudio, Translation, \
 	FrTag, RuTag
 from polly.models import PollyTask
 from .consts import *
@@ -16,7 +16,7 @@ from .polly import *
 from .table import Table, Tense
 from .utils import autocomplete_forms_startswith, \
 	autocomplete_infinitive_contains, search_verbs, switch_keyboard_layout, \
-	search_verbs_with_forms
+	search_verbs_with_forms, autocomplete_infinitive_levenshtein
 
 
 @require_http_methods(["POST"])
@@ -141,6 +141,7 @@ def verb_page(request, se, feminin, verb, homonym):
 
 
 def get_autocomplete_list(request):
+	# TODO: add Cross-Site protection
 	list_len = 50
 	_term = request.GET['term'].lower()
 	term = switch_keyboard_layout(_term)
@@ -151,6 +152,8 @@ def get_autocomplete_list(request):
 		reflexive = True
 		s = term[3:] if term.startswith('se ') else term[2:]
 	autocomplete_list = autocomplete_forms_startswith(s, reflexive)
+	if len(autocomplete_list) < list_len:
+		autocomplete_list += autocomplete_infinitive_levenshtein(s, reflexive, list_len - len(autocomplete_list))
 	if len(autocomplete_list) < list_len:
 		autocomplete_list += autocomplete_infinitive_contains(s, reflexive, limit=list_len - len(autocomplete_list))
 	return JsonResponse(autocomplete_list[:list_len], safe=False)
