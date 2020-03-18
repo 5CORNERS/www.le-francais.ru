@@ -226,6 +226,8 @@ def advert_head(context, page):
 	block_list = []
 
 	if isinstance(page, LessonPage):
+		if context['lesson_was_payed_by_user']:
+			return {'block_list': []}
 		elements = [page.body, page.comments_for_lesson, page.dictionary]
 		block_list = search_advertisement_heads(elements, block_list)
 		for child_value in page.other_tabs:
