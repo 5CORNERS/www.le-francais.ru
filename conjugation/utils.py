@@ -74,7 +74,8 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50):
 			url=url,
 			verb=verb.infinitive,
 			html=html,
-			isInfinitive=is_infinitive
+			isInfinitive=is_infinitive,
+			cls='starts-with',
 		))
 	return autocomplete_list
 
@@ -103,6 +104,7 @@ def autocomplete_infinitive_contains(s, reflexive=False, limit=50):
 			verb=verb.infinitive,
 			html=html,
 			isInfinitive=True,
+			cls='contains',
 		))
 	return autocomplete_list
 
@@ -200,9 +202,11 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit):
 	from .models import Verb
 	autocomplete_list = []
 	verbs = Verb.objects.raw('''
-	SELECT levenshtein_less_equal(%s, v.infinitive_no_accents,1,1,1, 12), v.infinitive, v.*
-	FROM conjugation_verb v 
-	ORDER BY levenshtein_less_equal, v.count LIMIT %s''', [s, limit])
+	SELECT * FROM
+	(SELECT levenshtein_less_equal(%s, v.infinitive_no_accents,1,1,1, 12) as levenshtein, v.infinitive, v.* 
+	FROM conjugation_verb v
+	ORDER BY levenshtein, v.count LIMIT %s) t 
+	WHERE t.levenshtein <> 0''', [s, limit])
 	for verb in verbs:
 		if reflexive and verb.can_reflexive or verb.reflexive_only:
 			verb = verb.reflexiveverb
@@ -214,5 +218,6 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit):
 			verb=verb.infinitive,
 			html=html,
 			isInfinitive=True,
+			cls='levenshtein',
 		))
 	return autocomplete_list
