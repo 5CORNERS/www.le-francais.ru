@@ -154,7 +154,7 @@ a.ui-menu-item-wrapper{
     width: 100%;
 }
 
-.is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive {
+.is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive, .starts-with + .contains, .starts-with + .levenshtein, .contains + .levenshtein {
     margin-top: 5px;
     padding-top: 5px;
     border-top: 1px solid #dee2e6;
