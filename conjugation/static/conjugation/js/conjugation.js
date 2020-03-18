@@ -57,6 +57,6 @@ $(window).ready(function () {
     }else if(!b['isInfinitive']){
       liClass = 'is-not-infinitive'
     }
-    return $(`<li class='verb-autocomplete-item ${liClass}'>`)["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
+    return $(`<li class='verb-autocomplete-item ${liClass} ${b["cls"]}'>`)["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
   };
 });
