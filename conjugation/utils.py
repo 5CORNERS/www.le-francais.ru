@@ -39,6 +39,8 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50):
 	:return: autocomplete list of dictionaries with "url", "verb" and "html" keys
 	"""
 	autocomplete_list = []
+	autocomplete_list_infinitives = []
+	autocomplete_list_forms = []
 	verbs = search_verbs_with_forms(s, limit)
 	verbs.sort(key=lambda x: x[1][0][2] != 'infinitive-present')
 	for verb, forms_list in verbs:
@@ -70,13 +72,18 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50):
 				html = r_html
 			else:
 				html = f'<b>{verb.infinitive[:len(s)]}</b>{verb.infinitive[len(s):]}'
-		autocomplete_list.append(dict(
+		item = dict(
 			url=url,
 			verb=verb.infinitive,
 			html=html,
 			isInfinitive=is_infinitive,
 			cls='starts-with',
-		))
+		)
+		if is_infinitive:
+			autocomplete_list_infinitives.append(item)
+		else:
+			autocomplete_list_forms.append(item)
+	autocomplete_list = autocomplete_list_infinitives + autocomplete_list_forms
 	return autocomplete_list
 
 
@@ -198,7 +205,7 @@ def switch_keyboard_layout(s: str):
 	return s
 
 
-def autocomplete_infinitive_levenshtein(s, reflexive, limit):
+def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3):
 	from .models import Verb
 	autocomplete_list = []
 	verbs = Verb.objects.raw('''
@@ -206,7 +213,7 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit):
 	(SELECT levenshtein_less_equal(%s, v.infinitive_no_accents,1,1,1, 12) as levenshtein, v.infinitive, v.* 
 	FROM conjugation_verb v
 	ORDER BY levenshtein, v.count LIMIT %s) t 
-	WHERE t.levenshtein <> 0 and t.levenshtein < 3''', [s, limit])
+	WHERE t.levenshtein <> 0 and t.levenshtein < %s''', [s, limit, max_distance])
 	for verb in verbs:
 		if reflexive and verb.can_reflexive or verb.reflexive_only:
 			verb = verb.reflexiveverb

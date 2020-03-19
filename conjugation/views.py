@@ -140,6 +140,18 @@ def verb_page(request, se, feminin, verb, homonym):
 	})
 
 
+def remove_autocomplete_duplicants(autocomplete_list):
+	reversed_auto = list(reversed(autocomplete_list))
+	urls = []
+	for i, item in reversed(list(enumerate(reversed_auto))):
+		if item['url'] in urls:
+			reversed_auto.pop(i)
+		else:
+			urls.append(item['url'])
+	autocomplete_list = list(reversed(reversed_auto))
+	return autocomplete_list
+
+
 def get_autocomplete_list(request):
 	# TODO: add Cross-Site protection
 	list_len = 50
@@ -153,9 +165,14 @@ def get_autocomplete_list(request):
 		s = term[3:] if term.startswith('se ') else term[2:]
 	autocomplete_list = autocomplete_forms_startswith(s, reflexive)
 	if len(autocomplete_list) < list_len:
-		autocomplete_list += autocomplete_infinitive_levenshtein(s, reflexive, list_len - len(autocomplete_list))
+		if len(autocomplete_list) == 1:
+			max_distance = 1
+		else:
+			max_distance = 3
+		autocomplete_list += autocomplete_infinitive_levenshtein(s, reflexive, list_len - len(autocomplete_list), max_distance)
 	if len(autocomplete_list) < list_len:
 		autocomplete_list += autocomplete_infinitive_contains(s, reflexive, limit=list_len - len(autocomplete_list))
+	autocomplete_list = remove_autocomplete_duplicants(autocomplete_list)
 	return JsonResponse(autocomplete_list[:list_len], safe=False)
 
 
