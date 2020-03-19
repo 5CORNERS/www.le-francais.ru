@@ -6,6 +6,8 @@ from django.core.management import BaseCommand
 from django.db.models.signals import post_save
 
 from pybb.models import Post, Topic
+from pybb.signals import post_saved
+
 from notifications.models import create_pybb_post_notification
 
 from pandas import read_csv
@@ -22,6 +24,7 @@ class Command(BaseCommand):
 		# but for now, we must connect / disconnect the callback
 		post_save.disconnect(topic_saved, sender=Topic)
 		post_save.disconnect(create_pybb_post_notification, sender=Post)
+		post_save.disconnect(post_saved, instance=Post)
 		for i in range(len(table)):
 			post_id = int(table['Post ID'][i])
 			old_link = table['Image Link'][i]
@@ -32,6 +35,7 @@ class Command(BaseCommand):
 			post.save()
 		post_save.connect(topic_saved, sender=Topic)
 		post_save.connect(create_pybb_post_notification, sender=Post)
+		post_save.connect(post_saved, sender=Post)
 
 		for post in Post.objects.all():
 			for link in re.findall('\((((http://)|(https://))(.+?\.(png|jpeg|gif)))', post.body):

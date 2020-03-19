@@ -206,7 +206,7 @@ def switch_keyboard_layout(s: str):
 	return s
 
 
-def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3):
+def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3, min_distance_hide=1):
 	from .models import Verb
 	autocomplete_list = []
 	verbs = Verb.objects.raw('''
@@ -216,6 +216,9 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3):
 	ORDER BY levenshtein, v.count DESC LIMIT %s) t 
 	WHERE t.levenshtein <> 0 and t.levenshtein < %s''', [s, limit, max_distance])
 	for verb in verbs:
+		cls = 'levenshtein'
+		if verb.levenshtein >= min_distance_hide:
+			cls += ' load-more hide'
 		if reflexive and verb.can_reflexive or verb.reflexive_only:
 			verb = verb.reflexiveverb
 		elif reflexive and not (verb.can_reflexive or verb.reflexive_only):
@@ -226,7 +229,7 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3):
 			verb=verb.infinitive,
 			html=html,
 			isInfinitive=True,
-			cls='levenshtein',
+			cls=cls,
 		))
 	return autocomplete_list
 
@@ -235,13 +238,13 @@ def autocomplete_verb(s, reflexive, list_len):
 	autocomplete_list = autocomplete_forms_startswith(s, reflexive)
 	if len(autocomplete_list) < list_len:
 		if len(autocomplete_list) == 1:
-			max_distance = 1
+			hide_distance = 1
 		else:
-			max_distance = 3
+			hide_distance = 3
 		autocomplete_list += autocomplete_infinitive_levenshtein(
 			s, reflexive,
 			list_len - len(autocomplete_list),
-			max_distance)
+			3, hide_distance)
 	if len(autocomplete_list) < list_len:
 		autocomplete_list += autocomplete_infinitive_contains(
 			s, reflexive,
