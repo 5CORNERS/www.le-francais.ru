@@ -29,6 +29,18 @@ self.addEventListener('install', function (event) {
     );
 });
 
+self.addEventListener('activate', event => {
+    let cacheKeepList = [CACHE_NAME];
+    event.waitUntil(
+        caches.keys().then(keyList => {
+            return Promise.all(keyList.map(key => {
+                if (cacheKeepList.indexOf(key) === -1) {
+                    return caches.delete(key);
+                }
+            }))
+        })
+    )
+});
 
 self.addEventListener('fetch', function (event) {
     event.respondWith(
