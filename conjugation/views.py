@@ -14,8 +14,7 @@ from polly.models import PollyTask
 from .consts import *
 from .polly import *
 from .table import Table, Tense
-from .utils import autocomplete_forms_startswith, \
-	autocomplete_infinitive_contains, search_verbs, switch_keyboard_layout, \
+from .utils import search_verbs, switch_keyboard_layout, \
 	search_verbs_with_forms, autocomplete_verb
 
 
@@ -134,18 +133,6 @@ def verb_page(request, se, feminin, verb, homonym):
 		'forms_count': verb.template.forms_count,
 		'forms_range': list(range(1, verb.template.forms_count + 1))
 	})
-
-
-def remove_autocomplete_duplicates(autocomplete_list):
-	reversed_auto = list(reversed(autocomplete_list))
-	urls = []
-	for i, item in reversed(list(enumerate(reversed_auto))):
-		if item['url'] in urls:
-			reversed_auto.pop(i)
-		else:
-			urls.append(item['url'])
-	autocomplete_list = list(reversed(reversed_auto))
-	return autocomplete_list
 
 
 def get_autocomplete_list(request):
