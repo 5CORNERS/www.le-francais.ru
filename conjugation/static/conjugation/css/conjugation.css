@@ -148,7 +148,7 @@ h4 {
     color: var(--white);
 }
 
-a.ui-menu-item-wrapper{
+ul.ui-autocomplete>li>a.ui-menu-item-wrapper{
     text-decoration: none !important;
     display: block;
     width: 100%;
