@@ -16,7 +16,7 @@ from .polly import *
 from .table import Table, Tense
 from .utils import autocomplete_forms_startswith, \
 	autocomplete_infinitive_contains, search_verbs, switch_keyboard_layout, \
-	search_verbs_with_forms, autocomplete_infinitive_levenshtein
+	search_verbs_with_forms, autocomplete_verb
 
 
 @require_http_methods(["POST"])
@@ -45,13 +45,13 @@ def search(request):
 		search_string = switch_keyboard_layout(str(request.POST.get('q')).strip(' ').lower())
 	else:
 		search_string = switch_keyboard_layout(str(request.GET.get('q')).strip(' ').lower())
-	reflexive = True
+	is_reflexive = True
 	if search_string.find("s'") == 0:
 		search_string = search_string[2:]
 	elif search_string.find("se ") == 0:
 		search_string = search_string[3:]
 	else:
-		reflexive = False
+		is_reflexive = False
 	found_forms = []
 	for verb, forms in  search_verbs_with_forms(search_string, exact=True):
 		for form in forms:
@@ -62,7 +62,7 @@ def search(request):
 					person_index -= 2
 					gender = -1
 			conjugation = Table(
-				verb, gender, reflexive).get_conjugation(
+				verb, gender, is_reflexive).get_conjugation(
 				form[1], form[2], person_index, form[4] or 0)
 			if form[2] in PERSONS.keys():
 				persons_keys = PERSONS[form[2]]
@@ -80,13 +80,9 @@ def search(request):
 	if len(found_forms) > 1:
 		return render(request, 'conjugation/verb_found_forms.html',
 		              {'search_string': search_string, 'found_forms': found_forms})
-	verb, form = search_verbs(search_string, reflexive, return_first=True)
+	verb, form = search_verbs(search_string, is_reflexive, return_first=True)
 	if verb is None:
-		autocomplete_list = autocomplete_forms_startswith(search_string, reflexive)
-		if len(autocomplete_list) < 50:
-			autocomplete_list += autocomplete_infinitive_contains(search_string, reflexive,
-			                                                      limit=50 - len(
-				                                                      autocomplete_list))
+		autocomplete_list = autocomplete_verb(search_string, is_reflexive, 50)
 		return render(request, 'conjugation/verb_not_found.html',
 		              {'search_string': search_string, 'autocomplete_list': autocomplete_list})
 	return redirect(verb.get_absolute_url())
@@ -140,7 +136,7 @@ def verb_page(request, se, feminin, verb, homonym):
 	})
 
 
-def remove_autocomplete_duplicants(autocomplete_list):
+def remove_autocomplete_duplicates(autocomplete_list):
 	reversed_auto = list(reversed(autocomplete_list))
 	urls = []
 	for i, item in reversed(list(enumerate(reversed_auto))):
@@ -163,16 +159,7 @@ def get_autocomplete_list(request):
 	if term[:3] == 'se ' or term[:2] == "s'":
 		reflexive = True
 		s = term[3:] if term.startswith('se ') else term[2:]
-	autocomplete_list = autocomplete_forms_startswith(s, reflexive)
-	if len(autocomplete_list) < list_len:
-		if len(autocomplete_list) == 1:
-			max_distance = 1
-		else:
-			max_distance = 3
-		autocomplete_list += autocomplete_infinitive_levenshtein(s, reflexive, list_len - len(autocomplete_list), max_distance)
-	if len(autocomplete_list) < list_len:
-		autocomplete_list += autocomplete_infinitive_contains(s, reflexive, limit=list_len - len(autocomplete_list))
-	autocomplete_list = remove_autocomplete_duplicants(autocomplete_list)
+	autocomplete_list = autocomplete_verb(s, reflexive, list_len)
 	return JsonResponse(autocomplete_list[:list_len], safe=False)
 
 
