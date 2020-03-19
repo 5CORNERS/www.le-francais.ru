@@ -213,7 +213,7 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3):
 	SELECT * FROM
 	(SELECT levenshtein_less_equal(%s, v.infinitive_no_accents,1,1,1, 12) as levenshtein, v.infinitive, v.* 
 	FROM conjugation_verb v
-	ORDER BY levenshtein, v.count LIMIT %s) t 
+	ORDER BY levenshtein, v.count DESC LIMIT %s) t 
 	WHERE t.levenshtein <> 0 and t.levenshtein < %s''', [s, limit, max_distance])
 	for verb in verbs:
 		if reflexive and verb.can_reflexive or verb.reflexive_only:
