@@ -4,6 +4,9 @@ from conjugation.consts import LAYOUT_EN, LAYOUT_RU, VOWELS_LIST
 
 import collections
 
+from conjugation.views import remove_autocomplete_duplicates
+
+
 def flatten(d, parent_key='', sep='_'):
 	items = []
 	for k, v in d.items():
@@ -227,4 +230,23 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3):
 			isInfinitive=True,
 			cls='levenshtein',
 		))
+	return autocomplete_list
+
+
+def autocomplete_verb(s, reflexive, list_len):
+	autocomplete_list = autocomplete_forms_startswith(s, reflexive)
+	if len(autocomplete_list) < list_len:
+		if len(autocomplete_list) == 1:
+			max_distance = 1
+		else:
+			max_distance = 3
+		autocomplete_list += autocomplete_infinitive_levenshtein(
+			s, reflexive,
+			list_len - len(autocomplete_list),
+			max_distance)
+	if len(autocomplete_list) < list_len:
+		autocomplete_list += autocomplete_infinitive_contains(
+			s, reflexive,
+			limit=list_len - len(autocomplete_list))
+	autocomplete_list = remove_autocomplete_duplicates(autocomplete_list)
 	return autocomplete_list
