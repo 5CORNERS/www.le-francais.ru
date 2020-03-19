@@ -147,6 +147,8 @@ def get_autocomplete_list(request):
 		reflexive = True
 		s = term[3:] if term.startswith('se ') else term[2:]
 	autocomplete_list = autocomplete_verb(s, reflexive, list_len)
+	for item in autocomplete_list[10:]:
+		item.update((k, v + ' load-more hide') for k, v in item.items() if k == 'cls' and 'hide' not in v)
 	return JsonResponse(autocomplete_list[:list_len], safe=False)
 
 

@@ -132,6 +132,11 @@ h4 {
 	padding: 3px 0;
 	box-shadow: rgba(32, 33, 36, 0.21) 1px 3px 9px 3px;
 	border-radius: 0.3rem;
+
+     /*max-height: 360px;*/
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
 }
 
 .ui-menu-item-wrapper>b {
@@ -152,6 +157,10 @@ ul.ui-autocomplete>li>a.ui-menu-item-wrapper{
     text-decoration: none !important;
     display: block;
     width: 100%;
+}
+
+ul.ui-autocomplete>li.load-more.hide{
+    display: none;
 }
 
 .is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive, .starts-with + .contains, .starts-with + .levenshtein, .contains + .levenshtein {
