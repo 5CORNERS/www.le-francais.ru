@@ -4,8 +4,6 @@ from conjugation.consts import LAYOUT_EN, LAYOUT_RU, VOWELS_LIST
 
 import collections
 
-from conjugation.views import remove_autocomplete_duplicates
-
 
 def flatten(d, parent_key='', sep='_'):
 	items = []
@@ -249,4 +247,16 @@ def autocomplete_verb(s, reflexive, list_len):
 			s, reflexive,
 			limit=list_len - len(autocomplete_list))
 	autocomplete_list = remove_autocomplete_duplicates(autocomplete_list)
+	return autocomplete_list
+
+
+def remove_autocomplete_duplicates(autocomplete_list):
+	reversed_auto = list(reversed(autocomplete_list))
+	urls = []
+	for i, item in reversed(list(enumerate(reversed_auto))):
+		if item['url'] in urls:
+			reversed_auto.pop(i)
+		else:
+			urls.append(item['url'])
+	autocomplete_list = list(reversed(reversed_auto))
 	return autocomplete_list
