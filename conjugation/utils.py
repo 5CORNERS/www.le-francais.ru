@@ -31,56 +31,64 @@ def index_tuple(l, value, index=0):
 	raise ValueError("list.index(x): x not in list")
 
 
-def autocomplete_forms_startswith(s, reflexive=False, limit=50):
+def autocomplete_forms_startswith(s, reflexive=False, limit=50,
+                                  show_infinitives=10, show_forms=5):
 	"""
 	Returns autocomplete list of verbs which forms starts with search string
+	:param show_infinitives: max index of infinitives item, after which others will be hidden
+	:param show_forms: max index of forms item, after which others will be hidden
 	:param limit: limits the sql request
 	:param reflexive: returns only reflexive verbs
 	:param s: search string
 	:return: autocomplete list of dictionaries with "url", "verb" and "html" keys
 	"""
-	autocomplete_list = []
 	autocomplete_list_infinitives = []
 	autocomplete_list_forms = []
 	verbs = search_verbs_with_forms(s, limit)
-	verbs.sort(key=lambda x: x[1][0][2] != 'infinitive-present')
+	# verbs.sort(key=lambda x: x[1][0][2] != 'infinitive-present')
+	infinitives_len = 0
+	forms_len = 0
 	for verb, forms_list in verbs:
-		cur_reflexive = False  # indicates that current verb must be reflexive
+		infinitive_contains_search_string = forms_list[0][2] == 'infinitive-present'
+		current_is_reflexive = False
+		infinitive = verb.infinitive
 		if reflexive and verb.can_reflexive or verb.reflexive_only:
 			verb = verb.reflexiveverb
-			cur_reflexive = True
+			current_is_reflexive = True
 		elif reflexive and not (verb.can_reflexive or verb.reflexive_only):
-			continue
-		first_form = forms_list[0][0]
-		is_infinitive = forms_list[0][2] == 'infinitive-present'
-		if cur_reflexive and is_infinitive:
-			if first_form[0] in VOWELS_LIST:
-				r_html = f"s'<b>{first_form[:len(s)]}</b>{first_form[len(s):]}"
-				first_form = f"s'{first_form}"
-			else:
-				r_html = f"se <b>{first_form[:len(s)]}</b>{first_form[len(s):]}"
-				first_form = f"se {first_form}"
-		if first_form != verb.infinitive:
-			forms = list(dict.fromkeys([a[0] for a in forms_list]))
+			continue # if user type s' or se skip non reflexive verbs
+		cls = 'starts-with'
+		if not infinitive_contains_search_string:
+			cls = cls + '-form'
+			forms_len += 1
+			if forms_len > show_forms:
+				cls = cls + ' load-more hide'
+			forms = list(dict.fromkeys([a[0] for a in forms_list])) # removing duplicate forms
 			forms_html = ', '.join(
 				[f'<b>{f[:len(s)]}</b>{f[len(s):]}' for f in forms]
-			)
-			html = f'{verb.infinitive} ({forms_html})'
-			url =  f'{verb.get_absolute_url()}#form{forms_list[0][4] or 0}'
+			) # comma-separated forms list
+			html = f'{infinitive} ({forms_html})'
+			url = f'{verb.get_absolute_url()}#form{forms_list[0][4] or 0}'
 		else:
+			cls = cls + '-infinitive'
+			infinitives_len +=1
+			if infinitives_len > show_infinitives:
+				cls = cls + ' load-more hide'
 			url = verb.get_absolute_url()
-			if cur_reflexive:
-				html = r_html
+			html = f"<b>{infinitive[:len(s)]}</b>{infinitive[len(s):]}"
+		if current_is_reflexive:
+			if infinitive[0] in VOWELS_LIST:
+				html = "s'" + html
 			else:
-				html = f'<b>{verb.infinitive[:len(s)]}</b>{verb.infinitive[len(s):]}'
+				html = 'se ' + html
 		item = dict(
 			url=url,
 			verb=verb.infinitive,
 			html=html,
-			isInfinitive=is_infinitive,
-			cls='starts-with',
+			isInfinitive=infinitive_contains_search_string,
+			cls=cls,
 		)
-		if is_infinitive:
+		if infinitive_contains_search_string:
 			autocomplete_list_infinitives.append(item)
 		else:
 			autocomplete_list_forms.append(item)
@@ -88,9 +96,10 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50):
 	return autocomplete_list
 
 
-def autocomplete_infinitive_contains(s, reflexive=False, limit=50):
+def autocomplete_infinitive_contains(s, reflexive=False, limit=50, max_show=5):
 	"""
 
+	:param max_show:
 	:param s:
 	:param reflexive:
 	:param limit:
@@ -98,12 +107,18 @@ def autocomplete_infinitive_contains(s, reflexive=False, limit=50):
 	"""
 	autocomplete_list = []
 	from conjugation.models import Verb
-	verbs = Verb.objects.filter(infinitive_no_accents__contains=s).exclude(infinitive_no_accents__startswith=s).order_by('-count')[:limit]
-	for verb in verbs:
+	verbs = Verb.objects.filter(infinitive_no_accents__contains=s).exclude(
+		infinitive_no_accents__startswith=s).order_by('-count')[:limit]
+	count = 0
+	for i, verb in enumerate(verbs):
+		cls = 'contains'
 		if reflexive and verb.can_reflexive or verb.reflexive_only:
 			verb = verb.reflexiveverb
 		elif reflexive and not (verb.can_reflexive or verb.reflexive_only):
 			continue
+		count += 1
+		if count > max_show:
+			cls += ' load-more hide'
 		pos_start = verb.infinitive_no_accents.find(s)
 		pos_end = pos_start + len(s)
 		html = f"{verb.infinitive[:pos_start]}<b>{verb.infinitive[pos_start:pos_end]}</b>{verb.infinitive[pos_end:]}"
@@ -112,7 +127,7 @@ def autocomplete_infinitive_contains(s, reflexive=False, limit=50):
 			verb=verb.infinitive,
 			html=html,
 			isInfinitive=True,
-			cls='contains',
+			cls=cls,
 		))
 	return autocomplete_list
 
@@ -191,7 +206,8 @@ def search_verbs_with_forms(s, limit=50, exact=False):
 		"SELECT * FROM conjugation_verb "
 		"WHERE position(main_part_no_accents in %s)=1 "
 		"OR main_part_no_accents LIKE %s "
-		"ORDER BY count DESC, CHAR_LENGTH (main_part) DESC LIMIT %s", [s, like_s, limit+3]
+		"ORDER BY count DESC, CHAR_LENGTH (main_part) DESC LIMIT %s",
+		[s, like_s, limit + 3]
 	))
 	for searching_verb in verbs_for_search:
 		found_forms = searching_verb.find_forms(s, exact=exact)
@@ -206,7 +222,8 @@ def switch_keyboard_layout(s: str):
 	return s
 
 
-def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3, min_distance_hide=1):
+def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3,
+                                        max_show=5):
 	from .models import Verb
 	autocomplete_list = []
 	verbs = Verb.objects.raw('''
@@ -214,15 +231,19 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3, min
 	(SELECT levenshtein_less_equal(%s, v.infinitive_no_accents,1,1,1, 12) as levenshtein, v.infinitive, v.* 
 	FROM conjugation_verb v
 	ORDER BY levenshtein, v.count DESC LIMIT %s) t 
-	WHERE t.levenshtein <> 0 and t.levenshtein < %s''', [s, limit, max_distance])
+	WHERE t.levenshtein <> 0 and t.levenshtein < %s''',
+	                         [s, limit, max_distance])
+
+	count = 0
 	for verb in verbs:
 		cls = 'levenshtein'
-		if verb.levenshtein >= min_distance_hide:
-			cls += ' load-more hide'
 		if reflexive and verb.can_reflexive or verb.reflexive_only:
 			verb = verb.reflexiveverb
 		elif reflexive and not (verb.can_reflexive or verb.reflexive_only):
 			continue
+		count += 1
+		if count > max_show:
+			cls += ' load-more hide'
 		html = verb.infinitive
 		autocomplete_list.append(dict(
 			url=verb.get_absolute_url(),
@@ -234,32 +255,32 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3, min
 	return autocomplete_list
 
 
-def autocomplete_verb(s, reflexive, list_len):
-	autocomplete_list = autocomplete_forms_startswith(s, reflexive)
+def autocomplete_verb(
+		search_string, is_reflexive, list_len, show_startswith_infinitive=99,
+		show_startswith_forms=99, show_starts_with_levenshtein=5,
+		show_startswith_contains=5):
+	autocomplete_list = autocomplete_forms_startswith(
+		search_string,
+		is_reflexive,
+		show_infinitives=show_startswith_infinitive,
+		show_forms=show_startswith_forms)
 	if len(autocomplete_list) < list_len:
-		if len(autocomplete_list) == 1:
-			hide_distance = 1
-		else:
-			hide_distance = 3
 		autocomplete_list += autocomplete_infinitive_levenshtein(
-			s, reflexive,
-			list_len - len(autocomplete_list),
-			3, hide_distance)
+			search_string,
+             is_reflexive,
+             limit=list_len - len(autocomplete_list),
+             max_distance=3,
+             max_show=show_starts_with_levenshtein)
 	if len(autocomplete_list) < list_len:
 		autocomplete_list += autocomplete_infinitive_contains(
-			s, reflexive,
-			limit=list_len - len(autocomplete_list))
+			search_string,
+			is_reflexive,
+			limit=list_len - len(autocomplete_list),
+			max_show=show_startswith_contains)
 	autocomplete_list = remove_autocomplete_duplicates(autocomplete_list)
 	return autocomplete_list
 
 
 def remove_autocomplete_duplicates(autocomplete_list):
-	reversed_auto = list(reversed(autocomplete_list))
-	urls = []
-	for i, item in reversed(list(enumerate(reversed_auto))):
-		if item['url'] in urls:
-			reversed_auto.pop(i)
-		else:
-			urls.append(item['url'])
-	autocomplete_list = list(reversed(reversed_auto))
-	return autocomplete_list
+	return [item for i, item in enumerate(autocomplete_list)
+	        if not any(_item['url'] == item['url'] for _item in autocomplete_list[:i])]
