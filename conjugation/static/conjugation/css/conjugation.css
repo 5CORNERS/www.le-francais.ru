@@ -128,23 +128,23 @@ h4 {
 }
 
 .ui-autocomplete {
-	margin-top: 3px;
-	padding: 3px 0;
-	box-shadow: rgba(32, 33, 36, 0.21) 1px 3px 9px 3px;
-	border-radius: 0.3rem;
+    margin-top: 3px;
+    padding: 3px 0;
+    box-shadow: rgba(32, 33, 36, 0.21) 1px 3px 9px 3px;
+    border-radius: 0.3rem;
 
-     /*max-height: 360px;*/
+    /*max-height: 360px;*/
     overflow-y: auto;
     /* prevent horizontal scrollbar */
     overflow-x: hidden;
 }
 
-.ui-menu-item-wrapper>b {
+.ui-menu-item-wrapper > b {
     color: var(--blue);
 }
 
-.ui-state-active{
-     border:0 !important;
+.ui-state-active {
+    border: 0 !important;
     background: #8bb8df !important;
     margin: 0 !important;
 }
@@ -153,17 +153,17 @@ h4 {
     color: var(--white);
 }
 
-ul.ui-autocomplete>li>a.ui-menu-item-wrapper{
+ul.ui-autocomplete > li > a.ui-menu-item-wrapper {
     text-decoration: none !important;
     display: block;
     width: 100%;
 }
 
-ul.ui-autocomplete>li.load-more.hide{
+ul.ui-autocomplete > li.load-more.hide {
     display: none;
 }
 
-.is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive, .starts-with + .contains, .starts-with + .levenshtein, .contains + .levenshtein {
+.is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive, .starts-with-infinitive + .starts-with-form, .starts-with-infinitive + .contains, .starts-with-infinitive + .levenshtein, .starts-with-form + .contains, .starts-with-form + .levenshtein, .contains + .levenshtein {
     margin-top: 5px;
     padding-top: 5px;
     border-top: 1px solid #dee2e6;
@@ -175,11 +175,11 @@ ul.ui-autocomplete>li.load-more.hide{
     text-overflow: ellipsis;
 }
 
-.is-not-infinitive.starts-with {
+.starts-with-form {
     background-color: rgba(255, 193, 7, 0.4);
 }
 
-.is-infinitive.starts-with {
+.starts-with-infinitive {
     background-color: rgba(40, 167, 69, 0.08);
 }
 
