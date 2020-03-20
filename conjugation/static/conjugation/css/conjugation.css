@@ -153,10 +153,14 @@ h4 {
     color: var(--white);
 }
 
-ul.ui-autocomplete > li > a.ui-menu-item-wrapper {
-    text-decoration: none !important;
+a.ui-menu-item-wrapper {
     display: block;
     width: 100%;
+}
+
+ul.ui-autocomplete > li > a.ui-menu-item-wrapper {
+    text-decoration: none !important;
+
 }
 
 ul.ui-autocomplete > li.load-more.hide {
@@ -167,10 +171,14 @@ ul.ui-autocomplete > li.load-more.action {
     text-align: center;
 }
 
-.is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive, .starts-with-infinitive + .starts-with-form, .starts-with-infinitive + .contains, .starts-with-infinitive + .levenshtein, .starts-with-form + .contains, .starts-with-form + .levenshtein, .contains + .levenshtein {
+.is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive, .starts-with-infinitive + .starts-with-form, .starts-with-infinitive + .contains, .starts-with-infinitive + .levenshtein, .starts-with-form + .contains, .starts-with-form + .levenshtein, .levenshtein + .contains {
     margin-top: 5px;
     padding-top: 5px;
     border-top: 1px solid #dee2e6;
+}
+
+.autocomplete-item {
+    padding-bottom: 5px;
 }
 
 .ui-menu-item.verb-autocomplete-item {
