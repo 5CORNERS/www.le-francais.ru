@@ -59,7 +59,7 @@ $(window).ready(function () {
       $('.ui-menu').width($('#search-verb').innerWidth()).
         css('max-height', $(window).height() - $('#search-verb').offset().top - $('#search-verb').height() - 20);
       if ($('.load-more.hide').length){
-        $('.ui-autocomplete').append($("<li class='verb-autocomplete-item ui-menu-item load-more action'><a class='ui-menu-item-wrapper'>Показать всё</a></li>").on('click', event => {
+        $('.ui-autocomplete').append($("<li class='verb-autocomplete-item ui-menu-item load-more action'><a class='ui-menu-item-wrapper'>Показать ещё</a></li>").on('click', event => {
           showHiddenAutocomplete()
         }));
         $('.ui-autocomplete.hide').on('focus', event => {
