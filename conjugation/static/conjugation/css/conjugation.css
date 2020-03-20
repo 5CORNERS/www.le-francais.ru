@@ -163,6 +163,10 @@ ul.ui-autocomplete > li.load-more.hide {
     display: none;
 }
 
+ul.ui-autocomplete > li.load-more.action {
+    text-align: center;
+}
+
 .is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive, .starts-with-infinitive + .starts-with-form, .starts-with-infinitive + .contains, .starts-with-infinitive + .levenshtein, .starts-with-form + .contains, .starts-with-form + .levenshtein, .contains + .levenshtein {
     margin-top: 5px;
     padding-top: 5px;
