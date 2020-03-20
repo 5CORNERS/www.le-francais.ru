@@ -1,7 +1,8 @@
 {% extends 'conjugation/_base.html' %}
-{% load static conjugation_tags%}
+{% load static conjugation_tags %}
 
-{% block title %}Спряжение французских глаголов — глагол «{{ search_string }}» не найден{% endblock %}
+{% block title %}Спряжение французских глаголов — глагол «{{ search_string }}»
+    не найден{% endblock %}
 
 {% block head_advertisments %}
     {% conjugation_advertisement_head "lf_fr_conj_rsb_01" %}
@@ -13,18 +14,24 @@
 {% block first_row_content %}
 
     {% if autocomplete_list %}
-        <p>Мы не нашли глагола «<b>{{ search_string }}</b>» по точному совпадению. :(</p>
-        <p>Вот список глаголов, которые начинаются с этих букв или содержат их
-        в середине или же в одной из форм спряжения — возможно, то, что Вы
-        ищете, окажется среди них (если список большой, он ограничен
-        пятьюдесятью записями наиболее частозапрашиваемых глаголов).</p>
+        <p>Мы не нашли глагола «<b>{{ search_string }}</b>» по точному
+            совпадению. :(</p>
+        <p>Вот список глаголов, которые начинаются с этих букв, содержат их
+            в середине или же в одной из форм спряжения. Кроме того, в случае,
+            если вы сделали одну или две опечатки, мы предлагаеи список
+            глаголов, близких по написанию — возможно, то, что Вы
+            ищете, окажется в этом списке</p>
+
+        <p>В каждой группе глаголы отсортированы по частоте запросов. Если список большой, он ограничен
+            пятьюдесятью записями наиболее частозапрашиваемых глаголов.</p>
         <ul class="">
-        {% for autocomplete_item in autocomplete_list %}
-            <li class="{% if autocomplete_item.isInfinitive %}is-infinitive{% else %}is-not-infinitive{% endif %}">
-                <a class="no-color ui-menu-item-wrapper" href="{{ autocomplete_item.url }}">{{ autocomplete_item.html|safe }}</a>
-            </li>
-        {% endfor %}
-    </ul>{% else %}
+            {% for autocomplete_item in autocomplete_list %}
+                <li class="autocomplete-item {% if autocomplete_item.isInfinitive %}is-infinitive{% else %}is-not-infinitive{% endif %} {{ autocomplete_item.cls }}">
+                    <a class="no-color ui-menu-item-wrapper"
+                       href="{{ autocomplete_item.url }}">{{ autocomplete_item.html|safe }}</a>
+                </li>
+            {% endfor %}
+        </ul>{% else %}
         <p>Мы не нашли глагол «<b>{{ search_string }}</b>» ни по точному, ни по
             частичному совпадению. Похоже, здесь какая-то опечатка.</p>
     {% endif %}
