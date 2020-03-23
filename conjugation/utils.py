@@ -256,27 +256,36 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3,
 
 
 def autocomplete_verb(
-		search_string, is_reflexive, list_len, show_startswith_infinitive=99,
+		search_string, is_reflexive, limit, show_startswith_infinitive=99,
 		show_startswith_forms=99, show_starts_with_levenshtein=5,
 		show_startswith_contains=5):
-	autocomplete_list = autocomplete_forms_startswith(
+	autocomplete_list_startswith = autocomplete_forms_startswith(
 		search_string,
 		is_reflexive,
 		show_infinitives=show_startswith_infinitive,
 		show_forms=show_startswith_forms)
-	if len(autocomplete_list) < list_len:
-		autocomplete_list += autocomplete_infinitive_levenshtein(
+	current_len = len(autocomplete_list_startswith)
+
+	autocomplete_list_levenshtein = []
+	if current_len < limit:
+		autocomplete_list_levenshtein = autocomplete_infinitive_levenshtein(
 			search_string,
              is_reflexive,
-             limit=list_len - len(autocomplete_list),
+             limit=limit - current_len,
              max_distance=3,
              max_show=show_starts_with_levenshtein)
-	if len(autocomplete_list) < list_len:
-		autocomplete_list += autocomplete_infinitive_contains(
+		current_len = current_len + len(autocomplete_list_levenshtein)
+
+	autocomplete_list_contains = []
+	if current_len < limit:
+		autocomplete_list_contains = autocomplete_infinitive_contains(
 			search_string,
 			is_reflexive,
-			limit=list_len - len(autocomplete_list),
-			max_show=show_startswith_contains)
+			limit=limit - current_len,
+			max_show=show_startswith_contains
+		)
+
+	autocomplete_list = autocomplete_list_startswith + autocomplete_list_contains + autocomplete_list_levenshtein
 	autocomplete_list = remove_autocomplete_duplicates(autocomplete_list)
 	return autocomplete_list
 
