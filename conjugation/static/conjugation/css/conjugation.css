@@ -171,7 +171,7 @@ ul.ui-autocomplete > li.load-more.action {
     text-align: center;
 }
 
-.is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive, .starts-with-infinitive + .starts-with-form, .starts-with-infinitive + .contains, .starts-with-infinitive + .levenshtein, .starts-with-form + .contains, .starts-with-form + .levenshtein, .levenshtein + .contains {
+.is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive, .starts-with-infinitive + .starts-with-form, .starts-with-infinitive + .contains, .starts-with-infinitive + .levenshtein, .starts-with-form + .contains, .starts-with-form + .levenshtein, .levenshtein + .contains, .contains + .levenshtein {
     margin-top: 5px;
     padding-top: 5px;
     border-top: 1px solid #dee2e6;
@@ -197,4 +197,9 @@ ul.ui-autocomplete > li.load-more.action {
 
 .levenshtein {
     background-color: #007bff21;
+    font-style: italic;
+}
+
+.levenshtein>a:after{
+    content: ' ?';
 }
