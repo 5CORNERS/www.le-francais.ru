@@ -192,7 +192,7 @@ ul.ui-autocomplete > li.load-more.action {
 }
 
 .starts-with-infinitive {
-    background-color: rgba(40, 167, 69, 0.08);
+    /*background-color: rgba(40, 167, 69, 0.08);*/
 }
 
 .levenshtein {
