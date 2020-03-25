@@ -149,6 +149,8 @@ class Message(models.Model):
 					payments_query = Payment.objects.filter(status__in=['CONFIRMED', 'AUTHORIZED'])
 					if self.recipients_filter.last_payment_was:
 						payments_query = payments_query.filter(update_date__lte=self.recipients_filter.last_payment_was)
+					if self.recipients_filter.first_payment_was:
+						payments_query = payments_query.filter(update_date__gte=self.recipients_filter.first_payment_was)
 					wanted_pks = [int(p.customer_key) for p in payments_query]
 					recipients = recipients.filter(id__in=wanted_pks)
 				elif recipients_filter == UsersFilter.USERS_WITHOUT_ACTIVATIONS:
