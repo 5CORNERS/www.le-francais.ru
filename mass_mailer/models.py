@@ -88,13 +88,14 @@ class UsersFilter(models.Model):
 		(USERS_WITHOUT_ACTIVATIONS, 'Users w/o activations'),
 		(USERS_WITH_PAYMENTS, 'Users with payments'),
 	]
+	name = models.CharField(max_length=64)
 	filters = ChoiceArrayField(
 		models.CharField(max_length=12, choices=FILTERS), default=list,
 		blank=True
 	)
-	name = models.CharField(max_length=64)
 	first_payment_was = models.DateField(null=True)
 	last_payment_was = models.DateField(null=True)
+	manual_email_list = models.TextField(max_length=1024, help_text='Comma-separated list of emails, for testing purposes.', default=None, null=True)
 
 	def __str__(self):
 		return self.name
@@ -143,6 +144,9 @@ class Message(models.Model):
 	def get_recipients(self):
 		recipients = User.objects.all()
 		if self.recipients_filter:
+			if self.recipients_filter.manual_email_list:
+				email_list = [email.strip() for email in self.recipients_filter.manual_email_list.split(',')]
+				return recipients.filter(email__in=email_list)
 			for recipients_filter in self.recipients_filter.filters.copy():
 				if recipients_filter == UsersFilter.USERS_WITH_PAYMENTS:
 					from tinkoff_merchant.models import Payment
@@ -206,9 +210,9 @@ class Message(models.Model):
 			user=recipient.user,
 			profile=recipient,
 			last_payment={
-				'date': last_payment.update_date,
+				'date': last_payment.update_date if last_payment else None,
 				'cups_count': sum(
-					item.site_quantity for item in last_payment.items())
+					item.site_quantity for item in last_payment.items()) if last_payment else 0
 			}
 		)
 		return context
