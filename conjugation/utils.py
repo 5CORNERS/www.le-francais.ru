@@ -272,7 +272,7 @@ def autocomplete_verb(
 			search_string,
              is_reflexive,
              limit=limit - current_len,
-             max_distance=3,
+             max_distance=3 if current_len else 4,
              max_show=show_starts_with_levenshtein)
 		current_len = current_len + len(autocomplete_list_levenshtein)
 
