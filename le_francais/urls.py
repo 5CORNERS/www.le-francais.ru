@@ -29,6 +29,7 @@ from pybb.views import ProfileEditView
 from search import views as search_views
 from tinkoff_merchant.urls import urlpatterns as tinkoff_urls
 from le_francais_dictionary.urls import urlpatterns as dictionary_urls
+from mass_mailer.urls import urlpatterns as mass_mailer_urls
 
 extra = getattr(settings, setting_name('TRAILING_SLASH'), True) and '/' or ''
 urlpatterns = [
@@ -97,6 +98,7 @@ urlpatterns = [
 
 
     url(r'^le_nombres/', include('le_nombres.urls')),
+    url(r'^', include(mass_mailer_urls, namespace='mass_mailer')),
     url(r'^', include(meta_urls, namespace='meta')),
     url(r'^', include(favicon_urls, namespace='favicon')),
     url(r'^', include('social_django.urls'.format(extra), namespace='social')),
