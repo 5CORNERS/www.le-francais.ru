@@ -171,7 +171,7 @@ class Message(models.Model):
 					pk__in=[u.pk for u in self.sent.all()])
 		return recipients
 
-	def send_messages(self):
+	def send(self):
 		backend = self.get_backend()
 		emails = []
 		recipients = self.get_recipients()
@@ -192,7 +192,7 @@ class Message(models.Model):
 				)
 				email_message.attach_alternative(self.get_html_body_for(recipient.mailer_profile), 'text/html')
 				emails.append(email_message)
-			sent_count = backend.send_messages(emails)
+			sent_count = backend.send(emails)
 			self.sent.add(*chunk[:sent_count])
 			time.sleep(1)
 
