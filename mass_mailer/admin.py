@@ -4,9 +4,15 @@ from django.contrib import admin
 from mass_mailer.models import Message, EmailSettings, UsersFilter
 
 
+def send(modeladmin, request, qs):
+	for q in qs:
+		q.send()
+
+
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
 	readonly_fields = ['sent']
+	actions = [send]
 	pass
 
 @admin.register(EmailSettings)
