@@ -67,7 +67,7 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50,
 			forms_html = ', '.join(
 				[f'<b>{f[:len(s)]}</b>{f[len(s):]}' for f in forms]
 			) # comma-separated forms list
-			html = f'{infinitive} ({forms_html})'
+			html = f'{infinitive} <span style="font-size: 1.2em;">→</span> {forms_html}'
 			url = f'{verb.get_absolute_url()}#form{forms_list[0][4] or 0}'
 		else:
 			cls = cls + '-infinitive'
@@ -92,6 +92,13 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50,
 			autocomplete_list_infinitives.append(item)
 		else:
 			autocomplete_list_forms.append(item)
+	if autocomplete_list_infinitives:
+		autocomplete_list_infinitives[-1]['cls'] = autocomplete_list_infinitives[-1][
+		                               'cls'] + ' last-of-type'
+	if autocomplete_list_forms:
+		autocomplete_list_forms[-1]['cls'] = autocomplete_list_forms[-1][
+		                               'cls'] + ' last-of-type'
+
 	autocomplete_list = autocomplete_list_infinitives + autocomplete_list_forms
 	return autocomplete_list
 
@@ -129,6 +136,10 @@ def autocomplete_infinitive_contains(s, reflexive=False, limit=50, max_show=5):
 			isInfinitive=True,
 			cls=cls,
 		))
+	if autocomplete_list:
+		autocomplete_list[-1]['cls'] = autocomplete_list[-1][
+		                               'cls'] + ' last-of-type'
+
 	return autocomplete_list
 
 
@@ -222,20 +233,31 @@ def switch_keyboard_layout(s: str):
 	return s
 
 
+def message(val, param1, param2, param5):
+	n10 = val % 10
+	n100 = val % 100
+	if n10 == 1 and n100 != 11:
+		return f'{val} {param1}'
+	elif n10 in [2, 3, 4] and n100 not in [12, 13, 14]:
+		return f'{val} {param2}'
+	else:
+		return f'{val} {param5}'
+
+
 def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3,
                                         max_show=5):
 	from .models import Verb
 	autocomplete_list = []
-	verbs = Verb.objects.raw('''
-	SELECT * FROM
-	(SELECT levenshtein_less_equal(%s, v.infinitive_no_accents,1,1,1, 12) as levenshtein, v.infinitive, v.* 
+	verbs = Verb.objects.raw('''SELECT * FROM
+	(SELECT levenshtein_less_equal(%s, v.infinitive_no_accents,1,1,1, 12) as levenshtein, v.*
 	FROM conjugation_verb v
-	ORDER BY levenshtein, v.count DESC LIMIT %s) t 
-	WHERE t.levenshtein <> 0 and t.levenshtein < %s''',
-	                         [s, limit, max_distance])
+	ORDER BY v.count DESC, levenshtein) t
+	WHERE t.levenshtein <> 0 and t.levenshtein < %s LIMIT %s''',
+	                         [s, max_distance, limit])
 
 	count = 0
 	for verb in verbs:
+		levenshtein = verb.levenshtein
 		cls = 'levenshtein'
 		if reflexive and verb.can_reflexive or verb.reflexive_only:
 			verb = verb.reflexiveverb
@@ -244,7 +266,7 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3,
 		count += 1
 		if count > max_show:
 			cls += ' load-more hide'
-		html = verb.infinitive
+		html = f'{verb.infinitive} ? <span class="levenshtein-typos">{message(levenshtein, "опечатка","опечатки","опечаток")}</span>'
 		autocomplete_list.append(dict(
 			url=verb.get_absolute_url(),
 			verb=verb.infinitive,
@@ -252,6 +274,8 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3,
 			isInfinitive=True,
 			cls=cls,
 		))
+	if autocomplete_list:
+		autocomplete_list[-1]['cls'] = autocomplete_list[-1]['cls'] + ' last-of-type'
 	return autocomplete_list
 
 
@@ -292,4 +316,4 @@ def autocomplete_verb(
 
 def remove_autocomplete_duplicates(autocomplete_list):
 	return [item for i, item in enumerate(autocomplete_list)
-	        if not any(_item['url'] == item['url'] for _item in autocomplete_list[:i])]
+	        if not any(_item['url'].split('#')[0] == item['url'] for _item in autocomplete_list[:i])]
