@@ -96,6 +96,8 @@ class UsersFilter(models.Model):
 	first_payment_was = models.DateField(null=True)
 	last_payment_was = models.DateField(null=True)
 	manual_email_list = models.TextField(max_length=1024, help_text='Comma-separated list of emails, for testing purposes.', default=None, null=True)
+	ignore_subscriptions = models.BooleanField(default=False)
+	send_once = models.BooleanField(default=True)
 
 	def __str__(self):
 		return self.name
@@ -147,22 +149,26 @@ class Message(models.Model):
 			if self.recipients_filter.manual_email_list:
 				email_list = [email.strip() for email in self.recipients_filter.manual_email_list.split(',')]
 				return recipients.filter(email__in=email_list)
-			for recipients_filter in self.recipients_filter.filters.copy():
-				if recipients_filter == UsersFilter.USERS_WITH_PAYMENTS:
-					from tinkoff_merchant.models import Payment
-					payments_query = Payment.objects.filter(status__in=['CONFIRMED', 'AUTHORIZED'])
-					if self.recipients_filter.last_payment_was:
-						payments_query = payments_query.filter(update_date__lte=self.recipients_filter.last_payment_was)
-					if self.recipients_filter.first_payment_was:
-						payments_query = payments_query.filter(update_date__gte=self.recipients_filter.first_payment_was)
-					wanted_pks = [int(p.customer_key) for p in payments_query]
-					recipients = recipients.filter(id__in=wanted_pks)
-				elif recipients_filter == UsersFilter.USERS_WITHOUT_ACTIVATIONS:
-					recipients = recipients.filter(payment__isnull=True)
-		recipients = recipients.exclude(pk__in=[u.pk for u in self.sent.all()])
-		recipients = recipients.exclude(pk__in=[p.user.pk for p in
-		                                        Profile.objects.filter(
-			                                        subscribed=False)])
+			else:
+				for recipients_filter in self.recipients_filter.filters.copy():
+					if recipients_filter == UsersFilter.USERS_WITH_PAYMENTS:
+						from tinkoff_merchant.models import Payment
+						payments_query = Payment.objects.filter(status__in=['CONFIRMED', 'AUTHORIZED'])
+						if self.recipients_filter.last_payment_was:
+							payments_query = payments_query.filter(update_date__lte=self.recipients_filter.last_payment_was)
+						if self.recipients_filter.first_payment_was:
+							payments_query = payments_query.filter(update_date__gte=self.recipients_filter.first_payment_was)
+						wanted_pks = [int(p.customer_key) for p in payments_query]
+						recipients = recipients.filter(id__in=wanted_pks)
+					elif recipients_filter == UsersFilter.USERS_WITHOUT_ACTIVATIONS:
+						recipients = recipients.filter(payment__isnull=True)
+			if not self.recipients_filter.ignore_subscriptions:
+				recipients = recipients.exclude(pk__in=[p.user.pk for p in
+				                                        Profile.objects.filter(
+					                                        subscribed=False)])
+			if self.recipients_filter.send_once:
+				recipients = recipients.exclude(
+					pk__in=[u.pk for u in self.sent.all()])
 		return recipients
 
 	def send_messages(self):
