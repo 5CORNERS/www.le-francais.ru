@@ -1,8 +1,7 @@
 {% extends 'mass_mailer/base.html' %}
 {% load mass_mailer_tags %}
 {% block body %}
-<p>Добрый день! Это Илья Думов, автор le-francais.ru. Мы с Вами заочно знакомы,
-    потому что Вы занимаетесь на моем сайте. Я заметил, что Вы
+<p>Добрый день! Это Илья Думов, автор le-francais.ru. Мы с Вами заочно знакомы — Вы занимаетесь на моем сайте. Я заметил, что Вы
     {{ last_payment.date|date:'d-m-Y' }} приобрели
         {% message last_payment.cups_count 'чашечку' 'чашечки' 'чашечек' %} и до сих пор {% if last_payment.cups_count > 1 %}их{% else %}eё{% endif %} не расходуете.
 </p>
