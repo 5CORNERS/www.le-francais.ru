@@ -6,6 +6,7 @@ from mass_mailer.models import Message, EmailSettings, UsersFilter
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
+	readonly_fields = ['sent']
 	pass
 
 @admin.register(EmailSettings)
