@@ -129,13 +129,10 @@ h4 {
 
 .ui-autocomplete {
     margin-top: 3px;
-    padding: 3px 0;
-    box-shadow: rgba(32, 33, 36, 0.21) 1px 3px 9px 3px;
-    border-radius: 0.3rem;
-
-    /*max-height: 360px;*/
+    /* padding:3px 0; */
+    box-shadow: rgba(32,33,36,0.21) 1px 3px 9px 3px;
+    border-radius: .3rem;
     overflow-y: auto;
-    /* prevent horizontal scrollbar */
     overflow-x: hidden;
 }
 
@@ -143,10 +140,21 @@ h4 {
     color: var(--blue);
 }
 
+.ui-menu .ui-menu-item-wrapper {
+    position: relative;
+    padding: 2px 1em 2px .4em;
+}
+
+
+.starts-with-form > .ui-menu-item-wrapper {
+    padding: 0 1em 0 .4em;
+}
+
+
 .ui-state-active {
     border: 0 !important;
     background: #8bb8df !important;
-    margin: 0 !important;
+    margin: 0 !important
 }
 
 .ui-state-active > b {
@@ -171,10 +179,10 @@ ul.ui-autocomplete > li.load-more.action {
     text-align: center;
 }
 
-.is-infinitive + .is-not-infinitive, .is-not-infinitive + .is-infinitive, .starts-with-infinitive + .starts-with-form, .starts-with-infinitive + .contains, .starts-with-infinitive + .levenshtein, .starts-with-form + .contains, .starts-with-form + .levenshtein, .levenshtein + .contains, .contains + .levenshtein {
-    margin-top: 5px;
+.starts-with-infinitive + .starts-with-form > a, .starts-with-infinitive+.contains > a, .starts-with-infinitive+.levenshtein > a, .starts-with-form+.contains > a, .starts-with-form+.levenshtein > a, .levenshtein+.contains > a, .contains+.levenshtein > a {
+    /* margin-top: 5px !important; */
     padding-top: 5px;
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid #dee2e6 !important;
 }
 
 .autocomplete-item {
@@ -200,6 +208,43 @@ ul.ui-autocomplete > li.load-more.action {
     font-style: italic;
 }
 
-.levenshtein>a:after{
-    content: ' ?';
+.levenshtein-typos {
+    float: right;
+}
+
+.ui-menu-item.verb-autocomplete-item:first-child {
+    /* padding-top: 6px; */
+}
+
+ui-menu {
+    display: inherit !important;
+}
+
+ul#ui-id-1 {
+    display: block !important;
+}
+
+li.verb-autocomplete-item:first-child > a {
+    padding-top: 6px;
+}
+
+li.verb-autocomplete-item.starts-with-form:first-child > a {
+    padding-top: 2px;
+}
+
+li.verb-autocomplete-item:last-child > a {
+    padding-bottom: 3px;
+}
+
+.last-of-type > a.ui-menu-item-wrapper {
+    padding-bottom: 6px;
+}
+
+.last-of-type.starts-with-form > a.ui-menu-item-wrapper {
+    padding-bottom: 4px;
+}
+
+.levenshtein-typos {
+    float: right;
+    color: #3333336b;
 }
