@@ -103,7 +103,7 @@
             {% endif %}
             <p><a class="button secondaryAction"
                href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a></p>
-            <div>Если у вас ещё нет аккаунта на этом сайте и в социальных сетях, то для входа надо сперва <a href="{% url 'account_signup' %}?next={% if redirect_field_value %}{{ redirect_field_value }}{% else %}{{ request.GET.next }}{% endif %}">зарегестрироваться</a>.</div>
+            <div>Если у вас ещё нет аккаунта на этом сайте и в социальных сетях, то для входа надо сперва <a href="{% url 'account_signup' %}?next={% if redirect_field_value %}{{ redirect_field_value }}{% else %}{{ request.GET.next }}{% endif %}">зарегистрироваться</a>.</div>
           </form>
         </div>
       </div>
