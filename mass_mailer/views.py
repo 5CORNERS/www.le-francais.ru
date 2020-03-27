@@ -8,6 +8,6 @@ def unsubscribe(request, key):
 		profile = Profile.objects.get(key=key)
 		profile.subscribed = False
 		profile.save()
-		return HttpResponse(f'Ваш адрес {profile.user.email} был отписан от всех рассылок.', status=200, content_type='text/plain')
+		return HttpResponse(f'Ваш адрес {profile.user.email} был отписан от всех рассылок.', status=200, content_type='text/plain; charset=UTF-8')
 	except Profile.DoesNotExist:
 		return HttpResponseNotFound
