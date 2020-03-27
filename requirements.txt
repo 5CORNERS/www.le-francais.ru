@@ -7,7 +7,7 @@ xmltodict==0.10.2
 django >= 1.11.27, < 2.0.0
 django-robots
 gunicorn==19.6.0
-psycopg2==2.7.3.2
+psycopg2==2.8.4
 python-dotenv
 whitenoise
 sorl-thumbnail==12.4a1
@@ -18,7 +18,6 @@ django-allauth==0.37.0
 social-auth-core
 social-auth-app-django
 mutagen
-pysftp
 markdown==2.6.11
 urllib3
 pymdown-extensions==5.0.0
@@ -30,6 +29,8 @@ django-timezone-field>=3.1, <4.0
 django-braces
 APScheduler==3.0.0
 regex
+google
+pysftp
 
 django-user-agents
 django-annoying
