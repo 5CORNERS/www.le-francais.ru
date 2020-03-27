@@ -1,10 +1,8 @@
 import os
 from mutagen.mp3 import EasyMP3
-import pysftp
 from io import BytesIO
 
 import eyed3
-from google.cloud import texttospeech
 from polly.api import PollyAPI
 from polly.const import LANGUAGE_CODE_FR as LANGUAGE_FR, \
 	LANGUAGE_CODE_RU as LANGUAGE_RU, VOICE_ID_LEA as POLLY_FR_VOICE_FEMALE, \
@@ -44,6 +42,7 @@ def get_url_path(language_code):
 		return ru_verbs_url
 
 def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, file_id=None, file_title=None):
+	from google.cloud import texttospeech
 	client = texttospeech.TextToSpeechClient()
 	voices = client.list_voices(language_code=language).voices
 	if genre == GENRE_FEMININE:
@@ -93,6 +92,7 @@ def amazon_polly_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
 
 def save_to_sftp(audio_stream, path, filename, file_id, file_title,
                  file_author, file_album):
+	import pysftp
 	with BytesIO() as mp3_file:
 		mp3_file.write(audio_stream)
 		mp3 = EasyMP3(mp3_file)
