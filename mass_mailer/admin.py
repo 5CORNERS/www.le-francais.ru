@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from mass_mailer.models import Message, EmailSettings, UsersFilter
+from mass_mailer.models import Message, EmailSettings, UsersFilter, Profile
 
 
 def send(modeladmin, request, qs):
@@ -13,7 +13,6 @@ def send(modeladmin, request, qs):
 class MessageAdmin(admin.ModelAdmin):
 	readonly_fields = ['sent']
 	actions = [send]
-	pass
 
 @admin.register(EmailSettings)
 class EmailSettings(admin.ModelAdmin):
@@ -21,4 +20,9 @@ class EmailSettings(admin.ModelAdmin):
 
 @admin.register(UsersFilter)
 class UsersFilterAdmin(admin.ModelAdmin):
+	raw_id_fields = ['blacklist']
+
+@admin.register(Profile)
+class MailerProfileAdmin(admin.ModelAdmin):
+	raw_id_fields = ['user']
 	pass
