@@ -49,12 +49,14 @@ class Profile(models.Model):
 	]
 	key = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
 	user = AutoOneToOneField(to=User, related_name='mailer_profile', on_delete=models.CASCADE)
-	tags = ChoiceArrayField(default=[], base_field=models.IntegerField(choices=TAG_CHOICES))
 	subscribed = models.BooleanField(default=True)
 
 	def get_unsubscribe_url(self):
 		domain = 'www.le-francais.ru'
 		return 'https://' + domain + reverse("mass_mailer:unsubscribe", kwargs={"key": self.key})
+
+	def __str__(self):
+		return str(self.user)
 
 
 class EmailSettings(models.Model):
@@ -65,8 +67,11 @@ class EmailSettings(models.Model):
 	use_tls = models.BooleanField()
 	use_ssl = models.BooleanField()
 
-	messages_per_second = models.IntegerField(default=50)
-	messages_per_hour = models.IntegerField(default=300)
+	sender_email = models.EmailField(null=True)
+	sender_username = models.CharField(max_length=100, null=True)
+
+	messages_per_connection = models.IntegerField(default=35)
+	delay_between_connections = models.IntegerField(default=10, help_text='In seconds')
 
 	def __str__(self):
 		return f'{self.username}@{self.host}:{self.port}'
@@ -80,13 +85,18 @@ class EmailSettings(models.Model):
 		             timeout=None,
 		             ssl_keyfile=None, ssl_certfile=None)
 
+	def get_sender_header(self):
+		return f'{self.sender_username} <{self.sender_email}>'
+
 
 class UsersFilter(models.Model):
 	USERS_WITHOUT_ACTIVATIONS = '0'
 	USERS_WITH_PAYMENTS = '1'
+	PAYMENTS_WITHOUT_ACTIVATIONS = '2'
 	FILTERS = [
 		(USERS_WITHOUT_ACTIVATIONS, 'Users w/o activations'),
 		(USERS_WITH_PAYMENTS, 'Users with payments'),
+		(PAYMENTS_WITHOUT_ACTIVATIONS, 'Payments w/o activations')
 	]
 	name = models.CharField(max_length=64)
 	filters = ChoiceArrayField(
@@ -95,7 +105,8 @@ class UsersFilter(models.Model):
 	)
 	first_payment_was = models.DateField(null=True)
 	last_payment_was = models.DateField(null=True)
-	manual_email_list = models.TextField(max_length=1024, help_text='Comma-separated list of emails, for testing purposes.', default=None, null=True)
+	blacklist = models.ManyToManyField(to=User, blank=True)
+	manual_email_list = models.TextField(max_length=1024, help_text='Comma-separated list of emails, for testing purposes.', default=None, null=True, blank=True)
 	ignore_subscriptions = models.BooleanField(default=False)
 	send_once = models.BooleanField(default=True)
 
@@ -104,29 +115,34 @@ class UsersFilter(models.Model):
 
 
 class Message(models.Model):
-	USERS_WITHOUT_ACTIVATIONS = 0
-	USERS_WITH_PAYMENTS = 1
-	TO_GROUPS_FILTERS = [
-		(USERS_WITHOUT_ACTIVATIONS, 'Users w/o activations'),
-		(USERS_WITH_PAYMENTS, 'Users with payments'),
-	]
-
 	template_subject = models.CharField(max_length=64, blank=True)
 	template_html = models.TextField(blank=True, help_text='You can ')
 	template_txt = models.TextField(blank=True)
-	extra_headers = JSONField(null=True, blank=True, help_text='JSON Format', default=None)
-	from_email = models.EmailField(default=settings.DEFAULT_FROM_EMAIL)
-	reply_to = models.EmailField(null=True)
-	recipients_filter = models.ForeignKey('UsersFilter', null=True, on_delete=models.SET_NULL)
-	sent = models.ManyToManyField(to=User, related_name='mass_mailer_received', null=True, blank=True)
+
+	from_username = models.CharField(max_length=64)
+	from_email = models.EmailField()
+
+	reply_to_username = models.CharField(max_length=64, null=True, blank=True)
+	reply_to_email = models.EmailField(null=True, blank=True)
+
+	extra_headers = JSONField(help_text='JSON Dict Format', default=dict, blank=True)
 
 	email_settings = models.ForeignKey('EmailSettings', on_delete=models.SET_NULL, null=True)
+	recipients_filter = models.ForeignKey('UsersFilter', null=True, on_delete=models.SET_NULL)
+
+	sent = models.ManyToManyField(to=User, related_name='mass_mailer_received', null=True, blank=True)
+
 
 	created_datetime = models.DateTimeField(auto_now_add=True)
 	send_datetime = models.DateTimeField(null=True)
 
 	def __str__(self):
 		return f'{self.template_subject}'
+
+	def get_reply_to_header(self):
+		if self.reply_to_email:
+			return [f'{self.reply_to_username} <{self.reply_to_email}>']
+		return None
 
 	def get_backend(self):
 		if self.email_settings:
@@ -153,7 +169,7 @@ class Message(models.Model):
 				for recipients_filter in self.recipients_filter.filters.copy():
 					if recipients_filter == UsersFilter.USERS_WITH_PAYMENTS:
 						from tinkoff_merchant.models import Payment
-						payments_query = Payment.objects.filter(status__in=['CONFIRMED', 'AUTHORIZED'])
+						payments_query = Payment.objects.filter(status__in=['CONFIRMED', 'AUTHORIZED'], amount__gte=10000)
 						if self.recipients_filter.last_payment_was:
 							payments_query = payments_query.filter(update_date__lte=self.recipients_filter.last_payment_was)
 						if self.recipients_filter.first_payment_was:
@@ -162,6 +178,17 @@ class Message(models.Model):
 						recipients = recipients.filter(id__in=wanted_pks)
 					elif recipients_filter == UsersFilter.USERS_WITHOUT_ACTIVATIONS:
 						recipients = recipients.filter(payment__isnull=True)
+					elif recipients_filter == UsersFilter.PAYMENTS_WITHOUT_ACTIVATIONS:
+						from tinkoff_merchant.models import Payment
+						payments_query = Payment.objects.filter(
+							status__in=['CONFIRMED', 'AUTHORIZED'],
+							amount__gte=10000)
+						if self.recipients_filter.last_payment_was:
+							payments_query = payments_query.filter(update_date__lte=self.recipients_filter.last_payment_was)
+						if self.recipients_filter.first_payment_was:
+							payments_query = payments_query.filter(update_date__gte=self.recipients_filter.first_payment_was)
+						payments = [p for p in list(payments_query) if p.closest_activation == '-']
+						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments])
 			if not self.recipients_filter.ignore_subscriptions:
 				recipients = recipients.exclude(pk__in=[p.user.pk for p in
 				                                        Profile.objects.filter(
@@ -169,32 +196,40 @@ class Message(models.Model):
 			if self.recipients_filter.send_once:
 				recipients = recipients.exclude(
 					pk__in=[u.pk for u in self.sent.all()])
-		return recipients
+			if self.recipients_filter.blacklist.exists():
+				recipients = recipients.exclude(
+					pk__in=self.recipients_filter.blacklist.all()
+				)
+		return recipients.distinct()
 
 	def send(self):
 		backend = self.get_backend()
 		emails = []
 		recipients = self.get_recipients()
-		chunks = [recipients[x:x+self.email_settings.messages_per_second] for x in range(0, len(recipients), self.email_settings.messages_per_second)]
+		chunks = [recipients[x:x+self.email_settings.messages_per_connection] for x in range(0, len(recipients), self.email_settings.messages_per_connection)]
 		for chunk in chunks:
+			emails = []
 			for recipient in chunk:
 				header = {
-					'List-Unsubscribe': f'<{recipient.mailer_profile.get_unsubscribe_url()}>'
+					# 'List-Unsubscribe': f'<{recipient.mailer_profile.get_unsubscribe_url()}>',
+					'Sender': f'{self.email_settings.get_sender_header()}',
 				}
-				# header.update(self.extra_headers)
+				if self.extra_headers:
+					for name, value in self.extra_headers.items():
+						header[name] = value
 				email_message = EmailMultiAlternatives(
 					subject=self.get_subject_for(recipient.mailer_profile),
-					from_email=self.from_email,
+					from_email=f'{self.from_username} <{self.from_email}>',
 					to=[recipient.email],
 					headers=header,
-					reply_to=[self.reply_to],
+					reply_to=self.get_reply_to_header(),
 					body=self.get_txt_body_for(recipient.mailer_profile)
 				)
 				email_message.attach_alternative(self.get_html_body_for(recipient.mailer_profile), 'text/html')
 				emails.append(email_message)
-			sent_count = backend.send(emails)
+			sent_count = backend.send_messages(emails) # FIXME add try except to catch smtp errors
 			self.sent.add(*chunk[:sent_count])
-			time.sleep(1)
+			time.sleep(self.email_settings.delay_between_connections)
 
 	def get_subject_for(self, recipient):
 		return Template(self.template_subject).\
@@ -219,6 +254,7 @@ class Message(models.Model):
 				'date': last_payment.update_date if last_payment else None,
 				'cups_count': sum(
 					item.site_quantity for item in last_payment.items()) if last_payment else 0
-			}
+			},
+			unsubscribe_url=recipient.get_unsubscribe_url(),
 		)
 		return context
