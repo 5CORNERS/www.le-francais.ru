@@ -216,14 +216,6 @@ ul.ui-autocomplete > li.load-more.action {
     /* padding-top: 6px; */
 }
 
-ui-menu {
-    display: inherit !important;
-}
-
-ul#ui-id-1 {
-    display: block !important;
-}
-
 li.verb-autocomplete-item:first-child > a {
     padding-top: 6px;
 }
