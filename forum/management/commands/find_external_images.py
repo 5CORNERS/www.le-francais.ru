@@ -24,7 +24,7 @@ class Command(BaseCommand):
 		# but for now, we must connect / disconnect the callback
 		post_save.disconnect(topic_saved, sender=Topic)
 		post_save.disconnect(create_pybb_post_notification, sender=Post)
-		post_save.disconnect(post_saved, instance=Post)
+		post_save.disconnect(post_saved, sender=Post)
 		for i in range(len(table)):
 			post_id = int(table['Post ID'][i])
 			old_link = table['Image Link'][i]
