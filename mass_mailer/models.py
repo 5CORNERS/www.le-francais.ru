@@ -310,3 +310,6 @@ class MessageLog(models.Model):
 	log_message = models.TextField(null=True, blank=True)
 
 	objects = MessageLogManager()
+
+	def __str__(self):
+		return f'{self.message}'
