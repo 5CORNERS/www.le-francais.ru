@@ -124,7 +124,7 @@
 				</div>
 			</div>
 			<div class="col-12 col-md-12 col-lg-6" style="text-align: center">
-                {% if is_pc %}
+                {% if request|is_pc %}
                     {% conjugation_advertisement_body "lf_fr_conj_rsb_01" %}
                 {% else %}
                     {% conjugation_advertisement_body "lf_fr_conj_mob_01" %}
