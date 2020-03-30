@@ -1,3 +1,7 @@
+import smtplib
+
+from ssl import socket_error
+
 import time
 import uuid
 
@@ -131,6 +135,12 @@ class Message(models.Model):
 	recipients_filter = models.ForeignKey('UsersFilter', null=True, on_delete=models.SET_NULL)
 
 	sent = models.ManyToManyField(to=User, related_name='mass_mailer_received', null=True, blank=True)
+	was_sent_to = models.ManyToManyField(
+		User,
+		through='mass_mailer.MessageLog',
+		through_fields=('message', 'recipient'),
+		related_query_name='received_mass_mailer_messages'
+	)
 
 
 	created_datetime = models.DateTimeField(auto_now_add=True)
@@ -195,7 +205,7 @@ class Message(models.Model):
 					                                        subscribed=False)])
 			if self.recipients_filter.send_once:
 				recipients = recipients.exclude(
-					pk__in=[u.pk for u in self.sent.all()])
+					pk__in=[u.pk for u in self.was_sent_to.all()])
 			if self.recipients_filter.blacklist.exists():
 				recipients = recipients.exclude(
 					pk__in=self.recipients_filter.blacklist.all()
@@ -203,12 +213,12 @@ class Message(models.Model):
 		return recipients.distinct()
 
 	def send(self):
-		backend = self.get_backend()
-		emails = []
+		backend:EmailBackend = self.get_backend()
+		messages_with_recipients = []
 		recipients = self.get_recipients()
 		chunks = [recipients[x:x+self.email_settings.messages_per_connection] for x in range(0, len(recipients), self.email_settings.messages_per_connection)]
 		for chunk in chunks:
-			emails = []
+			messages_with_recipients = []
 			for recipient in chunk:
 				header = {
 					# 'List-Unsubscribe': f'<{recipient.mailer_profile.get_unsubscribe_url()}>',
@@ -226,9 +236,22 @@ class Message(models.Model):
 					body=self.get_txt_body_for(recipient.mailer_profile)
 				)
 				email_message.attach_alternative(self.get_html_body_for(recipient.mailer_profile), 'text/html')
-				emails.append(email_message)
-			sent_count = backend.send_messages(emails) # FIXME add try except to catch smtp errors
-			self.sent.add(*chunk[:sent_count])
+				messages_with_recipients.append((email_message, recipient))
+
+			backend.open()
+			for message, recipient in messages_with_recipients:
+				try:
+					backend.send_messages([message])
+					MessageLog.objects.log(self, recipient, MessageLog.RESULT_SUCCESS)
+					time.sleep(1)
+				except (socket_error, smtplib.SMTPSenderRefused,
+				        smtplib.SMTPRecipientsRefused,
+				        smtplib.SMTPDataError,
+				        smtplib.SMTPAuthenticationError) as error:
+					MessageLog.objects.log(self, recipient, MessageLog.RESULT_FAILURE,
+					                       log_message=str(error))
+					raise
+			backend.close()
 			time.sleep(self.email_settings.delay_between_connections)
 
 	def get_subject_for(self, recipient):
@@ -258,3 +281,32 @@ class Message(models.Model):
 			unsubscribe_url=recipient.get_unsubscribe_url(),
 		)
 		return context
+
+
+class MessageLogManager(models.Manager):
+	def log(self, message:Message, recipient:User, result_code:int, log_message=""):
+		return self.create(
+			message_id=message.pk,
+			recipient_id=recipient.pk,
+			result=result_code,
+			log_message=log_message
+		)
+
+
+class MessageLog(models.Model):
+	RESULT_SUCCESS = 1
+	RESULT_FAILURE = 2
+	RESULT_DIDNT_SEND = 3
+	RESULT_CHOICES = [
+		(RESULT_SUCCESS, 'Success'),
+		(RESULT_FAILURE, 'Failure'),
+		(RESULT_DIDNT_SEND, "Didn't send")
+	]
+	message = models.ForeignKey('Message', on_delete=models.CASCADE)
+	recipient = models.ForeignKey(User, on_delete=models.CASCADE)
+
+	sent_datetime = models.DateTimeField(auto_now_add=True)
+	result = models.IntegerField(choices=RESULT_CHOICES, default=RESULT_DIDNT_SEND)
+	log_message = models.TextField(null=True, blank=True)
+
+	objects = MessageLogManager()

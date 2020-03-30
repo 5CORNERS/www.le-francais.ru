@@ -4,6 +4,7 @@ from mass_mailer.models import Profile
 
 
 def unsubscribe(request, key):
+	# TODO: add form with template
 	try:
 		profile = Profile.objects.get(key=key)
 		profile.subscribed = False
