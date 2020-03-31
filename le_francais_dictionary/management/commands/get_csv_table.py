@@ -13,6 +13,7 @@ titles = [('NOL', 'order'),
           ('WORD_UNIFIED', 'uni.word'),
           ('WORD_ORIG', 'word'),
           ('GROUP', 'definition_num'),
+          ('GROUP_ID', 'group_id'),
           ('TRANSLATION_UNIFIED', 'uni.translation'),
           ('TRANSLATION_ORIG', 'first_translation.translation'),
           ('POS', 'part_of_speech'),
@@ -38,7 +39,11 @@ class Command(BaseCommand):
 			print(f'{word.order}/{l}\t{word}')
 			row_dict = OrderedDict()
 			for title, attr in titles:
-				row_dict[title] = operator.attrgetter(attr)(word) or ''
+				try:
+					row_dict[title] = operator.attrgetter(attr)(word) or ''
+				except Exception as err:
+					row_dict[title] = 'ERROR'
+					print(str(err))
 			table.append(row_dict)
 		to_tsv(table)
 
