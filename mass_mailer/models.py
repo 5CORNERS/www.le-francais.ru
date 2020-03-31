@@ -1,6 +1,10 @@
 import smtplib
-
+from datetime import datetime
 from ssl import socket_error
+
+from django.db.models import Q
+from django.utils import timezone
+from typing import Tuple
 
 import time
 import uuid
@@ -117,6 +121,66 @@ class UsersFilter(models.Model):
 	def __str__(self):
 		return self.name
 
+	def get_recipients(self):
+		recipients = User.objects.all()
+		if self:
+			if self.manual_email_list:
+				email_list = [email.strip() for email in
+				              self.manual_email_list.split(',')]
+				return recipients.filter(email__in=email_list)
+			else:
+				for recipients_filter in self.filters.copy():
+					if recipients_filter == UsersFilter.USERS_WITH_PAYMENTS:
+						from tinkoff_merchant.models import Payment
+						payments_query = Payment.objects.filter(
+							status__in=['CONFIRMED', 'AUTHORIZED'],
+							amount__gte=10000)
+						if self.last_payment_was:
+							payments_query = payments_query.filter(
+								update_date__lte=self.last_payment_was)
+						if self.first_payment_was:
+							payments_query = payments_query.filter(
+								update_date__gte=self.first_payment_was)
+						wanted_pks = [int(p.customer_key) for p in
+						              payments_query]
+						recipients = recipients.filter(id__in=wanted_pks)
+					elif recipients_filter == UsersFilter.USERS_WITHOUT_ACTIVATIONS:
+						recipients = recipients.filter(payment__isnull=True)
+					elif recipients_filter == UsersFilter.PAYMENTS_WITHOUT_ACTIVATIONS:
+						from tinkoff_merchant.models import Payment
+						payments_query = Payment.objects.filter(
+							status__in=['CONFIRMED', 'AUTHORIZED'],
+							amount__gte=10000)
+						if self.last_payment_was:
+							payments_query = payments_query.filter(
+								update_date__lte=timezone.make_aware(datetime.combine(self.last_payment_was, datetime.min.time())))
+						if self.first_payment_was:
+							payments_query = payments_query.filter(
+								update_date__gte=timezone.make_aware(datetime.combine(self.first_payment_was, datetime.min.time())))
+						payments = [p for p in list(payments_query) if
+						            p.closest_activation == '-']
+						recipients = recipients.filter(
+							id__in=[int(p.customer_key) for p in payments])
+			if not self.ignore_subscriptions:
+				recipients = recipients.exclude(pk__in=[p.user.pk for p in
+				                                        Profile.objects.filter(
+					                                        subscribed=False)])
+			if self.blacklist.exists():
+				recipients = recipients.exclude(
+					pk__in=self.blacklist.all()
+				)
+		return recipients.distinct()
+	
+	def get_recipients_for_message(self, message):
+		"""
+		:type message: Message
+		"""
+		recipients = self.get_recipients()
+		if self.send_once:
+			recipients = recipients.exclude(
+				pk__in=[log.recipient_id for log in MessageLog.objects.filter(Q(result=MessageLog.RESULT_SUCCESS) | Q(result=MessageLog.RESULT_DIDNT_SEND), message=message)])
+		return recipients
+
 
 class Message(models.Model):
 	template_subject = models.CharField(max_length=64, blank=True)
@@ -142,9 +206,12 @@ class Message(models.Model):
 		related_query_name='received_mass_mailer_messages'
 	)
 
-
 	created_datetime = models.DateTimeField(auto_now_add=True)
 	send_datetime = models.DateTimeField(null=True)
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self._recipients = None
 
 	def __str__(self):
 		return f'{self.template_subject}'
@@ -170,52 +237,19 @@ class Message(models.Model):
 	                 ssl_keyfile=None, ssl_certfile=None)
 
 	def get_recipients(self):
-		recipients = User.objects.all()
-		if self.recipients_filter:
-			if self.recipients_filter.manual_email_list:
-				email_list = [email.strip() for email in self.recipients_filter.manual_email_list.split(',')]
-				return recipients.filter(email__in=email_list)
-			else:
-				for recipients_filter in self.recipients_filter.filters.copy():
-					if recipients_filter == UsersFilter.USERS_WITH_PAYMENTS:
-						from tinkoff_merchant.models import Payment
-						payments_query = Payment.objects.filter(status__in=['CONFIRMED', 'AUTHORIZED'], amount__gte=10000)
-						if self.recipients_filter.last_payment_was:
-							payments_query = payments_query.filter(update_date__lte=self.recipients_filter.last_payment_was)
-						if self.recipients_filter.first_payment_was:
-							payments_query = payments_query.filter(update_date__gte=self.recipients_filter.first_payment_was)
-						wanted_pks = [int(p.customer_key) for p in payments_query]
-						recipients = recipients.filter(id__in=wanted_pks)
-					elif recipients_filter == UsersFilter.USERS_WITHOUT_ACTIVATIONS:
-						recipients = recipients.filter(payment__isnull=True)
-					elif recipients_filter == UsersFilter.PAYMENTS_WITHOUT_ACTIVATIONS:
-						from tinkoff_merchant.models import Payment
-						payments_query = Payment.objects.filter(
-							status__in=['CONFIRMED', 'AUTHORIZED'],
-							amount__gte=10000)
-						if self.recipients_filter.last_payment_was:
-							payments_query = payments_query.filter(update_date__lte=self.recipients_filter.last_payment_was)
-						if self.recipients_filter.first_payment_was:
-							payments_query = payments_query.filter(update_date__gte=self.recipients_filter.first_payment_was)
-						payments = [p for p in list(payments_query) if p.closest_activation == '-']
-						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments])
-			if not self.recipients_filter.ignore_subscriptions:
-				recipients = recipients.exclude(pk__in=[p.user.pk for p in
-				                                        Profile.objects.filter(
-					                                        subscribed=False)])
-			if self.recipients_filter.send_once:
-				recipients = recipients.exclude(
-					pk__in=[u.pk for u in self.was_sent_to.all()])
-			if self.recipients_filter.blacklist.exists():
-				recipients = recipients.exclude(
-					pk__in=self.recipients_filter.blacklist.all()
-				)
-		return recipients.distinct()
+		if self._recipients is None:
+			if self.recipients_filter:
+				self._recipients = self.recipients_filter.get_recipients_for_message(
+					message=self)
+		return self._recipients
 
-	def send(self):
+	def send(self) -> Tuple[int, int]:
 		backend:EmailBackend = self.get_backend()
-		messages_with_recipients = []
 		recipients = self.get_recipients()
+		sent_count = 0
+		errors_count = 0
+		if not recipients:
+			return sent_count, errors_count
 		chunks = [recipients[x:x+self.email_settings.messages_per_connection] for x in range(0, len(recipients), self.email_settings.messages_per_connection)]
 		for chunk in chunks:
 			messages_with_recipients = []
@@ -242,6 +276,7 @@ class Message(models.Model):
 			for message, recipient in messages_with_recipients:
 				try:
 					backend.send_messages([message])
+					sent_count += 1
 					MessageLog.objects.log(self, recipient, MessageLog.RESULT_SUCCESS)
 					time.sleep(1)
 				except (socket_error, smtplib.SMTPSenderRefused,
@@ -250,9 +285,10 @@ class Message(models.Model):
 				        smtplib.SMTPAuthenticationError) as error:
 					MessageLog.objects.log(self, recipient, MessageLog.RESULT_FAILURE,
 					                       log_message=str(error))
-					raise
+					errors_count += 1
 			backend.close()
 			time.sleep(self.email_settings.delay_between_connections)
+		return sent_count, errors_count
 
 	def get_subject_for(self, recipient):
 		return Template(self.template_subject).\
@@ -291,6 +327,10 @@ class MessageLogManager(models.Manager):
 			result=result_code,
 			log_message=log_message
 		)
+
+	# TODO purge logs command and method
+	def purge_logs(self):
+		...
 
 
 class MessageLog(models.Model):
