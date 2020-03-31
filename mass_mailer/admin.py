@@ -33,5 +33,5 @@ class MailerProfileAdmin(admin.ModelAdmin):
 @admin.register(MessageLog)
 class MessageLogAdmin(admin.ModelAdmin):
 	list_display = ['__str__', 'recipient', 'sent_datetime', 'result']
-	readonly_fields = ['message', 'recipient', 'result', 'sent_datetime']
+	readonly_fields = ['message', 'recipient', 'sent_datetime']
 	pass
