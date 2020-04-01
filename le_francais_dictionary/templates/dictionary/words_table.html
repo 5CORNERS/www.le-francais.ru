@@ -10,19 +10,26 @@
         </tr>
     </thead>
     <tbody>
-    {% if table.rows %}{% for row in table.rows %}
-        <tr id="{{ row.id }}" {% if row.cells.1.value %}class="deleted" {% endif %}>
-            <td>{{ row.id }}</td>
-            {% for cell in row.cells %}
-                <td {% if cell.cls %}class="{{ cell.cls }}"{% endif %}
-                    {% if not cell.visible %}style="display: none;" {% endif %}{% if cell.order_value %}data-order='{{ cell.order_value }}' {% endif %}{% if cell.filter_value != None %}data-filter="{{ cell.filter_value }}" {% endif %}>
-                    {% if cell.id == 'stars' %}
-                        {% rating2stars cell.value %}{% elif cell.id == 'repetitions' %}
-                        {% repetitions2bars cell.value %}{% else %}
-                        {{ cell.value|safe }}{% endif %}</td>
-            {% endfor %}
-        </tr>
-    {% endfor %}
+    {% if table.rows %}
+        {% for row in table.rows %}
+            <tr id="{{ row.id }}"
+                {% if row.cells.1.value %}class="deleted" {% endif %}>
+                <td>{{ row.id }}</td>
+                {% for cell in row.cells %}
+                    <td {% if cell.cls %}class="{{ cell.cls }}"{% endif %}
+                        {% if not cell.visible %}style="display: none;" {% endif %}{% if cell.order_value %}data-order='{{ cell.order_value }}' {% endif %}{% if cell.filter_value != None %}data-filter="{{ cell.filter_value }}" {% endif %}>
+                        {% if cell.id == 'stars' %}
+                            {% rating2stars cell.value %}{% elif cell.id == 'repetitions' %}
+                            {% repetitions2bars cell.value %}
+                        {% else %}
+                            {{ cell.value|safe }}
+                        {% endif %}
+                        {% if forloop.counter0 == 2 %} <i class="fa fa-play-circle play" data-audiosrc="{{ row.fr_audio_src }}"></i>
+                        {% elif forloop.counter0 == 3 %} <i class="fa fa-play-circle play" data-audiosrc="{{ row.ru_audio_src }}"></i>{% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
     {% else %}
         <tr>
             <td colspan="5">

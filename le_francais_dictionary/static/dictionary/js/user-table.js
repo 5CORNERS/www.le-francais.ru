@@ -356,7 +356,18 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                         showDeleted(this.checked);
                         add_selected_filtered_alert(dt)
                     });
-                    $dt.on("select.dt.dtCheckboxes deselect.dt.dtCheckboxes", function(e, api, type, indexes) {
+                    let play_icons = $('.play');
+                    play_icons.unbind();
+                    play_icons.click(event => {
+                        let url = $(event.target).data('audiosrc');
+                        voice(url)
+                    });
+                    $dt.on('user-select.dt.dtCheckboxes', function (e, api, type, indexes, originalEvent) {
+                        if ($(originalEvent.target).hasClass('play')){
+                            e.preventDefault()
+                        }
+                    });
+                    $dt.on("select.dt.dtCheckboxes deselect.dt.dtCheckboxes", function(e, api, type, indexes, originalEvent) {
                         if (savingFiltersEnabled) {
                             tableFilters.selectAfterFilter = {};
                             let filterIds = [];
@@ -417,8 +428,13 @@ function get_selected_filtered(dt){
 }
 
 function get_filtered(dt){
-    let filtered_ids = dt.api().rows({search:"applied"}).data().pluck(0).toArray();
-    return filtered_ids
+    return  dt.api().rows({search:"applied"}).data().pluck(0).toArray();
+}
+
+let audio = undefined;
+function voice(src){
+    audio = new Audio(src);
+    audio.play();
 }
 
 $(document).ready(function () {
@@ -507,7 +523,6 @@ $(document).ready(function () {
         // Prevent actual form submission
         e.preventDefault();
     });
-
     loadFilterButton.init();
 
 });

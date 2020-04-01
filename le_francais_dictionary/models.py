@@ -278,6 +278,9 @@ class Word(models.Model):
 
 	@property
 	def first_translation(self):
+		"""
+		:rtype: WordTranslation
+		"""
 		if self._first_translation is None:
 			self._first_translation = self.wordtranslation_set.first()
 		return self._first_translation
@@ -849,6 +852,7 @@ def prefetch_words_data(words, user):
 			'-datetime'))
 	user_repetitions = list(
 		UserWordRepetition.objects.filter(user=user, word__in=words))
+	word: Word
 	for word in words:
 		group = next(
 			(group for group in groups if group.pk == word.group_id),
