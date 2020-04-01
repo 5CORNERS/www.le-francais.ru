@@ -24,8 +24,8 @@
                         {% else %}
                             {{ cell.value|safe }}
                         {% endif %}
-                        {% if forloop.counter0 == 2 %} <i class="fa fa-play-circle play" data-audiosrc="{{ row.fr_audio_src }}"></i>
-                        {% elif forloop.counter0 == 3 %} <i class="fa fa-play-circle play" data-audiosrc="{{ row.ru_audio_src }}"></i>{% endif %}
+                        {% if forloop.counter0 == 2 %} <i class="fa fa-volume-down play" data-audiosrc="{{ row.fr_audio_src }}"></i>
+                        {% elif forloop.counter0 == 3 %} <i class="fa fa-volume-down play" data-audiosrc="{{ row.ru_audio_src }}"></i>{% endif %}
                     </td>
                 {% endfor %}
             </tr>
