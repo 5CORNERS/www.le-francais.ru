@@ -90,6 +90,8 @@ class WordsManagementFilterForm(forms.Form):
 				) for column in self.COLUMNS],
 				rows=[dict(
 					id=word.pk,
+					ru_audio_src=word.first_translation.polly_url,
+					fr_audio_src=word.polly_url,
 					cells=[dict(
 						id=column[0],
 						value=column[-1] if not callable(column[-1]) else column[-1](word),
