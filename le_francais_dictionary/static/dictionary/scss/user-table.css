@@ -46,4 +46,14 @@ div.dataTables_wrapper div.dataTables_info { padding-top: 0 !important; white-sp
 
 #getAndApplyFilters { max-width: 257px; }
 
-.play { float: right; color: var(--info); cursor: pointer; }
+.play { margin-right: 10px; margin-top: 4px; float: left; color: #6c757dad; cursor: pointer; }
+
+th#stars { max-width: 78px; padding-right: 2px; }
+
+th .bootstrap-select { width: 100% !important; }
+
+.table-sm td, .table-sm th { padding: 0.2rem; }
+
+td:nth-child(4), td:nth-child(5) { min-width: 150px !important; }
+
+th:nth-child(1) { padding: 5px !important; }
