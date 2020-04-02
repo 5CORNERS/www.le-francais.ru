@@ -265,9 +265,9 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                     "<'row'" +
                         "<'col-sm-12 mb-2'tr>" +
                     ">" +
-                    "<'row'" +
+                    "<'row mb-2'" +
                         "<'#alert.col-12'>" +
-                        "<'#info.col-12'i>" +
+                        "<'#info.col-12 mb-2'i>" +
                         "<'col-sm-12 col-md-5'l>" +
                         "<'col-sm-12 col-md-7'p>" +
                     ">",
@@ -395,7 +395,7 @@ function add_selected_filtered_alert(dt){
     if (get_selected(dt).sort().join(',') !== get_filtered(dt).sort().join(',')){
         $('#alert').html(
             '<div class="alert alert-info d-flex flex-row" role="alert">' +
-                '<i class="fas fa-fw fa-info-circle mr-3 mt-1"></i>' +
+                '<i class="fas fa-fw fa-info-circle mr-3 mt-1 mb-1"></i>' +
                 '<div>' +
                     'К выбранным, но скрытым фильтрами элементам действия не применяются.' +
                 '</div>' +
