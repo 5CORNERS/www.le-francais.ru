@@ -55,7 +55,7 @@
                 </form>
             </div>
             <div class="col-12 words-footable">
-                <div class="card card-body bg-light uppertable" style="display: none">
+                <div class="card card-body bg-light uppertable pt-2 pb-1" style="display: none">
 {#                        <div class="form-check-inline mb-2 mr-sm-2">#}
 {#                            <input class="form-check-input" type="checkbox"#}
 {#                                   id="showOnlyLearned"#}
@@ -77,13 +77,22 @@
                 <div class="table-responsive">
                     {% include 'dictionary/words_table.html' with table=table %}
                 </div>
-                <button style="display: none" type="button"
-                        class="btn btn-primary mb-2 undertable" id="startApp">Запустить в Карточках
-                </button>
-                <button style="display: none" type="button"
-                        class="btn btn-warning mb-2 undertable" id="markWords">Добавить в исключенные</button>
-                <button style="display: none" type="button"
-                        class="btn btn-success mb-2 undertable" id="unmarkWords">Убрать из исключенных</button>
+                <div class="row">
+                    <div class="col-12 d-flex">
+                        <button style="display: none" type="button"
+                                class="btn btn-primary mb-2 undertable"
+                                id="startApp">Запустить в Карточках
+                        </button>
+                        <button style="display: none" type="button"
+                                class="btn btn-warning mb-2 undertable ml-auto"
+                                id="markWords">Добавить в исключенные
+                        </button>
+                        <button style="display: none" type="button"
+                                class="btn btn-success mb-2 undertable ml-2"
+                                id="unmarkWords">Убрать из исключенных
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
