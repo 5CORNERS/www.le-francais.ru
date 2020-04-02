@@ -137,7 +137,7 @@ th .bootstrap-select {
   padding: 0.2rem;
 }
 
-td:nth-child(4), td:nth-child(5) {
+th:nth-child(4), th:nth-child(5) {
   min-width: 150px !important;
 }
 
