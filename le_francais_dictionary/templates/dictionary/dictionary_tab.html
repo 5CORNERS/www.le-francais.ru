@@ -1,4 +1,4 @@
-{% load static le_francais_dictionary wagtailcore_tags %}
+{% load static le_francais_dictionary wagtailcore_tags site_tags %}
 <h4>Флэш-карты со словами к уроку</h4>
 <div class="row">
     {% if not hide_info %}
@@ -176,6 +176,9 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="col-12">
+        {% include_advertisements contains="flash_cards_01" maskable=True %}
     </div>
 </div>
 <script>

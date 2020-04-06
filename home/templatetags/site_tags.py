@@ -35,8 +35,10 @@ def index(List, i):
 	return List[int(i)]
 
 
-@register.inclusion_tag('tags/include_advertisements.html')
-def include_advertisements(contains=None, page_type=None, placement=None, in_house=False):
+@register.inclusion_tag('tags/include_advertisements.html', takes_context=True)
+def include_advertisements(context, contains=None, page_type=None, placement=None, in_house=False, maskable=False):
+	if maskable and context.get("hide") == True:
+		return {'hide':True}
 	random_id = ''.join(
 		random.choices(string.ascii_uppercase + string.digits, k=5))
 	snippets = AdUnit.objects.all().order_by('adunit_code')
@@ -55,7 +57,8 @@ def include_advertisements(contains=None, page_type=None, placement=None, in_hou
 	return {
 		'id': random_id, 'ads': snippets,
 		'mappings': list(set(ad.size_mapping for ad in snippets)),
-		'ids': [random_id + '-' + str(i) for i in range(len(snippets))]
+		'ids': [random_id + '-' + str(i) for i in range(len(snippets))],
+		'hide': False
 	}
 
 
