@@ -1,13 +1,15 @@
 {% load site_tags %}
 {% if not hide %}
 <script id="script-{{ id }}">
+    debugger;
 	let ad_elements_{{ id }} = [
 		{% for ad in ads %}
 			$("<div style='margin-bottom: 10px' id='{{ ids|index:forloop.counter0 }}' class='__{{ ad.placement }}'</div>"),
 		{% endfor %}
 	];
-	let last_{{ id }} = ad_elements_{{ id }}.pop();
 	let parent_container_{{ id }} = $('#script-{{ id }}').parent();
+    {% if sidebar %}
+	let last_{{ id }} = ad_elements_{{ id }}.pop();
 	let n_{{ id }} = ~~(parent_container_{{ id }}.height()/1000);
 	parent_container_{{ id }}.append(ad_elements_{{ id }}[0]);
 	var i;
@@ -17,6 +19,11 @@
 	if (i < n_{{ id }}) {
 		parent_container_{{ id }}.append(last_{{ id }})
 	}
+    {% else %}
+        for (i=0; i < ad_elements_{{ id }}.length; i++){
+            parent_container_{{ id }}.append(ad_elements_{{ id }}[i])
+        }
+    {% endif %}
 </script>
 <script>
 	var gptadslots = [];

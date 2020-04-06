@@ -36,7 +36,7 @@ def index(List, i):
 
 
 @register.inclusion_tag('tags/include_advertisements.html', takes_context=True)
-def include_advertisements(context, contains=None, page_type=None, placement=None, in_house=False, maskable=False):
+def include_advertisements(context, contains=None, page_type=None, placement=None, in_house=False, maskable=False, is_sidebar=True):
 	if maskable and context.get("hide") == True:
 		return {'hide':True}
 	random_id = ''.join(
@@ -58,7 +58,8 @@ def include_advertisements(context, contains=None, page_type=None, placement=Non
 		'id': random_id, 'ads': snippets,
 		'mappings': list(set(ad.size_mapping for ad in snippets)),
 		'ids': [random_id + '-' + str(i) for i in range(len(snippets))],
-		'hide': False
+		'hide': False,
+		'is_sidebar': is_sidebar,
 	}
 
 
