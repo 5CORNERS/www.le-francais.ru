@@ -1,20 +1,21 @@
 {% load site_tags %}
+{% if not hide %}
 <script id="script-{{ id }}">
-	let ad_elements = [
+	let ad_elements_{{ id }} = [
 		{% for ad in ads %}
 			$("<div style='margin-bottom: 10px' id='{{ ids|index:forloop.counter0 }}' class='__{{ ad.placement }}'</div>"),
 		{% endfor %}
 	];
-	let last = ad_elements.pop();
-	let parent_contaner = $('#script-{{ id }}').parent();
-	let n = ~~(parent_contaner.height()/1000);
-	parent_contaner.append(ad_elements[0]);
+	let last_{{ id }} = ad_elements_{{ id }}.pop();
+	let parent_container_{{ id }} = $('#script-{{ id }}').parent();
+	let n_{{ id }} = ~~(parent_container_{{ id }}.height()/1000);
+	parent_container_{{ id }}.append(ad_elements_{{ id }}[0]);
 	var i;
-	for (i = 1; i < n && i < ad_elements.length; i++){
-		parent_contaner.append(ad_elements[i]);
+	for (i = 1; i < n_{{ id }} && i < ad_elements_{{ id }}.length; i++){
+		parent_container_{{ id }}.append(ad_elements_{{ id }}[i]);
 	}
-	if (i < n) {
-		parent_contaner.append(last)
+	if (i < n_{{ id }}) {
+		parent_container_{{ id }}.append(last_{{ id }})
 	}
 </script>
 <script>
@@ -37,11 +38,12 @@
 		googletag.enableServices();
 	});
 
-	let adunits = document.querySelectorAll('div[id^="{{ id }}-"]');
-	for (let i = 0; i < adunits.length; i++) {
+	let adunits_{{ id }} = document.querySelectorAll('div[id^="{{ id }}-"]');
+	for (let i = 0; i < adunits_{{ id }}.length; i++) {
 		googletag.cmd.push(function () {
-			googletag.display(adunits[i].getAttribute('id'));
+			googletag.display(adunits_{{ id }}[i].getAttribute('id'));
 		});
 	}
 
 </script>
+{% endif %}
