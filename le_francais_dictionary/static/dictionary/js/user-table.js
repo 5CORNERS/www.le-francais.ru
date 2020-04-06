@@ -447,8 +447,10 @@ $(document).ready(function () {
         if(ids.length === 0){
             $('#startApp').popover({
                 'content': "Вы не выбрали ни одного слова",
-                'placement': 'top',
+                'placement': 'auto',
                 'trigger': 'manual',
+                'container': 'body',
+                'boundary': 'viewport'
             }).popover('show');
             setTimeout(function () {
                 $('#startApp').popover('hide').popover('dispose')
@@ -473,37 +475,66 @@ $(document).ready(function () {
 }
     });
     $('#markWords').on('click', function () {
-       $.ajax(Urls['dictionary:mark_words'](), {
-           type: 'POST',
-            contentType: "application/json",
-            dataType: "json",
-            data: JSON.stringify({
-                words: get_selected_filtered(dt),
-                csrfmiddlewaretoken: csrf,
-            }),
-            success: function (r) {
-                updateTable()
-            },
-           error: errorLoading,
-           beforeSend: tableReloading,
-       })
+        let ids=get_selected_filtered(dt);
+        if (ids.length === 0) {
+            $('#markWords').popover({
+                'content': "Вы не выбрали ни одного слова",
+                'placement': 'auto',
+                'trigger': 'manual',
+                'container': 'body',
+                'boundary': 'viewport'
+            }).popover('show');
+            setTimeout(function () {
+                $('#markWords').popover('hide').popover('dispose')
+            }, 2000)
+        } else {
+            $('#markWords').popover('dispose');
+            $.ajax(Urls['dictionary:mark_words'](), {
+                type: 'POST',
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    words: get_selected_filtered(dt),
+                    csrfmiddlewaretoken: csrf,
+                }),
+                success: function (r) {
+                    updateTable()
+                },
+                error: errorLoading,
+                beforeSend: tableReloading,
+            })
+        }
     });
     $('#unmarkWords').on('click', function () {
-        var rows_selected = dt.api().column(0).checkboxes.selected();
-       $.ajax(Urls['dictionary:unmark_words'](), {
-           type: 'POST',
-            contentType: "application/json",
-            dataType: "json",
-            data: JSON.stringify({
-                words: get_selected_filtered(dt),
-                csrfmiddlewaretoken: csrf,
-            }),
-            success: function (r) {
-                updateTable()
-            },
-           error: errorLoading,
-           beforeSend: tableReloading,
-       })
+        let ids=get_selected_filtered(dt);
+        if (ids.length === 0) {
+            $('#unmarkWords').popover({
+                'content': "Вы не выбрали ни одного слова",
+                'placement': 'auto',
+                'trigger': 'manual',
+                'container': 'body',
+                'boundary': 'viewport'
+            }).popover('show');
+            setTimeout(function () {
+                $('#unmarkWords').popover('hide').popover('dispose')
+            }, 2000)
+        } else {
+            $('#unmarkWords').popover('dispose');
+            $.ajax(Urls['dictionary:unmark_words'](), {
+                type: 'POST',
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    words: get_selected_filtered(dt),
+                    csrfmiddlewaretoken: csrf,
+                }),
+                success: function (r) {
+                    updateTable()
+                },
+                error: errorLoading,
+                beforeSend: tableReloading,
+            })
+        }
     });
     // Handle form submission event
     $('#main-frm').on('submit', function (e) {
