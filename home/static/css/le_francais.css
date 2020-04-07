@@ -604,10 +604,14 @@ td.forum-last-post, td.topic-last-post {
         margin-top: 0;
     }
 
+    .navbar {
+        padding: 0.5rem 0.5rem;
+    }
+
     .navbar-brand-home {
         display: inline;
         margin-left: 10%;
-        margin-right: 10%;
+        margin-right: 0;
     }
 
     .navbar-brand-text {
@@ -745,7 +749,7 @@ details.no-details:not([open]) summary {
 
 .coffee-icon > svg {
     display: inline;
-    height: 16px;
+    height: 20px;
     width: 20px;
 }
 
