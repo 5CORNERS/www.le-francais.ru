@@ -66,8 +66,27 @@
 					mute: 'mute',
 					mini: 'mini',
 					download: 'download',
-					downloadButton: 'download-button'
-				};
+					downloadButton: 'download-button',
+					tenSecondsBack: 'ten-seconds-back',
+					tenSecondsBackMask: 'ten-seconds-back-mask',
+				},
+		tenSecondsBackMaskSvg = $(`<svg class="${cssClassSub.tenSecondsBackMask}">
+      <defs>
+        <pattern id="pattern-stripe" width="3" height="2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="1" height="3" transform="translate(0,0)" fill="white" data-darkreader-inline-fill="" style="--darkreader-inline-fill:#bdbdbd;"></rect>
+        </pattern>
+        <mask id="mask-stripe">
+          <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-stripe)"></rect>
+        </mask>      
+      </defs>
+
+      <!-- bar chart -->
+      <rect class="hbar thing-2" x="0" y="0" width="32" height="32" style="
+    mask: url(#mask-stripe);
+    fill: #292b2c;
+"></rect>
+    
+</svg>`);
 
 		for (var subName in cssClassSub) {
 			cssClass[subName] = params.classPrefix + '-' + cssClassSub[subName];
@@ -254,6 +273,8 @@
 				$menuPlayer.addClass(cssClass.mini).addClass('pull-right');
 				$menuPlayer.attr('number', $menuPlayer.find('audio').attr('number'));
 				$menuPlayer.find('audio').remove();
+				$menuPlayer.prepend($(`<div class="${cssClass.tenSecondsBack}" title="Отмотать на 10 секунд"><a class="fas fa-undo-alt" href="#"></a></div>`));
+				$menuPlayer.find('.' + cssClass.tenSecondsBack).prepend(tenSecondsBackMaskSvg);
 				$('nav.navbar > .container > .d-flex.order-2 > .navbar-nav').prepend($menuPlayer);
 
 				$menuPlayer.find('.' + cssClass.playPause).on('click', function (e) {
@@ -268,6 +289,11 @@
 
 			thePlayer.find('.' + cssClass.playPause).on('click', function () {
 				return playerPlayPause(false);
+			});
+
+			$menuPlayer.find('.' + cssClass.tenSecondsBack).on('click', e => {
+				e.preventDefault();
+				return playerSeekBack(10);
 			});
 
 			function playerPlayPause(is_menu) {
@@ -318,6 +344,10 @@
 				}
 
 				return false;
+			}
+
+			function playerSeekBack(s) {
+				theAudio.currentTime -= s
 			}
 
 			$this.replaceWith(thePlayer);
