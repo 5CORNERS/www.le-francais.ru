@@ -183,6 +183,8 @@ class UsersFilter(models.Model):
 
 
 class Message(models.Model):
+	name = models.CharField(max_length=64, blank=True, null=True, unique=True)
+
 	template_subject = models.CharField(max_length=64, blank=True)
 	template_html = models.TextField(blank=True, help_text='You can ')
 	template_txt = models.TextField(blank=True)
@@ -195,8 +197,8 @@ class Message(models.Model):
 
 	extra_headers = JSONField(help_text='JSON Dict Format', default=dict, blank=True)
 
-	email_settings = models.ForeignKey('EmailSettings', on_delete=models.SET_NULL, null=True)
-	recipients_filter = models.ForeignKey('UsersFilter', null=True, on_delete=models.SET_NULL)
+	email_settings = models.ForeignKey('EmailSettings', on_delete=models.SET_NULL, null=True, blank=True)
+	recipients_filter = models.ForeignKey('UsersFilter', null=True, blank=True, on_delete=models.SET_NULL)
 
 	sent = models.ManyToManyField(to=User, related_name='mass_mailer_received', null=True, blank=True)
 	was_sent_to = models.ManyToManyField(
@@ -243,9 +245,17 @@ class Message(models.Model):
 					message=self)
 		return self._recipients
 
-	def send(self) -> Tuple[int, int]:
+	def send(self, to=None, users_context=None) -> Tuple[int, int]:
+		"""
+		:param to: list of users
+		:param users_context: dict with users ids as keys and values as context
+		:return: count of success, count of failures
+		"""
 		backend:EmailBackend = self.get_backend()
-		recipients = self.get_recipients()
+		if not to:
+			recipients = self.get_recipients()
+		else:
+			recipients = to
 		sent_count = 0
 		errors_count = 0
 		if not recipients:
@@ -261,15 +271,19 @@ class Message(models.Model):
 				if self.extra_headers:
 					for name, value in self.extra_headers.items():
 						header[name] = value
+				if users_context and recipient.pk in users_context.keys():
+					additional_context = users_context[recipient.pk]
+				else:
+					additional_context = None
 				email_message = EmailMultiAlternatives(
-					subject=self.get_subject_for(recipient.mailer_profile),
+					subject=self.get_subject_for(recipient.mailer_profile, additional_context),
 					from_email=f'{self.from_username} <{self.from_email}>',
 					to=[recipient.email],
 					headers=header,
 					reply_to=self.get_reply_to_header(),
-					body=self.get_txt_body_for(recipient.mailer_profile)
+					body=self.get_txt_body_for(recipient.mailer_profile, additional_context)
 				)
-				email_message.attach_alternative(self.get_html_body_for(recipient.mailer_profile), 'text/html')
+				email_message.attach_alternative(self.get_html_body_for(recipient.mailer_profile, additional_context), 'text/html')
 				messages_with_recipients.append((email_message, recipient))
 
 			backend.open()
@@ -290,23 +304,24 @@ class Message(models.Model):
 			time.sleep(self.email_settings.delay_between_connections)
 		return sent_count, errors_count
 
-	def get_subject_for(self, recipient):
+	def get_subject_for(self, recipient, additional_context=None):
 		return Template(self.template_subject).\
-			render(Context(self.get_context(recipient)))
+			render(Context(self.get_context(recipient, additional_context, include_subject=False)))
 
-	def get_html_body_for(self, recipient):
+	def get_html_body_for(self, recipient, additional_context=None):
 		return Template(self.template_html). \
-			render(Context(self.get_context(recipient)))
+			render(Context(self.get_context(recipient, additional_context)))
 
-	def get_txt_body_for(self, recipient):
+	def get_txt_body_for(self, recipient, additional_context=None):
 		return Template(self.template_txt).render(
-			Context(self.get_context(recipient))
+			Context(self.get_context(recipient, additional_context))
 		)
 
-	def get_context(self, recipient):
+	def get_context(self, recipient, additional_context=None, include_subject=True):
 		from tinkoff_merchant.models import Payment
 		last_payment = Payment.objects.filter(customer_key=str(recipient.user.pk), status__in=['CONFIRMED', 'AUTHORIZED']).order_by('update_date').last()
 		context = dict(
+			domain="www.le-francais.ru",
 			user=recipient.user,
 			profile=recipient,
 			last_payment={
@@ -316,6 +331,11 @@ class Message(models.Model):
 			},
 			unsubscribe_url=recipient.get_unsubscribe_url(),
 		)
+		if include_subject:
+			context['subject'] = self.get_subject_for(recipient, additional_context)
+		if additional_context:
+			for k, v in additional_context.items():
+				context[k]=v
 		return context
 
 
