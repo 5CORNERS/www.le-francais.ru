@@ -281,6 +281,10 @@
 					e.preventDefault();
 					return playerPlayPause(true);
 				});
+				$menuPlayer.find('.' + cssClass.tenSecondsBack).on('click', e => {
+				e.preventDefault();
+				return playerSeekBack(10);
+			});
 			}
 
 			if (isAutoPlay) {
@@ -289,11 +293,6 @@
 
 			thePlayer.find('.' + cssClass.playPause).on('click', function () {
 				return playerPlayPause(false);
-			});
-
-			$menuPlayer.find('.' + cssClass.tenSecondsBack).on('click', e => {
-				e.preventDefault();
-				return playerSeekBack(10);
 			});
 
 			function playerPlayPause(is_menu) {
