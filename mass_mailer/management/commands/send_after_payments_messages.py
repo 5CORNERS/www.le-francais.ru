@@ -66,23 +66,30 @@ class Command(BaseCommand):
 def filter_users_with_payments_with_activations(message):
 	users_payments_activations = []
 	receipt_items = ReceiptItem.objects.select_related('receipt', 'receipt__payment').filter(
-		Q(receipt__payment__status="AUTHORISED") | Q(receipt__payment__status="CONFIRMED")
+		receipt__payment__status__in=["AUTHORISED", "CONFIRMED"]
 	).filter(
 		receipt__payment__update_date__date=timezone.now().today()
 	).filter(
 		receipt__payment__update_date__lte=timezone.now() - timezone.timedelta(minutes=15)
 	).order_by('receipt__payment__customer_key')
 
-	users = User.objects.filter(pk__in=[receipt_item.receipt.payment.customer_key for receipt_item in receipt_items]).order_by('id').exclude(
-				pk__in=[log.recipient_id for log in MessageLog.objects.filter(Q(result=MessageLog.RESULT_SUCCESS) | Q(result=MessageLog.RESULT_DIDNT_SEND), message=message)])
-	if not users:
-		return []
+	users = User.objects.filter(
+		pk__in=[receipt_item.receipt.payment.customer_key for receipt_item in receipt_items]
+	).order_by('id').exclude(
+				pk__in=[log.recipient_id for log in MessageLog.objects.filter(Q(result=MessageLog.RESULT_SUCCESS) | Q(result=MessageLog.RESULT_DIDNT_SEND), message=message)]
+	)
 	user_lessons = UserLesson.objects.select_related('lesson').filter(user_id__in=[u.pk for u in users]).order_by('-date')
 
 	item: ReceiptItem
 	for item in receipt_items:
 		update_datetime = item.receipt.payment.update_date
 		user = next((u for u in users if u.pk == int(item.receipt.payment.customer_key)), None)
+		# Exclude users which already got this message
+		if user is None:
+			continue
+		# Exclude users which has more than one payment
+		if Payment.objects.filter(status__in=["AUTHORISED", "CONFIRMED"], customer_key=str(user.pk)).count() > 1:
+			continue
 		activation = next((ul for ul in user_lessons if ul.date > update_datetime and ul.user_id == user.pk), None)
 		users_payments_activations.append((user, item.receipt.payment, activation))
 	return users_payments_activations
