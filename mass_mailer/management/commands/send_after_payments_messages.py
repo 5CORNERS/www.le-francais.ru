@@ -8,7 +8,7 @@ from django.db.models.sql.datastructures import Join
 from django.utils import timezone
 
 from home.models import UserLesson
-from mass_mailer.models import EmailSettings, Message, MessageLog
+from mass_mailer.models import EmailSettings, Message, MessageLog, Profile
 from django.contrib.auth import get_user_model
 
 from tinkoff_merchant.models import Payment, Receipt, ReceiptItem
@@ -74,10 +74,18 @@ def filter_users_with_payments_with_activations(message):
 	).order_by('receipt__payment__customer_key')
 
 	users = User.objects.filter(
-		pk__in=[receipt_item.receipt.payment.customer_key for receipt_item in receipt_items]
+		pk__in=[receipt_item.receipt.payment.customer_key for receipt_item in
+		        receipt_items]
 	).order_by('id').exclude(
-				pk__in=[log.recipient_id for log in MessageLog.objects.filter(Q(result=MessageLog.RESULT_SUCCESS) | Q(result=MessageLog.RESULT_DIDNT_SEND), message=message)]
+		pk__in=[log.recipient_id for log in MessageLog.objects.filter(
+			Q(result=MessageLog.RESULT_SUCCESS) | Q(
+				result=MessageLog.RESULT_DIDNT_SEND), message=message)]
+	).exclude(
+		pk__in=[p.user.pk for p in Profile.objects.filter(
+			subscribed=False
+		)]
 	)
+
 	user_lessons = UserLesson.objects.select_related('lesson').filter(user_id__in=[u.pk for u in users]).order_by('-date')
 
 	item: ReceiptItem

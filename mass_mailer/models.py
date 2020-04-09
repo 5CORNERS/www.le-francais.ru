@@ -278,7 +278,7 @@ class Message(models.Model):
 				email_message = EmailMultiAlternatives(
 					subject=self.get_subject_for(recipient.mailer_profile, additional_context),
 					from_email=f'{self.from_username} <{self.from_email}>',
-					to=[recipient.email],
+					to=[f'{recipient.username} <{recipient.email}>'],
 					headers=header,
 					reply_to=self.get_reply_to_header(),
 					body=self.get_txt_body_for(recipient.mailer_profile, additional_context)
