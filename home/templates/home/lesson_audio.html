@@ -31,7 +31,7 @@
 				{% if not user.is_authenticated %}
 				{% elif not user.must_pay %}
 					{% if not userlesson %}
-					<img class="new-svg-button" id="coffee-button"
+					    <img class="new-svg-button" id="coffee-button"
 							{% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
 							 data-toggle="modal"
 							 data-target="#give-me-a-coffee-modal"
@@ -42,13 +42,14 @@
 							 data-target="#give-me-a-coffee-modal"
 							{% endif %}
 							 src="{% static "images/buttons/new-button.svg" %}"
-					>
-				{% else %}
-					<button class="coffee-button btn btn-secondary btn-xs" disabled="disabled" id="coffee-button">
-						<img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}">
-						<div id="coffee-button-text" class="coffee-button-text">Вы уже угощали меня<br>за этот урок :)</div>
-					</button>
-				{% endif %}
+                         title="Поблагодарить"
+					    >
+                    {% else %}
+                        <button class="coffee-button btn btn-secondary btn-xs" disabled="disabled" id="coffee-button">
+                            <img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}">
+                            <div id="coffee-button-text" class="coffee-button-text">Вы уже угощали меня<br>за этот урок :)</div>
+                        </button>
+                    {% endif %}
 				{% elif not userlesson %}
 					<img
 							class="new-svg-button activate-button{% if userlesson %} activated{% endif %}"
@@ -67,17 +68,17 @@
 			{% else %}
 				{% if not userlesson %}
 					<img class="new-svg-button" id="coffee-button"
-							{% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
-							 data-toggle="modal"
-							 data-target="#give-me-a-coffee-modal"
-							{% elif user.is_authenticated and not user.has_coffee %}
-							 onclick="location.href='{% url 'coffee:check_amount' %}?next={{ request.path }}&s_t=0';"
-							{% elif not user.is_authenticated %}
-							 data-toggle="modal"
-							 data-target="#give-me-a-coffee-modal"
-							{% endif %}
-								src="{% static 'svg/buy me coffee-07.svg' %}"
-{#							 src="{% static "images/buttons/new-button.svg" %}"#}
+                        {% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
+                             data-toggle="modal"
+                             data-target="#give-me-a-coffee-modal"
+                        {% elif user.is_authenticated and not user.has_coffee %}
+                            onclick="location.href='{% url 'coffee:check_amount' %}?next={{ request.path }}&s_t=0';"
+                        {% elif not user.is_authenticated %}
+                             data-toggle="modal"
+                             data-target="#give-me-a-coffee-modal"
+                        {% endif %}
+                         src="{% static 'svg/buy me coffee-07.svg' %}"
+                         title="Поблагодарить"
 					>
 				{% else %}
 					<button class="coffee-button btn btn-disabled btn-xs" disabled="disabled" id="coffee-button">
