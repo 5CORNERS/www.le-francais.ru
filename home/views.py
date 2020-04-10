@@ -146,8 +146,9 @@ def get_navigation_object_from_page(page: Page, current_page_id: int) -> dict:
             "selected": True
         }
         page_object["selectable"] = False
+    child: Page
     for child in page.get_children():
-        if child.show_in_menus:
+        if child.show_in_menus and child.live:
             page_object["nodes"].append(
                 get_navigation_object_from_page(child, current_page_id))
     if len(page_object["nodes"]) == 0:
