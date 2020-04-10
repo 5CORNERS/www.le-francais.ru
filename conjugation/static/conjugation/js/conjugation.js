@@ -162,13 +162,6 @@ $(window).ready(function () {
               "isInfinitive": true,
               "cls": "starts-with-infinitive"
             },
-            {
-              "url": "/conjugaison/parler/",
-              "verb": "parler",
-              "html": "<b></b>parler",
-              "isInfinitive": true,
-              "cls": "starts-with-infinitive"
-            },
           ]);
         }else{
           $searchVerb.autocomplete('option', 'source', Urls['conjugation:autocomplete']());
