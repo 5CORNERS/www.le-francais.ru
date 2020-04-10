@@ -144,11 +144,11 @@ def autocomplete_infinitive_contains(s, reflexive=False, limit=50, max_show=5):
 
 
 def search_verbs(s, reflexive=None, return_first=False):
+	from conjugation.models import Verb
 	s_unaccent = unidecode(s)
 	verb = None
 	verbs = []
 	try:
-		from conjugation.models import Verb
 		verb = Verb.objects.get(infinitive_no_accents=s_unaccent)
 		verbs.append((verb, None))
 	except Verb.DoesNotExist:
@@ -185,7 +185,7 @@ def search_verbs(s, reflexive=None, return_first=False):
 					return [(None, None)]
 	for i, (v, f) in enumerate(verbs):
 		if reflexive and (v.can_reflexive or v.reflexive_only):
-			verbs[i] = v.reflexiveverb
+			verbs[i] = (v.reflexiveverb, f)
 	if return_first:
 		return verbs[0]
 	else:
