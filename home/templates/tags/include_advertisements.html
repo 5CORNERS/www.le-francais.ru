@@ -1,7 +1,6 @@
 {% load site_tags %}
 {% if not hide %}
 <script id="script-{{ id }}">
-    debugger;
 	let ad_elements_{{ id }} = [
 		{% for ad in ads %}
 			$("<div style='margin-bottom: 10px' id='{{ ids|index:forloop.counter0 }}' class='__{{ ad.placement }}'</div>"),
