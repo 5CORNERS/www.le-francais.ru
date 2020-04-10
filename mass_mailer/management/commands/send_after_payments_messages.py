@@ -99,7 +99,9 @@ def filter_users_with_payments_with_activations(message):
 		if Payment.objects.filter(status__in=["AUTHORISED", "CONFIRMED"], customer_key=str(user.pk)).count() > 1:
 			continue
 		activation = next((ul for ul in user_lessons if ul.date > update_datetime and ul.user_id == user.pk), None)
-		users_payments_activations.append((user, item.receipt.payment, activation))
+		payment = item.receipt.payment
+		cups_quantity = item.site_quantity
+		users_payments_activations.append((user, payment, activation, cups_quantity))
 	return users_payments_activations
 
 
@@ -135,7 +137,7 @@ def create_message(settings, subject, template_html, template_txt,
                    reply_to_header, from_header) -> Message:
 	message, created = Message.objects.get_or_create(name='__after_payments')
 	message.email_settings = settings
-	message.subject = subject
+	message.template_subject = subject
 	message.template_html = template_html
 	message.template_txt = template_txt
 	message.reply_to_username, message.reply_to_email = split_username_email(
@@ -146,17 +148,18 @@ def create_message(settings, subject, template_html, template_txt,
 	return message
 
 
-def send_message(message: Message, users_payments_activations: List[Tuple[User, Payment, UserLesson]]) -> (int, int):
+def send_message(message: Message, users_payments_activations: List[Tuple[User, Payment, UserLesson, int]]) -> (int, int):
 	contexts = {}
-	for user, payment, activation in users_payments_activations:
-		contexts[user.pk] = get_context(user, message, payment, activation)
+	for user, payment, activation, quantity in users_payments_activations:
+		contexts[user.pk] = get_context(user, message, payment, activation, quantity)
 	sent_count, errors_count = message.send(to=[user for user, *o in users_payments_activations], users_context=contexts)
 	return sent_count, errors_count
 
 
-def get_context(user, message, payment, next_after_payment_activation=None) -> dict:
+def get_context(user, message, payment, next_after_payment_activation=None, quantity=1) -> dict:
 	context = {
 		"payment":payment,
 		"next_after_payment_activation":next_after_payment_activation,
+		"cups_quantity":quantity
 	}
 	return context
