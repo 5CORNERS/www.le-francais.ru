@@ -11,3 +11,11 @@ def message(val, form1, form2, form5):
 		return f'{val} {form2}'
 	else:
 		return f'{val} {form5}'
+
+@register.filter(takes_context=False)
+def n_to_word(s:str):
+	if "5 " in s:
+		s = s.replace("5 ", "пять ")
+	elif "1 " in s:
+		s = s.replace("1 ", "")
+	return s
