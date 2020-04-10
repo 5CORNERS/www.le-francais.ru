@@ -52,4 +52,4 @@ Cordialement
 ILYA DUMOV
 le-francais.ru{% endif %}{% endif %}
 
-Если Вы больше не хотите получать сообщения от команды Le-francais.ru, вы можете отписаться, перейдя по этой ссылке: {{ unsubscribe_url }}
+P.S. Если Вы больше не хотите получать сообщения от команды Le-francais.ru, вы можете отписаться, перейдя по этой ссылке: {{ unsubscribe_url }}
