@@ -193,7 +193,7 @@ class UsersFilter(models.Model):
 			if self.has_name_for_emails:
 				recipients = recipients.exclude(name_for_emails__isnull=True)
 			if self.do_not_send_to_pass_partout:
-				recipients = recipients.exclude(must_pay=True)
+				recipients = recipients.exclude(must_pay=False)
 			recipients = recipients.distinct()
 		return recipients
 	
