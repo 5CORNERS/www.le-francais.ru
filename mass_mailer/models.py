@@ -111,10 +111,17 @@ class UsersFilter(models.Model):
 		models.CharField(max_length=12, choices=FILTERS), default=list,
 		blank=True
 	)
-	first_payment_was = models.DateField(null=True)
-	last_payment_was = models.DateField(null=True)
+	first_payment_was = models.DateField(null=True, blank=True)
+	last_payment_was = models.DateField(null=True, blank=True)
+
+	joined_before = models.DateField(null=True, blank=True)
+	joined_after = models.DateField(null=True, blank=True)
+
+	has_name_for_emails = models.BooleanField(default=False)
+
 	blacklist = models.ManyToManyField(to=User, blank=True)
 	manual_email_list = models.TextField(max_length=1024, help_text='Comma-separated list of emails, for testing purposes.', default=None, null=True, blank=True)
+	manual_blacklist = models.TextField(blank=True, null=True, default=None)
 	ignore_subscriptions = models.BooleanField(default=False)
 	send_once = models.BooleanField(default=True)
 
@@ -169,6 +176,17 @@ class UsersFilter(models.Model):
 				recipients = recipients.exclude(
 					pk__in=self.blacklist.all()
 				)
+			if self.joined_before:
+				recipients = recipients.filter(
+					date_joined__lte=self.joined_before
+				)
+			if self.joined_after:
+				recipients = recipients.filter(
+					date_joined__gte=self.joined_after
+				)
+			if self.manual_blacklist:
+				blacklist = self.manual_blacklist.split(",")
+				recipients = recipients.exclude(email__in=blacklist)
 		return recipients.distinct()
 	
 	def get_recipients_for_message(self, message):
@@ -330,6 +348,7 @@ class Message(models.Model):
 					item.site_quantity for item in last_payment.items()) if last_payment else 0
 			},
 			unsubscribe_url=recipient.get_unsubscribe_url(),
+			username=recipient.name_for_emails,
 		)
 		if include_subject:
 			context['subject'] = self.get_subject_for(recipient, additional_context)

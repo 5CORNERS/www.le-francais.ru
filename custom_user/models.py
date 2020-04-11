@@ -44,6 +44,15 @@ class User(AbstractUser):
 			'unique': _("A user with that email already exists."),
 		},
 	)
+
+	name_for_emails = models.CharField(
+		max_length=32,
+		help_text="Name, which will be used in emails instead of username",
+		null=True,
+		blank=True,
+		default=None,
+	)
+
 	username = models.CharField(
 		max_length=32,
 		verbose_name='nickname',
