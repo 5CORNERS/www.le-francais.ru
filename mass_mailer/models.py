@@ -126,7 +126,7 @@ class UsersFilter(models.Model):
 	send_once = models.BooleanField(default=True)
 
 	send_only_first = models.IntegerField(null=True, blank=True, default=None)
-	do_not_send_to_pass_partout = models.BooleanField(null=True, blank=True, default=None)
+	do_not_send_to_pass_partout = models.BooleanField(default=False)
 
 	def __str__(self):
 		return self.name
