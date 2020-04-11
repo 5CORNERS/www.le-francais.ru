@@ -191,9 +191,8 @@ class UsersFilter(models.Model):
 				recipients = recipients.exclude(email__in=blacklist)
 			if self.has_name_for_emails:
 				recipients = recipients.exclude(name_for_emails__isnull=True)
-			if self.send_only_first:
-				recipients = recipients[:self.send_only_first]
-		return recipients.distinct()
+			recipients = recipients.distinct()
+		return recipients
 	
 	def get_recipients_for_message(self, message):
 		"""
@@ -284,6 +283,8 @@ class Message(models.Model):
 		errors_count = 0
 		if not recipients:
 			return sent_count, errors_count
+		if self.recipients_filter and self.recipients_filter.send_only_first:
+			recipients = recipients[:self.recipients_filter.send_only_first]
 		chunks = [recipients[x:x+self.email_settings.messages_per_connection] for x in range(0, len(recipients), self.email_settings.messages_per_connection)]
 		for chunk in chunks:
 			messages_with_recipients = []
@@ -354,7 +355,7 @@ class Message(models.Model):
 					item.site_quantity for item in last_payment.items()) if last_payment else 0
 			},
 			unsubscribe_url=recipient.get_unsubscribe_url(),
-			username=recipient.name_for_emails,
+			username=recipient.user.name_for_emails,
 		)
 		if include_subject:
 			context['subject'] = self.get_subject_for(recipient, additional_context)
