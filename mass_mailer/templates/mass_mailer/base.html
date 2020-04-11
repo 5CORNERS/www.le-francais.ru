@@ -52,8 +52,8 @@
                cellspacing="0">
             <tr>
                 <td class="content-block">
-                    Если Вы больше не хотите получать сообщения от команды Le-francais.ru, вы можете отписаться, перейдя
-                    <a href="{% block unsubscribe_url %}{% endblock %}">по этой ссылке</a>.
+                    {% block unsubscribe %}Если Вы больше не хотите получать сообщения от команды Le-francais.ru, вы можете отписаться, перейдя
+                    <a href="{% block unsubscribe_url %}{{ unsubscribe_url }}{% endblock %}">по этой ссылке</a>.{% endblock %}
                 </td>
             </tr>
         </table>
