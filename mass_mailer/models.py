@@ -187,6 +187,8 @@ class UsersFilter(models.Model):
 			if self.manual_blacklist:
 				blacklist = self.manual_blacklist.split(",")
 				recipients = recipients.exclude(email__in=blacklist)
+			if self.has_name_for_emails:
+				recipients = recipients.exclude(name_for_emails__isnull=True)
 		return recipients.distinct()
 	
 	def get_recipients_for_message(self, message):
