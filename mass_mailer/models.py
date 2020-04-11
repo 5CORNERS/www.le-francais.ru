@@ -125,6 +125,8 @@ class UsersFilter(models.Model):
 	ignore_subscriptions = models.BooleanField(default=False)
 	send_once = models.BooleanField(default=True)
 
+	send_only_first = models.IntegerField(null=True, blank=True, default=None)
+
 	def __str__(self):
 		return self.name
 
@@ -189,6 +191,8 @@ class UsersFilter(models.Model):
 				recipients = recipients.exclude(email__in=blacklist)
 			if self.has_name_for_emails:
 				recipients = recipients.exclude(name_for_emails__isnull=True)
+			if self.send_only_first:
+				recipients = recipients[:self.send_only_first]
 		return recipients.distinct()
 	
 	def get_recipients_for_message(self, message):
