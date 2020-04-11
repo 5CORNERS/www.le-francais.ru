@@ -275,9 +275,21 @@ def clear_all(request):
 
 def get_packet_progress(request, pk):
     if int(pk) == 99999999:
-        packet = UserStandalonePacket.objects.get(user=request.user)
-        result = packet.to_dict(user=request.user)
-        result['isAuthenticated'] = request.user.is_authenticated
+        try:
+            packet = UserStandalonePacket.objects.get(user=request.user)
+            result = packet.to_dict(user=request.user)
+            result['isAuthenticated'] = request.user.is_authenticated
+        except UserStandalonePacket.DoesNotExist:
+            result = {
+                "pk": 99999999,
+                "name": "Пользовательский пакет",
+                "lessonNumber": None,
+                "demo": True,
+                "activated": True,
+                "added": True,
+                "wordsCount": 0,
+                "isAuthenticated": True
+            }
         return JsonResponse(result)
     try:
         result = Packet.objects.get(pk=pk).to_dict(user=request.user)
