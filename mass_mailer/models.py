@@ -294,7 +294,7 @@ class Message(models.Model):
 			messages_with_recipients = []
 			for recipient in chunk:
 				validated_email = validate_email(
-					email_address='example@example.com',
+					email_address=recipient.email,
 					check_regex=True,
 					check_mx=True,
 					smtp_timeout=10,
