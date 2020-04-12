@@ -68,3 +68,5 @@ git+git://github.com/zostera/django-bootstrap4.git@d3e77d458c00ef97facd35997deae
 pymorphy2
 pymorphy2-dicts
 DAWG-Python
+
+py3-validate-email
