@@ -129,6 +129,8 @@ class UsersFilter(models.Model):
 	send_only_first = models.IntegerField(null=True, blank=True, default=None)
 	do_not_send_to_pass_partout = models.BooleanField(default=False)
 
+	do_not_send_to_gmail = models.BooleanField(default=False)
+
 	def __str__(self):
 		return self.name
 
@@ -195,6 +197,8 @@ class UsersFilter(models.Model):
 				recipients = recipients.exclude(name_for_emails__isnull=True)
 			if self.do_not_send_to_pass_partout:
 				recipients = recipients.exclude(must_pay=False)
+			if self.do_not_send_to_gmail:
+				recipients = recipients.exclude(email__contains='@gmail.com')
 			recipients = recipients.distinct()
 		return recipients
 	
@@ -237,6 +241,8 @@ class Message(models.Model):
 
 	created_datetime = models.DateTimeField(auto_now_add=True)
 	send_datetime = models.DateTimeField(null=True)
+
+	list_unsubscribe_header = models.BooleanField(default=False)
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -306,9 +312,10 @@ class Message(models.Model):
 					errors_count += 1
 					continue
 				header = {
-					# 'List-Unsubscribe': f'<{recipient.mailer_profile.get_unsubscribe_url()}>',
 					'Sender': f'{self.email_settings.get_sender_header()}',
 				}
+				if self.list_unsubscribe_header:
+					header['List-Unsubscribe'] = f'<{recipient.mailer_profile.get_unsubscribe_url()}>'
 				if self.extra_headers:
 					for name, value in self.extra_headers.items():
 						header[name] = value
