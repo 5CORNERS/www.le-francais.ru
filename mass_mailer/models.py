@@ -21,6 +21,7 @@ from django.forms import SelectMultiple, MultipleChoiceField
 from django.template import Context, Template
 from django.utils.module_loading import import_string
 from django.shortcuts import reverse
+from validate_email import validate_email
 
 User = get_user_model()
 
@@ -292,6 +293,18 @@ class Message(models.Model):
 		for chunk in chunks:
 			messages_with_recipients = []
 			for recipient in chunk:
+				validated_email = validate_email(
+					email_address='example@example.com',
+					check_regex=True,
+					check_mx=True,
+					smtp_timeout=10,
+					dns_timeout=10,
+					use_blacklist=True)
+				if not validated_email:
+					MessageLog.objects.log(self, recipient, MessageLog.RESULT_FAILURE,
+										   log_message=str(f"Can't Validate EMail"))
+					errors_count += 1
+					continue
 				header = {
 					# 'List-Unsubscribe': f'<{recipient.mailer_profile.get_unsubscribe_url()}>',
 					'Sender': f'{self.email_settings.get_sender_header()}',
