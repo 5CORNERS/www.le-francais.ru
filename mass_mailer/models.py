@@ -341,6 +341,7 @@ class Message(models.Model):
 					MessageLog.objects.log(self, recipient, MessageLog.RESULT_FAILURE,
 					                       log_message=str(error))
 					errors_count += 1
+					print(f"SMTP Error: {str(error)}")
 			backend.close()
 			time.sleep(self.email_settings.delay_between_connections)
 		return sent_count, errors_count
