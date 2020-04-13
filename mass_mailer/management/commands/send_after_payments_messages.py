@@ -86,7 +86,7 @@ def filter_users_with_payments_with_activations(message):
 		)]
 	)
 
-	user_lessons = UserLesson.objects.select_related('lesson').filter(user_id__in=[u.pk for u in users]).order_by('-date')
+	user_lessons = UserLesson.objects.select_related('lesson').filter(user_id__in=[u.pk for u in users]).order_by('date')
 
 	item: ReceiptItem
 	for item in receipt_items:
