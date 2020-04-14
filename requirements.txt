@@ -62,11 +62,10 @@ django-npm
 -e git+https://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26#egg=django_pure_pagination
 -e git+https://github.com/5CORNERS/pybbm.git#egg=pybbm
 -e git+https://github.com/AntonDumov/django-recaptcha3.git#egg=django-recaptcha3
+-e git+https://github.com/AntonDumov/py3-validate-email.git#egg=validate-email
 
 git+git://github.com/zostera/django-bootstrap4.git@d3e77d458c00ef97facd35997deaea7b8e311d9e
 
 pymorphy2
 pymorphy2-dicts
 DAWG-Python
-
-py3-validate-email
