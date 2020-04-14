@@ -96,6 +96,14 @@ class EmailSettings(models.Model):
 
 	def get_sender_header(self):
 		return f'{self.sender_username} <{self.sender_email}>'
+#
+#
+# class BlackList(models.Model):
+# 	name = models.CharField(max_length=64)
+# 	users = models.ManyToManyField(User)
+#
+# 	def __str__(self):
+# 		return f"{self.name}"
 
 
 class UsersFilter(models.Model):
@@ -189,7 +197,16 @@ class UsersFilter(models.Model):
 						)
 
 					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_GT1CUP:
-						...
+						payments = Payment.objects.filter(
+							status__in=['CONFIRMED', 'AUTHORIZED'],
+							receipt__receiptitem__site_quantity=1
+						)
+						payments = self.first_last_payments_filter(
+							self.first_payment_was, self.last_payment_was,
+							payments)
+						recipients = recipients.filter(
+							id__in=[int(p.customer_key) for p in payments]
+						)
 			if not self.ignore_subscriptions:
 				recipients = recipients.exclude(pk__in=[p.user.pk for p in
 				                                        Profile.objects.filter(
@@ -218,7 +235,8 @@ class UsersFilter(models.Model):
 			recipients = recipients.distinct()
 		return recipients
 
-	def first_last_payments_filter(self, first_payment_date, last_payment_date,
+	@staticmethod
+	def first_last_payments_filter(first_payment_date, last_payment_date,
 	                               payments_query):
 		if last_payment_date:
 			payments_query = payments_query.filter(
