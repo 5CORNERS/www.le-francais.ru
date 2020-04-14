@@ -352,7 +352,7 @@ class Message(models.Model):
 					smtp_timeout=10,
 					dns_timeout=10,
 					use_blacklist=True)
-				if not is_validated == True:
+				if not is_validated and is_validated is not None:
 					MessageLog.objects.log(self, recipient, MessageLog.RESULT_FAILURE,
 										   log_message=str(f"Can't Validate EMail"))
 					errors_count += 1
