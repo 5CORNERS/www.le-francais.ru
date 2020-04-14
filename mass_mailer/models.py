@@ -299,14 +299,14 @@ class Message(models.Model):
 		for chunk in chunks:
 			messages_with_recipients = []
 			for recipient in chunk:
-				validated_email = validate_email(
+				is_validated = validate_email(
 					email_address=recipient.email,
 					check_regex=True,
 					check_mx=True,
 					smtp_timeout=10,
 					dns_timeout=10,
 					use_blacklist=True)
-				if not validated_email:
+				if not is_validated == True:
 					MessageLog.objects.log(self, recipient, MessageLog.RESULT_FAILURE,
 										   log_message=str(f"Can't Validate EMail"))
 					errors_count += 1
