@@ -7,7 +7,7 @@
 		{% endfor %}
 	];
 	let parent_container_{{ id }} = $('#script-{{ id }}').parent();
-    {% if sidebar %}
+    {% if is_sidebar %}
 	let last_{{ id }} = ad_elements_{{ id }}.pop();
 	let n_{{ id }} = ~~(parent_container_{{ id }}.height()/1000);
 	parent_container_{{ id }}.append(ad_elements_{{ id }}[0]);

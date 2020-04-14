@@ -102,10 +102,14 @@ class UsersFilter(models.Model):
 	USERS_WITHOUT_ACTIVATIONS = '0'
 	USERS_WITH_PAYMENTS = '1'
 	PAYMENTS_WITHOUT_ACTIVATIONS = '2'
+	USERS_WITH_PAYMENTS_EQ1CUP = '3'
+	USERS_WITH_PAYMENTS_GT1CUP = '4'
 	FILTERS = [
 		(USERS_WITHOUT_ACTIVATIONS, 'Users w/o activations'),
 		(USERS_WITH_PAYMENTS, 'Users with payments'),
-		(PAYMENTS_WITHOUT_ACTIVATIONS, 'Payments w/o activations')
+		(PAYMENTS_WITHOUT_ACTIVATIONS, 'Payments w/o activations'),
+		(USERS_WITH_PAYMENTS_EQ1CUP, 'Users, which payed for 1 cup only'),
+		(USERS_WITH_PAYMENTS_GT1CUP, 'Users, which payed for more than 1 cups'),
 	]
 	name = models.CharField(max_length=64)
 	filters = ChoiceArrayField(
@@ -135,6 +139,7 @@ class UsersFilter(models.Model):
 		return self.name
 
 	def get_recipients(self):
+		from tinkoff_merchant.models import Payment
 		recipients = User.objects.all()
 		if self:
 			if self.manual_email_list:
@@ -144,36 +149,47 @@ class UsersFilter(models.Model):
 			else:
 				for recipients_filter in self.filters.copy():
 					if recipients_filter == UsersFilter.USERS_WITH_PAYMENTS:
-						from tinkoff_merchant.models import Payment
 						payments_query = Payment.objects.filter(
 							status__in=['CONFIRMED', 'AUTHORIZED'],
 							amount__gte=10000)
-						if self.last_payment_was:
-							payments_query = payments_query.filter(
-								update_date__lte=self.last_payment_was)
-						if self.first_payment_was:
-							payments_query = payments_query.filter(
-								update_date__gte=self.first_payment_was)
+						payments_query = self.first_last_payments_filter(
+							self.first_payment_was, self.last_payment_was,
+							payments_query)
 						wanted_pks = [int(p.customer_key) for p in
 						              payments_query]
 						recipients = recipients.filter(id__in=wanted_pks)
+
 					elif recipients_filter == UsersFilter.USERS_WITHOUT_ACTIVATIONS:
 						recipients = recipients.filter(payment__isnull=True)
+
 					elif recipients_filter == UsersFilter.PAYMENTS_WITHOUT_ACTIVATIONS:
-						from tinkoff_merchant.models import Payment
+
 						payments_query = Payment.objects.filter(
-							status__in=['CONFIRMED', 'AUTHORIZED'],
-							amount__gte=10000)
-						if self.last_payment_was:
-							payments_query = payments_query.filter(
-								update_date__lte=timezone.make_aware(datetime.combine(self.last_payment_was, datetime.min.time())))
-						if self.first_payment_was:
-							payments_query = payments_query.filter(
-								update_date__gte=timezone.make_aware(datetime.combine(self.first_payment_was, datetime.min.time())))
+							status__in=['CONFIRMED', 'AUTHORIZED'])
+
+						payments_query = self.first_last_payments_filter(
+							self.first_payment_was, self.last_payment_was,
+							payments_query)
+
 						payments = [p for p in list(payments_query) if
 						            p.closest_activation == '-']
 						recipients = recipients.filter(
 							id__in=[int(p.customer_key) for p in payments])
+
+					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_EQ1CUP:
+						payments = Payment.objects.filter(
+							status__in=['CONFIRMED', 'AUTHORIZED'],
+							receipt__receiptitem__site_quantity = 1
+						)
+						payments = self.first_last_payments_filter(
+							self.first_payment_was, self.last_payment_was,
+							payments)
+						recipients = recipients.filter(
+							id__in=[int(p.customer_key) for p in payments]
+						)
+
+					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_GT1CUP:
+						...
 			if not self.ignore_subscriptions:
 				recipients = recipients.exclude(pk__in=[p.user.pk for p in
 				                                        Profile.objects.filter(
@@ -201,7 +217,19 @@ class UsersFilter(models.Model):
 				recipients = recipients.exclude(email__contains='@gmail.com')
 			recipients = recipients.distinct()
 		return recipients
-	
+
+	def first_last_payments_filter(self, first_payment_date, last_payment_date,
+	                               payments_query):
+		if last_payment_date:
+			payments_query = payments_query.filter(
+				update_date__lte=timezone.make_aware(
+					datetime.combine(last_payment_date, datetime.min.time())))
+		if first_payment_date:
+			payments_query = payments_query.filter(
+				update_date__gte=timezone.make_aware(
+					datetime.combine(first_payment_date, datetime.min.time())))
+		return payments_query
+
 	def get_recipients_for_message(self, message):
 		"""
 		:type message: Message
