@@ -373,27 +373,16 @@ POSTMAN_DISALLOW_ANONYMOUS = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 MASS_EMAIL_BACKEND = EMAIL_BACKEND
-DEFAULT_FROM_EMAIL = 'no_reply@files.le-francais.ru'
+DEFAULT_FROM_EMAIL = 'no-reply@mail.le-francais.ru'
 
 email_config = dj_email_url.config()
 
-EMAIL_HOST = os.environ.get('EMAIL_HOST', email_config['EMAIL_HOST'])
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', email_config['EMAIL_PORT']))
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', email_config['EMAIL_HOST_USER'])
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', email_config['EMAIL_HOST_PASSWORD'])
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', email_config['EMAIL_USE_TLS']) == 'True'
-EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', email_config['EMAIL_USE_SSL']) == 'True'
-
-mass_email_config = dj_email_url.config('MASS_EMAIL_URL')
-
-MASS_EMAIL_HOST = mass_email_config.get('EMAIL_HOST')
-MASS_EMAIL_PORT = mass_email_config.get('EMAIL_PORT')
-MASS_EMAIL_HOST_USER = mass_email_config.get('EMAIL_HOST_USER')
-MASS_EMAIL_HOST_PASSWORD = mass_email_config.get('EMAIL_HOST_PASSWORD')
-MASS_EMAIL_USE_TLS = mass_email_config.get('EMAIL_USE_TLS')
-MASS_EMAIL_USE_SSL = mass_email_config.get('EMAIL_USE_SSL')
-
-MASS_EMAIL_TIMEOUT = 30
+EMAIL_HOST = email_config['EMAIL_HOST']
+EMAIL_PORT = email_config['EMAIL_PORT']
+EMAIL_HOST_USER = email_config['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = email_config['EMAIL_HOST_PASSWORD']
+EMAIL_USE_TLS = email_config['EMAIL_USE_TLS']
+EMAIL_USE_SSL = email_config['EMAIL_USE_SSL']
 
 # Django Mailer Settings
 
