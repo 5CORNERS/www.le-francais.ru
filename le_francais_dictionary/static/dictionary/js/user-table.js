@@ -246,6 +246,15 @@ function applyFilters(process, filters){
 }
 
 
+function bind_play_icons() {
+    let play_icons = $('.play');
+    play_icons.unbind();
+    play_icons.click(event => {
+        let url = $(event.target).data('audiosrc');
+        voice(url)
+    });
+}
+
 function updateTable(afterInit=undefined, initialPageLength=50) {
     let form = $('#filterWordsForm');
     let url = Urls['dictionary:my_words']();
@@ -356,12 +365,12 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                         showDeleted(this.checked);
                         add_selected_filtered_alert(dt)
                     });
-                    let play_icons = $('.play');
-                    play_icons.unbind();
-                    play_icons.click(event => {
-                        let url = $(event.target).data('audiosrc');
-                        voice(url)
+
+                    bind_play_icons();
+                    $dt.on('page.dt', (e, settings) => {
+                        setTimeout(bind_play_icons, 1000)
                     });
+
                     $dt.on('user-select.dt.dtCheckboxes', function (e, api, type, indexes, originalEvent) {
                         if ($(originalEvent.target).hasClass('play')){
                             e.preventDefault()
