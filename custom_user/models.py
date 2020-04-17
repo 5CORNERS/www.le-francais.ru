@@ -101,6 +101,8 @@ class User(AbstractUser):
 		null=True
 	)
 
+	receive_emails = models.BooleanField(default=True)
+
 	_cup_amount = models.IntegerField(
 		default=0, editable=True,
 		verbose_name='Кол-во чашек/билеткиов')
