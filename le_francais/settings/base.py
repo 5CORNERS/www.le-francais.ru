@@ -363,6 +363,7 @@ PYBB_SMILES = dict()
 PYBB_DEFAULT_AUTOSUBSCRIBE = True
 PYBB_DEFAULT_TITLE = 'Forum'
 PYBB_PERMISSION_HANDLER = 'forum.permissions.CustomPermissionHandler'
+PYBB_FROM_EMAIL = 'Le-francais.ru » Форум <no-reply@mail.le-francais.ru>'
 
 # Postman settings
 
