@@ -8,17 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-27 16:22+0300\n"
-"PO-Revision-Date: \n"
+"POT-Creation-Date: 2020-04-17 16:28+0300\n"
+"PO-Revision-Date: 2020-04-17 18:00+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: \n"
+"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
-"%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #: .\forms.py:23
 msgid "Notify me about follow-up comments"
@@ -56,7 +53,111 @@ msgstr "url-ссылка на ваше имя (необязательно)"
 msgid "Your comment"
 msgstr "Напишите комментарий"
 
-#: .\templates\comments\form.html:67
+#: .\forms.py:80
+msgid "New username"
+msgstr "Новое имя"
+
+#: .\forms.py:88
+msgid "Captcha"
+msgstr "Капча"
+
+#: .\forms.py:97
+msgid "Signature"
+msgstr "Подпись"
+
+#: .\templates\account\account_inactive.html:5
+#: .\templates\account\account_inactive.html:9
+msgid "Account Inactive"
+msgstr "Аккаунт неактивен"
+
+#: .\templates\account\email.html:5
+msgid "Account"
+msgstr "Аккаунт"
+
+#: .\templates\account\email.html:11
+msgid "E-mail Addresses"
+msgstr "E-mail адреса"
+
+#: .\templates\account\email.html:14
+msgid "The following e-mail addresses are associated with your account:"
+msgstr "E-mail адреса, прикреплённые к вашему аккаунту"
+
+#: .\templates\account\email.html:33
+msgid "Verified"
+msgstr "Подтверждён"
+
+#: .\templates\account\email.html:35
+msgid "Unverified"
+msgstr "Не подтверждён"
+
+#: .\templates\account\email.html:38
+msgid "Primary"
+msgstr "Основной"
+
+#: .\templates\account\email.html:44
+msgid "Make Primary"
+msgstr "Сделать основным"
+
+#: .\templates\account\email.html:46
+msgid "Re-send Verification"
+msgstr "Отправить подтверждение"
+
+#: .\templates\account\email.html:48
+msgid "Remove"
+msgstr "Удалить"
+
+#: .\templates\account\email.html:55
+msgid "Warning:"
+msgstr "Внимание:"
+
+#: .\templates\account\email.html:55
+msgid ""
+"You currently do not have any e-mail address set up. You should really add "
+"an e-mail address so you can receive notifications, reset your password, etc."
+msgstr ""
+"Сейчас у вас нет прикрепленного e-mail адреса. Рекомендуем добавить, чтобы "
+"начать получать уведомления, сброс пароля и прочее."
+
+#: .\templates\account\email.html:62
+msgid "Add E-mail Address"
+msgstr "Добавить e-mail адрес"
+
+#: .\templates\account\email.html:69
+msgid "Add E-mail"
+msgstr "Добавить e-mail"
+
+#: .\templates\account\email.html:82
+msgid "Do you really want to remove the selected e-mail address?"
+msgstr "Вы действительно хотите открепить этот e-mail адрес?"
+
+#: .\templates\account\login.html:6
+msgid "Sign In"
+msgstr "Войти"
+
+#: .\templates\account\login.html:107 .\templates\account\login_form.html:49
+msgid "Forgot Password?"
+msgstr "Забыли пароль?"
+
+#: .\templates\account\logout.html:5 .\templates\account\logout.html:11
+#: .\templates\account\logout.html:20
+msgid "Sign Out"
+msgstr "Выйти"
+
+#: .\templates\account\logout.html:13
+msgid "Are you sure you want to sign out?"
+msgstr "Вы уверены, что хотите выйти?"
+
+#: .\templates\account\password_change.html:5
+#: .\templates\account\password_change.html:8
+#: .\templates\account\password_change.html:13
+msgid "Change Password"
+msgstr "Изменить пароль"
+
+#: .\templates\account\signup.html:6
+msgid "Signup"
+msgstr "Зарегестрироваться"
+
+#: .\templates\comments\_form.html:65
 msgid "send"
 msgstr "отправить"
 
@@ -230,3 +331,356 @@ msgstr "Ответить на комментарий"
 #: templates/pybb/post_template.html:85
 msgid "quote entire message (not recommended)"
 msgstr "цитировать сообщение целиком (избегайте оверквотинга!)"
+
+#: .\templates\pybb\edit_profile.html:4
+msgid "Profile editing"
+msgstr "Редактирование профиля"
+
+#: .\templates\pybb\edit_profile.html:74
+msgid "Save"
+msgstr "Сохранить"
+
+#: .\templates\pybb\edit_profile.html:90
+msgid "delete"
+msgstr "удалить"
+
+#: .\templates\pybb\forum_last_update_info.html:7
+#: .\templates\pybb\post_template.html:87
+#: .\templates\pybb\post_template.html:93
+#: .\templates\pybb\topic_last_message_info.html:9
+#: .\templates\pybb\user_topics.html:80 .\templates\tags\related_post.html:19
+#: .\templates\tags\related_post.html:25
+msgid "ago"
+msgstr "назад"
+
+#: .\templates\pybb\index.html:8
+msgid "Список форумов"
+msgstr ""
+
+#: .\templates\pybb\index.html:19
+msgid "Последние сообщения"
+msgstr ""
+
+#: .\templates\pybb\index.html:29
+msgid "Самое обсуждаемое"
+msgstr ""
+
+#: .\templates\pybb\index.html:40 .\templates\pybb\index.html:63
+#: .\templates\pybb\latest_topics.html:5 .\templates\pybb\latest_topics.html:8
+#: .\templates\pybb\latest_topics.html:22
+msgid "Last updates in topics"
+msgstr "Последние обновления в темах"
+
+#: .\templates\pybb\index.html:45 .\templates\pybb\index.html:68
+msgid "Mark all forums as read"
+msgstr "Отметить всё как прочитанное"
+
+#: .\templates\pybb\index.html:54
+msgid "Forum categories are not created"
+msgstr "Категории не созданы"
+
+#: .\templates\pybb\index.html:57
+msgid "Add a category now"
+msgstr "Добавить категорию"
+
+#: .\templates\pybb\latest_topics.html:17
+#: .\templates\pybb\latest_topics.html:38
+msgid "Mark all topics as read"
+msgstr "Отметить всё как прочитанное"
+
+#: .\templates\pybb\mail_templates\forum_subscription_email_body.html:4
+#, python-format
+msgid ""
+"User %(username)s post a new topic in forum to which you are subscribed "
+"(%(forum_name)s)."
+msgstr ""
+"%(username)s создал(а) новую тему на форуме, на который вы подписаны"
+"(%(forum_name)s)."
+
+#: .\templates\pybb\mail_templates\forum_subscription_email_body.html:5
+#: .\templates\pybb\mail_templates\subscription_email_body.html:5
+msgid "Link to topic"
+msgstr "Ссылка на тему"
+
+#: .\templates\pybb\mail_templates\forum_subscription_email_body.html:5
+#: .\templates\pybb\mail_templates\forum_subscription_email_body.html:6
+#: .\templates\pybb\mail_templates\forum_subscription_email_body.html:9
+#: .\templates\pybb\mail_templates\subscription_email_body.html:4
+#: .\templates\pybb\mail_templates\subscription_email_body.html:5
+msgid ":"
+msgstr ":"
+
+#: .\templates\pybb\mail_templates\forum_subscription_email_body.html:6
+msgid "Link to forum"
+msgstr "Ссылка на форум"
+
+#: .\templates\pybb\mail_templates\forum_subscription_email_body.html:9
+msgid ""
+"If you don't want to receive notifications on new topics in this forum visit "
+"following link"
+msgstr ""
+"Если вы не хотите получать уведомления о новых темах на этом форуме - "
+"перейдите по этой ссылке"
+
+#: .\templates\pybb\mail_templates\forum_subscription_email_subject.html:2
+msgid "New topic in forum that you subscribed."
+msgstr "Новая тема на форуме, на который вы подписаны"
+
+#: .\templates\pybb\mail_templates\subscription_email_body-html.html:7
+#: .\templates\pybb\mail_templates\subscription_email_body.html:3
+#, python-format
+msgid "User %(username)s replied in topic to which you are subscribed."
+msgstr "%(username)s ответил в теме, на которую вы подписаны"
+
+#: .\templates\pybb\mail_templates\subscription_email_body-html.html:10
+#, python-format
+msgid ""
+"Follow %(link_post_start)sthis link%(link_end)s to see the new post on the "
+"topic %(link_topic_start)s%(topic_name)s%(link_end)s."
+msgstr ""
+"Перейдите по %(link_post_start)sссылке%(link_end)s, чтобы увидеть новое "
+"сообщение в теме %(link_topic_start)s%(topic_name)s%(link_end)s."
+
+#: .\templates\pybb\mail_templates\subscription_email_body-html.html:14
+#, python-format
+msgid ""
+"If you don't want to receive notifications on new posts in this topic visit "
+"%(link_start)sthis link%(link_end)s."
+msgstr ""
+"Если вы не хотите получать уведомления о новых сообщениях в этой теме - "
+"перейдите по этой %(link_start)sссылке%(link_end)s."
+
+#: .\templates\pybb\mail_templates\subscription_email_body.html:4
+msgid "Link to post"
+msgstr "Ссылка на сообщение"
+
+#: .\templates\pybb\mail_templates\subscription_email_body.html:8
+#, python-format
+msgid ""
+"If you don't want to receive notifications on new messages in this topic "
+"visit following link: %(delete_url_full)s"
+msgstr ""
+"Если вы не хотите получать уведомления о новых сообщениях в этой теме - "
+"перейдите по этой ссылке: %(delete_url_full)s"
+
+#: .\templates\pybb\mail_templates\subscription_email_subject.html:2
+msgid "New answer in topic that you subscribed."
+msgstr "Новый ответ в теме, на которую вы подписаны"
+
+#: .\templates\pybb\move_post_pg.html:5
+msgid "Move post to another topic"
+msgstr "Переместить сообщение в другую тему"
+
+#: .\templates\pybb\move_post_pg.html:26
+msgid "Choose topic where to move post"
+msgstr "Выберите тему, куда перенести сообщение"
+
+#: .\templates\pybb\move_post_pg.html:45 .\templates\pybb\move_post_pg.html:61
+#: .\templates\pybb\post_template.html:113 .\templates\pybb\topic_list.html:10
+#: .\templates\pybb\topic_topic.html:32 .\templates\pybb\topic_topic.html:56
+#: .\templates\pybb\user_posts.html:20 .\templates\pybb\user_topics.html:22
+#: .\templates\tags\related_post.html:45 .\templates\tags\topic_block.html:23
+msgid "Posts"
+msgstr "Сообщения"
+
+#: .\templates\pybb\move_post_pg.html:65
+msgid "Move selected posts"
+msgstr "Переместить выбранные сообщения"
+
+#: .\templates\pybb\post_template.html:33
+#: .\templates\pybb\post_template.html:40
+msgid "Move post"
+msgstr "Переместить сообщение"
+
+#: .\templates\pybb\post_template.html:43
+msgid "Split posts"
+msgstr "Разделить сообщения"
+
+#: .\templates\pybb\post_template.html:48
+msgid "Approve post"
+msgstr "Подтвердить сообщение"
+
+#: .\templates\pybb\post_template.html:59
+msgid "Delete"
+msgstr "Удалить"
+
+#: .\templates\pybb\post_template.html:65
+msgid "Edit"
+msgstr "Изменить"
+
+#: .\templates\pybb\post_template.html:74
+msgid "quote selected"
+msgstr "цитировать выделенное"
+
+#: .\templates\pybb\post_template.html:79
+msgid "Write personal message"
+msgstr "Написать личное сообщение"
+
+#: .\templates\pybb\post_template.html:89 .\templates\tags\related_post.html:21
+msgid "edited"
+msgstr "изменено"
+
+#: .\templates\pybb\post_template.html:97 .\templates\tags\related_post.html:29
+msgid "from"
+msgstr "от"
+
+#: .\templates\pybb\post_template.html:107
+#: .\templates\tags\related_post.html:39
+msgid "Topics"
+msgstr "Темы"
+
+#: .\templates\pybb\post_template.html:119
+#: .\templates\tags\related_post.html:51
+msgid "Member since"
+msgstr "Участник с"
+
+#: .\templates\pybb\post_template.html:122
+#: .\templates\tags\related_post.html:54
+msgid "blocked"
+msgstr "заблокирован"
+
+#: .\templates\pybb\topic.html:30 .\templates\pybb\topic_topic.html:65
+#: .\templates\tags\topic_block.html:32
+msgid "Unstick topic"
+msgstr "Снять закрепление"
+
+#: .\templates\pybb\topic.html:32 .\templates\pybb\topic_topic.html:68
+#: .\templates\tags\topic_block.html:35
+msgid "Stick topic"
+msgstr "Закрепить тему"
+
+#: .\templates\pybb\topic.html:36 .\templates\pybb\topic_topic.html:72
+#: .\templates\tags\topic_block.html:39
+msgid "Open topic"
+msgstr "Открыть тему"
+
+#: .\templates\pybb\topic.html:38 .\templates\pybb\topic_topic.html:75
+#: .\templates\tags\topic_block.html:42
+msgid "Close topic"
+msgstr "Закрыть тему"
+
+#: .\templates\pybb\topic.html:41 .\templates\pybb\topic_topic.html:79
+#: .\templates\pybb\user.html:79 .\templates\tags\top_menu.html:60
+#: .\templates\tags\topic_block.html:46
+msgid "Admin"
+msgstr "Админка"
+
+#: .\templates\pybb\topic.html:52
+msgid "Subscribe"
+msgstr "Получать уведомления"
+
+#: .\templates\pybb\topic_last_message_info.html:12
+msgid "posted by"
+msgstr "сообшение от"
+
+#: .\templates\pybb\topic_list.html:7 .\templates\pybb\user_topics.html:19
+msgid "Topic"
+msgstr "Тема"
+
+#: .\templates\pybb\topic_list.html:13 .\templates\pybb\user_topics.html:25
+msgid "Views"
+msgstr "Просмотров"
+
+#: .\templates\pybb\topic_list.html:16 .\templates\pybb\user_topics.html:28
+msgid "Last post"
+msgstr "Последнее сообщение"
+
+#: .\templates\pybb\topic_list.html:31 .\templates\pybb\user_topics.html:38
+msgid "Sticky"
+msgstr "Закреплено"
+
+#: .\templates\pybb\topic_list.html:32 .\templates\pybb\user_topics.html:39
+msgid "Closed"
+msgstr "Закрыто"
+
+#: .\templates\pybb\topic_list.html:51 .\templates\pybb\user_topics.html:58
+msgid "Go to first unread post"
+msgstr "Перейти к первому непрочитанному сообщению"
+
+#: .\templates\pybb\topic_list.html:57
+msgid "Author"
+msgstr "Автор"
+
+#: .\templates\pybb\topic_list.html:59 .\templates\pybb\user_topics.html:64
+msgid "posted in"
+msgstr "написал в"
+
+#: .\templates\pybb\topic_topic.html:111 .\templates\tags\topic_block.html:78
+msgid "Subscribers"
+msgstr "Подписчики"
+
+#: .\templates\pybb\user.html:21
+msgid "Information"
+msgstr "Информация"
+
+#: .\templates\pybb\user.html:33
+msgid "Personal site"
+msgstr "Сайт"
+
+#: .\templates\pybb\user.html:36
+msgid "Interests"
+msgstr "Интересы"
+
+#: .\templates\pybb\user.html:39
+msgid "Statistics"
+msgstr "Статистика"
+
+#: .\templates\pybb\user.html:62
+msgid "Moderator"
+msgstr "Модератор"
+
+#: .\templates\pybb\user.html:68
+msgid "Block"
+msgstr "Заблокировать"
+
+#: .\templates\pybb\user.html:73
+msgid "Unblock"
+msgstr "Разблокировать"
+
+#: .\templates\pybb\user_posts.html:4 .\templates\pybb\user_posts.html:8
+msgid "posts"
+msgstr "сообщения"
+
+#: .\templates\pybb\user_topics.html:4 .\templates\pybb\user_topics.html:8
+msgid "topics"
+msgstr "темы"
+
+#: .\templates\tags\top_menu.html:85
+#: .\templates\templates\ajax_registration_modal.html:12
+#: .\templates\templates\socialauth_success.html:3
+msgid "Login"
+msgstr "Войти"
+
+#: .\templates\templates\ajax_login.html:7
+msgid "Login using"
+msgstr "Войти используя"
+
+#: .\templates\templates\ajax_registration_modal.html:7
+msgid "Access"
+msgstr "Доступ"
+
+#: .\templates\templates\ajax_registration_modal.html:15
+msgid "Registration"
+msgstr "Регистрация"
+
+#: .\templates\templates\ajax_registration_modal.html:26
+msgid "Submit"
+msgstr "Отправить"
+
+#: .\templates\templates\ajax_registration_modal.html:27
+msgid "Close"
+msgstr "Закрыть"
+
+#: .\templates\templates\socialauth_success.html:3
+msgid "Success"
+msgstr "Завершено"
+
+#: .\templates\templates\socialauth_success.html:7
+msgid ""
+"\n"
+"    You have been successfully logged in.<br />\n"
+"    You can now close this window\n"
+msgstr ""
+"\n"
+"    Вход завершён.<br />\n"
+"    Вы можете закрыть это окно\n"
