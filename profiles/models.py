@@ -16,6 +16,7 @@ class Profile(PybbProfile):
         (PROFILE_DATE_SHOW_CLASSIC, _(u'Classic')),
     )
     user = AutoOneToOneField(MyUser, related_name='profile')
+    receive_emails = models.BooleanField(default=True)
     date_show_type = models.IntegerField(verbose_name=_(u'Date show type'), choices=PROFILE_DATE_SHOW_TYPES,
                                          default=PROFILE_DATE_SHOW_REVERTED)
 
