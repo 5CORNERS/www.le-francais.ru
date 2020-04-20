@@ -232,7 +232,7 @@ class UsersFilter(models.Model):
 				recipients = recipients.exclude(must_pay=False)
 			if self.do_not_send_to_gmail:
 				recipients = recipients.exclude(email__contains='@gmail.com')
-			recipients = recipients.exclude(active=False)
+			recipients = recipients.exclude(is_active=False)
 			recipients = recipients.distinct()
 		return recipients
 
