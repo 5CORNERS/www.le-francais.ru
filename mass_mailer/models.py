@@ -241,7 +241,7 @@ class UsersFilter(models.Model):
 				recipients = recipients.exclude(email__contains='@yandex.ru').exclude(email__contains='@ya.ru')
 			if self.do_not_send_to_comcast:
 				recipients = recipients.exclude( email__contains='@comcast.net')
-			recipients = recipients.exclude(is_active=False)
+			recipients = recipients.exclude(is_active=False).order_by('-date_joined')
 			recipients = recipients.distinct()
 		return recipients
 
