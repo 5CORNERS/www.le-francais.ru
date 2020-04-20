@@ -232,6 +232,7 @@ class UsersFilter(models.Model):
 				recipients = recipients.exclude(must_pay=False)
 			if self.do_not_send_to_gmail:
 				recipients = recipients.exclude(email__contains='@gmail.com')
+			recipients = recipients.exclude(active=False)
 			recipients = recipients.distinct()
 		return recipients
 
@@ -372,7 +373,7 @@ class Message(models.Model):
 				email_message = EmailMultiAlternatives(
 					subject=self.get_subject_for(recipient.mailer_profile, additional_context),
 					from_email=f'{self.from_username} <{self.from_email}>',
-					to=[f'{recipient.username} <{recipient.email}>'],
+					to=[f'"{recipient.username}" <{recipient.email}>'],
 					headers=header,
 					reply_to=self.get_reply_to_header(),
 					body=self.get_txt_body_for(recipient.mailer_profile, additional_context)
