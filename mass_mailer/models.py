@@ -142,6 +142,8 @@ class UsersFilter(models.Model):
 	do_not_send_to_pass_partout = models.BooleanField(default=False)
 
 	do_not_send_to_gmail = models.BooleanField(default=False)
+	do_not_send_to_yandex = models.BooleanField(default=False)
+	do_not_send_to_mailru = models.BooleanField(default=False)
 
 	def __str__(self):
 		return self.name
@@ -232,6 +234,10 @@ class UsersFilter(models.Model):
 				recipients = recipients.exclude(must_pay=False)
 			if self.do_not_send_to_gmail:
 				recipients = recipients.exclude(email__contains='@gmail.com')
+			if self.do_not_send_to_mailru:
+				recipients = recipients.exclude(email__contains='@mail.ru')
+			if self.do_not_send_to_yandex:
+				recipients = recipients.exclude(email__contains='@yandex.ru').exclude(email__contains='@ya.ru')
 			recipients = recipients.exclude(is_active=False)
 			recipients = recipients.distinct()
 		return recipients
