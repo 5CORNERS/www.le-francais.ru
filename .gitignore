@@ -25,3 +25,4 @@ config.txt
 home/data/devoirs.csv
 *.log
 /temp/
+/mass_mailer/temp/
