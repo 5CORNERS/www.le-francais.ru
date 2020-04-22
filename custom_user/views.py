@@ -24,8 +24,6 @@ class SawMessageView(View):
             if user.saw_message:
                 return HttpResponse(status=403)
             msg_body = MESSAGE_FOR_NOT_PAYED
-            if user.days_since_joined() > 7:
-                user.add_cups(1)
             if not user.is_staff:
                 EmailMessage(
                     to=[request.user.email],
@@ -33,10 +31,12 @@ class SawMessageView(View):
                     body=msg_body,
                     from_email='ilia.dumov@files.le-francais.ru',
                     reply_to=['support@le-francais.ru']
-                ).send()
+                ).send(fail_silently=True)
             user.saw_message = True
             user.saw_message_datetime = datetime.now()
             user.save()
+            if user.days_since_joined() > 7:
+                user.add_cups(1)
             return HttpResponse(b'OK', status=200)
         elif request.POST['action'] == 'get_state':
             return HttpResponse(json.dumps(user.saw_message),
