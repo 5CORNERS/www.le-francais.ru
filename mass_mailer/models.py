@@ -387,7 +387,8 @@ class Message(models.Model):
 					reply_to=self.get_reply_to_header(),
 					body=self.get_txt_body_for(recipient.mailer_profile, additional_context)
 				)
-				email_message.attach_alternative(self.get_html_body_for(recipient.mailer_profile, additional_context), 'text/html')
+				if self.template_html:
+					email_message.attach_alternative(self.get_html_body_for(recipient.mailer_profile, additional_context), 'text/html')
 				messages_with_recipients.append((email_message, recipient))
 
 			backend.open()
