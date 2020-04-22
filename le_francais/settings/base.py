@@ -361,9 +361,10 @@ PYBB_NICE_URL = False
 PYBB_SMILES = dict()
 # disable auto subscribe
 PYBB_DEFAULT_AUTOSUBSCRIBE = True
-PYBB_DEFAULT_TITLE = 'Forum'
+PYBB_DEFAULT_TITLE = 'Французский язык — Форум'
 PYBB_PERMISSION_HANDLER = 'forum.permissions.CustomPermissionHandler'
 PYBB_FROM_EMAIL = 'Le-francais.ru » Форум <no-reply@mail.le-francais.ru>'
+# PYBB_PROFILE_RELATED_NAME = 'profile'
 
 # Postman settings
 
