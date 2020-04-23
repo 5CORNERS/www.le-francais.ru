@@ -33,27 +33,29 @@
                             <h6 class="dropdown-header d-sm-none"><span
                                     style="text-overflow: ellipsis;max-width: 106px;">{{ request.user.username }}</span>
                             </h6>
+                            <a class="dropdown-item{% if '/payments/' in request.path %} active{% endif %}"
+                               href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">Пополнить
+                                запасы</a>
+                            <div class="dropdown-divider"></div>
                             <a class="dropdown-item"
                                href="{% url 'pybb:edit_profile' %}">Настройки
                                 профиля{# TODO l18n #}</a>
-                            {% if user.pybb_profile.post_count > 0 %}
-                                <a class="dropdown-item"
-                                   href="{{ request.user.profile.get_absolute_url }}">Мои
-                                    посты{# TODO l18n Forum activity #}</a>
-                            {% endif %}
-                            <a class="dropdown-item"
-                               href="{% url 'dictionary:my_words' %}">
-                                Мои слова
-                            </a>
                             <a class="dropdown-item"
                                href="{% url 'postman:inbox' %}">
                                 Личные сообщения{# TODO l18n #}
                                 {% if unread_count %}
                                     <strong>({{ unread_count }})</strong>{% endif %}
                             </a>
-                            <a class="dropdown-item{% if '/payments/' in request.path %} active{% endif %}"
-                               href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal">Пополнить
-                                запасы</a>
+                            {% if user.pybb_profile.post_count > 0 %}
+                                <a class="dropdown-item"
+                                   href="{{ request.user.profile.get_absolute_url }}">Мои
+                                    посты{# TODO l18n Forum activity #}</a>
+                            {% endif %}
+                            <a class="dropdown-item"
+                               href="{% url 'dictionary:my_words' %}"
+                            >
+                                Мои слова <span class="text-secondary">(Flashcards)</span>
+                            </a>
                             {% if request.user.is_staff %}
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item"
