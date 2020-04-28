@@ -366,6 +366,9 @@ PYBB_PERMISSION_HANDLER = 'forum.permissions.CustomPermissionHandler'
 PYBB_FROM_EMAIL = 'Le-francais.ru » Форум <no-reply@mail.le-francais.ru>'
 # PYBB_PROFILE_RELATED_NAME = 'profile'
 
+from profiles.utils import check_user
+PYBB_PREMODERATION = check_user
+
 # Postman settings
 
 POSTMAN_AUTO_MODERATE_AS = True
