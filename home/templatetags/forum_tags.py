@@ -1,5 +1,5 @@
 from django import template
-from django.db.models import Max
+from django.db.models import Max, Q
 from pybb.models import Topic
 
 from home.utils import get_svg_avatar
@@ -9,8 +9,9 @@ register = template.Library()
 
 @register.inclusion_tag('tags/entries.html')
 def last_topics(count=50, *args, **kwargs):
+	last_post_created = Max('posts__created', filter=Q(posts__on_moderation=False))
 	qs = Topic.objects.filter(forum__hidden=False).filter(
-		forum__category__hidden=False).prefetch_related('posts').annotate(last_post_created=Max('posts__created'))
+		forum__category__hidden=False).prefetch_related('posts').annotate(last_post_created=last_post_created)
 	qs = qs.filter(on_moderation=False)
 	qs = qs.order_by('-last_post_created')
 	qs = qs[:count]
