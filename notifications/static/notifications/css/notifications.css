@@ -4,7 +4,7 @@
 }
 
 .dropdown-menu.notify-drop {
-    min-width: 320px;
+    width:320px;
     background-color: #fff;
     min-height: 360px;
     max-height: 360px;
@@ -58,7 +58,7 @@
 
 @media (min-width: 576px) {
     .dropdown-menu.notify-drop {
-        min-width: 410px;
+        width:410px;
         left: -315px;
     }
 
@@ -69,7 +69,7 @@
 
 @media (min-width: 768px) {
     .dropdown-menu.notify-drop {
-        min-width: 360px;
+        width:360px;
         left: -237px;
     }
 
@@ -80,7 +80,7 @@
 
 @media (min-width: 992px) {
     .dropdown-menu.notify-drop {
-        min-width: 360px;
+        width:360px;
         left: -304px;
     }
 
@@ -91,7 +91,7 @@
 
 @media (min-width: 1200px) {
     .dropdown-menu.notify-drop {
-        min-width: 360px;
+        width:360px;
         left: -290px;
     }
 
