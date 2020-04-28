@@ -7,10 +7,12 @@ from datetime import datetime
 import requests
 from annoying.fields import AutoOneToOneField
 from django.conf import settings
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.db.models import Q
 from django.db.models.signals import post_save, post_delete
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -39,6 +41,7 @@ class NotificationImage(models.Model):
 	# 	super(NotificationImage, self).save(*args, **kwargs)
 
 class Notification(models.Model):
+	MODERATION = 'MD'
 	LIKES = 'LK'
 	REPLYES = 'RP'
 	MESSAGES = 'MG'
@@ -255,8 +258,38 @@ def clean_post(post: str) -> str:
 	return result[:50] + tail
 
 
+def create_moderator_notification(sender, instance):
+	if not isinstance(instance, Post):
+		return
+	notification = Notification(
+		title='Пост требует модерации',
+		category=Notification.MODERATION,
+		data=dict(
+			username=str(instance.user),
+			post_name=clean_post(instance.body),
+			post_url=instance.get_absolute_url(),
+			topic_name=str(instance.topic),
+			topic_url=instance.topic.get_absolute_url()
+		),
+		click_url=instance.get_absolute_url(),
+		image=NotificationImage.objects.get_or_create(
+			url=instance.user.pybb_profile.avatar_url
+		)[0],
+		content_object=instance,
+	)
+	notification.save()
+	perm = Permission.objects.get(codename='change_post')
+	users_to_notify = User.objects.filter(
+		Q(is_superuser=True) | Q(groups__permissions=perm) | Q(user_permissions=perm)
+	).distinct()
+	for user in users_to_notify:
+		notification_user, created = NotificationUser.objects.get_or_create(
+			notification=notification,
+			user=user
+		)
+
 def create_pybb_post_notification(sender, instance: Post, **kwargs):
-	if instance.updated is None:
+	if not instance.on_moderation and instance.updated is None:
 		notification = Notification(
 			title='Новый ответ в теме',
 			category=Notification.REPLYES,
@@ -282,6 +315,11 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 				notification=notification,
 				user=user
 			)
+	elif instance.on_moderation:
+		if instance.updated is not None:
+			Post.objects.filter(id=instance.id).update(updated=None)
+		else:
+			create_moderator_notification(sender, instance)
 
 
 def create_pybb_like_notification(sender, instance: Like, **kwargs):

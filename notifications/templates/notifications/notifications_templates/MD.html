@@ -1,0 +1,13 @@
+{% extends './base.html' %}
+{% load forum_tags %}
+{% block img %}
+    {% if self.image.url != '/static/pybb/img/default_avatar.jpg' %}
+        <img src="{{ self.image.url }}" height="10px" alt="">
+    {% else %}
+        {% avinit_initials username 45 %}
+    {% endif %}
+{% endblock %}
+{% block text %}
+    Пост от пользвателя <b>{{ username }}</b> требует модерации.
+    <a href='{{ self.get_click_url }}'>"{{ post_name }}"</a>
+{% endblock %}
