@@ -43,7 +43,7 @@ from .forms import ChangeUsername
 from django.contrib.admin.views.decorators import staff_member_required
 from home.models import UserLesson
 from .models import Payment
-from .utils import message_left
+from .utils import message_left, get_nav_tree
 
 if "mailer" in settings.INSTALLED_APPS:
     from mailer import send_mail
@@ -124,53 +124,20 @@ def authorized(request):
     return HttpResponse('')
 
 
-def get_navigation_object_from_page(page: Page, current_page_id: int) -> dict:
-    page_object = {
-        "text": str(page.title),
-        "nodes": [],
-        "href": page.get_url(),
-        "state": {}
-    }
-    if isinstance(page.specific, PageWithSidebar) or isinstance(page.specific,
-                                                                LessonPage) or isinstance(
-        page.specific, ArticlePage):
-        menu_title = page.specific.menu_title
-        if not isinstance(menu_title, str):
-            menu_title = menu_title.decode()
-        if menu_title != '':
-            page_object["text"] = menu_title
-        if not page.specific.is_selectable:
-            page_object["selectable"] = False
-    if page.id == current_page_id:
-        page_object["state"] = {
-            "selected": True
-        }
-        page_object["selectable"] = False
-    child: Page
-    for child in page.get_children():
-        if child.show_in_menus and child.live:
-            page_object["nodes"].append(
-                get_navigation_object_from_page(child, current_page_id))
-    if len(page_object["nodes"]) == 0:
-        page_object.pop('nodes', None)
-    return page_object
-
-
 def get_nav_data(request):
     if "rootId" not in request.GET:
         return HttpResponse(status=400, content="Root page id not provided")
     root_id = request.GET['rootId']
     page_id = int(request.GET['pageId'])
-    if Page.objects.get(id=root_id).show_in_menus:
-        nav_items = [
-            get_navigation_object_from_page(Page.objects.get(id=root_id),
-                                            page_id)]
-    else:
-        nav_items = \
-            get_navigation_object_from_page(Page.objects.get(id=root_id),
-                                            page_id)[
-                "nodes"]
-    return HttpResponse(content=json.dumps(nav_items))
+    page = Page.objects.get(id=page_id)
+    page_tree = page.nav_tree
+    if not page_tree.tree:
+        page_tree.tree = get_nav_tree(
+            root=Page.objects.get(id=root_id),
+            current_page=page
+        )
+        page_tree.save()
+    return HttpResponse(content=json.dumps(page_tree.tree))
 
 
 @csrf_exempt

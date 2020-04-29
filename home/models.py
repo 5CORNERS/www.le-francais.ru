@@ -2,10 +2,12 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 
+from annoying.fields import AutoOneToOneField
 from django.conf import settings
+from django.contrib.postgres.fields import JSONField
 from django.db.models import CharField, SmallIntegerField, OneToOneField, \
     IntegerField, BooleanField, SET_NULL, ForeignKey, URLField, \
-    Model, ImageField
+    Model, ImageField, CASCADE
 from django.db.models.fields import TextField, DateTimeField
 from django.dispatch import receiver
 from django.forms import CheckboxInput
@@ -722,6 +724,11 @@ class BackUrls(Model):
     success = URLField()
     fail = URLField()
     payment = ForeignKey('tinkoff_merchant.Payment')
+
+
+class WagtailPageNavTree(Model):
+    page = AutoOneToOneField(Page, on_delete=CASCADE, related_name='nav_tree')
+    tree = JSONField(default={}, blank=True, null=True)
 
 
 @receiver(payment_confirm)
