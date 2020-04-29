@@ -167,3 +167,42 @@ def get_avatar_data_url(text, **kwargs):
     b64_avatar = b64encode(svg_avatar.encode('utf-8'))
     return 'data:image/svg+xml;base64,' + b64_avatar.decode('utf-8')
 
+def get_navigation_object_from_page(root, current_page) -> dict:
+    page_object = {
+        "text": str(root.title),
+        "nodes": [],
+        "href": root.get_url(),
+        "state": {}
+    }
+    from home.models import PageWithSidebar
+    from home.models import LessonPage
+    from home.models import ArticlePage
+    if isinstance(root.specific, PageWithSidebar) or isinstance(root.specific,
+                                                                LessonPage) or isinstance(
+        root.specific, ArticlePage):
+        menu_title = root.specific.menu_title
+        if not isinstance(menu_title, str):
+            menu_title = menu_title.decode()
+        if menu_title != '':
+            page_object["text"] = menu_title
+        if not root.specific.is_selectable:
+            page_object["selectable"] = False
+    if root.id == current_page.id:
+        page_object["state"] = {
+            "selected": True
+        }
+        page_object["selectable"] = False
+    for child in root.get_children():
+        if child.show_in_menus and child.live:
+            page_object["nodes"].append(
+                get_navigation_object_from_page(child, current_page))
+    if len(page_object["nodes"]) == 0:
+        page_object.pop('nodes', None)
+    return page_object
+
+def get_nav_tree(root, current_page):
+    if root.show_in_menus:
+        nav_items = [get_navigation_object_from_page(root, current_page)]
+    else:
+        nav_items = get_navigation_object_from_page(root, current_page)["nodes"]
+    return nav_items
