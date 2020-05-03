@@ -38,7 +38,7 @@ class Command(BaseCommand):
 		post_save.connect(post_saved, sender=Post)
 
 		for post in Post.objects.all():
-			for link in re.findall('\((((http://)|(https://))(.+?\.(png|jpeg|gif)))', post.body):
+			for link in re.findall('\((((http://)|(https://))(.+?\.(png|jpeg|gif|jpg)))', post.body, re.I):
 				file_name = link[0].split('//')[1]
 				file_name = re.sub('/', '+', file_name)
 				if link[0].startswith('https://files.le-francais.ru'):
