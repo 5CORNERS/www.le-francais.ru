@@ -315,12 +315,22 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 				notification=notification,
 				user=user
 			)
+
 	elif instance.on_moderation:
 		if instance.updated is not None:
 			Post.objects.filter(id=instance.id).update(updated=None)
 		else:
 			create_moderator_notification(sender, instance)
-
+	# hide topic notification if topic is on moderation and show if it was confirmed
+	if instance.is_topic_head:
+		topic_notification = Notification.objects.filter(
+			content_type=ContentType.objects.get_for_model(Topic),
+			object_id=instance.topic.pk
+		)
+		if instance.on_moderation:
+			topic_notification.update(active=False)
+		else:
+			topic_notification.update(active=True)
 
 def create_pybb_like_notification(sender, instance: Like, **kwargs):
 	if instance.post.user == instance.profile.user:
