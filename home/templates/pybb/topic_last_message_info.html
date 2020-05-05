@@ -1,17 +1,17 @@
 {% load i18n %}
 
 {% if topic.updated %}
-    <a href="{{ topic.last_post.get_absolute_url }}">
+    <a href="{{ topic.last_public_post.get_absolute_url }}">
         {% if request.user.profile.date_show_type == 1 %}
-            {{ topic.updated }}
+            {{ topic.last_public_post.created }}
         {% else %}
-            {{ topic.updated|timesince }}
+            {{ topic.last_public_post.created|timesince }}
             {% trans "ago" %}
         {% endif %}
     </a><br>
     {% trans "posted by" %}
-    {% if topic.last_post.user %}
-        <a href="{% url 'pybb:user' topic.last_post.user.username %}">
+    {% if topic.last_public_post.user %}
+        <a href="{% url 'pybb:user' topic.last_public_post.user.username %}">
             {{ topic.last_post.user.username }}
         </a>
     {% endif %}
