@@ -62,10 +62,10 @@ NAMESPACE = getattr(settings, setting_name('URL_NAMESPACE'), None) or 'social'
 class LeFrancaisWagtailSitemap(WagtailSitemap):
     def items(self):
         q = []
-        q += list(ArticlePage.objects.filter(show_in_sitemap=True))
-        q += list(LessonPage.objects.filter(show_in_sitemap=True))
-        q += list(PageWithSidebar.objects.filter(show_in_sitemap=True))
-        q += list(DefaultPage.objects.filter(show_in_sitemap=True))
+        q += list(ArticlePage.objects.filter(show_in_sitemap=True, live=True))
+        q += list(LessonPage.objects.filter(show_in_sitemap=True, live=True))
+        q += list(PageWithSidebar.objects.filter(show_in_sitemap=True, live=True))
+        q += list(DefaultPage.objects.filter(show_in_sitemap=True, live=True))
         q += list(IndexPage.objects.all())
         return q
 
