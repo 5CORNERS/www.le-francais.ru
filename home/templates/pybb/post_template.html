@@ -43,7 +43,7 @@
 									   title="{% trans "Split posts" %}">
 								{% endif %}</i></a>
 
-							{% if post.on_moderation %}
+							{% if post.on_moderation or post.is_topic_head and post.topic.on_moderation %}
 								<a href="{% url 'pybb:moderate_post' pk=post.id %}"
 								   title="{% trans "Approve post" %}">
 									<i class="glyphicon glyphicon-check"></i></a>
@@ -111,7 +111,7 @@
 			<div>
 				{% trans "Posts" %}:
 				<a href="{% url 'user_posts' post.user.username %}">
-					{{ post_user_profile.post_count }}
+					{{ post.user.posts.count }}
 				</a>
 			</div>
 			<div>
