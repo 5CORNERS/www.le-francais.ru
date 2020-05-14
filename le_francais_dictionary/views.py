@@ -458,10 +458,12 @@ def start_app_repeat(request):
 def get_verbs(request, packet_id):
     result = {
         "verbs": [],
-        "errors": []
+        "errors": [],
+        # "isInfinitiveTranslation":None,
     }
     try:
         packet = VerbPacket.objects.get(pk=packet_id)
+        # result['isInfinitiveTranslation'] = int(packet.lesson.lesson_number) % 2 == 0
     except VerbPacket.DoesNotExist:
         result['errors'].append({
             "message":consts.PACKET_DOES_NOT_EXIST_MESSAGE,
@@ -469,7 +471,7 @@ def get_verbs(request, packet_id):
         })
         return JsonResponse(result, status=404)
     for verb in packet.verb_set.all():
-        result['verbs'].append(verb.to_dict())
+        result['verbs'].append(verb.to_dict(voice_translation=int(packet.lesson.lesson_number) % 2 == 0))
     return JsonResponse(result, status=200)
 
 

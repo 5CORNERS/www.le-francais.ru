@@ -718,7 +718,7 @@ class Verb(models.Model):
 	                                      related_name='dictionary_verb_translation_set')
 	translation_audio_url = models.URLField(null=True)
 
-	def to_dict(self):
+	def to_dict(self, voice_translation):
 		polly_url = self.audio_url if self.audio_url else self.polly.url if self.polly else None
 		if self.translation_audio_url:
 			translation_polly_url = self.translation_audio_url
@@ -726,7 +726,7 @@ class Verb(models.Model):
 			translation_polly_url = self.translation_polly.url
 		else:
 			translation_polly_url = None
-		has_translation = True if self.translation else False
+		# has_translation = True if self.translation else False
 		forms = []
 		for form in self.verbform_set.all().order_by('order'):
 			forms.append(form.to_dict())
@@ -735,7 +735,8 @@ class Verb(models.Model):
 			"pollyUrl": polly_url,
 			"translation": self.translation,
 			"trPollyUrl": translation_polly_url,
-			"isTranslation": has_translation,
+			"isTranslation": voice_translation,
+			"isShownOnDrill": True,
 			"forms": forms,
 			"packet": self.packet_id
 		}
