@@ -375,7 +375,7 @@ class Message(models.Model):
 					body=Template(self.template_txt).render(Context(data['context']))
 				)
 				if self.template_html:
-					email_message.attach_alternative(Template(self.template_html).render(data["context"]), 'text/html')
+					email_message.attach_alternative(Template(self.template_html).render(Context(data["context"])), 'text/html')
 
 				to_send.append(email_message)
 			backend.open()
