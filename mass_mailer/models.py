@@ -334,6 +334,77 @@ class Message(models.Model):
 					message=self)
 		return self._recipients
 
+	def send_manual(self, data_list:list):
+		backend: EmailBackend = self.get_backend()
+		sent_count = 0
+		errors_count = 0
+		chunks = [data_list[x:x + self.email_settings.messages_per_connection] for x in range(0, len(data_list), self.email_settings.messages_per_connection)]
+		for chunk in chunks:
+			to_send = []
+			for data in chunk:
+				to = data['email']
+				context = data['context']
+				is_validated = validate_email(
+					email_address=to,
+					check_regex=True,
+					check_mx=True,
+					smtp_timeout=10,
+					dns_timeout=10,
+					use_blacklist=True)
+				if not is_validated and is_validated is not None:
+					MessageLog.objects.create(
+						message=self,
+						result=MessageLog.RESULT_FAILURE,
+						log_message=str(f"Can't Validate EMail: {to}")
+					)
+					continue
+
+				header = {
+					'Sender': f'{self.email_settings.get_sender_header()}',
+				}
+				if self.extra_headers:
+					for name, value in self.extra_headers.items():
+						header[name] = value
+
+				email_message = EmailMultiAlternatives(
+					subject=Template(self.template_subject).render(data['context']),
+					from_email=f'{self.from_username} <{self.from_email}>',
+					to=[f'"{data["name"]}" <{data["email"]}>'],
+					headers=header,
+					reply_to=self.get_reply_to_header(),
+					body=Template(self.template_txt).render(data['context'])
+				)
+				if self.template_html:
+					email_message.attach_alternative(Template(self.template_html).render(data["context"]), 'text/html')
+
+				to_send.append(email_message)
+			backend.open()
+			for message in to_send:
+				try:
+					backend.send_messages([message])
+					sent_count += 1
+					MessageLog.objects.create(
+						result=MessageLog.RESULT_SUCCESS,
+						message=self,
+						log_message=f'Message to {message.to} was sent'
+					)
+					time.sleep(1)
+				except (socket_error, smtplib.SMTPSenderRefused,
+				        smtplib.SMTPRecipientsRefused,
+				        smtplib.SMTPDataError,
+				        smtplib.SMTPAuthenticationError) as error:
+					MessageLog.objects.create(
+						result=MessageLog.RESULT_FAILURE,
+						message=self,
+						log_message=f'Message to {message.to} wasn\'t sent\n{error}'
+					)
+					errors_count += 1
+					print(f"SMTP Error: {str(error)}")
+			backend.close()
+			time.sleep(self.email_settings.delay_between_connections)
+		return sent_count, errors_count
+
+
 	def send(self, to=None, users_context=None) -> Tuple[int, int]:
 		"""
 		:param to: list of users
@@ -469,8 +540,8 @@ class MessageLog(models.Model):
 		(RESULT_FAILURE, 'Failure'),
 		(RESULT_DIDNT_SEND, "Didn't send")
 	]
-	message = models.ForeignKey('Message', on_delete=models.CASCADE)
-	recipient = models.ForeignKey(User, on_delete=models.CASCADE)
+	message = models.ForeignKey('Message', on_delete=models.SET_NULL, null=True, blank=True)
+	recipient = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
 	sent_datetime = models.DateTimeField(auto_now_add=True)
 	result = models.IntegerField(choices=RESULT_CHOICES, default=RESULT_DIDNT_SEND)
