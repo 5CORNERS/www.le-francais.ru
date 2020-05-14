@@ -367,12 +367,12 @@ class Message(models.Model):
 						header[name] = value
 
 				email_message = EmailMultiAlternatives(
-					subject=Template(self.template_subject).render(data['context']),
+					subject=Template(self.template_subject).render(Context(data['context'])),
 					from_email=f'{self.from_username} <{self.from_email}>',
 					to=[f'"{data["name"]}" <{data["email"]}>'],
 					headers=header,
 					reply_to=self.get_reply_to_header(),
-					body=Template(self.template_txt).render(data['context'])
+					body=Template(self.template_txt).render(Context(data['context']))
 				)
 				if self.template_html:
 					email_message.attach_alternative(Template(self.template_html).render(data["context"]), 'text/html')
