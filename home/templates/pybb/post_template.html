@@ -2,7 +2,7 @@
 
 {% pybb_get_profile post.user as post_user_profile %}
 {% pybb_get_profile request.user as request_user_profile %}
-{% liked post request_user_profile as liked %}
+{% liked post request.user as liked %}
 
 <table class="table table-bordered post post-row
        {% if post.on_moderation %}on-moderation{% endif %}"
