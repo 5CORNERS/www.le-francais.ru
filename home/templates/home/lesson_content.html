@@ -320,6 +320,7 @@
 							{% for block in self.exercise %}
 								{% include_block block with page=self %}
 							{% endfor %}
+                            {% include 'home/exercise_credits.html' %}
 						</div>
 					{% endif %}
 				</div>
