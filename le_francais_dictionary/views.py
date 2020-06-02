@@ -277,6 +277,8 @@ def get_packet_progress(request, pk):
     if int(pk) == 99999999:
         try:
             packet = UserStandalonePacket.objects.get(user=request.user)
+            if packet.words is None:
+                packet.words = Packet.objects.get(lesson__lesson_number=1).word_set.all().values_list('pk', flat=True)
             result = packet.to_dict(user=request.user)
             result['isAuthenticated'] = request.user.is_authenticated
         except UserStandalonePacket.DoesNotExist:
