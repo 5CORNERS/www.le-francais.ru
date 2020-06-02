@@ -18,7 +18,7 @@ urlpatterns = [
     url('^my-words-get-filters/$', views.get_filters, name='get_filters'),
     url('^my-words-save-filters/$', views.save_filters, name='save_filters'),
     url('^app/$', views.start_app, name='app'),
-    url('^app/reviews$', views.start_app_repeat, name='app_repeat'),
+    url('^app/reviews/$', views.start_app_repeat, name='app_repeat'),
     url('^verbs/(?P<packet_id>[0-9]+)/$', views.get_verbs, name='get_verbs'),
 ]
 
