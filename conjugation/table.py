@@ -153,7 +153,7 @@ class Tense:
 		return ssml
 
 import json
-FORMULAS_JSON = json.load(open('conjugation\data\parse_conjugations\output\output.json'))
+FORMULAS_JSON = json.load(open('conjugation/formulas.json'))
 
 def switches_to_key(reflexive, negative, question, passive):
 	keys = []
