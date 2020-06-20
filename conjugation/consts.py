@@ -580,3 +580,12 @@ AUDIO_LIST = [
     "guider",
     "piquer",
     ]
+
+GENDER_MASCULINE = 'm'
+GENDER_FEMININE = 'f'
+
+ETRE = 'etre'
+AVOIR = 'avoir'
+
+VOWEL = 'vowel_1'
+NOT_VOWEL = 'vowel_0'

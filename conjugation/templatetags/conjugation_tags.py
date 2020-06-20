@@ -1,5 +1,6 @@
 from django import template
-from django.urls import reverse
+
+from conjugation.utils import get_url_from_switches
 from home.models import PageLayoutAdvertisementSnippet
 
 register = template.Library()
@@ -8,23 +9,25 @@ register = template.Library()
 def option_url(context, option):
     feminin = context.dicts[3]['feminin']
     reflexive = context.dicts[3]['reflexive']
+    passive = context.dicts[3]['passive']
+    negative = context.dicts[3]['negative']
+    question = context.dicts[3]['question']
 
     if option == 'gender':
         feminin = not feminin
-    elif option == 'se':
+    elif option == 'reflexive':
         reflexive = not reflexive
+    elif option == 'passive':
+        passive = not passive
+    elif option == 'negative':
+        negative = not negative
+    elif option == 'question':
+        question = not question
 
-    if feminin:
-        gender = 'feminin_'
-    else:
-        gender = ''
+    infinitive = context.dicts[3]['v'].infinitive_no_accents
 
-    if reflexive:
-        pronominal = 'se_'
-    else:
-        pronominal = ''
+    return get_url_from_switches(infinitive, negative, question, passive, reflexive, feminin)
 
-    return reverse('conjugation:verb',kwargs=dict(feminin=gender, se=pronominal, verb=context.dicts[3]['v'].infinitive_no_accents))
 
 @register.inclusion_tag('tags/conjugation_advert_body.html')
 def conjugation_advertisement_body(code):

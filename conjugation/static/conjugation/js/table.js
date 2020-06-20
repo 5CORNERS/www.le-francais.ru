@@ -22,7 +22,7 @@ function changeClassTo(icon, c) {
 
 
 function pollyListen(icon, key) {
-	if (IS_REFLEXIVE === 'False' && icon.attributes['data-mood'].value === 'indicative' && icon.attributes['data-tense'].value === 'present' && AUDIO_URL !== 'None') {
+	if (!IS_REFLEXIVE && icon.attributes['data-mood'].value === 'indicative' && icon.attributes['data-tense'].value === 'present' && AUDIO_URL !== 'None') {
 		polly[key] = AUDIO_URL
 	}
 	if (polly[key] === undefined) {

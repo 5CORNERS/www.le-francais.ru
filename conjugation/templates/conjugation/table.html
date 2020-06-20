@@ -2,9 +2,10 @@
 {% load static conjugation_tags %}
 {% load site_tags %}
 {% load user_agents %}
+{% load bootstrap4 %}
 
-{% block title %}Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} во французском языке.{% endblock %}
-{% block description %}Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} — в самой крутой спрягалке из всех здесь представленных: с озвучанием, комментариями и особенностями спряжения. Вам понравится! :){% endblock %}
+{% block title %}{% include 'conjugation/conjugation_title.html' %}{% endblock %}
+{% block description %}{% include 'conjugation/conjugation_descritpion.html' %}{% endblock %}
 
 {% block head_advertisments %}
     {% conjugation_advertisement_head "lf_fr_conj_rsb_01" %}
@@ -17,12 +18,115 @@
 		const CONJ_POLLY_URL = '{% url 'conjugation:polly' %}';
 		const CSRF_TOKEN = '{{ csrf_token }}';
 		const AUDIO_URL = 'None';
-		const IS_REFLEXIVE = '{{ v.reflexive }}';
+		const IS_REFLEXIVE = {{ v.reflexive|yesno:'true,false' }};
+		const IS_NEGATIVE = {{ negative|yesno:'true,false' }};
+		const IS_QUESTION = {{ question|yesno:'true,false' }};
+		const IS_PASSIVE = {{ passive|yesno:'true,false' }};
+		const IS_FEMININE = {{ feminin|yesno:'true,false' }};
+		const CAN_BE_PASSIVE = {{ v.can_passive|yesno:'true,false' }};
+		const CAN_BE_REFLEXIVE = {{ v.can_reflexive|yesno:'true,false' }};
+		const CAN_BE_FEMININE = {{ v.can_feminin|yesno:'true,false' }};
 	</script>
 	<script async
 	        type="text/javascript"
 	        src="{% static 'js/le_francais.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'conjugation/js/table.min.js' %}"></script>
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        .voice-range {
+            padding-left: 1em;
+        }
+
+        .voice-range label {
+            display: block;
+            text-align: center;
+        }
+
+        .voice-range input {
+            width: 100%;
+        }
+
+        datalist {
+            width: 121%;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+        }
+
+        datalist option {
+            -webkit-box-flex: 1;
+            -webkit-flex-grow: 1;
+            -ms-flex-positive: 1;
+            flex-grow: 1;
+            -webkit-flex-basis: 0;
+            -ms-flex-preferred-size: 0;
+            flex-basis: 0;
+        }
+
+        .switchers {
+            width: 320px;
+        }
+
+        .verb-switch-right-label {
+            margin-left: 50px;
+            padding-left: 10px;
+        }
+
+        .verb-switch {
+            padding-left: 0;
+        }
+
+        .input-label-container {
+            padding-left: 0;
+        }
+
+        .switch-input-label {
+            margin-left: 40px;
+            padding-left: 0;
+        }
+
+        .switches-container {
+            display: flex;
+            flex-direction: row;
+            width: 300px;
+        }
+
+        .left-labels,
+        .input-labels,
+        .righ-labels {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-labels {
+            flex-grow: 2;
+        }
+
+        .left-labels,
+        .right-labels {
+            flex-grow: 1;
+            width: 8em;
+        }
+
+        .left-label {
+            text-align: right;
+        }
+
+        .right-label {
+            text-align: left;
+        }
+
+        .switches-name,.voice-range-name {
+            font-weight: bold;
+        }
+
+        .switches-submit-container {
+            text-align: right;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -103,15 +207,143 @@
 						</div>
 					{% endif %}
 					<div class="col-12 {% if forms_count == 2 %} col-offset-210{% elif forms_count == 3 %} col-offset-315{% else %}{% endif %}">
-						<div>
-							{% if v.can_feminin %}
-								<a class="btn btn-primary{% if request|is_mobile %} btn-sm{% endif %}" href="{% option_url 'gender' %}">
-									{% if not feminin %}В женском роде{% else %}В мужском роде{% endif %}</a>{% endif %}
-							{% if v.can_reflexive %}
-								<a class="btn btn-primary{% if request|is_mobile %} btn-sm{% endif %}" href="{% option_url 'se' %}">
-									{% if not reflexive %}В возвратной форме{% else %}В невозвратной форме{% endif %}</a>{% endif %}
-						</div>
-					</div>
+{#						<div>#}
+{#							{% if v.can_feminin %}#}
+{#								<a class="btn btn-primary{% if request|is_mobile %} btn-sm{% endif %}" href="{% option_url 'gender' %}">#}
+{#									{% if not feminin %}В женском роде{% else %}В мужском роде{% endif %}</a>{% endif %}#}
+{#							{% if v.can_reflexive %}#}
+{#								<a class="btn btn-primary{% if request|is_mobile %} btn-sm{% endif %}{% if passive %} disabled{% endif %}"{% if passive %} disabled{% endif %} href="{% option_url 'reflexive' %}">#}
+{#									{% if not reflexive %}В возвратной форме{% else %}В невозвратной форме{% endif %}</a>{% endif %}#}
+{#                            {% if v.can_passive %}#}
+{#                                <a class="btn btn-primary{% if request|is_mobile %} btn-sm{% endif %}{% if reflexive %} disabled{% endif %}"{% if reflexive %} disabled{% endif %} href="{% option_url 'passive' %}">#}
+{#									{% if not passive %}+ passive-voix{% else %}- passive-voix{% endif %}</a>#}
+{#                            {% endif %}#}
+{#                            <a class="btn btn-primary{% if request|is_mobile %} btn-sm{% endif %}" href="{% option_url 'negative' %}">#}
+{#									{% if not negative %}+ negation{% else %}- negation{% endif %}</a>#}
+{#                            <a class="btn btn-primary{% if request|is_mobile %} btn-sm{% endif %}" href="{% option_url 'question' %}">#}
+{#									{% if not question %}+ question{% else %}- question{% endif %}</a>#}
+{#						</div>#}
+                        {% for badge in badges %}<span class="badge badge-info ml-1">{{ badge }}</span>{% endfor %}
+                        <button class="btn btn-sm btn-primary" data-toggle="collapse" href="#hiddenSwitches"
+                                role="button" aria-expanded="true">Изменить
+                        </button>
+
+<div class="collapse" id="hiddenSwitches">
+    <div class="card card-body">
+        <form action="{{ request.path }}" method="post">
+            {% csrf_token %}
+
+            <div class="switches-name">Форма</div>
+            <div class="switches-container">
+                <div class="left-labels">
+                    <div class="left-label">
+                        Утвердительная
+                    </div>
+                    <div class="left-label">
+                        Повествование
+                    </div>
+                </div>
+                <div class="input-labels">
+                    <div class="custom-control custom-switch input-label-container">
+                        <input type="checkbox" class="custom-control-input"
+                               id="{{ switches_form.negative.id_for_label }}"
+                               {% if switches_form.negative.value %}checked{% endif %}
+                               name="{{ switches_form.negative.html_name }}"
+                        ><label
+                            class="custom-control-label switch-input-label"
+                            for="{{ switches_form.negative.id_for_label }}"></label>
+                    </div>
+                    <div class="custom-control custom-switch input-label-container">
+                        <input type="checkbox" class="custom-control-input"
+                               id="{{ switches_form.question.id_for_label }}"
+                               {% if switches_form.question.value %}checked{% endif %}
+                               name="{{ switches_form.question.html_name }}"
+                        ><label
+                            class="custom-control-label switch-input-label"
+                            for="{{ switches_form.question.id_for_label }}"></label>
+                    </div>
+                </div>
+                <div class="right-labels">
+                    <div class="right-label">
+                        Отрицательная
+                    </div>
+                    <div class="right-label">
+                        Вопрос
+                    </div>
+                    <div></div>
+                </div>
+            </div>
+
+            <div class="voice-range-name">Залог</div>
+            <div class="voice-range"><input
+                    id="{{ switches_form.voice.id_for_label }}"
+                    value="{{ switches_form.voice.value }}" name="{{ switches_form.voice.html_name }}" type="range"
+                    min="0" max="3" step="1" list="num"/>
+                <datalist id="num">
+                    <option value="0" label="Активный">
+                    <option value="1" label="Пассивный"{% if not v.can_passive %} disabled{% endif %}>
+                    <option value="2" label="Возвратный"{% if not v.can_reflexive %} disabled{% endif %}>
+                    <option value="3" label="s'en">
+                </datalist>
+            </div>
+            <div class="switches-name">Род</div>
+            <div class="switches-container">
+                <div class="left-labels">
+                    <div class="left-label">
+                        Мужской
+                    </div>
+                </div>
+                <div class="input-labels">
+                    <div class="custom-control custom-switch input-label-container">
+                        <input type="checkbox" class="custom-control-input"
+                               id="{{ switches_form.feminine.id_for_label }}"
+                               {% if switches_form.feminine.value %}checked{% endif %}
+                               name="{{ switches_form.feminine.html_name }}"
+                        ><label
+                            class="custom-control-label switch-input-label"
+                            for="{{ switches_form.feminine.id_for_label }}"></label>
+                    </div>
+                </div>
+                <div class="right-labels">
+                    <div class="right-label">
+                        Женский
+                    </div>
+                </div>
+            </div>
+            <div class="switches-submit-container mt-1">
+                <input type="submit" class="btn btn-primary" value="Применить">
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let $voice_range = $("#{{ switches_form.voice.id_for_label }}")
+let last_val = $voice_range.val()
+$voice_range.change(ev => {
+    if ($voice_range.val() === '1' && !CAN_BE_PASSIVE && CAN_BE_REFLEXIVE){
+        if (last_val === '0'){
+            $voice_range.val('2')
+        }else{
+            $voice_range.val('0')
+        }
+    }else if ($voice_range.val()==='2' && !CAN_BE_REFLEXIVE && CAN_BE_PASSIVE){
+        if (last_val === '3'){
+            $voice_range.val('2')
+        }else{
+            $(this.val('4'))
+        }
+    }else if(!CAN_BE_PASSIVE && !CAN_BE_REFLEXIVE && ($voice_range.val()==='2' || $voice_range.val()==='1')){
+        if(last_val==='0'){
+            $voice_range.val('4')
+        }else{
+            $voice_range.val('0')
+        }
+    }
+    last_val = $voice_range.val()
+})
+</script>
+                    </div>
 				</div>
 				<div class="row mood_name">
 					<div class="col-12">
@@ -151,12 +383,7 @@
 								></span></a>{% endif %}{% comment %}<img
 		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
                             >{% endcomment %}</h5></div>
-							<p class="person">{% for person in tense.persons %}
-								<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}
-									<r class="tab-content">{% for form in person.forms %}
-										<r class="tab-pane fade{% if forloop.counter0 == 0 %} show active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}
-									</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}
-								<br>{% endfor %}</p>
+							<p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade{% if forloop.counter0 == 0 %} show active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
 						</div>
 					{% endfor %}
 				</div>
