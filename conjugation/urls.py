@@ -39,6 +39,13 @@ urlpatterns = [
 		views.search,
 		name='search'),
     url(r"polly/$", views.get_polly_audio_link, name='polly'),
-    url(r"(?P<feminin>feminin_)?(?P<se>se_|s_)?(?P<verb>[-'a-zÀ-ÿ]{1,30})(?P<homonym>_2)?/$", views.verb_page, name='verb'),
+    url(r"^(?P<feminin>feminin_)?"
+        r"(?P<question>question_)?"
+        r"(?P<negative>negation_)?"
+        r"(?P<passive>voix-passive_)?"
+        r"(?P<reflexive>se_|s_)?"
+        r"(?P<verb>[-'a-zÀ-ÿ]+)"
+        r"(?P<homonym>_2)?/$", views.verb_page, name='verb'),
+	url(r'^switches$', views.verb_switches_form_view, name='switches'),
     url(r'^$', views.index, name='index'),
 ]

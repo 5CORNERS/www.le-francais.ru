@@ -376,7 +376,7 @@ class ReflexiveVerb(models.Model):
 			particule = "s_"
 		else:
 			particule = "se_"
-		return reverse('conjugation:verb', kwargs=dict(se=particule, verb=self.verb.infinitive_no_accents))
+		return reverse('conjugation:verb', kwargs=dict(reflexive=particule, verb=self.verb.infinitive_no_accents))
 
 	def rename(self):
 		self.infinitive = "s'" + self.verb.infinitive if self.verb.infnitive_first_letter_is_vowel() and not self.verb.aspirate_h else "se " + self.verb.infinitive

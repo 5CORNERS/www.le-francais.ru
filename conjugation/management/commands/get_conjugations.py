@@ -446,6 +446,7 @@ class Command(BaseCommand):
         for verb in verb_list:
             v = Verb.objects.get(infinitive=verb)
             v.construct_conjugations()
+            # FIXME Table arguments
             table = Table(v, 0, False)
             # print(v.infinitive)
             # s += v.infinitive + '\n'

@@ -1,3 +1,4 @@
+from django.urls import reverse
 from unidecode import unidecode
 
 from conjugation.consts import LAYOUT_EN, LAYOUT_RU, VOWELS_LIST
@@ -317,3 +318,34 @@ def autocomplete_verb(
 def remove_autocomplete_duplicates(autocomplete_list):
 	return [item for i, item in enumerate(autocomplete_list)
 	        if not any(_item['url'].split('#')[0] == item['url'] for _item in autocomplete_list[:i])]
+
+
+def get_url_from_switches(infinitive, negative, question, passive, reflexive, feminin):
+    if feminin:
+        gender = 'feminin_'
+    else:
+        gender = ''
+    if reflexive:
+        reflexive = 'se_'
+    else:
+        reflexive = ''
+    if negative:
+        negative = 'negation_'
+    else:
+        negative = ''
+    if passive:
+        passive = 'voix-passive_'
+    else:
+        passive = ''
+    if question:
+        question = 'question_'
+    else:
+        question = ''
+    return reverse('conjugation:verb', kwargs=dict(
+        feminin=gender,
+        reflexive=reflexive,
+        negative=negative,
+        passive=passive,
+        question=question,
+        verb=infinitive
+    ))
