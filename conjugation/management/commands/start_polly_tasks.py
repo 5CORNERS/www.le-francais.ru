@@ -17,6 +17,7 @@ class Command(BaseCommand):
 		for counter, v in enumerate(verbs):  # type: int, Verb
 			print('\rCreating ssml texts... {0} in {1}'.format(counter+1, options['count']), end='')
 			for verb, gender, is_reflexive in v.get_all():
+				# FIXME table arguments
 				table = Table(verb, gender, is_reflexive)  # type: Table
 				for mood in table.moods:  # type: Mood
 					for tense in mood.tenses:  # type: Tense

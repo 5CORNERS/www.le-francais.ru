@@ -5,6 +5,28 @@ from django import forms
 from . import models
 
 
+class SwitchesForm(forms.Form):
+	infinitive = forms.CharField(widget=forms.HiddenInput(), required=False)
+	negative = forms.BooleanField(required=False)
+	question = forms.BooleanField(required=False)
+	voice = forms.IntegerField(widget=forms.NumberInput(attrs={'type':'range', 'step': '1', 'min': '0', 'max': '3'}))
+	feminine = forms.BooleanField(required=False)
+	lock = forms.BooleanField(required=False, label='Lock options')
+
+	def clean(self):
+		super(SwitchesForm, self).clean()
+		self.cleaned_data['passive'] = False
+		self.cleaned_data['reflexive'] = False
+		if self.cleaned_data['voice'] == 1:
+			self.cleaned_data['passive'] = True
+		elif self.cleaned_data['voice'] == 2:
+			self.cleaned_data['reflexive'] = True
+		elif self.cleaned_data['voice'] == 3:
+			self.cleaned_data['pronoun'] = True
+		self.cleaned_data.pop('voice')
+		return self.cleaned_data
+
+
 class BaseVerbTranslationForm(forms.ModelForm):
 	"""Formset for editing phrases, which belong to verb"""
 	fr_verb = forms.ModelChoiceField(queryset=models.Translation.objects.all(), widget=forms.HiddenInput())
