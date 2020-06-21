@@ -44,6 +44,7 @@ urlpatterns = [
         r"(?P<negative>negation_)?"
         r"(?P<passive>voix-passive_)?"
         r"(?P<reflexive>se_|s_)?"
+		r"(?P<pronoun>s-en_)?"
         r"(?P<verb>[-'a-zÀ-ÿ]+)"
         r"(?P<homonym>_2)?/$", views.verb_page, name='verb'),
 	url(r'^switches$', views.verb_switches_form_view, name='switches'),
