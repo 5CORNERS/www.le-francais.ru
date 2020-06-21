@@ -589,3 +589,7 @@ AVOIR = 'avoir'
 
 VOWEL = 'vowel_1'
 NOT_VOWEL = 'vowel_0'
+
+VOICE_ACTIVE = 'active'
+VOICE_PASSIVE = 'passive'
+VOICE_REFLEXIVE = 'reflexive'

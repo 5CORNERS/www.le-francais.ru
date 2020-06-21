@@ -1,7 +1,7 @@
 from django.urls import reverse
 from unidecode import unidecode
 
-from conjugation.consts import LAYOUT_EN, LAYOUT_RU, VOWELS_LIST
+from conjugation.consts import LAYOUT_EN, LAYOUT_RU, VOWELS_LIST, GENDER_FEMININE, GENDER_MASCULINE
 
 import collections
 
@@ -15,21 +15,6 @@ def flatten(d, parent_key='', sep='_'):
 		else:
 			items.append((new_key, v))
 	return dict(items)
-
-
-def index_tuple(l, value, index=0):
-	"""
-	Returns index of tuple in list of tuples, which [j] element is the same as s string
-	:param index: index for searching tuples
-	:param l: target list
-	:param value: search string
-	:return: index of tuple
-	:rtype: int
-	"""
-	for pos, t in enumerate(l):
-		if t[index] == value:
-			return pos
-	raise ValueError("list.index(x): x not in list")
 
 
 def autocomplete_forms_startswith(s, reflexive=False, limit=50,
@@ -349,3 +334,33 @@ def get_url_from_switches(infinitive, negative, question, passive, reflexive, fe
         question=question,
         verb=infinitive
     ))
+
+
+def switches_to_verb_url(switches, infinitive):
+	gender, reflexive, question, negative, passive = parse_switches(switches)
+	return reverse('conjugation:verb', kwargs={
+		'feminin': 'feminin_' if gender == GENDER_FEMININE else '',
+		'question': 'question_' if question else '',
+		'negative': 'negation_' if negative else '',
+		'passive': 'voix-passive_' if passive else '',
+		'reflexive': 'se_' if reflexive else '',
+		'verb': infinitive})
+
+
+def parse_switches(s):
+	gender = GENDER_MASCULINE
+	reflexive = False
+	negative = False
+	question = False
+	passive = False
+	if 'feminine' in s and s['feminine']:
+		gender = GENDER_FEMININE
+	if "reflexive" in s and s['reflexive']:
+		reflexive = True
+	if "negative" in s and s['negative']:
+		negative = True
+	if 'question' in s and s['question']:
+		question = True
+	if 'passive' in s and s['passive']:
+		passive = True
+	return gender, reflexive, question, negative, passive
