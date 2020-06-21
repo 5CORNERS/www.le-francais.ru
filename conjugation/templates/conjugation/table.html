@@ -278,12 +278,11 @@
             <div class="voice-range"><input
                     id="{{ switches_form.voice.id_for_label }}"
                     value="{{ switches_form.voice.value }}" name="{{ switches_form.voice.html_name }}" type="range"
-                    min="0" max="3" step="1" list="num"/>
+                    min="0" max="2" step="1" list="num"/>
                 <datalist id="num">
                     <option value="0" label="Активный">
                     <option value="1" label="Пассивный"{% if not v.can_passive %} disabled{% endif %}>
                     <option value="2" label="Возвратный"{% if not v.can_reflexive %} disabled{% endif %}>
-                    <option value="3" label="s'en">
                 </datalist>
             </div>
             <div class="switches-name">Род</div>
@@ -329,16 +328,12 @@ $voice_range.change(ev => {
         }
     }else if ($voice_range.val()==='2' && !CAN_BE_REFLEXIVE && CAN_BE_PASSIVE){
         if (last_val === '3'){
-            $voice_range.val('2')
+            $voice_range.val('1')
         }else{
-            $(this.val('4'))
+            $voice_range.val('3')
         }
     }else if(!CAN_BE_PASSIVE && !CAN_BE_REFLEXIVE && ($voice_range.val()==='2' || $voice_range.val()==='1')){
-        if(last_val==='0'){
-            $voice_range.val('4')
-        }else{
-            $voice_range.val('0')
-        }
+         $voice_range.val('0')
     }
     last_val = $voice_range.val()
 })

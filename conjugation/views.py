@@ -113,73 +113,58 @@ def index(request):
 	return render(request, 'conjugation/index.html', dict(frequent_urls=FREQUENT_URLS))
 
 
-def parse_switches(s):
-	gender = GENDER_MASCULINE
-	reflexive = False
-	negative = False
-	question = False
-	passive = False
-	feminine = False
-	se = ''
-	if 'feminine' in s and s['feminine']:
-		gender = GENDER_FEMININE
-		feminine = True
-	if "reflexive" in s and s['reflexive']:
-		reflexive = True
-		se = 'se_'
-	if "negative" in s and s['negative']:
-		negative = True
-	if 'question' in s and s['question']:
-		question = True
-	if 'passive' in s and s['passive']:
-		passive = True
-	return gender, reflexive, question, negative, passive
-
-
-def switches_to_verb_url(switches, infinitive):
-	gender, reflexive, question, negative, passive = parse_switches(switches)
-	return reverse('conjugation:verb', kwargs={
-		'feminin': 'feminin_' if gender == GENDER_FEMININE else '',
-		'question': 'question_' if question else '',
-		'negative': 'negation_' if negative else '',
-		'passive': 'voix-passive_' if passive else '',
-		'reflexive': 'se_' if reflexive else '',
-		'verb': infinitive})
-
-
 # FIXME: s'appler feminine form
-def verb_page(request, feminin, question, negative, passive, reflexive, verb, homonym):
+def verb_page(request, feminin, question, negative, passive, reflexive, pronoun, verb, homonym):
 	pronoun = False
+	word_no_accent = unidecode(verb)
+	try:
+		verb = Verb.objects.get(infinitive_no_accents=word_no_accent)
+	except Verb.DoesNotExist:
+		return render(request, 'conjugation/verb_not_found.html',
+					  {'search_string': word_no_accent})
+	except Verb.MultipleObjectsReturned:
+		try:
+			verb = Verb.objects.get(infinitive=verb)
+		except:
+			verb = Verb.objects.filter(infinitive_no_accents=word_no_accent).first()
 	if request.POST:
 		switches_form = SwitchesForm(request.POST)
 		if switches_form.is_valid():
 			data = switches_form.cleaned_data
 			lock = data.pop('lock', False)
-			url = switches_to_verb_url(data, verb)
+			url = verb.get_url(
+				negative=data['negative'],
+				question=data['question'],
+				voice=VOICE_PASSIVE if data['passive'] else VOICE_REFLEXIVE if data['reflexive'] else VOICE_ACTIVE,
+				pronoun=data['pronoun'],
+				gender=GENDER_FEMININE if data['feminine'] else GENDER_MASCULINE
+			)
 			return HttpResponseRedirect(url)
 		else:
 			return HttpResponseBadRequest()
 	else:
 		badges = []
-		word_no_accent = unidecode(verb)
-		try:
-			verb = Verb.objects.get(infinitive_no_accents=word_no_accent)
-		except Verb.DoesNotExist:
-			return render(request, 'conjugation/verb_not_found.html',
-			              {'search_string': word_no_accent})
-		except Verb.MultipleObjectsReturned:
-			try:
-				verb = Verb.objects.get(infinitive=verb)
-			except:
-				verb = Verb.objects.filter(infinitive_no_accents=word_no_accent).first()
+
+		url_kwargs = dict(
+			feminin=feminin, question=question, negative=negative, passive=passive, reflexive=reflexive,
+			pronoun=pronoun, verb=verb, homonym=homonym
+		)
 
 		if verb.reflexive_only and not reflexive:
-			return redirect(verb.reflexiveverb.get_absolute_url())
+			url_kwargs['reflexive'] = 'se'
+			return redirect(reverse('conjugation:verb', kwargs=url_kwargs))
+
 		if not (verb.reflexive_only or verb.can_reflexive) and reflexive:
-			return redirect(verb.get_absolute_url())
+			url_kwargs['reflexive'] = ''
+			return redirect(reverse('conjugation:verb', kwargs=url_kwargs))
+
+		if not verb.can_passive and passive:
+			url_kwargs['passive'] = ''
+			return redirect(reverse('conjugation:verb', kwargs=url_kwargs))
 
 		if (reflexive == "se_" and verb.reflexiveverb.is_short()) or (reflexive == "s_" and not verb.reflexiveverb.is_short()):
-			return redirect(verb.reflexiveverb.get_absolute_url())
+			url_kwargs['reflexive'] = 's_' if verb.reflexiveverb.is_short() else 'se_'
+			return redirect(reverse('conjugation:verb', kwargs=url_kwargs))
 
 		reflexive = True if (verb.can_reflexive or verb.reflexive_only) and reflexive else False
 

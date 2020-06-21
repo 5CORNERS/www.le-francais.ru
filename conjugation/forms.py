@@ -10,6 +10,7 @@ class SwitchesForm(forms.Form):
 	negative = forms.BooleanField(required=False)
 	question = forms.BooleanField(required=False)
 	voice = forms.IntegerField(widget=forms.NumberInput(attrs={'type':'range', 'step': '1', 'min': '0', 'max': '3'}))
+	pronoun = forms.BooleanField(required=False)
 	feminine = forms.BooleanField(required=False)
 	lock = forms.BooleanField(required=False, label='Lock options')
 
@@ -21,8 +22,6 @@ class SwitchesForm(forms.Form):
 			self.cleaned_data['passive'] = True
 		elif self.cleaned_data['voice'] == 2:
 			self.cleaned_data['reflexive'] = True
-		elif self.cleaned_data['voice'] == 3:
-			self.cleaned_data['pronoun'] = True
 		self.cleaned_data.pop('voice')
 		return self.cleaned_data
 

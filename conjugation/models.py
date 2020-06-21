@@ -6,9 +6,8 @@ from django.db import models
 from django.urls import reverse
 from unidecode import unidecode
 
-from .consts import MOODS, TENSES
+from .consts import MOODS, TENSES, VOICE_REFLEXIVE, VOICE_PASSIVE, GENDER_FEMININE
 from .polly import TEXT_TYPES, LANGUAGE_CODES, OUTPUT_FORMATS, SAMPLE_RATES, VOICE_IDS, TASK_STATUSES, PARAMS
-from .utils import index_tuple
 
 VOWELS_LIST = ['a', 'ê', 'é', 'è', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
 
@@ -192,8 +191,30 @@ class Verb(models.Model):
 	def get_absolute_url(self):
 		return reverse('conjugation:verb', kwargs=dict(verb=self.infinitive_no_accents))
 
-	def url(self):
-		return self.get_absolute_url()
+	def get_url(self, negative, question, voice, pronoun, gender):
+		url_kwargs = dict(
+			feminin='', question='', negative='', passive='', reflexive='',
+			pronoun='', verb=self.infinitive_no_accents, homonym=''
+		)
+		if voice == VOICE_REFLEXIVE:
+			if pronoun:
+				url_kwargs['pronoun'] = 's-en_'
+			else:
+				if self.reflexiveverb.is_short():
+					url_kwargs['reflexive'] = 's_'
+				else:
+					url_kwargs['reflexive'] = 'se_'
+		elif voice == VOICE_PASSIVE:
+			url_kwargs['passive'] = 'voix-passive_'
+
+		if negative:
+			url_kwargs['negative'] = 'negation_'
+		if question:
+			url_kwargs['question'] = 'question_'
+		if gender == GENDER_FEMININE:
+			url_kwargs['feminin'] = 'feminin_'
+
+		return reverse('conjugation:verb', kwargs=url_kwargs)
 
 	def __str__(self):
 		return self.infinitive
@@ -368,9 +389,6 @@ class ReflexiveVerb(models.Model):
 	def create_no_accents(self):
 		self.infinitive_no_accents = unidecode(self.infinitive)
 
-	def url(self):
-		return self.get_absolute_url()
-
 	def get_absolute_url(self):
 		if self.is_short():
 			particule = "s_"
@@ -406,3 +424,18 @@ class DeffectivePattern(models.Model):
 				return False
 		except:
 			return False
+
+
+def index_tuple(l, value, index=0):
+	"""
+	Returns index of tuple in list of tuples, which [j] element is the same as s string
+	:param index: index for searching tuples
+	:param l: target list
+	:param value: search string
+	:return: index of tuple
+	:rtype: int
+	"""
+	for pos, t in enumerate(l):
+		if t[index] == value:
+			return pos
+	raise ValueError("list.index(x): x not in list")
