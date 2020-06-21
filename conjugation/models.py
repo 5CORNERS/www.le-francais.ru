@@ -119,6 +119,7 @@ class Verb(models.Model):
 	homonym = models.IntegerField(null=True, default=None)
 
 	reflexive_only = models.BooleanField(default=False)
+	can_be_pronoun = models.BooleanField(default=False)
 
 	is_defective = models.BooleanField(default=False)
 	deffective = models.ForeignKey('DeffectivePattern', null=True, on_delete=models.SET_NULL)
