@@ -26,6 +26,7 @@
 		const CAN_BE_PASSIVE = {{ v.can_passive|yesno:'true,false' }};
 		const CAN_BE_REFLEXIVE = {{ v.can_reflexive|yesno:'true,false' }};
 		const CAN_BE_FEMININE = {{ v.can_feminin|yesno:'true,false' }};
+		const CAN_BE_PRONOUN = {{ v.can_be_pronoun|yesno:'true,false' }};
 	</script>
 	<script async
 	        type="text/javascript"
@@ -126,6 +127,12 @@
         .switches-submit-container {
             text-align: right;
         }
+        .custom-control-input:checked~.custom-control-label.switch-input-label::before{
+            background-color: #fff;
+        }
+        .verb-switch-container.custom-switch .custom-control-label.switch-input-label::after,.verb-switch-container.custom-switch .custom-control-input:checked~.custom-control-label.switch-input-label::after{
+            background-color: #337ab7;
+        }
     </style>
 {% endblock %}
 
@@ -224,7 +231,7 @@
 {#									{% if not question %}+ question{% else %}- question{% endif %}</a>#}
 {#						</div>#}
                         {% for badge in badges %}<span class="badge badge-info ml-1">{{ badge }}</span>{% endfor %}
-                        <button class="btn btn-sm btn-primary" data-toggle="collapse" href="#hiddenSwitches"
+                        <button class="btn btn-sm btn-link" data-toggle="collapse" href="#hiddenSwitches"
                                 role="button" aria-expanded="true">Изменить
                         </button>
 
@@ -244,7 +251,7 @@
                     </div>
                 </div>
                 <div class="input-labels">
-                    <div class="custom-control custom-switch input-label-container">
+                    <div class="custom-control custom-switch verb-switch-container input-label-container">
                         <input type="checkbox" class="custom-control-input"
                                id="{{ switches_form.negative.id_for_label }}"
                                {% if switches_form.negative.value %}checked{% endif %}
@@ -253,7 +260,7 @@
                             class="custom-control-label switch-input-label"
                             for="{{ switches_form.negative.id_for_label }}"></label>
                     </div>
-                    <div class="custom-control custom-switch input-label-container">
+                    <div class="custom-control custom-switch verb-switch-container input-label-container">
                         <input type="checkbox" class="custom-control-input"
                                id="{{ switches_form.question.id_for_label }}"
                                {% if switches_form.question.value %}checked{% endif %}
@@ -276,6 +283,7 @@
 
             <div class="voice-range-name">Залог</div>
             <div class="voice-range"><input
+                    class="custom-range"
                     id="{{ switches_form.voice.id_for_label }}"
                     value="{{ switches_form.voice.value }}" name="{{ switches_form.voice.html_name }}" type="range"
                     min="0" max="2" step="1" list="num"/>
@@ -285,6 +293,10 @@
                     <option value="2" label="Возвратный"{% if not v.can_reflexive %} disabled{% endif %}>
                 </datalist>
             </div>
+            <div style="padding-left: 2.5em;display: none;" class="pronoun custom-control custom-checkbox" id="pronounCheckbox">
+                <input class="custom-control-input" type="checkbox" id="{{ switches_form.pronoun.id_for_label }}" name="{{ switches_form.pronoun.html_name }}"{% if switches_form.pronoun.value %} checked{% endif %}>
+                <label class="custom-control-label" id="pronon-label" for="{{ switches_form.pronoun.id_for_label }}">s'en {{ v.infinitive }}</label>
+            </div>
             <div class="switches-name">Род</div>
             <div class="switches-container">
                 <div class="left-labels">
@@ -293,7 +305,7 @@
                     </div>
                 </div>
                 <div class="input-labels">
-                    <div class="custom-control custom-switch input-label-container">
+                    <div class="custom-control custom-switch input-label-container verb-switch-container">
                         <input type="checkbox" class="custom-control-input"
                                id="{{ switches_form.feminine.id_for_label }}"
                                {% if switches_form.feminine.value %}checked{% endif %}
@@ -317,26 +329,27 @@
 </div>
 
 <script>
-let $voice_range = $("#{{ switches_form.voice.id_for_label }}")
-let last_val = $voice_range.val()
-$voice_range.change(ev => {
-    if ($voice_range.val() === '1' && !CAN_BE_PASSIVE && CAN_BE_REFLEXIVE){
-        if (last_val === '0'){
-            $voice_range.val('2')
-        }else{
+    let $pronounCheckbox = $('#pronounCheckbox');
+    let $voice_range = $("#{{ switches_form.voice.id_for_label }}");
+    let last_val = $voice_range.val();
+    $voice_range.change(ev => {
+        if ($voice_range.val() === '1' && !CAN_BE_PASSIVE && CAN_BE_REFLEXIVE) {
+            if (last_val === '0') {
+                $voice_range.val('2')
+            } else {
+                $voice_range.val('0')
+            }
+        } else if ($voice_range.val() === '2' && !CAN_BE_REFLEXIVE && CAN_BE_PASSIVE) {
+            if (last_val === '3') {
+                $voice_range.val('1')
+            } else {
+                $voice_range.val('3')
+            }
+        } else if (!CAN_BE_PASSIVE && !CAN_BE_REFLEXIVE && ($voice_range.val() === '2' || $voice_range.val() === '1')) {
             $voice_range.val('0')
         }
-    }else if ($voice_range.val()==='2' && !CAN_BE_REFLEXIVE && CAN_BE_PASSIVE){
-        if (last_val === '3'){
-            $voice_range.val('1')
-        }else{
-            $voice_range.val('3')
-        }
-    }else if(!CAN_BE_PASSIVE && !CAN_BE_REFLEXIVE && ($voice_range.val()==='2' || $voice_range.val()==='1')){
-         $voice_range.val('0')
-    }
-    last_val = $voice_range.val()
-})
+        last_val = $voice_range.val()
+    })
 </script>
                     </div>
 				</div>
