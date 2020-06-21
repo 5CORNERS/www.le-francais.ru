@@ -260,12 +260,12 @@ def update_switch(conjugations:dict, formulas:dict, switch:str, verb:Verb, gende
 				for i, line in enumerate(persons):
 					person_key = person_list[i]
 					g = genders[i]
-					line_result = parse_line(line, verb, tense, mood, str(i), g)
+					line_result = parse_line(line, verb, tense, mood, str(i), g, switch)
 					formulas = merge_line_result(etre_or_avoir, formulas, line_result, mood, person_key, switch, tense)
 			else:
 				for i, line in enumerate(persons):
 					person_key = person_list[i]
-					line_result = parse_line(line, verb, tense, mood, str(i), gender)
+					line_result = parse_line(line, verb, tense, mood, str(i), gender, switch)
 					formulas = merge_line_result(etre_or_avoir, formulas, line_result, mood, person_key, switch, tense)
 	return formulas
 
@@ -331,7 +331,7 @@ def parse_le_conjugueur_html(html):
 	return results
 
 
-def parse_line(line, verb, line_tense, line_mood, line_person, gender=MASCULINE):
+def parse_line(line, verb, line_tense, line_mood, line_person, gender=MASCULINE, switch=None):
 	result = {
 		'part_1': {
 			MASCULINE: {
@@ -378,7 +378,9 @@ def parse_line(line, verb, line_tense, line_mood, line_person, gender=MASCULINE)
 						) or (
 								((line_mood, line_tense) in COMPLICATED_TENSES.keys() and
 								 form_tense == COMPLICATED_TENSES[line_mood, line_tense])
-						):
+						) or (
+                            'PASSIVE' in switch and form_tense == 'past-participle'
+                        ):
 							part_1 = line[:match.start(1)]
 							part_2 = line[match.end(1):]
 							verb_form = form
