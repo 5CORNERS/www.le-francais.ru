@@ -173,15 +173,6 @@ def verb_page(request, feminin, question, negative, passive, reflexive, verb, ho
 			except:
 				verb = Verb.objects.filter(infinitive_no_accents=word_no_accent).first()
 
-		if feminin:
-			feminin = True
-			gender = GENDER_FEMININE
-			badges.append('женский род')
-		else:
-			feminin = False
-			gender = GENDER_MASCULINE
-			badges.append('мужской род')
-
 		if verb.reflexive_only and not reflexive:
 			return redirect(verb.reflexiveverb.get_absolute_url())
 		if not (verb.reflexive_only or verb.can_reflexive) and reflexive:
@@ -191,12 +182,7 @@ def verb_page(request, feminin, question, negative, passive, reflexive, verb, ho
 			return redirect(verb.reflexiveverb.get_absolute_url())
 
 		reflexive = True if (verb.can_reflexive or verb.reflexive_only) and reflexive else False
-		if reflexive:
-			badges.append("возвратный залог")
-		elif passive:
-			badges.append('пассивный залог')
-		else:
-			badges.append('активный залог')
+
 		if negative:
 			badges.append('отрицание')
 		else:
@@ -205,6 +191,20 @@ def verb_page(request, feminin, question, negative, passive, reflexive, verb, ho
 			badges.append('вопрос')
 		else:
 			badges.append('повествование')
+		if reflexive:
+			badges.append("возвратный залог")
+		elif passive:
+			badges.append('пассивный залог')
+		else:
+			badges.append('активный залог')
+		if feminin:
+			feminin = True
+			gender = GENDER_FEMININE
+			badges.append('женский род')
+		else:
+			feminin = False
+			gender = GENDER_MASCULINE
+			badges.append('мужской род')
 
 		verb.count += 1
 		verb.save()
