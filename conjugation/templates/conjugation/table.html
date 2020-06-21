@@ -32,6 +32,37 @@
 	        type="text/javascript"
 	        src="{% static 'js/le_francais.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'conjugation/js/table.min.js' %}"></script>
+    <script>
+        let $pronounCheckbox = $('#pronounCheckbox');
+        let $voice_range = $("#{{ switches_form.voice.id_for_label }}");
+        let last_val = $voice_range.val();
+        if (CAN_BE_PRONOUN && $voice_range.val() === '2') {
+            $pronounCheckbox.show()
+        }
+        $voice_range.change(ev => {
+            if ($voice_range.val() === '1' && !CAN_BE_PASSIVE && CAN_BE_REFLEXIVE) {
+                if (last_val === '0') {
+                    $voice_range.val('2')
+                } else {
+                    $voice_range.val('0')
+                }
+            } else if ($voice_range.val() === '2' && !CAN_BE_REFLEXIVE && CAN_BE_PASSIVE) {
+                if (last_val === '3') {
+                    $voice_range.val('1')
+                } else {
+                    $voice_range.val('3')
+                }
+            } else if (!CAN_BE_PASSIVE && !CAN_BE_REFLEXIVE && ($voice_range.val() === '2' || $voice_range.val() === '1')) {
+                $voice_range.val('0')
+            }
+            if (CAN_BE_PRONOUN && $voice_range.val() === '2') {
+                $pronounCheckbox.show()
+            }else{
+                $pronounCheckbox.hide()
+            }
+            last_val = $voice_range.val()
+        })
+    </script>
 {% endblock %}
 
 {% block extra_css %}
@@ -328,29 +359,6 @@
     </div>
 </div>
 
-<script>
-    let $pronounCheckbox = $('#pronounCheckbox');
-    let $voice_range = $("#{{ switches_form.voice.id_for_label }}");
-    let last_val = $voice_range.val();
-    $voice_range.change(ev => {
-        if ($voice_range.val() === '1' && !CAN_BE_PASSIVE && CAN_BE_REFLEXIVE) {
-            if (last_val === '0') {
-                $voice_range.val('2')
-            } else {
-                $voice_range.val('0')
-            }
-        } else if ($voice_range.val() === '2' && !CAN_BE_REFLEXIVE && CAN_BE_PASSIVE) {
-            if (last_val === '3') {
-                $voice_range.val('1')
-            } else {
-                $voice_range.val('3')
-            }
-        } else if (!CAN_BE_PASSIVE && !CAN_BE_REFLEXIVE && ($voice_range.val() === '2' || $voice_range.val() === '1')) {
-            $voice_range.val('0')
-        }
-        last_val = $voice_range.val()
-    })
-</script>
                     </div>
 				</div>
 				<div class="row mood_name">
