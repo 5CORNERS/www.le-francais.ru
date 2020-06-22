@@ -1,9 +1,10 @@
+import re
 from re import sub
 
 from django.db.models import Q
 
 from conjugation.consts import POLLY_EMPTY_MOOD_NAMES, VOWELS_LIST, \
-	TEMPLATE_NAME, SHORT_LIST, ETRE, AVOIR, VOWEL, NOT_VOWEL
+	TEMPLATE_NAME, SHORT_LIST, ETRE, AVOIR, VOWEL, NOT_VOWEL, GENDER_MASCULINE
 from conjugation.models import Verb, PollyAudio
 from conjugation.furmulas import *
 
@@ -84,12 +85,13 @@ class Mood:
 class Tense:
 	_key = None
 
-	def __init__(self, v: Verb = None, mood_name=None, tense_name=None, gender: int = None,
+	def __init__(self, v: Verb = None, mood_name=None, tense_name=None, gender: str = GENDER_MASCULINE,
 	             reflexive: bool = None, negative: bool = None, question: bool = None,
 	             passive: bool = None, pronoun: bool = None, key=None):
 		if key:
 			verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive, negative, question, passive, pronoun = key.split('_')
-			v, gender, reflexive = Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents), int(gender), False if reflexive in ('False', 'None') else True
+			reflexive, negative, question, passive, pronoun = reflexive=='True', negative=='True', question=='True', passive=='True', pronoun=='True'
+			v = Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents)
 		self.v = v
 		self.tense_name = tense_name
 		self.mood_name = mood_name
@@ -150,7 +152,7 @@ class Tense:
 				ssml += '. '
 			else:
 				ssml += ', '
-		ssml = ssml[0:-1] + '.'
+		ssml = ssml[0:-2] + '.'
 		ssml += '</prosody></speak>'
 		return ssml
 
@@ -270,6 +272,15 @@ class Person:
 
 		part_1 = person_formula['part_1'][gender][first_char_is_vowel]
 		part_2 = person_formula['part_2'][gender][last_char_is_vowel]
+
+		if self.question and self.mood_name == 'indicative' and self.tense_name == 'present' and self.person_name=='person_I_S':
+			if isinstance(verb_forms, list):
+				for n, verb_form in enumerate(verb_forms):
+					verb_forms[n] = re.sub('e(?=</b>$|</i>$|$)', 'é', verb_forms[n])
+			else:
+				verb_forms = re.sub('e(?=</b>$|</i>$|$)', 'é', verb_forms)
+			if self.v.infinitive == 'pouvoir':
+				verb_forms = verb_forms[1]
 
 		return part_1, verb_forms, part_2
 
