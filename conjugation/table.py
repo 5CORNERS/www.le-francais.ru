@@ -163,12 +163,12 @@ def switches_to_key(reflexive, negative, question, passive, pronoun):
 		keys.append('QUESTION')
 	if reflexive:
 		keys.append('REFLEXIVE')
+	if pronoun:
+		keys.append('S-EN')
 	if negative:
 		keys.append('NEGATIVE')
 	if passive:
 		keys.append('PASSIVE')
-	if pronoun:
-		keys.append('S-EN')
 	return '_'.join(keys)
 
 def get_formula(reflexive, negative, question, passive, pronoun):
