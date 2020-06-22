@@ -24,9 +24,10 @@
 		const IS_PASSIVE = {{ passive|yesno:'true,false' }};
 		const IS_FEMININE = {{ feminin|yesno:'true,false' }};
 		const CAN_BE_PASSIVE = {{ v.can_passive|yesno:'true,false' }};
-		const CAN_BE_REFLEXIVE = {{ v.can_reflexive|yesno:'true,false' }};
+		const CAN_BE_REFLEXIVE = {{ can_be_reflexive|yesno:'true,false' }};
 		const CAN_BE_FEMININE = {{ v.can_feminin|yesno:'true,false' }};
 		const CAN_BE_PRONOUN = {{ v.can_be_pronoun|yesno:'true,false' }};
+		const MUST_BE_PRONOUN = {{ must_be_pronoun|yesno:'true,false' }};
 	</script>
 	<script async
 	        type="text/javascript"
@@ -34,6 +35,7 @@
 	<script type="text/javascript" src="{% static 'conjugation/js/table.min.js' %}"></script>
     <script>
         let $pronounCheckbox = $('#pronounCheckbox');
+        let $pronounInput = $pronounCheckbox.find('input')
         let $voice_range = $("#{{ switches_form.voice.id_for_label }}");
         let last_val = $voice_range.val();
         if (CAN_BE_PRONOUN && $voice_range.val() === '2') {
@@ -56,8 +58,16 @@
                 $voice_range.val('0')
             }
             if (CAN_BE_PRONOUN && $voice_range.val() === '2') {
+                if (MUST_BE_PRONOUN){
+                    $pronounInput.prop('checked', true)
+                    $pronounInput.prop('disabled', true)
+                }
                 $pronounCheckbox.show()
             }else{
+                if (MUST_BE_PRONOUN){
+                    $pronounInput.prop('checked', false)
+                    $pronounInput.prop('disabled', false)
+                }
                 $pronounCheckbox.hide()
             }
             last_val = $voice_range.val()
@@ -245,22 +255,7 @@
 						</div>
 					{% endif %}
 					<div class="col-12 {% if forms_count == 2 %} col-offset-210{% elif forms_count == 3 %} col-offset-315{% else %}{% endif %}">
-{#						<div>#}
-{#							{% if v.can_feminin %}#}
-{#								<a class="btn btn-primary{% if request|is_mobile %} btn-sm{% endif %}" href="{% option_url 'gender' %}">#}
-{#									{% if not feminin %}В женском роде{% else %}В мужском роде{% endif %}</a>{% endif %}#}
-{#							{% if v.can_reflexive %}#}
-{#								<a class="btn btn-primary{% if request|is_mobile %} btn-sm{% endif %}{% if passive %} disabled{% endif %}"{% if passive %} disabled{% endif %} href="{% option_url 'reflexive' %}">#}
-{#									{% if not reflexive %}В возвратной форме{% else %}В невозвратной форме{% endif %}</a>{% endif %}#}
-{#                            {% if v.can_passive %}#}
-{#                                <a class="btn btn-primary{% if request|is_mobile %} btn-sm{% endif %}{% if reflexive %} disabled{% endif %}"{% if reflexive %} disabled{% endif %} href="{% option_url 'passive' %}">#}
-{#									{% if not passive %}+ passive-voix{% else %}- passive-voix{% endif %}</a>#}
-{#                            {% endif %}#}
-{#                            <a class="btn btn-primary{% if request|is_mobile %} btn-sm{% endif %}" href="{% option_url 'negative' %}">#}
-{#									{% if not negative %}+ negation{% else %}- negation{% endif %}</a>#}
-{#                            <a class="btn btn-primary{% if request|is_mobile %} btn-sm{% endif %}" href="{% option_url 'question' %}">#}
-{#									{% if not question %}+ question{% else %}- question{% endif %}</a>#}
-{#						</div>#}
+
                         {% for badge in badges %}<span class="badge badge-info ml-1">{{ badge }}</span>{% endfor %}
                         <button class="btn btn-sm btn-link" data-toggle="collapse" href="#hiddenSwitches"
                                 role="button" aria-expanded="true">Изменить
@@ -321,7 +316,7 @@
                 <datalist id="num">
                     <option value="0" label="Активный">
                     <option value="1" label="Пассивный"{% if not v.can_passive %} disabled{% endif %}>
-                    <option value="2" label="Возвратный"{% if not v.can_reflexive %} disabled{% endif %}>
+                    <option value="2" label="Возвратный"{% if not v.can_reflexive and not v.can_be_pronoun %} disabled{% endif %}>
                 </datalist>
             </div>
             <div style="padding-left: 2.5em;display: none;" class="pronoun custom-control custom-checkbox" id="pronounCheckbox">

@@ -201,10 +201,7 @@ class Verb(models.Model):
 			if pronoun:
 				url_kwargs['pronoun'] = 's-en_'
 			else:
-				if self.reflexiveverb.is_short():
-					url_kwargs['reflexive'] = 's_'
-				else:
-					url_kwargs['reflexive'] = 'se_'
+				url_kwargs['reflexive'] = 'se_'
 		elif voice == VOICE_PASSIVE:
 			url_kwargs['passive'] = 'voix-passive_'
 
