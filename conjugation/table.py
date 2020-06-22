@@ -15,7 +15,8 @@ class Table:
 			reflexive: bool = False,
 			negative: bool = False,
 			question: bool = False,
-			passive: bool = False
+			passive: bool = False,
+			pronoun: bool = False,
 	):
 		"""
 		:param v: Verb object
@@ -24,12 +25,12 @@ class Table:
 		"""
 		self.v = v
 		self.t = v.template
-		self.moods = self.get_moods_list(gender, reflexive, negative, question, passive)
+		self.moods = self.get_moods_list(gender, reflexive, negative, question, passive, pronoun)
 
-	def get_moods_list(self, gender, reflexive, negative, question, passive):
+	def get_moods_list(self, gender, reflexive, negative, question, passive, pronoun):
 		moods = []
 		for mood_name in FORMULAS.keys():
-			mood = Mood(self.v, mood_name, gender, reflexive, negative, question, passive)
+			mood = Mood(self.v, mood_name, gender, reflexive, negative, question, passive, pronoun)
 			moods.append(mood)
 		return moods
 
@@ -62,17 +63,17 @@ class Table:
 
 class Mood:
 	def __init__(self, v, mood_name, gender: int, reflexive: bool, negative: bool, question: bool,
-	             passive: bool):
+	             passive: bool, pronoun: bool):
 		self.name = TEMPLATE_NAME[mood_name]
 		self.v = v
 		self.mood_name = mood_name
-		self.tenses = self.get_tenses_list(gender, reflexive, negative, question, passive)
+		self.tenses = self.get_tenses_list(gender, reflexive, negative, question, passive, pronoun)
 
-	def get_tenses_list(self, gender, reflexive, negative, question, passive):
+	def get_tenses_list(self, gender, reflexive, negative, question, passive, pronoun):
 		tenses = []
 		mood_dict = FORMULAS[self.mood_name]
 		for tense_name in mood_dict.keys():
-			tense = Tense(self.v, self.mood_name, tense_name, gender, reflexive, negative, question, passive)
+			tense = Tense(self.v, self.mood_name, tense_name, gender, reflexive, negative, question, passive, pronoun)
 			tenses.append(tense)
 		return tenses
 
@@ -85,9 +86,9 @@ class Tense:
 
 	def __init__(self, v: Verb = None, mood_name=None, tense_name=None, gender: int = None,
 	             reflexive: bool = None, negative: bool = None, question: bool = None,
-	             passive: bool = None, key=None):
+	             passive: bool = None, pronoun: bool = None, key=None):
 		if key:
-			verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive, negative, question, passive = key.split('_')
+			verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive, negative, question, passive, pronoun = key.split('_')
 			v, gender, reflexive = Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents), int(gender), False if reflexive in ('False', 'None') else True
 		self.v = v
 		self.tense_name = tense_name
@@ -97,13 +98,14 @@ class Tense:
 		self.negative = negative
 		self.question = question
 		self.passive = passive
+		self.pronoun = pronoun
 		self.name = TEMPLATE_NAME[tense_name]
 		self.persons = self.get_persons_list()
 
 	@property
 	def key(self):
 		if not self._key:
-			self._key = f'{self.v.infinitive_no_accents}_{self.mood_name}_{self.tense_name}_{self.gender}_{self.reflexive}_{self.negative}_{self.question}_{self.passive}'
+			self._key = f'{self.v.infinitive_no_accents}_{self.mood_name}_{self.tense_name}_{self.gender}_{self.reflexive}_{self.negative}_{self.question}_{self.passive}_{self.pronoun}'
 		return self._key
 
 	def is_empty(self):
@@ -117,7 +119,7 @@ class Tense:
 		tense_dict = FORMULAS[self.mood_name][self.tense_name]
 		for person_name in tense_dict[1].keys():
 			person = Person(self.v, self.mood_name, self.tense_name, person_name, self.gender,
-			                self.reflexive, self.negative, self.question, self.passive)
+			                self.reflexive, self.negative, self.question, self.passive, self.pronoun)
 			persons.append(person)
 		return persons
 
@@ -155,7 +157,7 @@ class Tense:
 import json
 FORMULAS_JSON = json.load(open('conjugation/formulas.json'))
 
-def switches_to_key(reflexive, negative, question, passive):
+def switches_to_key(reflexive, negative, question, passive, pronoun):
 	keys = []
 	if question:
 		keys.append('QUESTION')
@@ -165,17 +167,20 @@ def switches_to_key(reflexive, negative, question, passive):
 		keys.append('NEGATIVE')
 	if passive:
 		keys.append('PASSIVE')
+	if pronoun:
+		keys.append('S-EN')
 	return '_'.join(keys)
 
-def get_formula(reflexive, negative, question, passive):
-	key = switches_to_key(reflexive, negative, question, passive)
+def get_formula(reflexive, negative, question, passive, pronoun):
+	key = switches_to_key(reflexive, negative, question, passive, pronoun)
 	return FORMULAS_JSON[key]
 
 
 class Person:
 
 	def __init__(self, v: Verb, mood_name: str, tense_name: str, person_name: str, gender: str,
-	             reflexive: bool=False, negative: bool=False, question: bool=False, passive: bool=False, empty=False):
+				 reflexive: bool = False, negative: bool = False, question: bool = False, passive: bool = False,
+				 pronoun: bool = False, empty=False):
 		self.v = v
 		self.mood_name = mood_name
 		self.tense_name = tense_name
@@ -186,8 +191,9 @@ class Person:
 		self.negative = negative
 		self.question = question
 		self.passive = passive
+		self.pronoun = pronoun
 
-		pronoun = -1 if v.infnitive_first_letter_is_vowel() else 0
+		vowel_0 = -1 if v.infnitive_first_letter_is_vowel() else 0
 		etre = AVOIR if not self.v.conjugated_with_etre else ETRE
 		if self.v.is_impersonal and (
 				self.person_name != "person_III_S" and not (self.person_name == 'singular' and gender == 'm') and self.person_name != 'compose' and self.mood_name != 'infinitive' and self.mood_name != 'gerund'
@@ -196,7 +202,7 @@ class Person:
 		elif empty:
 			self.all_empty()
 		else:
-			self.part_0, self.forms, self.part_2 = self.get_parts(etre, 0, gender, pronoun, reflexive, negative, question, passive)
+			self.part_0, self.forms, self.part_2 = self.get_parts(etre, 0, gender, vowel_0, reflexive, negative, question, passive, pronoun)
 		if not isinstance(self.forms, list):
 			self.forms = [self.forms]
 
@@ -209,9 +215,9 @@ class Person:
 	def all_empty(self):
 		self.part_0, self.forms, self.part_2 = '-', '', ''
 
-	def get_parts(self, etre, switch, gender, pronoun, reflexive, negative, question, passive):
+	def get_parts(self, etre, switch, gender, vowel_0, reflexive, negative, question, passive, pronoun):
 
-		formula = get_formula(reflexive, negative, question, passive)
+		formula = get_formula(reflexive, negative, question, passive, pronoun)
 		person_formula = formula[self.mood_name][self.tense_name][etre][self.person_name]
 		verb_key = person_formula['verb_part'][gender]
 		if verb_key is None:
@@ -301,16 +307,16 @@ class Person:
 
 		if isinstance(verb_forms, list):
 			if verb_forms[0][0] == '<':
-				pronoun = -1 if verb_forms[0][3] in VOWELS_LIST and not self.v.aspirate_h else 0
+				vowel_0 = -1 if verb_forms[0][3] in VOWELS_LIST and not self.v.aspirate_h else 0
 			else:
-				pronoun = -1 if verb_forms[0][0] in VOWELS_LIST and not self.v.aspirate_h else 0
+				vowel_0 = -1 if verb_forms[0][0] in VOWELS_LIST and not self.v.aspirate_h else 0
 		else:
 			if verb_forms[0] == '<':
-				pronoun = -1 if verb_forms[3] in VOWELS_LIST and not self.v.aspirate_h else 0
+				vowel_0 = -1 if verb_forms[3] in VOWELS_LIST and not self.v.aspirate_h else 0
 			else:
-				pronoun = -1 if verb_forms[0] in VOWELS_LIST and not self.v.aspirate_h else 0
+				vowel_0 = -1 if verb_forms[0] in VOWELS_LIST and not self.v.aspirate_h else 0
 
-		return parts[0][gender][pronoun], verb_forms, parts[2][gender][pronoun]
+		return parts[0][gender][vowel_0], verb_forms, parts[2][gender][vowel_0]
 
 	def __str__(self):
 		return self.person_name

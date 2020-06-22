@@ -115,7 +115,11 @@ def index(request):
 
 # FIXME: s'appler feminine form
 def verb_page(request, feminin, question, negative, passive, reflexive, pronoun, verb, homonym):
-	pronoun = False
+	url_kwargs = dict(
+		feminin=feminin or '', question=question or '', negative=negative or '', passive=passive or '',
+		reflexive=reflexive or '',
+		pronoun=pronoun or '', verb=verb, homonym=homonym or ''
+	)
 	word_no_accent = unidecode(verb)
 	try:
 		verb = Verb.objects.get(infinitive_no_accents=word_no_accent)
@@ -145,25 +149,32 @@ def verb_page(request, feminin, question, negative, passive, reflexive, pronoun,
 	else:
 		badges = []
 
-		url_kwargs = dict(
-			feminin=feminin, question=question, negative=negative, passive=passive, reflexive=reflexive,
-			pronoun=pronoun, verb=verb, homonym=homonym
-		)
+		needs_redirect = False
+		if verb.reflexive_only and not (reflexive or pronoun):
+			url_kwargs['reflexive'] = 's_' if verb.reflexiveverb.is_short() else 'se_'
+			needs_redirect = True
 
-		if verb.reflexive_only and not reflexive:
-			url_kwargs['reflexive'] = 'se'
-			return redirect(reverse('conjugation:verb', kwargs=url_kwargs))
-
-		if not (verb.reflexive_only or verb.can_reflexive) and reflexive:
+		elif reflexive and not pronoun and not verb.can_reflexive:
 			url_kwargs['reflexive'] = ''
-			return redirect(reverse('conjugation:verb', kwargs=url_kwargs))
+			needs_redirect = True
+
+		elif not (verb.reflexive_only or verb.can_reflexive or verb.can_be_pronoun) and reflexive:
+			url_kwargs['reflexive'] = ''
+			needs_redirect = True
+
+		elif (reflexive == "se_" and verb.reflexiveverb.is_short()) or (reflexive == "s_" and not verb.reflexiveverb.is_short()):
+			url_kwargs['reflexive'] = 's_' if verb.reflexiveverb.is_short() else 'se_'
+			needs_redirect = True
 
 		if not verb.can_passive and passive:
 			url_kwargs['passive'] = ''
-			return redirect(reverse('conjugation:verb', kwargs=url_kwargs))
+			needs_redirect = True
 
-		if (reflexive == "se_" and verb.reflexiveverb.is_short()) or (reflexive == "s_" and not verb.reflexiveverb.is_short()):
-			url_kwargs['reflexive'] = 's_' if verb.reflexiveverb.is_short() else 'se_'
+		if not verb.can_be_pronoun and pronoun:
+			url_kwargs['pronoun'] = ''
+			needs_redirect = True
+
+		if needs_redirect:
 			return redirect(reverse('conjugation:verb', kwargs=url_kwargs))
 
 		reflexive = True if (verb.can_reflexive or verb.reflexive_only) and reflexive else False
@@ -176,12 +187,14 @@ def verb_page(request, feminin, question, negative, passive, reflexive, pronoun,
 			badges.append('вопрос')
 		else:
 			badges.append('повествование')
-		if reflexive:
+		if reflexive or pronoun:
 			badges.append("возвратный залог")
 		elif passive:
 			badges.append('пассивный залог')
 		else:
 			badges.append('активный залог')
+		if pronoun:
+			badges.append(f's\'en {verb.infinitive}')
 		if feminin:
 			feminin = True
 			gender = GENDER_FEMININE
@@ -201,10 +214,13 @@ def verb_page(request, feminin, question, negative, passive, reflexive, pronoun,
 			question=bool(question),
 			passive=bool(passive),
 			negative=bool(negative),
+			pronoun=bool(pronoun)
 		)
 		return render(request, 'conjugation/table.html', {
 			'v': verb,
 			'reflexive': bool(reflexive),
+			'can_be_reflexive': verb.can_reflexive or verb.can_be_pronoun,
+			'must_be_pronoun': not verb.can_reflexive and verb.can_be_pronoun,
 			'feminin': feminin,
 			'table': table,
 			'forms_count': verb.template.forms_count,
@@ -217,7 +233,8 @@ def verb_page(request, feminin, question, negative, passive, reflexive, pronoun,
 				'negative': bool(negative),
 				'question': bool(question),
 				'feminine': bool(feminin),
-				'voice': 1 if passive else 2 if reflexive else 3 if pronoun else 0
+				'voice': 1 if passive else 2 if reflexive or pronoun else 0,
+				'pronoun': pronoun,
 			}),
 			'badges': badges,
 		})
