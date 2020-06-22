@@ -38,8 +38,12 @@
         let $pronounInput = $pronounCheckbox.find('input')
         let $voice_range = $("#{{ switches_form.voice.id_for_label }}");
         let last_val = $voice_range.val();
+        let $switchesForm = $('#switchesForm')
         if (CAN_BE_PRONOUN && $voice_range.val() === '2') {
             $pronounCheckbox.show()
+            if (MUST_BE_PRONOUN){
+                $pronounCheckbox.prop('disabled', true)
+            }
         }
         $voice_range.change(ev => {
             if ($voice_range.val() === '1' && !CAN_BE_PASSIVE && CAN_BE_REFLEXIVE) {
@@ -71,6 +75,11 @@
                 $pronounCheckbox.hide()
             }
             last_val = $voice_range.val()
+        })
+        $switchesForm.submit(ev => {
+            if ($pronounInput.prop('disabled')){
+                $pronounInput.prop('disabled', false)
+            }
         })
     </script>
 {% endblock %}
@@ -263,7 +272,7 @@
 
 <div class="collapse" id="hiddenSwitches">
     <div class="card card-body">
-        <form action="{{ request.path }}" method="post">
+        <form action="{{ request.path }}" method="post" id="switchesForm">
             {% csrf_token %}
 
             <div class="switches-name">Форма</div>
