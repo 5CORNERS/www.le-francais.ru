@@ -16,7 +16,7 @@ MASCULINE = 0
 
 
 class PollyAudio(models.Model):
-	key = models.CharField(max_length=64, primary_key=True)
+	key = models.CharField(max_length=128, primary_key=True)
 	polly = models.ForeignKey('polly.PollyTask', null=True)
 
 
