@@ -35,10 +35,11 @@ urlpatterns = [
 		name='translation_update'
 	),
 	url(
-		r'search/$',
+		r'^search/$',
 		views.search,
 		name='search'),
-    url(r"polly/$", views.get_polly_audio_link, name='polly'),
+    url(r"^polly/$", views.get_polly_audio_link, name='polly'),
+	url(r"^polly/(?P<pk>\S+)/$", views.get_polly_audio_stream, name='polly_listen'),
     url(r"^(?P<feminin>feminin_)?"
         r"(?P<question>question_)?"
         r"(?P<negative>negation_)?"

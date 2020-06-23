@@ -1,6 +1,8 @@
+from io import BytesIO
+
 from dal import autocomplete
 from django.forms import modelformset_factory
-from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedirect, FileResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
@@ -23,6 +25,7 @@ from .utils import search_verbs, switch_keyboard_layout, \
 @require_http_methods(["POST"])
 def get_polly_audio_link(request):
 	key = request.POST.get('key')
+	task_completed = False
 	polly_audio, created = PollyAudio.objects.select_related('polly').get_or_create(key=key)
 	if created or polly_audio.polly is None or polly_audio.polly.url is None:
 		tense = Tense(key=key)
@@ -34,11 +37,30 @@ def get_polly_audio_link(request):
 			voice_id=VOICE_ID_LEA,
 			output_format=OUTPUT_FORMAT_MP3,
 		)
-		polly_task.create_task('polly-conjugations/', wait=True, save=True)
+		polly_task.create_task('polly-conjugations/', wait=False, save=True)
 		polly_audio.polly = polly_task
 		polly_audio.save()
-	return JsonResponse(data={key: {'url': polly_audio.polly.url}})
+	elif polly_audio.polly.task_status != 'completed':
+		polly_audio.polly.update_task()
+		if polly_audio.polly.task_status == 'complete':
+			task_completed = True
+	else:
+		task_completed = True
+	if task_completed:
+		return JsonResponse(data={key: {'url': polly_audio.polly.url}})
+	else:
+		return JsonResponse(data={
+			key: {'url': reverse(
+				'conjugation:polly_listen', kwargs={'pk':polly_audio.pk}
+			)}
+		})
 
+def get_polly_audio_stream(request, pk):
+	polly_audio = PollyAudio.objects.get(pk=pk)
+	stream = polly_audio.polly.get_audio_stream()
+	response = HttpResponse(stream.read(), content_type='audio/mp3')
+	stream.close()
+	return response
 
 @csrf_exempt
 def search(request):
