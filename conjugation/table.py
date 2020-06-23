@@ -36,14 +36,15 @@ class Table:
 		return moods
 
 	def all_polly(self):
-		keys = list(filter(None, [tense.key if not tense.is_empty() else None for mood in self.moods for tense in mood.tenses]))
-		polly_filter = Q()
-		for key in keys:
-			polly_filter = polly_filter | Q(key=key)
-		query = PollyAudio.objects.filter(polly_filter)
-		if len(query) < len(keys):
-			return False
 		return True
+		# keys = list(filter(None, [tense.key if not tense.is_empty() else None for mood in self.moods for tense in mood.tenses]))
+		# polly_filter = Q()
+		# for key in keys:
+		# 	polly_filter = polly_filter | Q(key=key)
+		# query = PollyAudio.objects.filter(polly_filter)
+		# if len(query) < len(keys):
+		# 	return False
+		# return True
 
 	def __str__(self):
 		return self.v.infinitive + ' Table Object'
