@@ -7,7 +7,7 @@ from django.urls import reverse
 from unidecode import unidecode
 
 from .consts import MOODS, TENSES, VOICE_REFLEXIVE, VOICE_PASSIVE, GENDER_FEMININE
-from .polly import TEXT_TYPES, LANGUAGE_CODES, OUTPUT_FORMATS, SAMPLE_RATES, VOICE_IDS, TASK_STATUSES, PARAMS
+from polly.const import TEXT_TYPES, LANGUAGE_CODES, OUTPUT_FORMATS, SAMPLE_RATES, VOICE_IDS, TASK_STATUSES, PARAMS
 
 VOWELS_LIST = ['a', 'ê', 'é', 'è', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
 

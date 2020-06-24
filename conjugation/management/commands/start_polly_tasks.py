@@ -2,8 +2,8 @@ from django.core.management import BaseCommand
 
 from conjugation.models import Verb, PollyAudio
 from conjugation.table import Table, Mood, Tense
-from conjugation.polly import *
-
+from polly.api import *
+from polly.const import *
 
 class Command(BaseCommand):
 	def add_arguments(self, parser):
