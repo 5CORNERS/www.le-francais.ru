@@ -16,7 +16,7 @@ from conjugation.models import Verb, PollyAudio, Translation, \
 from polly.models import PollyTask
 from .consts import *
 from .forms import SwitchesForm
-from .polly import *
+from polly.const import *
 from .table import Table, Tense
 from .utils import search_verbs, switch_keyboard_layout, \
 	search_verbs_with_forms, autocomplete_verb, get_url_from_switches
@@ -176,7 +176,7 @@ def verb_page(request, feminin, question, negative, passive, reflexive, pronoun,
 			url_kwargs['reflexive'] = 's_' if verb.reflexiveverb.is_short() else 'se_'
 			needs_redirect = True
 
-		elif reflexive and not pronoun and not verb.can_reflexive:
+		elif reflexive and not pronoun and not verb.can_reflexive and not verb.reflexive_only:
 			url_kwargs['reflexive'] = ''
 			needs_redirect = True
 
@@ -210,13 +210,11 @@ def verb_page(request, feminin, question, negative, passive, reflexive, pronoun,
 		else:
 			badges.append('повествование')
 		if reflexive or pronoun:
-			badges.append("возвратный залог")
+			badges.append("возвратный залог" + (f' (s\'en {verb.infinitive})' if pronoun else ''))
 		elif passive:
 			badges.append('пассивный залог')
 		else:
 			badges.append('активный залог')
-		if pronoun:
-			badges.append(f's\'en {verb.infinitive}')
 		if feminin:
 			feminin = True
 			gender = GENDER_FEMININE
