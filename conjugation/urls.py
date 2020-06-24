@@ -40,13 +40,21 @@ urlpatterns = [
 		name='search'),
     url(r"^polly/$", views.get_polly_audio_link, name='polly'),
 	url(r"^polly/(?P<pk>\S+)/$", views.get_polly_audio_stream, name='polly_listen'),
-    url(r"^(?P<feminin>feminin_)?"
-        r"(?P<question>question_)?"
-        r"(?P<negative>negation_)?"
-        r"(?P<passive>voix-passive_)?"
-        r"(?P<reflexive>se_|s_)?"
+	url(r"^(?P<feminin>feminin_)?"
+		r"(?P<question>question_)?"
+		r"(?P<negative>negation_)?"
+		r"(?P<passive>voix-passive_)?"
+		r"(?P<reflexive>se_|s_)?"
+		r"(?P<pronoun>s-en_)?"
+		r"(?P<verb>[-'a-zÀ-ÿ]+)"
+		r"(?P<homonym>_2)?/$", views.verb_page_redirect, name='verb_old'),
+    url(r"^(?P<reflexive>se_|s_)?"
 		r"(?P<pronoun>s-en_)?"
         r"(?P<verb>[-'a-zÀ-ÿ]+)"
+		r"(?P<feminin>_feminin)?"
+        r"(?P<question>_question)?"
+        r"(?P<negative>_negation)?"
+        r"(?P<passive>_voix-passive)?"
         r"(?P<homonym>_2)?/$", views.verb_page, name='verb'),
 	url(r'^switches$', views.verb_switches_form_view, name='switches'),
     url(r'^$', views.index, name='index'),
