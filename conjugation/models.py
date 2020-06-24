@@ -203,14 +203,14 @@ class Verb(models.Model):
 			else:
 				url_kwargs['reflexive'] = 'se_'
 		elif voice == VOICE_PASSIVE:
-			url_kwargs['passive'] = 'voix-passive_'
+			url_kwargs['passive'] = '_voix-passive'
 
 		if negative:
-			url_kwargs['negative'] = 'negation_'
+			url_kwargs['negative'] = '_negation'
 		if question:
-			url_kwargs['question'] = 'question_'
+			url_kwargs['question'] = '_question'
 		if gender == GENDER_FEMININE:
-			url_kwargs['feminin'] = 'feminin_'
+			url_kwargs['feminin'] = '_feminin'
 
 		return reverse('conjugation:verb', kwargs=url_kwargs)
 
@@ -224,13 +224,13 @@ class Verb(models.Model):
 		return unidecode(self.infinitive)
 
 	def feminin_url(self):
-		return reverse('conjugation:verb', kwargs=dict(femenin='feminin_', verb=self.infinitive_no_accents, se=None))
+		return reverse('conjugation:verb', kwargs=dict(femenin='_feminin', verb=self.infinitive_no_accents, se=None))
 
 	def se_url(self):
 		return reverse('conjugation:verb', kwargs=dict(femenin=None, verb=self.infinitive_no_accents, se='se_'))
 
 	def feminin_se_url(self):
-		return reverse('conjugation:verb', kwargs=dict(femenin='feminin_', verb=self.infinitive_no_accents, se='se_'))
+		return reverse('conjugation:verb', kwargs=dict(femenin='_feminin', verb=self.infinitive_no_accents, se='se_'))
 
 	def infnitive_first_letter_is_vowel(self):
 		return True if self.infinitive[0] in VOWELS_LIST and not self.aspirate_h else False

@@ -135,6 +135,19 @@ def index(request):
 	return render(request, 'conjugation/index.html', dict(frequent_urls=FREQUENT_URLS))
 
 
+def verb_page_redirect(request, feminin, question, negative, passive, reflexive, pronoun, verb, homonym):
+	return HttpResponseRedirect(reverse('conjugation:verb', kwargs=dict(
+		feminin='_feminin' if bool(feminin) else '',
+		question='_question' if bool(question) else '',
+		negative='_negation' if bool(negative) else '',
+		passive='_voix-passive' if bool(passive) else '',
+		reflexive=reflexive or '',
+		pronoun=pronoun or '',
+		verb=verb,
+		homonym=homonym or ''
+	)))
+
+
 # FIXME: s'appler feminine form
 def verb_page(request, feminin, question, negative, passive, reflexive, pronoun, verb, homonym):
 	url_kwargs = dict(

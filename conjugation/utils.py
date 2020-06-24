@@ -307,7 +307,7 @@ def remove_autocomplete_duplicates(autocomplete_list):
 
 def get_url_from_switches(infinitive, negative, question, passive, reflexive, feminin):
     if feminin:
-        gender = 'feminin_'
+        gender = '_feminin'
     else:
         gender = ''
     if reflexive:
@@ -315,15 +315,15 @@ def get_url_from_switches(infinitive, negative, question, passive, reflexive, fe
     else:
         reflexive = ''
     if negative:
-        negative = 'negation_'
+        negative = '_negation'
     else:
         negative = ''
     if passive:
-        passive = 'voix-passive_'
+        passive = '_voix-passive'
     else:
         passive = ''
     if question:
-        question = 'question_'
+        question = '_question'
     else:
         question = ''
     return reverse('conjugation:verb', kwargs=dict(
@@ -339,10 +339,10 @@ def get_url_from_switches(infinitive, negative, question, passive, reflexive, fe
 def switches_to_verb_url(switches, infinitive):
 	gender, reflexive, question, negative, passive = parse_switches(switches)
 	return reverse('conjugation:verb', kwargs={
-		'feminin': 'feminin_' if gender == GENDER_FEMININE else '',
-		'question': 'question_' if question else '',
-		'negative': 'negation_' if negative else '',
-		'passive': 'voix-passive_' if passive else '',
+		'feminin': '_feminin' if gender == GENDER_FEMININE else '',
+		'question': '_question' if question else '',
+		'negative': '_negation' if negative else '',
+		'passive': '_voix-passive' if passive else '',
 		'reflexive': 'se_' if reflexive else '',
 		'verb': infinitive})
 
