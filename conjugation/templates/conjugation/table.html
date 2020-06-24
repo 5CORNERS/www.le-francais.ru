@@ -35,12 +35,12 @@
 	<script type="text/javascript" src="{% static 'conjugation/js/table.min.js' %}"></script>
     <script>
         let $pronounCheckbox = $('#pronounCheckbox');
-        let $pronounInput = $pronounCheckbox.find('input')
+        let $pronounInput = $pronounCheckbox.find('input');
         let $voice_range = $("#{{ switches_form.voice.id_for_label }}");
         let last_val = $voice_range.val();
         let $switchesForm = $('#switchesForm')
         if (CAN_BE_PRONOUN && $voice_range.val() === '2') {
-            $pronounCheckbox.show()
+            $pronounCheckbox.show();
             if (MUST_BE_PRONOUN){
                 $pronounCheckbox.prop('disabled', true)
             }
@@ -100,7 +100,7 @@
         }
 
         datalist {
-            width: 121%;
+            width: 100%;
             display: -webkit-box;
             display: -webkit-flex;
             display: -ms-flexbox;
@@ -172,6 +172,8 @@
 
         .switches-name,.voice-range-name {
             font-weight: bold;
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .switches-submit-container {
@@ -182,6 +184,23 @@
         }
         .verb-switch-container.custom-switch .custom-control-label.switch-input-label::after,.verb-switch-container.custom-switch .custom-control-input:checked~.custom-control-label.switch-input-label::after{
             background-color: #337ab7;
+        }
+        @media (max-width: 320px) {
+            .switches-name{
+                text-align: center;
+            }
+
+            .card-switches{
+                padding: 0.2em;
+            }
+
+            .voice-range{
+                padding-left: 0;
+            }
+            .switches-submit-container {
+                text-align: center;
+                margin-top: 0.5rem;
+            }
         }
     </style>
 {% endblock %}
@@ -271,7 +290,7 @@
                         </button>
 
 <div class="collapse" id="hiddenSwitches">
-    <div class="card card-body">
+    <div class="card card-body card-switches">
         <form action="{{ request.path }}" method="post" id="switchesForm">
             {% csrf_token %}
 
@@ -323,9 +342,9 @@
                     value="{{ switches_form.voice.value }}" name="{{ switches_form.voice.html_name }}" type="range"
                     min="0" max="2" step="1" list="num"/>
                 <datalist id="num">
-                    <option value="0" label="Активный">
-                    <option value="1" label="Пассивный"{% if not v.can_passive %} disabled{% endif %}>
-                    <option value="2" label="Возвратный"{% if not v.can_reflexive and not v.can_be_pronoun %} disabled{% endif %}>
+                    <option value="0" label="Активный" style="text-align: left">
+                    <option value="1" label="Пассивный"{% if not v.can_passive %} disabled{% endif %} style="text-align: center">
+                    <option value="2" label="Возвратный"{% if not v.can_reflexive and not v.can_be_pronoun %} disabled{% endif %} style="text-align: right">
                 </datalist>
             </div>
             <div style="padding-left: 2.5em;display: none;" class="pronoun custom-control custom-checkbox" id="pronounCheckbox">
