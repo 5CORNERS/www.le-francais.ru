@@ -2,7 +2,8 @@ from io import BytesIO
 
 from dal import autocomplete
 from django.forms import modelformset_factory
-from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedirect, FileResponse, HttpResponse
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedirect, FileResponse, HttpResponse, \
+	HttpResponsePermanentRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
@@ -136,7 +137,7 @@ def index(request):
 
 
 def verb_page_redirect(request, feminin, question, negative, passive, reflexive, pronoun, verb, homonym):
-	return HttpResponseRedirect(reverse('conjugation:verb', kwargs=dict(
+	return HttpResponsePermanentRedirect(reverse('conjugation:verb', kwargs=dict(
 		feminin='_feminin' if bool(feminin) else '',
 		question='_question' if bool(question) else '',
 		negative='_negation' if bool(negative) else '',
