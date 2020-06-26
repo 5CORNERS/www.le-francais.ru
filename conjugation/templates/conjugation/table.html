@@ -102,7 +102,7 @@
 				</div>
 				<div class="row">
 					{% if forms_count > 1 %}
-						<div class="{% if forms_count == 2 %}col-fixed-210{% elif forms_count == 3 %}col-fixed-315{% endif %}">
+						<div class="col-12 mb-2">
 							<ul class="nav nav-pills">
 								{% for i in forms_range %}
 									<li style="cursor: pointer"
@@ -114,7 +114,7 @@
 							</ul>
 						</div>
 					{% endif %}
-					<div class="col-12 {% if forms_count == 2 %} col-offset-210{% elif forms_count == 3 %} col-offset-315{% else %}{% endif %}">
+					<div class="col-12">
 
                         {% for badge in badges %}<span class="badge badge-info ml-1">{{ badge }}</span>{% endfor %}
                         <button class="btn btn-sm btn-link" data-toggle="collapse" href="#hiddenSwitches"
