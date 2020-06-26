@@ -281,6 +281,7 @@ def verb_page(request, feminin, question, negative, passive, reflexive, pronoun,
 			'question':bool(question),
 			'passive':bool(passive),
 			'negative':bool(negative),
+			'pronoun':bool(pronoun),
 			'switches_form': SwitchesForm(initial={
 				'infinitive': verb.infinitive_no_accents,
 				'negative': bool(negative),
