@@ -18,7 +18,7 @@ def flatten(d, parent_key='', sep='_'):
 
 
 def autocomplete_forms_startswith(s, reflexive=False, limit=50,
-                                  show_infinitives=10, show_forms=5):
+                                  show_infinitives=10, show_forms=5, pronoun=False):
 	"""
 	Returns autocomplete list of verbs which forms starts with search string
 	:param show_infinitives: max index of infinitives item, after which others will be hidden
@@ -37,12 +37,17 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50,
 	for verb, forms_list in verbs:
 		infinitive_contains_search_string = forms_list[0][2] == 'infinitive-present'
 		current_is_reflexive = False
+		current_is_pronoun = False
 		infinitive = verb.infinitive
 		if reflexive and verb.can_reflexive or verb.reflexive_only:
 			verb = verb.reflexiveverb
 			current_is_reflexive = True
 		elif reflexive and not (verb.can_reflexive or verb.reflexive_only):
-			continue # if user type s' or se skip non reflexive verbs
+			continue  # skipping non reflexive verbs if user type "s'" or "se"
+		elif pronoun and verb.can_be_pronoun:
+			current_is_pronoun = True
+		elif pronoun and not verb.can_be_pronoun:
+			continue  # skipping non pronoun verbs if user type "s'en"
 		cls = 'starts-with'
 		if not infinitive_contains_search_string:
 			cls = cls + '-form'
@@ -67,6 +72,9 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50,
 				html = "s'" + html
 			else:
 				html = 'se ' + html
+		elif current_is_pronoun:
+			html = 's\'en ' + html
+			url = verb.get_url(pronoun=True)
 		item = dict(
 			url=url,
 			verb=verb.infinitive,
@@ -268,12 +276,14 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3,
 def autocomplete_verb(
 		search_string, is_reflexive, limit, show_startswith_infinitive=99,
 		show_startswith_forms=99, show_starts_with_levenshtein=5,
-		show_startswith_contains=5):
+		show_startswith_contains=5, is_pronoun=False):
 	autocomplete_list_startswith = autocomplete_forms_startswith(
 		search_string,
 		is_reflexive,
 		show_infinitives=show_startswith_infinitive,
-		show_forms=show_startswith_forms)
+		show_forms=show_startswith_forms,
+		pronoun=is_pronoun
+	)
 	current_len = len(autocomplete_list_startswith)
 
 	autocomplete_list_levenshtein = []
