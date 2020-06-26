@@ -6,7 +6,7 @@ from django.db import models
 from django.urls import reverse
 from unidecode import unidecode
 
-from .consts import MOODS, TENSES, VOICE_REFLEXIVE, VOICE_PASSIVE, GENDER_FEMININE
+from .consts import MOODS, TENSES, VOICE_REFLEXIVE, VOICE_PASSIVE, GENDER_FEMININE, GENDER_MASCULINE, VOICE_ACTIVE
 from polly.const import TEXT_TYPES, LANGUAGE_CODES, OUTPUT_FORMATS, SAMPLE_RATES, VOICE_IDS, TASK_STATUSES, PARAMS
 
 VOWELS_LIST = ['a', 'ê', 'é', 'è', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
@@ -192,7 +192,7 @@ class Verb(models.Model):
 	def get_absolute_url(self):
 		return reverse('conjugation:verb', kwargs=dict(verb=self.infinitive_no_accents))
 
-	def get_url(self, negative, question, voice, pronoun, gender):
+	def get_url(self, negative=False, question=False, voice=VOICE_ACTIVE, pronoun=False, gender=GENDER_MASCULINE):
 		url_kwargs = dict(
 			feminin='', question='', negative='', passive='', reflexive='',
 			pronoun='', verb=self.infinitive_no_accents, homonym=''

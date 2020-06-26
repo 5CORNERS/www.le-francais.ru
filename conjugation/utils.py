@@ -1,7 +1,7 @@
 from django.urls import reverse
 from unidecode import unidecode
 
-from conjugation.consts import LAYOUT_EN, LAYOUT_RU, VOWELS_LIST, GENDER_FEMININE, GENDER_MASCULINE
+from conjugation.consts import LAYOUT_EN, LAYOUT_RU, VOWELS_LIST, GENDER_FEMININE, GENDER_MASCULINE, VOICE_REFLEXIVE
 
 import collections
 
@@ -67,6 +67,7 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50,
 				cls = cls + ' load-more hide'
 			url = verb.get_absolute_url()
 			html = f"<b>{infinitive[:len(s)]}</b>{infinitive[len(s):]}"
+		name = verb.infinitive
 		if current_is_reflexive:
 			if infinitive[0] in VOWELS_LIST:
 				html = "s'" + html
@@ -74,10 +75,11 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50,
 				html = 'se ' + html
 		elif current_is_pronoun:
 			html = 's\'en ' + html
-			url = verb.get_url(pronoun=True)
+			url = verb.get_url(pronoun=True, voice=VOICE_REFLEXIVE)
+			name = 's\'en ' + name
 		item = dict(
 			url=url,
-			verb=verb.infinitive,
+			verb=name,
 			html=html,
 			isInfinitive=infinitive_contains_search_string,
 			cls=cls,
@@ -137,7 +139,7 @@ def autocomplete_infinitive_contains(s, reflexive=False, limit=50, max_show=5):
 	return autocomplete_list
 
 
-def search_verbs(s, reflexive=None, return_first=False):
+def search_verbs(s, reflexive=None, return_first=False, is_pronoun=False):
 	from conjugation.models import Verb
 	s_unaccent = unidecode(s)
 	verb = None

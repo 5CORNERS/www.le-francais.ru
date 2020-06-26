@@ -69,13 +69,17 @@ def search(request):
 		search_string = switch_keyboard_layout(str(request.POST.get('q')).strip(' ').lower())
 	else:
 		search_string = switch_keyboard_layout(str(request.GET.get('q')).strip(' ').lower())
-	is_reflexive = True
-	if search_string.find("s'") == 0:
+	is_reflexive = False
+	is_pronoun = False
+	if search_string.find("s'en ") == 0:
+		search_string = search_string[5:]
+		is_pronoun = True
+	elif search_string.find("s'") == 0:
 		search_string = search_string[2:]
+		is_reflexive = True
 	elif search_string.find("se ") == 0:
 		search_string = search_string[3:]
-	else:
-		is_reflexive = False
+		is_reflexive = True
 	found_forms = []
 	for verb, forms in search_verbs_with_forms(search_string, exact=True):
 		if verb.infinitive == search_string:
@@ -99,7 +103,8 @@ def search(request):
 			conjugation = Table(
 				v=verb,
 				gender=gender,
-				reflexive=is_reflexive
+				reflexive=is_reflexive,
+				pronoun=is_pronoun,
 			).get_conjugation(
 				form[1], form[2], person_index, form[4] or 0)
 			if form[2] in PERSONS.keys():
@@ -118,12 +123,16 @@ def search(request):
 	if len(found_forms) > 1:
 		return render(request, 'conjugation/verb_found_forms.html',
 		              {'search_string': search_string, 'found_forms': found_forms})
-	verb, form = search_verbs(search_string, is_reflexive, return_first=True)
+	verb, form = search_verbs(search_string, is_reflexive, return_first=True, is_pronoun=is_pronoun)
 	if verb is None:
-		autocomplete_list = autocomplete_verb(search_string, is_reflexive, 50)
+		autocomplete_list = autocomplete_verb(search_string, is_reflexive, 50, is_pronoun=is_pronoun)
 		return render(request, 'conjugation/verb_not_found.html',
 		              {'search_string': search_string, 'autocomplete_list': autocomplete_list})
-	return redirect(verb.get_absolute_url())
+	if is_pronoun:
+		url = verb.get_url(pronoun=True, voice=VOICE_REFLEXIVE)
+	else:
+		url = verb.get_absolute_url()
+	return redirect(url)
 
 
 def verb_switches_form_view(request):
