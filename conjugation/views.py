@@ -77,7 +77,17 @@ def search(request):
 	else:
 		is_reflexive = False
 	found_forms = []
-	for verb, forms in  search_verbs_with_forms(search_string, exact=True):
+	for verb, forms in search_verbs_with_forms(search_string, exact=True):
+		if verb.infinitive == search_string:
+			found_forms.append(dict(
+				url=verb.get_absolute_url(),
+				infinitive=verb.infinitive,
+				conjugation=search_string,
+				mood='Infinitif',
+				tense='présent',
+				person='—'
+			))
+			break
 		for form in forms:
 			gender = GENDER_MASCULINE
 			person_index = form[3]
