@@ -285,12 +285,7 @@
 									></span></a>{% endif %}{% comment %}<img
 		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
                             >{% endcomment %}</h5></div>
-								<p class="person">{% for person in tense.persons %}
-									<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}
-										<r class="tab-content">{% for form in person.forms %}
-											<r class="tab-pane fade {% if forloop.counter0 == 0 %} show active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}
-										</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}
-									<br>{% endfor %}</p>
+								<p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %} show active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
 							</div>
 						{% endfor %}
 					</div>
