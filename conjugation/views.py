@@ -291,11 +291,15 @@ def get_autocomplete_list(request):
 	term = switch_keyboard_layout(_term)
 	term = unidecode(term)
 	reflexive = False
+	pronoun = False
 	s = term
-	if term[:3] == 'se ' or term[:2] == "s'":
+	if term[:5] == 's\'en ':
+		pronoun = True
+		s = term[5:]
+	elif term[:3] == 'se ' or term[:2] == "s'":
 		reflexive = True
 		s = term[3:] if term.startswith('se ') else term[2:]
-	autocomplete_list = autocomplete_verb(s, reflexive, list_len)
+	autocomplete_list = autocomplete_verb(s, reflexive, list_len, is_pronoun=pronoun)
 	return JsonResponse(autocomplete_list[:list_len], safe=False)
 
 
