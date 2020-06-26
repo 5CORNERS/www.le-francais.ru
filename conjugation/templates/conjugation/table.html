@@ -51,7 +51,7 @@
 				<div class="row">
 					<div class="col-12">
 						<h1 class="title">Спряжение {% if not request|is_mobile %}глагола{% endif %}
-							{% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %}
+							{% if reflexive %}{{ v.reflexiveverb.infinitive }}{% elif pronoun %}s'en {{ v.infinitive }}{% else %}{{ v.infinitive }}{% endif %}
 									{% if not table.moods.5.tenses.0.is_empty %}
 										<a class="link-play-pause"
 										   style="cursor: pointer; margin: -2px 0;"><span
