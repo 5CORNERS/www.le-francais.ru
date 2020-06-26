@@ -253,6 +253,8 @@ class Person:
 
 			t_mood, t_tense, t_person = globals()[verb_key]
 		verb_forms = self.v.conjugations[t_mood][t_tense][int(t_person)]
+		if verb_forms is None:
+			return '-', '', ''
 		if isinstance(verb_forms, list):
 			verb_form:str = str(verb_forms[0])
 		else:
