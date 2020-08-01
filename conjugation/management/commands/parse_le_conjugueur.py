@@ -285,9 +285,12 @@ def merge_line_result(etre, formulas, line_result, mood, person_key, switch, ten
 
 def parse_le_conjugueur_url(url, verb):
 	temp = Path(f'conjugation/data/parse_conjugations/temp/html/{url.split("/")[-1]}')
+	temp_wo_html = Path(f'conjugation/data/parse_conjugations/temp/html/{url.split("/")[-1].replace(".html","")}')
 	print(f'Parsing {url}')
 	if temp.exists():
 		body = temp.read_bytes()
+	elif temp_wo_html.exists():
+		body = temp_wo_html.read_bytes()
 	else:
 		headers = default_headers()
 		headers.update({
@@ -307,23 +310,25 @@ def parse_le_conjugueur_html(html):
 	results = {}
 	for mood_tag in soup.find_all("div", class_="modeBloc"):
 		# le_conjugueur uses the modeBloc class w/o conjugations
+        # skipping tags w/o conjugations
 		if not mood_tag.text in MOODS_TO_KEYS.keys():
 			continue
 		mood = MOODS_TO_KEYS[mood_tag.text]
 		mood_key = mood
 		results[mood_key] = {}
 		tense_tag = mood_tag.next_sibling
-		eom = False  # end of mood
-		while not eom:
+		end_of_mood = False
+		while not end_of_mood:
 			# skipping empty tense tags
 			if tense_tag.find(class_='tempsBloc') is not None:
 				tense = tense_tag.find(class_='tempsBloc').text
 				tense_key = TENSES_TO_KEYS[tense]
 				results[mood_key][tense_key] = []
 				# replacing <br> tags with newlines
-				for br in tense_tag.find_all('br'):
-					br.replace_with("\n" + br.text)
+				for br_tag in tense_tag.find_all('br'):
+					br_tag.replace_with("\n" + br_tag.text)
 				# getting last <p> with conjugations
+                # splitting tense lines by \n
 				lines = tense_tag.find_all("p")[-1].text.split("\n")
 				for line in lines:
 					results[mood_key][tense_key].append(line)
@@ -331,7 +336,7 @@ def parse_le_conjugueur_html(html):
 			# checking is there next tense
 			if 'class' not in tense_tag.attrs.keys() or not 'conjugBloc' in tense_tag.attrs[
 				'class']:
-				eom = True
+				end_of_mood = True
 	return results
 
 

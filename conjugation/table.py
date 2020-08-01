@@ -4,10 +4,21 @@ from re import sub
 from django.db.models import Q
 
 from conjugation.consts import POLLY_EMPTY_MOOD_NAMES, VOWELS_LIST, \
-	TEMPLATE_NAME, SHORT_LIST, ETRE, AVOIR, VOWEL, NOT_VOWEL, GENDER_MASCULINE
+	TEMPLATE_NAME, SHORT_LIST, ETRE, AVOIR, VOWEL, NOT_VOWEL, GENDER_MASCULINE, VOICE_ACTIVE, VOICE_REFLEXIVE, \
+	VOICE_PASSIVE
 from conjugation.models import Verb, PollyAudio
 from conjugation.furmulas import *
 
+def get_table(verb, negative=False, question=False, voice=VOICE_ACTIVE, pronoun=False, gender=GENDER_MASCULINE):
+	return Table(
+		verb,
+		gender='m' if gender == GENDER_MASCULINE else 'f',
+		reflexive=True if voice == VOICE_REFLEXIVE else False,
+		negative=negative,
+		question=question,
+		passive=True if voice == VOICE_PASSIVE else False,
+		pronoun=pronoun
+	)
 
 class Table:
 	def __init__(
@@ -63,6 +74,21 @@ class Table:
 						return conjugation if conjugation != '-' else None
 		return None
 
+	def replace(self, pattern, replace_to, mood_name=None, tense_name=None, person_name=None):
+		for mood in self.moods:
+			if mood_name is None or mood.mood_name == mood_name:
+				for tense in mood.tenses:
+					if tense_name is None or tense.tense_name == tense_name:
+						for person in tense.persons:
+							if person_name is None or person.person_name == person_name:
+								person.replace(pattern, replace_to)
+
+	def to_dict(self):
+		d = {}
+		for mood in self.moods:
+			d[mood.mood_name] = mood.to_dict()
+		return d
+
 class Mood:
 	def __init__(self, v, mood_name, gender: int, reflexive: bool, negative: bool, question: bool,
 	             passive: bool, pronoun: bool):
@@ -81,6 +107,12 @@ class Mood:
 
 	def __str__(self):
 		return self.mood_name
+
+	def to_dict(self):
+		d = {}
+		for tense in self.tenses:
+			d[tense.tense_name] = tense.to_dict()
+		return d
 
 
 class Tense:
@@ -157,6 +189,13 @@ class Tense:
 		ssml += '</prosody></speak>'
 		return ssml
 
+	def to_dict(self):
+		d = []
+		for person in self.persons:
+			d.append(person.to_dict())
+		return d
+
+
 import json
 FORMULAS_JSON = json.load(open('conjugation/formulas.json'))
 
@@ -164,9 +203,9 @@ def switches_to_key(reflexive, negative, question, passive, pronoun):
 	keys = []
 	if question:
 		keys.append('QUESTION')
-	if reflexive:
+	if reflexive and not pronoun:
 		keys.append('REFLEXIVE')
-	if pronoun:
+	elif pronoun:
 		keys.append('S-EN')
 	if negative:
 		keys.append('NEGATIVE')
@@ -209,6 +248,7 @@ class Person:
 		if not isinstance(self.forms, list):
 			self.forms = [self.forms]
 
+	@property
 	def more_than_one(self):
 		if len(self.forms) > 1:
 			return True
@@ -334,3 +374,11 @@ class Person:
 
 	def __str__(self):
 		return self.person_name
+
+	def replace(self, pattern, replace_to):
+		# TODO: replace method
+		pass
+
+	def to_dict(self):
+		s = f'{self.part_0}{re.sub(r"<.*?>","", self.forms[0])}{self.part_2}'
+		return s.replace('\xa0', ' ')

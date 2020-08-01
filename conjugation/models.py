@@ -161,6 +161,10 @@ class Verb(models.Model):
 	main_part = models.CharField(max_length=64)
 	main_part_no_accents = models.CharField(max_length=64)
 
+	@property
+	def can_be_active(self):
+		return not self.reflexive_only
+
 	def employs(self):
 		s = ""
 		s += '<b>' + self.infinitive + "</b> — "
