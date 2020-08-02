@@ -86,11 +86,11 @@ class Command(BaseCommand):
                     if diff[0] == 'remove' and diff[1] == 'conditional' and diff[2][0][0] == 'past-second':
                         # for some reason we do not have 'past-second'
                         continue
-                    elif diff[0] == 'change' and diff[1] == ['participle', 'past', 2]:
-                        # participle-past are totally different
-                        continue
-                    elif diff[0] == 'remove' and diff[1] == 'participle.past':
-                        # participle-past are totally different
-                        continue
+                    # elif diff[0] == 'change' and diff[1] == ['participle', 'past', 2]:
+                    #     # participle-past are totally different
+                    #     continue
+                    # elif diff[0] == 'remove' and diff[1] == 'participle.past':
+                    #     # participle-past are totally different
+                    #     continue
                     print(f'{verb.infinitive}\t{diff}')
 

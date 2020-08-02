@@ -5,20 +5,10 @@ from django.db.models import Q
 
 from conjugation.consts import POLLY_EMPTY_MOOD_NAMES, VOWELS_LIST, \
 	TEMPLATE_NAME, SHORT_LIST, ETRE, AVOIR, VOWEL, NOT_VOWEL, GENDER_MASCULINE, VOICE_ACTIVE, VOICE_REFLEXIVE, \
-	VOICE_PASSIVE
+	VOICE_PASSIVE, GENDER_FEMININE
 from conjugation.models import Verb, PollyAudio
 from conjugation.furmulas import *
 
-def get_table(verb, negative=False, question=False, voice=VOICE_ACTIVE, pronoun=False, gender=GENDER_MASCULINE):
-	return Table(
-		verb,
-		gender='m' if gender == GENDER_MASCULINE else 'f',
-		reflexive=True if voice == VOICE_REFLEXIVE else False,
-		negative=negative,
-		question=question,
-		passive=True if voice == VOICE_PASSIVE else False,
-		pronoun=pronoun
-	)
 
 class Table:
 	def __init__(
@@ -89,8 +79,23 @@ class Table:
 			d[mood.mood_name] = mood.to_dict()
 		return d
 
+
+def get_table(verb: Verb, negative: bool = False, question: bool = False, voice: str = VOICE_ACTIVE, pronoun: bool = False,
+			  gender: str = GENDER_MASCULINE) -> Table:
+	return Table(
+		verb,
+		gender='m' if gender == GENDER_MASCULINE else 'f',
+		reflexive=True if voice == VOICE_REFLEXIVE else False,
+		negative=negative,
+		question=question,
+		passive=True if voice == VOICE_PASSIVE else False,
+		pronoun=pronoun
+	)
+
+
+
 class Mood:
-	def __init__(self, v, mood_name, gender: int, reflexive: bool, negative: bool, question: bool,
+	def __init__(self, v, mood_name, gender: str, reflexive: bool, negative: bool, question: bool,
 	             passive: bool, pronoun: bool):
 		self.name = TEMPLATE_NAME[mood_name]
 		self.v = v
@@ -191,6 +196,12 @@ class Tense:
 
 	def to_dict(self):
 		d = []
+		if self.mood_name == 'participle' and self.tense_name == 'past':
+			self.gender = GENDER_MASCULINE
+			m_persons = self.get_persons_list()
+			self.gender = GENDER_FEMININE
+			f_persons = self.get_persons_list()
+			self.persons = [m_persons[0], f_persons[0], m_persons[1], f_persons[1], m_persons[2]]
 		for person in self.persons:
 			d.append(person.to_dict())
 		return d
