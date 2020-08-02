@@ -5227,7 +5227,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -10789,7 +10789,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -16351,7 +16351,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -16431,7 +16431,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -16692,11 +16692,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "je me ",
+                "vowel_1": "je m'",
                 "vowel_0": "je me "
               },
               "f": {
-                "vowel_1": "je me ",
+                "vowel_1": "je m'",
                 "vowel_0": "je me "
               }
             },
@@ -16718,11 +16718,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "tu te ",
+                "vowel_1": "tu t'",
                 "vowel_0": "tu te "
               },
               "f": {
-                "vowel_1": "tu te ",
+                "vowel_1": "tu t'",
                 "vowel_0": "tu te "
               }
             },
@@ -16744,11 +16744,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "il se ",
+                "vowel_1": "il s'",
                 "vowel_0": "il se "
               },
               "f": {
-                "vowel_1": "elle se ",
+                "vowel_1": "elle s'",
                 "vowel_0": "elle se "
               }
             },
@@ -16822,11 +16822,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ils se ",
+                "vowel_1": "ils s'",
                 "vowel_0": "ils se "
               },
               "f": {
-                "vowel_1": "elles se ",
+                "vowel_1": "elles s'",
                 "vowel_0": "elles se "
               }
             },
@@ -17328,11 +17328,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "je me ",
+                "vowel_1": "je m'",
                 "vowel_0": "je me "
               },
               "f": {
-                "vowel_1": "je me ",
+                "vowel_1": "je m'",
                 "vowel_0": "je me "
               }
             },
@@ -17354,11 +17354,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "tu te ",
+                "vowel_1": "tu t'",
                 "vowel_0": "tu te "
               },
               "f": {
-                "vowel_1": "tu te ",
+                "vowel_1": "tu t'",
                 "vowel_0": "tu te "
               }
             },
@@ -17380,11 +17380,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "il se ",
+                "vowel_1": "il s'",
                 "vowel_0": "il se "
               },
               "f": {
-                "vowel_1": "elle se ",
+                "vowel_1": "elle s'",
                 "vowel_0": "elle se "
               }
             },
@@ -17458,11 +17458,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ils se ",
+                "vowel_1": "ils s'",
                 "vowel_0": "ils se "
               },
               "f": {
-                "vowel_1": "elles se ",
+                "vowel_1": "elles s'",
                 "vowel_0": "elles se "
               }
             },
@@ -17964,11 +17964,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "je me ",
+                "vowel_1": "je m'",
                 "vowel_0": "je me "
               },
               "f": {
-                "vowel_1": "je me ",
+                "vowel_1": "je m'",
                 "vowel_0": "je me "
               }
             },
@@ -17990,11 +17990,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "tu te ",
+                "vowel_1": "tu t'",
                 "vowel_0": "tu te "
               },
               "f": {
-                "vowel_1": "tu te ",
+                "vowel_1": "tu t'",
                 "vowel_0": "tu te "
               }
             },
@@ -18016,11 +18016,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "il se ",
+                "vowel_1": "il s'",
                 "vowel_0": "il se "
               },
               "f": {
-                "vowel_1": "elle se ",
+                "vowel_1": "elle s'",
                 "vowel_0": "elle se "
               }
             },
@@ -18094,11 +18094,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ils se ",
+                "vowel_1": "ils s'",
                 "vowel_0": "ils se "
               },
               "f": {
-                "vowel_1": "elles se ",
+                "vowel_1": "elles s'",
                 "vowel_0": "elles se "
               }
             },
@@ -18600,11 +18600,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "je me ",
+                "vowel_1": "je m'",
                 "vowel_0": "je me "
               },
               "f": {
-                "vowel_1": "je me ",
+                "vowel_1": "je m'",
                 "vowel_0": "je me "
               }
             },
@@ -18626,11 +18626,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "tu te ",
+                "vowel_1": "tu t'",
                 "vowel_0": "tu te "
               },
               "f": {
-                "vowel_1": "tu te ",
+                "vowel_1": "tu t'",
                 "vowel_0": "tu te "
               }
             },
@@ -18652,11 +18652,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "il se ",
+                "vowel_1": "il s'",
                 "vowel_0": "il se "
               },
               "f": {
-                "vowel_1": "elle se ",
+                "vowel_1": "elle s'",
                 "vowel_0": "elle se "
               }
             },
@@ -18730,11 +18730,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ils se ",
+                "vowel_1": "ils s'",
                 "vowel_0": "ils se "
               },
               "f": {
-                "vowel_1": "elles se ",
+                "vowel_1": "elles s'",
                 "vowel_0": "elles se "
               }
             },
@@ -19238,11 +19238,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "que je me ",
+                "vowel_1": "que je m'",
                 "vowel_0": "que je me "
               },
               "f": {
-                "vowel_1": "que je me ",
+                "vowel_1": "que je m'",
                 "vowel_0": "que je me "
               }
             },
@@ -19264,11 +19264,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "que tu te ",
+                "vowel_1": "que tu t'",
                 "vowel_0": "que tu te "
               },
               "f": {
-                "vowel_1": "que tu te ",
+                "vowel_1": "que tu t'",
                 "vowel_0": "que tu te "
               }
             },
@@ -19290,11 +19290,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "qu'il se ",
+                "vowel_1": "qu'il s'",
                 "vowel_0": "qu'il se "
               },
               "f": {
-                "vowel_1": "qu'elle se ",
+                "vowel_1": "qu'elle s'",
                 "vowel_0": "qu'elle se "
               }
             },
@@ -19368,11 +19368,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "qu'ils se ",
+                "vowel_1": "qu'ils s'",
                 "vowel_0": "qu'ils se "
               },
               "f": {
-                "vowel_1": "qu'elles se ",
+                "vowel_1": "qu'elles s'",
                 "vowel_0": "qu'elles se "
               }
             },
@@ -19874,11 +19874,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "que je me ",
+                "vowel_1": "que je m'",
                 "vowel_0": "que je me "
               },
               "f": {
-                "vowel_1": "que je me ",
+                "vowel_1": "que je m'",
                 "vowel_0": "que je me "
               }
             },
@@ -19900,11 +19900,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "que tu te ",
+                "vowel_1": "que tu t'",
                 "vowel_0": "que tu te "
               },
               "f": {
-                "vowel_1": "que tu te ",
+                "vowel_1": "que tu t'",
                 "vowel_0": "que tu te "
               }
             },
@@ -19926,11 +19926,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "qu'il se ",
+                "vowel_1": "qu'il s'",
                 "vowel_0": "qu'il se "
               },
               "f": {
-                "vowel_1": "qu'elle se ",
+                "vowel_1": "qu'elle s'",
                 "vowel_0": "qu'elle se "
               }
             },
@@ -20004,11 +20004,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "qu'ils se ",
+                "vowel_1": "qu'ils s'",
                 "vowel_0": "qu'ils se "
               },
               "f": {
-                "vowel_1": "qu'elles se ",
+                "vowel_1": "qu'elles s'",
                 "vowel_0": "qu'elles se "
               }
             },
@@ -20512,11 +20512,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "je me ",
+                "vowel_1": "je m'",
                 "vowel_0": "je me "
               },
               "f": {
-                "vowel_1": "je me ",
+                "vowel_1": "je m'",
                 "vowel_0": "je me "
               }
             },
@@ -20538,11 +20538,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "tu te ",
+                "vowel_1": "tu t'",
                 "vowel_0": "tu te "
               },
               "f": {
-                "vowel_1": "tu te ",
+                "vowel_1": "tu t'",
                 "vowel_0": "tu te "
               }
             },
@@ -20564,11 +20564,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "il se ",
+                "vowel_1": "il s'",
                 "vowel_0": "il se "
               },
               "f": {
-                "vowel_1": "elle se ",
+                "vowel_1": "elle s'",
                 "vowel_0": "elle se "
               }
             },
@@ -20642,11 +20642,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ils se ",
+                "vowel_1": "ils s'",
                 "vowel_0": "ils se "
               },
               "f": {
-                "vowel_1": "elles se ",
+                "vowel_1": "elles s'",
                 "vowel_0": "elles se "
               }
             },
@@ -21794,11 +21794,11 @@
           "singular": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -21862,7 +21862,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -21888,7 +21888,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -21914,7 +21914,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -22016,11 +22016,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -22134,11 +22134,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "en se ",
+                "vowel_1": "en s'",
                 "vowel_0": "en se "
               },
               "f": {
-                "vowel_1": "en se ",
+                "vowel_1": "en s'",
                 "vowel_0": "en se "
               }
             },
@@ -27475,7 +27475,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -27816,11 +27816,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "je ne me ",
+                "vowel_1": "je ne m'",
                 "vowel_0": "je ne me "
               },
               "f": {
-                "vowel_1": "je ne me ",
+                "vowel_1": "je ne m'",
                 "vowel_0": "je ne me "
               }
             },
@@ -27842,11 +27842,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "tu ne te ",
+                "vowel_1": "tu ne t'",
                 "vowel_0": "tu ne te "
               },
               "f": {
-                "vowel_1": "tu ne te ",
+                "vowel_1": "tu ne t'",
                 "vowel_0": "tu ne te "
               }
             },
@@ -27868,7 +27868,7 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "il ne se ",
+                "vowel_1": "il ne s'",
                 "vowel_0": "il ne se "
               },
               "f": {
@@ -27946,11 +27946,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ils ne se ",
+                "vowel_1": "ils ne s'",
                 "vowel_0": "ils ne se "
               },
               "f": {
-                "vowel_1": "elles ne se ",
+                "vowel_1": "elles ne s'",
                 "vowel_0": "elles ne se "
               }
             },
@@ -28452,11 +28452,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "je ne me ",
+                "vowel_1": "je ne m'",
                 "vowel_0": "je ne me "
               },
               "f": {
-                "vowel_1": "je ne me ",
+                "vowel_1": "je ne m'",
                 "vowel_0": "je ne me "
               }
             },
@@ -28478,11 +28478,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "tu ne te ",
+                "vowel_1": "tu ne t'",
                 "vowel_0": "tu ne te "
               },
               "f": {
-                "vowel_1": "tu ne te ",
+                "vowel_1": "tu ne t'",
                 "vowel_0": "tu ne te "
               }
             },
@@ -28504,7 +28504,7 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "il ne se ",
+                "vowel_1": "il ne s'",
                 "vowel_0": "il ne se "
               },
               "f": {
@@ -28582,11 +28582,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ils ne se ",
+                "vowel_1": "ils ne s'",
                 "vowel_0": "ils ne se "
               },
               "f": {
-                "vowel_1": "elles ne se ",
+                "vowel_1": "elles ne s'",
                 "vowel_0": "elles ne se "
               }
             },
@@ -29088,11 +29088,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "je ne me ",
+                "vowel_1": "je ne m'",
                 "vowel_0": "je ne me "
               },
               "f": {
-                "vowel_1": "je ne me ",
+                "vowel_1": "je ne m'",
                 "vowel_0": "je ne me "
               }
             },
@@ -29114,11 +29114,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "tu ne te ",
+                "vowel_1": "tu ne t'",
                 "vowel_0": "tu ne te "
               },
               "f": {
-                "vowel_1": "tu ne te ",
+                "vowel_1": "tu ne t'",
                 "vowel_0": "tu ne te "
               }
             },
@@ -29140,7 +29140,7 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "il ne se ",
+                "vowel_1": "il ne s'",
                 "vowel_0": "il ne se "
               },
               "f": {
@@ -29218,11 +29218,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ils ne se ",
+                "vowel_1": "ils ne s'",
                 "vowel_0": "ils ne se "
               },
               "f": {
-                "vowel_1": "elles ne se ",
+                "vowel_1": "elles ne s'",
                 "vowel_0": "elles ne se "
               }
             },
@@ -29724,11 +29724,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "je ne me ",
+                "vowel_1": "je ne m'",
                 "vowel_0": "je ne me "
               },
               "f": {
-                "vowel_1": "je ne me ",
+                "vowel_1": "je ne m'",
                 "vowel_0": "je ne me "
               }
             },
@@ -29750,11 +29750,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "tu ne te ",
+                "vowel_1": "tu ne t'",
                 "vowel_0": "tu ne te "
               },
               "f": {
-                "vowel_1": "tu ne te ",
+                "vowel_1": "tu ne t'",
                 "vowel_0": "tu ne te "
               }
             },
@@ -29776,7 +29776,7 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "il ne se ",
+                "vowel_1": "il ne s'",
                 "vowel_0": "il ne se "
               },
               "f": {
@@ -29854,11 +29854,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ils ne se ",
+                "vowel_1": "ils ne s'",
                 "vowel_0": "ils ne se "
               },
               "f": {
-                "vowel_1": "elles ne se ",
+                "vowel_1": "elles ne s'",
                 "vowel_0": "elles ne se "
               }
             },
@@ -30362,11 +30362,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "que je ne me ",
+                "vowel_1": "que je ne m'",
                 "vowel_0": "que je ne me "
               },
               "f": {
-                "vowel_1": "que je ne me ",
+                "vowel_1": "que je ne m'",
                 "vowel_0": "que je ne me "
               }
             },
@@ -30388,11 +30388,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "que tu ne te ",
+                "vowel_1": "que tu ne t'",
                 "vowel_0": "que tu ne te "
               },
               "f": {
-                "vowel_1": "que tu ne te ",
+                "vowel_1": "que tu ne t'",
                 "vowel_0": "que tu ne te "
               }
             },
@@ -30414,11 +30414,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "qu'il ne se ",
+                "vowel_1": "qu'il ne s'",
                 "vowel_0": "qu'il ne se "
               },
               "f": {
-                "vowel_1": "qu'elle ne se ",
+                "vowel_1": "qu'elle ne s'",
                 "vowel_0": "qu'elle ne se "
               }
             },
@@ -30492,11 +30492,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "qu'ils ne se ",
+                "vowel_1": "qu'ils ne s'",
                 "vowel_0": "qu'ils ne se "
               },
               "f": {
-                "vowel_1": "qu'elles ne se ",
+                "vowel_1": "qu'elles ne s'",
                 "vowel_0": "qu'elles ne se "
               }
             },
@@ -30998,11 +30998,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "que je ne me ",
+                "vowel_1": "que je ne m'",
                 "vowel_0": "que je ne me "
               },
               "f": {
-                "vowel_1": "que je ne me ",
+                "vowel_1": "que je ne m'",
                 "vowel_0": "que je ne me "
               }
             },
@@ -31024,11 +31024,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "que tu ne te ",
+                "vowel_1": "que tu ne t'",
                 "vowel_0": "que tu ne te "
               },
               "f": {
-                "vowel_1": "que tu ne te ",
+                "vowel_1": "que tu ne t'",
                 "vowel_0": "que tu ne te "
               }
             },
@@ -31050,11 +31050,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "qu'il ne se ",
+                "vowel_1": "qu'il ne s'",
                 "vowel_0": "qu'il ne se "
               },
               "f": {
-                "vowel_1": "qu'elle ne se ",
+                "vowel_1": "qu'elle ne s'",
                 "vowel_0": "qu'elle ne se "
               }
             },
@@ -31128,11 +31128,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "qu'ils ne se ",
+                "vowel_1": "qu'ils ne s'",
                 "vowel_0": "qu'ils ne se "
               },
               "f": {
-                "vowel_1": "qu'elles ne se ",
+                "vowel_1": "qu'elles ne s'",
                 "vowel_0": "qu'elles ne se "
               }
             },
@@ -31636,11 +31636,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "je ne me ",
+                "vowel_1": "je ne m'",
                 "vowel_0": "je ne me "
               },
               "f": {
-                "vowel_1": "je ne me ",
+                "vowel_1": "je ne m'",
                 "vowel_0": "je ne me "
               }
             },
@@ -31662,11 +31662,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "tu ne te ",
+                "vowel_1": "tu ne t'",
                 "vowel_0": "tu ne te "
               },
               "f": {
-                "vowel_1": "tu ne te ",
+                "vowel_1": "tu ne t'",
                 "vowel_0": "tu ne te "
               }
             },
@@ -31688,7 +31688,7 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "il ne se ",
+                "vowel_1": "il ne s'",
                 "vowel_0": "il ne se "
               },
               "f": {
@@ -31766,11 +31766,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ils ne se ",
+                "vowel_1": "ils ne s'",
                 "vowel_0": "ils ne se "
               },
               "f": {
-                "vowel_1": "elles ne se ",
+                "vowel_1": "elles ne s'",
                 "vowel_0": "elles ne se "
               }
             },
@@ -32592,11 +32592,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne te ",
+                "vowel_1": "ne t'",
                 "vowel_0": "ne te "
               },
               "f": {
-                "vowel_1": "ne te ",
+                "vowel_1": "ne t'",
                 "vowel_0": "ne te "
               }
             },
@@ -32918,11 +32918,11 @@
           "singular": {
             "part_1": {
               "m": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               },
               "f": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               }
             },
@@ -32986,7 +32986,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -33012,7 +33012,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -33038,7 +33038,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -33140,11 +33140,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne pas se ",
+                "vowel_1": "ne pas s'",
                 "vowel_0": "ne pas se "
               },
               "f": {
-                "vowel_1": "ne pas se ",
+                "vowel_1": "ne pas s'",
                 "vowel_0": "ne pas se "
               }
             },
@@ -33258,11 +33258,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "en ne se ",
+                "vowel_1": "en ne s'",
                 "vowel_0": "en ne se "
               },
               "f": {
-                "vowel_1": "en ne se ",
+                "vowel_1": "en ne s'",
                 "vowel_0": "en ne se "
               }
             },
@@ -38599,7 +38599,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -44161,7 +44161,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -49723,7 +49723,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -55285,7 +55285,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -55365,7 +55365,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -55626,11 +55626,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "me ",
+                "vowel_1": "m'",
                 "vowel_0": "me "
               },
               "f": {
-                "vowel_1": "me ",
+                "vowel_1": "m'",
                 "vowel_0": "me "
               }
             },
@@ -55652,11 +55652,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "te ",
+                "vowel_1": "t'",
                 "vowel_0": "te "
               },
               "f": {
-                "vowel_1": "te ",
+                "vowel_1": "t'",
                 "vowel_0": "te "
               }
             },
@@ -55678,11 +55678,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -55756,11 +55756,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -56262,11 +56262,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "me ",
+                "vowel_1": "m'",
                 "vowel_0": "me "
               },
               "f": {
-                "vowel_1": "me ",
+                "vowel_1": "m'",
                 "vowel_0": "me "
               }
             },
@@ -56288,11 +56288,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "te ",
+                "vowel_1": "t'",
                 "vowel_0": "te "
               },
               "f": {
-                "vowel_1": "te ",
+                "vowel_1": "t'",
                 "vowel_0": "te "
               }
             },
@@ -56314,11 +56314,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -56392,11 +56392,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -56898,11 +56898,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "me ",
+                "vowel_1": "m'",
                 "vowel_0": "me "
               },
               "f": {
-                "vowel_1": "me ",
+                "vowel_1": "m'",
                 "vowel_0": "me "
               }
             },
@@ -56924,11 +56924,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "te ",
+                "vowel_1": "t'",
                 "vowel_0": "te "
               },
               "f": {
-                "vowel_1": "te ",
+                "vowel_1": "t'",
                 "vowel_0": "te "
               }
             },
@@ -56950,11 +56950,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -57028,11 +57028,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -57534,11 +57534,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "me ",
+                "vowel_1": "m'",
                 "vowel_0": "me "
               },
               "f": {
-                "vowel_1": "me ",
+                "vowel_1": "m'",
                 "vowel_0": "me "
               }
             },
@@ -57560,11 +57560,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "te ",
+                "vowel_1": "t'",
                 "vowel_0": "te "
               },
               "f": {
-                "vowel_1": "te ",
+                "vowel_1": "t'",
                 "vowel_0": "te "
               }
             },
@@ -57586,11 +57586,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -57664,11 +57664,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -59446,11 +59446,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "me ",
+                "vowel_1": "m'",
                 "vowel_0": "me "
               },
               "f": {
-                "vowel_1": "me ",
+                "vowel_1": "m'",
                 "vowel_0": "me "
               }
             },
@@ -59472,11 +59472,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "te ",
+                "vowel_1": "t'",
                 "vowel_0": "te "
               },
               "f": {
-                "vowel_1": "te ",
+                "vowel_1": "t'",
                 "vowel_0": "te "
               }
             },
@@ -59498,11 +59498,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -59576,11 +59576,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -60728,11 +60728,11 @@
           "singular": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -60796,7 +60796,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -60822,7 +60822,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -60848,7 +60848,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -60950,11 +60950,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               },
               "f": {
-                "vowel_1": "se ",
+                "vowel_1": "s'",
                 "vowel_0": "se "
               }
             },
@@ -61068,11 +61068,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "en se ",
+                "vowel_1": "en s'",
                 "vowel_0": "en se "
               },
               "f": {
-                "vowel_1": "en se ",
+                "vowel_1": "en s'",
                 "vowel_0": "en se "
               }
             },
@@ -66409,7 +66409,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -66750,11 +66750,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne me ",
+                "vowel_1": "ne m'",
                 "vowel_0": "ne me "
               },
               "f": {
-                "vowel_1": "ne me ",
+                "vowel_1": "ne m'",
                 "vowel_0": "ne me "
               }
             },
@@ -66776,11 +66776,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne te ",
+                "vowel_1": "ne t'",
                 "vowel_0": "ne te "
               },
               "f": {
-                "vowel_1": "ne te ",
+                "vowel_1": "ne t'",
                 "vowel_0": "ne te "
               }
             },
@@ -66802,11 +66802,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               },
               "f": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               }
             },
@@ -66880,11 +66880,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               },
               "f": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               }
             },
@@ -67386,11 +67386,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne me ",
+                "vowel_1": "ne m'",
                 "vowel_0": "ne me "
               },
               "f": {
-                "vowel_1": "ne me ",
+                "vowel_1": "ne m'",
                 "vowel_0": "ne me "
               }
             },
@@ -67412,11 +67412,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne te ",
+                "vowel_1": "ne t'",
                 "vowel_0": "ne te "
               },
               "f": {
-                "vowel_1": "ne te ",
+                "vowel_1": "ne t'",
                 "vowel_0": "ne te "
               }
             },
@@ -67438,11 +67438,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               },
               "f": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               }
             },
@@ -67516,11 +67516,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               },
               "f": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               }
             },
@@ -68022,11 +68022,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne me ",
+                "vowel_1": "ne m'",
                 "vowel_0": "ne me "
               },
               "f": {
-                "vowel_1": "ne me ",
+                "vowel_1": "ne m'",
                 "vowel_0": "ne me "
               }
             },
@@ -68048,11 +68048,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne te ",
+                "vowel_1": "ne t'",
                 "vowel_0": "ne te "
               },
               "f": {
-                "vowel_1": "ne te ",
+                "vowel_1": "ne t'",
                 "vowel_0": "ne te "
               }
             },
@@ -68074,11 +68074,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               },
               "f": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               }
             },
@@ -68152,11 +68152,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               },
               "f": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               }
             },
@@ -68658,11 +68658,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne me ",
+                "vowel_1": "ne m'",
                 "vowel_0": "ne me "
               },
               "f": {
-                "vowel_1": "ne me ",
+                "vowel_1": "ne m'",
                 "vowel_0": "ne me "
               }
             },
@@ -68684,11 +68684,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne te ",
+                "vowel_1": "ne t'",
                 "vowel_0": "ne te "
               },
               "f": {
-                "vowel_1": "ne te ",
+                "vowel_1": "ne t'",
                 "vowel_0": "ne te "
               }
             },
@@ -68710,11 +68710,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               },
               "f": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               }
             },
@@ -68788,11 +68788,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               },
               "f": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               }
             },
@@ -70570,11 +70570,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne me ",
+                "vowel_1": "ne m'",
                 "vowel_0": "ne me "
               },
               "f": {
-                "vowel_1": "ne me ",
+                "vowel_1": "ne m'",
                 "vowel_0": "ne me "
               }
             },
@@ -70596,11 +70596,11 @@
           "person_II_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne te ",
+                "vowel_1": "ne t'",
                 "vowel_0": "ne te "
               },
               "f": {
-                "vowel_1": "ne te ",
+                "vowel_1": "ne t'",
                 "vowel_0": "ne te "
               }
             },
@@ -70622,11 +70622,11 @@
           "person_III_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               },
               "f": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               }
             },
@@ -70700,11 +70700,11 @@
           "person_III_P": {
             "part_1": {
               "m": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               },
               "f": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               }
             },
@@ -71852,11 +71852,11 @@
           "singular": {
             "part_1": {
               "m": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               },
               "f": {
-                "vowel_1": "ne se ",
+                "vowel_1": "ne s'",
                 "vowel_0": "ne se "
               }
             },
@@ -71920,7 +71920,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -71946,7 +71946,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -71972,7 +71972,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -72074,11 +72074,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "ne pas se ",
+                "vowel_1": "ne pas s'",
                 "vowel_0": "ne pas se "
               },
               "f": {
-                "vowel_1": "ne pas se ",
+                "vowel_1": "ne pas s'",
                 "vowel_0": "ne pas se "
               }
             },
@@ -72192,11 +72192,11 @@
           "person_I_S": {
             "part_1": {
               "m": {
-                "vowel_1": "en ne se ",
+                "vowel_1": "en ne s'",
                 "vowel_0": "en ne se "
               },
               "f": {
-                "vowel_1": "en ne se ",
+                "vowel_1": "en ne s'",
                 "vowel_0": "en ne se "
               }
             },
@@ -77533,7 +77533,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -83095,7 +83095,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -83175,7 +83175,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -88657,7 +88657,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
@@ -88737,7 +88737,7 @@
               }
             },
             "verb_part": {
-              "m": "VERB_PAST_PARTICIPLE_S_F",
+              "m": "VERB_PAST_PARTICIPLE_S_M",
               "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
