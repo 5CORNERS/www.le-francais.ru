@@ -75,7 +75,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for verb in Verb.objects.prefetch_related('template').all().order_by('-count'):
             for combination in get_kwargs(verb):
-                conjugueur_conjugations = parse_le_conjugueur_url(get_conjugueur_url(verb, **combination), verb)
+                conjugueur_conjugations, identity = parse_le_conjugueur_url(get_conjugueur_url(verb, **combination), verb, check_identity=True)
+                if not identity:
+                    print(f'IDENTITY FAILED')
+                    continue
                 print(f'Comparing with https://www.le-francais.ru{verb.get_url(**combination)}')
                 verb_conjugations = get_table(verb, **combination).to_dict()
                 differences = dictdiffer.diff(conjugueur_conjugations, verb_conjugations)

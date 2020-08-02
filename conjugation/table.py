@@ -236,7 +236,7 @@ class Person:
 		self.pronoun = pronoun
 
 		vowel_0 = -1 if v.infnitive_first_letter_is_vowel() else 0
-		etre = AVOIR if not self.v.conjugated_with_etre else ETRE
+		etre = AVOIR if not self.v.conjugated_with_etre and not self.reflexive else ETRE
 		if self.v.is_impersonal and (
 				self.person_name != "person_III_S" and not (self.person_name == 'singular' and gender == 'm') and self.person_name != 'compose' and self.mood_name != 'infinitive' and self.mood_name != 'gerund'
 		):
