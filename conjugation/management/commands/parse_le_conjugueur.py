@@ -283,7 +283,7 @@ def merge_line_result(etre, formulas, line_result, mood, person_key, switch, ten
 	return formulas
 
 
-def parse_le_conjugueur_url(url, verb):
+def parse_le_conjugueur_url(url, verb, check_identity=False):
 	temp = Path(f'conjugation/data/parse_conjugations/temp/html/{url.split("/")[-1]}')
 	temp_wo_html = Path(f'conjugation/data/parse_conjugations/temp/html/{url.split("/")[-1].replace(".html","")}')
 	print(f'Parsing {url}')
@@ -301,13 +301,20 @@ def parse_le_conjugueur_url(url, verb):
 		temp.touch()
 		temp.write_bytes(body)
 		sleep(SLEEP_DURATION_BETWEEN_REQUESTS)
-	return parse_le_conjugueur_html(html=body)
+	return parse_le_conjugueur_html(html=body, check_identity=check_identity, url=url)
 
 
-def parse_le_conjugueur_html(html):
+def parse_le_conjugueur_html(html, check_identity=False, url=None):
 	soup = BeautifulSoup(html, features="html5lib")
 	mood_tag: Tag
 	results = {}
+	identity = True
+	if check_identity and url is not None:
+		title_tag = soup.find("div", class_="verbe").find("h1")
+		if 'pronominal-en' in url and not 's\'en' in title_tag.text:
+			identity = False
+		elif 'pronominal' in url and 's\'en' in title_tag.text:
+			identity = False
 	for mood_tag in soup.find_all("div", class_="modeBloc"):
 		# le_conjugueur uses the modeBloc class w/o conjugations
         # skipping tags w/o conjugations
@@ -337,7 +344,10 @@ def parse_le_conjugueur_html(html):
 			if 'class' not in tense_tag.attrs.keys() or not 'conjugBloc' in tense_tag.attrs[
 				'class']:
 				end_of_mood = True
-	return results
+	if check_identity:
+		return results, identity
+	else:
+		return results
 
 
 def parse_line(line, verb, line_tense, line_mood, line_person, gender=MASCULINE, switch=None):
