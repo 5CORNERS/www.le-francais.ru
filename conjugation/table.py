@@ -6,7 +6,7 @@ from django.db.models import Q
 from conjugation.consts import POLLY_EMPTY_MOOD_NAMES, VOWELS_LIST, \
 	TEMPLATE_NAME, SHORT_LIST, ETRE, AVOIR, VOWEL, NOT_VOWEL, GENDER_MASCULINE, VOICE_ACTIVE, VOICE_REFLEXIVE, \
 	VOICE_PASSIVE, GENDER_FEMININE
-from conjugation.models import Verb, PollyAudio
+from conjugation.models import Verb, PollyAudio, Except
 from conjugation.furmulas import *
 
 
@@ -269,40 +269,26 @@ class Person:
 	def all_empty(self):
 		self.part_0, self.forms, self.part_2 = '-', '', ''
 
+	def has_exceptions(self):
+		if self.get_exceptions():
+			return True
+		return False
+
 	def get_parts(self, etre, switch, gender, vowel_0, reflexive, negative, question, passive, pronoun):
 
 		formula = get_formula(reflexive, negative, question, passive, pronoun)
 		person_formula = formula[self.mood_name][self.tense_name][etre][self.person_name]
+		exceptions = self.get_exceptions()
 		verb_key = person_formula['verb_part'][gender]
+		if exceptions:
+			exception = exceptions[-1]
+			if exception.conjugation_override:
+				verb_key = exception.conjugation_override
+			if exception.blank:
+				verb_key = None
 		if verb_key is None:
 			return '-', '', ''
-		else:
-
-			if self.reflexive and not self.mood_name == 'participle' and self.v.infinitive in [
-				"plaire",
-				"complaire",
-				"déplaire",
-				"rire",
-				"convenir",
-				"nuire",
-				"mentir",
-				"ressembler",
-				"sourire",
-				"suffire",
-				"survivre",
-				"acheter",
-				"succéder",
-				"téléphoner",
-				"parler",
-				"demander",
-				"entre-nuire",
-			]:
-				if verb_key in ['VERB_PAST_PARTICIPLE_S_F',
-				                'VERB_PAST_PARTICIPLE_P_M',
-				                'VERB_PAST_PARTICIPLE_P_F', ]:
-					verb_key = 'VERB_PAST_PARTICIPLE_S_M'
-
-			t_mood, t_tense, t_person = globals()[verb_key]
+		t_mood, t_tense, t_person = globals()[verb_key]
 		verb_forms = self.v.conjugations[t_mood][t_tense][int(t_person)]
 		if verb_forms is None:
 			return '-', '', ''
@@ -386,9 +372,31 @@ class Person:
 	def __str__(self):
 		return self.person_name
 
-	def replace(self, pattern, replace_to):
-		# TODO: replace method
-		pass
+	def get_exceptions(self):
+		result = []
+		exceptions = list(Except.objects.filter(verbs=self.v).order_by())
+		for exception in exceptions:
+			gender_condition = (self.gender == GENDER_MASCULINE and exception.male_gender) or (
+						self.gender == GENDER_FEMININE and exception.feminine_gender)
+			mood_tense_condition = getattr(exception, f'{self.mood_name}_{self.tense_name}')
+			person_condition = getattr(exception, f'{self.person_name}')
+			if gender_condition and mood_tense_condition and person_condition:
+				pass
+			else:
+				result.append(exception)
+		return result
+
+
+	def replace(self):
+		for exception in self.get_exceptions():
+			if exception.pattern_1:
+				self.part_0 = re.sub(exception.pattern_1, exception.replace_to_1, self.part_0)
+			if exception.pattern_2:
+				self.part_2 = re.sub(exception.pattern_2, exception.replace_to_2, self.part_2)
+			if exception.pattern_verb:
+				for i, form in enumerate(self.forms):
+					self.forms[i] = re.sub(exception.pattern_verb, exception.replace_to_verb, form)
+
 
 	def to_dict(self):
 		s = f'{self.part_0}{re.sub(r"<.*?>","", self.forms[0])}{self.part_2}'
