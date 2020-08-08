@@ -6,7 +6,8 @@ from django.db import models
 from django.urls import reverse
 from unidecode import unidecode
 
-from .consts import MOODS, TENSES, VOICE_REFLEXIVE, VOICE_PASSIVE, GENDER_FEMININE, GENDER_MASCULINE, VOICE_ACTIVE
+from .consts import MOODS, TENSES, VOICE_REFLEXIVE, VOICE_PASSIVE, GENDER_FEMININE, GENDER_MASCULINE, VOICE_ACTIVE, \
+	MOODS_TENSES, TEMPLATE_VERBS, PERSONS_LIST, VERB_TEMPLATE_NAMES, SWITCHES_CHOICES, ETRE, AVOIR
 from polly.const import TEXT_TYPES, LANGUAGE_CODES, OUTPUT_FORMATS, SAMPLE_RATES, VOICE_IDS, TASK_STATUSES, PARAMS
 
 VOWELS_LIST = ['a', 'ê', 'é', 'è', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
@@ -370,7 +371,29 @@ class Verb(models.Model):
 					iter_list.append((mood, tense, i, person, None))
 		return iter(iter_list)
 
+class Except(models.Model):
+	blank = models.BooleanField(default=False, verbose_name='Empty')
+	etre = models.CharField(max_length=10, verbose_name='"Etre" or "Avoir"', choices=[(ETRE, 'Etre'),(AVOIR,'Avoir')], null=True, blank=True)
+	pattern_1 = models.CharField(max_length=100, verbose_name='Regex Before', null=True, blank=True)
+	replace_to_1 = models.CharField(max_length=100, verbose_name='Replace To Before', null=True, blank=True)
+	pattern_2 = models.CharField(max_length=100, verbose_name='Regex After', null=True, blank=True)
+	replace_to_2 = models.CharField(max_length=100, verbose_name='Replace To After', null=True, blank=True)
+	pattern_verb = models.CharField(max_length=100, verbose_name='Regex Verb', null=True, blank=True)
+	replace_to_verb = models.CharField(max_length=100, verbose_name='Replace To Verb', null=True, blank=True)
+	conjugation_override = models.CharField(max_length=64, choices=VERB_TEMPLATE_NAMES, null=True, blank=True)
+	verbs = models.ManyToManyField('conjugation.Verb', related_name='exceptions')
+	male_gender = models.BooleanField(default=True, blank=True)
+	feminine_gender = models.BooleanField(default=False, blank=True)
+	order = models.PositiveIntegerField(default=1)
 
+for mood_tense, name in MOODS_TENSES:
+	Except.add_to_class(mood_tense, models.BooleanField(verbose_name=name))
+
+for persons, name in PERSONS_LIST:
+	Except.add_to_class(persons, models.BooleanField(verbose_name=name))
+
+for key, name in SWITCHES_CHOICES:
+	Except.add_to_class(key, models.BooleanField(verbose_name=name))
 
 class ReflexiveVerb(models.Model):
 	verb = models.OneToOneField(Verb, on_delete=models.CASCADE, primary_key=True)
