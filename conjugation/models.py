@@ -372,6 +372,7 @@ class Verb(models.Model):
 		return iter(iter_list)
 
 class Except(models.Model):
+	name = models.CharField(default='Exception', max_length=100)
 	blank = models.BooleanField(default=False, verbose_name='Empty')
 	etre = models.CharField(max_length=10, verbose_name='"Etre" or "Avoir"', choices=[(ETRE, 'Etre'),(AVOIR,'Avoir')], null=True, blank=True)
 	pattern_1 = models.CharField(max_length=100, verbose_name='Regex Before', null=True, blank=True)
@@ -385,6 +386,9 @@ class Except(models.Model):
 	male_gender = models.BooleanField(default=True, blank=True)
 	feminine_gender = models.BooleanField(default=False, blank=True)
 	order = models.PositiveIntegerField(default=1)
+
+	def __str__(self):
+		return f'{self.name}:{self.pk}'
 
 for mood_tense, name in MOODS_TENSES:
 	Except.add_to_class(mood_tense, models.BooleanField(verbose_name=name))
