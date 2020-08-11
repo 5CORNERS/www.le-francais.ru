@@ -229,6 +229,44 @@ PERSONS_LIST = [
     ('person_pp_2','Plural Past Participle'),
     ('person_pp_3','Compose Past Participle')
 ]
+
+KEY_TO_MOOD_TENSE = {
+    'infinitive_present':'infinitive_present',
+    'infinitive_past':'infinitive_past',
+    'indicative_present':'indicative_present',
+    'indicative_composé-past':'indicative_composé-past',
+    'indicative_imperfect':'indicative_imperfect',
+    'indicative_pluperfect':'indicative_pluperfect',
+    'indicative_simple-past':'indicative_simple-past',
+    'indicative_antérieur-past':'indicative_antérieur-past',
+    'indicative_future':'indicative_future',
+    'indicative_antérieur-future':'indicative_antérieur-future',
+    'subjunctive_present':'subjunctive_present',
+    'subjunctive_past':'subjunctive_past',
+    'subjunctive_imperfect':'subjunctive_imperfect',
+    'subjunctive_pluperfect':'subjunctive_pluperfect',
+    'conditional_present':'conditional_present',
+    'conditional_past-first':'conditional_past',
+    'imperative_present':'imperative_present',
+    'imperative_past':'imperative_past',
+    'participle_present':'participle_present',
+    'participle_past':'participle_past',
+    'gerund_present':'gerund_present',
+    'gerund_past':'gerund_past',
+}
+
+KEY_TO_PERSON = {
+    'person_I_S':'person_1',
+    'person_II_S':'person_2',
+    'person_III_S':'person_3',
+    'person_I_P':'person_4',
+    'person_II_P':'person_5',
+    'person_III_P':'person_6',
+    'singular':'person_pp_1',
+    'plural':'person_pp_2',
+    'compose':'person_pp_3',
+}
+
 SWITCHES_CHOICES = [
     ('active',"ACTIVE",),
     ('pronominal', "REFLEXIVE",),
