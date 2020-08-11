@@ -72,8 +72,17 @@ def get_kwargs(verb:Verb):
 
 
 class Command(BaseCommand):
+
+    def add_arguments(self, parser):
+        parser.add_argument('verbs', nargs='+', type=str)
+
     def handle(self, *args, **options):
-        for verb in Verb.objects.prefetch_related('template').all().order_by('-count'):
+        verbs = Verb.objects.prefetch_related('template').order_by('-count')
+        if options['verbs']:
+            verbs = verbs.filter(infinitive__in=options['verbs'])
+        else:
+            verbs = verbs.all()
+        for verb in verbs:
             for combination in get_kwargs(verb):
                 conjugueur_conjugations, identity = parse_le_conjugueur_url(get_conjugueur_url(verb, **combination), verb, check_identity=True)
                 if not identity:

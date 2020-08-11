@@ -5,7 +5,7 @@ from django.db.models import Q
 
 from conjugation.consts import POLLY_EMPTY_MOOD_NAMES, VOWELS_LIST, \
 	TEMPLATE_NAME, SHORT_LIST, ETRE, AVOIR, VOWEL, NOT_VOWEL, GENDER_MASCULINE, VOICE_ACTIVE, VOICE_REFLEXIVE, \
-	VOICE_PASSIVE, GENDER_FEMININE
+	VOICE_PASSIVE, GENDER_FEMININE, KEY_TO_PERSON, KEY_TO_MOOD_TENSE
 from conjugation.models import Verb, PollyAudio, Except
 from conjugation.furmulas import *
 
@@ -152,9 +152,9 @@ class Tense:
 		return all(map(lambda a: a.part_0 == '-', self.persons))
 
 	def get_persons_list(self):
-		if self.v.deffective:
-			if self.v.deffective.has_mood_tense(self.mood_name, self.tense_name):
-				return self.get_empty_persons_list()
+		# if self.v.deffective:
+		# 	if self.v.deffective.has_mood_tense(self.mood_name, self.tense_name):
+		# 		return self.get_empty_persons_list()
 		persons = []
 		tense_dict = FORMULAS[self.mood_name][self.tense_name]
 		for person_name in tense_dict[1].keys():
@@ -378,11 +378,9 @@ class Person:
 		for exception in exceptions:
 			gender_condition = (self.gender == GENDER_MASCULINE and exception.male_gender) or (
 						self.gender == GENDER_FEMININE and exception.feminine_gender)
-			mood_tense_condition = getattr(exception, f'{self.mood_name}_{self.tense_name}')
-			person_condition = getattr(exception, f'{self.person_name}')
+			mood_tense_condition = getattr(exception, KEY_TO_MOOD_TENSE[f'{self.mood_name}_{self.tense_name}'])
+			person_condition = getattr(exception, KEY_TO_PERSON[self.person_name])
 			if gender_condition and mood_tense_condition and person_condition:
-				pass
-			else:
 				result.append(exception)
 		return result
 
