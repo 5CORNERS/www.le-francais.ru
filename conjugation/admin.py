@@ -4,7 +4,7 @@ from .models import Except, Verb
 # Register your models here.
 
 
-class VerbInline(admin.TabularInline):
+class VerbInline(admin.StackedInline):
     model = Except.verbs.through
     extra = 1
 
