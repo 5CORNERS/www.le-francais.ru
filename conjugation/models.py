@@ -384,7 +384,7 @@ class Except(models.Model):
 	conjugation_override = models.CharField(max_length=64, choices=VERB_TEMPLATE_NAMES, null=True, blank=True)
 	verbs = models.ManyToManyField('conjugation.Verb', related_name='exceptions')
 	male_gender = models.BooleanField(default=True, blank=True)
-	feminine_gender = models.BooleanField(default=False, blank=True)
+	feminine_gender = models.BooleanField(default=True, blank=True)
 	order = models.PositiveIntegerField(default=1)
 
 	def __str__(self):

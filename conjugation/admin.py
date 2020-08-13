@@ -6,7 +6,8 @@ from .models import Except, Verb
 
 class VerbInline(admin.StackedInline):
     model = Except.verbs.through
-    extra = 1
+    readonly_fields = ['verb']
+    extra = 0
 
 
 @admin.register(Except)
