@@ -391,13 +391,13 @@ class Except(models.Model):
 		return f'{self.name}:{self.pk}'
 
 for mood_tense, name in MOODS_TENSES:
-	Except.add_to_class(mood_tense, models.BooleanField(verbose_name=name))
+	Except.add_to_class(mood_tense, models.BooleanField(verbose_name=name, default=False))
 
 for persons, name in PERSONS_LIST:
-	Except.add_to_class(persons, models.BooleanField(verbose_name=name))
+	Except.add_to_class(persons, models.BooleanField(verbose_name=name, default=False))
 
 for key, name in SWITCHES_CHOICES:
-	Except.add_to_class(key, models.BooleanField(verbose_name=name))
+	Except.add_to_class(key, models.BooleanField(verbose_name=name, default=False))
 
 class ReflexiveVerb(models.Model):
 	verb = models.OneToOneField(Verb, on_delete=models.CASCADE, primary_key=True)
