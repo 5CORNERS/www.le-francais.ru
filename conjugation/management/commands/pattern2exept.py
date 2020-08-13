@@ -26,7 +26,9 @@ class Command(BaseCommand):
             verb_names = [verb.infinitive for verb in verbs]
             exception = Except.objects.create(name=f'DefectivePattern:{str(verb_names):.50}')
             exception.verbs.add(*verbs)
-            exception.save()
             for d_attr, e_attr in def2exept.items():
                 setattr(exception, e_attr, getattr(defective_pattern, d_attr))
+            exception.active = True
+            exception.blank = True
+            exception.save()
             print(defective_pattern)
