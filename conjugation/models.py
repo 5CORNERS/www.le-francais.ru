@@ -107,6 +107,7 @@ class Template(models.Model):
 class Verb(models.Model):
 	def __init__(self, *args, **kwargs):
 		super(Verb, self).__init__(*args, **kwargs)
+		self._exceptions = None
 		self._conjugations = None
 		self._conjugations_no_html = None
 
@@ -370,6 +371,12 @@ class Verb(models.Model):
 				else:
 					iter_list.append((mood, tense, i, person, None))
 		return iter(iter_list)
+
+	def get_exceptions(self):
+		if self._exceptions is None:
+			self._exceptions = list(self.exceptions.all())
+		return self._exceptions
+
 
 class Except(models.Model):
 	name = models.CharField(default='Exception', max_length=100)

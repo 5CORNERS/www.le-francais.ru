@@ -5,7 +5,7 @@ from django.db.models import Q
 
 from conjugation.consts import POLLY_EMPTY_MOOD_NAMES, VOWELS_LIST, \
 	TEMPLATE_NAME, SHORT_LIST, ETRE, AVOIR, VOWEL, NOT_VOWEL, GENDER_MASCULINE, VOICE_ACTIVE, VOICE_REFLEXIVE, \
-	VOICE_PASSIVE, GENDER_FEMININE, KEY_TO_PERSON, KEY_TO_MOOD_TENSE
+	VOICE_PASSIVE, GENDER_FEMININE, KEY_TO_PERSON, KEY_TO_MOOD_TENSE, KEY_TO_SWITCH
 from conjugation.models import Verb, PollyAudio, Except
 from conjugation.furmulas import *
 
@@ -27,12 +27,13 @@ class Table:
 		"""
 		self.v = v
 		self.t = v.template
-		self.moods = self.get_moods_list(gender, reflexive, negative, question, passive, pronoun)
+		self.verb_exceptions = list(v.get_exceptions())
+		self.moods = self.get_moods_list(gender, reflexive, negative, question, passive, pronoun, self.verb_exceptions)
 
-	def get_moods_list(self, gender, reflexive, negative, question, passive, pronoun):
+	def get_moods_list(self, gender, reflexive, negative, question, passive, pronoun, exeptions):
 		moods = []
 		for mood_name in FORMULAS.keys():
-			mood = Mood(self.v, mood_name, gender, reflexive, negative, question, passive, pronoun)
+			mood = Mood(self.v, mood_name, gender, reflexive, negative, question, passive, pronoun, exeptions)
 			moods.append(mood)
 		return moods
 
@@ -96,17 +97,18 @@ def get_table(verb: Verb, negative: bool = False, question: bool = False, voice:
 
 class Mood:
 	def __init__(self, v, mood_name, gender: str, reflexive: bool, negative: bool, question: bool,
-	             passive: bool, pronoun: bool):
+				 passive: bool, pronoun: bool, verb_exceptions):
 		self.name = TEMPLATE_NAME[mood_name]
 		self.v = v
 		self.mood_name = mood_name
-		self.tenses = self.get_tenses_list(gender, reflexive, negative, question, passive, pronoun)
+		self.verb_exceptions= verb_exceptions
+		self.tenses = self.get_tenses_list(gender, reflexive, negative, question, passive, pronoun, verb_exceptions)
 
-	def get_tenses_list(self, gender, reflexive, negative, question, passive, pronoun):
+	def get_tenses_list(self, gender, reflexive, negative, question, passive, pronoun, exceptions):
 		tenses = []
 		mood_dict = FORMULAS[self.mood_name]
 		for tense_name in mood_dict.keys():
-			tense = Tense(self.v, self.mood_name, tense_name, gender, reflexive, negative, question, passive, pronoun)
+			tense = Tense(self.v, self.mood_name, tense_name, gender, reflexive, negative, question, passive, pronoun, exceptions)
 			tenses.append(tense)
 		return tenses
 
@@ -124,13 +126,14 @@ class Tense:
 	_key = None
 
 	def __init__(self, v: Verb = None, mood_name=None, tense_name=None, gender: str = GENDER_MASCULINE,
-	             reflexive: bool = None, negative: bool = None, question: bool = None,
-	             passive: bool = None, pronoun: bool = None, key=None):
+				 reflexive: bool = None, negative: bool = None, question: bool = None,
+				 passive: bool = None, pronoun: bool = None, verb_exceptions=None, key=None):
 		if key:
 			verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive, negative, question, passive, pronoun = key.split('_')
 			reflexive, negative, question, passive, pronoun = reflexive=='True', negative=='True', question=='True', passive=='True', pronoun=='True'
 			v = Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents)
 		self.v = v
+		self.verb_exceptions = verb_exceptions
 		self.tense_name = tense_name
 		self.mood_name = mood_name
 		self.gender = gender
@@ -159,7 +162,7 @@ class Tense:
 		tense_dict = FORMULAS[self.mood_name][self.tense_name]
 		for person_name in tense_dict[1].keys():
 			person = Person(self.v, self.mood_name, self.tense_name, person_name, self.gender,
-			                self.reflexive, self.negative, self.question, self.passive, self.pronoun)
+							self.reflexive, self.negative, self.question, self.passive, self.pronoun, self.verb_exceptions)
 			persons.append(person)
 		return persons
 
@@ -233,12 +236,12 @@ class Person:
 
 	def __init__(self, v: Verb, mood_name: str, tense_name: str, person_name: str, gender: str,
 				 reflexive: bool = False, negative: bool = False, question: bool = False, passive: bool = False,
-				 pronoun: bool = False, empty=False):
+				 pronoun: bool = False, verb_exceptions=None, empty=False):
+		self._verb_exceptions = verb_exceptions
 		self.v = v
 		self.mood_name = mood_name
 		self.tense_name = tense_name
 		self.person_name = person_name
-
 		self.gender = gender
 		self.reflexive = reflexive
 		self.negative = negative
@@ -270,7 +273,7 @@ class Person:
 		self.part_0, self.forms, self.part_2 = '-', '', ''
 
 	def has_exceptions(self):
-		if self.get_exceptions():
+		if self.verb_exceptions:
 			return True
 		return False
 
@@ -278,10 +281,9 @@ class Person:
 
 		formula = get_formula(reflexive, negative, question, passive, pronoun)
 		person_formula = formula[self.mood_name][self.tense_name][etre][self.person_name]
-		exceptions = self.get_exceptions()
 		verb_key = person_formula['verb_part'][gender]
-		if exceptions:
-			exception = exceptions[-1]
+		if self.verb_exceptions:
+			exception = self.verb_exceptions[-1]
 			if exception.conjugation_override:
 				verb_key = exception.conjugation_override
 			if exception.blank:
@@ -372,21 +374,24 @@ class Person:
 	def __str__(self):
 		return self.person_name
 
-	def get_exceptions(self):
-		result = []
-		exceptions = list(Except.objects.filter(verbs=self.v).order_by())
-		for exception in exceptions:
+	@property
+	def verb_exceptions(self):
+		if self._verb_exceptions is None:
+			self._verb_exceptions = list(self.v.get_exceptions())
+		r = []
+		for exception in self._verb_exceptions:
 			gender_condition = (self.gender == GENDER_MASCULINE and exception.male_gender) or (
-						self.gender == GENDER_FEMININE and exception.feminine_gender)
+					self.gender == GENDER_FEMININE and exception.feminine_gender)
 			mood_tense_condition = getattr(exception, KEY_TO_MOOD_TENSE[f'{self.mood_name}_{self.tense_name}'])
 			person_condition = getattr(exception, KEY_TO_PERSON[self.person_name])
-			if gender_condition and mood_tense_condition and person_condition:
-				result.append(exception)
-		return result
+			switch_condition = getattr(exception, KEY_TO_SWITCH[switches_to_key(self.reflexive, self.negative, self.question, self.passive, self.pronoun)])
+			if gender_condition and mood_tense_condition and person_condition and switch_condition:
+				r.append(exception)
+		return r
 
 
 	def replace(self):
-		for exception in self.get_exceptions():
+		for exception in self.verb_exceptions:
 			if exception.pattern_1:
 				self.part_0 = re.sub(exception.pattern_1, exception.replace_to_1, self.part_0)
 			if exception.pattern_2:
