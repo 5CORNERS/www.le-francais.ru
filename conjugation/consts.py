@@ -287,7 +287,7 @@ SWITCHES_CHOICES = [
 ]
 
 KEY_TO_SWITCH = {
-    "ACTIVE": 'active',
+    "": 'active',
     "REFLEXIVE": 'pronominal',
     "PASSIVE": 'voix_passive',
     "QUESTION": 'question',
