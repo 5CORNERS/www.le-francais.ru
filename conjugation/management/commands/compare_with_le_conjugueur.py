@@ -1,4 +1,7 @@
+import json
+import os
 import re
+from pathlib import Path
 
 import dictdiffer
 from bs4 import BeautifulSoup, Tag
@@ -66,7 +69,7 @@ def get_kwargs(verb:Verb):
             continue
         elif not verb.can_be_active and combination['voice'] == VOICE_ACTIVE:
             continue
-        combinations.append(combination)
+        combinations.append((combination, key))
 
     return combinations
 
@@ -74,32 +77,67 @@ def get_kwargs(verb:Verb):
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument('verbs', nargs='+', type=str)
+        parser.add_argument('--verb', dest='verbs', action='append', type=str)
+        parser.add_argument('--count', type=int)
 
     def handle(self, *args, **options):
+        result_file =  open('conjugation/data/compare/result.txt', 'w', encoding='utf-8')
+        same_file = open('conjugation/data/compare/same.txt', 'w', encoding='utf-8')
         verbs = Verb.objects.prefetch_related('template').order_by('-count')
+        result = {}
+        full_identity = []
         if options['verbs']:
             verbs = verbs.filter(infinitive__in=options['verbs'])
         else:
             verbs = verbs.all()
-        for verb in verbs:
-            for combination in get_kwargs(verb):
-                conjugueur_conjugations, identity = parse_le_conjugueur_url(get_conjugueur_url(verb, **combination), verb, check_identity=True)
-                if not identity:
-                    print(f'IDENTITY FAILED')
-                    continue
-                print(f'Comparing with https://www.le-francais.ru{verb.get_url(**combination)}')
-                verb_conjugations = get_table(verb, **combination).to_dict()
-                differences = dictdiffer.diff(conjugueur_conjugations, verb_conjugations)
-                for diff in list(differences):
-                    if diff[0] == 'remove' and diff[1] == 'conditional' and diff[2][0][0] == 'past-second':
-                        # for some reason we do not have 'past-second'
+        if options['count']:
+            verbs = verbs[:options['count']]
+        l = len(verbs)
+        for n, verb in enumerate(verbs,1):
+            same = True
+            print(f'{n}/{l}')
+            result[f'{verb.infinitive}\t{verb.template.name}'] = {}
+            if verb.conjugated_with_avoir and verb.conjugated_with_etre:
+                etre_or_avoir = 'both'
+            elif verb.conjugated_with_etre:
+                ...
+            else:
+                etre_or_avoir = 'avoir'
+            for combination, key in get_kwargs(verb):
+                p = Path(f'conjugation/data/compare/temp/{verb.infinitive}_{key}.json')
+                if not p.exists():
+                    conjugueur_conjugations, identity = parse_le_conjugueur_url(get_conjugueur_url(verb, **combination), verb, check_identity=True)
+                    if not identity:
+                        print(f'IDENTITY FAILED')
                         continue
-                    # elif diff[0] == 'change' and diff[1] == ['participle', 'past', 2]:
-                    #     # participle-past are totally different
-                    #     continue
-                    # elif diff[0] == 'remove' and diff[1] == 'participle.past':
-                    #     # participle-past are totally different
-                    #     continue
-                    print(f'{verb.infinitive}\t{diff}')
-
+                    print(f'Comparing with https://www.le-francais.ru{verb.get_url(**combination)}')
+                    print('...conjugating')
+                    verb_conjugations = get_table(verb, **combination).to_dict()
+                    print('...comparing')
+                    differences = dictdiffer.diff(conjugueur_conjugations, verb_conjugations)
+                    temp_file = p.open('w', encoding='utf-8')
+                    print(f'...writing to {temp_file.name}')
+                    json.dump(list(differences), temp_file)
+                    temp_file.close()
+                else:
+                    temp_file = p.open('r', encoding='utf-8')
+                    differences = json.load(temp_file)
+                    temp_file.close()
+                if differences:
+                    same = False
+                    result[f'{verb.infinitive}\t{verb.template.name}'][key] = []
+                    for diff in list(differences):
+                        if diff[0] == 'remove' and diff[1] == 'conditional' and diff[2][0][0] == 'past-second':
+                            # for some reason we do not have 'past-second'
+                            continue
+                        result[f'{verb.infinitive}\t{verb.template.name}'][key].append(diff)
+            if same:
+                full_identity.append(f'{verb.infinitive}\t{verb.template.name}')
+        for verb, combinations in result.items():
+            for switch, diffs in combinations.items():
+                if diffs:
+                    print(f'{verb}\t{switch}\t', file=result_file)
+                    for diff in diffs:
+                        print(diff, file=result_file)
+        for line in full_identity:
+            print(line, file=same_file)
