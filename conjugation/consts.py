@@ -286,6 +286,25 @@ SWITCHES_CHOICES = [
     ('question_pronominal_en_negation', 'QUESTION_S_EN_NEGATIVE',),
 ]
 
+KEY_TO_SWITCH = {
+    "ACTIVE": 'active',
+    "REFLEXIVE": 'pronominal',
+    "PASSIVE": 'voix_passive',
+    "QUESTION": 'question',
+    "NEGATIVE": 'negation',
+    "S_EN": 'pronominal_en',
+    "QUESTION_REFLEXIVE": 'question_pronominal',
+    "REFLEXIVE_NEGATIVE": 'pronominal_negation',
+    "QUESTION_PASSIVE": 'question_voix_passive',
+    "NEGATIVE_PASSIVE": 'negation_voix_passive',
+    "QUESTION_NEGATIVE": 'question_negation',
+    'QUESTION_S_EN': 'question_pronominal_en',
+    'S_EN_NEGATIVE': 'pronominal_en_negation',
+    "QUESTION_REFLEXIVE_NEGATIVE": 'question_pronominal_negation',
+    "QUESTION_NEGATIVE_PASSIVE": 'question_negation_voix_passive',
+    'QUESTION_S_EN_NEGATIVE': 'question_pronominal_en_negation',
+}
+
 PERSONS = {
     'infinitive-present':[
         (0, '—')

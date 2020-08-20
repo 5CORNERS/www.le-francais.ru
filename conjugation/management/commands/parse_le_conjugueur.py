@@ -3,9 +3,11 @@ import re
 from pathlib import Path
 from time import sleep
 
+import Prawler
 import requests
 from bs4 import BeautifulSoup, Tag
 from django.core.management import BaseCommand
+from proxy_requests import ProxyRequests
 from requests.utils import default_headers
 
 from conjugation.consts import VOWELS_LIST
@@ -296,11 +298,20 @@ def parse_le_conjugueur_url(url, verb, check_identity=False):
 		headers.update({
 			'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0'
 		})
-		req = requests.get(url, headers)
-		body = req.content
-		temp.touch()
-		temp.write_bytes(body)
-		sleep(SLEEP_DURATION_BETWEEN_REQUESTS)
+		print('...getting proxy')
+		proxy = Prawler.get_random_proxy('http', 'elite')
+		print('...accessing url')
+		r = requests.get(url, headers=headers, proxies={'http': proxy})
+		if r.status_code == requests.codes.ok:
+			print(f'...used proxy {proxy}')
+			body = r.content
+			print(f'...write to {temp}')
+			temp.touch()
+			temp.write_bytes(body)
+			# sleep(SLEEP_DURATION_BETWEEN_REQUESTS)
+		else:
+			print('...proxy error')
+			return parse_le_conjugueur_url(url, verb, check_identity)
 	return parse_le_conjugueur_html(html=body, check_identity=check_identity, url=url)
 
 
@@ -310,11 +321,13 @@ def parse_le_conjugueur_html(html, check_identity=False, url=None):
 	results = {}
 	identity = True
 	if check_identity and url is not None:
+		print('...checking identity')
 		title_tag = soup.find("div", class_="verbe").find("h1")
 		if 'pronominal-en' in url and not 's\'en' in title_tag.text:
 			identity = False
 		elif 'pronominal' in url and 's\'en' in title_tag.text:
 			identity = False
+	print('...parsing')
 	for mood_tag in soup.find_all("div", class_="modeBloc"):
 		# le_conjugueur uses the modeBloc class w/o conjugations
         # skipping tags w/o conjugations
