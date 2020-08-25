@@ -114,22 +114,22 @@ class Command(BaseCommand):
                     print('...conjugating')
                     verb_conjugations = get_table(verb, **combination).to_dict()
                     print('...comparing')
-                    differences = dictdiffer.diff(conjugueur_conjugations, verb_conjugations)
+                    differences = list(dictdiffer.diff(conjugueur_conjugations, verb_conjugations))
                     temp_file = p.open('w', encoding='utf-8')
                     print(f'...writing to {temp_file.name}')
-                    json.dump(list(differences), temp_file)
+                    json.dump(differences, temp_file)
                     temp_file.close()
                 else:
                     temp_file = p.open('r', encoding='utf-8')
                     differences = json.load(temp_file)
                     temp_file.close()
                 if differences:
-                    same = False
                     result[f'{verb.infinitive}\t{verb.template.name}'][key] = []
-                    for diff in list(differences):
+                    for diff in differences:
                         if diff[0] == 'remove' and diff[1] == 'conditional' and diff[2][0][0] == 'past-second':
                             # for some reason we do not have 'past-second'
                             continue
+                        same = False
                         result[f'{verb.infinitive}\t{verb.template.name}'][key].append(diff)
             if same:
                 full_identity.append(f'{verb.infinitive}\t{verb.template.name}')
