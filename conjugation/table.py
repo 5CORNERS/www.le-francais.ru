@@ -65,14 +65,6 @@ class Table:
 						return conjugation if conjugation != '-' else None
 		return None
 
-	def replace(self, pattern, replace_to, mood_name=None, tense_name=None, person_name=None):
-		for mood in self.moods:
-			if mood_name is None or mood.mood_name == mood_name:
-				for tense in mood.tenses:
-					if tense_name is None or tense.tense_name == tense_name:
-						for person in tense.persons:
-							if person_name is None or person.person_name == person_name:
-								person.replace(pattern, replace_to)
 
 	def to_dict(self):
 		d = {}
@@ -261,6 +253,7 @@ class Person:
 			self.part_0, self.forms, self.part_2 = self.get_parts(etre, 0, gender, vowel_0, reflexive, negative, question, passive, pronoun)
 		if not isinstance(self.forms, list):
 			self.forms = [self.forms]
+		self.replace()
 
 	@property
 	def more_than_one(self):
