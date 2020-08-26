@@ -319,51 +319,6 @@ class Person:
 
 		return part_1, verb_forms, part_2
 
-		if not reflexive:
-			parts = FORMULAS[self.mood_name][self.tense_name][etre][self.person_name][switch]
-		else:
-			if self.v.infinitive in [
-				"plaire",
-				"complaire",
-				"déplaire",
-				"rire",
-				"convenir",
-				"nuire",
-				"mentir",
-				"ressembler",
-				"sourire",
-				"suffire",
-				"survivre",
-				"acheter",
-				"succéder",
-				"téléphoner",
-				"parler",
-				"demander",
-				"ntre-nuire",
-			]:
-				parts = FORMULAS_PASSIVE_X[self.mood_name][self.tense_name][etre][self.person_name][switch]
-			else:
-				parts = FORMULAS_PASSIVE[self.mood_name][self.tense_name][etre][self.person_name][switch]
-		path_to_conjugation = parts[1][gender]
-		if path_to_conjugation is None:
-			return '-', '', ''
-		verb_forms = self.v.conjugations[path_to_conjugation[0]][path_to_conjugation[1]][int(path_to_conjugation[2])]
-		if verb_forms is None:
-			return '-', '', ''
-
-		if isinstance(verb_forms, list):
-			if verb_forms[0][0] == '<':
-				vowel_0 = -1 if verb_forms[0][3] in VOWELS_LIST and not self.v.aspirate_h else 0
-			else:
-				vowel_0 = -1 if verb_forms[0][0] in VOWELS_LIST and not self.v.aspirate_h else 0
-		else:
-			if verb_forms[0] == '<':
-				vowel_0 = -1 if verb_forms[3] in VOWELS_LIST and not self.v.aspirate_h else 0
-			else:
-				vowel_0 = -1 if verb_forms[0] in VOWELS_LIST and not self.v.aspirate_h else 0
-
-		return parts[0][gender][vowel_0], verb_forms, parts[2][gender][vowel_0]
-
 	def __str__(self):
 		return self.person_name
 
