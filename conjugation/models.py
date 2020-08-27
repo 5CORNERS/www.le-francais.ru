@@ -381,6 +381,7 @@ class Verb(models.Model):
 class Except(models.Model):
 	name = models.CharField(default='Exception', max_length=100)
 	blank = models.BooleanField(default=False, verbose_name='Empty')
+	override_blank = models.BooleanField(default=False, verbose_name='Override blank', help_text='If true, exception will override blank strings in the formula, this could lead to results like "None<verb>None"')
 	etre = models.CharField(max_length=10, verbose_name='"Etre" or "Avoir"', choices=[(ETRE, 'Etre'),(AVOIR,'Avoir')], null=True, blank=True)
 	pattern_1 = models.CharField(max_length=100, verbose_name='Regex Before', null=True, blank=True)
 	replace_to_1 = models.CharField(max_length=100, verbose_name='Replace To Before', null=True, blank=True)
