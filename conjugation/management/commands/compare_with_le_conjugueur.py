@@ -79,6 +79,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--verb', dest='verbs', action='append', type=str)
         parser.add_argument('--count', type=int)
+        parser.add_argument('--no-cache', dest='no_cache', action='store_true')
 
     def handle(self, *args, **options):
         result_file =  open('conjugation/data/compare/result.txt', 'w', encoding='utf-8')
@@ -105,7 +106,7 @@ class Command(BaseCommand):
                 etre_or_avoir = 'avoir'
             for combination, key in get_kwargs(verb):
                 p = Path(f'conjugation/data/compare/temp/{verb.infinitive}_{key}.json')
-                if not p.exists():
+                if not p.exists() or options['no_cache']:
                     conjugueur_conjugations, identity = parse_le_conjugueur_url(get_conjugueur_url(verb, **combination), verb, check_identity=True)
                     if not identity:
                         print(f'IDENTITY FAILED')
