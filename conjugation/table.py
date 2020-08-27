@@ -277,10 +277,11 @@ class Person:
 		verb_key = person_formula['verb_part'][gender]
 		if self.verb_exceptions:
 			exception = self.verb_exceptions[-1]
-			if exception.conjugation_override:
-				verb_key = exception.conjugation_override
-			if exception.blank:
-				verb_key = None
+			if verb_key is None and exception.override_blank or verb_key is not None:
+				if exception.conjugation_override:
+					verb_key = exception.conjugation_override
+				if exception.blank:
+					verb_key = None
 		if verb_key is None:
 			return '-', '', ''
 		t_mood, t_tense, t_person = globals()[verb_key]
