@@ -2,8 +2,8 @@ from django.core.management import BaseCommand
 
 from conjugation.models import Verb, PollyAudio
 from conjugation.table import Table, Mood, Tense
-from conjugation.polly import *
-
+from polly.api import *
+from polly.const import *
 
 class Command(BaseCommand):
 	def add_arguments(self, parser):
@@ -17,6 +17,7 @@ class Command(BaseCommand):
 		for counter, v in enumerate(verbs):  # type: int, Verb
 			print('\rCreating ssml texts... {0} in {1}'.format(counter+1, options['count']), end='')
 			for verb, gender, is_reflexive in v.get_all():
+				# FIXME table arguments
 				table = Table(verb, gender, is_reflexive)  # type: Table
 				for mood in table.moods:  # type: Mood
 					for tense in mood.tenses:  # type: Tense

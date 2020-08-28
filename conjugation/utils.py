@@ -1,6 +1,7 @@
+from django.urls import reverse
 from unidecode import unidecode
 
-from conjugation.consts import LAYOUT_EN, LAYOUT_RU, VOWELS_LIST
+from conjugation.consts import LAYOUT_EN, LAYOUT_RU, VOWELS_LIST, GENDER_FEMININE, GENDER_MASCULINE, VOICE_REFLEXIVE
 
 import collections
 
@@ -16,23 +17,8 @@ def flatten(d, parent_key='', sep='_'):
 	return dict(items)
 
 
-def index_tuple(l, value, index=0):
-	"""
-	Returns index of tuple in list of tuples, which [j] element is the same as s string
-	:param index: index for searching tuples
-	:param l: target list
-	:param value: search string
-	:return: index of tuple
-	:rtype: int
-	"""
-	for pos, t in enumerate(l):
-		if t[index] == value:
-			return pos
-	raise ValueError("list.index(x): x not in list")
-
-
 def autocomplete_forms_startswith(s, reflexive=False, limit=50,
-                                  show_infinitives=10, show_forms=5):
+                                  show_infinitives=10, show_forms=5, pronoun=False):
 	"""
 	Returns autocomplete list of verbs which forms starts with search string
 	:param show_infinitives: max index of infinitives item, after which others will be hidden
@@ -51,12 +37,17 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50,
 	for verb, forms_list in verbs:
 		infinitive_contains_search_string = forms_list[0][2] == 'infinitive-present'
 		current_is_reflexive = False
+		current_is_pronoun = False
 		infinitive = verb.infinitive
 		if reflexive and verb.can_reflexive or verb.reflexive_only:
 			verb = verb.reflexiveverb
 			current_is_reflexive = True
 		elif reflexive and not (verb.can_reflexive or verb.reflexive_only):
-			continue # if user type s' or se skip non reflexive verbs
+			continue  # skipping non reflexive verbs if user type "s'" or "se"
+		elif pronoun and verb.can_be_pronoun:
+			current_is_pronoun = True
+		elif pronoun and not verb.can_be_pronoun:
+			continue  # skipping non pronoun verbs if user type "s'en"
 		cls = 'starts-with'
 		if not infinitive_contains_search_string:
 			cls = cls + '-form'
@@ -76,14 +67,19 @@ def autocomplete_forms_startswith(s, reflexive=False, limit=50,
 				cls = cls + ' load-more hide'
 			url = verb.get_absolute_url()
 			html = f"<b>{infinitive[:len(s)]}</b>{infinitive[len(s):]}"
+		name = verb.infinitive
 		if current_is_reflexive:
 			if infinitive[0] in VOWELS_LIST:
 				html = "s'" + html
 			else:
 				html = 'se ' + html
+		elif current_is_pronoun:
+			html = 's\'en ' + html
+			url = verb.get_url(pronoun=True, voice=VOICE_REFLEXIVE)
+			name = 's\'en ' + name
 		item = dict(
 			url=url,
-			verb=verb.infinitive,
+			verb=name,
 			html=html,
 			isInfinitive=infinitive_contains_search_string,
 			cls=cls,
@@ -143,7 +139,7 @@ def autocomplete_infinitive_contains(s, reflexive=False, limit=50, max_show=5):
 	return autocomplete_list
 
 
-def search_verbs(s, reflexive=None, return_first=False):
+def search_verbs(s, reflexive=None, return_first=False, is_pronoun=False):
 	from conjugation.models import Verb
 	s_unaccent = unidecode(s)
 	verb = None
@@ -282,12 +278,14 @@ def autocomplete_infinitive_levenshtein(s, reflexive, limit, max_distance=3,
 def autocomplete_verb(
 		search_string, is_reflexive, limit, show_startswith_infinitive=99,
 		show_startswith_forms=99, show_starts_with_levenshtein=5,
-		show_startswith_contains=5):
+		show_startswith_contains=5, is_pronoun=False):
 	autocomplete_list_startswith = autocomplete_forms_startswith(
 		search_string,
 		is_reflexive,
 		show_infinitives=show_startswith_infinitive,
-		show_forms=show_startswith_forms)
+		show_forms=show_startswith_forms,
+		pronoun=is_pronoun
+	)
 	current_len = len(autocomplete_list_startswith)
 
 	autocomplete_list_levenshtein = []
@@ -317,3 +315,64 @@ def autocomplete_verb(
 def remove_autocomplete_duplicates(autocomplete_list):
 	return [item for i, item in enumerate(autocomplete_list)
 	        if not any(_item['url'].split('#')[0] == item['url'] for _item in autocomplete_list[:i])]
+
+
+def get_url_from_switches(infinitive, negative, question, passive, reflexive, feminin):
+    if feminin:
+        gender = '_feminin'
+    else:
+        gender = ''
+    if reflexive:
+        reflexive = 'se_'
+    else:
+        reflexive = ''
+    if negative:
+        negative = '_negation'
+    else:
+        negative = ''
+    if passive:
+        passive = '_voix-passive'
+    else:
+        passive = ''
+    if question:
+        question = '_question'
+    else:
+        question = ''
+    return reverse('conjugation:verb', kwargs=dict(
+        feminin=gender,
+        reflexive=reflexive,
+        negative=negative,
+        passive=passive,
+        question=question,
+        verb=infinitive
+    ))
+
+
+def switches_to_verb_url(switches, infinitive):
+	gender, reflexive, question, negative, passive = parse_switches(switches)
+	return reverse('conjugation:verb', kwargs={
+		'feminin': '_feminin' if gender == GENDER_FEMININE else '',
+		'question': '_question' if question else '',
+		'negative': '_negation' if negative else '',
+		'passive': '_voix-passive' if passive else '',
+		'reflexive': 'se_' if reflexive else '',
+		'verb': infinitive})
+
+
+def parse_switches(s):
+	gender = GENDER_MASCULINE
+	reflexive = False
+	negative = False
+	question = False
+	passive = False
+	if 'feminine' in s and s['feminine']:
+		gender = GENDER_FEMININE
+	if "reflexive" in s and s['reflexive']:
+		reflexive = True
+	if "negative" in s and s['negative']:
+		negative = True
+	if 'question' in s and s['question']:
+		question = True
+	if 'passive' in s and s['passive']:
+		passive = True
+	return gender, reflexive, question, negative, passive
