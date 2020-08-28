@@ -29,7 +29,7 @@ def get_polly_audio_link(request):
 	task_completed = False
 	polly_audio, created = PollyAudio.objects.select_related('polly').get_or_create(key=key)
 	text = Tense(key=key).get_polly_ssml()
-	if polly_audio.polly.text != text:
+	if polly_audio.polly and polly_audio.polly.text != text:
 		polly_audio.delete()
 		polly_audio, created = PollyAudio.objects.select_related('polly').get_or_create(key=key)
 	if created or polly_audio.polly is None or polly_audio.polly.url is None:
