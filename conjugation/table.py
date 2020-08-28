@@ -1,15 +1,25 @@
+import re
 from re import sub
 
 from django.db.models import Q
 
 from conjugation.consts import POLLY_EMPTY_MOOD_NAMES, VOWELS_LIST, \
-	TEMPLATE_NAME, SHORT_LIST
-from conjugation.models import Verb, PollyAudio
-from conjugation.furmulas import FORMULAS, FORMULAS_PASSIVE, FORMULAS_PASSIVE_X
+	TEMPLATE_NAME, SHORT_LIST, ETRE, AVOIR, VOWEL, NOT_VOWEL, GENDER_MASCULINE, VOICE_ACTIVE, VOICE_REFLEXIVE, \
+	VOICE_PASSIVE, GENDER_FEMININE, KEY_TO_PERSON, KEY_TO_MOOD_TENSE, KEY_TO_SWITCH
+from conjugation.models import Verb, PollyAudio, Except
+from conjugation.furmulas import *
 
 
 class Table:
-	def __init__(self, v: Verb, gender: int, reflexive: bool):
+	def __init__(
+			self, v: Verb,
+			gender: int,
+			reflexive: bool = False,
+			negative: bool = False,
+			question: bool = False,
+			passive: bool = False,
+			pronoun: bool = False,
+	):
 		"""
 		:param v: Verb object
 		:param gender: -1 if feminine 0 if masculine
@@ -17,24 +27,26 @@ class Table:
 		"""
 		self.v = v
 		self.t = v.template
-		self.moods = self.get_moods_list(gender, reflexive)
+		self.verb_exceptions = list(v.get_exceptions())
+		self.moods = self.get_moods_list(gender, reflexive, negative, question, passive, pronoun, self.verb_exceptions)
 
-	def get_moods_list(self, gender, reflexive):
+	def get_moods_list(self, gender, reflexive, negative, question, passive, pronoun, exeptions):
 		moods = []
 		for mood_name in FORMULAS.keys():
-			mood = Mood(self.v, mood_name, gender, reflexive)
+			mood = Mood(self.v, mood_name, gender, reflexive, negative, question, passive, pronoun, exeptions)
 			moods.append(mood)
 		return moods
 
 	def all_polly(self):
-		keys = list(filter(None, [tense.key if not tense.is_empty() else None for mood in self.moods for tense in mood.tenses]))
-		polly_filter = Q()
-		for key in keys:
-			polly_filter = polly_filter | Q(key=key)
-		query = PollyAudio.objects.filter(polly_filter)
-		if len(query) < len(keys):
-			return False
 		return True
+		# keys = list(filter(None, [tense.key if not tense.is_empty() else None for mood in self.moods for tense in mood.tenses]))
+		# polly_filter = Q()
+		# for key in keys:
+		# 	polly_filter = polly_filter | Q(key=key)
+		# query = PollyAudio.objects.filter(polly_filter)
+		# if len(query) < len(keys):
+		# 	return False
+		# return True
 
 	def __str__(self):
 		return self.v.infinitive + ' Table Object'
@@ -53,57 +65,96 @@ class Table:
 						return conjugation if conjugation != '-' else None
 		return None
 
+
+	def to_dict(self):
+		d = {}
+		for mood in self.moods:
+			d[mood.mood_name] = mood.to_dict()
+		return d
+
+
+def get_table(verb: Verb, negative: bool = False, question: bool = False, voice: str = VOICE_ACTIVE, pronoun: bool = False,
+			  gender: str = GENDER_MASCULINE) -> Table:
+	return Table(
+		verb,
+		gender='m' if gender == GENDER_MASCULINE else 'f',
+		reflexive=True if voice == VOICE_REFLEXIVE else False,
+		negative=negative,
+		question=question,
+		passive=True if voice == VOICE_PASSIVE else False,
+		pronoun=pronoun
+	)
+
+
+
 class Mood:
-	def __init__(self, v, mood_name, gender: int, reflexive: bool):
+	def __init__(self, v, mood_name, gender: str, reflexive: bool, negative: bool, question: bool,
+				 passive: bool, pronoun: bool, verb_exceptions):
 		self.name = TEMPLATE_NAME[mood_name]
 		self.v = v
 		self.mood_name = mood_name
-		self.tenses = self.get_tenses_list(gender, reflexive)
+		self.verb_exceptions= verb_exceptions
+		self.tenses = self.get_tenses_list(gender, reflexive, negative, question, passive, pronoun, verb_exceptions)
 
-	def get_tenses_list(self, gender, reflexive):
+	def get_tenses_list(self, gender, reflexive, negative, question, passive, pronoun, exceptions):
 		tenses = []
 		mood_dict = FORMULAS[self.mood_name]
 		for tense_name in mood_dict.keys():
-			tense = Tense(self.v, self.mood_name, tense_name, gender, reflexive)
+			tense = Tense(self.v, self.mood_name, tense_name, gender, reflexive, negative, question, passive, pronoun, exceptions)
 			tenses.append(tense)
 		return tenses
 
 	def __str__(self):
 		return self.mood_name
 
+	def to_dict(self):
+		d = {}
+		for tense in self.tenses:
+			d[tense.tense_name] = tense.to_dict()
+		return d
+
 
 class Tense:
 	_key = None
 
-	def __init__(self, v: Verb=None, mood_name=None, tense_name=None, gender: int=None, reflexive: bool=None, key=None):
+	def __init__(self, v: Verb = None, mood_name=None, tense_name=None, gender: str = GENDER_MASCULINE,
+				 reflexive: bool = None, negative: bool = None, question: bool = None,
+				 passive: bool = None, pronoun: bool = None, verb_exceptions=None, key=None):
 		if key:
-			verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive = key.split('_')
-			v, gender, reflexive = Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents), int(gender), False if reflexive in ('False', 'None') else True
+			verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive, negative, question, passive, pronoun = key.split('_')
+			reflexive, negative, question, passive, pronoun = reflexive=='True', negative=='True', question=='True', passive=='True', pronoun=='True'
+			v = Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents)
 		self.v = v
+		self.verb_exceptions = verb_exceptions
 		self.tense_name = tense_name
 		self.mood_name = mood_name
 		self.gender = gender
 		self.reflexive = reflexive
+		self.negative = negative
+		self.question = question
+		self.passive = passive
+		self.pronoun = pronoun
 		self.name = TEMPLATE_NAME[tense_name]
 		self.persons = self.get_persons_list()
 
 	@property
 	def key(self):
 		if not self._key:
-			self._key = self.v.infinitive_no_accents + '_' + self.mood_name + '_' + self.tense_name + '_' + self.gender.__str__() + '_' + self.reflexive.__str__()
+			self._key = f'{self.v.infinitive_no_accents}_{self.mood_name}_{self.tense_name}_{self.gender}_{self.reflexive}_{self.negative}_{self.question}_{self.passive}_{self.pronoun}'
 		return self._key
 
 	def is_empty(self):
 		return all(map(lambda a: a.part_0 == '-', self.persons))
 
 	def get_persons_list(self):
-		if self.v.deffective:
-			if self.v.deffective.has_mood_tense(self.mood_name, self.tense_name):
-				return self.get_empty_persons_list()
+		# if self.v.deffective:
+		# 	if self.v.deffective.has_mood_tense(self.mood_name, self.tense_name):
+		# 		return self.get_empty_persons_list()
 		persons = []
 		tense_dict = FORMULAS[self.mood_name][self.tense_name]
 		for person_name in tense_dict[1].keys():
-			person = Person(self.v, self.mood_name, self.tense_name, person_name, self.gender, self.reflexive)
+			person = Person(self.v, self.mood_name, self.tense_name, person_name, self.gender,
+							self.reflexive, self.negative, self.question, self.passive, self.pronoun, self.verb_exceptions)
 			persons.append(person)
 		return persons
 
@@ -134,32 +185,77 @@ class Tense:
 				ssml += '. '
 			else:
 				ssml += ', '
-		ssml = ssml[0:-1] + '.'
+		ssml = ssml[0:-2] + '.'
 		ssml += '</prosody></speak>'
 		return ssml
+
+	def to_dict(self):
+		d = []
+		if self.mood_name == 'participle' and self.tense_name == 'past':
+			self.gender = GENDER_MASCULINE
+			m_persons = self.get_persons_list()
+			self.gender = GENDER_FEMININE
+			f_persons = self.get_persons_list()
+			self.persons = [m_persons[0], f_persons[0], m_persons[1], f_persons[1], m_persons[2]]
+		for person in self.persons:
+			d.append(person.to_dict())
+		return d
+
+
+import json
+FORMULAS_JSON = json.load(open('conjugation/formulas.json'))
+
+def switches_to_key(reflexive, negative, question, passive, pronoun):
+	keys = []
+	if question:
+		keys.append('QUESTION')
+	if reflexive and not pronoun:
+		keys.append('REFLEXIVE')
+	elif pronoun:
+		keys.append('S-EN')
+	if negative:
+		keys.append('NEGATIVE')
+	if passive:
+		keys.append('PASSIVE')
+	return '_'.join(keys)
+
+def get_formula(reflexive, negative, question, passive, pronoun):
+	key = switches_to_key(reflexive, negative, question, passive, pronoun)
+	return FORMULAS_JSON[key]
 
 
 class Person:
 
-	def __init__(self, v: Verb, mood_name: str, tense_name: str, person_name: str, gender: int, reflexive: bool, empty=False):
+	def __init__(self, v: Verb, mood_name: str, tense_name: str, person_name: str, gender: str,
+				 reflexive: bool = False, negative: bool = False, question: bool = False, passive: bool = False,
+				 pronoun: bool = False, verb_exceptions=None, empty=False):
+		self._verb_exceptions = verb_exceptions
 		self.v = v
 		self.mood_name = mood_name
 		self.tense_name = tense_name
 		self.person_name = person_name
+		self.gender = gender
+		self.reflexive = reflexive
+		self.negative = negative
+		self.question = question
+		self.passive = passive
+		self.pronoun = pronoun
 
-		pronoun = -1 if v.infnitive_first_letter_is_vowel() else 0
-		etre = 2 if not self.v.conjugated_with_avoir and self.v.conjugated_with_etre else 1
+		vowel_0 = -1 if v.infnitive_first_letter_is_vowel() else 0
+		etre = AVOIR if not self.v.conjugated_with_etre and not self.reflexive else ETRE
 		if self.v.is_impersonal and (
-				self.person_name != "person_III_S" and not (self.person_name == 'singular' and gender == 0) and self.person_name != 'compose' and self.mood_name != 'infinitive' and self.mood_name != 'gerund'
+				self.person_name != "person_III_S" and not (self.person_name == 'singular' and gender == 'm') and self.person_name != 'compose' and self.mood_name != 'infinitive' and self.mood_name != 'gerund'
 		):
 			self.all_empty()
 		elif empty:
 			self.all_empty()
 		else:
-			self.part_0, self.forms, self.part_2 = self.get_parts(etre, 0, gender, pronoun, reflexive)
+			self.part_0, self.forms, self.part_2 = self.get_parts(etre, 0, gender, vowel_0, reflexive, negative, question, passive, pronoun)
 		if not isinstance(self.forms, list):
 			self.forms = [self.forms]
+		self.replace()
 
+	@property
 	def more_than_one(self):
 		if len(self.forms) > 1:
 			return True
@@ -169,51 +265,92 @@ class Person:
 	def all_empty(self):
 		self.part_0, self.forms, self.part_2 = '-', '', ''
 
-	def get_parts(self, maison, switch, gender, pronoun, reflexive):
-		if not reflexive:
-			parts = FORMULAS[self.mood_name][self.tense_name][maison][self.person_name][switch]
-		else:
-			if self.v.infinitive in [
-				"plaire",
-				"complaire",
-				"déplaire",
-				"rire",
-				"convenir",
-				"nuire",
-				"mentir",
-				"ressembler",
-				"sourire",
-				"suffire",
-				"survivre",
-				"acheter",
-				"succéder",
-				"téléphoner",
-				"parler",
-				"demander",
-				"ntre-nuire",
-			]:
-				parts = FORMULAS_PASSIVE_X[self.mood_name][self.tense_name][maison][self.person_name][switch]
-			else:
-				parts = FORMULAS_PASSIVE[self.mood_name][self.tense_name][maison][self.person_name][switch]
-		path_to_conjugation = parts[1][gender]
-		if path_to_conjugation is None:
+	def has_exceptions(self):
+		if self.verb_exceptions:
+			return True
+		return False
+
+	def get_parts(self, etre, switch, gender, vowel_0, reflexive, negative, question, passive, pronoun):
+
+		formula = get_formula(reflexive, negative, question, passive, pronoun)
+		person_formula = formula[self.mood_name][self.tense_name][etre][self.person_name]
+		verb_key = person_formula['verb_part'][gender]
+		if self.verb_exceptions:
+			exception = self.verb_exceptions[-1]
+			if verb_key is None and exception.override_blank or verb_key is not None:
+				if exception.conjugation_override:
+					verb_key = exception.conjugation_override
+				if exception.blank:
+					verb_key = None
+		if verb_key is None:
 			return '-', '', ''
-		verb_forms = self.v.conjugations[path_to_conjugation[0]][path_to_conjugation[1]][int(path_to_conjugation[2])]
+		t_mood, t_tense, t_person = globals()[verb_key]
+		verb_forms = self.v.conjugations[t_mood][t_tense][int(t_person)]
 		if verb_forms is None:
 			return '-', '', ''
-
 		if isinstance(verb_forms, list):
-			if verb_forms[0][0] == '<':
-				pronoun = -1 if verb_forms[0][3] in VOWELS_LIST and not self.v.aspirate_h else 0
-			else:
-				pronoun = -1 if verb_forms[0][0] in VOWELS_LIST and not self.v.aspirate_h else 0
+			verb_forms = verb_forms.copy()
+			verb_form:str = str(verb_forms[0])
 		else:
-			if verb_forms[0] == '<':
-				pronoun = -1 if verb_forms[3] in VOWELS_LIST and not self.v.aspirate_h else 0
-			else:
-				pronoun = -1 if verb_forms[0] in VOWELS_LIST and not self.v.aspirate_h else 0
+			verb_form:str = str(verb_forms)
 
-		return parts[0][gender][pronoun], verb_forms, parts[2][gender][pronoun]
+		for r in ['<b>', '</b>', '<i>', '</i>']:
+			verb_form = verb_form.replace(r, '')
+
+		if self.v.aspirate_h or verb_form[0] in VOWELS_LIST:
+			first_char_is_vowel = VOWEL
+		else:
+			first_char_is_vowel = NOT_VOWEL
+
+		if verb_form[-1] in VOWELS_LIST:
+			last_char_is_vowel = VOWEL
+		else:
+			last_char_is_vowel = NOT_VOWEL
+
+		part_1 = person_formula['part_1'][gender][first_char_is_vowel]
+		part_2 = person_formula['part_2'][gender][last_char_is_vowel]
+
+		if self.question and self.mood_name == 'indicative' and self.tense_name == 'present' and self.person_name=='person_I_S':
+			if isinstance(verb_forms, list):
+				for n, verb_form in enumerate(verb_forms):
+					verb_forms[n] = re.sub('e(?=</b>$|</i>$|$)', 'é', verb_forms[n])
+			else:
+				verb_forms = re.sub('e(?=</b>$|</i>$|$)', 'é', verb_forms)
+			if self.v.infinitive == 'pouvoir':
+				verb_forms = verb_forms[1]
+
+		return part_1, verb_forms, part_2
 
 	def __str__(self):
 		return self.person_name
+
+	@property
+	def verb_exceptions(self):
+		if self._verb_exceptions is None:
+			self._verb_exceptions = list(self.v.get_exceptions())
+		r = []
+		for exception in self._verb_exceptions:
+			gender_condition = (self.gender == GENDER_MASCULINE and exception.male_gender) or (
+					self.gender == GENDER_FEMININE and exception.feminine_gender)
+			mood_tense_condition = getattr(exception, KEY_TO_MOOD_TENSE[f'{self.mood_name}_{self.tense_name}'])
+			person_condition = getattr(exception, KEY_TO_PERSON[self.person_name])
+			switch_condition = getattr(exception, KEY_TO_SWITCH[switches_to_key(self.reflexive, self.negative, self.question, self.passive, self.pronoun)])
+			if gender_condition and mood_tense_condition and person_condition and switch_condition:
+				r.append(exception)
+		return r
+
+
+	def replace(self):
+		for exception in self.verb_exceptions:
+			if exception.pattern_1:
+				self.part_0 = re.sub(exception.pattern_1, exception.replace_to_1, self.part_0)
+			if exception.pattern_2:
+				self.part_2 = re.sub(exception.pattern_2, exception.replace_to_2, self.part_2)
+			if exception.pattern_verb:
+				for i, form in enumerate(self.forms):
+					self.forms[i] = re.sub(exception.pattern_verb, exception.replace_to_verb, form)
+
+
+	def to_dict(self):
+		s = f'{self.part_0}{re.sub(r"<.*?>","", self.forms[0])}{self.part_2}'
+		return s.replace('\xa0', ' ')

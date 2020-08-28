@@ -47,6 +47,113 @@ FREQUENT_URLS = [
 ]
 VOWELS_LIST = ['a', 'ê', 'é', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y',
                'œ', ]
+VERB_TEMPLATE_NAMES = [
+('VERB_INFINITIVE', 'VERB_INFINITIVE'),
+('VERB_PRESENT_1', 'VERB_PRESENT_1'),
+('VERB_PRESENT_2', 'VERB_PRESENT_2'),
+('VERB_PRESENT_3', 'VERB_PRESENT_3'),
+('VERB_PRESENT_4', 'VERB_PRESENT_4'),
+('VERB_PRESENT_5', 'VERB_PRESENT_5'),
+('VERB_PRESENT_6', 'VERB_PRESENT_6'),
+('VERB_IMPERFECT_1', 'VERB_IMPERFECT_1'),
+('VERB_IMPERFECT_2', 'VERB_IMPERFECT_2'),
+('VERB_IMPERFECT_3', 'VERB_IMPERFECT_3'),
+('VERB_IMPERFECT_4', 'VERB_IMPERFECT_4'),
+('VERB_IMPERFECT_5', 'VERB_IMPERFECT_5'),
+('VERB_IMPERFECT_6', 'VERB_IMPERFECT_6'),
+('VERB_FUTURE_1', 'VERB_FUTURE_1'),
+('VERB_FUTURE_2', 'VERB_FUTURE_2'),
+('VERB_FUTURE_3', 'VERB_FUTURE_3'),
+('VERB_FUTURE_4', 'VERB_FUTURE_4'),
+('VERB_FUTURE_5', 'VERB_FUTURE_5'),
+('VERB_FUTURE_6', 'VERB_FUTURE_6'),
+('VERB_SIMPLE_PAST_1', 'VERB_SIMPLE_PAST_1'),
+('VERB_SIMPLE_PAST_2', 'VERB_SIMPLE_PAST_2'),
+('VERB_SIMPLE_PAST_3', 'VERB_SIMPLE_PAST_3'),
+('VERB_SIMPLE_PAST_4', 'VERB_SIMPLE_PAST_4'),
+('VERB_SIMPLE_PAST_5', 'VERB_SIMPLE_PAST_5'),
+('VERB_SIMPLE_PAST_6', 'VERB_SIMPLE_PAST_6'),
+('VERB_SUBJUNCTIVE_PRESENT_1', 'VERB_SUBJUNCTIVE_PRESENT_1'),
+('VERB_SUBJUNCTIVE_PRESENT_2', 'VERB_SUBJUNCTIVE_PRESENT_2'),
+('VERB_SUBJUNCTIVE_PRESENT_3', 'VERB_SUBJUNCTIVE_PRESENT_3'),
+('VERB_SUBJUNCTIVE_PRESENT_4', 'VERB_SUBJUNCTIVE_PRESENT_4'),
+('VERB_SUBJUNCTIVE_PRESENT_5', 'VERB_SUBJUNCTIVE_PRESENT_5'),
+('VERB_SUBJUNCTIVE_PRESENT_6', 'VERB_SUBJUNCTIVE_PRESENT_6'),
+('VERB_SUBJUNCTIVE_IMPERFECT_1', 'VERB_SUBJUNCTIVE_IMPERFECT_1'),
+('VERB_SUBJUNCTIVE_IMPERFECT_2', 'VERB_SUBJUNCTIVE_IMPERFECT_2'),
+('VERB_SUBJUNCTIVE_IMPERFECT_3', 'VERB_SUBJUNCTIVE_IMPERFECT_3'),
+('VERB_SUBJUNCTIVE_IMPERFECT_4', 'VERB_SUBJUNCTIVE_IMPERFECT_4'),
+('VERB_SUBJUNCTIVE_IMPERFECT_5', 'VERB_SUBJUNCTIVE_IMPERFECT_5'),
+('VERB_SUBJUNCTIVE_IMPERFECT_6', 'VERB_SUBJUNCTIVE_IMPERFECT_6'),
+('VERB_CONDITIONAL_PRESENT_1', 'VERB_CONDITIONAL_PRESENT_1'),
+('VERB_CONDITIONAL_PRESENT_2', 'VERB_CONDITIONAL_PRESENT_2'),
+('VERB_CONDITIONAL_PRESENT_3', 'VERB_CONDITIONAL_PRESENT_3'),
+('VERB_CONDITIONAL_PRESENT_4', 'VERB_CONDITIONAL_PRESENT_4'),
+('VERB_CONDITIONAL_PRESENT_5', 'VERB_CONDITIONAL_PRESENT_5'),
+('VERB_CONDITIONAL_PRESENT_6', 'VERB_CONDITIONAL_PRESENT_6'),
+('VERB_IMPERATIVE_PRESENT_II_S', 'VERB_IMPERATIVE_PRESENT_II_S'),
+('VERB_IMPERATIVE_PRESENT_I_P', 'VERB_IMPERATIVE_PRESENT_I_P'),
+('VERB_IMPERATIVE_PRESENT_II_P', 'VERB_IMPERATIVE_PRESENT_II_P'),
+('VERB_PRESENT_PARTICIPLE', 'VERB_PRESENT_PARTICIPLE'),
+('VERB_PAST_PARTICIPLE_S_M', 'VERB_PAST_PARTICIPLE_S_M'),
+('VERB_PAST_PARTICIPLE_S_F', 'VERB_PAST_PARTICIPLE_S_F'),
+('VERB_PAST_PARTICIPLE_P_M', 'VERB_PAST_PARTICIPLE_P_M'),
+('VERB_PAST_PARTICIPLE_P_F', 'VERB_PAST_PARTICIPLE_P_F'),
+]
+TEMPLATE_VERBS = {
+	'VERB_INFINITIVE': ["infinitive", "infinitive-present", "0"],
+	'VERB_PRESENT_1': ["indicative", "present", "0"],
+	'VERB_PRESENT_2': ["indicative", "present", "1"],
+	'VERB_PRESENT_3': ["indicative", "present", "2"],
+	'VERB_PRESENT_4': ["indicative", "present", "3"],
+	'VERB_PRESENT_5': ["indicative", "present", "4"],
+	'VERB_PRESENT_6': ["indicative", "present", "5"],
+	'VERB_IMPERFECT_1': ["indicative", "imperfect", "0"],
+	'VERB_IMPERFECT_2': ["indicative", "imperfect", "1"],
+	'VERB_IMPERFECT_3': ["indicative", "imperfect", "2"],
+	'VERB_IMPERFECT_4': ["indicative", "imperfect", "3"],
+	'VERB_IMPERFECT_5': ["indicative", "imperfect", "4"],
+	'VERB_IMPERFECT_6': ["indicative", "imperfect", "5"],
+	'VERB_FUTURE_1': ["indicative", "future", "0"],
+	'VERB_FUTURE_2': ["indicative", "future", "1"],
+	'VERB_FUTURE_3': ["indicative", "future", "2"],
+	'VERB_FUTURE_4': ["indicative", "future", "3"],
+	'VERB_FUTURE_5': ["indicative", "future", "4"],
+	'VERB_FUTURE_6': ["indicative", "future", "5"],
+	'VERB_SIMPLE_PAST_1': ["indicative", "simple-past", "0"],
+	'VERB_SIMPLE_PAST_2': ["indicative", "simple-past", "1"],
+	'VERB_SIMPLE_PAST_3': ["indicative", "simple-past", "2"],
+	'VERB_SIMPLE_PAST_4': ["indicative", "simple-past", "3"],
+	'VERB_SIMPLE_PAST_5': ["indicative", "simple-past", "4"],
+	'VERB_SIMPLE_PAST_6': ["indicative", "simple-past", "5"],
+	'VERB_SUBJUNCTIVE_PRESENT_1': ["subjunctive", "present", "0"],
+	'VERB_SUBJUNCTIVE_PRESENT_2': ["subjunctive", "present", "1"],
+	'VERB_SUBJUNCTIVE_PRESENT_3': ["subjunctive", "present", "2"],
+	'VERB_SUBJUNCTIVE_PRESENT_4': ["subjunctive", "present", "3"],
+	'VERB_SUBJUNCTIVE_PRESENT_5': ["subjunctive", "present", "4"],
+	'VERB_SUBJUNCTIVE_PRESENT_6': ["subjunctive", "present", "5"],
+	'VERB_SUBJUNCTIVE_IMPERFECT_1': ["subjunctive", "imperfect", "0"],
+	'VERB_SUBJUNCTIVE_IMPERFECT_2': ["subjunctive", "imperfect", "1"],
+	'VERB_SUBJUNCTIVE_IMPERFECT_3': ["subjunctive", "imperfect", "2"],
+	'VERB_SUBJUNCTIVE_IMPERFECT_4': ["subjunctive", "imperfect", "3"],
+	'VERB_SUBJUNCTIVE_IMPERFECT_5': ["subjunctive", "imperfect", "4"],
+	'VERB_SUBJUNCTIVE_IMPERFECT_6': ["subjunctive", "imperfect", "5"],
+	'VERB_CONDITIONAL_PRESENT_1': ["conditional", "present", "0"],
+	'VERB_CONDITIONAL_PRESENT_2': ["conditional", "present", "1"],
+	'VERB_CONDITIONAL_PRESENT_3': ["conditional", "present", "2"],
+	'VERB_CONDITIONAL_PRESENT_4': ["conditional", "present", "3"],
+	'VERB_CONDITIONAL_PRESENT_5': ["conditional", "present", "4"],
+	'VERB_CONDITIONAL_PRESENT_6': ["conditional", "present", "5"],
+	'VERB_IMPERATIVE_PRESENT_II_S': ["imperative", "imperative-present", "0"],
+	'VERB_IMPERATIVE_PRESENT_I_P': ["imperative", "imperative-present", "1"],
+	'VERB_IMPERATIVE_PRESENT_II_P': ["imperative", "imperative-present", "2"],
+	'VERB_PRESENT_PARTICIPLE': ["participle", "present-participle", "0"],
+	'VERB_PAST_PARTICIPLE_S_M': ["participle", "past-participle", "0"],
+	'VERB_PAST_PARTICIPLE_S_F': ["participle", "past-participle", "2"],
+	'VERB_PAST_PARTICIPLE_P_M': ["participle", "past-participle", "1"],
+	'VERB_PAST_PARTICIPLE_P_F': ["participle", "past-participle", "3"]
+}
+
 
 POLLY_EMPTY_MOOD_NAMES = [
 	('indicative', 'composé-past'),
@@ -85,6 +192,118 @@ TENSES = [
 	('present-participle', 'présent'),
 	('past-participle', 'passé'),
 ]
+
+MOODS_TENSES = [
+    ('infinitive_present', 'Infinitif Present'),
+    ('infinitive_past', 'Infinitif Passé'),
+    ('indicative_present', 'Indicatif Present'),
+    ('indicative_composé_past', 'Indicatif Passe Compose'),
+    ('indicative_imperfect', 'Indicatif Imparfait'),
+    ('indicative_pluperfect', 'Indicatif Plus Que Parfait'),
+    ('indicative_simple_past', 'Indicatif Passe Simple'),
+    ('indicative_antérieur_past', 'Indicatif Passe Antérieur'),
+    ('indicative_future', 'Indicatif Future Simple'),
+    ('indicative_antérieur_future', 'Indicatif Future Antérieur'),
+    ('subjunctive_present', 'Subjonctif Present'),
+    ('subjunctive_past', 'Subjonctif Passé'),
+    ('subjunctive_imperfect', 'Subjonctif Imparfait'),
+    ('subjunctive_pluperfect', 'Subjonctif Plus Que Parfait'),
+    ('conditional_present', 'Conditionnel Present'),
+    ('conditional_past', 'Conditionnel Passé'),
+    ('imperative_present', 'Impératif Present'),
+    ('imperative_past', 'Impératif Passé'),
+    ('participle_present', 'Participe Present'),
+    ('participle_past', 'Participe Passé'),
+    ('gerund_present', 'Gérondif Present'),
+    ('gerund_past', 'Gérondif Passé'),
+]
+
+PERSONS_LIST = [
+    ('person_1','person_I_S'),
+    ('person_2','person_II_S'),
+    ('person_3','person_III_S'),
+    ('person_4','person_I_P'),
+    ('person_5','person_II_P'),
+    ('person_6','person_III_P'),
+    ('person_pp_1','Singular Past Participle'),
+    ('person_pp_2','Plural Past Participle'),
+    ('person_pp_3','Compose Past Participle')
+]
+
+KEY_TO_MOOD_TENSE = {
+    'infinitive_present':'infinitive_present',
+    'infinitive_past':'infinitive_past',
+    'indicative_present':'indicative_present',
+    'indicative_composé-past':'indicative_composé_past',
+    'indicative_imperfect':'indicative_imperfect',
+    'indicative_pluperfect':'indicative_pluperfect',
+    'indicative_simple-past':'indicative_simple_past',
+    'indicative_antérieur-past':'indicative_antérieur_past',
+    'indicative_future':'indicative_future',
+    'indicative_antérieur-future':'indicative_antérieur_future',
+    'subjunctive_present':'subjunctive_present',
+    'subjunctive_past':'subjunctive_past',
+    'subjunctive_imperfect':'subjunctive_imperfect',
+    'subjunctive_pluperfect':'subjunctive_pluperfect',
+    'conditional_present':'conditional_present',
+    'conditional_past-first':'conditional_past',
+    'imperative_present':'imperative_present',
+    'imperative_past':'imperative_past',
+    'participle_present':'participle_present',
+    'participle_past':'participle_past',
+    'gerund_present':'gerund_present',
+    'gerund_past':'gerund_past',
+}
+
+KEY_TO_PERSON = {
+    'person_I_S':'person_1',
+    'person_II_S':'person_2',
+    'person_III_S':'person_3',
+    'person_I_P':'person_4',
+    'person_II_P':'person_5',
+    'person_III_P':'person_6',
+    'singular':'person_pp_1',
+    'plural':'person_pp_2',
+    'compose':'person_pp_3',
+}
+
+SWITCHES_CHOICES = [
+    ('active',"ACTIVE",),
+    ('pronominal', "REFLEXIVE",),
+    ('voix_passive', "PASSIVE",),
+	('question', "QUESTION",),
+    ('negation', "NEGATIVE",),
+    ('pronominal_en', "S_EN",),
+    ('question_pronominal', "QUESTION_REFLEXIVE",),
+    ('pronominal_negation', "REFLEXIVE_NEGATIVE",),
+    ('question_voix_passive', "QUESTION_PASSIVE",),
+    ('negation_voix_passive', "NEGATIVE_PASSIVE",),
+    ('question_negation', "QUESTION_NEGATIVE",),
+    ('question_pronominal_en', 'QUESTION_S_EN',),
+    ('pronominal_en_negation', 'S_EN_NEGATIVE',),
+    ('question_pronominal_negation', "QUESTION_REFLEXIVE_NEGATIVE",),
+	('question_negation_voix_passive', "QUESTION_NEGATIVE_PASSIVE",),
+    ('question_pronominal_en_negation', 'QUESTION_S_EN_NEGATIVE',),
+]
+
+KEY_TO_SWITCH = {
+    "": 'active',
+    "REFLEXIVE": 'pronominal',
+    "PASSIVE": 'voix_passive',
+    "QUESTION": 'question',
+    "NEGATIVE": 'negation',
+    "S_EN": 'pronominal_en',
+    "QUESTION_REFLEXIVE": 'question_pronominal',
+    "REFLEXIVE_NEGATIVE": 'pronominal_negation',
+    "QUESTION_PASSIVE": 'question_voix_passive',
+    "NEGATIVE_PASSIVE": 'negation_voix_passive',
+    "QUESTION_NEGATIVE": 'question_negation',
+    'QUESTION_S_EN': 'question_pronominal_en',
+    'S_EN_NEGATIVE': 'pronominal_en_negation',
+    "QUESTION_REFLEXIVE_NEGATIVE": 'question_pronominal_negation',
+    "QUESTION_NEGATIVE_PASSIVE": 'question_negation_voix_passive',
+    'QUESTION_S_EN_NEGATIVE': 'question_pronominal_en_negation',
+}
 
 PERSONS = {
     'infinitive-present':[
@@ -580,3 +799,16 @@ AUDIO_LIST = [
     "guider",
     "piquer",
     ]
+
+GENDER_MASCULINE = 'm'
+GENDER_FEMININE = 'f'
+
+ETRE = 'etre'
+AVOIR = 'avoir'
+
+VOWEL = 'vowel_1'
+NOT_VOWEL = 'vowel_0'
+
+VOICE_ACTIVE = 'active'
+VOICE_PASSIVE = 'passive'
+VOICE_REFLEXIVE = 'reflexive'

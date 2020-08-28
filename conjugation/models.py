@@ -6,9 +6,9 @@ from django.db import models
 from django.urls import reverse
 from unidecode import unidecode
 
-from .consts import MOODS, TENSES
-from .polly import TEXT_TYPES, LANGUAGE_CODES, OUTPUT_FORMATS, SAMPLE_RATES, VOICE_IDS, TASK_STATUSES, PARAMS
-from .utils import index_tuple
+from .consts import MOODS, TENSES, VOICE_REFLEXIVE, VOICE_PASSIVE, GENDER_FEMININE, GENDER_MASCULINE, VOICE_ACTIVE, \
+	MOODS_TENSES, TEMPLATE_VERBS, PERSONS_LIST, VERB_TEMPLATE_NAMES, SWITCHES_CHOICES, ETRE, AVOIR
+from polly.const import TEXT_TYPES, LANGUAGE_CODES, OUTPUT_FORMATS, SAMPLE_RATES, VOICE_IDS, TASK_STATUSES, PARAMS
 
 VOWELS_LIST = ['a', 'ê', 'é', 'è', 'h', 'e', 'â', 'i', 'o', 'ô', 'u', 'w', 'y', 'œ', ]
 
@@ -17,7 +17,7 @@ MASCULINE = 0
 
 
 class PollyAudio(models.Model):
-	key = models.CharField(max_length=64, primary_key=True)
+	key = models.CharField(max_length=128, primary_key=True)
 	polly = models.ForeignKey('polly.PollyTask', null=True)
 
 
@@ -107,6 +107,7 @@ class Template(models.Model):
 class Verb(models.Model):
 	def __init__(self, *args, **kwargs):
 		super(Verb, self).__init__(*args, **kwargs)
+		self._exceptions = None
 		self._conjugations = None
 		self._conjugations_no_html = None
 
@@ -120,6 +121,7 @@ class Verb(models.Model):
 	homonym = models.IntegerField(null=True, default=None)
 
 	reflexive_only = models.BooleanField(default=False)
+	can_be_pronoun = models.BooleanField(default=False)
 
 	is_defective = models.BooleanField(default=False)
 	deffective = models.ForeignKey('DeffectivePattern', null=True, on_delete=models.SET_NULL)
@@ -161,6 +163,10 @@ class Verb(models.Model):
 	main_part = models.CharField(max_length=64)
 	main_part_no_accents = models.CharField(max_length=64)
 
+	@property
+	def can_be_active(self):
+		return not self.reflexive_only
+
 	def employs(self):
 		s = ""
 		s += '<b>' + self.infinitive + "</b> — "
@@ -192,8 +198,27 @@ class Verb(models.Model):
 	def get_absolute_url(self):
 		return reverse('conjugation:verb', kwargs=dict(verb=self.infinitive_no_accents))
 
-	def url(self):
-		return self.get_absolute_url()
+	def get_url(self, negative=False, question=False, voice=VOICE_ACTIVE, pronoun=False, gender=GENDER_MASCULINE):
+		url_kwargs = dict(
+			feminin='', question='', negative='', passive='', reflexive='',
+			pronoun='', verb=self.infinitive_no_accents, homonym=''
+		)
+		if voice == VOICE_REFLEXIVE:
+			if pronoun:
+				url_kwargs['pronoun'] = 's-en_'
+			else:
+				url_kwargs['reflexive'] = 'se_'
+		elif voice == VOICE_PASSIVE:
+			url_kwargs['passive'] = '_voix-passive'
+
+		if negative:
+			url_kwargs['negative'] = '_negation'
+		if question:
+			url_kwargs['question'] = '_question'
+		if gender == GENDER_FEMININE:
+			url_kwargs['feminin'] = '_feminin'
+
+		return reverse('conjugation:verb', kwargs=url_kwargs)
 
 	def __str__(self):
 		return self.infinitive
@@ -205,13 +230,13 @@ class Verb(models.Model):
 		return unidecode(self.infinitive)
 
 	def feminin_url(self):
-		return reverse('conjugation:verb', kwargs=dict(femenin='feminin_', verb=self.infinitive_no_accents, se=None))
+		return reverse('conjugation:verb', kwargs=dict(femenin='_feminin', verb=self.infinitive_no_accents, se=None))
 
 	def se_url(self):
 		return reverse('conjugation:verb', kwargs=dict(femenin=None, verb=self.infinitive_no_accents, se='se_'))
 
 	def feminin_se_url(self):
-		return reverse('conjugation:verb', kwargs=dict(femenin='feminin_', verb=self.infinitive_no_accents, se='se_'))
+		return reverse('conjugation:verb', kwargs=dict(femenin='_feminin', verb=self.infinitive_no_accents, se='se_'))
 
 	def infnitive_first_letter_is_vowel(self):
 		return True if self.infinitive[0] in VOWELS_LIST and not self.aspirate_h else False
@@ -347,7 +372,43 @@ class Verb(models.Model):
 					iter_list.append((mood, tense, i, person, None))
 		return iter(iter_list)
 
+	def get_exceptions(self):
+		if self._exceptions is None:
+			self._exceptions = list(self.exceptions.all())
+		return self._exceptions
 
+	def conjugates_with(self):
+		return AVOIR if not self.conjugated_with_etre else ETRE
+
+
+class Except(models.Model):
+	name = models.CharField(default='Exception', max_length=100)
+	blank = models.BooleanField(default=False, verbose_name='Empty')
+	override_blank = models.BooleanField(default=False, verbose_name='Override blank', help_text='If true, exception will override blank strings in the formula, this could lead to results like "None<verb>None"')
+	etre = models.CharField(max_length=10, verbose_name='"Etre" or "Avoir"', choices=[(ETRE, 'Etre'),(AVOIR,'Avoir')], null=True, blank=True)
+	pattern_1 = models.CharField(max_length=100, verbose_name='Regex Before', null=True, blank=True)
+	replace_to_1 = models.CharField(max_length=100, verbose_name='Replace To Before', null=True, blank=True)
+	pattern_2 = models.CharField(max_length=100, verbose_name='Regex After', null=True, blank=True)
+	replace_to_2 = models.CharField(max_length=100, verbose_name='Replace To After', null=True, blank=True)
+	pattern_verb = models.CharField(max_length=100, verbose_name='Regex Verb', null=True, blank=True)
+	replace_to_verb = models.CharField(max_length=100, verbose_name='Replace To Verb', null=True, blank=True)
+	conjugation_override = models.CharField(max_length=64, choices=VERB_TEMPLATE_NAMES, null=True, blank=True)
+	verbs = models.ManyToManyField('conjugation.Verb', related_name='exceptions')
+	male_gender = models.BooleanField(default=True, blank=True)
+	feminine_gender = models.BooleanField(default=True, blank=True)
+	order = models.PositiveIntegerField(default=1)
+
+	def __str__(self):
+		return f'{self.name}:{self.pk}'
+
+for mood_tense, name in MOODS_TENSES:
+	Except.add_to_class(mood_tense, models.BooleanField(verbose_name=name, default=False))
+
+for persons, name in PERSONS_LIST:
+	Except.add_to_class(persons, models.BooleanField(verbose_name=name, default=False))
+
+for key, name in SWITCHES_CHOICES:
+	Except.add_to_class(key, models.BooleanField(verbose_name=name, default=False))
 
 class ReflexiveVerb(models.Model):
 	verb = models.OneToOneField(Verb, on_delete=models.CASCADE, primary_key=True)
@@ -368,15 +429,12 @@ class ReflexiveVerb(models.Model):
 	def create_no_accents(self):
 		self.infinitive_no_accents = unidecode(self.infinitive)
 
-	def url(self):
-		return self.get_absolute_url()
-
 	def get_absolute_url(self):
 		if self.is_short():
 			particule = "s_"
 		else:
 			particule = "se_"
-		return reverse('conjugation:verb', kwargs=dict(se=particule, verb=self.verb.infinitive_no_accents))
+		return reverse('conjugation:verb', kwargs=dict(reflexive=particule, verb=self.verb.infinitive_no_accents))
 
 	def rename(self):
 		self.infinitive = "s'" + self.verb.infinitive if self.verb.infnitive_first_letter_is_vowel() and not self.verb.aspirate_h else "se " + self.verb.infinitive
@@ -406,3 +464,18 @@ class DeffectivePattern(models.Model):
 				return False
 		except:
 			return False
+
+
+def index_tuple(l, value, index=0):
+	"""
+	Returns index of tuple in list of tuples, which [j] element is the same as s string
+	:param index: index for searching tuples
+	:param l: target list
+	:param value: search string
+	:return: index of tuple
+	:rtype: int
+	"""
+	for pos, t in enumerate(l):
+		if t[index] == value:
+			return pos
+	raise ValueError("list.index(x): x not in list")

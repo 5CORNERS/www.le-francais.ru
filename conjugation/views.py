@@ -1,7 +1,11 @@
+from io import BytesIO
+
 from dal import autocomplete
 from django.forms import modelformset_factory
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedirect, FileResponse, HttpResponse, \
+	HttpResponsePermanentRedirect
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -12,31 +16,55 @@ from conjugation.models import Verb, PollyAudio, Translation, \
 	FrTag, RuTag
 from polly.models import PollyTask
 from .consts import *
-from .polly import *
+from .forms import SwitchesForm
+from polly.const import *
 from .table import Table, Tense
 from .utils import search_verbs, switch_keyboard_layout, \
-	search_verbs_with_forms, autocomplete_verb
+	search_verbs_with_forms, autocomplete_verb, get_url_from_switches
 
 
 @require_http_methods(["POST"])
 def get_polly_audio_link(request):
 	key = request.POST.get('key')
+	task_completed = False
 	polly_audio, created = PollyAudio.objects.select_related('polly').get_or_create(key=key)
+	text = Tense(key=key).get_polly_ssml()
+	if polly_audio.polly.text != text:
+		polly_audio.delete()
+		polly_audio, created = PollyAudio.objects.select_related('polly').get_or_create(key=key)
 	if created or polly_audio.polly is None or polly_audio.polly.url is None:
-		tense = Tense(key=key)
 		polly_task = PollyTask(
-			text=tense.get_polly_ssml(),
+			text=text,
 			text_type=TEXT_TYPE_SSML,
 			language_code=LANGUAGE_CODE_FR,
 			sample_rate=SAMPLE_RATE_22050,
 			voice_id=VOICE_ID_LEA,
 			output_format=OUTPUT_FORMAT_MP3,
 		)
-		polly_task.create_task('polly-conjugations/', wait=True, save=True)
+		polly_task.create_task('polly-conjugations/', wait=False, save=True)
 		polly_audio.polly = polly_task
 		polly_audio.save()
-	return JsonResponse(data={key: {'url': polly_audio.polly.url}})
+	elif polly_audio.polly.task_status != 'completed':
+		polly_audio.polly.update_task()
+		if polly_audio.polly.task_status == 'complete':
+			task_completed = True
+	else:
+		task_completed = True
+	if task_completed:
+		return JsonResponse(data={key: {'url': polly_audio.polly.url}})
+	else:
+		return JsonResponse(data={
+			key: {'url': reverse(
+				'conjugation:polly_listen', kwargs={'pk':polly_audio.pk}
+			)}
+		})
 
+def get_polly_audio_stream(request, pk):
+	polly_audio = PollyAudio.objects.get(pk=pk)
+	stream = polly_audio.polly.get_audio_stream()
+	response = HttpResponse(stream.read(), content_type='audio/mp3')
+	stream.close()
+	return response
 
 @csrf_exempt
 def search(request):
@@ -44,24 +72,43 @@ def search(request):
 		search_string = switch_keyboard_layout(str(request.POST.get('q')).strip(' ').lower())
 	else:
 		search_string = switch_keyboard_layout(str(request.GET.get('q')).strip(' ').lower())
-	is_reflexive = True
-	if search_string.find("s'") == 0:
+	is_reflexive = False
+	is_pronoun = False
+	if search_string.find("s'en ") == 0:
+		search_string = search_string[5:]
+		is_pronoun = True
+	elif search_string.find("s'") == 0:
 		search_string = search_string[2:]
+		is_reflexive = True
 	elif search_string.find("se ") == 0:
 		search_string = search_string[3:]
-	else:
-		is_reflexive = False
+		is_reflexive = True
 	found_forms = []
-	for verb, forms in  search_verbs_with_forms(search_string, exact=True):
+	for verb, forms in search_verbs_with_forms(search_string, exact=True):
+		if verb.infinitive == search_string:
+			found_forms.append(dict(
+				url=verb.get_absolute_url(),
+				infinitive=verb.infinitive,
+				conjugation=search_string,
+				mood='Infinitif',
+				tense='présent',
+				person='—'
+			))
+			break
 		for form in forms:
-			gender = 0
+			gender = GENDER_MASCULINE
 			person_index = form[3]
 			if form[2] == 'past-participle':
 				if person_index in [2, 3]:
 					person_index -= 2
-					gender = -1
+					gender = GENDER_FEMININE
+			# FIXME fix Table arguments
 			conjugation = Table(
-				verb, gender, is_reflexive).get_conjugation(
+				v=verb,
+				gender=gender,
+				reflexive=is_reflexive,
+				pronoun=is_pronoun,
+			).get_conjugation(
 				form[1], form[2], person_index, form[4] or 0)
 			if form[2] in PERSONS.keys():
 				persons_keys = PERSONS[form[2]]
@@ -79,60 +126,175 @@ def search(request):
 	if len(found_forms) > 1:
 		return render(request, 'conjugation/verb_found_forms.html',
 		              {'search_string': search_string, 'found_forms': found_forms})
-	verb, form = search_verbs(search_string, is_reflexive, return_first=True)
+	verb, form = search_verbs(search_string, is_reflexive, return_first=True, is_pronoun=is_pronoun)
 	if verb is None:
-		autocomplete_list = autocomplete_verb(search_string, is_reflexive, 50)
+		autocomplete_list = autocomplete_verb(search_string, is_reflexive, 50, is_pronoun=is_pronoun)
 		return render(request, 'conjugation/verb_not_found.html',
 		              {'search_string': search_string, 'autocomplete_list': autocomplete_list})
-	return redirect(verb.get_absolute_url())
+	if is_pronoun:
+		url = verb.get_url(pronoun=True, voice=VOICE_REFLEXIVE)
+	else:
+		url = verb.get_absolute_url()
+	return redirect(url)
+
+
+def verb_switches_form_view(request):
+	if request.method == 'POST':
+		form = SwitchesForm(request.POST)
+		if form.is_valid():
+			data:dict = form.cleaned_data
+		else:
+			return HttpResponseBadRequest()
+		lock = data.pop('lock', False)
+		url = get_url_from_switches(
+			**data
+		)
+		return HttpResponseRedirect(url)
+	else:
+		return HttpResponseBadRequest()
 
 
 def index(request):
 	return render(request, 'conjugation/index.html', dict(frequent_urls=FREQUENT_URLS))
 
 
-def verb_page(request, se, feminin, verb, homonym):
+def verb_page_redirect(request, feminin, question, negative, passive, reflexive, pronoun, verb, homonym):
+	return HttpResponsePermanentRedirect(reverse('conjugation:verb', kwargs=dict(
+		feminin='_feminin' if bool(feminin) else '',
+		question='_question' if bool(question) else '',
+		negative='_negation' if bool(negative) else '',
+		passive='_voix-passive' if bool(passive) else '',
+		reflexive=reflexive or '',
+		pronoun=pronoun or '',
+		verb=verb,
+		homonym=homonym or ''
+	)))
+
+
+# FIXME: s'appler feminine form
+def verb_page(request, feminin, question, negative, passive, reflexive, pronoun, verb, homonym):
+	url_kwargs = dict(
+		feminin=feminin or '', question=question or '', negative=negative or '', passive=passive or '',
+		reflexive=reflexive or '',
+		pronoun=pronoun or '', verb=verb, homonym=homonym or ''
+	)
 	word_no_accent = unidecode(verb)
 	try:
 		verb = Verb.objects.get(infinitive_no_accents=word_no_accent)
 	except Verb.DoesNotExist:
 		return render(request, 'conjugation/verb_not_found.html',
-		              {'search_string': word_no_accent})
+					  {'search_string': word_no_accent})
 	except Verb.MultipleObjectsReturned:
 		try:
 			verb = Verb.objects.get(infinitive=verb)
 		except:
 			verb = Verb.objects.filter(infinitive_no_accents=word_no_accent).first()
-
-	if feminin:
-		feminin = True
-		gender = -1
+	if request.POST:
+		switches_form = SwitchesForm(request.POST)
+		if switches_form.is_valid():
+			data = switches_form.cleaned_data
+			lock = data.pop('lock', False)
+			url = verb.get_url(
+				negative=data['negative'],
+				question=data['question'],
+				voice=VOICE_PASSIVE if data['passive'] else VOICE_REFLEXIVE if data['reflexive'] else VOICE_ACTIVE,
+				pronoun=data['pronoun'],
+				gender=GENDER_FEMININE if data['feminine'] else GENDER_MASCULINE
+			)
+			return HttpResponseRedirect(url)
+		else:
+			return HttpResponseBadRequest()
 	else:
-		feminin = False
-		gender = 0
+		badges = []
 
-	if verb.reflexive_only and not se:
-		return redirect(verb.reflexiveverb.get_absolute_url())
-	if not (verb.reflexive_only or verb.can_reflexive) and se:
-		return redirect(verb.get_absolute_url())
+		needs_redirect = False
+		if verb.reflexive_only and not (reflexive or pronoun):
+			url_kwargs['reflexive'] = 's_' if verb.reflexiveverb.is_short() else 'se_'
+			needs_redirect = True
 
-	if (se == "se_" and verb.reflexiveverb.is_short()) or (se == "s_" and not verb.reflexiveverb.is_short()):
-		return redirect(verb.reflexiveverb.get_absolute_url())
+		elif reflexive and not pronoun and not verb.can_reflexive and not verb.reflexive_only:
+			url_kwargs['reflexive'] = ''
+			needs_redirect = True
 
-	reflexive = True if (verb.can_reflexive or verb.reflexive_only) and se else False
+		elif not (verb.reflexive_only or verb.can_reflexive or verb.can_be_pronoun) and reflexive:
+			url_kwargs['reflexive'] = ''
+			needs_redirect = True
 
-	verb.count += 1
-	verb.save()
-	verb.construct_conjugations()
-	table = Table(verb, gender, reflexive)
-	return render(request, 'conjugation/table.html', {
-		'v': verb,
-		'reflexive': reflexive,
-		'feminin': feminin,
-		'table': table,
-		'forms_count': verb.template.forms_count,
-		'forms_range': list(range(1, verb.template.forms_count + 1))
-	})
+		elif (reflexive == "se_" and verb.reflexiveverb.is_short()) or (reflexive == "s_" and not verb.reflexiveverb.is_short()):
+			url_kwargs['reflexive'] = 's_' if verb.reflexiveverb.is_short() else 'se_'
+			needs_redirect = True
+
+		if not verb.can_passive and passive:
+			url_kwargs['passive'] = ''
+			needs_redirect = True
+
+		if not verb.can_be_pronoun and pronoun:
+			url_kwargs['pronoun'] = ''
+			needs_redirect = True
+
+		if needs_redirect:
+			return redirect(reverse('conjugation:verb', kwargs=url_kwargs))
+
+		reflexive = True if (verb.can_reflexive or verb.reflexive_only) and reflexive else False
+
+		if negative:
+			badges.append('отрицание')
+		else:
+			badges.append('утверждение')
+		if question:
+			badges.append('вопрос')
+		else:
+			badges.append('повествование')
+		if reflexive or pronoun:
+			badges.append("возвратный залог" + (f' (s\'en {verb.infinitive})' if pronoun else ''))
+		elif passive:
+			badges.append('пассивный залог')
+		else:
+			badges.append('активный залог')
+		if feminin:
+			feminin = True
+			gender = GENDER_FEMININE
+			badges.append('женский род')
+		else:
+			feminin = False
+			gender = GENDER_MASCULINE
+			badges.append('мужской род')
+
+		verb.count += 1
+		verb.save()
+		verb.construct_conjugations()
+		table = Table(
+			v=verb,
+			reflexive=reflexive,
+			gender=gender,
+			question=bool(question),
+			passive=bool(passive),
+			negative=bool(negative),
+			pronoun=bool(pronoun)
+		)
+		return render(request, 'conjugation/table.html', {
+			'v': verb,
+			'reflexive': bool(reflexive),
+			'can_be_reflexive': verb.can_reflexive or verb.can_be_pronoun,
+			'must_be_pronoun': not verb.can_reflexive and verb.can_be_pronoun,
+			'feminin': feminin,
+			'table': table,
+			'forms_count': verb.template.forms_count,
+			'forms_range': list(range(1, verb.template.forms_count + 1)),
+			'question':bool(question),
+			'passive':bool(passive),
+			'negative':bool(negative),
+			'pronoun':bool(pronoun),
+			'switches_form': SwitchesForm(initial={
+				'infinitive': verb.infinitive_no_accents,
+				'negative': bool(negative),
+				'question': bool(question),
+				'feminine': bool(feminin),
+				'voice': 1 if passive else 2 if reflexive or pronoun else 0,
+				'pronoun': pronoun,
+			}),
+			'badges': badges,
+		})
 
 
 def get_autocomplete_list(request):
@@ -142,11 +304,15 @@ def get_autocomplete_list(request):
 	term = switch_keyboard_layout(_term)
 	term = unidecode(term)
 	reflexive = False
+	pronoun = False
 	s = term
-	if term[:3] == 'se ' or term[:2] == "s'":
+	if term[:5] == 's\'en ':
+		pronoun = True
+		s = term[5:]
+	elif term[:3] == 'se ' or term[:2] == "s'":
 		reflexive = True
 		s = term[3:] if term.startswith('se ') else term[2:]
-	autocomplete_list = autocomplete_verb(s, reflexive, list_len)
+	autocomplete_list = autocomplete_verb(s, reflexive, list_len, is_pronoun=pronoun)
 	return JsonResponse(autocomplete_list[:list_len], safe=False)
 
 
