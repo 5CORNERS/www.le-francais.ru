@@ -22,7 +22,7 @@ function changeClassTo(icon, c) {
 
 
 function pollyListen(icon, key) {
-	if (IS_REFLEXIVE === 'False' && icon.attributes['data-mood'].value === 'indicative' && icon.attributes['data-tense'].value === 'present' && AUDIO_URL !== 'None') {
+	if (!IS_REFLEXIVE && icon.attributes['data-mood'].value === 'indicative' && icon.attributes['data-tense'].value === 'present' && AUDIO_URL !== 'None') {
 		polly[key] = AUDIO_URL
 	}
 	if (polly[key] === undefined) {
@@ -77,7 +77,6 @@ function see_more() {
 	window.localStorage.setItem('long_list', 'true');
 }
 
-
 $(document).ready(function () {
 	if (window.localStorage.getItem('long_list') === 'true') {
 		see_more()
@@ -123,5 +122,54 @@ $(document).ready(function () {
 				$('.play-pause-icon').show()
 			}
 		})
+	})
+
+	// Verb Switches script
+	let $pronounCheckbox = $('#pronounCheckbox');
+	let $pronounInput = $pronounCheckbox.find('input');
+	let $voice_range = $(`#${VOICE_RANGE_ID}`);
+	let last_val = $voice_range.val();
+	let $switchesForm = $('#switchesForm')
+	if (CAN_BE_PRONOUN && $voice_range.val() === '2') {
+		$pronounCheckbox.show();
+		if (MUST_BE_PRONOUN) {
+			$pronounInput.prop('disabled', true)
+		}
+	}
+	$voice_range.change(ev => {
+		if ($voice_range.val() === '1' && !CAN_BE_PASSIVE && CAN_BE_REFLEXIVE) {
+			if (last_val === '0') {
+				$voice_range.val('2')
+			} else {
+				$voice_range.val('0')
+			}
+		} else if ($voice_range.val() === '2' && !CAN_BE_REFLEXIVE && CAN_BE_PASSIVE) {
+			if (last_val === '3') {
+				$voice_range.val('1')
+			} else {
+				$voice_range.val('3')
+			}
+		} else if (!CAN_BE_PASSIVE && !CAN_BE_REFLEXIVE && ($voice_range.val() === '2' || $voice_range.val() === '1')) {
+			$voice_range.val('0')
+		}
+		if (CAN_BE_PRONOUN && $voice_range.val() === '2') {
+			if (MUST_BE_PRONOUN) {
+				$pronounInput.prop('checked', true)
+				$pronounInput.prop('disabled', true)
+			}
+			$pronounCheckbox.show()
+		} else {
+			if (MUST_BE_PRONOUN) {
+				$pronounInput.prop('checked', false)
+				$pronounInput.prop('disabled', false)
+			}
+			$pronounCheckbox.hide()
+		}
+		last_val = $voice_range.val()
+	})
+	$switchesForm.submit(ev => {
+		if ($pronounInput.prop('disabled')) {
+			$pronounInput.prop('disabled', false)
+		}
 	})
 });
