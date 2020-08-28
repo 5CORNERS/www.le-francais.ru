@@ -51,6 +51,7 @@
                                    href="{{ request.user.profile.get_absolute_url }}">Мои
                                     посты{# TODO l18n Forum activity #}</a>
                             {% endif %}
+                            <div class="dropdown-divider"></div>
                             <a class="dropdown-item"
                                href="{% url 'dictionary:my_words' %}"
                             >
