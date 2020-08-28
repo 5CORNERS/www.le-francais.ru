@@ -7,8 +7,10 @@ import dictdiffer
 from bs4 import BeautifulSoup, Tag
 from django.core.management import BaseCommand
 
-from conjugation.consts import VOICE_ACTIVE, GENDER_MASCULINE, VOICE_PASSIVE, VOICE_REFLEXIVE, GENDER_FEMININE
-from conjugation.management.commands.parse_le_conjugueur import MOODS_TO_KEYS, TENSES_TO_KEYS, FORMULAS_SWITCHES, parse_le_conjugueur_url
+from conjugation.consts import VOICE_ACTIVE, GENDER_MASCULINE, VOICE_PASSIVE, VOICE_REFLEXIVE, GENDER_FEMININE, ETRE, \
+    AVOIR
+from conjugation.management.commands.parse_le_conjugueur import MOODS_TO_KEYS, TENSES_TO_KEYS, FORMULAS_SWITCHES, \
+    parse_le_conjugueur_url
 from conjugation.models import Verb
 from conjugation.table import Table, get_table
 
@@ -54,7 +56,7 @@ def key_to_switches(key):
     return switches
 
 
-def get_kwargs(verb:Verb):
+def get_kwargs(verb: Verb):
     combinations = []
 
     for key in FORMULAS_SWITCHES.values():
@@ -82,7 +84,7 @@ class Command(BaseCommand):
         parser.add_argument('--no-cache', dest='no_cache', action='store_true')
 
     def handle(self, *args, **options):
-        result_file =  open('conjugation/data/compare/result.txt', 'w', encoding='utf-8')
+        result_file = open('conjugation/data/compare/result.txt', 'w', encoding='utf-8')
         same_file = open('conjugation/data/compare/same.txt', 'w', encoding='utf-8')
         verbs = Verb.objects.prefetch_related('template').order_by('-count')
         result = {}
@@ -94,21 +96,22 @@ class Command(BaseCommand):
         if options['count']:
             verbs = verbs[:options['count']]
         l = len(verbs)
-        for n, verb in enumerate(verbs,1):
+        for n, verb in enumerate(verbs, 1):
             same = True
             print(f'{n}/{l}')
             result[f'{verb.infinitive}\t{verb.template.name}'] = {}
-            if verb.conjugated_with_avoir and verb.conjugated_with_etre:
-                etre_or_avoir = 'both'
-            elif verb.conjugated_with_etre:
-                ...
-            else:
-                etre_or_avoir = 'avoir'
             for combination, key in get_kwargs(verb):
                 p = Path(f'conjugation/data/compare/temp/{verb.infinitive}_{key}.json')
                 if not p.exists() or options['no_cache']:
-                    conjugueur_conjugations, identity = parse_le_conjugueur_url(get_conjugueur_url(verb, **combination), verb, check_identity=True)
+                    conjugueur_conjugations, identity, etre_or_avoir = parse_le_conjugueur_url(
+                        get_conjugueur_url(verb, **combination), verb, check_identity=True, check_etre_or_avoir=True)
                     if not identity:
+                        print(f'IDENTITY FAILED')
+                        continue
+                    if not (etre_or_avoir == ETRE and (
+                            verb.conjugates_with() == ETRE or combination['voice'] == VOICE_REFLEXIVE)) and not (
+                            etre_or_avoir == AVOIR and verb.conjugates_with() == AVOIR
+                    ):
                         print(f'IDENTITY FAILED')
                         continue
                     print(f'Comparing with https://www.le-francais.ru{verb.get_url(**combination)}')
