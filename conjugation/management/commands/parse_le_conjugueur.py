@@ -285,7 +285,7 @@ def merge_line_result(etre, formulas, line_result, mood, person_key, switch, ten
 	return formulas
 
 
-def parse_le_conjugueur_url(url, verb, check_identity=False):
+def parse_le_conjugueur_url(url, verb, check_identity=False, check_etre_or_avoir=False):
 	temp = Path(f'conjugation/data/parse_conjugations/temp/html/{url.split("/")[-1]}')
 	temp_wo_html = Path(f'conjugation/data/parse_conjugations/temp/html/{url.split("/")[-1].replace(".html","")}')
 	print(f'Parsing {url}')
@@ -311,11 +311,11 @@ def parse_le_conjugueur_url(url, verb, check_identity=False):
 			# sleep(SLEEP_DURATION_BETWEEN_REQUESTS)
 		else:
 			print('...proxy error')
-			return parse_le_conjugueur_url(url, verb, check_identity)
-	return parse_le_conjugueur_html(html=body, check_identity=check_identity, url=url)
+			return parse_le_conjugueur_url(url, verb, check_identity, check_etre_or_avoir=check_etre_or_avoir)
+	return parse_le_conjugueur_html(html=body, check_identity=check_identity, check_etre_or_avoir=check_etre_or_avoir, url=url)
 
 
-def parse_le_conjugueur_html(html, check_identity=False, url=None):
+def parse_le_conjugueur_html(html, check_identity=False, url=None, check_etre_or_avoir=False):
 	soup = BeautifulSoup(html, features="html5lib")
 	mood_tag: Tag
 	results = {}
@@ -327,6 +327,14 @@ def parse_le_conjugueur_html(html, check_identity=False, url=None):
 			identity = False
 		elif 'pronominal' in url and 's\'en' in title_tag.text:
 			identity = False
+	etre_or_avoir = None
+	if check_etre_or_avoir:
+		print('...checking etre or avoir')
+		etre_tag = soup.find("div", class_="verbe").find("nav")
+		if "avoir" in etre_tag.text:
+			etre_or_avoir = AVOIR
+		else:
+			etre_or_avoir = ETRE
 	print('...parsing')
 	for mood_tag in soup.find_all("div", class_="modeBloc"):
 		# le_conjugueur uses the modeBloc class w/o conjugations
@@ -358,7 +366,10 @@ def parse_le_conjugueur_html(html, check_identity=False, url=None):
 				'class']:
 				end_of_mood = True
 	if check_identity:
-		return results, identity
+		if check_etre_or_avoir:
+			return results, identity, etre_or_avoir
+		else:
+			return results, identity
 	else:
 		return results
 

@@ -377,6 +377,9 @@ class Verb(models.Model):
 			self._exceptions = list(self.exceptions.all())
 		return self._exceptions
 
+	def conjugates_with(self):
+		return AVOIR if not self.conjugated_with_etre else ETRE
+
 
 class Except(models.Model):
 	name = models.CharField(default='Exception', max_length=100)
