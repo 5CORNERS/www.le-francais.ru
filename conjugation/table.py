@@ -289,6 +289,7 @@ class Person:
 		if verb_forms is None:
 			return '-', '', ''
 		if isinstance(verb_forms, list):
+			verb_forms = verb_forms.copy()
 			verb_form:str = str(verb_forms[0])
 		else:
 			verb_form:str = str(verb_forms)
