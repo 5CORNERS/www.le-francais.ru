@@ -47,7 +47,9 @@ $(window).ready(function () {
       source: Urls['conjugation:autocomplete'](),
       minLength: 0,
       focus: function (event, ui) {
-        $("#search-verb").val(ui.item["verb"]);
+        if (event.originalEvent.originalEvent.type === 'keydown') {
+          $("#search-verb").val(ui.item["verb"]);
+        }
         if (ui.item['cls'].includes('hide')) {
           showHiddenAutocomplete()
         }
@@ -175,7 +177,8 @@ $(window).ready(function () {
       } else if (!b['isInfinitive']) {
         liClass = 'is-not-infinitive'
       }
-      return $(`<li class='verb-autocomplete-item ${liClass} ${b["cls"]}'>`)["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
+      return $(`<li class='verb-autocomplete-item ${liClass} ${b["cls"]}'>`
+      )["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
     };
     $searchVerb.on('focus', e=>{
       console.log('Focused on input');
