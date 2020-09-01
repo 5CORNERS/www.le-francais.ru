@@ -72,6 +72,9 @@ $(document).ready(function () {
     $('a#tab-flash-cards').one('show.bs.tab', function () {
         reloadPage(LESSON_NUMBER, 'flash-cards');
     });
+    $('a#tab-verbs').one('show.bs.tab', function () {
+        reloadPage(LESSON_NUMBER, 'verbs')
+    })
 
     let ua = window.navigator.userAgent;
     let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
