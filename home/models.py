@@ -458,6 +458,11 @@ class LessonPage(Page):
         else:
             return False
 
+    def has_verbs(self):
+        if self.verbpacket_set.exists():
+            return True
+        return False
+
     def several_word_packets(self):
         if self.dictionary_packets.all().count() > 1:
             return True

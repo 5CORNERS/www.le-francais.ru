@@ -805,6 +805,14 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
             }, request=request),
             transition=False
         ))
+    if tab_id is None or tab_id == 'verbs':
+        result.append(dict(
+            attr='verbs', type='html', href='verbs', title='Глаголы',
+            value=render_to_string('dictionary/verbs_tab.html', context={
+                'packet_id': page.verbpacket_set.first().pk
+            }, request=request),
+            transition=False
+        ))
     if not page.payed(user):
         for blocked in LESSON_PAGE_BLOCKED_CONTENT:
             for tab in result:
