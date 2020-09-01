@@ -75,7 +75,18 @@
         methods: {
 
             getNextCard: function () {
-                return this.cards[this.currentCard + 1]
+                if (this.type === LISTENING) {
+                    let nextCard = this.cards.slice(this.currentCard).find(card => card.isShownOnDrill)
+                    if (nextCard === undefined) {
+                        return this.cards[0]
+                    }
+                    return nextCard
+                } else {
+                    if (this.currentCard === (this.cards.length - 1)) {
+                        return this.cards[0]
+                    }
+                    return this.cards[this.currentCard + 1]
+                }
             },
             isInfinitive: function () {
                 return 'forms' in this.card
@@ -119,53 +130,72 @@
                 if (!this.pause) {
                     _this = this;
 
-                    this.progress += this.progressStep;
-
-                    var verb_timeout;
-                    if (this.nextCardIsInfinitive() || this.isInfinitive()){
-                        verb_timeout = this.timeoutInfinitive
-                        console.log('infinitive')
-                    }else{
-                        console.log('not-infinitive')
-                        verb_timeout = this.timeoutDefault
+                    if (this.progress < 100) {
+                        this.progress += this.progressStep;
                     }
 
                     if (this.card.isShownOnDrill || this.type == CHECKING) {
+                        var verb_timeout;
+                        if (this.nextCardIsInfinitive() || this.isInfinitive()) {
+                            // текущая или следующая карточка -- инфинитив
+                            verb_timeout = this.timeoutInfinitive
+                            console.log('infinitive')
+                        } else {
+                            // текущая и следующая карточка -- не инфинитив
+                            console.log('not-infinitive')
+                            verb_timeout = this.timeoutDefault
+                        }
+                        // карточка показывается в режиме прослушивания или режим проверки
                         playSound(this.card.pollyUrl).then(function (duration) {
                             duration *= 1000;
                             var translateTimeout;
                             if (this.card.isTranslation || this.type == CHECKING) {
+                                // карточка подлежит переводу или режим проверки
                                 translateTimeout = this.timeoutTranslation;
                             } else if (this.type == LISTENING) {
+                                // режим прослушивания и карточка не подлежит переводу
                                 translateTimeout = 0;
                             }
-                            console.log('translate timeout: '+Number(translateTimeout))
+                            console.log('translate timeout: ' + Number(translateTimeout))
                             setTimeout(function () {
 
                                 if ((_this.type == LISTENING && _this.card.isTranslation) || _this.type == CHECKING) {
+                                    // Карточка подлежит переводу и установлен режим прослушивания или режим проверки
                                     _this.card.flipped = !_this.card.flipped;
                                     playSound(_this.card.trPollyUrl).then(function (trDuration) {
                                         trDuration *= 1000;
-                                        console.log('word timeout: '+ (Number(_this.timeoutDefault) + Number(verb_timeout) + Number(trDuration)))
+                                        console.log('word timeout: ' + (Number(verb_timeout) + Number(trDuration)))
                                         setTimeout(function () {
                                             _this.currentCard++;
+                                            if (_this.currentCard === (_this.cards.length)) {
+                                                _this.currentCard = 0
+                                            }
                                             _this.card = array[_this.currentCard];
                                             _this.playCards(array);
-                                        }, Number(_this.timeoutDefault) + Number(verb_timeout) + Number(trDuration));
+                                        }, Number(verb_timeout) + Number(trDuration));
                                     }.bind(_this));
                                 } else {
-                                    console.log('word timeout: '+ (Number(_this.timeoutDefault) + Number(verb_timeout) + Number(duration)))
+                                    // Карточка не подлежит переводу и  установлен режим прослушивания
+                                    console.log('word timeout: ' + (Number(verb_timeout) + Number(duration)))
                                     setTimeout(function () {
                                         _this.currentCard++;
+                                        if (_this.currentCard === (_this.cards.length)) {
+                                            _this.currentCard = 0
+                                        }
                                         _this.card = array[_this.currentCard];
                                         _this.playCards(array);
-                                    }, Number(_this.timeoutDefault) + Number(verb_timeout) + Number(duration));
+                                    }, Number(verb_timeout) + Number(duration));
                                 }
                             }, Number(translateTimeout));
                         }.bind(this));
                     } else {
+                        // карточки не показывается в режиме прослушивания и режим прослушивания
                         _this.currentCard++;
+                        if (_this.currentCard === (_this.cards.length)) {
+                            _this.currentCard = 0
+                        }
                         _this.card = array[_this.currentCard];
+
                         _this.playCards(array);
                     }
                 }
