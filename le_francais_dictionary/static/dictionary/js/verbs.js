@@ -164,7 +164,7 @@
                             var translateTimeout;
                             if (this.card.isTranslation || this.type == CHECKING) {
                                 // карточка подлежит переводу или режим проверки
-                                translateTimeout = this.timeoutTranslation + duration;
+                                translateTimeout = Number(this.timeoutTranslation) + duration;
                             } else if (this.type == LISTENING) {
                                 // режим прослушивания и карточка не подлежит переводу
                                 translateTimeout = 0;
