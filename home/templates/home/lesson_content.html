@@ -50,7 +50,7 @@
                     </a>
                 </li>
             {% endif %}
-            {% if self.has_verbs and request.user.is_staff %}
+            {% if self.has_verbs %}
                 <li class="nav-item">
                     <a class="nav-link" id="tab-verbs" data-toggle="tab"
                        href="#verbs" role="tab"
@@ -257,7 +257,7 @@
                 </div>
             </div>
         {% endif %}
-        {% if self.has_verbs and request.user.is_staff %}
+        {% if self.has_verbs %}
             <div id="verbs" class="{{ pane_class }}" role="tabpanel">
                 <div id="lazy-verbs col-12">
                     <div class="alert alert-primary">Пожалуйста, дождитесь загрузки приложения. При медленном
