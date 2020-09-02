@@ -709,7 +709,9 @@ class Verb(models.Model):
 		(0, 'affirmative'),
 		(1, 'negative'),
 	], default=0)
+	regular = models.BooleanField(default=True)
 	translation = models.CharField(max_length=64, null=True)
+	translation_text = models.CharField(max_length=64, null=True)
 	packet = models.ForeignKey(VerbPacket, null=True, on_delete=models.SET_NULL)
 	polly = models.ForeignKey(PollyTask, null=True, on_delete=models.SET_NULL, related_name='dictionary_verb_set')
 	audio_url = models.URLField(null=True)
@@ -772,6 +774,7 @@ class VerbForm(models.Model):
 	is_shown = models.BooleanField(default=1)
 	form_to_show = models.CharField(max_length=64, null=True)
 	translation = models.CharField(max_length=64, null=True)
+	translation_text = models.CharField(max_length=64, null=True)
 	polly = models.ForeignKey(PollyTask, null=True, on_delete=models.SET_NULL,
 	                          related_name='dictionary_verb_form_set')
 	audio_url = models.URLField(null=True)
@@ -812,7 +815,7 @@ class VerbForm(models.Model):
 			file_title=self.form
 		)
 		self.translation_audio_url = google_cloud_tts(
-			self.translation,
+			self.translation_text if self.translation_text else self.translation,
 			filename=self.translation.replace(' ', '_'),
 			language=LANGUAGE_CODE_RU,
 			genre='m',
