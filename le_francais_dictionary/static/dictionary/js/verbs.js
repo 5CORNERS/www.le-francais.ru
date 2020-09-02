@@ -76,7 +76,7 @@
 
             getNextCard: function () {
                 if (this.type === LISTENING) {
-                    let nextCard = this.cards.slice(this.currentCard).find(card => card.isShownOnDrill)
+                    let nextCard = this.cards.slice(this.currentCard+1).find(card => card.isShownOnDrill)
                     if (nextCard === undefined) {
                         return this.cards[0]
                     }
@@ -126,7 +126,20 @@
                 array.sort(() => Math.random() - 0.5);
             },
 
-            playCards: function (array) {
+            playNextCard: function () {
+                this.currentCard++;
+                if (this.currentCard === (this.cards.length)) {
+                    this.currentCard = 0
+                }
+                if (this.type === LISTENING){
+                    this.card = this.cards[this.currentCard];
+                }else{
+                    this.card = this.cardsRepeat[this.currentCard];
+                }
+                this.playCards();
+            },
+
+            playCards: function () {
                 if (!this.pause) {
                     _this = this;
 
@@ -151,7 +164,7 @@
                             var translateTimeout;
                             if (this.card.isTranslation || this.type == CHECKING) {
                                 // карточка подлежит переводу или режим проверки
-                                translateTimeout = this.timeoutTranslation;
+                                translateTimeout = this.timeoutTranslation + duration;
                             } else if (this.type == LISTENING) {
                                 // режим прослушивания и карточка не подлежит переводу
                                 translateTimeout = 0;
@@ -166,37 +179,21 @@
                                         trDuration *= 1000;
                                         console.log('word timeout: ' + (Number(verb_timeout) + Number(trDuration)))
                                         setTimeout(function () {
-                                            _this.currentCard++;
-                                            if (_this.currentCard === (_this.cards.length)) {
-                                                _this.currentCard = 0
-                                            }
-                                            _this.card = array[_this.currentCard];
-                                            _this.playCards(array);
+                                            _this.playNextCard()
                                         }, Number(verb_timeout) + Number(trDuration));
                                     }.bind(_this));
                                 } else {
                                     // Карточка не подлежит переводу и  установлен режим прослушивания
                                     console.log('word timeout: ' + (Number(verb_timeout) + Number(duration)))
                                     setTimeout(function () {
-                                        _this.currentCard++;
-                                        if (_this.currentCard === (_this.cards.length)) {
-                                            _this.currentCard = 0
-                                        }
-                                        _this.card = array[_this.currentCard];
-                                        _this.playCards(array);
+                                        _this.playNextCard()
                                     }, Number(verb_timeout) + Number(duration));
                                 }
                             }, Number(translateTimeout));
                         }.bind(this));
                     } else {
                         // карточки не показывается в режиме прослушивания и режим прослушивания
-                        _this.currentCard++;
-                        if (_this.currentCard === (_this.cards.length)) {
-                            _this.currentCard = 0
-                        }
-                        _this.card = array[_this.currentCard];
-
-                        _this.playCards(array);
+                        _this.playNextCard()
                     }
                 }
             }
