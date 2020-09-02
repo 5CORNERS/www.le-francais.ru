@@ -1,6 +1,7 @@
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'dictionary/css/verbs.css' %}">
-
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
+<script src="{% static 'dictionary/js/verbs.js' %}"></script>
 <div class="col-12">
 	<div id="dict-app" data-lesson-number="{{ packet_id }}">
 		<div class="row">
@@ -83,6 +84,4 @@
 			</div>
 		</div>
 	</div>
-	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
-	<script src="{% static 'dictionary/js/verbs.js' %}"></script>
 </div>
