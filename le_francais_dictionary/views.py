@@ -473,7 +473,7 @@ def get_verbs(request, packet_id):
         })
         return JsonResponse(result, status=404)
     for verb in packet.verb_set.all():
-        result['verbs'].append(verb.to_dict(voice_translation=int(packet.lesson.lesson_number) % 2 == 0))
+        result['verbs'].append(verb.to_dict())
     return JsonResponse(result, status=200)
 
 

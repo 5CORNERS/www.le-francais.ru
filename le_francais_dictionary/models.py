@@ -718,7 +718,7 @@ class Verb(models.Model):
 	                                      related_name='dictionary_verb_translation_set')
 	translation_audio_url = models.URLField(null=True)
 
-	def to_dict(self, voice_translation):
+	def to_dict(self):
 		polly_url = self.audio_url if self.audio_url else self.polly.url if self.polly else None
 		if self.translation_audio_url:
 			translation_polly_url = self.translation_audio_url
@@ -735,7 +735,7 @@ class Verb(models.Model):
 			"pollyUrl": polly_url,
 			"translation": self.translation,
 			"trPollyUrl": translation_polly_url,
-			"isTranslation": voice_translation,
+			"isTranslation": False,
 			"isShownOnDrill": True,
 			"forms": forms,
 			"packet": self.packet_id
