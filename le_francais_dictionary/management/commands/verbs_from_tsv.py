@@ -16,7 +16,7 @@ class Command(BaseCommand):
 				verb, verb_created = Verb.objects.get_or_create(
 					verb=row['INFINITIVE'],
 				)
-				if not verb_created and (verb.translation != row['TRANSLATION'] or verb.translation_text != row['VOICE']):
+				if verb.translation != row['TRANSLATION'] or verb.translation_text != row['VOICE']:
 					verb.translation = row['TRANSLATION']
 					verb.translation_text = row['VOICE']
 					verb.save()

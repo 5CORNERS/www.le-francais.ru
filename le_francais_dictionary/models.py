@@ -746,7 +746,7 @@ class Verb(models.Model):
 	def to_voice(self):
 		self.audio_url = amazon_polly_tts(
 			self.verb,
-			filename=self.verb.replace(' ', '_'),
+			filename=self.verb.replace(' ', '_').replace('\'', '_'),
 			language=LANGUAGE_CODE_FR,
 			genre='f',
 			file_id=str(self.pk),
@@ -808,7 +808,7 @@ class VerbForm(models.Model):
 			s += ','
 		self.audio_url = amazon_polly_tts(
 			s,
-			filename=self.form.replace(' ', '_'),
+			filename=self.form.replace(' ', '_').replace('\'', '_'),
 			language=LANGUAGE_CODE_FR,
 			genre='f',
 			file_id=str(self.pk),

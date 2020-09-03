@@ -22,6 +22,7 @@ gulp.task('css', () => {
 });
 
 gulp.task('js', () => {
+    // language=file-reference
     return gulp.src([
         'node_modules/jquery/dist/jquery.js',
         'node_modules/bootstrap/dist/js/bootstrap.js',
@@ -30,6 +31,7 @@ gulp.task('js', () => {
         'node_modules/jquery.simple-checkbox-table/dist/jquery.simple-checkbox-table.js',
         'node_modules/moment/moment.js',
         'node_modules/js-cookie/src/js.cookie.js',
+        'node_modules/vue/dist/vue.js',
         'src/js/**/*.js'
     ])
         .pipe(uglify())
