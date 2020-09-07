@@ -1,10 +1,10 @@
 import re
 
 from polly.const import LANGUAGE_CODE_FR, LANGUAGE_CODE_RU
-from .tts import google_cloud_tts, amazon_polly_tts
+from .tts import google_cloud_tts, amazon_polly_tts, shtooka_by_title_in_path
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, JSONField
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.http import urlquote
@@ -806,14 +806,23 @@ class VerbForm(models.Model):
 			s += '.'
 		else:
 			s += ','
-		self.audio_url = amazon_polly_tts(
-			s,
-			filename=self.form.replace(' ', '_').replace('\'', '_'),
-			language=LANGUAGE_CODE_FR,
-			genre='f',
-			file_id=str(self.pk),
-			file_title=self.form
+		shtooka_url = shtooka_by_title_in_path(
+			title=self.form
 		)
+		polly_task = None
+		if not shtooka_url:
+			self.audio_url, polly_task = amazon_polly_tts(
+				s,
+				filename=self.form.replace(' ', '_').replace('\'', '_'),
+				language=LANGUAGE_CODE_FR,
+				genre='f',
+				file_id=str(self.pk),
+				file_title=self.form,
+				return_polly=True
+			)
+			self.polly = polly_task
+		else:
+			self.audio_url = shtooka_url
 		self.translation_audio_url = google_cloud_tts(
 			self.translation_text if self.translation_text else self.translation,
 			filename=self.translation.replace(' ', '_'),
@@ -822,7 +831,10 @@ class VerbForm(models.Model):
 			file_id=str(self.pk),
 			file_title=self.translation
 		)
-		self.save(update_fields=['audio_url', 'translation_audio_url'])
+		with transaction.atomic():
+			if polly_task:
+				polly_task.save()
+			self.save(update_fields=['audio_url', 'translation_audio_url', 'polly'])
 
 	class Meta:
 		ordering = ['order']
