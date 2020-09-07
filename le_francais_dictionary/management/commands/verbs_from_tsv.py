@@ -8,7 +8,7 @@ from le_francais_dictionary.models import Verb, VerbForm, VerbPacket
 class Command(BaseCommand):
 	def handle(self, *args, **options):
 		verb_translations_path = 'le_francais_dictionary/local/Verbs for cards - SMALL TABLE.csv'
-		verb_forms_path = 'le_francais_dictionary/local/Verbs for cards - Verbs for cards - GRAND TABLE.csv'
+		verb_forms_path = 'le_francais_dictionary/local/Verbs for cards - GRAND TABLE.csv'
 		with open(verb_translations_path, 'r', encoding='utf-8') as vt_f:
 			verb_translations_reader = csv.DictReader(vt_f,
 			                                          dialect=csv.excel)
@@ -16,9 +16,9 @@ class Command(BaseCommand):
 				verb, verb_created = Verb.objects.get_or_create(
 					verb=row['INFINITIVE'],
 				)
-				if verb.translation != row['TRANSLATION'] or verb.translation_text != row['VOICE']:
+				if verb.translation != row['TRANSLATION'] or verb.translation_text != row['RU_SYNT']:
 					verb.translation = row['TRANSLATION']
-					verb.translation_text = row['VOICE']
+					verb.translation_text = row['RU_SYNT']
 					verb.save()
 				else:
 					pass
@@ -68,4 +68,6 @@ class Command(BaseCommand):
 				verb_form.translation_text = row['RU SYNTH']
 				verb_form.is_shown = row['IS_SHOWN'] if row['IS_SHOWN'] == '1' else False
 				verb_form.form_to_show = form_to_show
+				if verb.translation is None:
+					continue
 				verb_form.save()
