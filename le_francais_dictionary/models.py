@@ -1,7 +1,7 @@
 import re
 
 from polly.const import LANGUAGE_CODE_FR, LANGUAGE_CODE_RU
-from .tts import google_cloud_tts, amazon_polly_tts, shtooka_by_title_in_path
+from .tts import google_cloud_tts, amazon_polly_tts, shtooka_by_title_in_path, FTP_FR_VERBS_PATH, FTP_RU_VERBS_PATH
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models, transaction
@@ -744,23 +744,34 @@ class Verb(models.Model):
 		}
 
 	def to_voice(self):
-		self.audio_url = amazon_polly_tts(
-			self.verb,
-			filename=self.verb.replace(' ', '_').replace('\'', '_'),
-			language=LANGUAGE_CODE_FR,
-			genre='f',
-			file_id=str(self.pk),
-			file_title=self.verb
-		)
+		shtooka_url = shtooka_by_title_in_path(title=self.verb, ftp_path=FTP_FR_VERBS_PATH)
+		polly_task = None
+		if shtooka_url:
+			self.audio_url = shtooka_url
+			self.polly = None
+		else:
+			self.audio_url, polly_task = amazon_polly_tts(
+				self.verb,
+				filename=self.verb.replace(' ', '_').replace('\'', '_'),
+				language=LANGUAGE_CODE_FR,
+				genre='f',
+				file_id=str(self.pk),
+				file_title=self.verb,
+				return_polly=True
+			)
 		self.translation_audio_url = google_cloud_tts(
-			self.translation,
+			self.translation_text or self.translation,
 			filename=self.translation.replace(' ', '_'),
 			language=LANGUAGE_CODE_RU,
 			genre='m',
 			file_id=str(self.pk),
 			file_title=self.translation
 		)
-		self.save(update_fields=['audio_url', 'translation_audio_url'])
+		with transaction.atomic():
+			if polly_task:
+				polly_task.save()
+				self.polly = polly_task
+			self.save(update_fields=['audio_url', 'translation_audio_url', 'polly'])
 		for form in self.verbform_set.all():
 			form.to_voice()
 
@@ -807,7 +818,8 @@ class VerbForm(models.Model):
 		else:
 			s += ','
 		shtooka_url = shtooka_by_title_in_path(
-			title=self.form
+			title=self.form,
+			ftp_path=FTP_FR_VERBS_PATH,
 		)
 		polly_task = None
 		if not shtooka_url:
@@ -818,18 +830,20 @@ class VerbForm(models.Model):
 				genre='f',
 				file_id=str(self.pk),
 				file_title=self.form,
-				return_polly=True
+				return_polly=True,
+				ftp_path=FTP_FR_VERBS_PATH
 			)
 			self.polly = polly_task
 		else:
 			self.audio_url = shtooka_url
 		self.translation_audio_url = google_cloud_tts(
-			self.translation_text if self.translation_text else self.translation,
+			self.translation_text or self.translation,
 			filename=self.translation.replace(' ', '_'),
 			language=LANGUAGE_CODE_RU,
 			genre='m',
 			file_id=str(self.pk),
-			file_title=self.translation
+			file_title=self.translation,
+			ftp_path=FTP_RU_VERBS_PATH
 		)
 		with transaction.atomic():
 			if polly_task:

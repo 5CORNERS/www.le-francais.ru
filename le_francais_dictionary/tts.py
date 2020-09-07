@@ -6,6 +6,8 @@ from mutagen.mp3 import EasyMP3
 from io import BytesIO
 
 import eyed3
+from unidecode import unidecode
+
 from polly.api import PollyAPI
 from polly.const import LANGUAGE_CODE_FR as LANGUAGE_FR, \
 	LANGUAGE_CODE_RU as LANGUAGE_RU, VOICE_ID_LEA as POLLY_FR_VOICE_FEMALE, \
@@ -14,11 +16,13 @@ from pydub import AudioSegment
 
 from polly.models import PollyTask
 
-fr_words = '/var/www/www-root/data/www/files.le-francais.ru/dictionnaires/sound/FR/'
-fr_verbs = fr_words + 'verbs/'
+FTP_FR_WORDS_PATH = '/var/www/www-root/data/www/files.le-francais.ru/dictionnaires/sound/FR/'
+fr_verbs = FTP_FR_WORDS_PATH + 'verbs/'
 fr_verbs_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/verbs/'
-ru_words = '/var/www/www-root/data/www/files.le-francais.ru/dictionnaires/sound/RU/'
-ru_verbs = ru_words + 'verbs/'
+FTP_RU_WORDS_PATH = '/var/www/www-root/data/www/files.le-francais.ru/dictionnaires/sound/RU/'
+FTP_FR_VERBS_PATH = '/var/www/www-root/data/www/files.le-francais.ru/dictionnaires/sound/FR/verbs/'
+FTP_RU_VERBS_PATH = '/var/www/www-root/data/www/files.le-francais.ru/dictionnaires/sound/RU/verbs/'
+ru_verbs = FTP_RU_WORDS_PATH + 'verbs/'
 ru_verbs_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/verbs/'
 GENRE_MASCULINE = 'm'
 GENRE_FEMININE = 'f'
@@ -44,7 +48,7 @@ def get_url_path(language_code):
 	else:
 		return ru_verbs_url
 
-def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, file_id=None, file_title=None):
+def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, file_id=None, file_title=None, ftp_path=None):
 	from google.cloud import texttospeech
 	client = texttospeech.TextToSpeechClient()
 	voices = client.list_voices(language_code=language).voices
@@ -70,11 +74,13 @@ def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
 		ssml='<speak>{0}</speak>'.format(s)
 	)
 	response = client.synthesize_speech(synthesis_input, voice, audio_config)
-	save_audio_stream_to_sftp(response.audio_content, get_path(language), filename, file_id, file_title, voice.name, file_album='Google Cloud')
-	return get_url_path(language) + filename + '.mp3'
+	filename = filename + '.mp3'
+	save_audio_stream_to_sftp(response.audio_content, ftp_path or get_path(language), filename, file_id, file_title, voice.name, file_album='Google Cloud')
+	return get_url_path(language) + filename
 
 
-def shtooka_by_title_in_path(title):
+def shtooka_by_title_in_path(title, ftp_path, language_code=LANGUAGE_FR):
+	title = unidecode(title).lower().strip()
 	path = os.environ.get('SHTOOKA_PATH', None)
 	if path is None:
 		return None
@@ -86,7 +92,7 @@ def shtooka_by_title_in_path(title):
 		for file in d.glob('*.mp3'):
 			mp3 = EasyMP3(file)
 			if 'title' in mp3.tags:
-				t = mp3['title'][0]
+				t = unidecode(mp3['title'][0]).strip('\r')
 			else:
 				print(f'{file.name}')
 				continue
@@ -100,13 +106,13 @@ def shtooka_by_title_in_path(title):
 
 	if title in titles_map.keys():
 		filename = titles_map[title]
-		with open(f'{path}/{filename}') as mp3_file:
-			put_to_ftp(filename, mp3_file, get_path(LANGUAGE_FR))
-		return get_url_path(LANGUAGE_FR) + filename
+		put_to_ftp(filename, f'{path}/{filename}', ftp_path or get_path(language_code))
+		# TODO fix different paths to return
+		return f'https://files.le-francais.ru/dictionnaires/sound/FR/verbs/{filename}'
 	else:
 		return None
 
-def amazon_polly_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, file_id=None, file_title=None, return_polly=False):
+def amazon_polly_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, file_id=None, file_title=None, return_polly=False, ftp_path=None):
 	if genre == GENRE_MASCULINE:
 		voice_id = POLLY_FR_VOICE_MALE
 	elif genre == GENRE_FEMININE:
@@ -122,10 +128,12 @@ def amazon_polly_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
 		output_format=OUTPUT_FORMAT_MP3,
 	)
 	stream = polly_task.get_audio_stream()
-	save_audio_stream_to_sftp(stream.read(), get_path(language), filename, file_id, file_title, voice_id, file_album='Amazon Polly')
+	save_to_ftp_path = ftp_path or get_path(language)
+	filename = filename + '.mp3'
+	save_audio_stream_to_sftp(stream.read(), save_to_ftp_path, filename, file_id, file_title, voice_id, file_album='Amazon Polly')
 	if return_polly:
-		return get_url_path(language) + filename + '.mp3', polly_task
-	return get_url_path(language) + filename + '.mp3'
+		return get_url_path(language) + filename, polly_task
+	return get_url_path(language) + filename
 
 
 def save_audio_stream_to_sftp(audio, path, filename, file_id, file_title,
@@ -153,5 +161,11 @@ def put_to_ftp(filename, mp3_file, path):
 		cnopts=cnopts
 	)
 	with srv.cd(path):
-		mp3_file.seek(0)
-		srv.putfo(mp3_file, filename)
+		if isinstance(mp3_file, str):
+			file = open(mp3_file, 'rb')
+			srv.putfo(file, filename)
+			file.close()
+		else:
+			file = mp3_file
+			srv.putfo(file, filename)
+	return True
