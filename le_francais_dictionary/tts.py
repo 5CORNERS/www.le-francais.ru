@@ -1,4 +1,7 @@
+import json
 import os
+from pathlib import Path
+
 from mutagen.mp3 import EasyMP3
 from io import BytesIO
 
@@ -67,10 +70,43 @@ def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
 		ssml='<speak>{0}</speak>'.format(s)
 	)
 	response = client.synthesize_speech(synthesis_input, voice, audio_config)
-	save_to_sftp(response.audio_content, get_path(language), filename, file_id, file_title, voice.name, file_album='Google Cloud')
+	save_audio_stream_to_sftp(response.audio_content, get_path(language), filename, file_id, file_title, voice.name, file_album='Google Cloud')
 	return get_url_path(language) + filename + '.mp3'
 
-def amazon_polly_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, file_id=None, file_title=None):
+
+def shtooka_by_title_in_path(title):
+	path = os.environ.get('SHTOOKA_PATH', None)
+	if path is None:
+		return None
+	map_filename = path.split(r'/')[-1]+'.json'
+	map_path = Path(f'le_francais_dictionary/local/mp3_maps/{map_filename}')
+	if not map_path.exists():
+		titles_map = {}
+		d = Path(path)
+		for file in d.glob('*.mp3'):
+			mp3 = EasyMP3(file)
+			if 'title' in mp3.tags:
+				t = mp3['title'][0]
+			else:
+				print(f'{file.name}')
+				continue
+			titles_map[t] = file.name
+		map_file = map_path.open('w', encoding='utf-8')
+		json.dump(titles_map, map_file)
+	else:
+		map_file = map_path.open('r', encoding='utf-8')
+		titles_map = json.load(map_file)
+	map_file.close()
+
+	if title in titles_map.keys():
+		filename = titles_map[title]
+		with open(f'{path}/{filename}') as mp3_file:
+			put_to_ftp(filename, mp3_file, get_path(LANGUAGE_FR))
+		return get_url_path(LANGUAGE_FR) + filename
+	else:
+		return None
+
+def amazon_polly_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, file_id=None, file_title=None, return_polly=False):
 	if genre == GENRE_MASCULINE:
 		voice_id = POLLY_FR_VOICE_MALE
 	elif genre == GENRE_FEMININE:
@@ -86,15 +122,16 @@ def amazon_polly_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
 		output_format=OUTPUT_FORMAT_MP3,
 	)
 	stream = polly_task.get_audio_stream()
-	save_to_sftp(stream.read(), get_path(language), filename, file_id, file_title, voice_id, file_album='Amazon Polly')
+	save_audio_stream_to_sftp(stream.read(), get_path(language), filename, file_id, file_title, voice_id, file_album='Amazon Polly')
+	if return_polly:
+		return get_url_path(language) + filename + '.mp3', polly_task
 	return get_url_path(language) + filename + '.mp3'
 
 
-def save_to_sftp(audio_stream, path, filename, file_id, file_title,
-                 file_author, file_album):
-	import pysftp
+def save_audio_stream_to_sftp(audio, path, filename, file_id, file_title,
+							  file_author, file_album):
 	with BytesIO() as mp3_file:
-		mp3_file.write(audio_stream)
+		mp3_file.write(audio)
 		mp3 = EasyMP3(mp3_file)
 		mp3.add_tags()
 		mp3['tracknumber'] = file_id
@@ -102,14 +139,19 @@ def save_to_sftp(audio_stream, path, filename, file_id, file_title,
 		mp3['artist'] = file_author
 		mp3['album'] = file_album
 		mp3.save(mp3_file)
-		cnopts = pysftp.CnOpts()
-		cnopts.hostkeys = None
-		srv = pysftp.Connection(
-			host=os.environ.get('SFTP_FILES_LE_FRANCAIS_HOSTNAME'),
-			username=os.environ.get('SFTP_FILES_LE_FRANCAIS_USERNAME'),
-			password=os.environ.get('SFTP_FILES_LE_FRANCAIS_PASSWORD'),
-			cnopts=cnopts
-		)
-		with srv.cd(path):
-			mp3_file.seek(0)
-			srv.putfo(mp3_file, filename + '.mp3')
+		put_to_ftp(filename, mp3_file, path)
+
+
+def put_to_ftp(filename, mp3_file, path):
+	import pysftp
+	cnopts = pysftp.CnOpts()
+	cnopts.hostkeys = None
+	srv = pysftp.Connection(
+		host=os.environ.get('SFTP_FILES_LE_FRANCAIS_HOSTNAME'),
+		username=os.environ.get('SFTP_FILES_LE_FRANCAIS_USERNAME'),
+		password=os.environ.get('SFTP_FILES_LE_FRANCAIS_PASSWORD'),
+		cnopts=cnopts
+	)
+	with srv.cd(path):
+		mp3_file.seek(0)
+		srv.putfo(mp3_file, filename)
