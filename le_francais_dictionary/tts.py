@@ -167,5 +167,6 @@ def put_to_ftp(filename, mp3_file, path):
 			file.close()
 		else:
 			file = mp3_file
+			file.seek(0)
 			srv.putfo(file, filename)
 	return True

@@ -710,6 +710,7 @@ class Verb(models.Model):
 		(1, 'negative'),
 	], default=0)
 	regular = models.BooleanField(default=True)
+	order = models.PositiveIntegerField(default=1)
 	translation = models.CharField(max_length=64, null=True)
 	translation_text = models.CharField(max_length=64, null=True)
 	packet = models.ForeignKey(VerbPacket, null=True, on_delete=models.SET_NULL)
@@ -720,6 +721,16 @@ class Verb(models.Model):
 	                                      related_name='dictionary_verb_translation_set')
 	translation_audio_url = models.URLField(null=True)
 
+	def __init__(self, *args, **kwargs):
+		super(Verb, self).__init__(*args, **kwargs)
+		self._forms = None
+
+	@property
+	def forms(self):
+		if self._forms is None:
+			self._forms = list(self.verbform_set.all().order_by('order'))
+		return self._forms
+
 	def to_dict(self):
 		polly_url = self.audio_url if self.audio_url else self.polly.url if self.polly else None
 		if self.translation_audio_url:
@@ -729,9 +740,6 @@ class Verb(models.Model):
 		else:
 			translation_polly_url = None
 		# has_translation = True if self.translation else False
-		forms = []
-		for form in self.verbform_set.all().order_by('order'):
-			forms.append(form.to_dict())
 		return {
 			"verb": self.verb,
 			"pollyUrl": polly_url,
@@ -739,25 +747,23 @@ class Verb(models.Model):
 			"trPollyUrl": translation_polly_url,
 			"isTranslation": False,
 			"isShownOnDrill": True,
-			"forms": forms,
+			"forms": [form.to_dict() for form in self.forms],
 			"packet": self.packet_id
 		}
 
-	def to_voice(self):
+	def to_voice(self, save=True):
 		shtooka_url = shtooka_by_title_in_path(title=self.verb, ftp_path=FTP_FR_VERBS_PATH)
-		polly_task = None
 		if shtooka_url:
 			self.audio_url = shtooka_url
 			self.polly = None
 		else:
-			self.audio_url, polly_task = amazon_polly_tts(
+			self.audio_url = amazon_polly_tts(
 				self.verb,
 				filename=self.verb.replace(' ', '_').replace('\'', '_'),
 				language=LANGUAGE_CODE_FR,
 				genre='f',
 				file_id=str(self.pk),
 				file_title=self.verb,
-				return_polly=True
 			)
 		self.translation_audio_url = google_cloud_tts(
 			self.translation_text or self.translation,
@@ -767,13 +773,9 @@ class Verb(models.Model):
 			file_id=str(self.pk),
 			file_title=self.translation
 		)
-		with transaction.atomic():
-			if polly_task:
-				polly_task.save()
-				self.polly = polly_task
-			self.save(update_fields=['audio_url', 'translation_audio_url', 'polly'])
-		for form in self.verbform_set.all():
-			form.to_voice()
+		if save:
+			self.save()
+		return self
 
 
 
@@ -811,9 +813,9 @@ class VerbForm(models.Model):
 			"trPollyUrl": translation_polly_url,
 		}
 
-	def to_voice(self):
+	def to_voice(self, save=True):
 		s = self.form
-		if VerbForm.objects.filter(verb=self.verb, is_shown=True).order_by('order').last() == self:
+		if self.verb.forms[-1] == self:
 			s += '.'
 		else:
 			s += ','
@@ -821,19 +823,16 @@ class VerbForm(models.Model):
 			title=self.form,
 			ftp_path=FTP_FR_VERBS_PATH,
 		)
-		polly_task = None
 		if not shtooka_url:
-			self.audio_url, polly_task = amazon_polly_tts(
+			self.audio_url = amazon_polly_tts(
 				s,
 				filename=self.form.replace(' ', '_').replace('\'', '_'),
 				language=LANGUAGE_CODE_FR,
 				genre='f',
 				file_id=str(self.pk),
 				file_title=self.form,
-				return_polly=True,
 				ftp_path=FTP_FR_VERBS_PATH
 			)
-			self.polly = polly_task
 		else:
 			self.audio_url = shtooka_url
 		self.translation_audio_url = google_cloud_tts(
@@ -845,10 +844,10 @@ class VerbForm(models.Model):
 			file_title=self.translation,
 			ftp_path=FTP_RU_VERBS_PATH
 		)
-		with transaction.atomic():
-			if polly_task:
-				polly_task.save()
+		if save:
 			self.save(update_fields=['audio_url', 'translation_audio_url', 'polly'])
+		return self
+
 
 	class Meta:
 		ordering = ['order']
