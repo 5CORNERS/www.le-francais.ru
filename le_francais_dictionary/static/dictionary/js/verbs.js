@@ -58,10 +58,10 @@
             translation: cards[0]['translation'],
             progress: 0,
             progressStep: 0,
-            timeoutWordsListening: 1000, // время между словами в режиме прослушивания
-            timeoutWordsChecking: 1000, // время между словами в режиме проверки
-            timeoutTranslation: 2000, // время между переводом
-            timeoutInfinitive: 2000, // время до и после инфинитива
+            timeoutWordsListening: 1, // время между словами в режиме прослушивания
+            timeoutWordsChecking: 1, // время между словами в режиме проверки
+            timeoutTranslation: 2, // время между переводом
+            timeoutInfinitive: 2, // время до и после инфинитива
             type: LISTENING,
             pause: true,
             error: false,
@@ -152,15 +152,15 @@
                         var verb_timeout;
                         if (this.nextCardIsInfinitive() || this.isInfinitive()) {
                             // текущая или следующая карточка -- инфинитив
-                            verb_timeout = this.timeoutInfinitive
+                            verb_timeout = this.timeoutInfinitive * 1000
                             console.log('infinitive')
                         } else {
                             // текущая и следующая карточка -- не инфинитив
                             console.log('not-infinitive')
                             if (this.type === LISTENING){
-                                verb_timeout = this.timeoutWordsListening;
+                                verb_timeout = this.timeoutWordsListening * 1000;
                             }else{
-                                verb_timeout = this.timeoutWordsChecking;
+                                verb_timeout = this.timeoutWordsChecking * 1000;
                             }
                         }
                         // карточка показывается в режиме прослушивания или режим проверки
@@ -169,12 +169,12 @@
                             var translateTimeout;
                             if (this.card.isTranslation || this.type == CHECKING) {
                                 // карточка подлежит переводу или режим проверки
-                                translateTimeout = Number(this.timeoutTranslation) + duration;
+                                translateTimeout = this.timeoutTranslation * 1000 + duration;
                             } else if (this.type == LISTENING) {
                                 // режим прослушивания и карточка не подлежит переводу
                                 translateTimeout = 0;
                             }
-                            console.log('translate timeout: ' + Number(translateTimeout))
+                            console.log('translate timeout: ' + translateTimeout)
                             setTimeout(function () {
 
                                 if ((_this.type == LISTENING && _this.card.isTranslation) || _this.type == CHECKING) {
