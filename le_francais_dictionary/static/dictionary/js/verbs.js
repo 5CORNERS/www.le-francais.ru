@@ -58,7 +58,8 @@
             translation: cards[0]['translation'],
             progress: 0,
             progressStep: 0,
-            timeoutDefault: 1000, // время между словами
+            timeoutWordsListening: 1000, // время между словами в режиме прослушивания
+            timeoutWordsChecking: 1000, // время между словами в режиме проверки
             timeoutTranslation: 2000, // время между переводом
             timeoutInfinitive: 2000, // время до и после инфинитива
             type: LISTENING,
@@ -156,7 +157,11 @@
                         } else {
                             // текущая и следующая карточка -- не инфинитив
                             console.log('not-infinitive')
-                            verb_timeout = this.timeoutDefault
+                            if (this.type === LISTENING){
+                                verb_timeout = this.timeoutWordsListening;
+                            }else{
+                                verb_timeout = this.timeoutWordsChecking;
+                            }
                         }
                         // карточка показывается в режиме прослушивания или режим проверки
                         playSound(this.card.pollyUrl).then(function (duration) {
