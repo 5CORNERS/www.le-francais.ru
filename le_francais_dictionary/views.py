@@ -472,7 +472,7 @@ def get_verbs(request, packet_id):
             "code":consts.PACKET_DOES_NOT_EXIST_CODE,
         })
         return JsonResponse(result, status=404)
-    for verb in packet.verb_set.all():
+    for verb in packet.verb_set.all().order_by('order'):
         result['verbs'].append(verb.to_dict())
     return JsonResponse(result, status=200)
 
