@@ -2,118 +2,112 @@ from bulk_update.helper import bulk_update
 from django.core.management import BaseCommand
 import csv
 
-from django.db import transaction
-
 from home.models import LessonPage
-from le_francais_dictionary.models import Verb, VerbForm, VerbPacket
+from le_francais_dictionary.models import Verb, VerbForm, VerbPacket, VerbPacketRelation
 
 
 class Command(BaseCommand):
 	def handle(self, *args, **options):
 		verb_translations_path = 'le_francais_dictionary/local/Verbs for cards - SMALL TABLE.csv'
 		verb_forms_path = 'le_francais_dictionary/local/Verbs for cards - GRAND TABLE.csv'
-		infinitive_verb_map = {}
-		existed_packets = {packet.name:packet for packet in list(VerbPacket.objects.all())}
+
+		existed_packets = {packet.lesson.lesson_number:packet for packet in list(VerbPacket.objects.select_related('lesson').all())}
 		existed_verbs = {verb.verb:verb for verb in list(Verb.objects.all())}
-		existed_forms = {verb_form.pk:verb_form for verb_form in list(VerbForm.objects.all())}
-		with open(verb_translations_path, 'r', encoding='utf-8') as vt_f:
-			verb_translations_reader = csv.DictReader(vt_f,
-			                                          dialect=csv.excel)
-			order = 0
-			verbs_to_save = []
-			for row in verb_translations_reader:
-				order += 1
-				verb = existed_verbs.get(row['INFINITIVE'], None)
-				if verb is None:
-					verb = Verb(
-						verb=row['INFINITIVE']
-					)
-				print(verb.verb)
-				verbs_to_save.append(verb)
-				verb.translation = row['TRANSLATION']
-				verb.translation_text = row['RU_SYNT']
-				verb.order = order
-				infinitive_verb_map[verb.verb] = verb
-				verbs_to_save.append(verb)
-			bulk_update([verb for verb in verbs_to_save if not verb._state.adding])
-			Verb.objects.bulk_create([verb for verb in verbs_to_save if verb._state.adding])
-		with open(verb_forms_path, 'r', encoding='utf-8') as vf_f:
-			verbs_to_save = []
-			verb_forms_to_save = []
-			packets_to_save = []
-			lessons = {lesson.lesson_number:lesson for lesson in LessonPage.objects.all()}
-			verb_forms_reader = csv.DictReader(vf_f,
-			                                          dialect=csv.excel)
-			verb = None
-			order = 0
-			for row in verb_forms_reader:
-				if not row['LESSON_NO']:
-					continue
-				if not row['TRANSLATION']:
-					continue
+		existed_forms = {verb_form.form:verb_form for verb_form in list(VerbForm.objects.all())}
+		VerbPacketRelation.objects.all().delete()
 
-				lesson = lessons[int(row['LESSON_NO'])]
-				packet_name = f'Глаголы урока {lesson.lesson_number}'
-				packet = existed_packets.get(
-					packet_name, None
+		verb_infinitives_file = open(verb_translations_path, 'r', encoding='utf-8')
+		verb_infinitives_reader = csv.DictReader(verb_infinitives_file, dialect=csv.excel)
+
+		infinitive_translation_map = {}
+		for row in verb_infinitives_reader:
+			infinitive = row['INFINITIVE']
+			translation = row['TRANSLATION']
+			translation_text = row['RU_SYNT']
+			infinitive_translation_map[infinitive] = (translation, translation_text)
+
+		verb_forms_file = open(verb_forms_path, 'r', encoding='utf-8')
+		verb_forms_reader = csv.DictReader(verb_forms_file, dialect=csv.excel)
+
+		forms_to_save = []
+		verb_packet_relations_to_save = []
+
+		verb_order = 0
+		form_order = 0
+		last_infinitive = None
+		last_lesson_number = None
+		lessons = {lesson.lesson_number: lesson for lesson in LessonPage.objects.all()}
+		for row in verb_forms_reader:
+			if not row['TRANSLATION'] or not row['LESSON_NO']:
+				continue
+			lesson_number = int(row['LESSON_NO'])
+			if lesson_number in existed_packets.keys():
+				packet = existed_packets[lesson_number]
+			else:
+				packet = VerbPacket(
+					name=f'Глаголы урока {lesson_number}',
+					lesson=lessons[lesson_number]
 				)
-				if packet is None:
-					packet = VerbPacket(
-						id=lesson.lesson_number,
-						name=packet_name,
-						lesson=lesson,
-					)
-					existed_packets[packet_name] = packet
-					packets_to_save.append(packet)
+				print(f'Saving Packet: {packet.name}')
+				packet.save()
+				existed_packets[lesson_number] = packet
 
-				try:
-					new_verb = infinitive_verb_map[row['VERBE']]
-				except KeyError:
-					continue
-				if verb == new_verb:
-					order += 1
-				else:
-					order = 1
-					verb = new_verb
-					verb.packet_id = packet.pk
-					if row['TYPE'] == 'affirmative':
-						verb.type = 0
-					elif row['TYPE'] == 'negative':
-						verb.type = 1
-					if row['CLASS'] != 'regular':
-						verb.regular = False
-					verbs_to_save.append(verb)
-				form_to_show:str = row['CONJUGAISON']
-				if form_to_show.find('ils') == 0:
-					form_to_show = 'ils (elles)' + form_to_show[3:]
-				elif form_to_show.find('il') == 0:
-					form_to_show ='il (elle, on)' + form_to_show[2:]
-				verb_form = existed_forms.get(int(row['ID']), None)
-				if verb_form is None:
-					verb_form = VerbForm(
-						id=int(row['ID']),
-						verb_id=verb.pk,
-						order=order,
-						form=row['CONJUGAISON'],
-						translation=row['TRANSLATION'],
-						translation_text=row['RU SYNTH'],
-						is_shown=row['IS_SHOWN'] if row['IS_SHOWN'] == '1' else False,
-						form_to_show=form_to_show,
-					)
-				else:
-					verb_form.verb_id = verb.pk
-					verb_form.order = order
-					verb_form.form = row['CONJUGAISON']
-					verb_form.translation = row['TRANSLATION']
-					verb_form.translation_text = row['RU SYNTH']
-					verb_form.is_shown = row['IS_SHOWN'] if row['IS_SHOWN'] == '1' else False
-					verb_form.form_to_show = form_to_show
-					if verb.translation is None:
-						continue
-				verb_forms_to_save.append(verb_form)
-				print(verb_form.form)
-			VerbPacket.objects.bulk_create([packet for packet in packets_to_save if packet._state.adding])
-			bulk_update([packet for packet in packets_to_save if not packet._state.adding])
-			bulk_update(verbs_to_save)
-			VerbForm.objects.bulk_create([form for form in verb_forms_to_save if form._state.adding])
-			bulk_update([form for form in verb_forms_to_save if not form._state.adding])
+			infinitive = row['VERBE']
+			if infinitive in existed_verbs.keys():
+				verb = existed_verbs[infinitive]
+			elif infinitive in infinitive_translation_map.keys():
+				verb = Verb(
+					verb=row['VERBE'],
+					type=Verb.TYPE_AFFIRMATIVE if row['TYPE'] == 'affirmative' else Verb.TYPE_NEGATIVE,
+					regular=True if row['CLASS'] == 'regular' else False,
+				)
+				verb.translation, verb.translation_text = infinitive_translation_map[infinitive]
+				print(f'Saving Verb: {verb.verb}')
+				verb.save()
+				existed_verbs[infinitive] = verb
+			else:
+				continue
+
+			if lesson_number != last_lesson_number:
+				verb_order = 0
+			last_lesson_number = lesson_number
+
+			if infinitive != last_infinitive:
+				verb_order += 1
+				verb_packet_relations_to_save.append(VerbPacketRelation(
+					packet=packet,
+					verb=verb,
+					order=verb_order
+				))
+				form_order = 0
+			last_infinitive = infinitive
+
+			form_order += 1
+			form_form = row['CONJUGAISON']
+			if form_form in existed_forms.keys():
+				form = existed_forms[form_form]
+			else:
+				form = VerbForm(form=form_form)
+				existed_forms[form_form] = form
+
+			form_to_show: str = row['CONJUGAISON']
+			if form_to_show.find('ils') == 0:
+				form_to_show = 'ils (elles)' + form_to_show[3:]
+			elif form_to_show.find('il') == 0:
+				form_to_show = 'il (elle, on)' + form_to_show[2:]
+
+			form.verb = verb
+			form.order = form_order
+			form.translation = row['TRANSLATION']
+			form.translation_text = row['RU SYNTH']
+			form.is_shown = row['IS_SHOWN'] if row['IS_SHOWN'] == '1' else False
+			form.form_to_show = form_to_show
+			forms_to_save.append(form)
+
+		print(f'Saving Verb to Packets relations...')
+		VerbPacketRelation.objects.bulk_create([rel for rel in verb_packet_relations_to_save if rel._state.adding])
+		bulk_update([rel for rel in verb_packet_relations_to_save if not rel._state.adding])
+
+		print(f'Saving verb Forms...')
+		VerbForm.objects.bulk_create([form for form in forms_to_save if form._state.adding])
+		bulk_update([form for form in forms_to_save if not form._state.adding])
