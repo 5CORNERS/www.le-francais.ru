@@ -763,7 +763,7 @@ class Verb(models.Model):
 			self.audio_url = shtooka_url
 			self.polly = None
 		else:
-			self.audio_url = amazon_polly_tts(
+			self.audio_url = google_cloud_tts(
 				self.verb,
 				filename=self.verb.replace(' ', '_').replace('\'', '_'),
 				language=LANGUAGE_CODE_FR,
@@ -834,7 +834,7 @@ class VerbForm(models.Model):
 			ftp_path=FTP_FR_VERBS_PATH,
 		)
 		if not shtooka_url:
-			self.audio_url = amazon_polly_tts(
+			self.audio_url = google_cloud_tts(
 				s,
 				filename=self.form.replace(' ', '_').replace('\'', '_'),
 				language=LANGUAGE_CODE_FR,
