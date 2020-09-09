@@ -573,7 +573,7 @@ class UserWordData(models.Model):
 
 	@property
 	def e_factor(self):
-		if self._e_factor is -1:
+		if self._e_factor == -1:
 			if self.grade:
 				dataset = self.user_word_dataset
 				self._e_factor, self._quality, self._mean_quality = sm2_ef_q_mq(dataset)
@@ -583,7 +583,7 @@ class UserWordData(models.Model):
 
 	@property
 	def mean_quality(self):
-		if self._mean_quality is -1:
+		if self._mean_quality == -1:
 			if self.grade:
 				dataset = self.user_word_dataset
 				self._e_factor, self._quality, self._mean_quality = sm2_ef_q_mq(
@@ -592,7 +592,7 @@ class UserWordData(models.Model):
 
 	@property
 	def quality(self):
-		if self._quality is -1:
+		if self._quality == -1:
 			dataset = self.user_word_dataset
 			self._e_factor, self._quality, self._mean_quality = sm2_ef_q_mq(dataset)
 		return self._quality
