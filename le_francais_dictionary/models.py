@@ -704,16 +704,22 @@ class VerbPacket(models.Model):
 
 
 class Verb(models.Model):
+	TYPE_AFFIRMATIVE = 0
+	TYPE_NEGATIVE = 1
+	TYPE_CHOICES = [
+		(TYPE_AFFIRMATIVE, 'affirmative'),
+		(TYPE_NEGATIVE, 'negative')
+	]
 	verb = models.CharField(max_length=64)
 	type = models.IntegerField(choices=[
 		(0, 'affirmative'),
 		(1, 'negative'),
 	], default=0)
 	regular = models.BooleanField(default=True)
-	order = models.PositiveIntegerField(default=1)
 	translation = models.CharField(max_length=64, null=True)
 	translation_text = models.CharField(max_length=64, null=True)
 	packet = models.ForeignKey(VerbPacket, null=True, on_delete=models.SET_NULL)
+	packets = models.ManyToManyField(VerbPacket, through='VerbPacketRelation' ,null=True, related_name='verbs')
 	polly = models.ForeignKey(PollyTask, null=True, on_delete=models.SET_NULL, related_name='dictionary_verb_set')
 	audio_url = models.URLField(null=True)
 	translation_polly = models.ForeignKey(PollyTask, null=True,
@@ -778,6 +784,10 @@ class Verb(models.Model):
 		return self
 
 
+class VerbPacketRelation(models.Model):
+	verb = models.ForeignKey(Verb, on_delete=models.CASCADE)
+	packet = models.ForeignKey(VerbPacket, on_delete=models.CASCADE)
+	order = models.PositiveIntegerField(default=1)
 
 
 class VerbForm(models.Model):
