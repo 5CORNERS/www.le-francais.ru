@@ -87,13 +87,13 @@ class PollyAPI:
 			polly_audio.save()
 		print()
 
-	def update_task(self, polly_audio):
+	def update_task(self, polly_task):
 		try:
-			response = self.client.get_speech_synthesis_task(TaskId=polly_audio.task_id)
+			response = self.client.get_speech_synthesis_task(TaskId=polly_task.task_id)
 		except ClientError as e:
 			if e.response['Error']['Code'] == 'SynthesisTaskNotFoundException':
-				self.start_task(polly_task=polly_audio, wait=False, save=True)
+				self.start_task(polly_task=polly_task, wait=False, save=True)
 				return None
 		for response_key, field in RESPONSE_PARAMS.items():
-			setattr(polly_audio, field, response['SynthesisTask'][response_key])
-		polly_audio.save()
+			setattr(polly_task, field, response['SynthesisTask'][response_key])
+		polly_task.save()
