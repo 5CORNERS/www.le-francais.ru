@@ -31,7 +31,7 @@ django-timezone-field>=3.1, <4.0
 django-braces
 APScheduler==3.0.0
 regex
-google==2.0.3
+google==3.0.0
 pysftp
 
 django-user-agents
