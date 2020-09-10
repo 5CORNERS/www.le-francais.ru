@@ -5,14 +5,11 @@ from pathlib import Path
 from mutagen.mp3 import EasyMP3
 from io import BytesIO
 
-import eyed3
 from unidecode import unidecode
 
-from polly.api import PollyAPI
 from polly.const import LANGUAGE_CODE_FR as LANGUAGE_FR, \
 	LANGUAGE_CODE_RU as LANGUAGE_RU, VOICE_ID_LEA as POLLY_FR_VOICE_FEMALE, \
 	VOICE_ID_MATHIEU as POLLY_FR_VOICE_MALE, TEXT_TYPE_SSML, TEXT_TYPE_TEXT, SAMPLE_RATE_22050, OUTPUT_FORMAT_MP3
-from pydub import AudioSegment
 
 from polly.models import PollyTask
 
@@ -62,18 +59,18 @@ def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
 	for voice in voices:
 		if voice.name == voice_name:
 			break
-	voice = texttospeech.types.VoiceSelectionParams(
+	voice = texttospeech.VoiceSelectionParams(
 		language_code=language,
 		name=voice.name,
 	)
-	audio_config = texttospeech.types.AudioConfig(
-		audio_encoding=texttospeech.enums.AudioEncoding.MP3,
+	audio_config = texttospeech.AudioConfig(
+		audio_encoding=texttospeech.AudioEncoding.MP3,
 		speaking_rate=speacking_rate or 0.9,
 	)
-	synthesis_input = texttospeech.types.SynthesisInput(
+	synthesis_input = texttospeech.SynthesisInput(
 		ssml='<speak>{0}</speak>'.format(s)
 	)
-	response = client.synthesize_speech(synthesis_input, voice, audio_config)
+	response = client.synthesize_speech(input=synthesis_input,voice=voice,audio_config=audio_config)
 	filename = filename + '.mp3'
 	save_audio_stream_to_sftp(response.audio_content, ftp_path or get_path(language), filename, file_id, file_title, voice.name, file_album='Google Cloud')
 	return get_url_path(language) + filename
