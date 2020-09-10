@@ -48,7 +48,7 @@ def get_url_path(language_code):
 	else:
 		return ru_verbs_url
 
-def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, file_id=None, file_title=None, ftp_path=None):
+def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, file_id=None, file_title=None, ftp_path=None, speacking_rate=None):
 	from google.cloud import texttospeech
 	client = texttospeech.TextToSpeechClient()
 	voices = client.list_voices(language_code=language).voices
@@ -68,7 +68,7 @@ def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
 	)
 	audio_config = texttospeech.types.AudioConfig(
 		audio_encoding=texttospeech.enums.AudioEncoding.MP3,
-		speaking_rate=0.9,
+		speaking_rate=speacking_rate or 0.9,
 	)
 	synthesis_input = texttospeech.types.SynthesisInput(
 		ssml='<speak>{0}</speak>'.format(s)
@@ -161,6 +161,8 @@ def put_to_ftp(filename, mp3_file, path):
 		cnopts=cnopts
 	)
 	with srv.cd(path):
+		if srv.exists(filename):
+			srv.remove(filename)
 		if isinstance(mp3_file, str):
 			file = open(mp3_file, 'rb')
 			srv.putfo(file, filename)
