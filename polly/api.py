@@ -1,6 +1,6 @@
 import boto3
 from django.conf import settings
-
+from botocore.exceptions import ClientError
 from .const import RESPONSE_PARAMS
 
 
@@ -88,7 +88,12 @@ class PollyAPI:
 		print()
 
 	def update_task(self, polly_audio):
-		response = self.client.get_speech_synthesis_task(TaskId=polly_audio.task_id)
+		try:
+			response = self.client.get_speech_synthesis_task(TaskId=polly_audio.task_id)
+		except ClientError as e:
+			if e.response['Error']['Code'] == 'SynthesisTaskNotFoundException':
+				self.start_task(polly_task=polly_audio, wait=False, save=True)
+				return None
 		for response_key, field in RESPONSE_PARAMS.items():
 			setattr(polly_audio, field, response['SynthesisTask'][response_key])
 		polly_audio.save()
