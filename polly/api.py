@@ -56,7 +56,8 @@ class PollyAPI:
 
 	def start_task(self, polly_task, wait=False, save=True):
 		"""
-		:param polly_task: PollyAudio
+		:type polly_task: polly.models.PollyTask
+		:param polly_task: PollyTask
 		:param wait: wait while task is complited (or failed)
 		:param save: save object before return
 		:return: dict {'AudioStream': StreamingBody(),'ContentType': 'string','RequestCharacters': 123}
