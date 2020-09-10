@@ -770,6 +770,8 @@ class Verb(models.Model):
 				genre='f',
 				file_id=str(self.pk),
 				file_title=self.verb,
+				ftp_path=FTP_FR_VERBS_PATH,
+				speacking_rate=1
 			)
 		self.translation_audio_url = google_cloud_tts(
 			self.translation_text or self.translation,
@@ -777,7 +779,9 @@ class Verb(models.Model):
 			language=LANGUAGE_CODE_RU,
 			genre='m',
 			file_id=str(self.pk),
-			file_title=self.translation
+			file_title=self.translation,
+			ftp_path=FTP_RU_VERBS_PATH,
+			speacking_rate=1
 		)
 		if save:
 			self.save()
@@ -825,15 +829,15 @@ class VerbForm(models.Model):
 
 	def to_voice(self, save=True):
 		s = self.form
-		if self.verb.forms[-1] == self:
-			s += '.'
-		else:
-			s += ','
 		shtooka_url = shtooka_by_title_in_path(
 			title=self.form,
 			ftp_path=FTP_FR_VERBS_PATH,
 		)
 		if not shtooka_url:
+			if self.verb.verbform_set.filter(is_shown=True).order_by('order').last() == self:
+				s += '.'
+			else:
+				s += ','
 			self.audio_url = google_cloud_tts(
 				s,
 				filename=self.form.replace(' ', '_').replace('\'', '_'),
@@ -841,7 +845,8 @@ class VerbForm(models.Model):
 				genre='f',
 				file_id=str(self.pk),
 				file_title=self.form,
-				ftp_path=FTP_FR_VERBS_PATH
+				ftp_path=FTP_FR_VERBS_PATH,
+				speacking_rate=1
 			)
 		else:
 			self.audio_url = shtooka_url
@@ -852,7 +857,8 @@ class VerbForm(models.Model):
 			genre='m',
 			file_id=str(self.pk),
 			file_title=self.translation,
-			ftp_path=FTP_RU_VERBS_PATH
+			ftp_path=FTP_RU_VERBS_PATH,
+			speacking_rate=1
 		)
 		if save:
 			self.save(update_fields=['audio_url', 'translation_audio_url', 'polly'])
