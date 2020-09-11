@@ -152,6 +152,8 @@ class Verb(models.Model):
 	is_archaique = models.BooleanField(default=False)
 	is_slang = models.BooleanField(default=False)
 
+	is_etre_verb = models.BooleanField(default=False)
+
 	group_no = models.IntegerField(default=1)
 	group_str = models.CharField(default="", max_length=256)
 	id_regle = models.IntegerField(default=200)
