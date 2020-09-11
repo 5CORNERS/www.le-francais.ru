@@ -242,7 +242,7 @@ class Person:
 		self.pronoun = pronoun
 
 		vowel_0 = -1 if v.infnitive_first_letter_is_vowel() else 0
-		if not self.v.conjugated_with_avoir or self.reflexive:
+		if not self.v.conjugated_with_avoir or self.reflexive or self.v.is_etre_verb:
 			etre_or_avoir = ETRE
 		else:
 			etre_or_avoir = AVOIR
