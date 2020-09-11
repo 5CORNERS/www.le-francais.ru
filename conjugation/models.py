@@ -378,7 +378,7 @@ class Verb(models.Model):
 		return self._exceptions
 
 	def conjugates_with(self):
-		return AVOIR if not self.conjugated_with_etre else ETRE
+		return ETRE if not self.conjugated_with_avoir else AVOIR
 
 
 class Except(models.Model):
