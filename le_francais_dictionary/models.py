@@ -704,17 +704,27 @@ class VerbPacket(models.Model):
 
 
 class Verb(models.Model):
+
 	TYPE_AFFIRMATIVE = 0
 	TYPE_NEGATIVE = 1
 	TYPE_CHOICES = [
 		(TYPE_AFFIRMATIVE, 'affirmative'),
 		(TYPE_NEGATIVE, 'negative')
 	]
+
+	TENSE_INDICATIVE_PRESENT = 0
+	TENSE_PASSE_COMPOSE = 1
+	TENSE_CHOICES = [
+		(TENSE_INDICATIVE_PRESENT, 'Indicatif Présent'),
+		(TENSE_PASSE_COMPOSE, 'Passé Composé')
+	]
+
 	verb = models.CharField(max_length=64)
 	type = models.IntegerField(choices=[
 		(0, 'affirmative'),
 		(1, 'negative'),
 	], default=0)
+	tense = models.IntegerField(choices=TENSE_CHOICES, null=True, default=None)
 	regular = models.BooleanField(default=True)
 	translation = models.CharField(max_length=64, null=True)
 	translation_text = models.CharField(max_length=64, null=True)
