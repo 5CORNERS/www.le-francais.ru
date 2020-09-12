@@ -754,7 +754,8 @@ class Verb(models.Model):
 			"isTranslation": False,
 			"isShownOnDrill": True,
 			"forms": [form.to_dict() for form in self.forms],
-			"packet": self.packet_id
+			"packet": self.packet_id,
+			"type": self.type,
 		}
 
 	def to_voice(self, save=True):
@@ -825,6 +826,7 @@ class VerbForm(models.Model):
 			"pollyUrl": polly_url,
 			"translation": self.translation,
 			"trPollyUrl": translation_polly_url,
+			"type": self.verb.type,
 		}
 
 	def to_voice(self, save=True):

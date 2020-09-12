@@ -809,7 +809,8 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
         result.append(dict(
             attr='verbs', type='html', href='verbs', title='Глаголы',
             value=render_to_string('dictionary/verbs_tab.html', context={
-                'packet_id': page.verbpacket_set.first().pk
+                'packet_id': page.verbpacket_set.first().pk,
+                'default_show_negative': 'true',
             }, request=request),
             transition=False
         ))
