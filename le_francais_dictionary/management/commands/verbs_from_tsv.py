@@ -3,11 +3,11 @@ from django.core.management import BaseCommand
 import csv
 
 from home.models import LessonPage
-from le_francais_dictionary.models import Verb, VerbForm, VerbPacket, VerbPacketRelation
+from le_francais_dictionary.models import Verb, VerbForm, VerbPacket, VerbPacketRelation, TENSE_CHOICES
 
 
 def get_tense_id(name):
-	for tense_id, tense_name in Verb.TENSE_CHOICES:
+	for tense_id, tense_name in TENSE_CHOICES:
 		if tense_name == name:
 			return tense_id
 	return None
@@ -42,6 +42,7 @@ class Command(BaseCommand):
 		verb_order = 0
 		form_order = 0
 		last_infinitive = None
+		last_tense = None
 		last_lesson_number = None
 		lessons = {lesson.lesson_number: lesson for lesson in LessonPage.objects.all()}
 		for row in verb_forms_reader:
@@ -67,7 +68,6 @@ class Command(BaseCommand):
 					verb=row['VERBE'],
 					type=Verb.TYPE_AFFIRMATIVE if row['TYPE'] == 'affirmative' else Verb.TYPE_NEGATIVE,
 					regular=True if row['CLASS'] == 'regular' else False,
-					tense=get_tense_id(row['TENSE'])
 				)
 				verb.translation, verb.translation_text = infinitive_translation_map[infinitive]
 				print(f'Saving Verb: {verb.verb}')
@@ -80,14 +80,17 @@ class Command(BaseCommand):
 				verb_order = 0
 			last_lesson_number = lesson_number
 
-			if infinitive != last_infinitive:
+			tense = row['TENSE']
+			if infinitive != last_infinitive or (infinitive == last_infinitive and tense != last_tense):
 				verb_order += 1
 				verb_packet_relations_to_save.append(VerbPacketRelation(
 					packet=packet,
 					verb=verb,
-					order=verb_order
+					order=verb_order,
+					tense=get_tense_id(tense)
 				))
 				form_order = 0
+			last_tense = tense
 			last_infinitive = infinitive
 
 			form_order += 1
@@ -109,6 +112,7 @@ class Command(BaseCommand):
 				form_to_show = 'il (elle, on)' + form_to_show[2:]
 
 			form.verb = verb
+			form.tense = get_tense_id(tense)
 			form.order = form_order
 			form.translation = row['TRANSLATION']
 			form.translation_text = row['RU SYNTH']
