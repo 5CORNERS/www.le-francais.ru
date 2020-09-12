@@ -2,12 +2,17 @@
 
     var url_string = window.location.href;
     var url = new URL(url_string);
-    const lesson = $('#dict-app').data('lesson-number');
+    var $dictApp = $('#dict-app')
+    const lesson = $dictApp.data('lesson-number');
+    const showNegativeDefault = $dictApp.data('show-negative')
 
     const response = await fetch('/dictionary/verbs/' + lesson);
     const data = await response.json();
     const LISTENING = 0;
     const CHECKING = 1;
+
+    const CARD_TYPE_AFFIRMATIVE = 0
+    const CARD_TYPE_NEGATIVE = 1
 
     var verbs = [];
     data.verbs.forEach(function (form) {
@@ -65,6 +70,7 @@
             type: LISTENING,
             pause: true,
             error: false,
+            showNegative: showNegativeDefault,
         },
 
         mounted() {
@@ -131,6 +137,7 @@
                 this.currentCard++;
                 if (this.currentCard === (this.cards.length)) {
                     this.currentCard = 0
+                    this.progress = 0
                 }
                 if (this.type === LISTENING){
                     this.card = this.cards[this.currentCard];
@@ -146,6 +153,10 @@
 
                     if (this.progress < 100) {
                         this.progress += this.progressStep;
+                    }
+
+                    if (!this.showNegative && this.card.type === CARD_TYPE_NEGATIVE){
+                        return this.playNextCard()
                     }
 
                     if (this.card.isShownOnDrill || this.type == CHECKING) {

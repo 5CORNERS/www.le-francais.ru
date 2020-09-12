@@ -84,11 +84,15 @@ class Command(BaseCommand):
 
 			form_order += 1
 			form_form = row['CONJUGAISON']
+
 			if form_form in existed_forms.keys():
 				form = existed_forms[form_form]
 			else:
 				form = VerbForm(form=form_form)
 				existed_forms[form_form] = form
+
+			if form in forms_to_save:
+				continue
 
 			form_to_show: str = row['CONJUGAISON']
 			if form_to_show.find('ils') == 0:
