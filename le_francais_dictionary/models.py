@@ -702,6 +702,16 @@ class VerbPacket(models.Model):
 	name = models.CharField(max_length=32)
 	lesson = models.ForeignKey('home.LessonPage', on_delete=models.SET_NULL, null=True)
 
+	def to_dict(self):
+		result = []
+		for verb_to_packet in VerbPacketRelation.objects.filter(packet=self).order_by('order'):
+			verb_dict = verb_to_packet.verb.to_dict()
+			verb_dict['forms'] = []
+			for form in verb_to_packet.verb.verbform_set.filter(tense=verb_to_packet.tense).order_by('order'):
+				verb_dict['forms'].append(form.to_dict())
+			result.append(verb_dict)
+		return result
+
 
 class Verb(models.Model):
 
@@ -712,19 +722,12 @@ class Verb(models.Model):
 		(TYPE_NEGATIVE, 'negative')
 	]
 
-	TENSE_INDICATIVE_PRESENT = 0
-	TENSE_PASSE_COMPOSE = 1
-	TENSE_CHOICES = [
-		(TENSE_INDICATIVE_PRESENT, 'Indicatif Présent'),
-		(TENSE_PASSE_COMPOSE, 'Passé Composé')
-	]
-
 	verb = models.CharField(max_length=64)
 	type = models.IntegerField(choices=[
 		(0, 'affirmative'),
 		(1, 'negative'),
 	], default=0)
-	tense = models.IntegerField(choices=TENSE_CHOICES, null=True, default=None)
+
 	regular = models.BooleanField(default=True)
 	translation = models.CharField(max_length=64, null=True)
 	translation_text = models.CharField(max_length=64, null=True)
@@ -763,19 +766,18 @@ class Verb(models.Model):
 			"trPollyUrl": translation_polly_url,
 			"isTranslation": False,
 			"isShownOnDrill": True,
-			"forms": [form.to_dict() for form in self.forms],
 			"packet": self.packet_id,
 			"type": self.type,
 		}
 
 	def to_voice(self, save=True):
-		shtooka_url = shtooka_by_title_in_path(title=self.verb, ftp_path=FTP_FR_VERBS_PATH)
+		shtooka_url = shtooka_by_title_in_path(title=self.verb.lower(), ftp_path=FTP_FR_VERBS_PATH)
 		if shtooka_url:
 			self.audio_url = shtooka_url
 			self.polly = None
 		else:
 			self.audio_url = google_cloud_tts(
-				self.verb,
+				self.verb.lower(),
 				filename=self.verb.replace(' ', '_').replace('\'', '_'),
 				language=LANGUAGE_CODE_FR,
 				genre='f',
@@ -798,14 +800,24 @@ class Verb(models.Model):
 			self.save()
 		return self
 
+TENSE_INDICATIVE_PRESENT = 0
+TENSE_PASSE_COMPOSE = 1
+TENSE_IMPERATIVE = 2
+TENSE_CHOICES = [
+	(TENSE_INDICATIVE_PRESENT, 'Indicatif Présent'),
+	(TENSE_PASSE_COMPOSE, 'Passé Composé'),
+	(TENSE_IMPERATIVE, 'Impératif')
+]
 
 class VerbPacketRelation(models.Model):
 	verb = models.ForeignKey(Verb, on_delete=models.CASCADE)
 	packet = models.ForeignKey(VerbPacket, on_delete=models.CASCADE)
 	order = models.PositiveIntegerField(default=1)
+	tense = models.IntegerField(choices=TENSE_CHOICES, default=0)
 
 
 class VerbForm(models.Model):
+	tense = models.IntegerField(choices=TENSE_CHOICES, null=True, default=None)
 	verb = models.ForeignKey(Verb, on_delete=models.CASCADE, null=True)
 	order = models.PositiveSmallIntegerField(null=True)
 	form = models.CharField(max_length=64, null=True)
@@ -837,6 +849,7 @@ class VerbForm(models.Model):
 			"translation": self.translation,
 			"trPollyUrl": translation_polly_url,
 			"type": self.verb.type,
+			"tense": self.tense,
 		}
 
 	def to_voice(self, save=True):
