@@ -105,7 +105,7 @@
             togglePause: function () {
                 this.pause = !this.pause;
                 if (this.pause == false) {
-                    if (this.type == LISTENING) {
+                    if (this.type === LISTENING) {
                         this.playCards(this.cards);
                     } else {
                         this.playCards(this.cardsRepeat);
@@ -115,12 +115,16 @@
 
             toggleType: function () {
 
-                this.type = !this.type;
+                if (this.type === LISTENING){
+                    this.type = CHECKING
+                }else{
+                    this.type = LISTENING
+                }
                 this.progress = 0;
                 this.currentCard = 0;
                 this.pause = true;
 
-                if (this.type == LISTENING) {
+                if (this.type === LISTENING) {
                     this.progressStep = 100 / (verbs.length - 1);
                     this.card = this.cards[0];
                 } else {
@@ -159,7 +163,7 @@
                         return this.playNextCard()
                     }
 
-                    if (this.card.isShownOnDrill || this.type == CHECKING) {
+                    if (this.card.isShownOnDrill || this.type === CHECKING) {
                         var verb_timeout;
                         if (this.nextCardIsInfinitive() || this.isInfinitive()) {
                             // текущая или следующая карточка -- инфинитив
@@ -178,17 +182,17 @@
                         playSound(this.card.pollyUrl).then(function (duration) {
                             duration *= 1000;
                             var translateTimeout;
-                            if (this.card.isTranslation || this.type == CHECKING) {
+                            if (this.card.isTranslation || this.type === CHECKING) {
                                 // карточка подлежит переводу или режим проверки
                                 translateTimeout = this.timeoutTranslation * 1000 + duration;
-                            } else if (this.type == LISTENING) {
+                            } else if (this.type === LISTENING) {
                                 // режим прослушивания и карточка не подлежит переводу
                                 translateTimeout = 0;
                             }
                             console.log('translate timeout: ' + translateTimeout)
                             setTimeout(function () {
 
-                                if ((_this.type == LISTENING && _this.card.isTranslation) || _this.type == CHECKING) {
+                                if ((_this.type === LISTENING && _this.card.isTranslation) || _this.type === CHECKING) {
                                     // Карточка подлежит переводу и установлен режим прослушивания или режим проверки
                                     _this.card.flipped = !_this.card.flipped;
                                     playSound(_this.card.trPollyUrl).then(function (trDuration) {
