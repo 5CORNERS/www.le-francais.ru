@@ -6,6 +6,13 @@ from home.models import LessonPage
 from le_francais_dictionary.models import Verb, VerbForm, VerbPacket, VerbPacketRelation
 
 
+def get_tense_id(name):
+	for tense_id, tense_name in Verb.TENSE_CHOICES:
+		if tense_name == name:
+			return tense_id
+	return None
+
+
 class Command(BaseCommand):
 	def handle(self, *args, **options):
 		verb_translations_path = 'le_francais_dictionary/local/Verbs for cards - SMALL TABLE.csv'
@@ -60,6 +67,7 @@ class Command(BaseCommand):
 					verb=row['VERBE'],
 					type=Verb.TYPE_AFFIRMATIVE if row['TYPE'] == 'affirmative' else Verb.TYPE_NEGATIVE,
 					regular=True if row['CLASS'] == 'regular' else False,
+					tense=get_tense_id(row['TENSE'])
 				)
 				verb.translation, verb.translation_text = infinitive_translation_map[infinitive]
 				print(f'Saving Verb: {verb.verb}')
@@ -85,14 +93,14 @@ class Command(BaseCommand):
 			form_order += 1
 			form_form = row['CONJUGAISON']
 
+			if next((f for f in forms_to_save if f.form == form_form), None):
+				continue
+
 			if form_form in existed_forms.keys():
 				form = existed_forms[form_form]
 			else:
 				form = VerbForm(form=form_form)
 				existed_forms[form_form] = form
-
-			if form in forms_to_save:
-				continue
 
 			form_to_show: str = row['CONJUGAISON']
 			if form_to_show.find('ils') == 0:
