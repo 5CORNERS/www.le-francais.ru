@@ -1,7 +1,7 @@
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'dictionary/css/verbs.css' %}">
 <div class="col-12">
-	<div id="dict-app" data-lesson-number="{{ packet_id }}">
+	<div id="dict-app" data-lesson-number="{{ packet_id }}" data-show-negative="{{ default_show_negative }}">
 		<div class="row">
 			<div class="col">
 				<div style="">
@@ -54,8 +54,14 @@
 									</div>
 								</div>
 								<div class="row">
-									<div class="input-group" v-if="pause">
-										<input type="number" class="form-control" placeholder="Задержка между переводом" aria-label="Задержка между переводом" v-model="timeoutTranslation">
+                                    <div class="input-group">
+                                        <div type="checkbox" class="custom-control custom-checkbox mb-2">
+                                            <input id="showNegativeInput" type="checkbox" class="custom-control-input" v-model="showNegative">
+                                            <label class="custom-control-label" for="showNegativeInput">Показывать отрицательные</label>
+                                        </div>
+                                    </div>
+									<div class="input-group">
+										<input type="number" class="form-control" placeholder="Задержка перед переводом" aria-label="Задержка между переводом" v-model="timeoutTranslation">
 										<div class="input-group-append">
 										  <span class="input-group-text">секунд перед переводом</span>
 										</div>
