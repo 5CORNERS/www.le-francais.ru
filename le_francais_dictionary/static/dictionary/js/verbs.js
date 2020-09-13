@@ -63,10 +63,10 @@
             translation: cards[0]['translation'],
             progress: 0,
             progressStep: 0,
-            timeoutWordsListening: 1, // время между словами в режиме прослушивания
+            timeoutWordsListening: 0.5, // время между словами в режиме прослушивания
             timeoutWordsChecking: 1, // время между словами в режиме проверки
-            timeoutTranslation: 2, // время между переводом
-            timeoutInfinitive: 2, // время до и после инфинитива
+            timeoutTranslation: 5, // время между переводом
+            timeoutInfinitive: 1.2, // время до и после инфинитива
             type: LISTENING,
             pause: true,
             error: false,
