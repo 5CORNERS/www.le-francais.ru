@@ -59,49 +59,21 @@
                                             <div type="checkbox" class="custom-control custom-checkbox mb-2">
                                                 <input id="showNegativeInput" type="checkbox"
                                                        class="custom-control-input" v-model="showNegative">
-                                                <label class="custom-control-label" for="showNegativeInput">Показывать
-                                                    отрицательные</label>
+                                                <label class="custom-control-label" for="showNegativeInput">Показывать отрицания</label>
                                             </div>
                                         </div>
                                         <div class="input-group">
-                                            <input type="number" class="form-control"
-                                                   placeholder="Задержка перед переводом"
-                                                   aria-label="Задержка между переводом" v-model="timeoutTranslation">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text">секунд перед переводом</span>
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">Пауза на раздумье (задержка перед ответом):</span>
                                             </div>
+                                            <select type="number" class="custom-select" aria-label="Пауза на раздумье (задержка перед ответом):" v-model="timeoutTranslation">
+                                                <option value="1">1 секунда</option>
+                                                <option value="2">2 секунды</option>
+                                                <option value="3">3 секунды</option>
+                                                <option value="4">4 секунды</option>
+                                                <option value="5" selected>5 секунд</option>
+                                            </select>
                                         </div>
-
-                                        <div class="input-group" v-if="pause">
-                                            <input type="number" class="form-control"
-                                                   placeholder="Задержка между словами"
-                                                   aria-label="Задержка между словами" v-model="timeoutWordsListening">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text">секунд между словами в послушивании</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="input-group" v-if="pause">
-                                            <input type="number" class="form-control"
-                                                   placeholder="Задержка до и после инфинитива"
-                                                   aria-label="Задержка до и после инфинитива"
-                                                   v-model="timeoutInfinitive">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text">секунд до и после инфинитива</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="input-group" v-if="pause">
-                                            <input type="number" class="form-control"
-                                                   placeholder="Задержка до и после инфинитива"
-                                                   aria-label="Задержка до и после инфинитива"
-                                                   v-model="timeoutWordsChecking">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text">секунд между словами в проверке</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
 								</div>
 							</div>
 						</div>
