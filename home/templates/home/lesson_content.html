@@ -41,6 +41,15 @@
                     </a>
                 </li>
             {% endif %}
+        {% if self.has_verbs %}
+                <li class="nav-item">
+                    <a class="nav-link" id="tab-verbs" data-toggle="tab"
+                       href="#verbs" role="tab"
+                       aria-controls="verbs">
+                        Глаголы
+                    </a>
+                </li>
+            {% endif %}
             {% if self.flash_cards_is_included %}
                 <li class="nav-item">
                     <a class="nav-link" id="tab-flash-cards" data-toggle="tab"
@@ -243,6 +252,14 @@
         {% if self.flash_cards_is_included %}
             <div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
                 <div id="lazy-flash-cards col-12">
+                    <div class="alert alert-primary">Пожалуйста, дождитесь загрузки приложения. При медленном
+                        соединении это может занять некторое время...</div>
+                </div>
+            </div>
+        {% endif %}
+        {% if self.has_verbs %}
+            <div id="verbs" class="{{ pane_class }}" role="tabpanel">
+                <div id="lazy-verbs col-12">
                     <div class="alert alert-primary">Пожалуйста, дождитесь загрузки приложения. При медленном
                         соединении это может занять некторое время...</div>
                 </div>
