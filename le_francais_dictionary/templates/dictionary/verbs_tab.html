@@ -1,5 +1,39 @@
-{% load static %}
+{% load static wagtailcore_tags%}
 <link rel="stylesheet" type="text/css" href="{% static 'dictionary/css/verbs.css' %}">
+<div class="col-12">
+    <div id="verbs-cards-info"
+         class="alert alert-success alert-dismissible fade show"
+         role="alert">
+        <span style="color:red">ВАЖНО!</span> Как учить спряжения глаголов, чтобы это работало -- узнайте <a
+            href="{% slugurl 'comment-apprendre-la-conjugaison-française' %}">из
+        маленькой статьи</a> о том, какие механизмы запоминания мы используем.
+        <button type="button" data-toggle="tooltip"
+                title="Больше не показывать"
+                id="hide-verbs-cards-info-button" class="close"
+                data-dismiss="alert"
+                aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+</div>
+<div class="col-12">
+    <div id="verbs-cards-alert" class="alert alert-info alert-dismissible fade show" role="alert">
+        <p>Перед вами дорелизная версия карточек для запоминания спряжений глаголов (версия v.0.8).</p>
+        <p>Это значит, что это еще не самый окончательный вариант, который мы готовы опубликовать, но он
+            уже достаточно работоспособен, чтобы помогать вам запоминать спряжение глаголов -- вот почему мы решили
+            опубликовать его заранее. </p>
+        <p class="mb-0">Дорелизная версия доступна всем без исключения. Она охватывает глаголы и их формы из 29 первых уроков. Работа
+            по добавлению глаголов к новым урокам продолжается. При желании, вы можете к ней подключиться -- пишите на
+            форум! :)</p>
+        <button type="button" data-toggle="tooltip"
+                title="Больше не показывать"
+                id="hide-verbs-cards-alert-button" class="close"
+                data-dismiss="alert"
+                aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+</div>
 <div class="col-12">
 	<div id="dict-app" data-lesson-number="{{ packet_id }}" data-show-negative="{{ default_show_negative }}" data-translate-infinitives="{{ default_translate_infinitives }}">
 		<div class="row">
@@ -98,4 +132,58 @@
             document.getElementsByTagName("head")[0].appendChild(script);
         })
     </script>
+    </div>
 </div>
+<div class="col-12">
+        <hr>
+        <button class="btn btn-link collapse-button" id="verbs-collapse-button-one" data-toggle="collapse"
+                data-target="#verbsCollapseOne" aria-expanded="true"
+                aria-controls="verbsCollapseOne" style="font-weight: bold">Учись
+            студент! (с) ;)&nbsp;<i class="arrows fas fa-arrow-down arrow_down"
+                                 style="vertical-align: bottom;"></i>
+        </button>
+        <button class="btn btn-link collapse-button" id="verbs-collapse-button-two" data-toggle="collapse"
+                data-target="#verbsCollapseTwo" aria-expanded="true"
+                aria-controls="verbsCollapseTwo" style="font-weight: bold">Наши
+            благодарности&nbsp;<i class="arrows fas fa-arrow-down arrow_down"
+                                  style="vertical-align: bottom;"></i>
+        </button>
+    </div>
+<div class="col-12">
+    <div id="verbsAccordion">
+        <div class="card collapse" id="verbsCollapseOne"
+             data-parent="#accordion">
+            <div class="card-body">
+                <p><b>Фаза 1.</b> Слушайте спряжение глаголов. Чем больше вы их прослушаете, тем лучше. Если вы
+                    заметили, что уже готовы читать спряжение вперед диктора, переходите к фазе 2.</p>
+                <p><b>Фаза 2.</b>Вам дается интервал в пять секунд, чтобы выудить из памяти форму спряжение глагола в
+                    произвольном лице и числе. Это сложнее, чем читать спряжение подряд, но это помогает по-настоящему
+                    закрепить и пользоваться тем, что вы выучили.</p>
+                <p>Как это работает на уровне памяти, читайте в статье «Как быстро запомнить спряжение глаголов».</p>
+                <p class="mb-0">Que La Force soit avec vous ! :)</p>
+            </div>
+        </div>
+        <div class="card collapse" id="verbsCollapseTwo"
+             data-parent="#accordion">
+            <div class="card-body">
+                <p>Клиентскую часть этого приложения нам помог написать Захар Возмилов, фронтенд-программист,
+                    Санкт-Петербург.</p>
+
+                <p>Дизайн — Виктория Думова, графический дизайнер, Санкт-Петербург.</p>
+
+                <p class="mb-0">В наполнение базы глаголов принимал участие Борис Поляков, город Котовск Тамбовской области, и
+                    Надежда Кузнецова, город Торжок.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#verbs-collapse-button-one').click(function (e) {
+        $('#verbs-collapse-button-one > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+        $('#verbs-collapse-button-two > i').removeClass('fa-arrow-up').addClass('fa-arrow-down');
+    });
+    $('#verbs-collapse-button-two').click(function (e) {
+        $('#verbs-collapse-button-two > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+        $('#verbs-collapse-button-one > i').removeClass('fa-arrow-up').addClass('fa-arrow-down');
+    });
+</script>
