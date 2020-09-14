@@ -8,7 +8,7 @@
 					<div>
 						<div id="flashcard-app">
 							<div class="row">
-								<div class="col d-flex align-items-center justify-content-center next-step-block">
+								<div style="padding-right: 6px" class="col d-flex align-items-center justify-content-center next-step-block">
 									<span :class="[type == 0 ? 'active' : false]">Запоминаем</span>
 									<a href="#" class="d-flex justify-content-center flex-column align-items-center filled" v-on:click="toggleType()">
 										<div class="radial-progress-container" style="height: 66px; width: 66px;">
@@ -20,7 +20,7 @@
 											</div>
 										</div>
 									</a>
-									<span :class="[type == 1 ? 'active' : false]">Проверяем</span>
+									<span :class="[type == 1 ? 'active' : false]">Отрабатываем</span>
 								</div>
 							</div>
 							<div>
