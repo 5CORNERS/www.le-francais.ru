@@ -18,7 +18,7 @@ from le_francais_dictionary.forms import WordsManagementFilterForm
 from .models import Word, Packet, UserPacket, \
     UserWordData, UserWordRepetition, UserWordIgnore, UserStandalonePacket, \
     WordTranslation, prefetch_words_data, VerbPacket, WordGroup, \
-    UserDayRepetition, get_repetition_words_query
+    UserDayRepetition, get_repetition_words_query, VerbPacketRelation
 from . import consts
 from home.models import UserLesson
 
@@ -472,8 +472,7 @@ def get_verbs(request, packet_id):
             "code":consts.PACKET_DOES_NOT_EXIST_CODE,
         })
         return JsonResponse(result, status=404)
-    for verb in packet.verb_set.all():
-        result['verbs'].append(verb.to_dict(voice_translation=int(packet.lesson.lesson_number) % 2 == 0))
+    result['verbs'] = packet.to_dict()
     return JsonResponse(result, status=200)
 
 
