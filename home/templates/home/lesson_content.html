@@ -41,21 +41,21 @@
                     </a>
                 </li>
             {% endif %}
+        {% if self.has_verbs %}
+                <li class="nav-item">
+                    <a class="nav-link" id="tab-verbs" data-toggle="tab"
+                       href="#verbs" role="tab"
+                       aria-controls="verbs">
+                        Глаголы
+                    </a>
+                </li>
+            {% endif %}
             {% if self.flash_cards_is_included %}
                 <li class="nav-item">
                     <a class="nav-link" id="tab-flash-cards" data-toggle="tab"
                        href="#flash-cards" role="tab"
                        aria-controls="flash-cards">
                         Карточки со словами
-                    </a>
-                </li>
-            {% endif %}
-            {% if self.has_verbs %}
-                <li class="nav-item">
-                    <a class="nav-link" id="tab-verbs" data-toggle="tab"
-                       href="#verbs" role="tab"
-                       aria-controls="verbs">
-                        Глаголы
                     </a>
                 </li>
             {% endif %}
