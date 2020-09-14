@@ -1,7 +1,7 @@
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'dictionary/css/verbs.css' %}">
 <div class="col-12">
-	<div id="dict-app" data-lesson-number="{{ packet_id }}" data-show-negative="{{ default_show_negative }}">
+	<div id="dict-app" data-lesson-number="{{ packet_id }}" data-show-negative="{{ default_show_negative }}" data-translate-infinitives="{{ default_translate_infinitives }}">
 		<div class="row">
 			<div class="col">
 				<div style="">
@@ -60,6 +60,13 @@
                                                 <input id="showNegativeInput" type="checkbox"
                                                        class="custom-control-input" v-model="showNegative">
                                                 <label class="custom-control-label" for="showNegativeInput">Показывать отрицания</label>
+                                            </div>
+                                        </div>
+                                        <div class="input-group">
+                                            <div type="checkbox" class="custom-control custom-checkbox mb-2">
+                                                <input id="translateInfinitivesInput" type="checkbox"
+                                                       class="custom-control-input" v-model="translateInfinitives">
+                                                <label class="custom-control-label" for="translateInfinitivesInput">Показывать перевод инфинитивов</label>
                                             </div>
                                         </div>
                                         <div class="input-group">

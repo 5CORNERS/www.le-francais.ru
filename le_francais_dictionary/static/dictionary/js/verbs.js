@@ -5,6 +5,7 @@
     var $dictApp = $('#dict-app')
     const lesson = $dictApp.data('lesson-number');
     const showNegativeDefault = $dictApp.data('show-negative')
+    const translateInfinitivesDefault = $dictApp.data('translate-infinitives')
 
     const response = await fetch('/dictionary/verbs/' + lesson);
     const data = await response.json();
@@ -71,6 +72,8 @@
             pause: true,
             error: false,
             showNegative: showNegativeDefault,
+            translateInfinitives: translateInfinitivesDefault,
+            timeoutInfinitiveTranslation: 0.5,
         },
 
         mounted() {
@@ -185,6 +188,8 @@
                             if (this.card.isTranslation || this.type === CHECKING) {
                                 // карточка подлежит переводу или режим проверки
                                 translateTimeout = this.timeoutTranslation * 1000 + duration;
+                            }else if (this.translateInfinitives && this.isInfinitive() && this.type === LISTENING){
+                                translateTimeout = this.timeoutInfinitiveTranslation * 1000 + duration;
                             } else if (this.type === LISTENING) {
                                 // режим прослушивания и карточка не подлежит переводу
                                 translateTimeout = 0;
@@ -192,7 +197,7 @@
                             console.log('translate timeout: ' + translateTimeout)
                             setTimeout(function () {
 
-                                if ((_this.type === LISTENING && _this.card.isTranslation) || _this.type === CHECKING) {
+                                if ((_this.type === LISTENING && _this.card.isTranslation) || _this.type === CHECKING || (_this.translateInfinitives && _this.isInfinitive() && _this.type === LISTENING)) {
                                     // Карточка подлежит переводу и установлен режим прослушивания или режим проверки
                                     _this.card.flipped = !_this.card.flipped;
                                     playSound(_this.card.trPollyUrl).then(function (trDuration) {
