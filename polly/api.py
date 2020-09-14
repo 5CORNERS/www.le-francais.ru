@@ -1,6 +1,6 @@
 import boto3
 from django.conf import settings
-
+from botocore.exceptions import ClientError
 from .const import RESPONSE_PARAMS
 
 
@@ -56,7 +56,8 @@ class PollyAPI:
 
 	def start_task(self, polly_task, wait=False, save=True):
 		"""
-		:param polly_task: PollyAudio
+		:type polly_task: polly.models.PollyTask
+		:param polly_task: PollyTask
 		:param wait: wait while task is complited (or failed)
 		:param save: save object before return
 		:return: dict {'AudioStream': StreamingBody(),'ContentType': 'string','RequestCharacters': 123}
@@ -87,8 +88,13 @@ class PollyAPI:
 			polly_audio.save()
 		print()
 
-	def update_task(self, polly_audio):
-		response = self.client.get_speech_synthesis_task(TaskId=polly_audio.task_id)
+	def update_task(self, polly_task):
+		try:
+			response = self.client.get_speech_synthesis_task(TaskId=polly_task.task_id)
+		except ClientError as e:
+			if e.response['Error']['Code'] == 'SynthesisTaskNotFoundException':
+				self.start_task(polly_task=polly_task, wait=False, save=True)
+				return None
 		for response_key, field in RESPONSE_PARAMS.items():
-			setattr(polly_audio, field, response['SynthesisTask'][response_key])
-		polly_audio.save()
+			setattr(polly_task, field, response['SynthesisTask'][response_key])
+		polly_task.save()

@@ -477,11 +477,15 @@ def get_verbs(request, packet_id):
 
 
 def get_repetition_words_count(request):
-    # FIXME can be done with one query
-    words = get_repetition_words_query(request.user)
-    result = {
-        'count': words.count()
-    }
+    if request.user.is_anonymous:
+        result = {
+            'count': 0
+        }
+    else:
+        words = get_repetition_words_query(request.user)
+        result = {
+            'count': words.count()
+        }
     return JsonResponse(result, status=200)
 
 @csrf_exempt
