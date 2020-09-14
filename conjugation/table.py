@@ -242,7 +242,10 @@ class Person:
 		self.pronoun = pronoun
 
 		vowel_0 = -1 if v.infnitive_first_letter_is_vowel() else 0
-		etre = AVOIR if not self.v.conjugated_with_etre and not self.reflexive else ETRE
+		if not self.v.conjugated_with_avoir or self.reflexive or self.v.is_etre_verb:
+			etre_or_avoir = ETRE
+		else:
+			etre_or_avoir = AVOIR
 		if self.v.is_impersonal and (
 				self.person_name != "person_III_S" and not (self.person_name == 'singular' and gender == 'm') and self.person_name != 'compose' and self.mood_name != 'infinitive' and self.mood_name != 'gerund'
 		):
@@ -250,7 +253,7 @@ class Person:
 		elif empty:
 			self.all_empty()
 		else:
-			self.part_0, self.forms, self.part_2 = self.get_parts(etre, 0, gender, vowel_0, reflexive, negative, question, passive, pronoun)
+			self.part_0, self.forms, self.part_2 = self.get_parts(etre_or_avoir, 0, gender, vowel_0, reflexive, negative, question, passive, pronoun)
 		if not isinstance(self.forms, list):
 			self.forms = [self.forms]
 		self.replace()

@@ -34,7 +34,7 @@ class PollyTask(models.Model):
 
 	def update_task(self):
 		api = PollyAPI()
-		api.update_task(polly_audio=self)
+		api.update_task(polly_task=self)
 
 	def get_audio_stream(self):
 		api = PollyAPI()

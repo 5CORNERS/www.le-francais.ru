@@ -152,6 +152,8 @@ class Verb(models.Model):
 	is_archaique = models.BooleanField(default=False)
 	is_slang = models.BooleanField(default=False)
 
+	is_etre_verb = models.BooleanField(default=False)
+
 	group_no = models.IntegerField(default=1)
 	group_str = models.CharField(default="", max_length=256)
 	id_regle = models.IntegerField(default=200)
@@ -378,7 +380,9 @@ class Verb(models.Model):
 		return self._exceptions
 
 	def conjugates_with(self):
-		return AVOIR if not self.conjugated_with_etre else ETRE
+		if self.is_etre_verb or not self.conjugated_with_avoir:
+			return ETRE
+		return AVOIR
 
 
 class Except(models.Model):

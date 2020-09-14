@@ -3,16 +3,18 @@ import json
 from datetime import datetime
 
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth import login
 from django.core.mail import EmailMessage
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import HttpResponse, render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
 from custom_user.consts import MESSAGE_FOR_NOT_PAYED, MESSAGE_FOR_PAYED
+from custom_user.forms import ForceLoginForm
 from custom_user.models import User, LogMessage
-
+from django.utils.translation import ugettext_lazy as _
 
 class SawMessageView(View):
     def dispatch(self, request, *args, **kwargs):
@@ -82,6 +84,29 @@ class AdminCommands(View):
                 user.must_pay = True
             user.save()
         return render(request, template_name='custom_user/admin_commands.html')
+
+
+class ForceLogin(View):
+    @method_decorator(staff_member_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ForceLogin, self).dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        form = ForceLoginForm()
+        return render(request, 'custom_user/admin/force_login.html', {'form': form})
+
+    def post(self, request):
+        form = ForceLoginForm(request.POST)
+        if form.is_valid():
+            try:
+                user = User.objects.get(email=form.cleaned_data['email'])
+                login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
+                return HttpResponseRedirect('/', request)
+            except User.DoesNotExist:
+                form.add_error('email', _('User with such email does not exist.'))
+                return render(request, 'custom_user/admin/force_login.html', {'form': form})
+        else:
+            return render(request, 'custom_user/admin/force_login.html', {'form': form})
 
 
 def update_timezone(request):

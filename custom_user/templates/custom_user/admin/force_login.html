@@ -1,0 +1,14 @@
+{% extends 'base.html' %}{% load bootstrap4 %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <form action="{% url 'custom_user:force_login' %}" method="post">
+                    {% csrf_token %}
+                    {% bootstrap_form form %}
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

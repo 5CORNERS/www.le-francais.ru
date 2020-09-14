@@ -13,3 +13,6 @@ class CaptchaAllauthSignupForm(forms.Form):
 
 class UserAddCupsForm(forms.Form):
 	cups = forms.IntegerField()
+
+class ForceLoginForm(forms.Form):
+	email = forms.EmailField()
