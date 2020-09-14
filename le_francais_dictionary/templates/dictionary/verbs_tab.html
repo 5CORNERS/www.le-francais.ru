@@ -1,0 +1,188 @@
+{% load static wagtailcore_tags%}
+<link rel="stylesheet" type="text/css" href="{% static 'dictionary/css/verbs.css' %}">
+<div class="col-12">
+    <div id="verbs-cards-alert" class="alert alert-info alert-dismissible fade show" role="alert">
+        <p><b>Перед вами дорелизная версия карточек для запоминания спряжений глаголов (версия v.0.8).</b></p>
+        <p>Это значит, что это еще не самый окончательный вариант, который мы готовы опубликовать, но он
+            уже достаточно работоспособен, чтобы помогать вам запоминать спряжение глаголов -- вот почему мы решили
+            опубликовать его заранее. </p>
+        <p class="mb-0">Дорелизная версия доступна всем без исключения. Она охватывает глаголы в двух временах из 29
+            первых уроков. Работа по добавлению глаголов к новым урокам продолжается параллельно работе над приложением.
+            При желании, вы можете к ней подключиться -- пишите на форум! :)</p>
+        <button type="button" data-toggle="tooltip"
+                title="Больше не показывать"
+                id="hide-verbs-cards-alert-button" class="close"
+                data-dismiss="alert"
+                aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+</div>
+<div class="col-12">
+    <div id="verbs-cards-info"
+         class="alert alert-success alert-dismissible fade show"
+         role="alert">
+        <span style="color:red">ВАЖНО!</span> Как учить спряжения глаголов, чтобы это работало -- узнайте <a
+            href="{% slugurl 'comment-apprendre-la-conjugaison-française' %}">из
+        маленькой статьи</a> о том, какие механизмы запоминания мы используем.
+        <button type="button" data-toggle="tooltip"
+                title="Больше не показывать"
+                id="hide-verbs-cards-info-button" class="close"
+                data-dismiss="alert"
+                aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+</div>
+<div class="col-12">
+	<div id="dict-app" data-lesson-number="{{ packet_id }}" data-show-negative="{{ default_show_negative }}" data-translate-infinitives="{{ default_translate_infinitives }}">
+		<div class="row">
+			<div class="col">
+				<div style="">
+					<div>
+						<div id="flashcard-app">
+							<div class="row">
+								<div style="padding-right: 6px" class="col d-flex align-items-center justify-content-center next-step-block">
+									<span :class="[type == 0 ? 'active' : false]">Запоминаем</span>
+									<a href="#" class="d-flex justify-content-center flex-column align-items-center filled" v-on:click="toggleType()">
+										<div class="radial-progress-container" style="height: 66px; width: 66px;">
+											<div class="radial-progress-inner" style="width: 46px;">
+												<div>
+													<img src="{% static 'dictionary/img/next_step.962d8a45.svg' %}">
+													<img src="{% static 'dictionary/img/next_step_white.2843dc7a.svg' %}" :class="[type == 1 ? 'rotated' : false]">
+												</div>
+											</div>
+										</div>
+									</a>
+									<span :class="[type == 1 ? 'active' : false]">Отрабатываем</span>
+								</div>
+							</div>
+							<div>
+								<div class="row">
+									<div class="col text-center">
+										<div class="word-card sex-none">
+											<div class="dummy-row">&nbsp;</div>
+											{% verbatim %}<span class="word-card-phrase">{{ card.verb ?? card.form }}</span>{% endverbatim %}
+
+										  <br><br><br><br><br>
+
+										  <span class="play-button">
+										  	<img v-if="pause" src="{% static 'dictionary/img/play.16146fde.svg' %}" v-on:click="togglePause()">
+										  	<img v-else="pause" src="{% static 'dictionary/img/pause.173288f8.svg' %}" v-on:click="togglePause()">
+										  </span>
+
+										  <br><br><br>
+											<div class="word-card-phrase">
+												{% verbatim %}<span v-if="card.flipped">{{ card.translation }}</span>{% endverbatim %}
+												<span v-else="card.flipped">&nbsp;</span>
+											</div>
+											<div class="dummy-row2">&nbsp;</div>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col">
+										<div class="progress" id="learn-progress-bar" style="height: 8px;">
+											<div role="progressbar" class="progress-bar" :style="{'width': progress + '%'}"></div>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+                                    <div class="col">
+                                        <div class="input-group">
+                                            <div type="checkbox" class="custom-control custom-checkbox mb-2">
+                                                <input id="showNegativeInput" type="checkbox"
+                                                       class="custom-control-input" v-model="showNegative">
+                                                <label class="custom-control-label" for="showNegativeInput">Показывать отрицания</label>
+                                            </div>
+                                        </div>
+                                        <div class="input-group" v-if="type === TYPE_LISTENING">
+                                            <div type="checkbox" class="custom-control custom-checkbox mb-2">
+                                                <input id="translateInfinitivesInput" type="checkbox"
+                                                       class="custom-control-input" v-model="translateInfinitives">
+                                                <label class="custom-control-label" for="translateInfinitivesInput">Показывать перевод инфинитивов</label>
+                                            </div>
+                                        </div>
+                                        <div class="input-group" v-if="type === TYPE_CHECKING">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">Пауза на раздумье (задержка перед ответом):</span>
+                                            </div>
+                                            <select type="number" class="custom-select" aria-label="Пауза на раздумье (задержка перед ответом):" v-model="timeoutTranslation">
+                                                <option value="1">1 секунда</option>
+                                                <option value="2">2 секунды</option>
+                                                <option value="3">3 секунды</option>
+                                                <option value="4">4 секунды</option>
+                                                <option value="5" selected>5 секунд</option>
+                                            </select>
+                                        </div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    <script>
+        ['{% static "components/js/vue.js" %}', '{% static "dictionary/js/verbs.js" %}'].forEach(src => {
+            let script = document.createElement("script");
+            script.setAttribute("src", src);
+            script.setAttribute("type", "text/javascript");
+            script.setAttribute("async", "true");
+            document.getElementsByTagName("head")[0].appendChild(script);
+        })
+    </script>
+    </div>
+</div>
+<div class="col-12">
+        <hr>
+        <button class="btn btn-link collapse-button" id="verbs-collapse-button-one" data-toggle="collapse"
+                data-target="#verbsCollapseOne" aria-expanded="true"
+                aria-controls="verbsCollapseOne" style="font-weight: bold">Советы&nbsp;<i class="arrows fas fa-arrow-down arrow_down"
+                                 style="vertical-align: bottom;"></i>
+        </button>
+        <button class="btn btn-link collapse-button" id="verbs-collapse-button-two" data-toggle="collapse"
+                data-target="#verbsCollapseTwo" aria-expanded="true"
+                aria-controls="verbsCollapseTwo" style="font-weight: bold">Наши
+            благодарности&nbsp;<i class="arrows fas fa-arrow-down arrow_down"
+                                  style="vertical-align: bottom;"></i>
+        </button>
+    </div>
+<div class="col-12">
+    <div id="verbsAccordion">
+        <div class="card collapse" id="verbsCollapseOne"
+             data-parent="#verbsAccordion">
+            <div class="card-body">
+                <p><b>Фаза 1.</b> Слушайте спряжение глаголов. Чем больше вы их прослушаете, тем лучше. Если вы
+                    заметили, что уже готовы читать спряжение вперед диктора, переходите к фазе 2.</p>
+                <p><b>Фаза 2.</b>Вам дается интервал в пять секунд, чтобы выудить из памяти форму спряжение глагола в
+                    произвольном лице и числе. Это сложнее, чем читать спряжение подряд, но это помогает по-настоящему
+                    закрепить и пользоваться тем, что вы выучили.</p>
+                <p>Как это работает на уровне памяти, читайте в статье <a href="{% slugurl 'comment-apprendre-la-conjugaison-française' %}">«Как быстро запомнить спряжение глаголов»</a>.</p>
+                <p class="mb-0">Que La Force soit avec vous ! :)</p>
+            </div>
+        </div>
+        <div class="card collapse" id="verbsCollapseTwo"
+             data-parent="#verbsAccordion">
+            <div class="card-body">
+                <p>Клиентскую часть этого приложения нам помог написать Захар Возмилов, фронтенд-программист,
+                    Санкт-Петербург.</p>
+
+                <p>Дизайн — Виктория Думова, графический дизайнер, Санкт-Петербург.</p>
+
+                <p class="mb-0">В наполнение базы глаголов принимал участие Борис Поляков, город Котовск Тамбовской области, и
+                    Надежда Кузнецова, город Торжок.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#verbs-collapse-button-one').click(function (e) {
+        $('#verbs-collapse-button-one > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+        $('#verbs-collapse-button-two > i').removeClass('fa-arrow-up').addClass('fa-arrow-down');
+    });
+    $('#verbs-collapse-button-two').click(function (e) {
+        $('#verbs-collapse-button-two > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+        $('#verbs-collapse-button-one > i').removeClass('fa-arrow-up').addClass('fa-arrow-down');
+    });
+</script>

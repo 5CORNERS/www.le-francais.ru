@@ -329,9 +329,9 @@ def ru_local_pyttsx3():
 
 
 def googletts_get_ru_voice(voices, genre):
-	VOICE_MALE_NAME = 'ru-RU-Wavenet-D'
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
 	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
-	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
 	if genre == GENRE_MASCULINE:
 		voice_name = VOICE_MALE_NAME
 	elif genre == GENRE_FEMININE:
@@ -370,7 +370,7 @@ def local_fr_googletts(language='FR'):
 	STRING_ROW_INDEX = 3
 	FILENAME_ROW_INDEX = 5
 	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
-	mp3_path = 'le_francais_dictionary/local/{0}_googletts/'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
 	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
 	client = texttospeech.TextToSpeechClient()
 	voices = client.list_voices(language_code=voices_language_code).voices
@@ -406,6 +406,7 @@ def local_fr_googletts(language='FR'):
 					text=string_to_synth
 				)
 			if language == 'FR':
+				continue
 				if obj.genre == GENRE_MASCULINE:
 					print("!!!WRONG_GENRE!!!")
 					continue
@@ -415,7 +416,7 @@ def local_fr_googletts(language='FR'):
 					name = voice.name,
 				)
 			elif language == 'RU':
-				if obj.genre == GENRE_MASCULINE:
+				if obj.genre != GENRE_MASCULINE:
 					print("!!!WRONG_GENRE!!!")
 					continue
 				voice = googletts_get_ru_voice(voices, obj.genre)
@@ -441,7 +442,7 @@ def local_fr_googletts(language='FR'):
 			mp3.tag.album = 'Google Cloud TTS'
 			mp3.tag.save(encoding='utf-8')
 	from bulk_update import helper
-	helper.bulk_update(to_update, update_fields=['_polly_url'])
+	# helper.bulk_update(to_update, update_fields=['_polly_url'])
 
 
 import os
