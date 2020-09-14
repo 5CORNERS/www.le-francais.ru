@@ -1,24 +1,8 @@
 {% load static wagtailcore_tags%}
 <link rel="stylesheet" type="text/css" href="{% static 'dictionary/css/verbs.css' %}">
 <div class="col-12">
-    <div id="verbs-cards-info"
-         class="alert alert-success alert-dismissible fade show"
-         role="alert">
-        <span style="color:red">ВАЖНО!</span> Как учить спряжения глаголов, чтобы это работало -- узнайте <a
-            href="{% slugurl 'comment-apprendre-la-conjugaison-française' %}">из
-        маленькой статьи</a> о том, какие механизмы запоминания мы используем.
-        <button type="button" data-toggle="tooltip"
-                title="Больше не показывать"
-                id="hide-verbs-cards-info-button" class="close"
-                data-dismiss="alert"
-                aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-</div>
-<div class="col-12">
     <div id="verbs-cards-alert" class="alert alert-info alert-dismissible fade show" role="alert">
-        <p>Перед вами дорелизная версия карточек для запоминания спряжений глаголов (версия v.0.8).</p>
+        <p><b>Перед вами дорелизная версия карточек для запоминания спряжений глаголов (версия v.0.8).</b></p>
         <p>Это значит, что это еще не самый окончательный вариант, который мы готовы опубликовать, но он
             уже достаточно работоспособен, чтобы помогать вам запоминать спряжение глаголов -- вот почему мы решили
             опубликовать его заранее. </p>
@@ -28,6 +12,22 @@
         <button type="button" data-toggle="tooltip"
                 title="Больше не показывать"
                 id="hide-verbs-cards-alert-button" class="close"
+                data-dismiss="alert"
+                aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+</div>
+<div class="col-12">
+    <div id="verbs-cards-info"
+         class="alert alert-success alert-dismissible fade show"
+         role="alert">
+        <span style="color:red">ВАЖНО!</span> Как учить спряжения глаголов, чтобы это работало -- узнайте <a
+            href="{% slugurl 'comment-apprendre-la-conjugaison-française' %}">из
+        маленькой статьи</a> о том, какие механизмы запоминания мы используем.
+        <button type="button" data-toggle="tooltip"
+                title="Больше не показывать"
+                id="hide-verbs-cards-info-button" class="close"
                 data-dismiss="alert"
                 aria-label="Close">
             <span aria-hidden="true">&times;</span>
