@@ -96,14 +96,14 @@
                                                 <label class="custom-control-label" for="showNegativeInput">Показывать отрицания</label>
                                             </div>
                                         </div>
-                                        <div class="input-group">
+                                        <div class="input-group" v-if="type === TYPE_LISTENING">
                                             <div type="checkbox" class="custom-control custom-checkbox mb-2">
                                                 <input id="translateInfinitivesInput" type="checkbox"
                                                        class="custom-control-input" v-model="translateInfinitives">
                                                 <label class="custom-control-label" for="translateInfinitivesInput">Показывать перевод инфинитивов</label>
                                             </div>
                                         </div>
-                                        <div class="input-group">
+                                        <div class="input-group" v-if="type === TYPE_CHECKING">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text">Пауза на раздумье (задержка перед ответом):</span>
                                             </div>
@@ -138,8 +138,8 @@
         <hr>
         <button class="btn btn-link collapse-button" id="verbs-collapse-button-one" data-toggle="collapse"
                 data-target="#verbsCollapseOne" aria-expanded="true"
-                aria-controls="verbsCollapseOne" style="font-weight: bold"><i class="arrows fas fa-arrow-down arrow_down"
-                                 style="vertical-align: bottom;">Советы</i>
+                aria-controls="verbsCollapseOne" style="font-weight: bold">Советы&nbsp;<i class="arrows fas fa-arrow-down arrow_down"
+                                 style="vertical-align: bottom;"></i>
         </button>
         <button class="btn btn-link collapse-button" id="verbs-collapse-button-two" data-toggle="collapse"
                 data-target="#verbsCollapseTwo" aria-expanded="true"
@@ -158,7 +158,7 @@
                 <p><b>Фаза 2.</b>Вам дается интервал в пять секунд, чтобы выудить из памяти форму спряжение глагола в
                     произвольном лице и числе. Это сложнее, чем читать спряжение подряд, но это помогает по-настоящему
                     закрепить и пользоваться тем, что вы выучили.</p>
-                <p>Как это работает на уровне памяти, читайте в статье «Как быстро запомнить спряжение глаголов».</p>
+                <p>Как это работает на уровне памяти, читайте в статье <a href="{% slugurl 'comment-apprendre-la-conjugaison-française' %}">«Как быстро запомнить спряжение глаголов»</a>.</p>
                 <p class="mb-0">Que La Force soit avec vous ! :)</p>
             </div>
         </div>

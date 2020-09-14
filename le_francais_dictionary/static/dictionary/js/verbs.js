@@ -74,6 +74,8 @@
             showNegative: showNegativeDefault,
             translateInfinitives: translateInfinitivesDefault,
             timeoutInfinitiveTranslation: 0.5,
+            TYPE_LISTENING: LISTENING,
+            TYPE_CHECKING: CHECKING,
         },
 
         mounted() {
