@@ -19,6 +19,7 @@ urlpatterns = [
     url('^my-words-save-filters/$', views.save_filters, name='save_filters'),
     url('^app/$', views.start_app, name='app'),
     url('^app/reviews/$', views.start_app_repeat, name='app_repeat'),
-    url('^verbs/(?P<packet_id>[0-9]+)/$', views.get_verbs, name='get_verbs'),
+    url('^verbs/(?P<packet_id>\d+)/$', views.get_verbs, name='get_verbs'),
+    url('^verbs/(?P<packet_id>\d+)/(?P<more_lessons>\d+)/$', views.get_verbs, name='get_verbs_more_lessons'),
 ]
 
