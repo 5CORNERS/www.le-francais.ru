@@ -107,6 +107,9 @@
             },
 
             loadMoreCards: async function () {
+                if (!this.pause){
+                    this.pause = true;
+                }
                 this.cards = await loadCards(currentPacketID, 5);
                 this.init();
                 this.startOver();
