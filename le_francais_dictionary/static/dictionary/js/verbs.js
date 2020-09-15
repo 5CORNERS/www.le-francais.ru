@@ -3,11 +3,11 @@
     var url_string = window.location.href;
     var url = new URL(url_string);
     var $dictApp = $('#dict-app')
-    const lesson = $dictApp.data('lesson-number');
+    const currentPacketID = $dictApp.data('lesson-number');
     const showNegativeDefault = $dictApp.data('show-negative')
     const translateInfinitivesDefault = $dictApp.data('translate-infinitives')
 
-    const response = await fetch('/dictionary/verbs/' + lesson);
+    const response = await fetch('/dictionary/verbs/' + currentPacketID);
     const data = await response.json();
     const LISTENING = 0;
     const CHECKING = 1;
@@ -15,16 +15,24 @@
     const CARD_TYPE_AFFIRMATIVE = 0
     const CARD_TYPE_NEGATIVE = 1
 
-    var verbs = [];
-    data.verbs.forEach(function (form) {
-        verbs = verbs.concat(form)
-        verbs = verbs.concat(form.forms)
-    });
+    var loadCards = async function (packetId, more_lessons=undefined){
+        let verbs = []
+        let r
+        if (more_lessons !== undefined && typeof more_lessons === 'number') {
+            r = await fetch(`/dictionary/verbs/${packetId}/${more_lessons}`);
+        }else{
+            r = await fetch(`/dictionary/verbs/${packetId}/`)
+        }
+        let d = await r.json();
+        d.verbs.forEach(function (form){
+            verbs = verbs.concat(form)
+            verbs = verbs.concat(form.forms)
+        });
 
-//const cards = verbs.map((form) => {return {...form, verb: form.form, flipped: false }});
-    const cards = verbs.map((form) => {
-        return {...form, flipped: false}
-    });
+        return verbs.map((form) => {
+            return {...form, flipped: false}
+        });
+    }
 
     const getAudionDuration = (url) => {
         return new Promise((resolve, reject) => {
@@ -47,21 +55,12 @@
 
         el: '#flashcard-app',
         data: {
-            cards: cards,
-            cardsRepeat: cards.slice().map((i) => {
-                return {
-                    ...i,
-                    form: i.translation,
-                    verb: i.translation,
-                    translation: i.verb || i.form,
-                    pollyUrl: i.trPollyUrl,
-                    trPollyUrl: i.pollyUrl
-                }
-            }),
+            cards: [],
+            cardsRepeat: [],
             //cardsRepeat — тоже самое что и cards, но перевод и слово поменяны местами
-            card: cards[0],
+            card: undefined,
             currentCard: 0,
-            translation: cards[0]['translation'],
+            translation: undefined,
             progress: 0,
             progressStep: 0,
             timeoutWordsListening: 0.5, // время между словами в режиме прослушивания
@@ -78,17 +77,49 @@
             TYPE_CHECKING: CHECKING,
         },
 
-        mounted() {
-            this.progressStep = 100 / (verbs.length - 1);
-            this.shuffle(this.cardsRepeat);
-            console.log(this.cards);
+        async mounted() {
+            this.cards = await loadCards(currentPacketID);
+            this.init();
         },
 
         methods: {
 
+            init: function () {
+                this.progressStep = 100 / (verbs.length - 1);
+                this.initRepeatCards();
+                this.card = this.cards[0]
+                this.translation = this.cards[0]['translation']
+                console.log(this.cards);
+            },
+
+            initRepeatCards: function () {
+                this.cardsRepeat = this.cards.slice().map((i) => {
+                    return {
+                        ...i,
+                        form: i.translation,
+                        verb: i.translation,
+                        translation: i.verb || i.form,
+                        pollyUrl: i.trPollyUrl,
+                        trPollyUrl: i.pollyUrl
+                    }
+                })
+                this.shuffle(this.cardsRepeat)
+            },
+
+            loadMoreCards: async function () {
+                this.cards = await loadCards(currentPacketID, 5);
+                this.init();
+                this.startOver();
+            },
+
+            startOver: function(){
+                this.progress = 0;
+                this.currentCard = 0;
+            },
+
             getNextCard: function () {
                 if (this.type === LISTENING) {
-                    let nextCard = this.cards.slice(this.currentCard+1).find(card => card.isShownOnDrill)
+                    let nextCard = this.cards.slice(this.currentCard + 1).find(card => card.isShownOnDrill)
                     if (nextCard === undefined) {
                         return this.cards[0]
                     }
@@ -109,7 +140,7 @@
 
             togglePause: function () {
                 this.pause = !this.pause;
-                if (this.pause == false) {
+                if (this.pause === false) {
                     if (this.type === LISTENING) {
                         this.playCards(this.cards);
                     } else {
@@ -120,9 +151,9 @@
 
             toggleType: function () {
 
-                if (this.type === LISTENING){
+                if (this.type === LISTENING) {
                     this.type = CHECKING
-                }else{
+                } else {
                     this.type = LISTENING
                 }
                 this.progress = 0;
@@ -147,10 +178,13 @@
                 if (this.currentCard === (this.cards.length)) {
                     this.currentCard = 0
                     this.progress = 0
+                    if (this.type === CHECKING){
+                        this.shuffle(this.cardsRepeat)
+                    }
                 }
-                if (this.type === LISTENING){
+                if (this.type === LISTENING) {
                     this.card = this.cards[this.currentCard];
-                }else{
+                } else {
                     this.card = this.cardsRepeat[this.currentCard];
                 }
                 this.playCards();
@@ -164,7 +198,7 @@
                         this.progress += this.progressStep;
                     }
 
-                    if (!this.showNegative && this.card.type === CARD_TYPE_NEGATIVE){
+                    if (!this.showNegative && this.card.type === CARD_TYPE_NEGATIVE) {
                         return this.playNextCard()
                     }
 
@@ -177,9 +211,9 @@
                         } else {
                             // текущая и следующая карточка -- не инфинитив
                             console.log('not-infinitive')
-                            if (this.type === LISTENING){
+                            if (this.type === LISTENING) {
                                 verb_timeout = this.timeoutWordsListening * 1000;
-                            }else{
+                            } else {
                                 verb_timeout = this.timeoutWordsChecking * 1000;
                             }
                         }
@@ -190,7 +224,7 @@
                             if (this.card.isTranslation || this.type === CHECKING) {
                                 // карточка подлежит переводу или режим проверки
                                 translateTimeout = this.timeoutTranslation * 1000 + duration;
-                            }else if (this.translateInfinitives && this.isInfinitive() && this.type === LISTENING){
+                            } else if (this.translateInfinitives && this.isInfinitive() && this.type === LISTENING) {
                                 translateTimeout = this.timeoutInfinitiveTranslation * 1000 + duration;
                             } else if (this.type === LISTENING) {
                                 // режим прослушивания и карточка не подлежит переводу
