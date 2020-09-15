@@ -767,6 +767,7 @@ class Verb(models.Model):
 			"isTranslation": False,
 			"isShownOnDrill": True,
 			"packet": self.packet_id,
+			"packets": [vpr.packet.pk for vpr in self.verbpacketrelation_set.all()],
 			"type": self.type,
 		}
 

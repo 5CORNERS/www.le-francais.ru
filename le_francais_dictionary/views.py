@@ -457,7 +457,9 @@ def start_app_repeat(request):
 	})
 
 
-def get_verbs(request, packet_id):
+def get_verbs(request, packet_id:int, more_lessons:int=None):
+    if more_lessons is not None:
+        more_lessons = int(more_lessons)
     result = {
         "verbs": [],
         "errors": [],
@@ -472,7 +474,16 @@ def get_verbs(request, packet_id):
             "code":consts.PACKET_DOES_NOT_EXIST_CODE,
         })
         return JsonResponse(result, status=404)
-    result['verbs'] = packet.to_dict()
+    if more_lessons:
+        current_lesson = packet.lesson.lesson_number
+        more_packets = list(VerbPacket.objects.filter(
+            lesson__lesson_number__gte=current_lesson - more_lessons,
+            lesson__lesson_number__lt=current_lesson
+        ).order_by('-lesson__lesson_number'))
+        for packet in [packet] + more_packets:
+            result['verbs'] = result['verbs'] + packet.to_dict()
+    else:
+        result['verbs'] = packet.to_dict()
     return JsonResponse(result, status=200)
 
 
