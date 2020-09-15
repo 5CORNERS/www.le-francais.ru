@@ -85,7 +85,8 @@
         methods: {
 
             init: function () {
-                this.progressStep = 100 / (verbs.length - 1);
+                this.progress = 0
+                this.progressStep = 100 / (this.cards.length - 1);
                 this.initRepeatCards();
                 this.card = this.cards[0]
                 this.translation = this.cards[0]['translation']
