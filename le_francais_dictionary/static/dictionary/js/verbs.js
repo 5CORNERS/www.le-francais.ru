@@ -75,6 +75,7 @@
             timeoutInfinitiveTranslation: 0.5,
             TYPE_LISTENING: LISTENING,
             TYPE_CHECKING: CHECKING,
+            moreVerbsLoaded: false,
         },
 
         async mounted() {
@@ -114,6 +115,7 @@
                 this.cards = await loadCards(currentPacketID, 5);
                 this.init();
                 this.startOver();
+                this.moreVerbsLoaded = true;
             },
 
             startOver: function(){
