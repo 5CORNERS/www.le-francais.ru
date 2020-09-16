@@ -3,7 +3,8 @@
     var url_string = window.location.href;
     var url = new URL(url_string);
     var $dictApp = $('#dict-app')
-    const currentPacketID = $dictApp.data('lesson-number');
+    const currentLessonNumber = $dictApp.data('lesson-number')
+    const currentPacketID = $dictApp.data('packet-id');
     const showNegativeDefault = $dictApp.data('show-negative')
     const translateInfinitivesDefault = $dictApp.data('translate-infinitives')
 
@@ -76,6 +77,7 @@
             TYPE_LISTENING: LISTENING,
             TYPE_CHECKING: CHECKING,
             moreVerbsLoaded: false,
+            lessonNumber: currentLessonNumber,
         },
 
         async mounted() {
@@ -94,6 +96,25 @@
                 console.log(this.cards);
             },
 
+            lessonsAbove: function (){
+                let dif = this.lessonNumber - 5
+                let la
+                if (dif < 0){
+                    la = 5 + dif
+                } else {
+                    return 'пяти'
+                }
+                if (la === 4) {
+                    return 'четырёх'
+                } else if (la === 3) {
+                    return 'трёх'
+                } else if (la === 2) {
+                    return 'двух'
+                } else if (la === 1) {
+                    return 'одного'
+                }
+            },
+
             initRepeatCards: function () {
                 this.cardsRepeat = this.cards.slice().map((i) => {
                     return {
@@ -106,6 +127,16 @@
                     }
                 })
                 this.shuffle(this.cardsRepeat)
+            },
+
+            loadInitCards: async function () {
+                    if (!this.pause){
+                        this.pause = true;
+                    }
+                    this.cards = await loadCards(currentPacketID);
+                    this.init();
+                    this.startOver();
+                    this.moreVerbsLoaded = false;
             },
 
             loadMoreCards: async function () {
