@@ -35,7 +35,7 @@
     </div>
 </div>
 <div class="col-12">
-	<div id="dict-app" data-lesson-number="{{ packet_id }}" data-show-negative="{{ default_show_negative }}" data-translate-infinitives="{{ default_translate_infinitives }}">
+	<div id="dict-app" data-lesson-number="{{ lesson_number }}" data-packet-id="{{ packet_id }}" data-show-negative="{{ default_show_negative }}" data-translate-infinitives="{{ default_translate_infinitives }}">
 		<div class="row">
 			<div class="col">
 				<div style="">
@@ -89,8 +89,11 @@
 								</div>
 								<div class="row">
                                     <div class="col">
-                                        <div class="input-group">
-                                            <button type="button" class="btn btn-primary mb-2" :disabled="moreVerbsLoaded" v-on:click="loadMoreCards">Добавить глаголы с 5 предыдущих уроков</button>
+                                        <div class="input-group" v-if="!moreVerbsLoaded">
+                                            {% verbatim %}<button type="button" class="btn btn-primary mb-2" :disabled="moreVerbsLoaded" v-on:click="loadMoreCards">Добавить глаголы с {{ lessonsAbove() }} предыдущих уроков</button>{% endverbatim %}
+                                        </div>
+                                        <div class="input-group" v-if="moreVerbsLoaded">
+                                            <button type="button" class="btn btn-primary mb-2" :disabled="!moreVerbsLoaded" v-on:click="loadInitCards">Сбросить</button>
                                         </div>
                                         <div class="input-group">
                                             <div type="checkbox" class="custom-control custom-checkbox mb-2">
