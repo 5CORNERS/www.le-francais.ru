@@ -3,7 +3,7 @@
 {% load site_tags %}
 {% load user_agents %}
 {% load bootstrap4 %}
-
+{% load svg %}
 {% block title %}{% include 'conjugation/conjugation_title.html' %}{% endblock %}
 {% block description %}{% include 'conjugation/conjugation_descritpion.html' %}{% endblock %}
 
@@ -51,7 +51,8 @@
 				<div class="row">
 					<div class="col-12">
 						<h1 class="title">Спряжение {% if not request|is_mobile %}глагола{% endif %}
-							{% if reflexive %}{{ v.reflexiveverb.infinitive }}{% elif pronoun %}s'en {{ v.infinitive }}{% else %}{{ v.infinitive }}{% endif %}
+                            <span class="text-danger text-uppercase">{% if reflexive %}{{ v.reflexiveverb.infinitive }}{% elif pronoun %}s'en
+                                {{ v.infinitive }}{% else %}{{ v.infinitive }}{% endif %}</span>
 									{% if not table.moods.5.tenses.0.is_empty %}
 										<a class="link-play-pause"
 										   style="cursor: pointer; margin: -2px 0;"><span
@@ -116,9 +117,9 @@
 					{% endif %}
 					<div class="col-12">
 
-                        {% for badge in badges %}<span class="badge badge-info ml-1">{{ badge }}</span>{% endfor %}
-                        <button class="btn btn-sm btn-link" data-toggle="collapse" href="#hiddenSwitches"
-                                role="button" aria-expanded="true">Изменить
+                        {% for badge in badges %}<span class="badge badge-primary ml-1 ml-lg-2 badge-switches pt-1 pb-1">{{ badge }}</span>{% endfor %}
+                        <button class="btn btn-sm btn-link pr-1 pl-1" id="settingsButton" data-toggle="collapse" href="#hiddenSwitches"
+                                role="button" aria-expanded="true">{% svg 'settings' %}
                         </button>
 
 <div class="collapse" id="hiddenSwitches">
