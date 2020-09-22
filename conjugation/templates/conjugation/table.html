@@ -115,10 +115,10 @@
 							</ul>
 						</div>
 					{% endif %}
-					<div class="col-12">
+					<div class="col-12" id="switchesRow" data-toggle="collapse" href="#hiddenSwitches">
 
                         {% for badge in badges %}<span class="badge badge-primary mr-1 mr-lg-2 badge-switches pt-1 pb-1">{{ badge }}</span>{% endfor %}
-                        <button class="btn btn-sm btn-link ml-0 pr-1 pl-1" id="settingsButton" data-toggle="collapse" href="#hiddenSwitches"
+                        <button class="btn btn-sm btn-link ml-0 pr-1 pl-1" id="settingsButton"
                                 role="button" aria-expanded="true">{% svg 'settings' %}
                         </button>
 
