@@ -387,4 +387,5 @@ datalist option {
 .badge-switches {
     letter-spacing: 1px;
     cursor: pointer;
+    padding-bottom: .35rem;
 }
