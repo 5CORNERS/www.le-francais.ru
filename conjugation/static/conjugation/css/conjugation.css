@@ -387,3 +387,7 @@ datalist option {
 .badge-switches {
     letter-spacing: 1px;
 }
+
+#switchesRow {
+    cursor: pointer;
+}
