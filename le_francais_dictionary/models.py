@@ -705,9 +705,11 @@ class VerbPacket(models.Model):
 	def to_dict(self):
 		result = []
 		for verb_to_packet in VerbPacketRelation.objects.filter(packet=self).order_by('order'):
+			if verb_to_packet.verb.audio_url is None:
+				continue
 			verb_dict = verb_to_packet.verb.to_dict()
 			verb_dict['forms'] = []
-			for form in verb_to_packet.verb.verbform_set.filter(tense=verb_to_packet.tense).order_by('order'):
+			for form in verb_to_packet.verb.verbform_set.filter(tense=verb_to_packet.tense, audio_url__isnull=False).order_by('order'):
 				verb_dict['forms'].append(form.to_dict())
 			result.append(verb_dict)
 		return result
@@ -772,13 +774,16 @@ class Verb(models.Model):
 		}
 
 	def to_voice(self, save=True):
-		shtooka_url = shtooka_by_title_in_path(title=self.verb.lower(), ftp_path=FTP_FR_VERBS_PATH)
+		voice_string = self.verb.lower()
+		voice_string = re.sub(r'\(.*\)', '', voice_string)
+		voice_string = voice_string.strip()
+		shtooka_url = shtooka_by_title_in_path(title=voice_string, ftp_path=FTP_FR_VERBS_PATH)
 		if shtooka_url:
 			self.audio_url = shtooka_url
 			self.polly = None
 		else:
 			self.audio_url = google_cloud_tts(
-				self.verb.lower(),
+				voice_string,
 				filename=self.verb.replace(' ', '_').replace('\'', '_'),
 				language=LANGUAGE_CODE_FR,
 				genre='f',
@@ -807,7 +812,7 @@ TENSE_IMPERATIVE = 2
 TENSE_CHOICES = [
 	(TENSE_INDICATIVE_PRESENT, 'Indicatif Présent'),
 	(TENSE_PASSE_COMPOSE, 'Passé Composé'),
-	(TENSE_IMPERATIVE, 'Impératif')
+	(TENSE_IMPERATIVE, 'Impératif Présent')
 ]
 
 class VerbPacketRelation(models.Model):
@@ -854,18 +859,20 @@ class VerbForm(models.Model):
 		}
 
 	def to_voice(self, save=True):
-		s = self.form
+		voice_string = self.form.lower()
+		voice_string = re.sub(r'\(.*\)', '', voice_string)
+		voice_string = voice_string.strip()
 		shtooka_url = shtooka_by_title_in_path(
-			title=self.form,
+			title=voice_string,
 			ftp_path=FTP_FR_VERBS_PATH,
 		)
 		if not shtooka_url:
 			if self.verb.verbform_set.filter(is_shown=True).order_by('order').last() == self:
-				s += '.'
+				voice_string += '.'
 			else:
-				s += ','
+				voice_string += ','
 			self.audio_url = google_cloud_tts(
-				s,
+				voice_string,
 				filename=self.form.replace(' ', '_').replace('\'', '_'),
 				language=LANGUAGE_CODE_FR,
 				genre='f',
