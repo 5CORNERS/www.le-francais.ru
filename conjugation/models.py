@@ -424,6 +424,10 @@ class ReflexiveVerb(models.Model):
 
 	is_impersonal = models.BooleanField(default=False)
 
+	@property
+	def non_breakable_space_infinitive(self):
+		return self.infinitive.replace(' ', '&nbsp;')
+
 	def is_short(self):
 		if self.verb.infnitive_first_letter_is_vowel():
 			return True
