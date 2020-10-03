@@ -2,7 +2,7 @@ import json
 import os
 from pathlib import Path
 
-from mutagen.mp3 import EasyMP3
+from mutagen.mp3 import EasyMP3, HeaderNotFoundError
 from io import BytesIO
 
 from unidecode import unidecode
@@ -16,11 +16,13 @@ from polly.models import PollyTask
 FTP_FR_WORDS_PATH = '/var/www/www-root/data/www/files.le-francais.ru/dictionnaires/sound/FR/'
 fr_verbs = FTP_FR_WORDS_PATH + 'verbs/'
 fr_verbs_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/verbs/'
+fr_words_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
 FTP_RU_WORDS_PATH = '/var/www/www-root/data/www/files.le-francais.ru/dictionnaires/sound/RU/'
 FTP_FR_VERBS_PATH = '/var/www/www-root/data/www/files.le-francais.ru/dictionnaires/sound/FR/verbs/'
 FTP_RU_VERBS_PATH = '/var/www/www-root/data/www/files.le-francais.ru/dictionnaires/sound/RU/verbs/'
 ru_verbs = FTP_RU_WORDS_PATH + 'verbs/'
 ru_verbs_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/verbs/'
+ru_words_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
 GENRE_MASCULINE = 'm'
 GENRE_FEMININE = 'f'
 GOOGLE_FR_VOICE_MALE = 'Wavenet-D'
@@ -72,7 +74,11 @@ def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
 	)
 	response = client.synthesize_speech(input=synthesis_input,voice=voice,audio_config=audio_config)
 	filename = filename + '.mp3'
-	save_audio_stream_to_sftp(response.audio_content, ftp_path or get_path(language), filename, file_id, file_title, voice.name, file_album='Google Cloud')
+	try:
+		save_audio_stream_to_sftp(response.audio_content, ftp_path or get_path(language), filename, file_id, file_title, voice.name, file_album='Google Cloud')
+	except HeaderNotFoundError:
+		print(f'ERROR!! Can\'t voice: "{s}"' )
+		return None
 	return get_url_path(language) + filename
 
 
@@ -139,7 +145,7 @@ def save_audio_stream_to_sftp(audio, path, filename, file_id, file_title,
 		mp3_file.write(audio)
 		mp3 = EasyMP3(mp3_file)
 		mp3.add_tags()
-		mp3['tracknumber'] = file_id
+		mp3['tracknumber'] = str(file_id)
 		mp3['title'] = file_title
 		mp3['artist'] = file_author
 		mp3['album'] = file_album
@@ -167,5 +173,10 @@ def put_to_ftp(filename, mp3_file, path):
 		else:
 			file = mp3_file
 			file.seek(0)
-			srv.putfo(file, filename)
+			try:
+				srv.putfo(file, filename)
+			except FileNotFoundError as e:
+				print(e)
+				print(f'ERROR!! FILE NOT FOUND {filename} {path}')
+				return False
 	return True
