@@ -569,6 +569,9 @@ msgstr "Админка"
 msgid "Subscribe"
 msgstr "Получать уведомления"
 
+msgid "Unsubscribe"
+msgstr "Отписаться от уведомлений в этой теме"
+
 #: .\templates\pybb\topic_last_message_info.html:12
 msgid "posted by"
 msgstr "сообшение от"
