@@ -46,7 +46,7 @@
             {% endif %}
 
             {% if user.is_subscribed %}
-                <a class="btn btn-default" href="{% url 'pybb:delete_subscription' topic.id %}?from_topic">Больше не получать уведомления о новых постах в этой теме</a>
+                <a class="btn btn-default" href="{% url 'pybb:delete_subscription' topic.id %}?from_topic">{% trans "Unsubscribe" %}</a>
             {% elif user|pybb_may_subscribe_topic:topic %}
                 <a class="btn btn-warning" href="{% url 'pybb:add_subscription' topic.id %}">{% trans "Subscribe" %}</a>
             {% endif %}
