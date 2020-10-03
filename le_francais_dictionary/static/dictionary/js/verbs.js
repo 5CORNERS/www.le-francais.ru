@@ -339,7 +339,7 @@
                         let afterTenseTimeout = 0
                         if (
                             this.type === LISTENING && (
-                                (this.currentCard === 0 && !this.isSameTense()) || (
+                                (this.currentCard === 0 && !(this.isSameTense() && this.card.tense === TENSE_INDICATIVE_PRESENT)) || (
                                     this.getLastCard() !== null && this.getLastCard().tense !== this.card.tense
                                 )
                             )
