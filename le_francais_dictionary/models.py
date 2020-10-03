@@ -1,7 +1,8 @@
 import re
 
 from polly.const import LANGUAGE_CODE_FR, LANGUAGE_CODE_RU
-from .tts import google_cloud_tts, amazon_polly_tts, shtooka_by_title_in_path, FTP_FR_VERBS_PATH, FTP_RU_VERBS_PATH
+from .tts import google_cloud_tts, amazon_polly_tts, shtooka_by_title_in_path, FTP_FR_VERBS_PATH, FTP_RU_VERBS_PATH, \
+	FTP_FR_WORDS_PATH, FTP_RU_WORDS_PATH
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models, transaction
@@ -466,6 +467,24 @@ class Word(models.Model):
 		# for translation in self.wordtranslation_set.all():
 		#     translation.create_polly_task()
 
+	def local_voice(self, save=False):
+		if self.word_ssml:
+			voice_string = self.word_ssml
+		else:
+			voice_string = f'<speak>{self.word}</speak>'
+		voice_url = google_cloud_tts(
+			voice_string,
+			filename=f'{self.word}_synth',
+			language=LANGUAGE_CODE_FR,
+			genre=self.genre,
+			file_id=self.cd_id,
+			file_title=self.word,
+			ftp_path=FTP_FR_WORDS_PATH,
+		)
+		self._polly_url = voice_url
+		if save:
+			self.save()
+
 	def __str__(self):
 		return f'Word:{self.cd_id} {self.word}'
 
@@ -536,6 +555,24 @@ class WordTranslation(models.Model):
 
 	def __str__(self):
 		return self.translation
+
+	def local_voice(self, save=False):
+		if self.translations_ssml:
+			voice_string = self.translations_ssml
+		else:
+			voice_string = f'<speak>{self.translation}</speak>'
+		voice_url = google_cloud_tts(
+			voice_string,
+			filename=f'{self.translation}_synth',
+			language=LANGUAGE_CODE_RU,
+			genre=self.genre,
+			file_id=self.cd_id,
+			file_title=self.translation,
+			ftp_path=FTP_RU_WORDS_PATH,
+		)
+		self._polly_url = voice_url
+		if save:
+			self.save()
 
 
 class UserWordIgnore(models.Model):
@@ -708,6 +745,7 @@ class VerbPacket(models.Model):
 			if verb_to_packet.verb.audio_url is None:
 				continue
 			verb_dict = verb_to_packet.verb.to_dict()
+			verb_dict['tense'] = verb_to_packet.tense
 			verb_dict['forms'] = []
 			for form in verb_to_packet.verb.verbform_set.filter(tense=verb_to_packet.tense, audio_url__isnull=False).order_by('order'):
 				verb_dict['forms'].append(form.to_dict())
@@ -784,7 +822,7 @@ class Verb(models.Model):
 		else:
 			self.audio_url = google_cloud_tts(
 				voice_string,
-				filename=self.verb.replace(' ', '_').replace('\'', '_'),
+				filename=self.verb.replace(' ', '_').replace('\'', '_').replace('\\', '_'),
 				language=LANGUAGE_CODE_FR,
 				genre='f',
 				file_id=str(self.pk),
@@ -809,10 +847,14 @@ class Verb(models.Model):
 TENSE_INDICATIVE_PRESENT = 0
 TENSE_PASSE_COMPOSE = 1
 TENSE_IMPERATIVE = 2
+TENSE_INDICATIVE_IMPARFAIT = 3
+TENSE_INDICATIVE_FUTURE = 4
 TENSE_CHOICES = [
 	(TENSE_INDICATIVE_PRESENT, 'Indicatif Présent'),
 	(TENSE_PASSE_COMPOSE, 'Passé Composé'),
-	(TENSE_IMPERATIVE, 'Impératif Présent')
+	(TENSE_IMPERATIVE, 'Impératif Présent'),
+	(TENSE_INDICATIVE_IMPARFAIT, 'Imparfait'),
+	(TENSE_INDICATIVE_FUTURE, 'Futur Simple')
 ]
 
 class VerbPacketRelation(models.Model):
@@ -873,7 +915,7 @@ class VerbForm(models.Model):
 				voice_string += ','
 			self.audio_url = google_cloud_tts(
 				voice_string,
-				filename=self.form.replace(' ', '_').replace('\'', '_'),
+				filename=self.form.replace(' ', '_').replace('\'', '_').replace('\\', '_'),
 				language=LANGUAGE_CODE_FR,
 				genre='f',
 				file_id=str(self.pk),
