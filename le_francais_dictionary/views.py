@@ -485,13 +485,15 @@ def get_verbs(request, packet_id:int, more_lessons:int=None):
             result['verbs'] = result['verbs'] + packet.to_dict()
     else:
         result['verbs'] = packet.to_dict()
-    activated_lessons_pks = UserLesson.objects.filter(user=request.user).values_list('lesson__pk', flat=True)
+    activated_lessons_pks = []
+    if request.user.is_authenticated:
+        activated_lessons_pks = UserLesson.objects.filter(user=request.user).values_list('lesson__pk', flat=True)
     packets = VerbPacket.objects.annotate(Count('verbs', distinct=True)).prefetch_related('lesson').all().order_by('lesson__lesson_number')
     result['packets'] = [{
             'id': p.id,
             'lessonNumber': p.lesson.lesson_number,
             'verbsCount':p.verbs__count,
-            'activated': p.lesson.pk in activated_lessons_pks if request.user.is_authenticated else None
+            'activated': p.lesson.pk in activated_lessons_pks
         } for p in packets]
     return JsonResponse(result, status=200)
 
