@@ -79,8 +79,6 @@
         })
     }
 
-    Vue.component('vue-multiselect', window.VueMultiselect.default)
-
     new Vue({
 
         el: '#flashcard-app',
