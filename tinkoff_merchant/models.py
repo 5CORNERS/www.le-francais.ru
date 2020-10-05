@@ -119,12 +119,14 @@ class Receipt(models.Model):
 		return super().save(*args, **kwargs)
 
 	def to_json(self) -> dict:
-		return {
-			'Email': self.email,
-			'Phone': self.phone,
-			'Taxation': self.taxation,
-			'Items': [item.to_json() for item in self.receiptitem_set.all()]
-		}
+		result = {}
+		if self.email:
+			result['Email'] = self.email
+		elif self.phone:
+			result['Phone'] = self.phone
+		result['Taxation'] = self.taxation
+		result['Items'] = [item.to_json() for item in self.receiptitem_set.all()]
+		return result
 
 	def to_json_pay54(self, receipt_type: int, tax_type: int) -> dict:
 		return {
