@@ -2,7 +2,7 @@
     {% for object in object_list %}
         <li>
             <a href="{% if to_end %}{{ object.last_public_post.get_absolute_url }}{% else %}{{ object.get_absolute_url }}{% endif %}">
-                {% if object.name|first == "❢" and object.name|slice:"1:2" != " " %}<span class="text-danger">{{ object.name|first }}</span>{{ object.name|slice:"1:" }}{% else %}{{ object.name }}{% endif %}&nbsp;({{ object.post_count }})
+                {% if object.name|first == "❢" and object.name|slice:"1:2" != " " %}<b><span class="text-danger">{{ object.name|first }}</span>{{ object.name|slice:"1:" }}</b>{% else %}{{ object.name }}{% endif %}&nbsp;({{ object.post_count }})
             </a>
         </li>
     {% endfor %}
