@@ -276,6 +276,10 @@ def advertisement_inline(context, name, header, body):
 def get_reviews():
 	return IndexReviews.objects.all()
 
+@register.inclusion_tag("tags/random_sidebar_review.html")
+def random_sidebar_review():
+	r = IndexReviews.objects.filter(show_in_sidebar=True).order_by('?').first()
+	return {"review": r}
 
 @register.inclusion_tag("tags/unwrap.html", takes_context=True)
 def unwrap(context, blocks):
