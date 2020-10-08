@@ -210,10 +210,12 @@ class IndexReviews(Orderable):
     url = URLField(null=True, blank=True)
     text = CharField(null=True, blank=True, max_length=1024)
     external = BooleanField(default=False)
+    show_in_sidebar = BooleanField(default=True)
     panels = [
         FieldPanel('url'),
         FieldPanel('text', TextField),
-        FieldPanel('external')
+        FieldPanel('external', help_text='Will open in new tab'),
+        FieldPanel('show_in_sidebar')
     ]
 
     @property

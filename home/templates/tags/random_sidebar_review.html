@@ -1,0 +1,21 @@
+{% load static wagtailcore_tags %}
+<div class="sidebar-random-review">
+    <a class="page-review"
+       {% if review.url %}href='{{ review.url }}'{% endif %}
+       {% if review.external %}target="_blank"
+       rel="nofollow"{% endif %}>
+        <div class="page-review_text" style="padding: 0 1.2rem;">
+            <p style="overflow: auto;">
+                <img class="size-full wp-image-1568 alignleft"
+                     src="{% static 'images/5-stars-rating.png' %}"
+                     alt=""
+                     width="97"
+                     height="20">
+            </p>
+            <p>{{ review.text }}</p>
+        </div>
+    </a>
+    <div class="random-review-bottom-links" style="padding: 0 1.2rem;">
+        <a style="float: left" href="{% slugurl "temoignage_de_respect" %}">Все отзывы</a>
+    </div>
+</div>
