@@ -321,6 +321,7 @@ class LessonPage(Page):
     summary = CharField(max_length=100, null=True, blank=True)
     repetition_material = CharField(max_length=100, null=True, blank=True, verbose_name='Révision')
     audio_material = CharField(max_length=100, null=True, blank=True)
+    audio_new = URLField(blank=True, null=True, default=None)
 
     need_payment = BooleanField(default=False)
     transcript_srt = FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
