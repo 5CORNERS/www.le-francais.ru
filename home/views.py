@@ -949,7 +949,10 @@ def lesson_transcript_prototype(request, lesson_number):
     start_ends_map = []
     for d in parsed_srt.values():
         start_ends_map.append({'start': int(d['start']), 'end': int(d['end']), 'id': d['id']})
+    audio_url = f'https://files.le-francais.ru/listen.php?number={ page.lesson_number }&key={ request.session.session_key }'
+    if page.audio_new:
+        audio_url = page.audio_new
     return render(request, 'home/lesson_transcript_prototype.html', {
-        "audio_url": f'https://files.le-francais.ru/listen.php?number={ page.lesson_number }&key={ request.session.session_key }', "html": html,
+        "audio_url": audio_url, "html": html,
         "start_ends_map": start_ends_map, "errors":errors
     })
