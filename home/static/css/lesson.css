@@ -16,3 +16,72 @@
 }
 
 .dialog-popover {background-color: #fff0c3;box-shadow: 10px 5px 5px #80808073;}
+
+.page-review {
+    padding: 3px;
+}
+
+.page-review p {
+    margin-bottom: 0;
+}
+
+a.page-review:focus,
+a.page-review:hover {
+    text-decoration: none;
+}
+
+.page-review {
+    width: 27%;
+    margin-top: 10px;
+    margin-right: 6%;
+    margin-bottom: 10px;
+    min-height: 70px;
+}
+
+.page-review {
+    margin: 10px 0;
+    width: 100%;
+}
+
+.page-review_text {
+    margin-top: 0px;
+    color: #495869;
+    font-size: 16px;
+}
+
+.page-review_text:hover {
+    color: #232937;
+}
+
+.page-review_text:before {
+    color: #bbb;
+    content: "\201C";
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 4em;
+    line-height: 0.1em;
+    margin-right: .2em;
+    position: relative;
+    top: 0.5rem;
+    right: 0.5rem;
+    vertical-align: -.4em;
+}
+
+.page-review_text:after {
+    color: #bbb;
+    position: relative;
+    content: "\201D"; /* Непечатаемый символ справа */
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 4em;
+    line-height: 0.1em;
+    float: right;
+    top: .4em;
+}
+
+.random-review-bottom-links {
+    display: inline;
+}
+.random-review-bottom-links > a{
+    margin-top: 0.5rem;
+    margin-left: 1.2rem;
+
+}
