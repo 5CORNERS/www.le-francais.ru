@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                {% for error in errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error.0 }} -- {{ error.1 }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <audio id="audio">
+                    <source src="{{ audio_url }}">
+                </audio>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {{ html|safe }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_css %}
+    <style>
+        .transcript-line{
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+{% block extra_js %}
+    <script>
+        addEventListener('audioplayerReady', function () {
+            let audio = $('#audio')
+            let startsEndsMap = {{ start_ends_map|safe }}
+            audio.on('timeupdate', function () {
+                let current = this.currentTime * 1000
+                startsEndsMap.filter((item) => item.start <= current && item.end >= current).forEach((item) => {
+                    $(`#${item.id}`).addClass(['bg-primary', 'text-white'])
+                })
+                startsEndsMap.filter((item) => item.end <= current || item.start >= current).forEach((item) => {
+                    $(`#${item.id}`).removeClass(['bg-primary', 'text-white'])
+                })
+            })
+            $('.transcript-line').on('click', function (){
+                audio[0].currentTime = $(this).data('start')/1000
+            })
+        })
+    </script>
+{% endblock %}

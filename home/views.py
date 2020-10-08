@@ -899,3 +899,57 @@ def redirect2static(path):
     def as_view(request):
         return HttpResponseRedirect('/static/' + path)
     return as_view
+
+COLUMN_SPEAKER = 'SPEAKER'
+COLUMN_START = 'START'
+COLUMN_END = 'END'
+COLUMN_TEXT = 'LINE'
+def parse_tab_delimited_srt_file(file):
+    from csv import DictReader, excel_tab
+    from collections import OrderedDict
+    result = OrderedDict()
+    c = 0
+    for row in DictReader(file, dialect=excel_tab):
+        result[row[COLUMN_TEXT]] = {
+            "id": f'line{c}',
+            "start":row[COLUMN_START],
+            "end":row[COLUMN_END],
+            "speaker":row[COLUMN_SPEAKER]
+        }
+        c += 1
+    return result
+
+def lesson_transcript_prototype(request, lesson_number):
+    import re
+    from io import StringIO
+    page = LessonPage.objects.get(lesson_number=lesson_number)
+    transcript_srt = page.transcript_srt.read().decode('utf-8')
+    parsed_srt = parse_tab_delimited_srt_file(StringIO(transcript_srt))
+    html = ""
+    errors = []
+    if page.transcript_text:
+        for paragraph in page.transcript_text.split('\n'):
+            html += f'<p>{paragraph}</p>'
+        current_pos = 0
+        for l, data in parsed_srt.items():
+            match = re.search(f'({re.escape(l)})', html)
+            if match is None:
+                errors.append(("NOT FOUND", l))
+                continue
+            html = html[:match.start(1)] + f'<span class="transcript-line" id="{data["id"]}" data-start="{data["start"]}"' \
+                             f' data-end="{data["end"]}"' \
+                             f' data-speaker="{data["speaker"]}"' \
+                             f'>{match.group(1)}</span>' + html[match.end(1):]
+    else:
+        for l, data in parsed_srt.items():
+            html += f'<span class="transcript-line" id="{data["id"]}" data-start="{data["start"]}"' \
+                    f' data-end="{data["end"]}"' \
+                    f' data-speaker="{data["speaker"]}"' \
+                    f'>{l}</span>'
+    start_ends_map = []
+    for d in parsed_srt.values():
+        start_ends_map.append({'start': int(d['start']), 'end': int(d['end']), 'id': d['id']})
+    return render(request, 'home/lesson_transcript_prototype.html', {
+        "audio_url": f'https://files.le-francais.ru/listen.php?number={ page.lesson_number }&key={ request.session.session_key }', "html": html,
+        "start_ends_map": start_ends_map, "errors":errors
+    })

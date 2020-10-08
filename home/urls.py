@@ -4,7 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 urlpatterns = [
-    url(r'^learning-apps/(?P<id>.+)/', views.get_learning_apps_iframe, name='get_learning_apps_iframe')
+    url(r'^learning-apps/(?P<id>.+)/', views.get_learning_apps_iframe, name='get_learning_apps_iframe'),
+    url(r'^lesson-transcript-prototype/(?P<lesson_number>\d+)/', views.lesson_transcript_prototype, name='lesson_transcript-prototype')
 ]
 
 meta_urls = [

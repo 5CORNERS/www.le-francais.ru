@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db.models import CharField, SmallIntegerField, OneToOneField, \
     IntegerField, BooleanField, SET_NULL, ForeignKey, URLField, \
-    Model, ImageField, CASCADE
+    Model, ImageField, CASCADE, FileField
 from django.db.models.fields import TextField, DateTimeField
 from django.dispatch import receiver
 from django.forms import CheckboxInput
@@ -323,6 +323,8 @@ class LessonPage(Page):
     audio_material = CharField(max_length=100, null=True, blank=True)
 
     need_payment = BooleanField(default=False)
+    transcript_srt = FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
+    transcript_text = TextField(null=True, blank=True, default=None)
 
     comments_for_lesson = StreamField([
         ('advertisement', AdvertisementInline()),
