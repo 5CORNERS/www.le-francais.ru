@@ -69,65 +69,82 @@
 	<link rel="stylesheet" href="{% static 'css/lesson.css' %}">
     <link rel="stylesheet" href="{% static 'components/css/bootstrap-treeview.css' %}">
 	<style>
-		.new-svg-button {
-			cursor: pointer;
-			height: 40px;
-		}
+        .portrait {
+            height: 120px;
+            margin-right: 15px;
+            margin-bottom: 5px;
+            margin-top: 5px;
+            float: left;
+        }
 
-		.new-svg-button:hover{
-        -webkit-filter: drop-shadow( 5px 5px 5px #7d7d7d );
-                filter: drop-shadow( 5px 5px 5px #7d7d7d );
-		}
-		.new-svg-button:active{
-        -webkit-filter: drop-shadow( 2px 2px 2px #7d7d7d);
-                filter: drop-shadow( 2px 2px 2px #7d7d7d );
-		}
-		.new-svg-button:focus{
-        outline: -webkit-focus-ring-color auto 5px;
-		}
+        .new-svg-button {
+            cursor: pointer;
+            height: 40px;
+        }
 
-		.new-svg-button.activate-button{
-			height: 32.5px;
-			margin-top: 1rem;
-			margin-bottom: 1rem;
-		}
+        .new-svg-button:hover {
+            -webkit-filter: drop-shadow(5px 5px 5px #7d7d7d);
+            filter: drop-shadow(5px 5px 5px #7d7d7d);
+        }
 
-		.new-svg-button.activated {
-			cursor: not-allowed;
-			-webkit-filter: none !important;
-			        filter: none !important;
-		}
+        .new-svg-button:active {
+            -webkit-filter: drop-shadow(2px 2px 2px #7d7d7d);
+            filter: drop-shadow(2px 2px 2px #7d7d7d);
+        }
 
-		#coffee-button {
-			cursor: pointer;
-			display: flex;
-			align-items: center;
-		}
-		#coffee-button:hover {}
-		#coffee-button:active {
-			background-image: none;
-			outline: 0;
-			-webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
-			box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
-			color: #333;
-			background-color: #e6e6e6;
-			border-color: #adadad;
-		}
-		#coffee-button:focus {}
-		.coffee-button-image {
-			margin-right: 5px;
-			display: block;
-			height: 2.5em
-		}
-		.coffee-button-text {
-			border-left: 1px solid #ccc;
-			padding-left: 5px;
-		}
+        .new-svg-button:focus {
+            outline: -webkit-focus-ring-color auto 5px;
+        }
 
-		.modal-header{
-			text-align: center;
-		}
-	</style>
+        .new-svg-button.activate-button {
+            height: 32.5px;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .new-svg-button.activated {
+            cursor: not-allowed;
+            -webkit-filter: none !important;
+            filter: none !important;
+        }
+
+        #coffee-button {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        #coffee-button:hover {
+        }
+
+        #coffee-button:active {
+            background-image: none;
+            outline: 0;
+            -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+            box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+            color: #333;
+            background-color: #e6e6e6;
+            border-color: #adadad;
+        }
+
+        #coffee-button:focus {
+        }
+
+        .coffee-button-image {
+            margin-right: 5px;
+            display: block;
+            height: 2.5em
+        }
+
+        .coffee-button-text {
+            border-left: 1px solid #ccc;
+            padding-left: 5px;
+        }
+
+        .modal-header {
+            text-align: center;
+        }
+    </style>
 {% endblock %}
 
 {% block meta %}
