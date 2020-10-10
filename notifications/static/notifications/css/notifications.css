@@ -13,14 +13,13 @@
 .dropdown-menu.notify-drop:before {
     position: absolute;
     pointer-events: none;
-    border: solid transparent;
     content: '';
     height: 0;
     width: 0;
     bottom: 100%;
     left: 232px;
-    border-width: 6px;
     margin: 0 -6px;
+    border: 6px solid transparent;
     border-bottom-color: #fafbfc;
 }
 
