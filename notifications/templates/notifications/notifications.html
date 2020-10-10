@@ -15,8 +15,3 @@
         {% include 'notifications/drop-content.html' with has_notifications=has_notification authenticated=authenticated new_notifications=new_notifications old_notifications=old_notifications login_url=login_url %}
     </ul>
 </li>
-<link type="text/css" rel="stylesheet"
-      href="{% static 'notifications/css/notifications.min.css' %}">
-{% if authenticated %}
-    <script type="text/javascript"
-            src="{% static 'notifications/js/notifications.min.js' %}"></script>{% endif %}
