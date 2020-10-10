@@ -1,0 +1,27 @@
+{% load i18n pybb_tags %}
+<ul class="breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">
+    {% include "pybb/breadcrumb_top_extra_crumb.html" %}
+    <li itemprop="itemListElement" itemscope
+        itemtype="https://schema.org/ListItem"><a href="{% url 'pybb:index' %}">{% trans 'Forum' %}</a> <span
+            class="divider">/</span>
+        <meta itemprop="position" content="1"/>
+    </li>
+    {% if object %}
+        {% if object.get_parents %}
+            {% for obj in object.get_parents %}
+                <li itemprop="itemListElement" itemscope
+                    itemtype="https://schema.org/ListItem">{% pybb_link obj %} <span class="divider">/</span>
+                    <meta itemprop="position" content="{{ forloop.counter|add:1 }}"/>
+                </li>
+            {% endfor %}
+        {% endif %}
+        {% if extra_crumb %}
+            <li>{% pybb_link object %} <span class="divider">/</span></li>
+        {% else %}
+            <li>{{ object }}</li>
+        {% endif %}
+    {% endif %}
+    {% if extra_crumb %}
+        <li>{% trans extra_crumb %}</li>
+    {% endif %}
+</ul>
