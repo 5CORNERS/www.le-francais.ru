@@ -76,14 +76,14 @@
 								</div>
 							</div>
 							<div class="col-3 cat-logo-collapse">
-								<img class="cat-logo" src="{% static 'images/cat_logo.png' %}">
+								<img class="cat-logo" alt="" src="{% static 'images/cat_logo.png' %}">
 							</div>
 						</div>
 					</div>
 				</div>
 				<div class="row">
 					<div class="col-12">
-						<img class="cat-logo-mini" src="{% static 'images/hat-logo.png' %}">
+						<img class="cat-logo-mini" alt="" src="{% static 'images/hat-logo.png' %}">
 						<div class="page-references">
 							{% for reference in self.related_pages.all %}
 								<a class="page-reference" href="{{ reference.referenced_page.url }}">
@@ -151,7 +151,7 @@
 							{% random_review %}
 						</div>
 						<hr>
-						<div align="center">
+						<div>
 							<a style="float: left" href="/forum/forum/15/">Все отзывы</a>
 							<a href="/reussites/temoignage_de_respect/">Избранные</a>
 							<a style="float: right" href="/reussites/">Истории успеха</a>
