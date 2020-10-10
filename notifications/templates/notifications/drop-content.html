@@ -1,34 +1,40 @@
+{% load static %}
 <div class="drop-content container">
-{% if has_notifications and authenticated %}
-	<script>
-		var NEW_NOTIFY_PKS = [{% for notify in new_notifications %}{{ notify.id }}, {% endfor %}];
-		var CHECK_URL = '{{ check_list_url }}';
-	</script>
-	{% if new_notifications %}
-        <div class="row flex-fill">
-            <div class="col-12 notify-drop-title">
-                Новые
+    {% if has_notifications and authenticated %}
+        <script>
+            var NEW_NOTIFY_PKS = [{% for notify in new_notifications %}{{ notify.id }}, {% endfor %}];
+            var CHECK_URL = '{{ check_list_url }}';
+        </script>
+        {% if new_notifications %}
+            <div class="row flex-fill">
+                <div class="col-12 notify-drop-title">
+                    Новые
+                </div>
             </div>
-        </div>
-		{% for notify in new_notifications %}
-			{% include 'notifications/notification.html' with notify=notify %}
-		{% endfor %}{% endif %}
-	{% if old_notifications %}
-        <div class="row flex-fill">
-            <div class="col-12 notify-drop-title">
-                Просмотренные
+            {% for notify in new_notifications %}
+                {% include 'notifications/notification.html' with notify=notify %}
+            {% endfor %}{% endif %}
+        {% if old_notifications %}
+            <div class="row flex-fill">
+                <div class="col-12 notify-drop-title">
+                    Просмотренные
+                </div>
             </div>
+            {% for notify in old_notifications %}
+                {% include 'notifications/notification.html' with notify=notify %}
+            {% endfor %}{% endif %}
+    {% elif not authenticated %}
+        <div class="col-12  notify-drop-title">
+            <a href="{{ login_url }}">Авторизуйтесь</a>, чтобы увидеть уведомления.
         </div>
-		{% for notify in old_notifications %}
-			{% include 'notifications/notification.html' with notify=notify %}
-		{% endfor %}{% endif %}
-{% elif not authenticated %}
-	<div class="col-12  notify-drop-title">
-		<a href="{{ login_url }}">Авторизуйтесь</a>, чтобы увидеть уведомления.
-	</div>
-{% else %}
-	<div class="col-12 notify-drop-title">
-		Нет уведомлений
-	</div>
-{% endif %}
+    {% else %}
+        <div class="col-12 notify-drop-title">
+            Нет уведомлений
+        </div>
+    {% endif %}
+    <link type="text/css" rel="stylesheet"
+          href="{% static 'notifications/css/notifications.min.css' %}">
+    {% if authenticated %}
+        <script type="text/javascript"
+                src="{% static 'notifications/js/notifications.min.js' %}"></script>{% endif %}
 </div>
