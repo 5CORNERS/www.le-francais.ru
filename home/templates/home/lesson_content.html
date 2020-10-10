@@ -182,7 +182,7 @@
                             <a class="nav-link" data-toggle="tab"
                                href="#{{ child_value.value.href }}" role="tab"
                                aria-controls="{{ child_value.value.href }}"><span
-                                    {% if child_value.value.invisible and user.is_superuser %}color="green" {% endif %}>{{ child_value.value.title }}</span></a>
+                                    {% if child_value.value.invisible and user.is_superuser %}style="color: green" {% endif %}>{{ child_value.value.title }}</span></a>
                         </li>
                     {% endif %}
                 {% endif %}
