@@ -131,8 +131,8 @@
 {% endblock %}
 
 {% block meta %}
-	<meta name="nav-root-id" data-value="{{ self.get_nav_root.id }}">
-	<meta name="page-id" data-value="{{ self.id }}">
+	<meta name="nav-root-id" content="{{ self.get_nav_root.id }}">
+	<meta name="page-id" content="{{ self.id }}">
 	{% if not self.show_in_sitemap %}<meta name=”robots” content=”noindex” />{% endif %}
 {% endblock %}
 
