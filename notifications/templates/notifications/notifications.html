@@ -10,8 +10,7 @@
         <span class="notify-badge" id="notify-badge-nav"
               {% if not new_notifications %}style="display: none" {% endif %}>{{ new_notifications|length }}</span>
     </a>
-
-    <ul class="dropdown-menu notify-drop" style="position: absolute">
+    <div class="dropdown-menu notify-drop" style="position: absolute">
         {% include 'notifications/drop-content.html' with has_notifications=has_notification authenticated=authenticated new_notifications=new_notifications old_notifications=old_notifications login_url=login_url %}
-    </ul>
+    </div>
 </li>
