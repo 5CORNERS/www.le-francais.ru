@@ -178,7 +178,7 @@ class Word(models.Model):
 		verbose_name='Color Dictionary ID',
 		primary_key=True)
 	word = models.CharField(max_length=120, verbose_name='Word')
-	word_ssml = models.CharField(max_length=200, null=True, default=None, blank=True)
+	word_ssml = models.CharField(max_length=1000, null=True, default=None, blank=True)
 	polly = models.ForeignKey(PollyTask, null=True, blank=True)
 	_polly_url = models.URLField(max_length=200, null=True, default=None, blank=True)
 	# TODO: must be moved to WordTranslation Model
@@ -492,7 +492,7 @@ class Word(models.Model):
 class WordTranslation(models.Model):
 	word = models.ForeignKey(Word, on_delete=models.CASCADE)
 	translation = models.CharField(max_length=120, null=False, blank=False)
-	translations_ssml = models.CharField(max_length=200, null=True, default=None, blank=True)
+	translations_ssml = models.CharField(max_length=1000, null=True, default=None, blank=True)
 	polly = models.ForeignKey(PollyTask, null=True, blank=True)
 	_polly_url = models.URLField(null=True, default=None, blank=True)
 	packet = models.ForeignKey('Packet', on_delete=models.CASCADE, null=True)
