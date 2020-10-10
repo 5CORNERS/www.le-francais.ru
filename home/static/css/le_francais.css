@@ -543,6 +543,7 @@ td.forum-last-post, td.topic-last-post {
         height: 22px;
         background: url("/static/images/chevron-right.png");
         background-repeat: no-repeat;
+        display: block;
     }
 
     .sidebar-collapse-button[aria-expanded="true"] {
