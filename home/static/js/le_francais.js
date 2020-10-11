@@ -1,5 +1,5 @@
 function getNavRootId() {
-    return $('meta[name="nav-root-id"]').attr("data-value")
+    return $('meta[name="nav-root-id"]').attr("content")
 }
 
 function resizeIframe(obj) {
@@ -7,7 +7,7 @@ function resizeIframe(obj) {
 }
 
 function getPageId() {
-    return $('meta[name="page-id"]').attr("data-value")
+    return $('meta[name="page-id"]').attr("content")
 }
 
 window.setIntervalRun = function (interval, callbackFunction, args) {
