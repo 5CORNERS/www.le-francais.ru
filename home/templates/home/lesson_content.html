@@ -187,6 +187,13 @@
                     {% endif %}
                 {% endif %}
             {% endfor %}
+            {% if has_transcript %}
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab"
+                       href="#playerPlus" role="tab"
+                       aria-controls="playerPlus">Player+</a>
+                </li>
+            {% endif %}
         </ul>
     </div>
 
@@ -376,6 +383,36 @@
 				{% for block in child_value.value.body %}{% include_block block %}{% endfor %}
 			</div>{% endif %}{% endif %}
 		{% endfor %}
+        {% if has_transcript %}
+            <div id="playerPlus" class="{{ pane_class }}" role="tabpanel">
+                <div class="row">
+                    <div class="col">
+                        {% for error in transcript_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <audio id="newAudioTranscript">
+                            <source
+                                    {% if self.audio_new %}
+                                        src="{{ self.audio_new }}"
+                                    {% else %}
+                                        src="{{ self.audio_material }}"
+                                    {% endif %}>
+                        </audio>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        {{ transcript_html|safe }}
+                    </div>
+                </div>
+			</div>
+        {% endif %}
 	</div>
 </div>
 

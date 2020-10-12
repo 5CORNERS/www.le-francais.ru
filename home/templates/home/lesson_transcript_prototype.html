@@ -12,7 +12,7 @@
         </div>
         <div class="row">
             <div class="col">
-                <audio id="audio">
+                <audio id="newAudioTranscript">
                     <source src="{{ audio_url }}">
                 </audio>
             </div>
@@ -34,7 +34,7 @@
 {% block extra_js %}
     <script>
         addEventListener('audioplayerReady', function () {
-            let audio = $('#audio')
+            let audio = $('#newAudioTranscript')
             let startsEndsMap = {{ start_ends_map|safe }}
             audio.on('timeupdate', function () {
                 let current = this.currentTime * 1000

@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+from io import StringIO
 
 from annoying.fields import AutoOneToOneField
 from django.conf import settings
@@ -39,7 +40,7 @@ from .blocks.BootstrapCalloutBlock import BootstrapCalloutBlock
 from .blocks.CollapseBlock import CollapseBlock
 from .blocks.FloatingImageBlock import FloatingImageBlock
 from .pay54 import Pay34API
-from .utils import message
+from .utils import message, create_document_from_transcript_srt, parse_tab_delimited_srt_file, sub_html
 
 PAGE_CHOICES = (
     ('lesson_a1', 'Lesson A1'),
@@ -493,6 +494,27 @@ class LessonPage(Page):
         # 	user.show_tickets = self.must_pay(user)
         # 	user.save()
         return super(LessonPage, self).serve(request, *args, **kwargs)
+
+    def get_transcript_html_errors_map(self):
+        transcript_srt = self.transcript_srt.read().decode('utf-8')
+        parsed_srt = parse_tab_delimited_srt_file(StringIO(transcript_srt))
+        html = ""
+        errors = []
+        if self.transcript_text:
+            for paragraph in self.transcript_text.split('\n'):
+                html += f'<p>{paragraph}</p>'
+            html, errors = sub_html(html, parsed_srt)
+        else:
+            for l, data in parsed_srt.items():
+                html += f'<span class="transcript-line" id="{data["id"]}" data-start="{data["start"]}"' \
+                        f' data-end="{data["end"]}"' \
+                        f' data-speaker="{data["speaker"]}"' \
+                        f'>{l}</span>'
+        start_ends_map = []
+        for d in parsed_srt.values():
+            start_ends_map.append({'start': int(d['start']), 'end': int(d['end']), 'id': d['id']})
+        return html, errors, start_ends_map
+
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request)
         user = request.user
@@ -524,6 +546,11 @@ class LessonPage(Page):
         if self.flash_cards_is_included():
             if BLOCK_AFTER_FLASHCARDS >= self.lesson_number or self.payed(user):
                 context['block_flash_cards'] = False
+
+        context['has_transcript'] = False
+        if self.transcript_srt.name:
+            context['has_transcript'] = True
+            context['transcript_html'], context['transcript_errors'], context['transcript_map'] = self.get_transcript_html_errors_map()
 
         return context
 
