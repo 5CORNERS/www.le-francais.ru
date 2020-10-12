@@ -40,6 +40,24 @@
 	</script>
 	<script type="text/javascript"
             src="{% static 'components/js/bootstrap-treeview.min.js' %}"></script>
+    <script>
+        addEventListener('audioplayerReady', function () {
+            let audio = $('#newAudioTranscript')
+            let startsEndsMap = {{ transcript_map|safe }}
+            audio.on('timeupdate', function () {
+                let current = this.currentTime * 1000
+                startsEndsMap.filter((item) => item.start <= current && item.end >= current).forEach((item) => {
+                    $(`#${item.id}`).addClass(['bg-primary', 'text-white'])
+                })
+                startsEndsMap.filter((item) => item.end <= current || item.start >= current).forEach((item) => {
+                    $(`#${item.id}`).removeClass(['bg-primary', 'text-white'])
+                })
+            })
+            $('.transcript-line').on('click', function (){
+                audio[0].currentTime = $(this).data('start')/1000
+            })
+        })
+    </script>
 	{% if request.GET.modal_open %}
 		{% with modal_id=request.GET.modal_open %}
 			<script>
@@ -143,6 +161,11 @@
 
         .modal-header {
             text-align: center;
+        }
+    </style>
+    <style>
+        .transcript-line{
+            cursor: pointer;
         }
     </style>
 {% endblock %}
