@@ -44,6 +44,14 @@
         addEventListener('audioplayerReady', function () {
             let audio = $('#newAudioTranscript')
             let startsEndsMap = {{ transcript_map|safe }}
+            audio.one('playing', function (){
+                $(document).keypress(function (event){
+                    if (event.keyCode === 32) {
+                        event.preventDefault()
+                        audio.paused ? audio.trigger('play') : audio.trigger('pause')
+                    }
+                })
+            })
             audio.on('timeupdate', function () {
                 let current = this.currentTime * 1000
                 startsEndsMap.filter((item) => item.start <= current && item.end >= current).forEach((item) => {
