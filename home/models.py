@@ -40,7 +40,7 @@ from .blocks.BootstrapCalloutBlock import BootstrapCalloutBlock
 from .blocks.CollapseBlock import CollapseBlock
 from .blocks.FloatingImageBlock import FloatingImageBlock
 from .pay54 import Pay34API
-from .utils import message, create_document_from_transcript_srt, parse_tab_delimited_srt_file, sub_html
+from .utils import message, parse_tab_delimited_srt_file, sub_html
 
 PAGE_CHOICES = (
     ('lesson_a1', 'Lesson A1'),
