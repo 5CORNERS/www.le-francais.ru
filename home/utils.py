@@ -1,8 +1,11 @@
 from collections import defaultdict
 import binascii
 from hashlib import md5
+from io import BytesIO, StringIO
 
 from django.conf import settings
+
+from home.consts import COLUMN_TEXT, COLUMN_START, COLUMN_END, COLUMN_SPEAKER
 
 
 def get_signature(params, secret_key=settings.WALLET_ONE_SECRET_KEY):
@@ -206,3 +209,41 @@ def get_nav_tree(root, current_page):
     else:
         nav_items = get_navigation_object_from_page(root, current_page)["nodes"]
     return nav_items
+
+def parse_tab_delimited_srt_file(file):
+    from csv import DictReader, excel_tab
+    from collections import OrderedDict
+    result = OrderedDict()
+    c = 0
+    for row in DictReader(file, dialect=excel_tab):
+        result[row[COLUMN_TEXT]] = {
+            "id": f'line{c}',
+            "start":row[COLUMN_START],
+            "end":row[COLUMN_END],
+            "speaker":row[COLUMN_SPEAKER]
+        }
+        c += 1
+    return result
+
+
+def sub_html(html:str, parsed_srt):
+    import re
+    errors = []
+    sub_map = []
+    cursor=0
+    for l, data in parsed_srt.items():
+        new_line = f'<span class="transcript-line" ' \
+                   f'id="{data["id"]}" ' \
+                   f'data-start="{data["start"]}"' \
+                   f' data-end="{data["end"]}"' \
+                   f' data-speaker="{data["speaker"]}"' \
+                   f'>{l}</span>'
+        match = re.search(f'({re.escape(l)})', html[cursor:])
+        if match is None:
+            errors.append(f'NOT FOUND -- {l}')
+            continue
+        sub_map.append((match.start(1) + cursor, match.end(1) + cursor, new_line))
+        cursor += match.end(1)
+    for start, end, new_line in reversed(sub_map):
+        html = html[:start] + new_line + html[end:]
+    return html, errors
