@@ -385,7 +385,7 @@
 		{% endfor %}
         {% if has_transcript %}
             <div id="playerPlus" class="{{ pane_class }}" role="tabpanel">
-                <div class="row">
+                {% if request.user.is_staff %}<div class="row">
                     <div class="col">
                         {% for error in transcript_errors %}
                             <div class="alert alert-danger" role="alert">
@@ -393,7 +393,7 @@
                             </div>
                         {% endfor %}
                     </div>
-                </div>
+                </div>{% endif %}
                 <div class="row">
                     <div class="col">
                         <audio id="newAudioTranscript">
