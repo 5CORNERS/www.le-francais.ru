@@ -564,7 +564,10 @@ LessonPage.settings_panels = LessonPage.settings_panels + [
         ],
         heading='Topic',
         classname='collapsible'
-    )
+    ),
+    FieldPanel('audio_new'),
+    FieldPanel('transcript_srt'),
+    FieldPanel('transcript_text'),
 ]
 
 
