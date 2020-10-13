@@ -10,6 +10,7 @@ Disallow: /conjugation/
 Disallow: /payments/
 Disallow: /conjugaison/polly/
 Disallow: /conjugaison/verbs_autocomplete/
+Disallow: /home/lesson-transcript-prototype/
 
 Host: https://www.le-francais.ru
 

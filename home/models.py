@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
-from io import StringIO
+from io import StringIO, BytesIO
 
 from annoying.fields import AutoOneToOneField
 from django.conf import settings
@@ -40,7 +40,8 @@ from .blocks.BootstrapCalloutBlock import BootstrapCalloutBlock
 from .blocks.CollapseBlock import CollapseBlock
 from .blocks.FloatingImageBlock import FloatingImageBlock
 from .pay54 import Pay34API
-from .utils import message, parse_tab_delimited_srt_file, sub_html
+from .utils import message, parse_tab_delimited_srt_file, sub_html, create_document_from_transcript_srt, \
+    get_html_and_map_from_docx
 
 PAGE_CHOICES = (
     ('lesson_a1', 'Lesson A1'),
@@ -325,7 +326,9 @@ class LessonPage(Page):
     audio_new = URLField(blank=True, null=True, default=None)
 
     need_payment = BooleanField(default=False)
+
     transcript_srt = FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
+    transcript_docx = FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
     transcript_text = TextField(null=True, blank=True, default=None)
 
     comments_for_lesson = StreamField([
@@ -548,11 +551,19 @@ class LessonPage(Page):
                 context['block_flash_cards'] = False
 
         context['has_transcript'] = False
-        if self.transcript_srt.name:
+        if self.transcript_docx.name:
             context['has_transcript'] = True
-            context['transcript_html'], context['transcript_errors'], context['transcript_map'] = self.get_transcript_html_errors_map()
+            context['transcript_html'], context['transcript_map'] = get_html_and_map_from_docx(BytesIO(self.transcript_docx.read()))
 
         return context
+
+    def create_transcript_docx(self):
+        self.transcript_docx.delete(save=True)
+        self.transcript_docx.save(
+            f'lesson-{str(self.lesson_number).zfill(3)}.docx',
+            create_document_from_transcript_srt(self.transcript_srt.read().decode('utf-8')),
+            save=True
+        )
 
     class Meta:
         permissions = (
@@ -594,7 +605,7 @@ LessonPage.settings_panels = LessonPage.settings_panels + [
     ),
     FieldPanel('audio_new'),
     FieldPanel('transcript_srt'),
-    FieldPanel('transcript_text'),
+    FieldPanel('transcript_docx'),
 ]
 
 

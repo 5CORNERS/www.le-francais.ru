@@ -3,7 +3,12 @@ import binascii
 from hashlib import md5
 from io import BytesIO, StringIO
 
+import docx
+from docx import Document
 from django.conf import settings
+from docx.text.paragraph import Paragraph
+from docx.text.run import Run
+from markdown import Markdown
 
 from home.consts import COLUMN_TEXT, COLUMN_START, COLUMN_END, COLUMN_SPEAKER
 
@@ -247,3 +252,57 @@ def sub_html(html:str, parsed_srt):
     for start, end, new_line in reversed(sub_map):
         html = html[:start] + new_line + html[end:]
     return html, errors
+
+def create_document_from_transcript_srt(table_csv) -> BytesIO:
+    parsed_table = parse_tab_delimited_srt_file(StringIO(table_csv))
+    document = docx.Document()
+    last_speaker = None
+    for l, data in parsed_table.items():
+        speaker = data['speaker']
+        if speaker != last_speaker:
+            current_p:Paragraph = document.add_paragraph('— ')
+        else:
+            current_p.add_run(' ')
+        new_run:Run = current_p.add_run(f'{l}')
+        comment = new_run.add_comment(
+            text=f'{data["speaker"]} {data["start"]} {data["end"]} {data["id"]}'
+        )
+        last_speaker = speaker
+    file = BytesIO()
+    document.save(file)
+    return file
+
+
+def get_html_and_map_from_docx(docx_file):
+    document = Document(docx_file)
+    paragraph: Paragraph
+    run: Run
+    start_ends_map = []
+    html = ""
+    for paragraph in document.paragraphs:
+        html += "<p>"
+        for elem in paragraph._element.xpath('./*'):
+            if elem.xpath('name()') == 'w:commentRangeStart':
+                speaker, mm_start, mm_end, l_id = document.comments_part._element.get_comment_by_id(
+                    int(elem.xpath('./@w:id')[0])).xpath('.//w:t/text()')[0].split(' ')
+                start_ends_map.append({'start':mm_start, 'end':mm_end, 'id':l_id})
+                html += f'<span class="transcript-line" id="{l_id}" data-start="{mm_start}" data-end="{mm_end}">'
+            elif elem.xpath('name()') == 'w:r':
+                for r_elem in elem.xpath('./*'):
+                    if r_elem.xpath('name()') == 'w:commentRangeStart':
+                        speaker, mm_start, mm_end, l_id = document.comments_part._element.get_comment_by_id(
+                            int(r_elem.xpath('./@w:id')[0])).xpath('.//w:t/text()')[0].split(' ')
+                        start_ends_map.append({'start': mm_start, 'end': mm_end, 'id': l_id})
+                        html += f'<span class="transcript-line" id="{l_id}" data-start="{mm_start}" data-end="{mm_end}">'
+                    elif r_elem.xpath('name()') == 'w:commentRangeEnd':
+                        html += f'</span>'
+                    elif r_elem.xpath('name()') == 'w:instrText':
+                        # TODO: INCLUDE PICTURE
+                        pass
+                    else:
+                        html += f'{"".join(r_elem.xpath(".//text()"))}'
+            elif elem.xpath('name()') == 'w:commentRangeEnd':
+                html += f'</span>'
+        html += '</p>'
+    return html, start_ends_map
+
