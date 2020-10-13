@@ -24,7 +24,7 @@ markdown==2.6.11
 urllib3
 pymdown-extensions==5.0.0
 django-mailer==1.2.6
-django-comments-xtd
+django-comments-xtd==2.7.2
 django-user-sessions
 django-cron
 django-timezone-field>=3.1, <4.0
