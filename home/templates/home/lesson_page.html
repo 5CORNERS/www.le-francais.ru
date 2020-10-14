@@ -48,7 +48,7 @@
                 $(document).keypress(function (event){
                     if (event.keyCode === 32) {
                         event.preventDefault()
-                        audio.paused ? audio.trigger('play') : audio.trigger('pause')
+                        audio[0].paused ? audio.trigger('play') : audio.trigger('pause')
                     }
                 })
             })
