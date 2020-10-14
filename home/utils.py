@@ -304,5 +304,6 @@ def get_html_and_map_from_docx(docx_file):
             elif elem.xpath('name()') == 'w:commentRangeEnd':
                 html += f'</span>'
         html += '</p>'
+    html = re.sub('!\[(.+?)\]\((.+?)\s"(.+?)"\)', '<img title="\g<1>" src="\g<2>" alt="\g<3>">', html)
     return html, start_ends_map
 
