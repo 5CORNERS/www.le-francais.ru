@@ -283,8 +283,12 @@ def get_html_and_map_from_docx(docx_file):
         html += "<p>"
         for elem in paragraph._element.xpath('./*'):
             if elem.xpath('name()') == 'w:commentRangeStart':
-                speaker, mm_start, mm_end, l_id = document.comments_part._element.get_comment_by_id(
-                    int(elem.xpath('./@w:id')[0])).xpath('.//w:t/text()')[0].split(' ')
+                try:
+                    speaker, mm_start, mm_end, l_id = "".join(document.comments_part._element.get_comment_by_id(
+                        int(elem.xpath('./@w:id')[0])).xpath('.//w:t/text()')).split(' ')
+                except ValueError as e:
+                    print("".join(document.comments_part._element.get_comment_by_id(
+                        int(elem.xpath('./@w:id')[0])).xpath('.//w:t/text()')))
                 start_ends_map.append({'start':mm_start, 'end':mm_end, 'id':l_id})
                 html += f'<span class="transcript-line" id="{l_id}" data-start="{mm_start}" data-end="{mm_end}">'
             elif elem.xpath('name()') == 'w:r':
