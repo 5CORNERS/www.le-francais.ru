@@ -2,12 +2,14 @@ from collections import defaultdict
 import binascii
 from hashlib import md5
 from io import BytesIO, StringIO
+from typing import List, Dict
 
 import docx
 from docx import Document
 from django.conf import settings
 from docx.text.paragraph import Paragraph
 from docx.text.run import Run
+from lxml import etree
 from markdown import Markdown
 
 from home.consts import COLUMN_TEXT, COLUMN_START, COLUMN_END, COLUMN_SPEAKER
@@ -279,9 +281,11 @@ def get_html_and_map_from_docx(docx_file):
     run: Run
     start_ends_map = []
     html = ""
+    c = 0
     for paragraph in document.paragraphs:
         html += "<p>"
         for elem in paragraph._element.xpath('./*'):
+            c += 1
             if elem.xpath('name()') == 'w:commentRangeStart':
                 try:
                     speaker, mm_start, mm_end, l_id = "".join(document.comments_part._element.get_comment_by_id(
@@ -289,15 +293,16 @@ def get_html_and_map_from_docx(docx_file):
                 except ValueError as e:
                     print("".join(document.comments_part._element.get_comment_by_id(
                         int(elem.xpath('./@w:id')[0])).xpath('.//w:t/text()')))
-                start_ends_map.append({'start':mm_start, 'end':mm_end, 'id':l_id})
-                html += f'<span class="transcript-line" id="{l_id}" data-start="{mm_start}" data-end="{mm_end}">'
+                start_ends_map.append({'start':mm_start, 'end':mm_end, 'id':f'line{c}'})
+                html += f'<span class="transcript-line" id="line{c}" data-start="{mm_start}" data-end="{mm_end}">'
             elif elem.xpath('name()') == 'w:r':
                 for r_elem in elem.xpath('./*'):
+                    c += 1
                     if r_elem.xpath('name()') == 'w:commentRangeStart':
-                        speaker, mm_start, mm_end, l_id = document.comments_part._element.get_comment_by_id(
-                            int(r_elem.xpath('./@w:id')[0])).xpath('.//w:t/text()')[0].split(' ')
-                        start_ends_map.append({'start': mm_start, 'end': mm_end, 'id': l_id})
-                        html += f'<span class="transcript-line" id="{l_id}" data-start="{mm_start}" data-end="{mm_end}">'
+                        speaker, mm_start, mm_end = document.comments_part._element.get_comment_by_id(
+                            int(r_elem.xpath('./@w:id')[0])).xpath('.//w:t/text()')[0].split(' ')[:3]
+                        start_ends_map.append({'start': mm_start, 'end': mm_end, 'id': f'line{c}'})
+                        html += f'<span class="transcript-line" id="line{c}" data-start="{mm_start}" data-end="{mm_end}">'
                     elif r_elem.xpath('name()') == 'w:commentRangeEnd':
                         html += f'</span>'
                     elif r_elem.xpath('name()') == 'w:instrText':
