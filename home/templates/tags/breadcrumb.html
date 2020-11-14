@@ -13,9 +13,9 @@
         <li itemprop="itemListElement" itemscope
           itemtype="https://schema.org/ListItem" class="breadcrumb-item {% if calling_page.url == breadcrumb_page.url %}active{% endif %}">
             {% if breadcrumb_page.specific.is_selectable %}
-                <a href="{% pageurl breadcrumb_page %}">{{ title }}</a>
+                <a itemprop="item" href="{% pageurl breadcrumb_page %}"><span itemprop="name">{{ title }}</span></a>
             {% else %}
-                {{ title }}
+                <span itemprop="name">{{ title }}</span>
             {% endif %}
             <meta itemprop="position" content="{{ forloop.counter }}" />
         </li>
