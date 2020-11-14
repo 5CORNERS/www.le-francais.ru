@@ -1,8 +1,8 @@
-{% load i18n pybb_tags %}
+{% load i18n pybb_tags forum_tags %}
 <ul class="breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">
     {% include "pybb/breadcrumb_top_extra_crumb.html" %}
     <li itemprop="itemListElement" itemscope
-        itemtype="https://schema.org/ListItem"><a href="{% url 'pybb:index' %}">{% trans 'Forum' %}</a> <span
+        itemtype="https://schema.org/ListItem"><a itemprop="item" href="{% url 'pybb:index' %}"><span itemprop="name">{% trans 'Forum' %}</span></a> <span
             class="divider">/</span>
         <meta itemprop="position" content="1"/>
     </li>
@@ -10,13 +10,13 @@
         {% if object.get_parents %}
             {% for obj in object.get_parents %}
                 <li itemprop="itemListElement" itemscope
-                    itemtype="https://schema.org/ListItem">{% pybb_link obj %} <span class="divider">/</span>
+                    itemtype="https://schema.org/ListItem">{% pybb_breadcrumb_link obj %} <span class="divider">/</span>
                     <meta itemprop="position" content="{{ forloop.counter|add:1 }}"/>
                 </li>
             {% endfor %}
         {% endif %}
         {% if extra_crumb %}
-            <li>{% pybb_link object %} <span class="divider">/</span></li>
+            <li>{% pybb_breadcrumb_link object %} <span class="divider">/</span></li>
         {% else %}
             <li>{{ object }}</li>
         {% endif %}

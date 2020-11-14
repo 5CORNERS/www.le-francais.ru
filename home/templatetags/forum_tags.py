@@ -1,5 +1,9 @@
 from django import template
 from django.db.models import Max, Q
+from django.utils.encoding import smart_text
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
+
 from pybb.models import Topic
 
 from home.utils import get_svg_avatar
@@ -31,3 +35,10 @@ def top_topics(count=50, *args, **kwargs):
 @register.inclusion_tag('pybb/_avinit.html')
 def avinit_initials(username, size):
 	return {'svg':get_svg_avatar(username, width=str(size), height=str(size), radius=str(size/2), **{'font-size':str(size/2)})}
+
+@register.simple_tag
+def pybb_breadcrumb_link(object, anchor=''):
+	url = hasattr(object, 'get_absolute_url') and object.get_absolute_url() or None
+	# noinspection PyRedeclaration
+	anchor = anchor or smart_text(object)
+	return mark_safe('<a itemprop="item" href="%s"><span itemprop="name">%s</span></a>' % (url, escape(anchor)))
