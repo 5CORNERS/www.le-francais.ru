@@ -17020,7 +17020,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -17046,7 +17046,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -17072,7 +17072,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -17098,7 +17098,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -17124,7 +17124,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -17150,7 +17150,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -17178,7 +17178,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -17204,7 +17204,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -17230,7 +17230,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -17656,7 +17656,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -17682,7 +17682,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -17708,7 +17708,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -17734,7 +17734,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -17760,7 +17760,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -17786,7 +17786,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -17814,7 +17814,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -17840,7 +17840,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -17866,7 +17866,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -18292,7 +18292,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -18318,7 +18318,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -18344,7 +18344,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -18370,7 +18370,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -18396,7 +18396,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -18422,7 +18422,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -18450,7 +18450,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -18476,7 +18476,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -18502,7 +18502,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -18928,7 +18928,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -18954,7 +18954,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -18980,7 +18980,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -19006,7 +19006,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -19032,7 +19032,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -19058,7 +19058,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -19086,7 +19086,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -19112,7 +19112,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -19138,7 +19138,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -19566,7 +19566,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -19592,7 +19592,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -19618,7 +19618,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -19644,7 +19644,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -19670,7 +19670,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -19696,7 +19696,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -19724,7 +19724,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -19750,7 +19750,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -19776,7 +19776,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -20202,7 +20202,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -20228,7 +20228,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -20254,7 +20254,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -20280,7 +20280,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -20306,7 +20306,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -20332,7 +20332,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -20360,7 +20360,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -20386,7 +20386,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -20412,7 +20412,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -20840,7 +20840,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -20866,7 +20866,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -20892,7 +20892,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -20918,7 +20918,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -20944,7 +20944,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -20970,7 +20970,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -20998,7 +20998,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -21024,7 +21024,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -21050,7 +21050,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -21158,7 +21158,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -21184,7 +21184,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -21210,7 +21210,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -21236,7 +21236,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -21262,7 +21262,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -21288,7 +21288,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -21316,7 +21316,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -21342,7 +21342,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -21368,7 +21368,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -22084,7 +22084,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -22112,7 +22112,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -22202,7 +22202,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -22230,7 +22230,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -28144,7 +28144,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -28170,7 +28170,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -28196,7 +28196,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -28222,7 +28222,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -28248,7 +28248,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -28274,7 +28274,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -28302,7 +28302,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -28328,7 +28328,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -28354,7 +28354,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -28780,7 +28780,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -28806,7 +28806,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -28832,7 +28832,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -28858,7 +28858,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -28884,7 +28884,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -28910,7 +28910,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -28938,7 +28938,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -28964,7 +28964,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -28990,7 +28990,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -29416,7 +29416,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -29442,7 +29442,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -29468,7 +29468,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -29494,7 +29494,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -29520,7 +29520,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -29546,7 +29546,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -29574,7 +29574,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -29600,7 +29600,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -29626,7 +29626,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -30052,7 +30052,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -30078,7 +30078,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -30104,7 +30104,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -30130,7 +30130,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -30156,7 +30156,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -30182,7 +30182,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -30210,7 +30210,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -30236,7 +30236,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -30262,7 +30262,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -30690,7 +30690,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -30716,7 +30716,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -30742,7 +30742,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -30768,7 +30768,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -30794,7 +30794,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -30820,7 +30820,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -30848,7 +30848,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -30874,7 +30874,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -30900,7 +30900,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -31326,7 +31326,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -31352,7 +31352,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -31378,7 +31378,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -31404,7 +31404,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -31430,7 +31430,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -31456,7 +31456,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -31484,7 +31484,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -31510,7 +31510,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -31536,7 +31536,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -31964,7 +31964,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -31990,7 +31990,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -32016,7 +32016,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -32042,7 +32042,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -32068,7 +32068,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -32094,7 +32094,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -32122,7 +32122,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -32148,7 +32148,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -32174,7 +32174,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -32282,7 +32282,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -32308,7 +32308,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -32334,7 +32334,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -32360,7 +32360,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -32386,7 +32386,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -32412,7 +32412,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -32440,7 +32440,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -32466,7 +32466,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -32492,7 +32492,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -33208,7 +33208,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -33236,7 +33236,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -33326,7 +33326,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -33354,7 +33354,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -55954,7 +55954,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -55980,7 +55980,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -56006,7 +56006,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -56032,7 +56032,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -56058,7 +56058,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -56084,7 +56084,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -56112,7 +56112,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -56138,7 +56138,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -56164,7 +56164,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -56590,7 +56590,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -56616,7 +56616,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -56642,7 +56642,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -56668,7 +56668,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -56694,7 +56694,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -56720,7 +56720,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -56748,7 +56748,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -56774,7 +56774,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -56800,7 +56800,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -57226,7 +57226,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -57252,7 +57252,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -57278,7 +57278,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -57304,7 +57304,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -57330,7 +57330,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -57356,7 +57356,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -57384,7 +57384,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -57410,7 +57410,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -57436,7 +57436,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -57862,7 +57862,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -57888,7 +57888,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -57914,7 +57914,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -57940,7 +57940,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -57966,7 +57966,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -57992,7 +57992,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -58020,7 +58020,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -58046,7 +58046,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -58072,7 +58072,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -59774,7 +59774,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -59800,7 +59800,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -59826,7 +59826,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -59852,7 +59852,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -59878,7 +59878,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -59904,7 +59904,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -59932,7 +59932,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -59958,7 +59958,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -59984,7 +59984,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -60092,7 +60092,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -60118,7 +60118,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -60144,7 +60144,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -60170,7 +60170,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -60196,7 +60196,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -60222,7 +60222,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -60250,7 +60250,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -60276,7 +60276,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -60302,7 +60302,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -61018,7 +61018,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -61046,7 +61046,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -61136,7 +61136,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -61164,7 +61164,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -67078,7 +67078,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -67104,7 +67104,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -67130,7 +67130,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -67156,7 +67156,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -67182,7 +67182,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -67208,7 +67208,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -67236,7 +67236,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -67262,7 +67262,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -67288,7 +67288,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -67714,7 +67714,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -67740,7 +67740,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -67766,7 +67766,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -67792,7 +67792,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -67818,7 +67818,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -67844,7 +67844,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -67872,7 +67872,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -67898,7 +67898,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -67924,7 +67924,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -68350,7 +68350,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -68376,7 +68376,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -68402,7 +68402,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -68428,7 +68428,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -68454,7 +68454,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -68480,7 +68480,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -68508,7 +68508,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -68534,7 +68534,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -68560,7 +68560,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -68986,7 +68986,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -69012,7 +69012,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -69038,7 +69038,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -69064,7 +69064,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -69090,7 +69090,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -69116,7 +69116,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -69144,7 +69144,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -69170,7 +69170,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -69196,7 +69196,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -70898,7 +70898,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -70924,7 +70924,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -70950,7 +70950,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -70976,7 +70976,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -71002,7 +71002,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -71028,7 +71028,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -71056,7 +71056,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -71082,7 +71082,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -71108,7 +71108,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -71216,7 +71216,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -71242,7 +71242,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -71268,7 +71268,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -71294,7 +71294,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -71320,7 +71320,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -71346,7 +71346,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_P_M",
-              "f": "VERB_PAST_PARTICIPLE_P_M"
+              "f": "VERB_PAST_PARTICIPLE_P_F"
             },
             "part_2": {
               "m": {
@@ -71374,7 +71374,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -71400,7 +71400,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -71426,7 +71426,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -72142,7 +72142,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -72170,7 +72170,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -72260,7 +72260,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
@@ -72288,7 +72288,7 @@
             },
             "verb_part": {
               "m": "VERB_PAST_PARTICIPLE_S_M",
-              "f": "VERB_PAST_PARTICIPLE_S_M"
+              "f": "VERB_PAST_PARTICIPLE_S_F"
             },
             "part_2": {
               "m": {
