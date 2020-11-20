@@ -347,17 +347,53 @@ def top_menu(context, parent, calling_page=None):
 		'user': context['user']
 	}
 
+def get_shortest_title(page):
+	try:
+		if page.specific.menu_title:
+			return page.specific.menu_title
+		else:
+			return page.title
+	except:
+		return page.title
+
+def get_page_url(page, context):
+	try:
+		current_site = context['request'].site
+	except (KeyError, AttributeError):
+		# request.site not available in the current context; fall back on page.url
+		return page.url
+	return page.relative_url(current_site, request=context.get('request'))
 
 @register.inclusion_tag('tags/breadcrumb.html', takes_context=True)
 def breadcrumb(context, calling_page):
-	breadcrumb_pages = []
-	breadcrumb_page = calling_page
-	while breadcrumb_page.get_parent() is not None:
-		breadcrumb_pages.append(breadcrumb_page)
-		breadcrumb_page = breadcrumb_page.get_parent()
+	current_page = calling_page
+	pages = [current_page]
+	while current_page.get_parent():
+		current_page = current_page.get_parent()
+		pages.append(current_page)
+	pages.pop(-1)
+	breadcrumbs = []
+	for page in reversed(pages):
+		if hasattr(page.specific, 'menu_title') and page.specific.menu_title:
+			title = page.specific.menu_title
+		else:
+			title = page.title
+		if hasattr(page.specific, 'is_selectable') and page.specific.is_selectable:
+			try:
+				current_site = context['request'].site
+				url = page.relative_url(current_site, context['request'])
+			except (KeyError, AttributeError):
+				url = page.url
+
+			breadcrumbs.append({
+				'name': title,
+				'url': url,
+				'active': page.url == calling_page.url
+			})
+		else:
+			breadcrumbs[-1]['name'] = breadcrumbs[-1]['name'] + ' > ' + title
 	return {
-		'calling_page': calling_page,
-		'breadcrumb_pages': reversed(breadcrumb_pages),
+		'breadcrumbs': breadcrumbs,
 		'request': context['request'],
 	}
 
