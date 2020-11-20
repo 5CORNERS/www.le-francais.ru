@@ -391,7 +391,7 @@ def breadcrumb(context, calling_page):
 				'active': page.url == calling_page.url
 			})
 		else:
-			breadcrumbs[-1]['name'] = breadcrumbs[-1]['name'] + ' > ' + title
+			breadcrumbs[-1]['name'] = f'{breadcrumbs[-1]["name"]} ({title})'
 	return {
 		'breadcrumbs': breadcrumbs,
 		'request': context['request'],
