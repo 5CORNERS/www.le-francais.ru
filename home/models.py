@@ -327,6 +327,10 @@ class LessonPage(Page):
 
     need_payment = BooleanField(default=False)
 
+    has_transcript = BooleanField(default=False)
+    transcript = JSONField(default=[], blank=True)
+    transcript_html = TextField(default='', blank=True)
+
     transcript_srt = FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
     transcript_docx = FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
     transcript_text = TextField(null=True, blank=True, default=None)
@@ -551,9 +555,13 @@ class LessonPage(Page):
                 context['block_flash_cards'] = False
 
         context['has_transcript'] = False
-        if self.transcript_docx.name:
+        if self.transcript_docx.name and self.has_transcript == False:
+            self.has_transcript = context['has_transcript'] = True
+            self.transcript, self.transcript_html = get_html_and_map_from_docx(BytesIO(self.transcript_docx.read()))
+            context['transcript_html'], context['transcript_map'] = self.transcript, self.transcript_html
+        elif self.has_transcript:
             context['has_transcript'] = True
-            context['transcript_html'], context['transcript_map'] = get_html_and_map_from_docx(BytesIO(self.transcript_docx.read()))
+            context['transcript_html'], context['transcript_map'] = self.transcript, self.transcript_html
 
         return context
 
