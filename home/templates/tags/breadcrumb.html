@@ -2,24 +2,15 @@
 {% load site_tags static %}
 
 <ol class="breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">
-    {% for breadcrumb_page in breadcrumb_pages %}
-
-        {% if breadcrumb_page.specific.menu_title %}
-            {% assign title breadcrumb_page.specific.menu_title %}
-        {% else %}
-            {% assign title breadcrumb_page.title %}
-        {% endif %}
-
+    {% for breadcrumb in breadcrumbs %}
         <li itemprop="itemListElement" itemscope
-          itemtype="https://schema.org/ListItem" class="breadcrumb-item {% if calling_page.url == breadcrumb_page.url %}active{% endif %}">
-            {% if breadcrumb_page.specific.is_selectable %}
-                <a itemprop="item" href="{% pageurl breadcrumb_page %}"><span itemprop="name">{{ title }}</span></a>
-            {% else %}
-                <span itemprop="name">{{ title }}</span>
-            {% endif %}
-            <meta itemprop="position" content="{{ forloop.counter }}" />
+            itemtype="https://schema.org/ListItem"
+            class="breadcrumb-item {% if breadcrumb.active %}active{% endif %}">
+            <a itemprop="item" href="{{ breadcrumb.url }}">
+                <span itemprop="name">{{ breadcrumb.name }}</span>
+            </a>
+            <meta itemprop="position" content="{{ forloop.counter }}"/>
         </li>
-
     {% endfor %}
 </ol>
 
