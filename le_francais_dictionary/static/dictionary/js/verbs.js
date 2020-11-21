@@ -69,13 +69,15 @@
             return 0;
         }
         return new Promise(resolve => {
-            let audio = new Audio(url);
+            let audio = new Audio();
             $(audio).on('canplay', async function () {
                 await audio.play()
                 resolve(audio.duration)
             }).on('error', () => {
                 resolve(0)
             })
+            audio.src = url;
+            audio.load()
         })
     }
 
