@@ -62,15 +62,24 @@
             }
         });
     }
-    let audio = new Audio()
+
     async function playSound(url) {
         if ((url === undefined) || (url === null)) {
             return 0;
         }
-        audio.src = url
-        audio.load()
-        audio.play()
-        return getAudionDuration(audio)
+        return new Promise(resolve => {
+            let howl = new Howl({
+                src: url,
+                preload: true,
+                loop: false,
+                buffer: true,
+                html5: true,
+                onload: () => {
+                    howl.play();
+                    resolve(howl.duration())
+                },
+            })
+        })
     }
 
     new Vue({

@@ -130,7 +130,12 @@
 		</div>
 	</div>
     <script>
-        ['{% static "components/js/vue.js" %}', '{% static "dictionary/js/verbs.js" %}'].forEach(src => {
+        [
+            '{% static "components/js/howler.js" %}',
+            '{% static "components/js/vue.js" %}',
+            '{% static "dictionary/js/verbs.js" %}',
+            '{% static "components/js/vue-multiselect.min.js" %}'
+        ].forEach(src => {
             let script = document.createElement("script");
             script.setAttribute("src", src);
             script.setAttribute("type", "text/javascript");
