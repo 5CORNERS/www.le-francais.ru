@@ -55,24 +55,22 @@
         }), d.packets];
     }
 
-    const getAudionDuration = (url) => {
+    const getAudionDuration = (audio) => {
         return new Promise((resolve, reject) => {
-            const audio = new Audio(url);
             audio.onloadedmetadata = () => {
                 resolve(audio.duration);
             }
         });
     }
-
+    let audio = new Audio()
     async function playSound(url) {
         if ((url === undefined) || (url === null)) {
             return 0;
         }
-        let audio = new Audio();
         audio.src = url
         audio.load()
         audio.play()
-        return getAudionDuration(url)
+        return getAudionDuration(audio)
     }
 
     new Vue({
