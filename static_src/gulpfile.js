@@ -15,6 +15,7 @@ gulp.task('sass', () => {
 
 gulp.task('css', () => {
     return gulp.src([
+        'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
         'css/**/*.css',
     ])
         .pipe(minify())
@@ -22,7 +23,6 @@ gulp.task('css', () => {
 });
 
 gulp.task('js', () => {
-    // language=file-reference
     return gulp.src([
         'node_modules/jquery/dist/jquery.js',
         'node_modules/bootstrap/dist/js/bootstrap.js',
@@ -32,6 +32,8 @@ gulp.task('js', () => {
         'node_modules/moment/moment.js',
         'node_modules/js-cookie/src/js.cookie.js',
         'node_modules/vue/dist/vue.js',
+        'node_modules/vue-multiselect/dist/vue-multiselect.min.js',
+        'node_modules/howler/dist/howler.js',
         'src/js/**/*.js'
     ])
         .pipe(uglify())
