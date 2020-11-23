@@ -51,9 +51,9 @@
 				<div class="row">
 					<div class="col-12">
 						<h1 class="title">Спряжение {% if not request|is_mobile %}глагола{% endif %}
-                            <span class="text-danger text-uppercase">{% if reflexive %}{{ v.reflexiveverb.non_breakable_space_infinitive | safe}}{% elif pronoun %}s'en&nbsp;{{ v.infinitive }}{% else %}{{ v.infinitive }}{% endif %}</span>
-									{% if not table.moods.5.tenses.0.is_empty %}
-										<a class="link-play-pause"
+                            <span
+                                    class="text-danger text-uppercase"
+                            >{% if reflexive %}{{ v.reflexiveverb.non_breakable_space_infinitive | safe}}{% elif pronoun %}s'en&nbsp;{{ v.infinitive }}{% else %}{{ v.infinitive }}{% endif %}</span>{% if not table.moods.5.tenses.0.is_empty %}<a class="link-play-pause"
 										   style="cursor: pointer; margin: -2px 0;"><span
 												style="height: 31px"
 												data-toggle="tooltip"
@@ -107,8 +107,8 @@
 								{% for i in forms_range %}
 									<li style="cursor: pointer"
 									    class="nav-item verb-form-pill">
-										<a href="" class="nav-link{% if forloop.first %} active{% endif %}" data-toggle="pill"
-										   data-target=".form{{ forloop.counter0 }}">Вариант {{ i }}</a>
+										<a href="" class="nav-link{% if forloop.first %} active{% endif %} form-pills" id="formPill{{ forloop.counter0 }}" data-toggle="pill"
+										   data-t=".form{{ forloop.counter0 }}">Вариант {{ i }}</a>
 									</li>
 								{% endfor %}
 							</ul>
@@ -254,7 +254,7 @@
 								></span></a>{% endif %}{% comment %}<img
 		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
                             >{% endcomment %}</h5></div>
-							<p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade{% if forloop.counter0 == 0 %} show active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
+                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span><r class="tab-content">{% for i in forms_range %}<r class="tab-pane fade{% if i == 1 %} show active{% endif %} form{{ forloop.counter0 }}">{% if person.forms|length >= forloop.counter %}{{ person.forms|index:forloop.counter0|safe }}{% else %}{{ person.forms|index:-1|safe }}{% endif %}</r>{% endfor %}</r>{{ person.part_2 | safe }}<br>{% endfor %}</p>
 						</div>
 					{% endfor %}
 				</div>
@@ -285,7 +285,7 @@
 									></span></a>{% endif %}{% comment %}<img
 		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
                             >{% endcomment %}</h5></div>
-								<p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span>{% if person.more_than_one %}<r class="tab-content">{% for form in person.forms %}<r class="tab-pane fade {% if forloop.counter0 == 0 %} show active{% endif %} form{{ forloop.counter0 }}">{{ form | safe }}</r>{% endfor %}</r>{% else %}{{ person.forms.0 | safe }}{% endif %}{{ person.part_2 | safe }}<br>{% endfor %}</p>
+								<p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span><r class="tab-content">{% for i in forms_range %}<r class="tab-pane fade{% if i == 1 %} show active{% endif %} form{{ forloop.counter0 }}">{% if person.forms|length >= forloop.counter %}{{ person.forms|index:forloop.counter0|safe }}{% else %}{{ person.forms|index:-1|safe}}{% endif %}</r>{% endfor %}</r>{{ person.part_2 | safe }}<br>{% endfor %}</p>
 							</div>
 						{% endfor %}
 					</div>
