@@ -86,12 +86,12 @@ $(document).ready(function () {
 	let url = location.href.replace(/\/$/, "");
 	if(location.hash){
 		const hash = url.split('#');
-		$(`.verb-form-pill a[data-target=".${hash[1]}"]`).tab('show');
+		$(`.verb-form-pill a[data-t=".${hash[1]}"]`).tab('show');
 	}
 
 	$('.verb-form-pill a[data-toggle="pill"]').on("click", function () {
 		let newUrl;
-		const hash = $(this).attr('data-target').replace(/\./, '#');
+		const hash = $(this).attr('data-t').replace(/\./, '#');
 		if (hash === '#form0') {
 			newUrl = url.split('#')[0]
 		}else{
@@ -116,11 +116,25 @@ $(document).ready(function () {
 	});
 	$('.nav-pills > li > a').each(function () {
 		this.addEventListener('click', function () {
-			if(this.attributes['data-target'].value !== '.form0'){
+			if(this.attributes['data-t'].value !== '.form0'){
 				$('.play-pause-icon').hide()
 			}else{
 				$('.play-pause-icon').show()
 			}
+		})
+	})
+
+	$('.form-pills').each(function () {
+		$(this).on('click', function () {
+			let $pill = $(this)
+			$('.tab-pane').each(function () {
+				let $tab = $(this)
+				if ($tab.hasClass($pill.data('t').slice(1))) {
+					$tab.addClass('show').addClass('active');
+				}else{
+					$tab.removeClass('active').removeClass('show');
+				}
+			})
 		})
 	})
 
