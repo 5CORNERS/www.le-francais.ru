@@ -36,6 +36,41 @@
         [TENSE_INDICATIVE_FUTURE]: "Futur Simple",
     }
 
+    const SILENCE_URL = '/static/dictionary/media/silence.2b5bb705.mp3';
+    const silence = new Howl({
+      src: SILENCE_URL,
+      loop: false,
+    })
+
+    const TENSE_SOUNDS = Object.keys(TENSE_AUDIO_URLS).map((key, url) => {
+        return {
+            [key]: new Howl({
+                src: [url],
+                preload: true,
+                loop: false,
+                buffer: true,
+                html5: true,
+                onload: () => resolve(howl),
+                onloaderror: () => resolve(silence)
+            })
+        }
+    })
+
+
+    var createSound = async function(url) {
+        return new Promise((resolve, reject) => {
+            const howl = new Howl({
+                src: [url],
+                preload: true,
+                loop: false,
+                buffer: true,
+                html5: true,
+                onload: () => resolve(howl),
+                onloaderror: () => resolve(silence)
+            })
+        })
+    }
+
     var loadCards = async function (packetId, more_lessons = undefined) {
         let verbs = []
         let r
@@ -51,7 +86,12 @@
         });
 
         return [verbs.map((form) => {
-            return {...form, flipped: false}
+            return {
+                ...form,
+                flipped: false,
+                formSound: createSound(form.pollyUrl),
+                translationSound: createSound(form.trPollyUrl)
+            }
         }), d.packets];
     }
 
@@ -63,21 +103,16 @@
         });
     }
 
-    async function playSound(url) {
-        if ((url === undefined) || (url === null)) {
+    async function playSound(sound) {
+        if ((sound === undefined) || (sound === null)) {
             return 0;
         }
         return new Promise(resolve => {
-            let howl = new Howl({
-                src: url,
-                preload: true,
-                loop: false,
-                buffer: true,
-                html5: true,
-                onload: () => {
-                    howl.play();
+            sound.then((howl) => {
+                howl.once('end', () => {
                     resolve(howl.duration())
-                },
+                })
+                howl.play()
             })
         })
     }
@@ -290,6 +325,10 @@
                 return TENSE_AUDIO_URLS[tense]
             },
 
+            getTenseSound: function () {
+                return TENSE_SOUNDS[this.card.tense]
+            },
+
             getLastCard: function() {
                 if (this.currentCard === 0) {
                     return null;
@@ -339,6 +378,7 @@
                         }
                         // произносим время, если предыдузая карточка была другого времени
                         let tenseUrl = undefined
+                        let tenseSound = undefined
                         let afterTenseTimeout = 0
                         if (
                             this.type === LISTENING && (
@@ -347,14 +387,15 @@
                                 )
                             )
                         ) {
-                            tenseUrl = this.getTenseUrl(this.card.tense)
+                            tenseUrl = this.getTenseUrl()
+                            tenseSound = this.getTenseSound()
                             afterTenseTimeout = this.timeoutTense * 1000
                         }
-                        playSound(tenseUrl).then(function (tenseDuration) {
+                        playSound(tenseSound).then(function (tenseDuration) {
                             tenseDuration *= 1000
                             console.log('tense timeout: ' + (tenseDuration + afterTenseTimeout))
                             setTimeout(function () {
-                                playSound(_this.card.pollyUrl).then(function (verbDuration) {
+                                playSound(_this.card.formSound).then(function (verbDuration) {
                                     verbDuration *= 1000;
                                     var beforeTranslationTimeout;
                                     if (_this.card.isTranslation || _this.type === CHECKING) {
@@ -368,12 +409,14 @@
                                     }
                                     console.log('translation timeout: ' + (beforeTranslationTimeout + verbDuration))
                                     setTimeout(function () {
-                                        let translationUrl = undefined
+                                        let translationUrl = undefined;
+                                        let translationSound = undefined;
                                         if ((_this.type === LISTENING && _this.card.isTranslation) || _this.type === CHECKING || (_this.translateInfinitives && _this.isInfinitive() && _this.type === LISTENING)) {
                                             translationUrl = _this.card.trPollyUrl;
+                                            translationSound = _this.card.translationSound
                                             _this.card.flipped = !_this.card.flipped;
                                         }
-                                        playSound(translationUrl).then(function (translationDuration) {
+                                        playSound(translationSound).then(function (translationDuration) {
                                             translationDuration *= 1000;
                                             let timeout = 0;
                                             if (_this.isInfinitive()) {}
