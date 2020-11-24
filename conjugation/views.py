@@ -72,6 +72,7 @@ def search(request):
 		search_string = switch_keyboard_layout(str(request.POST.get('q')).strip(' ').lower())
 	else:
 		search_string = switch_keyboard_layout(str(request.GET.get('q')).strip(' ').lower())
+	search_string = search_string.replace('’', '\'')
 	is_reflexive = False
 	is_pronoun = False
 	if search_string.find("s'en ") == 0:
@@ -301,7 +302,7 @@ def get_autocomplete_list(request):
 	# TODO: add Cross-Site protection
 	list_len = 50
 	_term = request.GET['term'].lower()
-	term = switch_keyboard_layout(_term)
+	term = switch_keyboard_layout(_term).replace('’', '\'')
 	term = unidecode(term)
 	reflexive = False
 	pronoun = False
