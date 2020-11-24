@@ -394,11 +394,11 @@
                             afterTenseTimeout = this.timeoutTense * 1000
                         }
                         playSound(tenseSound).then(function (tenseDuration) {
-                            tenseDuration *= 1000
+                            tenseDuration = 0
                             console.log('tense timeout: ' + (tenseDuration + afterTenseTimeout))
                             setTimeout(function () {
                                 playSound(_this.card.formSound).then(function (verbDuration) {
-                                    verbDuration *= 1000;
+                                    verbDuration = 0;
                                     var beforeTranslationTimeout;
                                     if (_this.card.isTranslation || _this.type === CHECKING) {
                                         // карточка подлежит переводу или режим проверки
@@ -419,7 +419,7 @@
                                             _this.card.flipped = !_this.card.flipped;
                                         }
                                         playSound(translationSound).then(function (translationDuration) {
-                                            translationDuration *= 1000;
+                                            translationDuration = 0;
                                             let timeout = 0;
                                             if (_this.isInfinitive()) {}
                                             setTimeout(function () {
