@@ -402,14 +402,14 @@
                                     var beforeTranslationTimeout;
                                     if (_this.card.isTranslation || _this.type === CHECKING) {
                                         // карточка подлежит переводу или режим проверки
-                                        beforeTranslationTimeout = this.timeoutTranslation * 1000 + verbDuration;
+                                        beforeTranslationTimeout = this.timeoutTranslation * 1000;
                                     } else if (_this.translateInfinitives && _this.isInfinitive() && _this.type === LISTENING) {
-                                        beforeTranslationTimeout = this.timeoutInfinitiveTranslation * 1000 + verbDuration;
+                                        beforeTranslationTimeout = this.timeoutInfinitiveTranslation * 1000;
                                     } else if (_this.type === LISTENING) {
                                         // режим прослушивания и карточка не подлежит переводу
                                         beforeTranslationTimeout = 0;
                                     }
-                                    console.log('translation timeout: ' + (beforeTranslationTimeout + verbDuration))
+                                    console.log('translation timeout: ' + (beforeTranslationTimeout))
                                     setTimeout(function () {
                                         let translationUrl = undefined;
                                         let translationSound = undefined;
@@ -422,16 +422,16 @@
                                             translationDuration *= 1000;
                                             let timeout = 0;
                                             if (_this.isInfinitive()) {}
+
+                                            console.log('word timeout: ' + (afterVerbTimeout))
                                             setTimeout(function () {
-                                                console.log('word timeout: ' + (afterVerbTimeout + translationDuration))
-                                                setTimeout(function () {
-                                                    _this.playNextCard()
-                                                }, afterVerbTimeout + translationDuration);
-                                            }.bind(_this), translationDuration)
+                                                _this.playNextCard()
+                                            }, afterVerbTimeout);
+
                                         }.bind(_this))
-                                    }, beforeTranslationTimeout + verbDuration);
+                                    }, beforeTranslationTimeout );
                                 }.bind(_this));
-                            }, tenseDuration + afterTenseTimeout)
+                            }, afterTenseTimeout)
                         }.bind(_this))
                     }else{
                         return this.playNextCard()
