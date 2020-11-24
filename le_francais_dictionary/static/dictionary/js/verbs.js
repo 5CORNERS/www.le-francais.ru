@@ -211,7 +211,9 @@
                         verb: i.translation,
                         translation: i.verb || i.form,
                         pollyUrl: i.trPollyUrl,
-                        trPollyUrl: i.pollyUrl
+                        trPollyUrl: i.pollyUrl,
+                        formSound: i.translationSound,
+                        translationSound: i.formSound
                     }
                 })
                 this.shuffle(this.cardsRepeat)
