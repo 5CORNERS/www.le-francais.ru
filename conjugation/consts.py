@@ -292,17 +292,17 @@ KEY_TO_SWITCH = {
     "PASSIVE": 'voix_passive',
     "QUESTION": 'question',
     "NEGATIVE": 'negation',
-    "S_EN": 'pronominal_en',
+    "S-EN": 'pronominal_en',
     "QUESTION_REFLEXIVE": 'question_pronominal',
     "REFLEXIVE_NEGATIVE": 'pronominal_negation',
     "QUESTION_PASSIVE": 'question_voix_passive',
     "NEGATIVE_PASSIVE": 'negation_voix_passive',
     "QUESTION_NEGATIVE": 'question_negation',
     'QUESTION_S_EN': 'question_pronominal_en',
-    'S_EN_NEGATIVE': 'pronominal_en_negation',
+    'S-EN_NEGATIVE': 'pronominal_en_negation',
     "QUESTION_REFLEXIVE_NEGATIVE": 'question_pronominal_negation',
     "QUESTION_NEGATIVE_PASSIVE": 'question_negation_voix_passive',
-    'QUESTION_S_EN_NEGATIVE': 'question_pronominal_en_negation',
+    'QUESTION_S-EN_NEGATIVE': 'question_pronominal_en_negation',
 }
 
 PERSONS = {
@@ -812,3 +812,26 @@ NOT_VOWEL = 'vowel_0'
 VOICE_ACTIVE = 'active'
 VOICE_PASSIVE = 'passive'
 VOICE_REFLEXIVE = 'reflexive'
+COMPLICATED_TENSES = {
+	('indicative', 'past'): 'past-participle',
+	('indicative', 'composé-past'):'past-participle',
+	('indicative', 'antérieur-past'):'past-participle',
+	('indicative', 'antérieur-future'):'past-participle',
+	('indicative', 'pluperfect'):'past-participle',
+	('subjunctive', 'past'): 'past-participle',
+	('subjunctive', 'pluperfect'): 'past-participle',
+	('conditional', 'past-first'): 'past-participle',
+	('conditional', 'past-second'): 'past-participle',
+	('imperative', 'past'): 'past-participle',
+	('imperative', 'present'): 'imperative-present',
+	('infinitive', 'past'): 'past-participle',
+	('infinitive', 'present'): 'infinitive-present',
+	('gerund', 'past'): 'past-participle',
+	('gerund', 'present'): 'present-participle',
+	('participle', 'present'): 'present-participle',
+	('participle', 'past'): 'past-participle',
+
+
+
+
+}
