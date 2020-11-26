@@ -328,7 +328,7 @@
 						</div>
 					{% else %}
 						{% for block in self.mail_archive %}
-							{% include block %}{% endfor %}
+							{% include_block block %}{% endfor %}
 					{% endif %}
 				</div>
 			</div>
@@ -357,7 +357,7 @@
 				{% else %}
 				<div>
 					{% for block in self.additional_exercise %}
-						{% include block %}
+						{% include_block block %}
 					{% endfor %}
 				</div>
 				{% endif %}
@@ -371,7 +371,7 @@
 				{% else %}
 					<div>
 						{% for block in self.resume_populaire %}
-							{% include block %}
+							{% include_block block %}
 						{% endfor %}
 					</div>
 				{% endif %}
