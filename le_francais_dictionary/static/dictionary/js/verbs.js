@@ -37,14 +37,20 @@
     }
 
     const SILENCE_URL = '/static/dictionary/media/silence.2b5bb705.mp3';
-    const silence = new Howl({
-      src: SILENCE_URL,
-      loop: false,
+    const silence = new Promise((resolve, reject) => {
+        const howl = new Howl({
+            src: [SILENCE_URL],
+            preload: true,
+            loop: false,
+            buffer: true,
+            html5: true,
+            onload: () => resolve(howl),
+        })
     })
 
-    const TENSE_SOUNDS = Object.keys(TENSE_AUDIO_URLS).map((key, url) => {
-        return {
-            [key]: new Howl({
+    const TENSE_SOUNDS = Object.keys(TENSE_AUDIO_URLS).map((key, url) => (
+        new Promise((resolve, reject) => {
+            const howl = new Howl({
                 src: [url],
                 preload: true,
                 loop: false,
@@ -53,8 +59,8 @@
                 onload: () => resolve(howl),
                 onloaderror: () => resolve(silence)
             })
-        }
-    })
+        })
+    ))
 
 
     var createSound = async function(url) {
@@ -107,7 +113,7 @@
         if ((sound === undefined) || (sound === null)) {
             return 0;
         }
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             sound.then((howl) => {
                 howl.once('end', () => {
                     resolve(howl.duration())
