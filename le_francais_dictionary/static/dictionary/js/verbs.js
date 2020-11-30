@@ -48,20 +48,21 @@
         })
     })
 
-    const TENSE_SOUNDS = Object.keys(TENSE_AUDIO_URLS).map((key, url) => (
-        new Promise((resolve, reject) => {
-            const howl = new Howl({
-                src: [url],
-                preload: true,
-                loop: false,
-                buffer: true,
-                html5: true,
-                onload: () => resolve(howl),
-                onloaderror: () => resolve(silence)
+    const TENSE_SOUNDS = Object.assign({}, ...Object.keys(TENSE_AUDIO_URLS).map(k => (
+        {
+            [k]: new Promise((resolve, reject) => {
+                const howl = new Howl({
+                    src: [TENSE_AUDIO_URLS[k]],
+                    preload: true,
+                    loop: false,
+                    buffer: true,
+                    html5: true,
+                    onload: () => resolve(howl),
+                    onloaderror: () => resolve(silence)
+                })
             })
-        })
-    ))
-
+        }
+    )))
 
     var createSound = async function(url) {
         return new Promise((resolve, reject) => {
