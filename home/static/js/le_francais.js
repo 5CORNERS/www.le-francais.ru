@@ -131,9 +131,9 @@ $(document).ready(function () {
     if (hash != "") {
         hash = hash.substring(1);
         $('.nav-tabs a[href="#' + hash + '"]').tab('show');
-    } else {
+    }/* else {
         $('.nav-tabs a:first').tab('show');
-    }
+    }*/
 
     window.onhashchange = function () {
         $('.nav-tabs a[href="#' + location.hash.substring(1) + '"]').tab('show');

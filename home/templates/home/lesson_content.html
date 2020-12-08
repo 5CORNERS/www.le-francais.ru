@@ -7,9 +7,10 @@
         {% endif %}</div>
     <div class="col-12">
         <ul class="nav nav-tabs lesson-tabs" role="tablist">
+        {% assign first_tab True %}
             {% if self.comments_for_lesson %}
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab"
+                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
                        href="#comments_for_lesson" role="tab"
                        aria-controls="body">
                         Комментарии к уроку
@@ -18,7 +19,7 @@
             {% endif %}
             {% if self.body %}
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#body"
+                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab" href="#body"
                        role="tab" aria-controls="body">
                         Диалог урока
                     </a>
@@ -26,7 +27,7 @@
             {% endif %}
             {% if self.dictionary %}
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#dictionary"
+                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab" href="#dictionary"
                        role="tab"
                        aria-controls="body">
                         Словарик
@@ -35,7 +36,7 @@
             {% endif %}
             {% if self.summary %}
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#resume"
+                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab" href="#resume"
                        role="tab" aria-controls="body">
                         Конспект
                     </a>
@@ -73,7 +74,7 @@
                         </li>
                     {% elif not user.must_pay %}
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab"
+                            <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
                                href="#revision" role="tab"
                                aria-controls="body">
                                 Материал для повторения
@@ -91,7 +92,7 @@
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab"
+                            <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
                                href="#revision" role="tab"
                                aria-controls="body">
                                 Материал для повторения
@@ -100,7 +101,7 @@
                     {% endif %}
                 {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="tab" href="#revision"
+                        <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab" href="#revision"
                            role="tab"
                            aria-controls="body">
                             Материал для повторения
@@ -159,7 +160,7 @@
             {% if self.additional_exercise %}
                 <li class="nav-item"
                     {% if block_additional_exercise %}style="display: none"{% endif %}>
-                    <a class="nav-link" data-toggle="tab"
+                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
                        href="#exercises_de_lecon" role="tab" id="tab-exercises-de-lesson"
                        aria-controls="exercises_de_lecon">
                         Упражнения с урока
@@ -168,7 +169,7 @@
             {% endif %}
             {% if self.resume_populaire %}
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab"
+                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
                        href="#resume-populaire" role="tab"
                        aria-controls="resume-populaire">
                         Народный Конспект
@@ -179,7 +180,7 @@
                 {% if not child_value.value.invisible_for_all or user.is_superuser %}
                     {% if not child_value.value.visible_only_if_payed or already_payed %}
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab"
+                            <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
                                href="#{{ child_value.value.href }}" role="tab"
                                aria-controls="{{ child_value.value.href }}"><span
                                     {% if child_value.value.invisible and user.is_superuser %}style="color: green" {% endif %}>{{ child_value.value.title }}</span></a>
@@ -189,7 +190,7 @@
             {% endfor %}
             {% if has_transcript %}
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab"
+                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
                        href="#playerPlus" role="tab"
                        aria-controls="playerPlus">Player+</a>
                 </li>
