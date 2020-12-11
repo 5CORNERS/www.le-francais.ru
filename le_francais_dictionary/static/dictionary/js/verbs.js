@@ -21,12 +21,14 @@
     const TENSE_IMPERATIVE = 2
     const TENSE_INDICATIVE_IMPARFAIT = 3
     const TENSE_INDICATIVE_FUTURE = 4
+    const TENSE_PARTICIPE_PASSE = 5
     const TENSE_AUDIO_URLS = {
         [TENSE_INDICATIVE_PRESENT]: "/static/dictionary/media/indicatif_present.mp3",
         [TENSE_PASSE_COMPOSE]: "/static/dictionary/media/passe_compose.mp3",
         [TENSE_IMPERATIVE]: "/static/dictionary/media/impératif_présent.mp3",
         [TENSE_INDICATIVE_IMPARFAIT]: "/static/dictionary/media/imparfait.mp3",
         [TENSE_INDICATIVE_FUTURE]: "/static/dictionary/media/futur_simple.mp3",
+        [TENSE_PARTICIPE_PASSE]: "/static/dictionary/media/silence.2b5bb705.mp3"
     }
     const TENSE_NAMES = {
         [TENSE_INDICATIVE_PRESENT]: "Indicatif Présent",
@@ -34,6 +36,7 @@
         [TENSE_IMPERATIVE]: "Impératif Présent",
         [TENSE_INDICATIVE_IMPARFAIT]: "Imparfait",
         [TENSE_INDICATIVE_FUTURE]: "Futur Simple",
+        [TENSE_PARTICIPE_PASSE]: "Participe Passé"
     }
 
     const SILENCE_URL = '/static/dictionary/media/silence.2b5bb705.mp3';
@@ -153,6 +156,8 @@
             lessonNumber: currentLessonNumber,
             packets: [],
             loadMoreOptions: [],
+            showParticipe: false,
+            hasParticipe: false,
         },
 
         async mounted() {
@@ -171,6 +176,7 @@
                 this.card = this.cards[0]
                 this.translation = this.cards[0]['translation']
                 console.log(this.cards);
+                this.hasParticipe = this.cards.filter(card => card.tense === TENSE_PARTICIPE_PASSE)
             },
 
             getVerbsCountById: function (packetId) {
@@ -367,6 +373,12 @@
                     }
 
                     if (!this.showNegative && this.card.type === CARD_TYPE_NEGATIVE) {
+                        return this.playNextCard()
+                    }
+                    if (!this.showParticipe && this.card.tense === TENSE_PARTICIPE_PASSE){
+                        return this.playNextCard()
+                    }
+                    if (this.showParticipe && this.card.tense !== TENSE_PARTICIPE_PASSE){
                         return this.playNextCard()
                     }
 
