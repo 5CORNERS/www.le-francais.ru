@@ -1,11 +1,11 @@
 import re
 
 from polly.const import LANGUAGE_CODE_FR, LANGUAGE_CODE_RU
-from .tts import google_cloud_tts, amazon_polly_tts, shtooka_by_title_in_path, FTP_FR_VERBS_PATH, FTP_RU_VERBS_PATH, \
+from .tts import google_cloud_tts, shtooka_by_title_in_path, FTP_FR_VERBS_PATH, FTP_RU_VERBS_PATH, \
 	FTP_FR_WORDS_PATH, FTP_RU_WORDS_PATH
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, JSONField
-from django.db import models, transaction
+from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.http import urlquote
@@ -14,7 +14,8 @@ from regex import regex
 from le_francais_dictionary.consts import GENRE_CHOICES, \
 	PARTOFSPEECH_CHOICES, \
 	PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
-	GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE
+	GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE, TENSE_CHOICES, \
+	TENSE_PARTICIPE_PASSE
 from le_francais_dictionary.utils import sm2_next_repetition_date, \
 	format_text2speech, sm2_ef_q_mq, create_or_update_repetition
 from polly import const as polly_const
@@ -742,12 +743,12 @@ class VerbPacket(models.Model):
 	def to_dict(self):
 		result = []
 		for verb_to_packet in VerbPacketRelation.objects.filter(packet=self).order_by('order'):
-			if verb_to_packet.verb.audio_url is None:
-				continue
+			# if verb_to_packet.verb.audio_url is None:
+			# 	continue
 			verb_dict = verb_to_packet.verb.to_dict()
 			verb_dict['tense'] = verb_to_packet.tense
 			verb_dict['forms'] = []
-			for form in verb_to_packet.verb.verbform_set.filter(tense=verb_to_packet.tense, audio_url__isnull=False).order_by('order'):
+			for form in verb_to_packet.verb.verbform_set.filter(tense=verb_to_packet.tense).order_by('order'):
 				verb_dict['forms'].append(form.to_dict())
 			result.append(verb_dict)
 		return result
@@ -844,18 +845,6 @@ class Verb(models.Model):
 			self.save()
 		return self
 
-TENSE_INDICATIVE_PRESENT = 0
-TENSE_PASSE_COMPOSE = 1
-TENSE_IMPERATIVE = 2
-TENSE_INDICATIVE_IMPARFAIT = 3
-TENSE_INDICATIVE_FUTURE = 4
-TENSE_CHOICES = [
-	(TENSE_INDICATIVE_PRESENT, 'Indicatif Présent'),
-	(TENSE_PASSE_COMPOSE, 'Passé Composé'),
-	(TENSE_IMPERATIVE, 'Impératif Présent'),
-	(TENSE_INDICATIVE_IMPARFAIT, 'Imparfait'),
-	(TENSE_INDICATIVE_FUTURE, 'Futur Simple')
-]
 
 class VerbPacketRelation(models.Model):
 	verb = models.ForeignKey(Verb, on_delete=models.CASCADE)
