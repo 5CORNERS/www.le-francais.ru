@@ -75,3 +75,18 @@ TOO_EARLY_MESSAGE = _(
     'You trying to repeat word, which repetition date has not come yet')
 NO_CUPS_MESSAGE = _('There are no cups left')
 NO_REPETITION_WORDS_MESSAGE = 'На сегодня нет слов на повторение, но вы не расслабляйтесь :)'
+TENSE_INDICATIVE_PRESENT = 0
+TENSE_PASSE_COMPOSE = 1
+TENSE_IMPERATIVE = 2
+TENSE_INDICATIVE_IMPARFAIT = 3
+TENSE_INDICATIVE_FUTURE = 4
+TENSE_PARTICIPE_PASSE = 5
+TENSE_CHOICES = [
+	(TENSE_INDICATIVE_PRESENT, 'Indicatif Présent'),
+	(TENSE_PASSE_COMPOSE, 'Passé Composé'),
+	(TENSE_IMPERATIVE, 'Impératif Présent'),
+	(TENSE_INDICATIVE_IMPARFAIT, 'Imparfait'),
+	(TENSE_INDICATIVE_FUTURE, 'Futur Simple'),
+	(TENSE_INDICATIVE_FUTURE, 'Futur simple'),
+    (TENSE_PARTICIPE_PASSE, 'Participe Passé')
+]
