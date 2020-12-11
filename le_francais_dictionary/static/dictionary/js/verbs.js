@@ -176,7 +176,7 @@
                 this.card = this.cards[0]
                 this.translation = this.cards[0]['translation']
                 console.log(this.cards);
-                this.hasParticipe = this.cards.filter(card => card.tense === TENSE_PARTICIPE_PASSE)
+                this.hasParticipe = this.cards.filter(card => card.tense === TENSE_PARTICIPE_PASSE).length > 0
             },
 
             getVerbsCountById: function (packetId) {
