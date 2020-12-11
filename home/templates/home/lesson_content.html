@@ -386,7 +386,7 @@
 		{% for child_value in self.other_tabs %}
             {% if not child_value.value.invisible_for_all or user.is_superuser %}
                 {% if not child_value.value.visible_only_if_payed or already_payed %}
-                    {% if not child_value.value.visible_onle_if_authorised or request.user.is_authenticated %}
+                    {% if not child_value.value.visible_only_if_authorised or request.user.is_authenticated %}
                         <div id="{{ child_value.value.href }}"
                              class="tab-pane fade" role="tabpanel">
                             {% for block in child_value.value.body %}
