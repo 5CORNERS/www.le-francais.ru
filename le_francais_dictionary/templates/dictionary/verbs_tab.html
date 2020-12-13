@@ -41,6 +41,22 @@
 				<div style="">
 					<div>
 						<div id="flashcard-app">
+                            <div class="row" v-if="hasParticipe">
+                                <div class="col mb-2 mt-2 pl-5 pr-5 d-flex justify-content-between">
+                                    <button type="button"
+                                            class="btn ml-2"
+                                            v-on:click="loadParticipeCards"
+                                            v-bind:class="{ 'btn-primary': !showParticipe, 'btn-outline-primary': showParticipe }"
+                                            :disabled="!showParticipe"
+                                    >Учим глаголы</button>
+                                    <button type="button"
+                                            class="btn mr-2"
+                                            v-on:click="loadParticipeCards"
+                                            v-bind:class="{ 'btn-primary': showParticipe, 'btn-outline-primary': !showParticipe }"
+                                            :disabled="showParticipe"
+                                    >Учим причастия</button>
+                                </div>
+                            </div>
 							<div class="row">
 								<div style="padding-right: 6px" class="col d-flex align-items-center justify-content-center next-step-block">
 									<span :class="[type == 0 ? 'active' : false]">Запоминаем</span>
