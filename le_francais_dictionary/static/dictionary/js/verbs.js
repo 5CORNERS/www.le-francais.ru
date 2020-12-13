@@ -51,21 +51,23 @@
         })
     })
 
-    const TENSE_SOUNDS = Object.assign({}, ...Object.keys(TENSE_AUDIO_URLS).map(k => (
-        {
-            [k]: new Promise((resolve, reject) => {
-                const howl = new Howl({
-                    src: [TENSE_AUDIO_URLS[k]],
-                    preload: true,
-                    loop: false,
-                    buffer: true,
-                    html5: true,
-                    onload: () => resolve(howl),
-                    onloaderror: () => resolve(silence)
+    const TENSE_SOUNDS = Object.assign({},
+        ...Object.keys(TENSE_AUDIO_URLS).map(tense_key => (
+            {
+                [tense_key]: new Promise((resolve, reject) => {
+                    const howl = new Howl({
+                        src: [TENSE_AUDIO_URLS[tense_key]],
+                        preload: true,
+                        loop: false,
+                        buffer: true,
+                        html5: true,
+                        onload: () => resolve(howl),
+                        onloaderror: () => resolve(silence)
+                    })
                 })
-            })
-        }
-    )))
+            }
+        ))
+    )
 
     var createSound = async function(url) {
         return new Promise((resolve, reject) => {
@@ -179,6 +181,24 @@
                 this.hasParticipe = this.cards.filter(card => card.tense === TENSE_PARTICIPE_PASSE).length > 0
             },
 
+            loadParticipeCards: function (){
+                this.pause = true
+                this.flipAllCards()
+                if (!this.showParticipe) {
+                    this.showParticipe = true;
+                    if(this.type === this.TYPE_LISTENING){
+                        this.currentCard = this.cards.findIndex(card => card.tense === TENSE_PARTICIPE_PASSE)
+                    }else{
+                        this.currentCard = this.cardsRepeat.findIndex(card => card.tense === TENSE_PARTICIPE_PASSE)
+                    }
+                } else {
+                    this.showParticipe = false;
+                    this.currentCard = 0;
+                    this.progress = 0;
+                }
+                this.card = this.cards[this.currentCard]
+            },
+
             getVerbsCountById: function (packetId) {
                 let packet = this.packets.find(packet => packet.id === packetId);
                 if (packet) {
@@ -197,21 +217,21 @@
                 }
             },
 
-            lessonsAbove: function () {
-                let dif = this.lessonNumber - 5
-                let la
-                if (dif < 0) {
-                    la = 5 + dif
-                } else {
+            flipAllCards: function (){
+                this.cards.forEach(card => card.flipped = false);
+                this.cardsRepeat.forEach(card => card.flipped = false);
+            },
+
+            message: function (n){
+                if (n >= 5) {
                     return 'пяти'
-                }
-                if (la === 4) {
+                } else if (n === 4) {
                     return 'четырёх'
-                } else if (la === 3) {
+                } else if (n === 3) {
                     return 'трёх'
-                } else if (la === 2) {
+                } else if (n === 2) {
                     return 'двух'
-                } else if (la === 1) {
+                } else if (n === 1) {
                     return 'одного'
                 }
             },
@@ -259,6 +279,7 @@
             startOver: function () {
                 this.progress = 0;
                 this.currentCard = 0;
+                this.flipAllCards();
             },
 
             getNextCard: function () {
@@ -301,9 +322,9 @@
                 } else {
                     this.type = LISTENING
                 }
-                this.progress = 0;
-                this.currentCard = 0;
                 this.pause = true;
+                this.progress = 0;
+                this.currentCard = 0
 
                 if (this.type === LISTENING) {
                     this.progressStep = 100 / (verbs.length - 1);
@@ -319,20 +340,22 @@
             },
 
             playNextCard: function () {
-                this.currentCard++;
-                if (this.currentCard === (this.cards.length)) {
-                    this.currentCard = 0
-                    this.progress = 0
-                    if (this.type === CHECKING) {
-                        this.shuffle(this.cardsRepeat)
+                if (!this.pause) {
+                    this.currentCard++;
+                    if (this.currentCard === (this.cards.length)) {
+                        this.currentCard = 0
+                        this.progress = 0
+                        if (this.type === CHECKING) {
+                            this.shuffle(this.cardsRepeat)
+                        }
                     }
+                    if (this.type === LISTENING) {
+                        this.card = this.cards[this.currentCard];
+                    } else {
+                        this.card = this.cardsRepeat[this.currentCard];
+                    }
+                    this.playCards();
                 }
-                if (this.type === LISTENING) {
-                    this.card = this.cards[this.currentCard];
-                } else {
-                    this.card = this.cardsRepeat[this.currentCard];
-                }
-                this.playCards();
             },
 
             getTenseUrl: function () {
@@ -364,6 +387,14 @@
 
             },
 
+            play: async function (sound){
+                if(!this.pause){
+                    return playSound(sound)
+                }else{
+                    return 0
+                }
+            },
+
             playCards: function () {
                 if (!this.pause) {
                     let _this = this;
@@ -377,8 +408,7 @@
                     }
                     if (!this.showParticipe && this.card.tense === TENSE_PARTICIPE_PASSE){
                         return this.playNextCard()
-                    }
-                    if (this.showParticipe && this.card.tense !== TENSE_PARTICIPE_PASSE){
+                    }else if (this.showParticipe && this.card.tense !== TENSE_PARTICIPE_PASSE){
                         return this.playNextCard()
                     }
 
@@ -412,11 +442,11 @@
                             tenseSound = this.getTenseSound()
                             afterTenseTimeout = this.timeoutTense * 1000
                         }
-                        playSound(tenseSound).then(function (tenseDuration) {
+                        this.play(tenseSound).then(function (tenseDuration) {
                             tenseDuration = 0
                             console.log('tense timeout: ' + (tenseDuration + afterTenseTimeout))
                             setTimeout(function () {
-                                playSound(_this.card.formSound).then(function (verbDuration) {
+                                _this.play(_this.card.formSound).then(function (verbDuration) {
                                     verbDuration = 0;
                                     var beforeTranslationTimeout;
                                     if (_this.card.isTranslation || _this.type === CHECKING) {
@@ -437,7 +467,7 @@
                                             translationSound = _this.card.translationSound
                                             _this.card.flipped = !_this.card.flipped;
                                         }
-                                        playSound(translationSound).then(function (translationDuration) {
+                                        _this.play(translationSound).then(function (translationDuration) {
                                             translationDuration = 0;
                                             let timeout = 0;
                                             if (_this.isInfinitive()) {}
