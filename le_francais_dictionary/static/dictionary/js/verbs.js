@@ -162,6 +162,7 @@
             showParticipe: false,
             hasParticipe: false,
             selectedLoadMoreOptions:[],
+            playing: false,
         },
 
         async mounted() {
@@ -183,22 +184,35 @@
                 this.hasParticipe = this.cards.filter(card => card.tense === TENSE_PARTICIPE_PASSE).length > 0
             },
 
+            getCurrentParticipeCard: function () {
+                if (this.type === this.TYPE_LISTENING) {
+                    return this.cards.findIndex(card => card.tense === TENSE_PARTICIPE_PASSE)
+                } else {
+                    return this.cardsRepeat.findIndex(card => card.tense === TENSE_PARTICIPE_PASSE)
+                }
+            },
+
+            showCurrentCard: function () {
+                if(this.type === LISTENING){
+                    this.card = this.cards[this.currentCard]
+                }else{
+                    this.card = this.cardsRepeat[this.currentCard]
+                }
+            },
+
             loadParticipeCards: function (){
                 this.pause = true
                 this.flipAllCards()
                 if (!this.showParticipe) {
                     this.showParticipe = true;
-                    if(this.type === this.TYPE_LISTENING){
-                        this.currentCard = this.cards.findIndex(card => card.tense === TENSE_PARTICIPE_PASSE)
-                    }else{
-                        this.currentCard = this.cardsRepeat.findIndex(card => card.tense === TENSE_PARTICIPE_PASSE)
-                    }
+                    this.currentCard = this.getCurrentParticipeCard()
+                    this.progress = this.currentCard * this.progressStep
                 } else {
                     this.showParticipe = false;
                     this.currentCard = 0;
                     this.progress = 0;
                 }
-                this.card = this.cards[this.currentCard]
+                this.showCurrentCard()
             },
 
             getVerbsCountById: function (packetId) {
@@ -293,7 +307,8 @@
                 if (!this.pause) {
                     this.pause = true;
                 }
-                let values = await loadCards(currentPacketID, 5);
+                let moreLessons = this.loadMoreValue.loadMore
+                let values = await loadCards(currentPacketID, moreLessons);
                 this.cards = values[0];
                 this.packets = values[1];
                 this.init();
@@ -351,6 +366,11 @@
                 this.progress = 0;
                 this.currentCard = 0
 
+                if (this.showParticipe) {
+                    this.currentCard = this.getCurrentParticipeCard()
+                }
+                this.showCurrentCard()
+
                 if (this.type === LISTENING) {
                     this.progressStep = 100 / (verbs.length - 1);
                     this.card = this.cards[0];
@@ -365,21 +385,19 @@
             },
 
             playNextCard: function () {
-                if (!this.pause) {
+                if (!this.pause && !this.playing) {
                     this.currentCard++;
                     if (this.currentCard === (this.cards.length)) {
                         this.currentCard = 0
                         this.progress = 0
+                        this.flipAllCards()
                         if (this.type === CHECKING) {
                             this.shuffle(this.cardsRepeat)
                         }
                     }
-                    if (this.type === LISTENING) {
-                        this.card = this.cards[this.currentCard];
-                    } else {
-                        this.card = this.cardsRepeat[this.currentCard];
+                    if (!this.pause) {
+                        this.playCards();
                     }
-                    this.playCards();
                 }
             },
 
@@ -421,23 +439,33 @@
             },
 
             playCards: function () {
+                if (this.playing){
+                    return
+                }
+                if (this.progress < 100) {
+                    this.progress += this.progressStep;
+                }
+
+                if (!this.showNegative && this.card.type === CARD_TYPE_NEGATIVE) {
+                    return this.playNextCard()
+                }
+                if (!this.showParticipe && this.card.tense === TENSE_PARTICIPE_PASSE){
+                    return this.playNextCard()
+                }else if (this.showParticipe && this.card.tense !== TENSE_PARTICIPE_PASSE){
+                    return this.playNextCard()
+                }
                 if (!this.pause) {
-                    let _this = this;
-
-                    if (this.progress < 100) {
-                        this.progress += this.progressStep;
-                    }
-
-                    if (!this.showNegative && this.card.type === CARD_TYPE_NEGATIVE) {
-                        return this.playNextCard()
-                    }
-                    if (!this.showParticipe && this.card.tense === TENSE_PARTICIPE_PASSE){
-                        return this.playNextCard()
-                    }else if (this.showParticipe && this.card.tense !== TENSE_PARTICIPE_PASSE){
-                        return this.playNextCard()
+                    if (this.type === LISTENING) {
+                        this.cards[this.currentCard].flipped = false;
+                        this.card = this.cards[this.currentCard];
+                    } else {
+                        this.cardsRepeat[this.currentCard].flipped = false;
+                        this.card = this.cardsRepeat[this.currentCard];
                     }
 
                     if (this.card.isShownOnDrill || this.type === CHECKING) {
+                        this.playing = true;
+                        let _this = this;
                         let afterVerbTimeout;
                         if (this.nextCardIsInfinitive() || this.isInfinitive()) {
                             // текущая или следующая карточка -- инфинитив
@@ -468,10 +496,18 @@
                             afterTenseTimeout = this.timeoutTense * 1000
                         }
                         this.play(tenseSound).then(function (tenseDuration) {
+                            if(_this.pause){
+                                _this.playing = false;
+                                return
+                            }
                             tenseDuration = 0
                             console.log('tense timeout: ' + (tenseDuration + afterTenseTimeout))
                             setTimeout(function () {
                                 _this.play(_this.card.formSound).then(function (verbDuration) {
+                                    if (_this.pause) {
+                                        _this.playing = false;
+                                        return
+                                    }
                                     verbDuration = 0;
                                     var beforeTranslationTimeout;
                                     if (_this.card.isTranslation || _this.type === CHECKING) {
@@ -490,16 +526,29 @@
                                         if ((_this.type === LISTENING && _this.card.isTranslation) || _this.type === CHECKING || (_this.translateInfinitives && _this.isInfinitive() && _this.type === LISTENING)) {
                                             translationUrl = _this.card.trPollyUrl;
                                             translationSound = _this.card.translationSound
-                                            _this.card.flipped = !_this.card.flipped;
+                                            _this.card.flipped = true;
+                                        }
+                                        if (_this.pause) {
+                                            _this.playing = false;
+                                            _this.card.flipped = false
+                                            return
                                         }
                                         _this.play(translationSound).then(function (translationDuration) {
+                                            if (_this.pause) {
+                                                _this.playing = false;
+                                                _this.card.flipped = false
+                                                return
+                                            }
                                             translationDuration = 0;
                                             let timeout = 0;
                                             if (_this.isInfinitive()) {}
                                             setTimeout(function () {
                                                 console.log('word timeout: ' + (afterVerbTimeout + translationDuration))
                                                 setTimeout(function () {
-                                                    _this.playNextCard()
+                                                    _this.playing = false;
+                                                    if (!_this.pause){
+                                                        _this.playNextCard()
+                                                    }
                                                 }, afterVerbTimeout + translationDuration);
                                             }.bind(_this), translationDuration)
                                         }.bind(_this))
