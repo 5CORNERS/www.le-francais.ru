@@ -157,9 +157,11 @@
             moreVerbsLoaded: false,
             lessonNumber: currentLessonNumber,
             packets: [],
+            loadMoreValue: [],
             loadMoreOptions: [],
             showParticipe: false,
             hasParticipe: false,
+            selectedLoadMoreOptions:[],
         },
 
         async mounted() {
@@ -234,6 +236,29 @@
                 } else if (n === 1) {
                     return 'одного'
                 }
+            },
+
+            loadMoreOptionsCustomLabel: function ({name}){
+                return `${name}`
+            },
+
+            lessonsAbove: function () {
+                let dif = this.lessonNumber - 5
+                return this.message(5 + dif)
+            },
+
+            getLoadMoreOptions: function () {
+                let options = []
+                let c = 0
+                while (c < 5) {
+                    c += 1
+                    let p = this.getVerbsCountByLesson(this.lessonNumber - c)
+                    if (!p){
+                        continue
+                    }
+                    options.push({loadMore: c, name: this.message(c), count: p})
+                }
+                return options
             },
 
             initRepeatCards: function () {
