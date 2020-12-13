@@ -192,12 +192,16 @@
                 }
             },
 
-            showCurrentCard: function () {
+            getCurrentCard: function () {
                 if(this.type === LISTENING){
-                    this.card = this.cards[this.currentCard]
+                    return this.cards[this.currentCard]
                 }else{
-                    this.card = this.cardsRepeat[this.currentCard]
+                    return this.cardsRepeat[this.currentCard]
                 }
+            },
+
+            showCurrentCard: function () {
+                this.card = this.getCurrentCard()
             },
 
             loadParticipeCards: function (){
@@ -373,10 +377,8 @@
 
                 if (this.type === LISTENING) {
                     this.progressStep = 100 / (verbs.length - 1);
-                    this.card = this.cards[0];
                 } else {
                     this.progressStep = 100 / verbs.length;
-                    this.card = this.cardsRepeat[0];
                 }
             },
 
@@ -446,23 +448,17 @@
                     this.progress += this.progressStep;
                 }
 
-                if (!this.showNegative && this.card.type === CARD_TYPE_NEGATIVE) {
+                if (!this.showNegative && this.getCurrentCard().type === CARD_TYPE_NEGATIVE) {
                     return this.playNextCard()
                 }
-                if (!this.showParticipe && this.card.tense === TENSE_PARTICIPE_PASSE){
+                if (!this.showParticipe && this.getCurrentCard().tense === TENSE_PARTICIPE_PASSE){
                     return this.playNextCard()
-                }else if (this.showParticipe && this.card.tense !== TENSE_PARTICIPE_PASSE){
+                }else if (this.showParticipe && this.getCurrentCard().tense !== TENSE_PARTICIPE_PASSE){
                     return this.playNextCard()
                 }
                 if (!this.pause) {
-                    if (this.type === LISTENING) {
-                        this.cards[this.currentCard].flipped = false;
-                        this.card = this.cards[this.currentCard];
-                    } else {
-                        this.cardsRepeat[this.currentCard].flipped = false;
-                        this.card = this.cardsRepeat[this.currentCard];
-                    }
-
+                    this.getCurrentCard().flipped = false;
+                    this.showCurrentCard()
                     if (this.card.isShownOnDrill || this.type === CHECKING) {
                         this.playing = true;
                         let _this = this;
