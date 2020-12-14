@@ -145,6 +145,13 @@
             timeoutWordsChecking: 1, // время между словами в режиме проверки
             timeoutTranslation: 5, // время между переводом
             timeoutInfinitive: 1.2, // время до и после инфинитива
+
+            participeTimeoutInfinitive: 0.5,
+            participeTimeoutWordsListening: 0.5,
+            participeTimeoutWordsChecking: 1,
+            participeTimeoutTranslation: 5,
+            participeTimeoutInfinitiveTranslation: 0,
+
             type: LISTENING,
             pause: true,
             error: false,
@@ -198,6 +205,48 @@
                 }else{
                     return this.cardsRepeat[this.currentCard]
                 }
+            },
+
+            getCardTimeouts: function (i, cardList) {
+                let afterVerbTimeout, afterTenseTimeout, beforeTranslationTimeout
+
+                if (!this.showParticipe
+                    && (this.isCardInfinitive(cardList[i], cardList) || this.isCardInfinitive(this.getNextCard(i)))
+                ) {
+                    afterVerbTimeout = this.timeoutInfinitive
+                }else if(!this.showParticipe){
+                    if (this.type === LISTENING) {
+                        afterVerbTimeout = this.timeoutWordsListening
+                    } else {
+                        afterVerbTimeout = this.timeoutWordsChecking
+                    }
+                } else {
+                    if (this.type === LISTENING) {
+                        afterVerbTimeout = this.participeTimeoutWordsListening;
+                    } else {
+                        afterVerbTimeout = this.participeTimeoutWordsChecking;
+                    }
+                }
+                afterVerbTimeout *= 1000
+
+                afterTenseTimeout = this.timeoutTense * 1000
+
+                if (!this.showParticipe
+                    && (cardList[i].isTranslation || this.type === CHECKING)
+                ){
+                    beforeTranslationTimeout = this.timeoutTranslation
+                }else if (!this.showParticipe && this.isCardInfinitive(cardList[i]) && this.type === LISTENING && this.translateInfinitives){
+                    beforeTranslationTimeout = this.timeoutInfinitiveTranslation
+                }else if (!this.showParticipe && this.type === LISTENING) {
+                    beforeTranslationTimeout = 0
+                } else if (this.showParticipe && this.type === LISTENING) {
+                    beforeTranslationTimeout = this.participeTimeoutTranslation
+                } else if (this.showParticipe && this.type === CHECKING) {
+                    beforeTranslationTimeout = this.timeoutTranslation
+                }
+                beforeTranslationTimeout *= 1000
+                console.log(`After Verb: ${afterVerbTimeout/1000}\nBefore Translation: ${beforeTranslationTimeout/1000}`)
+                return [afterVerbTimeout, beforeTranslationTimeout]
             },
 
             showCurrentCard: function () {
@@ -326,24 +375,36 @@
                 this.flipAllCards();
             },
 
-            getNextCard: function () {
-                if (this.type === LISTENING) {
-                    let nextCard = this.cards.slice(this.currentCard + 1).find(card => card.isShownOnDrill)
-                    if (nextCard === undefined) {
-                        return this.cards[0]
-                    }
-                    return nextCard
-                } else {
-                    if (this.currentCard === (this.cards.length - 1)) {
-                        return this.cards[0]
-                    }
-                    return this.cards[this.currentCard + 1]
+            filterCard: function(card){
+                return (this.type === CHECKING || card.isShownOnDrill)
+                    && (!this.showParticipe || card.tense === TENSE_PARTICIPE_PASSE)
+                    && (this.showNegative || card.type === CARD_TYPE_AFFIRMATIVE)
+
+            },
+
+            getNextCard: function (i=undefined, cardsList=undefined) {
+                if (i === undefined){
+                    i = this.currentCard
                 }
+                if (cardsList === undefined){
+                    cardsList = (this.type === this.TYPE_LISTENING) ? this.cards : this.cardsRepeat
+                }
+                let nextCard = cardsList.slice(i+1).find(card => this.filterCard(card))
+                if (nextCard === undefined){
+                    nextCard = cardsList.find(card => this.filterCard(card))
+                }
+                return nextCard
             },
-            isInfinitive: function () {
-                return 'forms' in this.card
+
+            isCardInfinitive: function (card){
+                return 'forms' in card
             },
-            nextCardIsInfinitive: function () {
+
+            isCurrentCardInfinitive: function () {
+                return this.isCardInfinitive(this.card)
+            },
+
+            nextCardAfterCurrentIsInfinitive: function () {
                 return 'forms' in this.getNextCard()
             },
 
@@ -412,12 +473,12 @@
                 return TENSE_SOUNDS[this.card.tense]
             },
 
-            getLastCard: function() {
-                if (this.currentCard === 0) {
-                    return null;
-                } else {
-                    return this.cards[this.currentCard - 1]
-                }
+            getLastCard: function(i=undefined, cardList=undefined) {
+                if (i === undefined) i = this.currentCard
+                if (cardList === undefined) cardList = this.type === LISTENING ? this.cards : this.cardsRepeat
+                let lastCard = cardList.slice(0, i).reverse().find(card => this.filterCard(card))
+                if (lastCard === undefined) lastCard = null
+                return lastCard
             },
 
             isSameTense: function () {
@@ -463,20 +524,10 @@
                         this.playing = true;
                         let _this = this;
                         let afterVerbTimeout;
-                        if (this.nextCardIsInfinitive() || this.isInfinitive()) {
-                            // текущая или следующая карточка -- инфинитив
-                            afterVerbTimeout = this.timeoutInfinitive * 1000
-                            console.log('infinitive')
-                        } else {
-                            // текущая и следующая карточка -- не инфинитив
-                            console.log('not-infinitive')
-                            if (this.type === LISTENING) {
-                                afterVerbTimeout = this.timeoutWordsListening * 1000;
-                            } else {
-                                afterVerbTimeout = this.timeoutWordsChecking * 1000;
-                            }
-                        }
+                        let beforeTranslationTimeout;
+                        [afterVerbTimeout, beforeTranslationTimeout] = this.getCardTimeouts(this.currentCard, this.type === LISTENING ? this.cards : this.cardsRepeat)
                         // произносим время, если предыдузая карточка была другого времени
+                        
                         let tenseUrl = undefined
                         let tenseSound = undefined
                         let afterTenseTimeout = 0
@@ -505,21 +556,10 @@
                                         return
                                     }
                                     verbDuration = 0;
-                                    var beforeTranslationTimeout;
-                                    if (_this.card.isTranslation || _this.type === CHECKING) {
-                                        // карточка подлежит переводу или режим проверки
-                                        beforeTranslationTimeout = this.timeoutTranslation * 1000 + verbDuration;
-                                    } else if (_this.translateInfinitives && _this.isInfinitive() && _this.type === LISTENING) {
-                                        beforeTranslationTimeout = this.timeoutInfinitiveTranslation * 1000 + verbDuration;
-                                    } else if (_this.type === LISTENING) {
-                                        // режим прослушивания и карточка не подлежит переводу
-                                        beforeTranslationTimeout = 0;
-                                    }
-                                    console.log('translation timeout: ' + (beforeTranslationTimeout + verbDuration))
                                     setTimeout(function () {
                                         let translationUrl = undefined;
                                         let translationSound = undefined;
-                                        if ((_this.type === LISTENING && _this.card.isTranslation) || _this.type === CHECKING || (_this.translateInfinitives && _this.isInfinitive() && _this.type === LISTENING)) {
+                                        if ((_this.type === LISTENING && _this.card.isTranslation) || _this.type === CHECKING || (_this.translateInfinitives && _this.isCurrentCardInfinitive() && _this.type === LISTENING)) {
                                             translationUrl = _this.card.trPollyUrl;
                                             translationSound = _this.card.translationSound
                                             _this.card.flipped = true;
@@ -537,7 +577,7 @@
                                             }
                                             translationDuration = 0;
                                             let timeout = 0;
-                                            if (_this.isInfinitive()) {}
+                                            if (_this.isCurrentCardInfinitive()) {}
                                             setTimeout(function () {
                                                 console.log('word timeout: ' + (afterVerbTimeout + translationDuration))
                                                 setTimeout(function () {
