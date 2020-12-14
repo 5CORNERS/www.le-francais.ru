@@ -559,8 +559,11 @@
                                     setTimeout(function () {
                                         let translationUrl = undefined;
                                         let translationSound = undefined;
-                                        if ((_this.type === LISTENING && _this.card.isTranslation) || _this.type === CHECKING || (_this.translateInfinitives && _this.isCurrentCardInfinitive() && _this.type === LISTENING)) {
-                                            translationUrl = _this.card.trPollyUrl;
+                                        if (_this.card.tense === TENSE_PARTICIPE_PASSE
+                                            || (_this.type === LISTENING && _this.card.isTranslation)
+                                            || _this.type === CHECKING
+                                            || (_this.translateInfinitives && _this.isCurrentCardInfinitive() && _this.type === LISTENING)
+                                        ) {
                                             translationSound = _this.card.translationSound
                                             _this.card.flipped = true;
                                         }
