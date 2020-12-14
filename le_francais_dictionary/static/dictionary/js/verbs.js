@@ -149,7 +149,7 @@
             participeTimeoutInfinitive: 0.5,
             participeTimeoutWordsListening: 0.5,
             participeTimeoutWordsChecking: 1,
-            participeTimeoutTranslation: 5,
+            participeTimeoutTranslation: 0,
             participeTimeoutInfinitiveTranslation: 0,
 
             type: LISTENING,
