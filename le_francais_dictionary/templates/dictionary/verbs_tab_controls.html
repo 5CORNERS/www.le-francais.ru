@@ -1,17 +1,5 @@
 <div class="row">
     <div class="col">
-        <div class="input-group" v-if="!moreVerbsLoaded && !showParticipe">
-            {% verbatim %}
-            <button type="button" class="btn btn-primary mb-2" :disabled="moreVerbsLoaded" v-on:click="loadMoreCards">
-                Добавить глаголы с {{ lessonsAbove() }} предыдущих уроков
-            </button>
-            {% endverbatim %}
-        </div>
-        <div class="input-group" v-if="moreVerbsLoaded && !showParticipe">
-            <button type="button" class="btn btn-primary mb-2" :disabled="!moreVerbsLoaded" v-on:click="loadInitCards">
-                Сбросить
-            </button>
-        </div>
         <div class="input-group" v-if="!showParticipe">
             <div type="checkbox" class="custom-control custom-checkbox mb-2">
                 <input id="showNegativeInput" type="checkbox"
@@ -38,6 +26,18 @@
                 <option value="3">3 секунды</option>
                 <option value="4">4 секунды</option>
                 <option value="5" selected>5 секунд</option>
+            </select>
+        </div>
+        <div class="input-group mb-2" v-if="!showParticipe">
+            <div class="input-group-prepend" v-if="!moreVerbsLoaded">
+                <button class="btn btn-primary" type="button" v-on:click="loadMoreCards">Добавить глаголы</button>
+            </div>
+            <div class="input-group-prepend" v-if="moreVerbsLoaded">
+                <button class="btn btn-danger" type="button" v-on:click="loadInitCards">Сбросить</button>
+            </div>
+            <select class="custom-select" :disabled="moreVerbsLoaded">
+                <option selected>Выберите кол-во уроков</option>
+                <option v-for="option in loadMoreOptions" v-bind:value="option.loadMore" v-text="option.name"></option>
             </select>
         </div>
     </div>
