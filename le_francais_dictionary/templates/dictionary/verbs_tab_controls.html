@@ -1,21 +1,21 @@
 <div class="row">
     <div class="col">
-        <div class="input-group" v-if="!showParticipe">
-            <div type="checkbox" class="custom-control custom-checkbox mb-2">
+        <div class="input-group mt-2" v-if="!showParticipe">
+            <div type="checkbox" class="custom-control custom-checkbox">
                 <input id="showNegativeInput" type="checkbox"
                        class="custom-control-input" v-model="showNegative">
                 <label class="custom-control-label" for="showNegativeInput">Показывать отрицания</label>
             </div>
         </div>
-        <div class="input-group" v-if="type === TYPE_LISTENING && !showParticipe">
-            <div type="checkbox" class="custom-control custom-checkbox mb-2">
+        <div class="input-group mt-2" v-if="type === TYPE_LISTENING && !showParticipe">
+            <div type="checkbox" class="custom-control custom-checkbox">
                 <input id="translateInfinitivesInput" type="checkbox"
                        class="custom-control-input" v-model="translateInfinitives">
                 <label class="custom-control-label" for="translateInfinitivesInput">Показывать перевод
                     инфинитивов</label>
             </div>
         </div>
-        <div class="input-group" v-if="type === TYPE_CHECKING">
+        <div class="input-group mt-2" v-if="type === TYPE_CHECKING">
             <div class="input-group-prepend">
                 <span class="input-group-text">Пауза на раздумье (задержка перед ответом):</span>
             </div>
@@ -28,7 +28,7 @@
                 <option value="5" selected>5 секунд</option>
             </select>
         </div>
-        <div class="input-group mb-2" v-if="!showParticipe">
+        <div class="input-group mt-2" v-if="!showParticipe">
             <div class="input-group-prepend" v-if="!moreVerbsLoaded">
                 <button class="btn btn-primary" type="button" v-on:click="loadMoreCards">Добавить глаголы</button>
             </div>
