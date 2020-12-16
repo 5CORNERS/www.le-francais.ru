@@ -15,6 +15,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # Create your views here.
 from le_francais_dictionary.forms import WordsManagementFilterForm
+from .consts import TENSE_PARTICIPE_PASSE
 from .models import Word, Packet, UserPacket, \
     UserWordData, UserWordRepetition, UserWordIgnore, UserStandalonePacket, \
     WordTranslation, prefetch_words_data, VerbPacket, WordGroup, \
@@ -488,12 +489,13 @@ def get_verbs(request, packet_id:int, more_lessons:int=None):
     activated_lessons_pks = []
     if request.user.is_authenticated:
         activated_lessons_pks = UserLesson.objects.filter(user=request.user).values_list('lesson__pk', flat=True)
-    packets = VerbPacket.objects.annotate(Count('verbs', distinct=True)).prefetch_related('lesson').all().order_by('lesson__lesson_number')
+    packets = VerbPacket.objects.annotate(Count('verbs' , distinct=True), participes_count=Count('verbpacketrelation', filter=Q(tense=TENSE_PARTICIPE_PASSE), distinct=True)).prefetch_related('lesson').all().order_by('lesson__lesson_number')
     result['packets'] = [{
             'id': p.id,
             'lessonNumber': p.lesson.lesson_number,
             'verbsCount':p.verbs__count,
-            'activated': p.lesson.pk in activated_lessons_pks
+            'activated': p.lesson.pk in activated_lessons_pks,
+            'participesCount': p.participes_count,
         } for p in packets]
     return JsonResponse(result, status=200)
 
