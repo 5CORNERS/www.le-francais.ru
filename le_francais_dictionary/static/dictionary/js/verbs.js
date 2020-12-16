@@ -83,7 +83,7 @@
         })
     }
 
-    var loadCards = async function (packetId, more_lessons = undefined) {
+    let loadCards = async function (packetId, more_lessons = undefined) {
         let verbs = []
         let r
         if (more_lessons !== undefined && typeof more_lessons === 'number') {
@@ -105,7 +105,7 @@
                 translationSound: createSound(form.trPollyUrl)
             }
         }), d.packets];
-    }
+    };
 
     const getAudionDuration = (audio) => {
         return new Promise((resolve, reject) => {
@@ -176,6 +176,7 @@
             let values = await loadCards(currentPacketID);
             this.cards = values[0];
             this.packets = values[1];
+            this.loadMoreOptions = this.getLoadMoreOptions();
             this.init();
         },
 
@@ -293,15 +294,15 @@
 
             message: function (n){
                 if (n >= 5) {
-                    return 'пяти'
+                    return 'пяти предыдущих уроков'
                 } else if (n === 4) {
-                    return 'четырёх'
+                    return 'четырёх предыдущих уроков'
                 } else if (n === 3) {
-                    return 'трёх'
+                    return 'трёх предыдущих уроков'
                 } else if (n === 2) {
-                    return 'двух'
+                    return 'двух предыдущих уроков'
                 } else if (n === 1) {
-                    return 'одного'
+                    return 'одного предыдущего урока'
                 }
             },
 
@@ -309,21 +310,29 @@
                 return `${name}`
             },
 
-            lessonsAbove: function () {
-                let dif = this.lessonNumber - 5
-                return this.message(5 + dif)
+            lessonsAbove: function (lessons) {
+                if (lessons===undefined) lessons = 5
+                let fromLessonNumber = this.lessonNumber - lessons
+                let dif = this.lessonNumber - fromLessonNumber
+                return `${this.message(lessons + dif)} уроков`
+            },
+
+            loadMoreName: function (nLessons, verbsCount){
+                return `${this.message(nLessons)} (${verbsCount} глагола)`
             },
 
             getLoadMoreOptions: function () {
                 let options = []
-                let c = 0
-                while (c < 5) {
-                    c += 1
-                    let p = this.getVerbsCountByLesson(this.lessonNumber - c)
-                    if (!p){
+                let lessons = 0
+                let verbsCount = 0
+                while (lessons < 5) {
+                    lessons += 1
+                    let currentLessonVerbsCOunt =  this.getVerbsCountByLesson(this.lessonNumber - lessons)
+                    if (!currentLessonVerbsCOunt){
                         continue
                     }
-                    options.push({loadMore: c, name: this.message(c), count: p})
+                    verbsCount += currentLessonVerbsCOunt
+                    options.push({loadMore: lessons, name: this.loadMoreName(lessons, verbsCount)})
                 }
                 return options
             },
@@ -361,6 +370,9 @@
                     this.pause = true;
                 }
                 let moreLessons = this.loadMoreValue.loadMore
+                if (moreLessons===null) {
+                    moreLessons = undefined
+                }
                 let values = await loadCards(currentPacketID, moreLessons);
                 this.cards = values[0];
                 this.packets = values[1];
