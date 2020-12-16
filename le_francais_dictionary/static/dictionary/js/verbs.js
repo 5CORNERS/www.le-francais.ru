@@ -287,6 +287,15 @@
                 }
             },
 
+            getParticipesCountByLesson: function(lessonNumber){
+                let packet = this.packets.find(packet => packet.lessonNumber === lessonNumber);
+                if (packet) {
+                    return packet.participesCount
+                } else {
+                    return null
+                }
+            },
+
             flipAllCards: function (){
                 this.cards.forEach(card => card.flipped = false);
                 this.cardsRepeat.forEach(card => card.flipped = false);
@@ -322,22 +331,29 @@
                 return `${this.message(lessons + dif)} уроков`
             },
 
-            loadMoreName: function (nLessons, verbsCount){
-                return `${this.message(nLessons)} ${this.numWord(nLessons, ['урока', 'уроков', 'уроков'])} (${verbsCount} ${this.numWord(verbsCount, ['глагол', 'глагола', 'глаголов'])})`
+            loadMoreName: function (nLessons, verbsCount, participesCount){
+                return `${this.message(nLessons)} ${this.numWord(nLessons, ['урока', 'уроков', 'уроков'])}
+                 (+${verbsCount} ${this.numWord(verbsCount, ['карточка', 'карточки', 'карточек'])})`
+                //`(+${participesCount} ${this.numWord(participesCount, ['причастие', 'причастия', 'причастий'])})`
             },
+
+            isLoadMoreSelected: function() {},
 
             getLoadMoreOptions: function () {
                 let options = []
                 let lessons = 0
                 let verbsCount = 0
+                let participesCount = 0
                 while (lessons < 5) {
                     lessons += 1
-                    let currentLessonVerbsCOunt =  this.getVerbsCountByLesson(this.lessonNumber - lessons)
-                    if (!currentLessonVerbsCOunt){
+                    let currentLessonVerbsCount =  this.getVerbsCountByLesson(this.lessonNumber - lessons)
+                    let currentLessonParticipesCount = this.getParticipesCountByLesson(this.lessonNumber - lessons)
+                    if (!currentLessonVerbsCount){
                         continue
                     }
-                    verbsCount += currentLessonVerbsCOunt
-                    options.push({loadMore: lessons, name: this.loadMoreName(lessons, verbsCount)})
+                    participesCount += currentLessonParticipesCount
+                    verbsCount += currentLessonVerbsCount
+                    options.push({loadMore: lessons, name: this.loadMoreName(lessons, verbsCount, participesCount)})
                 }
                 return options
             },
