@@ -29,14 +29,12 @@
             </select>
         </div>
         <div class="input-group mt-2" v-if="!showParticipe">
-            <div class="input-group-prepend" v-if="!moreVerbsLoaded">
-                <button class="btn btn-primary" type="button" v-on:click="loadMoreCards">Добавить глаголы</button>
-            </div>
-            <div class="input-group-prepend" v-if="moreVerbsLoaded">
-                <button class="btn btn-danger" type="button" v-on:click="loadInitCards">Сбросить</button>
+            <div class="input-group-prepend" :disabled="moreVerbsLoaded">
+                <button class="btn btn-primary" type="button" v-on:click="loadMoreCards"
+                >Добавить глаголы из:</button>
             </div>
             <select class="custom-select" :disabled="moreVerbsLoaded">
-                <option selected>Выберите кол-во уроков</option>
+                <option selected disabled>Выберите число предыдущих уроков</option>
                 <option v-for="option in loadMoreOptions" v-bind:value="option.loadMore" v-text="option.name"></option>
             </select>
         </div>
