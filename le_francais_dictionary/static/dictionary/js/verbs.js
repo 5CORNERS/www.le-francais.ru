@@ -292,22 +292,27 @@
                 this.cardsRepeat.forEach(card => card.flipped = false);
             },
 
-            message: function (n){
-                if (n >= 5) {
-                    return 'пяти предыдущих уроков'
-                } else if (n === 4) {
-                    return 'четырёх предыдущих уроков'
-                } else if (n === 3) {
-                    return 'трёх предыдущих уроков'
-                } else if (n === 2) {
-                    return 'двух предыдущих уроков'
-                } else if (n === 1) {
-                    return 'одного предыдущего урока'
-                }
+            numWord: function (n, words){
+                let value = Math.abs(n) % 100;
+                let num = value % 10;
+                if (value > 10 && value < 20) return words[2];
+                if (num > 1 && num < 5) return words[1];
+                if (num === 1) return words[0];
+                return words[2];
             },
 
-            loadMoreOptionsCustomLabel: function ({name}){
-                return `${name}`
+            message: function (n){
+                if (n >= 5) {
+                    return 'пяти'
+                } else if (n === 4) {
+                    return 'четырёх'
+                } else if (n === 3) {
+                    return 'трёх'
+                } else if (n === 2) {
+                    return 'двух'
+                } else if (n === 1) {
+                    return 'одного'
+                }
             },
 
             lessonsAbove: function (lessons) {
@@ -318,7 +323,7 @@
             },
 
             loadMoreName: function (nLessons, verbsCount){
-                return `${this.message(nLessons)} (${verbsCount} глагола)`
+                return `${this.message(nLessons)} ${this.numWord(nLessons, ['урока', 'уроков', 'уроков'])} (${verbsCount} ${this.numWord(verbsCount, ['глагол', 'глагола', 'глаголов'])})`
             },
 
             getLoadMoreOptions: function () {
