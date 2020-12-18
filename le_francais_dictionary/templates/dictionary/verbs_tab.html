@@ -42,6 +42,14 @@
 				<div style="">
 					<div>
 						<div id="flashcard-app">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div id="verbList">
+                                        <p><span v-for="verb in verbs">{% verbatim %}{{ verb.verb }} {% endverbatim %}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row" v-if="hasParticipe">
                                 <div class="col mb-2 mt-2 pl-5 pr-5 d-flex justify-content-between">
                                     <button type="button"

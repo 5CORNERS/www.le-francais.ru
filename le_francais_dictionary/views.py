@@ -4,7 +4,8 @@ from bulk_update.helper import bulk_update
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Case, Subquery, OuterRef, \
+    IntegerField
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -472,8 +473,8 @@ def get_verbs(request, packet_id:int, more_lessons:int=None):
         # result['isInfinitiveTranslation'] = int(packet.lesson.lesson_number) % 2 == 0
     except VerbPacket.DoesNotExist:
         result['errors'].append({
-            "message":consts.PACKET_DOES_NOT_EXIST_MESSAGE,
-            "code":consts.PACKET_DOES_NOT_EXIST_CODE,
+            "message": consts.PACKET_DOES_NOT_EXIST_MESSAGE,
+            "code": consts.PACKET_DOES_NOT_EXIST_CODE,
         })
         return JsonResponse(result, status=404)
     if more_lessons:
@@ -488,15 +489,28 @@ def get_verbs(request, packet_id:int, more_lessons:int=None):
         result['verbs'] = packet.to_dict()
     activated_lessons_pks = []
     if request.user.is_authenticated:
-        activated_lessons_pks = UserLesson.objects.filter(user=request.user).values_list('lesson__pk', flat=True)
-    packets = VerbPacket.objects.annotate(Count('verbs' , distinct=True), participes_count=Count('verbpacketrelation', filter=Q(tense=TENSE_PARTICIPE_PASSE), distinct=True)).prefetch_related('lesson').all().order_by('lesson__lesson_number')
+        activated_lessons_pks = UserLesson.objects.filter(
+            user=request.user).values_list('lesson__pk', flat=True)
+    packets = VerbPacket.objects.annotate(
+        num_verbs=Subquery(
+            VerbPacketRelation.objects.filter(packet=OuterRef('pk'))
+                .exclude(tense=TENSE_PARTICIPE_PASSE)
+                .values('packet').annotate(count=Count('pk')).values(
+                'count')),
+        num_participes=Subquery(
+            VerbPacketRelation.objects.filter(packet=OuterRef('pk'),
+                                              tense=TENSE_PARTICIPE_PASSE)
+                .values('packet').annotate(count=Count('pk')).values(
+                'count'), output_field=IntegerField())
+    ).prefetch_related('lesson').all().order_by(
+        'lesson__lesson_number')
     result['packets'] = [{
-            'id': p.id,
-            'lessonNumber': p.lesson.lesson_number,
-            'verbsCount':p.verbs__count,
-            'activated': p.lesson.pk in activated_lessons_pks,
-            'participesCount': p.participes_count,
-        } for p in packets]
+        'id': p.id,
+        'lessonNumber': p.lesson.lesson_number,
+        'verbsCount': p.num_verbs,
+        'participesCount': p.num_participes,
+        'activated': p.lesson.pk in activated_lessons_pks,
+    } for p in packets]
     return JsonResponse(result, status=200)
 
 
