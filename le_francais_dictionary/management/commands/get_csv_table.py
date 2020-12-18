@@ -32,10 +32,22 @@ def to_tsv(to_tsv_dict):
 
 
 class Command(BaseCommand):
+	def add_arguments(self, parser):
+		parser.add_argument('-g', dest='group_ids', type=int, action='append')
+
 	def handle(self, *args, **options):
 		table = []
 		l = Word.objects.all().count()
-		for word in Word.objects.prefetch_related('packet', 'packet__lesson', 'wordtranslation_set', 'group', 'group__unifiedword_set').order_by('order').all():
+		q = Word.objects.prefetch_related(
+				'packet',
+				'packet__lesson',
+				'wordtranslation_set',
+				'group',
+				'group__unifiedword_set'
+		).order_by('order').all()
+		if options['group_ids']:
+			q = q.filter(group_id__in=options['group_ids'])
+		for word in q:
 			print(f'{word.order}/{l}\t{word}')
 			row_dict = OrderedDict()
 			for title, attr in titles:
