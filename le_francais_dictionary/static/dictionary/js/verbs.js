@@ -170,6 +170,7 @@
             hasParticipe: false,
             selectedLoadMoreOptions:[],
             playing: false,
+            verbs: []
         },
 
         async mounted() {
@@ -190,6 +191,7 @@
                 this.translation = this.cards[0]['translation']
                 console.log(this.cards);
                 this.hasParticipe = this.cards.filter(card => card.tense === TENSE_PARTICIPE_PASSE).length > 0
+                this.verbs = this.cards.filter(card => card.verb !== undefined)
             },
 
             getCurrentParticipeCard: function () {
@@ -333,11 +335,18 @@
 
             loadMoreName: function (nLessons, verbsCount, participesCount){
                 return `${this.message(nLessons)} ${this.numWord(nLessons, ['урока', 'уроков', 'уроков'])}
-                 (+${verbsCount} ${this.numWord(verbsCount, ['карточка', 'карточки', 'карточек'])})`
+                 (+${verbsCount} ${this.numWord(verbsCount, ['глагол', 'глагола', 'глаголов'])} 
+                 ${participesCount > 0 ? `а так же ${participesCount} ${this.numWord(participesCount, ['причастие', 'причастия', 'причастий'])}` : ""})`
                 //`(+${participesCount} ${this.numWord(participesCount, ['причастие', 'причастия', 'причастий'])})`
             },
 
-            isLoadMoreSelected: function() {},
+            verbsList: function(){
+
+            },
+
+            isLoadMoreSelected: function() {
+
+            },
 
             getLoadMoreOptions: function () {
                 let options = []
