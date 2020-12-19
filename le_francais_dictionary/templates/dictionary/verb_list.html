@@ -1,0 +1,5 @@
+Спряжения глаголов {% for tense in tenses %}
+    {% for verb in tense.verbs %}
+        {{ verb }}{% if forloop.revcounter0 != 1%},{% else %} и{% endif %}
+    {% endfor %}в {{ tense }}.
+{% endfor %}

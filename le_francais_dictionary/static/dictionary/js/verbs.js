@@ -104,7 +104,7 @@
                 formSound: createSound(form.pollyUrl),
                 translationSound: createSound(form.trPollyUrl)
             }
-        }), d.packets];
+        }), d.packets, d.verbListHTML];
     };
 
     const getAudionDuration = (audio) => {
@@ -170,13 +170,14 @@
             hasParticipe: false,
             selectedLoadMoreOptions:[],
             playing: false,
-            verbs: []
+            verbListHTML: ''
         },
 
         async mounted() {
             let values = await loadCards(currentPacketID);
             this.cards = values[0];
             this.packets = values[1];
+            this.verbListHTML = values[2]
             this.loadMoreOptions = this.getLoadMoreOptions();
             this.init();
         },
@@ -191,7 +192,6 @@
                 this.translation = this.cards[0]['translation']
                 console.log(this.cards);
                 this.hasParticipe = this.cards.filter(card => card.tense === TENSE_PARTICIPE_PASSE).length > 0
-                this.verbs = this.cards.filter(card => card.verb !== undefined)
             },
 
             getCurrentParticipeCard: function () {

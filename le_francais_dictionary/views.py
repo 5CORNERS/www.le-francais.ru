@@ -488,6 +488,7 @@ def get_verbs(request, packet_id:int, more_lessons:int=None):
     else:
         result['verbs'] = packet.to_dict()
     activated_lessons_pks = []
+    tenses = list(set(verb['tense'] for verb in result['verbs']))
     if request.user.is_authenticated:
         activated_lessons_pks = UserLesson.objects.filter(
             user=request.user).values_list('lesson__pk', flat=True)
@@ -511,6 +512,12 @@ def get_verbs(request, packet_id:int, more_lessons:int=None):
         'participesCount': p.num_participes,
         'activated': p.lesson.pk in activated_lessons_pks,
     } for p in packets]
+    result['verbListHTML'] = render_to_string(
+        'dictionary/verb_list.html',
+        context={
+            'tenses': [{'name':t ,'verbs': [v['verb'] for v in result['verbs'] if v['tense'] == t]} for t in tenses],
+        }
+    )
     return JsonResponse(result, status=200)
 
 
