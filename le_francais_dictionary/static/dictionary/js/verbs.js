@@ -177,7 +177,7 @@
             let values = await loadCards(currentPacketID);
             this.cards = values[0];
             this.packets = values[1];
-            this.verbListHTML = values[2]
+            // this.verbListHTML = values[2]
             this.loadMoreOptions = this.getLoadMoreOptions();
             this.init();
         },

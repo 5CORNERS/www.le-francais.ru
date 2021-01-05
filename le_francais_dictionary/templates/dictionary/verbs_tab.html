@@ -34,7 +34,6 @@
         </button>
     </div>
 </div>
-{# TODO Запоминаем спряжения глаголов дрдрдр, дрдрдр и дрдрдр — в Indicative Present #}
 <div class="col-12">
 	<div id="dict-app" data-lesson-number="{{ lesson_number }}" data-packet-id="{{ packet_id }}" data-show-negative="{{ default_show_negative }}" data-translate-infinitives="{{ default_translate_infinitives }}">
 		<div class="row">
@@ -45,8 +44,7 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div id="verbList">
-                                        <p>{% verbatim %}{{ verbListHTML }}{% endverbatim %}
-                                        </p>
+                                        <p v-html="verbListHTML"></p>
                                     </div>
                                 </div>
                             </div>
@@ -93,13 +91,13 @@
 
 										  <span class="play-button">
 										  	<img v-if="pause" src="{% static 'dictionary/img/play.16146fde.svg' %}" v-on:click="togglePause()">
-										  	<img v-else="pause" src="{% static 'dictionary/img/pause.173288f8.svg' %}" v-on:click="togglePause()">
+										  	<img v-else src="{% static 'dictionary/img/pause.173288f8.svg' %}" v-on:click="togglePause()">
 										  </span>
 
 										  <br><br><br>
 											<div class="word-card-phrase">
 												{% verbatim %}<span v-if="card.flipped">{{ card.translation }}</span>{% endverbatim %}
-												<span v-else="card.flipped">&nbsp;</span>
+												<span v-else>&nbsp;</span>
 											</div>
 											<div class="dummy-row2">&nbsp;</div>
 										</div>
@@ -112,7 +110,48 @@
 										</div>
 									</div>
 								</div>
-								{% include 'dictionary/verbs_tab_controls.html' %}
+								<div class="row">
+                                    <div class="col">
+                                        <div class="input-group mt-2" v-if="!showParticipe">
+                                            <div type="checkbox" class="custom-control custom-checkbox">
+                                                <input id="showNegativeInput" type="checkbox"
+                                                       class="custom-control-input" v-model="showNegative">
+                                                <label class="custom-control-label" for="showNegativeInput">Показывать отрицания</label>
+                                            </div>
+                                        </div>
+                                        <div class="input-group mt-2" v-if="type === TYPE_LISTENING && !showParticipe">
+                                            <div type="checkbox" class="custom-control custom-checkbox">
+                                                <input id="translateInfinitivesInput" type="checkbox"
+                                                       class="custom-control-input" v-model="translateInfinitives">
+                                                <label class="custom-control-label" for="translateInfinitivesInput">Показывать перевод
+                                                    инфинитивов</label>
+                                            </div>
+                                        </div>
+                                        <div class="input-group mt-2" v-if="type === TYPE_CHECKING">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">Пауза на раздумье (задержка перед ответом):</span>
+                                            </div>
+                                            <select type="number" class="custom-select" aria-label="Пауза на раздумье (задержка перед ответом):"
+                                                    v-model="timeoutTranslation">
+                                                <option value="1">1 секунда</option>
+                                                <option value="2">2 секунды</option>
+                                                <option value="3">3 секунды</option>
+                                                <option value="4">4 секунды</option>
+                                                <option value="5" selected>5 секунд</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group mt-2" v-if="!showParticipe">
+                                            <div class="input-group-prepend" :disabled="moreVerbsLoaded">
+                                                <button class="btn btn-primary" type="button" v-on:click="loadMoreCards"
+                                                >Добавить глаголы из:</button>
+                                            </div>
+                                            <select class="custom-select" :disabled="moreVerbsLoaded">
+                                                <option selected disabled>Выберите число предыдущих уроков</option>
+                                                <option v-for="option in loadMoreOptions" v-bind:value="option.loadMore" v-text="option.name"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
 							</div>
 						</div>
 					</div>
