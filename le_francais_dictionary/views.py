@@ -512,12 +512,7 @@ def get_verbs(request, packet_id:int, more_lessons:int=None):
         'participesCount': p.num_participes,
         'activated': p.lesson.pk in activated_lessons_pks,
     } for p in packets]
-    result['verbListHTML'] = render_to_string(
-        'dictionary/verb_list.html',
-        context={
-            'tenses': [{'name':t ,'verbs': [v['verb'] for v in result['verbs'] if v['tense'] == t]} for t in tenses],
-        }
-    )
+    result['verbListHTML'] = ""
     return JsonResponse(result, status=200)
 
 
