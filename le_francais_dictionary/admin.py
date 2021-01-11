@@ -5,6 +5,7 @@ from typing import List, Dict
 
 from django.conf.urls import url
 from django.contrib import admin
+from django.contrib.admin import DateFieldListFilter
 from django.core.checks import messages
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
@@ -12,7 +13,7 @@ from django.shortcuts import redirect, render
 from home.models import LessonPage
 from .forms import DictionaryCsvImportForm, DictionaryWordFormset
 from .models import Word, WordTranslation, Packet, WordGroup, \
-	UnifiedWord, Verb, VerbForm
+	UnifiedWord, Verb, VerbForm, DictionaryError
 
 from django_bulk_update import helper as update_helper
 import time
@@ -332,3 +333,12 @@ class VerbFormInline(admin.TabularInline):
 @admin.register(Verb)
 class VerbAdmin(admin.ModelAdmin):
 	inlines = [VerbFormInline]
+
+@admin.register(DictionaryError)
+class DictionaryErrorAdmin(admin.ModelAdmin):
+	ordering = ['datetime_creation', 'user']
+	search_fields = ['user', 'message']
+	readonly_fields = ['user', 'message', 'datetime_creation']
+	list_filter = (
+		('datetime_creation', DateFieldListFilter),
+	)

@@ -1011,3 +1011,12 @@ def prefetch_words_data(words, user):
 		else:
 			word._first_translation = None
 	return words
+
+
+class DictionaryError(models.Model):
+	user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+	message = models.TextField(null=True)
+	datetime_creation = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return self.message[:10]
