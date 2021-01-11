@@ -342,4 +342,4 @@ class DictionaryErrorAdmin(admin.ModelAdmin):
 	list_filter = (
 		('datetime_creation', DateFieldListFilter),
 	)
-	list_display = ['user', 'datetime_creation']
+	list_display = ['__str__', 'user', 'datetime_creation']
