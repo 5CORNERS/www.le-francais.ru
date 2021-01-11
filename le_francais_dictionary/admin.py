@@ -336,7 +336,7 @@ class VerbAdmin(admin.ModelAdmin):
 
 @admin.register(DictionaryError)
 class DictionaryErrorAdmin(admin.ModelAdmin):
-	ordering = ['datetime_creation', 'user']
+	ordering = ['-datetime_creation']
 	search_fields = ['user', 'message']
 	readonly_fields = ['user', 'message', 'datetime_creation']
 	list_filter = (
