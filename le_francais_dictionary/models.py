@@ -1019,4 +1019,4 @@ class DictionaryError(models.Model):
 	datetime_creation = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
-		return self.message[:10]
+		return self.message[:20] + '...'
