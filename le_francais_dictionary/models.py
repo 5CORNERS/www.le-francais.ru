@@ -258,10 +258,15 @@ class Word(models.Model):
 
 	@property
 	def uni(self):
-		if self.group:
-			return self.group.unifiedword_set.get(definition_num__exact=self.definition_num)
-		else:
-			return EmptyUni()
+		if self._uni is None:
+			if self.group:
+				try:
+					self._uni = self.group.unifiedword_set.get(definition_num__exact=self.definition_num)
+				except UnifiedWord.DoesNotExist:
+					self._uni = EmptyUni()
+			else:
+				self._uni = EmptyUni()
+		return self._uni
 
 	@property
 	def filename(self):
@@ -393,6 +398,10 @@ class Word(models.Model):
 			'translations': [translation_dict],
 			'packet': self.packet.pk,
 			'userData': None,
+			'unifiedWord': self.uni.word,
+			'unifiedTranslation': self.uni.translation,
+			'unifiedWordPollyUrl': self.uni.word_polly_url,
+			'unifiedTranslationPollyUrl': self.uni.translation_polly_url,
 		}
 		if user and user.is_authenticated:
 			repetition: UserWordRepetition = self.get_repetition(user)
