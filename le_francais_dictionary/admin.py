@@ -27,7 +27,7 @@ def get_number(s) -> int:
 def create_polly_task(modeladmin: admin.ModelAdmin, request, qs):
 	for p in qs:
 		p.create_polly_task()
-
+		
 
 class WordTranslationInline(admin.TabularInline):
 	model = WordTranslation
@@ -342,3 +342,4 @@ class DictionaryErrorAdmin(admin.ModelAdmin):
 	list_filter = (
 		('datetime_creation', DateFieldListFilter),
 	)
+	list_display = ['user', 'datetime_creation']
