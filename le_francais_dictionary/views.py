@@ -1,4 +1,6 @@
 import json
+import pdb
+import traceback
 from typing import List
 from bulk_update.helper import bulk_update
 from django.contrib.auth.decorators import login_required
@@ -18,9 +20,11 @@ from django.utils.translation import ugettext_lazy as _
 from le_francais_dictionary.forms import WordsManagementFilterForm
 from .consts import TENSE_PARTICIPE_PASSE
 from .models import Word, Packet, UserPacket, \
-    UserWordData, UserWordRepetition, UserWordIgnore, UserStandalonePacket, \
+    UserWordData, UserWordRepetition, UserWordIgnore, \
+    UserStandalonePacket, \
     WordTranslation, prefetch_words_data, VerbPacket, WordGroup, \
-    UserDayRepetition, get_repetition_words_query, VerbPacketRelation
+    UserDayRepetition, get_repetition_words_query, VerbPacketRelation, \
+    DictionaryError
 from . import consts
 from home.models import UserLesson
 
@@ -184,82 +188,124 @@ def get_repetition_words(request):
 
 @csrf_exempt
 def update_words(request):
-    data = json.loads(request.body)
-    if isinstance(data, dict):
-        words_data: List[dict] = data.get('words', [])
-    else:
-        # FIXME return error if wrong json format
-        words_data: List[dict] = []
-    user_words_data: List[UserWordData] = []
-    errors = []
-    for word_data in words_data:
-        try:
-            word = Word.objects.select_related('packet').get(pk=word_data['pk'])
-            if word.group is not None:
-                new_word = Word.objects.filter(
-                    userdata__user=request.user, group=word.group
-                ).order_by('-userwordrepetition__time')
-                if new_word.exists() and new_word.first() != word:
-                    word = new_word.first()
-            grade = word_data.get('grade')
-            mistakes = word_data.get('mistakes')
-            delay = word_data.get('delay')
-            if UserWordRepetition.objects.filter(
-                    word=word, user=request.user,
-                    repetition_datetime__gt=timezone.now()).exists():
-                errors.append(dict(
-                    pk=word.pk,
-                    message=consts.TOO_EARLY_MESSAGE,
-                    code=consts.TOO_EARLY_CODE,
-                ))
-            elif word.packet.is_activated(request.user) or word.packet.demo:
-                user_words_data.append(UserWordData(
-                    word=word,
-                    user_id=request.user.id,
-                    grade=grade,
-                    mistakes=mistakes,
-                    delay=delay,
-                ))
-            else:
-                errors.append(dict(
-                    pk=word.pk,
-                    message=consts.LESSON_IS_NOT_ACTIVATED_MESSAGE,
-                    code=consts.LESSON_IS_NOT_ACTIVATED_CODE,
-                ))
-        except Word.DoesNotExist:
-            errors.append(dict(
-                pk=word_data['pk'],
-                message=consts.WORD_DOES_NOT_EXIST_MESSAGE,
-                code=consts.WORD_DOES_NOT_EXIST_CODE,
-            ))
-        except Exception as e:
-            errors.append(dict(
-                pk=word_data['pk'],
-                message=f'Unknown Error: {e.__doc__}',
-                code = consts.UNKNOWN_ERROR_CODE,
-            ))
-    user_words_data = UserWordData.objects.bulk_create(user_words_data)
-    words = []
-    for user_word_data in user_words_data:
-        e_factor = user_word_data.e_factor
-        quality = user_word_data.quality
-        mean_quality = user_word_data.mean_quality
-        if user_word_data.grade:
-            repetition = user_word_data.update_or_create_repetition()
-            repetition_datetime = repetition.repetition_datetime
-            repetition_time = repetition.time
+    try:
+        data = json.loads(request.body)
+        if isinstance(data, dict):
+            words_data: List[dict] = data.get('words', [])
         else:
-            repetition_datetime = None
-            repetition_time = None
-        words.append(dict(
-            pk=user_word_data.word_id,
-            nextRepetition=repetition_datetime,
-            repetitionTime=repetition_time,
-            e_factor=e_factor,
-            quality=quality,
-            mean_quality=mean_quality
-        ))
-    return JsonResponse(dict(words=words, errors=errors), safe=False)
+            # FIXME return error if wrong json format
+            words_data: List[dict] = []
+        user_words_data: List[UserWordData] = []
+        errors = []
+        for word_data in words_data:
+            try:
+                word = Word.objects.select_related('packet').get(pk=word_data['pk'])
+                if word.group is not None:
+                    new_word = Word.objects.filter(
+                        userdata__user=request.user, group=word.group
+                    ).order_by('-userwordrepetition__time')
+                    if new_word.exists() and new_word.first() != word:
+                        word = new_word.first()
+                grade = word_data.get('grade')
+                mistakes = word_data.get('mistakes')
+                delay = word_data.get('delay')
+                if UserWordRepetition.objects.filter(
+                        word=word, user=request.user,
+                        repetition_datetime__gt=timezone.now()).exists():
+                    errors.append(dict(
+                        pk=word.pk,
+                        message=consts.TOO_EARLY_MESSAGE,
+                        code=consts.TOO_EARLY_CODE,
+                    ))
+                elif word.packet.is_activated(request.user) or word.packet.demo:
+                    user_words_data.append(UserWordData(
+                        word=word,
+                        user_id=request.user.id,
+                        grade=grade,
+                        mistakes=mistakes,
+                        delay=delay,
+                    ))
+                else:
+                    errors.append(dict(
+                        pk=word.pk,
+                        message=consts.LESSON_IS_NOT_ACTIVATED_MESSAGE,
+                        code=consts.LESSON_IS_NOT_ACTIVATED_CODE,
+                    ))
+            except Word.DoesNotExist:
+                errors.append(dict(
+                    pk=word_data['pk'],
+                    message=consts.WORD_DOES_NOT_EXIST_MESSAGE,
+                    code=consts.WORD_DOES_NOT_EXIST_CODE,
+                ))
+                DictionaryError.objects.create(
+                    user=request.user,
+                    message=f'Error while update word: {consts.WORD_DOES_NOT_EXIST_CODE}\n'
+                            f'{consts.WORD_DOES_NOT_EXIST_MESSAGE}\n'
+                            f'Word ID: {word_data["pk"]}\n'
+                            f'\n==================\n'
+                            f'{traceback.format_exc()}'
+                            f'\n==================\n'
+                )
+            except Exception as e:
+                errors.append(dict(
+                    pk=word_data['pk'],
+                    message=f'Unknown Error: {e}',
+                    code = consts.UNKNOWN_ERROR_CODE,
+                ))
+                DictionaryError.objects.create(
+                    user=request.user,
+                    message=f'Uknown Error while update\n'
+                            f'\n==================\n'
+                            f'{traceback.format_exc()}'
+                            f'\n==================\n'
+                )
+        user_words_data = UserWordData.objects.bulk_create(user_words_data)
+        words = []
+        for user_word_data in user_words_data:
+            e_factor = user_word_data.e_factor
+            quality = user_word_data.quality
+            mean_quality = user_word_data.mean_quality
+            if user_word_data.grade:
+                repetition = user_word_data.update_or_create_repetition()
+                repetition_datetime = repetition.repetition_datetime
+                repetition_time = repetition.time
+            else:
+                repetition_datetime = None
+                repetition_time = None
+            words.append(dict(
+                pk=user_word_data.word_id,
+                nextRepetition=repetition_datetime,
+                repetitionTime=repetition_time,
+                e_factor=e_factor,
+                quality=quality,
+                mean_quality=mean_quality
+            ))
+        return JsonResponse(dict(words=words, errors=errors), safe=False)
+    except Exception as e:
+        DictionaryError.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            message=f'Fatal Error while Updating Words:\n'
+                    f'REQUEST DATA:\n'
+                    f'method: {request.method}\n'
+                    f'body:\n'
+                    f'==============\n'
+                    f'{request.body}\n'
+                    f'==============\n'
+                    f'user:{request.user}\n'
+                    f'GET PARAMS:\n'
+                    f'==============\n'
+                    f'{request.GET}\n'
+                    f'==============\n'
+                    f'POST PARAMS:\n'
+                    f'==============\n'
+                    f'{request.POST}\n'
+                    f'==============\n'
+                    f'TRACEBACK:\n'
+                    f'==================\n'
+                    f'{traceback.format_exc()}'
+                    f'==================\n'
+        )
+        raise e
 
 
 def clear_all(request):
