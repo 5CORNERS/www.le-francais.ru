@@ -208,7 +208,11 @@ def update_words(request):
                         word = new_word.first()
                 grade = word_data.get('grade')
                 mistakes = word_data.get('mistakes')
+                if mistakes < 0:
+                    mistakes = None
                 delay = word_data.get('delay')
+                if delay < 0:
+                    delay = None
                 if UserWordRepetition.objects.filter(
                         word=word, user=request.user,
                         repetition_datetime__gt=timezone.now()).exists():
