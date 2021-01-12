@@ -689,7 +689,7 @@ class UserDayRepetition(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 	words_qty = models.IntegerField(null=True)
 	repetitions = ArrayField(
-		models.PositiveSmallIntegerField(),
+		models.PositiveIntegerField(),
 		blank=True, default=[]
 
 	)
