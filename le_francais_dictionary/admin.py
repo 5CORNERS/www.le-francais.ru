@@ -5,6 +5,7 @@ from typing import List, Dict
 
 from django.conf.urls import url
 from django.contrib import admin
+from django.contrib.admin import DateFieldListFilter
 from django.core.checks import messages
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
@@ -12,7 +13,7 @@ from django.shortcuts import redirect, render
 from home.models import LessonPage
 from .forms import DictionaryCsvImportForm, DictionaryWordFormset
 from .models import Word, WordTranslation, Packet, WordGroup, \
-	UnifiedWord, Verb, VerbForm
+	UnifiedWord, Verb, VerbForm, DictionaryError
 
 from django_bulk_update import helper as update_helper
 import time
@@ -26,7 +27,7 @@ def get_number(s) -> int:
 def create_polly_task(modeladmin: admin.ModelAdmin, request, qs):
 	for p in qs:
 		p.create_polly_task()
-
+		
 
 class WordTranslationInline(admin.TabularInline):
 	model = WordTranslation
@@ -332,3 +333,13 @@ class VerbFormInline(admin.TabularInline):
 @admin.register(Verb)
 class VerbAdmin(admin.ModelAdmin):
 	inlines = [VerbFormInline]
+
+@admin.register(DictionaryError)
+class DictionaryErrorAdmin(admin.ModelAdmin):
+	ordering = ['-datetime_creation']
+	search_fields = ['user', 'message']
+	readonly_fields = ['user', 'message', 'datetime_creation']
+	list_filter = (
+		('datetime_creation', DateFieldListFilter),
+	)
+	list_display = ['__str__', 'user', 'datetime_creation']
