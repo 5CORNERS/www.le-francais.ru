@@ -118,30 +118,6 @@ class WordGroup(models.Model):
 		return f'{[w.word for w in self.word_set.all().order_by("order")]}'
 
 
-class UnifiedWord(models.Model):
-	word = models.CharField(max_length=120)
-	translation = models.CharField(max_length=120)
-	definition_num = models.IntegerField(null=True, blank=True, default=None)
-	group = models.ForeignKey('WordGroup', on_delete=models.CASCADE)
-	word_polly_url = models.URLField(max_length=200, null=True, default=None)
-	translation_polly_url = models.URLField(max_length=200, null=True,
-	                                        default=None)
-
-	@property
-	def ru_filename(self):
-		if self.translation_polly_url:
-			return self.translation_polly_url.rsplit('/', 1)[-1]
-		else:
-			return None
-
-	@property
-	def fr_filename(self):
-		if self.translation_polly_url:
-			return self.word_polly_url.rsplit('/', 1)[-1]
-		else:
-			return None
-
-
 class EmptyUni:
 	word = None
 	translation = None
@@ -213,6 +189,7 @@ class Word(models.Model):
 		self._repetitions_count = {}
 		self._first_translation = None
 		self._repetitions = {}
+		self._uni = None
 
 	def mistake_ratio(self, mistakes):
 		word = self.word
