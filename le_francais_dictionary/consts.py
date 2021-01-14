@@ -90,3 +90,9 @@ TENSE_CHOICES = [
 	(TENSE_INDICATIVE_FUTURE, 'Futur simple'),
     (TENSE_PARTICIPE_PASSE, 'Participe Passé')
 ]
+TYPE_AFFIRMATIVE = 0
+TYPE_NEGATIVE = 1
+TYPE_CHOICES = [
+	(TYPE_AFFIRMATIVE, 'affirmative'),
+	(TYPE_NEGATIVE, 'negative')
+]
