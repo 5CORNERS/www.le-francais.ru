@@ -1,8 +1,10 @@
 import re
+from typing import List
 
 from polly.const import LANGUAGE_CODE_FR, LANGUAGE_CODE_RU
-from .tts import google_cloud_tts, shtooka_by_title_in_path, FTP_FR_VERBS_PATH, FTP_RU_VERBS_PATH, \
-	FTP_FR_WORDS_PATH, FTP_RU_WORDS_PATH
+from .tts import google_cloud_tts, shtooka_by_title_in_path, \
+	FTP_FR_VERBS_PATH, FTP_RU_VERBS_PATH, \
+	FTP_FR_WORDS_PATH, FTP_RU_WORDS_PATH, pytts_voice_string
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models
@@ -15,9 +17,10 @@ from le_francais_dictionary.consts import GENRE_CHOICES, \
 	PARTOFSPEECH_CHOICES, \
 	PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
 	GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE, TENSE_CHOICES, \
-	TENSE_PARTICIPE_PASSE
+	TYPE_CHOICES
 from le_francais_dictionary.utils import sm2_next_repetition_date, \
-	format_text2speech, sm2_ef_q_mq, create_or_update_repetition
+	format_text2speech, sm2_ef_q_mq, create_or_update_repetition, \
+	remove_parenthesis, clean_filename
 from polly import const as polly_const
 from polly.models import PollyTask
 
@@ -172,6 +175,10 @@ def del_ends(s):
 			s.replace(' ' + end, '')
 			s = del_ends(s)
 	return s
+
+
+def escape_non_url_characters(str):
+	return str.replace(' ', '_').replace('\\', '_').replace('/', '_')
 
 
 class Word(models.Model):
@@ -486,6 +493,48 @@ class Word(models.Model):
 		if save:
 			self.save()
 
+	def get_ssml(self):
+		if self.word_ssml:
+			if not '<speak>' in self.word_ssml:
+				self.word_ssml = f'<speak>{self.word_ssml}</speak>'
+			return self.word_ssml
+		else:
+			return f'<speak>{format_text2speech(self.word)}</speak>'
+
+	def voice(self, save=True):
+		filename = escape_non_url_characters(remove_parenthesis(self.word))
+		ssml = self.get_ssml()
+		if self.group:
+			group_words = self.group.word_set.exclude(pk=self.pk).filter(polly__isnull=False, _polly_url__isnull=False)
+			for group_word in group_words:
+				group_word:Word
+				if group_word.get_ssml() == ssml:
+					if group_word.polly:
+						self.polly = group_word.polly
+					else:
+						self._polly_url = group_word._polly_url
+					if save:
+						self.save()
+					return self
+		shtooka_url = shtooka_by_title_in_path(title=remove_parenthesis(self.word), ftp_path=FTP_FR_WORDS_PATH, language_code=LANGUAGE_CODE_FR, genre=self.genre, filename=filename)
+		if shtooka_url:
+			self._polly_url = shtooka_url
+		else:
+			self._polly_url = google_cloud_tts(
+				s=ssml,
+				ssml=True,
+				filename=f'{escape_non_url_characters(remove_parenthesis(self.word))}_SYNTH',
+				language=LANGUAGE_CODE_FR,
+				genre=self.genre,
+				file_id=self.cd_id,
+				file_title=remove_parenthesis(self.word),
+				ftp_path=FTP_FR_WORDS_PATH,
+			)
+		if save:
+			self.save()
+		return self
+
+
 	def __str__(self):
 		return f'Word:{self.cd_id} {self.word}'
 
@@ -574,6 +623,182 @@ class WordTranslation(models.Model):
 		self._polly_url = voice_url
 		if save:
 			self.save()
+
+	def voice(self, save=True):
+		filename = escape_non_url_characters(remove_parenthesis(self.translation))
+		ssml = self.get_ssml()
+		if self.word.group:
+			group_words_ids = [w.cd_id for w in self.word.group.word_set.exclude(pk=self.word.pk)]
+			group_translations = WordTranslation.objects.filter(word_id__in=group_words_ids).exclude(pk=self.pk)
+			for group_translation in group_translations:
+				group_translation:WordTranslation
+				if group_translation.get_ssml() == ssml:
+					voiced = True
+					if group_translation.polly:
+						self.polly = group_translation.polly
+					elif group_translation._polly_url:
+						self._polly_url = group_translation._polly_url
+					else:
+						voiced = False
+					if save and voiced:
+						self.save()
+					if voiced:
+						return self
+		shtooka_url = shtooka_by_title_in_path(title=remove_parenthesis(self.translation), ftp_path=FTP_FR_WORDS_PATH, language_code=LANGUAGE_CODE_FR, filename=filename)
+		if shtooka_url:
+			self._polly_url = shtooka_url
+		else:
+			self._polly_url = google_cloud_tts(
+				s=ssml,
+				ssml=True,
+				filename=f'{filename}_synth',
+				language=LANGUAGE_CODE_RU,
+				genre=self.genre,
+				file_id=self.cd_id,
+				file_title=remove_parenthesis(self.translation),
+				ftp_path=FTP_RU_WORDS_PATH,
+			)
+		if save:
+			self.save()
+		return self
+
+	def get_ssml(self):
+		if self.translations_ssml:
+			return self.translations_ssml
+		else:
+			return f'<speak>{format_text2speech(self.translation)}</speak>'
+
+
+class UnifiedWord(models.Model):
+	word = models.CharField(max_length=120)
+	translation = models.CharField(max_length=120)
+	definition_num = models.IntegerField(null=True, blank=True,
+										 default=None)
+	group = models.ForeignKey('WordGroup', on_delete=models.CASCADE)
+	word_polly_url = models.URLField(max_length=1000, null=True,
+									 default=None)
+	translation_polly_url = models.URLField(max_length=1000, null=True,
+											default=None)
+
+	def __init__(self, *args, **kwargs):
+		super(UnifiedWord, self).__init__(*args, **kwargs)
+		self._original_translations = None
+		self._original_word = None
+		self._original_words = None
+
+	@property
+	def ru_filename(self):
+		if self.translation_polly_url:
+			return self.translation_polly_url.rsplit('/', 1)[-1]
+		else:
+			return None
+
+	@property
+	def fr_filename(self):
+		if self.translation_polly_url:
+			return self.word_polly_url.rsplit('/', 1)[-1]
+		else:
+			return None
+
+	@property
+	def original_word(self) -> Word:
+		if self._original_word is None:
+			self._original_word = self.group.word_set.filter(
+				definition_num=self.definition_num).first()
+		return self._original_word
+
+	@property
+	def genre(self) -> str:
+		return self.original_word.genre
+
+	@property
+	def part_of_speech(self) -> str:
+		return self.original_word.part_of_speech
+
+	@property
+	def original_words(self) -> List[Word]:
+		if self._original_words is None:
+			self._original_words = list(self.group.word_set.filter(
+				definition_num=self.definition_num
+			))
+		return self._original_words
+
+	@property
+	def original_translations(self) -> List[WordTranslation]:
+		if self._original_translations is None:
+			l = []
+			for o_word in self.original_words:
+				l.append(o_word.first_translation)
+			self._original_translations = l
+		return self._original_translations
+
+	def voice(self, save=True):
+		word_filename = clean_filename(self.word)
+		if len(word_filename) > 50:
+			word_filename = word_filename[:50]
+		voiced_from_original = False
+		for o_word in self.original_words:
+			if o_word.polly_url and remove_parenthesis(
+					o_word.word) == remove_parenthesis(self.word):
+				self.word_polly_url = o_word.polly_url
+				voiced_from_original = True
+		if not voiced_from_original:
+			shtooka_url = shtooka_by_title_in_path(
+				title=remove_parenthesis(self.word),
+				ftp_path=FTP_FR_WORDS_PATH,
+				filename=clean_filename(self.word),
+				genre=self.genre
+			)
+			if shtooka_url:
+				self.word_polly_url = shtooka_url
+			else:
+				if self.part_of_speech == PARTOFSPEECH_NOUN and self.genre == GENRE_MASCULINE:
+					self.word_polly_url = pytts_voice_string(
+						s=remove_parenthesis(self.word),
+						filename=clean_filename(self.word),
+						tag_id=int(
+							f'{self.group_id}{self.definition_num}'),
+						tag_title=remove_parenthesis(self.word),
+						genre=self.genre,
+					)
+				else:
+					self.word_polly_url = google_cloud_tts(
+						s=remove_parenthesis(self.word),
+						filename=clean_filename(self.word),
+						file_id=int(
+							f'{self.group_id}{self.definition_num}'),
+						file_title=remove_parenthesis(self.word),
+						genre=self.genre,
+						ftp_path=FTP_FR_WORDS_PATH,
+						speacking_rate=0.8
+					)
+
+		translation_voiced_from_original = False
+		translation_filename = clean_filename(self.translation)
+		if len(translation_filename) > 50:
+			translation_filename = translation_filename[:50]
+		for o_translation in self.original_translations:
+			if o_translation.polly_url and remove_parenthesis(
+					o_translation.translation) == remove_parenthesis(
+				self.translation):
+				self.translation_polly_url = o_translation.polly_url
+				translation_voiced_from_original = True
+		if not translation_voiced_from_original:
+			self.translation_polly_url = google_cloud_tts(
+				s = remove_parenthesis(self.translation),
+				filename=translation_filename,
+				file_title=remove_parenthesis(self.translation),
+				file_id=int(f'{self.group_id}{self.definition_num}'),
+				genre=self.genre,
+				language=LANGUAGE_CODE_RU,
+				ftp_path=FTP_RU_WORDS_PATH,
+				speacking_rate=1,
+				ssml=False
+			)
+		if save:
+			self.save(update_fields=['word_polly_url', 'translation_polly_url'])
+		return self
+
 
 
 class UserWordIgnore(models.Model):

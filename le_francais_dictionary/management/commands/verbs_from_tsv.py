@@ -3,7 +3,8 @@ from django.core.management import BaseCommand
 import csv
 
 from home.models import LessonPage
-from le_francais_dictionary.models import Verb, VerbForm, VerbPacket, VerbPacketRelation, TENSE_CHOICES
+from le_francais_dictionary.models import Verb, VerbForm, VerbPacket, VerbPacketRelation
+from le_francais_dictionary.consts import TENSE_CHOICES
 
 
 def get_tense_id(name):
@@ -20,7 +21,7 @@ class Command(BaseCommand):
 
 		existed_packets = {packet.lesson.lesson_number:packet for packet in list(VerbPacket.objects.select_related('lesson').all())}
 		existed_verbs = {verb.verb:verb for verb in list(Verb.objects.all())}
-		existed_forms = {verb_form.form:verb_form for verb_form in list(VerbForm.objects.all())}
+		existed_forms = {(verb_form.form, verb_form.verb_id):verb_form for verb_form in list(VerbForm.objects.all())}
 		VerbPacketRelation.objects.all().delete()
 
 		verb_infinitives_file = open(verb_translations_path, 'r', encoding='utf-8')
@@ -52,12 +53,11 @@ class Command(BaseCommand):
 			if lesson_number in existed_packets.keys():
 				packet = existed_packets[lesson_number]
 			else:
-				packet = VerbPacket(
+				print(f'Saving Packet:Глаголы урока {lesson_number}')
+				packet = VerbPacket.objects.create(
 					name=f'Глаголы урока {lesson_number}',
 					lesson=lessons[lesson_number]
 				)
-				print(f'Saving Packet: {packet.name}')
-				packet.save()
 				existed_packets[lesson_number] = packet
 
 			infinitive = row['VERBE']
@@ -96,14 +96,14 @@ class Command(BaseCommand):
 			form_order += 1
 			form_form = row['CONJUGAISON']
 
-			if next((f for f in forms_to_save if f.form == form_form), None):
+			if next((f for f in forms_to_save if f.form == form_form and f.verb_id == verb.pk), None):
 				continue
 
-			if form_form in existed_forms.keys():
-				form = existed_forms[form_form]
+			if (form_form, verb.pk) in existed_forms.keys():
+				form = existed_forms[(form_form, verb.pk)]
 			else:
 				form = VerbForm(form=form_form)
-				existed_forms[form_form] = form
+				existed_forms[(form_form, verb.pk)] = form
 
 			form_to_show: str = row['CONJUGAISON']
 			if form_to_show.find('ils') == 0:
@@ -120,10 +120,20 @@ class Command(BaseCommand):
 			form.form_to_show = form_to_show
 			forms_to_save.append(form)
 
+		forms_ids_to_delete = []
+		forms_ids_to_update = [f.pk for f in forms_to_save if not f._state.adding]
+		for form in existed_forms.values():
+			if form.pk is None or form.pk in forms_ids_to_update:
+				continue
+			else:
+				forms_ids_to_delete.append(form.pk)
+
+		VerbForm.objects.filter(pk__in=forms_ids_to_delete).delete()
+
 		print(f'Saving Verb to Packets relations...')
 		VerbPacketRelation.objects.bulk_create([rel for rel in verb_packet_relations_to_save if rel._state.adding])
 		bulk_update([rel for rel in verb_packet_relations_to_save if not rel._state.adding])
 
 		print(f'Saving verb Forms...')
 		VerbForm.objects.bulk_create([form for form in forms_to_save if form._state.adding])
-		bulk_update([form for form in forms_to_save if not form._state.adding])
+		bulk_update([form for form in forms_to_save if not form._state.adding], batch_size=200)

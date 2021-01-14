@@ -32,6 +32,8 @@ from home.models import PageWithSidebar, LessonPage, ArticlePage, BackUrls, \
     DefaultPage, IndexPage
 from home.src.site_import import import_content
 from pure_pagination import Paginator, PaginationMixin
+
+from le_francais_dictionary.consts import TENSE_PARTICIPE_PASSE
 from pybb import defaults, util as pybb_util
 from pybb.forms import PostForm
 from pybb.models import Post, Topic
@@ -812,7 +814,7 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
                 'packet_id': page.verbpacket_set.first().pk,
                 'default_show_negative': 'true',
                 'default_translate_infinitives': 'true',
-                'lesson_number': page.lesson_number,
+                'lesson_number': page.lesson_number,'participe':False
             }, request=request),
             transition=False
         ))
