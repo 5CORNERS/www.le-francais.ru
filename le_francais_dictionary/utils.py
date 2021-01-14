@@ -1,14 +1,14 @@
 import re
 import statistics
-from datetime import datetime, timedelta
-from typing import List, Optional, Any
+from datetime import timedelta
+from typing import List
 
-import pytz
-from django.utils import timezone
 from unidecode import unidecode
 
 from .consts import INITIAL_E_FACTOR, FIRST_REPETITION_DELTA, \
 	SECOND_REPETITION_DELTA, GENRE_MASCULINE, GENRE_FEMININE
+from .tts import PYTTX_FR_F_VOICE, PYTTX_FR_M_VOICE, PYTTX_RU_F_VOICE, \
+	PYTTX_RU_M_VOICE
 
 
 def create_or_update_repetition(user_id, word_id, repetition_datetime, time):
@@ -153,13 +153,30 @@ def sm2_next_repetition_date(dataset):
 
 def format_text2speech(text):
 	# FIXME ignore double parentheses
-	text = ''.join([s.split(')')[-1] for s in text.split('(')])  # ignore parentheses
+	text = remove_parenthesis(text)
+	text = text.replace(';', '.')
+	text = '. '.join([s[0].capitalize() + s[1:] for s in text.split('. ')])
+	return text
+
+
+def remove_parenthesis(text):
+	text = ''.join([s.split(')')[-1] for s in
+					text.split('(')])  # ignore parentheses
 	text = re.sub(' +', ' ', text)  # remove multiple whitespaces
 	return text
 
 
 def clean_filename(filename:str):
-	return filename.strip(' ').strip(' ').replace(' ', '_').replace('__', '_').replace('*', '')
+	return remove_parenthesis(filename.strip(' ')\
+		.strip(' ')\
+		.replace('\'', '_') \
+	  	.replace(' ', '_') \
+		.replace('\\', '_').replace('/', '_')\
+		.replace(' ', '_')\
+		.replace('*', ''))\
+		.replace('?', '_')\
+		.replace('__', '_')\
+		.replace(' ', '_')\
 
 
 def fr_local_polly():
@@ -189,12 +206,10 @@ def fr_local_polly():
 
 
 def fr_engine_change_voice(engine, genre):
-	F_VOICE = 'Vocalizer Expressive Audrey Harpo 22kHz'
-	M_VOICE = 'Vocalizer Expressive Thomas Harpo 22kHz'
 	if genre == GENRE_FEMININE:
-		voice_name = F_VOICE
+		voice_name = PYTTX_FR_F_VOICE
 	else:
-		voice_name = M_VOICE
+		voice_name = PYTTX_FR_M_VOICE
 	for voice in engine.getProperty('voices'):
 		if voice.name == voice_name:
 			engine.setProperty('voice', voice.id)
@@ -204,7 +219,7 @@ def fr_engine_change_voice(engine, genre):
 def fr_local_pyttsx3():
 	import csv
 	import pyttsx3
-	from .models import WordTranslation, Word
+	from .models import Word
 	import os
 	import eyed3
 	CD_ID_ROW = 0
@@ -260,12 +275,10 @@ def fr_local_pyttsx3():
 
 
 def ru_engine_change_voice(engine, genre):
-	F_VOICE = 'Vocalizer Expressive Milena Harpo 22kHz'
-	M_VOICE = 'Vocalizer Expressive Yuri Harpo 22kHz'
 	if genre == GENRE_FEMININE:
-		voice_name = F_VOICE
+		voice_name = PYTTX_RU_F_VOICE
 	else:
-		voice_name = M_VOICE
+		voice_name = PYTTX_RU_M_VOICE
 	for voice in engine.getProperty('voices'):
 		if voice.name == voice_name:
 			engine.setProperty('voice', voice.id)
@@ -274,7 +287,7 @@ def ru_engine_change_voice(engine, genre):
 def ru_local_pyttsx3():
 	import csv
 	import pyttsx3
-	from .models import WordTranslation, Word
+	from .models import WordTranslation
 	import os
 	import eyed3
 	CD_ID_ROW = 0
@@ -441,8 +454,9 @@ def local_fr_googletts(language='FR'):
 			mp3.tag.artist = voice.name
 			mp3.tag.album = 'Google Cloud TTS'
 			mp3.tag.save(encoding='utf-8')
-	from bulk_update import helper
-	# helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+# helper.bulk_update(to_update, update_fields=['_polly_url'])
 
 
 import os
