@@ -552,21 +552,47 @@ JS_REVERSE_OUTPUT_PATH = 'home/static/django_js_reverse/js/'
 
 # Logging settings
 
+def skip_static_requests(record):
+    if record.args[0].startswith('GET /static/'):  # filter whatever you want
+        return False
+    return True
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        # use Django's built in CallbackFilter to point to your filter
+        'skip_static_requests': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': skip_static_requests
+        }
+    },
+    'formatters': {
+        # django's default formatter
+        'django.server': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '[%(server_time)s] %(message)s',
+        }
+    },
     'handlers': {
-        'console': {
+        # django's default handler...
+        'django.server': {
+            'level': 'INFO',
+            'filters': ['skip_static_requests'],  # <- ...with one change
             'class': 'logging.StreamHandler',
+            'formatter': 'django.server',
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'ERROR'),
+        # django's default logger
+        'django.server': {
+            'handlers': ['django.server'],
+            'level': 'INFO',
+            'propagate': False,
         },
-    },
+    }
 }
+
 # ReCaptcha V3 settings
 
 RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_SECRET_KEY')
