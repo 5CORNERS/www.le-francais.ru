@@ -1,5 +1,6 @@
 from django import template
 
+from le_francais_dictionary.consts import TENSE_CHOICES, TYPE_CHOICES
 from le_francais_dictionary.models import UserPacket
 
 register = template.Library()
@@ -62,3 +63,12 @@ def rating2stars(rating):
 @register.inclusion_tag('dictionary/tags/repetitions2bars.html')
 def repetitions2bars(count):
     return {'count':count}
+
+
+@register.filter
+def tense_name(t):
+    return dict(TENSE_CHOICES).get(t, 'Unknown tense')
+
+@register.filter
+def type_name(t):
+    return dict(TYPE_CHOICES).get(t, 'Unknown type')
