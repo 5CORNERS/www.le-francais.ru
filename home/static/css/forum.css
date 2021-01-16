@@ -7002,7 +7002,7 @@
     border: 1px solid #eceeef;
 }
 
-.block-forum td, th {
+.block-forum td, .block-forum th {
     padding: .75rem;
     vertical-align: top;
     border: 1px solid #eceeef;
