@@ -167,12 +167,12 @@ a.page-review:hover {
 }
 
 .dcf-table tbody td, .dcf-table tbody th, .dcf-table tfoot td, .dcf-table tfoot th {
-    padding-top: .75em;
+    padding-top: .3em;
     vertical-align: top
 }
 
 .dcf-table tbody td, .dcf-table tbody th {
-    padding-bottom: .75em
+    padding-bottom: .3em
 }
 
 .dcf-table-bordered thead th {
