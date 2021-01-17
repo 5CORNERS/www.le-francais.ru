@@ -211,7 +211,11 @@ def update_words(request):
                 if mistakes < 0:
                     mistakes = None
                 delay = word_data.get('delay')
-                if delay < 0:
+                if delay < 0: # FIXME can be negative?
+                    DictionaryError.objects.create(
+                        user=request.user,
+                        message='Negative Delay'
+                    )
                     delay = None
                 if UserWordRepetition.objects.filter(
                         word=word, user=request.user,
