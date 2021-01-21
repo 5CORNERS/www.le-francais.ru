@@ -517,6 +517,7 @@ COMMENTS_XTD_MAX_THREAD_LEVEL = 999
 COMMENTS_XTD_CONFIRM_EMAIL = True
 COMMENTS_XTD_APP_MODEL_OPTIONS = {
     'default': {
+        'who_can_post': 'all',
         'allow_flagging': True,
         'allow_feedback': True,
         'show_feedback': True,
