@@ -18,9 +18,10 @@ from le_francais_dictionary.consts import GENRE_CHOICES, \
 	PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
 	GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE, TENSE_CHOICES, \
 	TYPE_CHOICES
-from le_francais_dictionary.utils import sm2_next_repetition_date, \
-	format_text2speech, sm2_ef_q_mq, create_or_update_repetition, \
+from le_francais_dictionary.utils import format_text2speech, \
+	create_or_update_repetition, \
 	remove_parenthesis, clean_filename
+from .sm2 import WordSM2
 from polly import const as polly_const
 from polly.models import PollyTask
 
@@ -799,18 +800,22 @@ class UserWordData(models.Model):
 	grade = models.IntegerField()
 	mistakes = models.IntegerField()
 	delay = models.IntegerField(null=True)
+	custom_grade = models.IntegerField(null=True, default=None)
 
 	def __init__(self, *args, **kwargs):
 		super(UserWordData, self).__init__(*args, **kwargs)
-		self._e_factor = -1
-		self._quality = -1
-		self._mean_quality = -1
+		self._sm2_word_data = None
 		self._user_word_dataset = None
 
 	def __str__(self):
 		return f'UserWordData: {self.user} -- {self.word} -- G/M/D: {self.grade}/' \
 		       f'{self.mistakes}/{self.delay} -- Datetime: {self.datetime}'
 
+	@property
+	def sm2_word_data(self):
+		if self._sm2_word_data is None:
+			self._sm2_word_data = WordSM2(self.user_word_dataset)
+		return self._sm2_word_data
 
 	@property
 	def user_word_dataset(self):
@@ -822,38 +827,21 @@ class UserWordData(models.Model):
 
 	@property
 	def e_factor(self):
-		if self._e_factor == -1:
-			if self.grade:
-				dataset = self.user_word_dataset
-				self._e_factor, self._quality, self._mean_quality = sm2_ef_q_mq(dataset)
-			else:
-				self._e_factor, self._quality = None, None
-		return self._e_factor
+		return self.sm2_word_data.e_factor
 
 	@property
 	def mean_quality(self):
-		if self._mean_quality == -1:
-			if self.grade:
-				dataset = self.user_word_dataset
-				self._e_factor, self._quality, self._mean_quality = sm2_ef_q_mq(
-					dataset)
-		return self._mean_quality
+		return self.sm2_word_data.mean_quality
 
 	@property
 	def quality(self):
-		if self._quality == -1:
-			dataset = self.user_word_dataset
-			self._e_factor, self._quality, self._mean_quality = sm2_ef_q_mq(dataset)
-		return self._quality
+		return self.sm2_word_data.last_quality
 
 	def get_e_factor(self):
 		return self.e_factor
 
-	# FIXME method can return None
 	def get_repetition_datetime_and_time(self):
-		dataset = self.user_word_dataset
-		repetition_datetime, time = sm2_next_repetition_date(dataset)
-		return repetition_datetime, time
+		return self.sm2_word_data.next_repetition, self.sm2_word_data.repetition_time
 
 	def get_tz_aware_repetition_datetime_and_time(self) -> (datetime, int):
 		repetition_datetime, time = self.get_repetition_datetime_and_time()
