@@ -5,8 +5,7 @@ from typing import List
 
 from unidecode import unidecode
 
-from .consts import INITIAL_E_FACTOR, FIRST_REPETITION_DELTA, \
-	SECOND_REPETITION_DELTA, GENRE_MASCULINE, GENRE_FEMININE
+from .consts import GENRE_MASCULINE, GENRE_FEMININE
 from .tts import PYTTX_FR_F_VOICE, PYTTX_FR_M_VOICE, PYTTX_RU_F_VOICE, \
 	PYTTX_RU_M_VOICE
 
@@ -62,93 +61,6 @@ def message(n, form1='новое слово', form2='новых слова', for
         return '{0} {1}'.format(str(n), form2)
     else:
         return '{0} {1}'.format(str(n), form5)
-
-
-
-def mistakes_grade(mistakes, word):
-	ratio = word.mistake_ratio(mistakes)
-	if ratio == 0:
-		return 0
-	elif ratio < 0.4:
-		return 1
-	elif ratio < 0.7:
-		return 2
-	else:
-		return 3
-
-def sm2_response_quality(data, zeros_dataset):
-	q = 5
-	mistakes = data.mistakes - data.word.unrelated_mistakes
-	if zeros_dataset.__len__() >= 2:
-		q = 0
-	elif zeros_dataset.__len__() == 1:
-		q = 2
-	q = q - mistakes_grade(mistakes, data.word)
-	return q if q > 0 else 0
-
-
-
-
-def sm2_new_e_factor(response_quality:int, last_e_factor:float=None) -> float:
-	last_e_factor = last_e_factor or INITIAL_E_FACTOR
-	result = last_e_factor + (0.1-(5-response_quality)*(0.08+(5-response_quality)*0.02))
-	if result < 1.3:
-		result = 1.3
-	elif result > 2.5:
-		result = 2.5
-	return result
-
-
-def sm2_ef_q_mq(dataset) -> (float, int, float):
-	"""
-	Returns final e_factor, quality and mean quality for given user_data set
-	:param dataset: list of UserData objects
-	"""
-	e_factor = 2.5
-	finals = []
-	qualities = []
-	zeros_dataset = []
-	for data in sorted(dataset, key=lambda x: x.datetime, reverse=False):
-		if data.grade:
-			response_quality = sm2_response_quality(data, zeros_dataset)
-			qualities.append(response_quality)
-			e_factor = sm2_new_e_factor(response_quality, e_factor)
-			if response_quality < 3:
-				finals = []
-			finals.append((data, e_factor, response_quality))
-			zeros_dataset = []
-		else:
-			zeros_dataset.append(data)
-	if not finals:
-		return None, None, None
-	return finals[-1][1], finals[-1][2], statistics.mean(qualities)
-
-
-def sm2_next_repetition_date(dataset):
-	e_factor = 2.5
-	finals = []
-	zeros_dataset = []
-	for data in sorted(dataset, key=lambda x: x.datetime, reverse=False):
-		if data.grade:
-			response_quality = sm2_response_quality(data, zeros_dataset)
-			e_factor = sm2_new_e_factor(response_quality, e_factor)
-			zeros_dataset = []
-			if response_quality < 3:
-				finals = []
-			finals.append((data, e_factor, response_quality))
-		else:
-			zeros_dataset.append(data)
-	if not finals:
-		return None, None
-	repetition_delta = 1
-	for n, final in enumerate(finals, 0):
-		if n == 0:
-			repetition_delta = FIRST_REPETITION_DELTA
-		elif n == 1:
-			repetition_delta = SECOND_REPETITION_DELTA
-		else:
-			repetition_delta = repetition_delta * final[1]
-	return finals[-1][0].datetime + timedelta(days=repetition_delta), n
 
 
 def format_text2speech(text):

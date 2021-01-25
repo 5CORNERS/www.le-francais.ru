@@ -8,7 +8,7 @@ from le_francais_dictionary.models import Packet, UserWordRepetition, Word, \
 	UserWordData, UserWordIgnore, WordTranslation, WordGroup, \
 	prefetch_words_data
 
-from .utils import sm2_ef_q_mq
+from .sm2 import sm2_ef_q_mq
 
 
 class DictionaryCsvImportForm(forms.Form):
