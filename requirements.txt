@@ -1,3 +1,4 @@
+Pillow~=5.4
 shortuuid~=1.0.1
 anytree~=2.8.0
 pytz~=2020.5
@@ -27,11 +28,10 @@ urllib3~=1.25.11
 pymdown-extensions==5.0.0
 django-mailer==1.2.6
 django-comments-xtd==2.7.2
-django-user-sessions~=1.7.1
+django-user-sessions~=1.5.3
 django-cron
 django-timezone-field>=3.1, <4.0
 django-braces
-APScheduler==3.0.0
 regex~=2020.11.13
 google==3.0.0
 pysftp~=0.2.9
@@ -51,7 +51,6 @@ google-cloud-texttospeech
 eyed3
 django-bulk-update~=2.2.0
 django-autocomplete-light==3.2.10
-django-simple-captcha~=0.5.13
 django-bootstrap-form
 django-postman==3.5.1
 django-crispy-forms
@@ -60,14 +59,13 @@ django-htmlmin
 pydub
 brotlipy
 django-inline-svg
-Pillow~=7.0.0
 django-npm
 
--e git+https://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26#egg=django_pure_pagination
 -e git+https://github.com/5CORNERS/pybbm.git#egg=pybbm
 -e git+https://github.com/AntonDumov/django-recaptcha3.git#egg=django-recaptcha3
--e git+https://github.com/AntonDumov/py3-validate-email.git#egg=validate-email
 
+git+git://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26
+git+git://github.com/AntonDumov/py3-validate-email.git
 git+git://github.com/zostera/django-bootstrap4.git@d3e77d458c00ef97facd35997deaea7b8e311d9e
 
 pymorphy2
@@ -85,7 +83,6 @@ paramiko~=2.7.1
 cryptography~=2.8
 six~=1.14.0
 bcrypt~=3.1.7
-zlib~=1.2.11
 setuptools~=51.0.0
 dnspython~=1.16.0
 idna~=2.9
@@ -97,7 +94,6 @@ lxml~=4.5.2
 httplib2~=0.17.0
 pandas~=1.0.3
 botocore~=1.19.49
-unidecode~=0.04.21
 prawler~=0.6b0
 dictdiffer~=0.8.1
 numpy~=1.18.2
