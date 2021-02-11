@@ -129,7 +129,7 @@ def add_log_message(request):
         value = None
     if not type in [choice[0] for choice in LogMessage.TYPES_CHOICES]:
         return HttpResponseBadRequest
-    user = null
+    user = None
     is request.user.is_authenticated:
         user = request.user
     LogMessage.objects.create(
