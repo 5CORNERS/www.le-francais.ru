@@ -137,14 +137,11 @@ class FlashCardsTestCase(TestCase):
                               f'{mistakes} -- '
                               f'{delay} -- '
                               f'{repetition_time}')
-                        if grade:
-                            repeating_words.pop(i)
-                            self.assertTrue(repetition_time < 6,
-                                            'Repetition time can\'t be more than 5')
-                            if not repeating_words:
-                                repeating = 'done'
-                        else:
-                            self.assertIsNone(repetition_time)
+                        repeating_words.pop(i)
+                        self.assertTrue(repetition_time < 6,
+                                        'Repetition time can\'t be more than 5')
+                        if not repeating_words:
+                            repeating = 'done'
             repeat_words(words)
 
             from notifications import views as notifications_views
@@ -214,66 +211,66 @@ class FlashCardsTestCase(TestCase):
 
 
 
-class FlashCardsGroupWordsTestCase(TestCase):
-    def setUp(self) -> None:
-        self.factory = RequestFactory()
-        self.user = User.objects.create_user(username='testuser',
-                                             email='testuser@test.com',
-                                             password='testpassword',
-                                             timezone='Europe/Moscow')
-        self.packet1, next_pk = create_test_word_packet(1, 1, 0)
-        self.packet2, next_pk = create_test_word_packet(2, 1, next_pk)
-        self.word_group = WordGroup.objects.create()
-        word1 = self.packet1.word_set.first()
-        word1.group = self.word_group
-        word1.save()
-        self.word1 = word1
-        word2 = self.packet2.word_set.first()
-        word2.group = self.word_group
-        word2.save()
-        self.word2 = word2
-        UserLesson.objects.create(user=self.user, lesson=self.packet1.lesson)
-        UserLesson.objects.create(user=self.user, lesson=self.packet2.lesson)
-
-    def test1(self):
-        with freeze_time(datetime.datetime(1,1,1,0,0,0)) as freeze_datetime:
-            update_words_request_word1 = self.factory.post(
-                path=reverse('dictionary:update_words'),
-                data=json.dumps({
-                    "words":[
-                        {
-                            "pk":self.word1.pk,
-                            "grade":1,
-                            "mistakes": 0,
-                            "delay": 3000
-                        }
-                    ]
-                }),
-                content_type='application/json'
-            )
-            update_words_request_word1.user = self.user
-            word1_response = views.update_words(update_words_request_word1)
-            freeze_datetime.tick(datetime.timedelta(seconds=10))
-            update_words_request_word2 = self.factory.post(
-                path=reverse('dictionary:update_words'),
-                data=json.dumps({
-                    "words": [
-                        {
-                            "pk": self.word2.pk,
-                            "grade": 1,
-                            "mistakes": 0,
-                            "delay": 3000
-                        }
-                    ]
-                }),
-                content_type='application/json'
-            )
-            update_words_request_word2.user = self.user
-            word2_response = views.update_words(update_words_request_word2)
-            self.assertEqual(json.loads(word2_response.content)['errors'][0]['code'], consts.TOO_EARLY_CODE)
-            freeze_datetime.tick(delta=datetime.timedelta(days=1))
-            word2_response = views.update_words(update_words_request_word2)
-            self.assertEqual(json.loads(word2_response.content)['words'][0]['repetitionTime'], 1)
+# class FlashCardsGroupWordsTestCase(TestCase):
+#     def setUp(self) -> None:
+#         self.factory = RequestFactory()
+#         self.user = User.objects.create_user(username='testuser',
+#                                              email='testuser@test.com',
+#                                              password='testpassword',
+#                                              timezone='Europe/Moscow')
+#         self.packet1, next_pk = create_test_word_packet(1, 1, 0)
+#         self.packet2, next_pk = create_test_word_packet(2, 1, next_pk)
+#         self.word_group = WordGroup.objects.create()
+#         word1 = self.packet1.word_set.first()
+#         word1.group = self.word_group
+#         word1.save()
+#         self.word1 = word1
+#         word2 = self.packet2.word_set.first()
+#         word2.group = self.word_group
+#         word2.save()
+#         self.word2 = word2
+#         UserLesson.objects.create(user=self.user, lesson=self.packet1.lesson)
+#         UserLesson.objects.create(user=self.user, lesson=self.packet2.lesson)
+#
+#     def test1(self):
+#         with freeze_time(datetime.datetime(1,1,1,0,0,0)) as freeze_datetime:
+#             update_words_request_word1 = self.factory.post(
+#                 path=reverse('dictionary:update_words'),
+#                 data=json.dumps({
+#                     "words":[
+#                         {
+#                             "pk":self.word1.pk,
+#                             "grade":1,
+#                             "mistakes": 0,
+#                             "delay": 3000
+#                         }
+#                     ]
+#                 }),
+#                 content_type='application/json'
+#             )
+#             update_words_request_word1.user = self.user
+#             word1_response = views.update_words(update_words_request_word1)
+#             freeze_datetime.tick(datetime.timedelta(seconds=10))
+#             update_words_request_word2 = self.factory.post(
+#                 path=reverse('dictionary:update_words'),
+#                 data=json.dumps({
+#                     "words": [
+#                         {
+#                             "pk": self.word2.pk,
+#                             "grade": 1,
+#                             "mistakes": 0,
+#                             "delay": 3000
+#                         }
+#                     ]
+#                 }),
+#                 content_type='application/json'
+#             )
+#             update_words_request_word2.user = self.user
+#             word2_response = views.update_words(update_words_request_word2)
+#             self.assertEqual(json.loads(word2_response.content)['errors'][0]['code'], consts.TOO_EARLY_CODE)
+#             freeze_datetime.tick(delta=datetime.timedelta(days=1))
+#             word2_response = views.update_words(update_words_request_word2)
+#             self.assertEqual(json.loads(word2_response.content)['words'][0]['repetitionTime'], 1)
 
 
 class FlashCardsIgnoreTestCase(TestCase):
@@ -352,3 +349,21 @@ class FlashCardsIgnoreTestCase(TestCase):
             self.assertNotIn(word2.pk, repeat_words_pks, 'Marked word getting in repeat words')
             self.assertNotIn(self.ignored_word, repeat_words_pks, 'WTF')
             self.assertFalse(UserDayRepetition.objects.filter(pk=word2.pk).exists(), 'Marked word staying in the y repetition')
+
+
+class FlashCardsEarlyUpdateTestCase(TestCase):
+
+    def setUp(self):
+        ...
+
+    def test_good_answer_right_after(self):
+        ...
+
+    def test_poor_answer_right_after(self):
+        ...
+
+    def test_good_answer_near_end(self):
+        ...
+
+    def test_poor_answer_near_end(self):
+        ...

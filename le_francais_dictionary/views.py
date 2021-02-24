@@ -123,6 +123,11 @@ def get_words(request, packet_id):
                 if request.user.is_authenticated:
                     words = list(words.exclude(
                     userwordignore__user=request.user))
+                    if not words:
+                        result['errors'].append({
+                            'message':'',
+                            'code':''
+                        })
                 result['words'] = [word.to_dict(user=request.user) for word in words]
             elif not request.user.is_authenticated:
                 result['errors'].append(
@@ -223,7 +228,8 @@ def update_words(request):
                         grade=grade,
                         mistakes=mistakes,
                         delay=delay,
-                        custom_grade=custom_grade
+                        custom_grade=custom_grade,
+                        timezone=request.user.timezone
                     ))
                 else:
                     errors.append(dict(

@@ -1,6 +1,4 @@
 import re
-import statistics
-from datetime import timedelta
 from typing import List
 
 from unidecode import unidecode
@@ -36,12 +34,15 @@ def create_or_update_repetition(user_id, word_id, repetition_datetime, time):
 				not repetition.pk in day_repetitions.repetitions):
 			day_repetitions.repetitions.append(repetition.pk)
 		if not day_repetition_created:
+			# deleting existing repetition from old day_repetition
+			# needs reworking
 			to_remove = list(UserWordRepetition.objects.filter(
 				pk__in=day_repetitions.repetitions
 			).exclude(
 				repetition_datetime__exact=repetition_datetime
-			).exclude(pk=repetition.pk).distinct().values_list('pk',
-			                                                   flat=True))
+			).exclude(
+				pk=repetition.pk
+			).distinct().values_list('pk', flat=True))
 			if to_remove:
 				day_repetitions.repetitions = [
 					x for x in day_repetitions.repetitions if

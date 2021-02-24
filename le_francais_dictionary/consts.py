@@ -59,6 +59,7 @@ LESSON_IS_NOT_ACTIVATED_CODE = 40
 WORD_DOES_NOT_EXIST_CODE = 50
 TOO_EARLY_CODE = 60
 NO_REPETITION_WORDS_CODE = 70
+ALL_WORDS_ARE_IGNORED_CODE = 71
 UNKNOWN_ERROR_CODE = 0
 
 USER_IS_NOT_AUTHENTICATED_MESSAGE = _('User is not authenticated')
@@ -71,6 +72,7 @@ TOO_EARLY_MESSAGE = _(
     'You trying to repeat word, which repetition date has not come yet')
 NO_CUPS_MESSAGE = _('There are no cups left')
 NO_REPETITION_WORDS_MESSAGE = 'На сегодня нет слов на повторение, но вы не расслабляйтесь :)'
+ALL_WORDS_ARE_IGNORED_MESSAGE = ''
 TENSE_INDICATIVE_PRESENT = 0
 TENSE_PASSE_COMPOSE = 1
 TENSE_IMPERATIVE = 2
