@@ -29,6 +29,12 @@ def create_polly_task(modeladmin: admin.ModelAdmin, request, qs):
 		p.create_polly_task()
 		
 
+def delete_day_repetitions(modeladmin: admin.ModelAdmin, request, qs):
+	word: Word
+	for word in qs:
+		...
+
+
 class WordTranslationInline(admin.TabularInline):
 	model = WordTranslation
 	readonly_fields = ['polly']

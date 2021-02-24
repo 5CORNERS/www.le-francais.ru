@@ -801,6 +801,7 @@ class UserWordData(models.Model):
 	mistakes = models.IntegerField()
 	delay = models.IntegerField(null=True)
 	custom_grade = models.IntegerField(null=True, default=None)
+	timezone = models.CharField(null=True, max_length=32)
 
 	def __init__(self, *args, **kwargs):
 		super(UserWordData, self).__init__(*args, **kwargs)
@@ -847,13 +848,12 @@ class UserWordData(models.Model):
 		repetition_datetime, time = self.get_repetition_datetime_and_time()
 		if repetition_datetime is None:
 			return None, None
-		user = self.user
 		repetition_datetime = timezone.make_aware(
 			timezone.make_naive(
-				repetition_datetime, user.pytz_timezone
+				repetition_datetime, self.user.pytz_timezone
 			).replace(
 				hour=0, minute=0, second=0, microsecond=0),
-			user.pytz_timezone)
+			self.user.pytz_timezone)
 		return repetition_datetime, time
 
 	def update_or_create_repetition(self):
@@ -954,19 +954,8 @@ class VerbPacket(models.Model):
 
 
 class Verb(models.Model):
-
-	TYPE_AFFIRMATIVE = 0
-	TYPE_NEGATIVE = 1
-	TYPE_CHOICES = [
-		(TYPE_AFFIRMATIVE, 'affirmative'),
-		(TYPE_NEGATIVE, 'negative')
-	]
-
 	verb = models.CharField(max_length=64)
-	type = models.IntegerField(choices=[
-		(0, 'affirmative'),
-		(1, 'negative'),
-	], default=0)
+	type = models.IntegerField(choices=TYPE_CHOICES, default=0)
 
 	regular = models.BooleanField(default=True)
 	translation = models.CharField(max_length=64, null=True)
@@ -1011,11 +1000,12 @@ class Verb(models.Model):
 			"type": self.type,
 		}
 
-	def to_voice(self, save=True):
+	def to_voice(self, save=True, translation_language=LANGUAGE_CODE_RU, translation_genre=GENRE_MASCULINE):
 		voice_string = self.verb.lower()
 		voice_string = re.sub(r'\(.*\)', '', voice_string)
 		voice_string = voice_string.strip()
-		shtooka_url = shtooka_by_title_in_path(title=voice_string, ftp_path=FTP_FR_VERBS_PATH)
+
+		shtooka_url = shtooka_by_title_in_path(title=voice_string, ftp_path=FTP_FR_VERBS_PATH, verbs=True)
 		if shtooka_url:
 			self.audio_url = shtooka_url
 			self.polly = None
@@ -1024,22 +1014,34 @@ class Verb(models.Model):
 				voice_string,
 				filename=self.verb.replace(' ', '_').replace('\'', '_').replace('\\', '_'),
 				language=LANGUAGE_CODE_FR,
-				genre='f',
+				genre=GENRE_MASCULINE,
 				file_id=str(self.pk),
 				file_title=self.verb,
 				ftp_path=FTP_FR_VERBS_PATH,
 				speacking_rate=1
 			)
-		self.translation_audio_url = google_cloud_tts(
-			self.translation_text or self.translation,
-			filename=self.translation.replace(' ', '_'),
-			language=LANGUAGE_CODE_RU,
-			genre='m',
-			file_id=str(self.pk),
-			file_title=self.translation,
+
+		translation_shtooka_url = shtooka_by_title_in_path(
+			title=self.translation_text or self.translation,
 			ftp_path=FTP_RU_VERBS_PATH,
-			speacking_rate=1
+			language_code=translation_language,
+			verbs=True
 		)
+
+		if not translation_shtooka_url:
+			self.translation_audio_url = google_cloud_tts(
+				self.translation_text or self.translation,
+				filename=self.translation.replace(' ', '_'),
+				language=translation_language,
+				genre=translation_genre,
+				file_id=str(self.pk),
+				file_title=self.translation,
+				ftp_path=FTP_RU_VERBS_PATH if translation_language == LANGUAGE_CODE_RU else FTP_FR_VERBS_PATH,
+				speacking_rate=1
+			)
+		else:
+			self.translation_audio_url = translation_shtooka_url
+
 		if save:
 			self.save()
 		return self
@@ -1088,14 +1090,16 @@ class VerbForm(models.Model):
 			"tense": self.tense,
 		}
 
-	def to_voice(self, save=True):
+	def to_voice(self, save=True, translation_language=LANGUAGE_CODE_RU, translation_genre=GENRE_MASCULINE):
 		voice_string = self.form.lower()
 		voice_string = re.sub(r'\(.*\)', '', voice_string)
 		voice_string = voice_string.strip()
+
 		shtooka_url = shtooka_by_title_in_path(
 			title=voice_string,
 			ftp_path=FTP_FR_VERBS_PATH,
 		)
+
 		if not shtooka_url:
 			if self.verb.verbform_set.filter(is_shown=True).order_by('order').last() == self:
 				voice_string += '.'
@@ -1105,7 +1109,7 @@ class VerbForm(models.Model):
 				voice_string,
 				filename=self.form.replace(' ', '_').replace('\'', '_').replace('\\', '_'),
 				language=LANGUAGE_CODE_FR,
-				genre='f',
+				genre=GENRE_MASCULINE,
 				file_id=str(self.pk),
 				file_title=self.form,
 				ftp_path=FTP_FR_VERBS_PATH,
@@ -1113,16 +1117,27 @@ class VerbForm(models.Model):
 			)
 		else:
 			self.audio_url = shtooka_url
-		self.translation_audio_url = google_cloud_tts(
-			self.translation_text or self.translation,
-			filename=self.translation.replace(' ', '_'),
-			language=LANGUAGE_CODE_RU,
-			genre='m',
-			file_id=str(self.pk),
-			file_title=self.translation,
+
+		translation_shtooka_url = shtooka_by_title_in_path(
+			title=self.translation_text or self.translation,
 			ftp_path=FTP_RU_VERBS_PATH,
-			speacking_rate=1
+			language_code=translation_language
 		)
+
+		if not translation_shtooka_url:
+			self.translation_audio_url = google_cloud_tts(
+				self.translation_text or self.translation,
+				filename=self.translation.replace(' ', '_'),
+				language=translation_language,
+				genre=translation_genre,
+				file_id=str(self.pk),
+				file_title=self.translation,
+				ftp_path=FTP_RU_VERBS_PATH if translation_language == LANGUAGE_CODE_RU else FTP_FR_VERBS_PATH,
+				speacking_rate=1
+			)
+		else:
+			self.translation_audio_url=translation_shtooka_url
+
 		if save:
 			self.save(update_fields=['audio_url', 'translation_audio_url', 'polly'])
 		return self
