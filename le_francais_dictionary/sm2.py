@@ -2,6 +2,9 @@ import statistics
 from datetime import datetime, timedelta
 from typing import Union, Tuple, List
 
+import pytz
+from django.utils.timezone import make_aware, make_naive, is_naive, \
+	get_default_timezone_name
 from numpy import inf, mean
 
 
@@ -23,8 +26,11 @@ class WordSM2:
 		qualities_list = []
 		n = 0
 		e_factor = 2.5
-		for data in self.dataset:
+		for i, data in enumerate(self.dataset):
+			answer_timezone = data.timezone or data.user.timezone or get_default_timezone_name()
 			answer_datetime = data.datetime
+			if is_naive(data.datetime):
+				answer_datetime = make_aware(answer_datetime, answer_timezone)
 
 			answer_quality = sm2_response_quality(data, zeros_dataset)
 
@@ -64,18 +70,19 @@ class WordSM2:
 						new_e_factor = e_factor + (
 									new_e_factor - e_factor) * current_next_ratio
 						if n == 1:
-							pass
+							new_repetition_date = answer_datetime + timedelta(
+								days=2)
 						else:
 							# новая персчитанная дата повторения
-							new_current_repetition_date = last_repetition_date + timedelta(
-								days=current_repetition_delta.days * new_e_factor)
+							new_current_repetition_date = repetition_datetime_to_date(last_repetition_date + timedelta(
+								days=current_repetition_delta.days * new_e_factor), answer_timezone)
 							if new_current_repetition_date < answer_datetime:
 								# если новая дата повторения оказывается раньше следующего
 								# засчитываем текущий ответ как после следующего повторения
 								repetitions_datetimes[
 									-1] = new_current_repetition_date
 								new_repetition_date = answer_datetime + timedelta(
-									days=current_repetition_delta * new_e_factor)
+									days=current_repetition_delta.days * new_e_factor)
 							else:
 								# иначе отодвигаем дату повторения
 								# и не засчитываем ответ
@@ -91,7 +98,7 @@ class WordSM2:
 				new_repetition_date = answer_datetime + timedelta(days=1)
 
 			if new_repetition_date is not None:
-				repetitions_datetimes.append(new_repetition_date)
+				repetitions_datetimes.append(repetition_datetime_to_date(new_repetition_date, answer_timezone))
 				answers_datetimes.append(answer_datetime)
 				if data.grade:
 					e_factor = new_e_factor
@@ -99,7 +106,9 @@ class WordSM2:
 
 		self.e_factor = e_factor
 		self.mean_quality = mean(qualities_list)
-		self.last_quality = qualities_list[-1]
+
+		if qualities_list:
+			self.last_quality = qualities_list[-1]
 		if repetitions_datetimes:
 			self.next_repetition = repetitions_datetimes[-1]
 			self.repetition_time = n
@@ -138,7 +147,7 @@ def mistakes_grade(mistakes, word):
 		return -4
 
 
-def sm2_response_quality(data, zeros_dataset):
+def sm2_response_quality(data, zeros_dataset, repetition_time=None):
 	q: int = 5
 	mistakes = data.mistakes - data.word.unrelated_mistakes
 	delay = data.delay
@@ -147,9 +156,14 @@ def sm2_response_quality(data, zeros_dataset):
 	elif zeros_dataset and data.grade:
 		q = 0
 	elif delay and not mistakes and data.grade:
-		for delay_start, delay_end, delay_minus in DELAY_RANGES:
+		if repetition_time is not None and repetition_time > 3:
+			ranges = PROGRESSIVE_DELAY_RANGES
+		else:
+			ranges = DELAY_RANGES
+		for delay_start, delay_end, delay_minus_start, delay_minus_end in ranges:
 			if delay_start <= delay <= delay_end:
-				q += delay_minus
+				delay_ratio = (delay - delay_start) / (delay_end - delay_start)
+				q += delay_minus_start + ((delay_minus_end - delay_minus_start) * delay_ratio)
 				break
 	elif mistakes and data.grade:
 		q += mistakes_grade(mistakes, data.word)
@@ -235,12 +249,31 @@ def sm2_next_repetition_date_obsolete(dataset) -> Union[
 		days=repetition_delta), n
 
 
-DELAY_RANGE_MINUS_1 = (0, 5000, 0)
-DELAY_RANGE_MINUS_2 = (5001, 10000, -1)
-DELAY_RANGE_MINUS_3 = (10001, 20000, -2)
-DELAY_RANGE_MINUS_5 = (20001, inf, -5)
-DELAY_RANGES = [DELAY_RANGE_MINUS_1, DELAY_RANGE_MINUS_2,
-                DELAY_RANGE_MINUS_3, DELAY_RANGE_MINUS_5]
+def repetition_datetime_to_date(d, tz):
+	return make_aware(
+		make_naive(d, pytz.timezone(tz or 'UTC')).replace(
+			hour=0, minute=0, second=0, microsecond=0
+		),
+		pytz.timezone(tz or 'UTC')
+	)
+
+
+DELAY_RANGE_MINUS_0 = (0, 5000, 0, 0) # 5
+DELAY_RANGE_MINUS_1 = (5001, 10000, 0, -1) # 4
+DELAY_RANGE_MINUS_2 = (10001, 20000, -1, -2) # 3
+DELAY_RANGE_MINUS_5 = (20001, inf, -5, -5) # 0
+DELAY_RANGES = [DELAY_RANGE_MINUS_0, DELAY_RANGE_MINUS_1,
+                DELAY_RANGE_MINUS_2, DELAY_RANGE_MINUS_5]
+
+PROGRESSIVE_DELAY_RANGE_MINUS_1 = (5001, 8500, 0, -1)
+PROGRESSIVE_DELAY_RANGE_MINUS_2 = (8501, 15000, -1, -2)
+PROGRESSIVE_DELAY_RANGE_MINUS_5 = (15001, inf, -5, -5)
+PROGRESSIVE_DELAY_RANGES = [DELAY_RANGE_MINUS_0,
+                            PROGRESSIVE_DELAY_RANGE_MINUS_1,
+                            PROGRESSIVE_DELAY_RANGE_MINUS_2,
+                            PROGRESSIVE_DELAY_RANGE_MINUS_5]
+
+
 INITIAL_E_FACTOR = 2.5
 FIRST_REPETITION_DELTA = 1
 SECOND_REPETITION_DELTA = 6

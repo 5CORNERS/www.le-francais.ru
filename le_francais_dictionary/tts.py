@@ -105,7 +105,7 @@ def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
 	return get_url_path(language) + filename
 
 
-def shtooka_by_title_in_path(title, ftp_path, filename=None, language_code=LANGUAGE_FR, genre=GENRE_FEMININE):
+def shtooka_by_title_in_path(title, ftp_path, filename=None, language_code=LANGUAGE_FR, genre=GENRE_FEMININE, verbs=False):
 	title = unidecode(title).lower().strip()
 	path = os.environ.get('SHTOOKA_PATH', None)
 	second_path = os.environ.get('SHTOOKA_PATH_SECOND', None)
@@ -116,33 +116,35 @@ def shtooka_by_title_in_path(title, ftp_path, filename=None, language_code=LANGU
 
 	if title in titles_map.keys():
 		mp3_filename = titles_map[title]
-		if genre == GENRE_FEMININE and not 'fem' in filename:
-			if check_if_file_exists(filename, ftp_path or get_path()):
-				delete_ftp_file(filename, ftp_path or get_path())
-			return None
 		if not filename:
 			filename = mp3_filename
 		else:
 			filename = filename+f'.{mp3_filename.split(".")[-1]}'
+		if genre == GENRE_FEMININE and not 'fem' in mp3_filename:
+			if check_if_file_exists(filename, ftp_path or get_path()):
+				delete_ftp_file(filename, ftp_path or get_path())
+			return None
+
 		put_to_ftp(filename,
 				   f'{path}/{mp3_filename}',
 				   ftp_path or get_path(language_code))
 		# TODO fix different paths to return
-		return f'https://files.le-francais.ru/dictionnaires/sound/FR/{filename}'
+		return f'{get_url_path(language_code, verbs=verbs)}{filename}'
 	elif title in titles_map_second.keys():
 		mp3_filename = titles_map_second[title]
-		if genre == GENRE_FEMININE and not 'fem' in filename:
-			if check_if_file_exists(filename, ftp_path or get_path()):
-				delete_ftp_file(filename, ftp_path or get_path())
-			return None
 		if not filename:
 			filename = mp3_filename
 		else:
 			filename = filename+f'.{mp3_filename.split(".")[-1]}'
+		if genre == GENRE_FEMININE and not 'fem' in mp3_filename:
+			if check_if_file_exists(filename, ftp_path or get_path()):
+				delete_ftp_file(filename, ftp_path or get_path())
+			return None
+
 		put_to_ftp(filename, f'{second_path}/{mp3_filename}',
 				   ftp_path or get_path(language_code))
 		# TODO fix different paths to return
-		return f'https://files.le-francais.ru/dictionnaires/sound/FR/{filename}'
+		return f'{get_url_path(language_code, verbs=verbs)}{filename}'
 	else:
 		return None
 
