@@ -85,7 +85,7 @@ class WordSM2:
 									new_e_factor - e_factor) * current_next_ratio
 						if n == 1:
 							new_repetition_date = answer_datetime + timedelta(
-								days=2)
+								days=SECOND_REPETITION_DELTA)
 						else:
 							# новая персчитанная дата повторения
 							new_current_repetition_date = repetition_datetime_to_date(last_repetition_date + timedelta(
