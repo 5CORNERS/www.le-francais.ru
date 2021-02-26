@@ -53,7 +53,7 @@ class WordSM2:
 			if answer_quality >= 3:
 				if n == 0:
 					new_repetition_date = answer_datetime + timedelta(
-						days=1)
+						days=FIRST_REPETITION_DELTA)
 				else:
 					# дата предыдущего повторения
 					last_repetition_date = answers_datetimes[-1]
@@ -75,10 +75,8 @@ class WordSM2:
 					if answer_datetime > current_repetition_date:
 						if n == 1:
 							new_repetition_date = answer_datetime + timedelta(
-								days=2)
+								days=SECOND_REPETITION_DELTA)
 						else:
-							# FIXME: 1 day on 3d repetition?
-							# maybe add +1 day?
 							new_repetition_date = answer_datetime + timedelta(
 								days=current_repetition_delta.days * new_e_factor)
 					else:
