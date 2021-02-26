@@ -1,24 +1,23 @@
 """
 No follow links
 
-Add html attribut to all links nofollow="true"
+Add html attribute to all links nofollow="true"
 """
+from markdown import util, Extension
+from markdown.inlinepatterns import LinkPattern, dequote
 
-from markdown.extensions import Extension
-from markdown.inlinepatterns import util, dequote, LinkPattern
-
-NOBRACKET = r'[^\]\[]*'
+NO_BRACKET = r'[^\]\[]*'
 
 BRK = (
 	r'\[(' +
-	(NOBRACKET + r'(\[') * 6 +
-	(NOBRACKET + r'\])*') * 6 +
-	NOBRACKET + r')\]'
+	(NO_BRACKET + r'(\[') * 6 +
+	(NO_BRACKET + r'\])*') * 6 +
+	NO_BRACKET + r')\]'
 )
 
-NOIMG = r'(?<!\!)'
+NO_IMG = r'(?<!\!)'
 
-LINK_RE = NOIMG + BRK + \
+LINK_RE = NO_IMG + BRK + \
           r'''\(\s*(<.*?>|((?:(?:\(.*?\))|[^\(\)]))*?)\s*((['"])(.*?)\12\s*)?\)'''
 
 

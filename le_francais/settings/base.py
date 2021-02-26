@@ -364,7 +364,7 @@ PYBB_DEFAULT_AUTOSUBSCRIBE = True
 PYBB_DEFAULT_TITLE = 'Французский язык — Форум'
 PYBB_PERMISSION_HANDLER = 'forum.permissions.CustomPermissionHandler'
 PYBB_FROM_EMAIL = 'Le-francais.ru » Форум <no-reply@mail.le-francais.ru>'
-PYBB_PROFILE_RELATED_NAME = 'profile'
+# PYBB_PROFILE_RELATED_NAME = 'profile'
 
 from profiles.utils import check_user
 PYBB_PREMODERATION = check_user
@@ -517,6 +517,7 @@ COMMENTS_XTD_MAX_THREAD_LEVEL = 999
 COMMENTS_XTD_CONFIRM_EMAIL = True
 COMMENTS_XTD_APP_MODEL_OPTIONS = {
     'default': {
+        'who_can_post': 'all',
         'allow_flagging': True,
         'allow_feedback': True,
         'show_feedback': True,
