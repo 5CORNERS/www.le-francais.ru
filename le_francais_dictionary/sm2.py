@@ -118,10 +118,13 @@ class WordSM2:
 				n += 1
 
 		self.e_factor = e_factor
-		self.mean_quality = mean(qualities_list)
 
 		if qualities_list:
 			self.last_quality = qualities_list[-1]
+			self.mean_quality = mean(qualities_list)
+		else:
+			self.last_quality = 0
+			self.mean_quality = 0
 		if repetitions_datetimes:
 			self.next_repetition = repetitions_datetimes[-1]
 			self.repetition_time = n
