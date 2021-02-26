@@ -283,12 +283,25 @@ def update_words(request):
 
             words.append(dict(
                 pk=user_word_data.word_id,
+                grade=user_word_data.grade,
+                customGrade=user_word_data.custom_grade,
+                delay=delay,
+                quality=quality,
                 nextRepetition=repetition_datetime,
                 repetitionTime=repetition_time,
-                e_factor=e_factor,
-                quality=quality,
-                mean_quality=mean_quality,
-                delay=delay,
+                eFactor=e_factor,
+                meanQuality=mean_quality,
+                history=[dict(
+                    datetime=d.datetime,
+                    grade=d.grade,
+                    userGrade=d.custom_grade,
+                    delay=d.delay,
+                    quality=d.quality,
+                    nextRepetition=d.sm2_word_data.next_repetition,
+                    repetitionTime=d.sm2_word_data.repetition_time,
+                    eFactor=d.e_factor,
+                    meanQuality=d.mean_quality
+                ) for d in user_word_data.user_word_dataset]
             ))
         return JsonResponse(dict(words=words, errors=errors), safe=False)
     except Exception as e:
