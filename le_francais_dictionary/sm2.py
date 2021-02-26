@@ -8,6 +8,12 @@ from django.utils.timezone import make_aware, make_naive, is_naive, \
 from numpy import inf, mean
 
 
+def get_repetitions_delta(start_d, end_d, timezone):
+	start_d = repetition_datetime_to_date(start_d, timezone)
+	end_d = repetition_datetime_to_date(end_d, timezone)
+	return end_d - start_d
+
+
 class WordSM2:
 
 	def __init__(self, dataset):
@@ -54,15 +60,25 @@ class WordSM2:
 					# дата следующего (текущего) повторения
 					current_repetition_date = repetitions_datetimes[-1]
 					# дельта между текущим ответом и датой предыдущего повторения
-					current_answer_delta = answer_datetime - last_repetition_date
+					current_answer_delta = get_repetitions_delta(
+						last_repetition_date,
+						answer_datetime,
+						answer_timezone
+					)
 					# дельта между предыдущим и следующим (текущим) повторением
-					current_repetition_delta = current_repetition_date - last_repetition_date
+					current_repetition_delta = get_repetitions_delta(
+						last_repetition_date,
+						current_repetition_date,
+						answer_timezone
+					)
 
 					if answer_datetime > current_repetition_date:
 						if n == 1:
 							new_repetition_date = answer_datetime + timedelta(
 								days=2)
 						else:
+							# FIXME: 1 day on 3d repetition?
+							# maybe add +1 day?
 							new_repetition_date = answer_datetime + timedelta(
 								days=current_repetition_delta.days * new_e_factor)
 					else:
