@@ -1,5 +1,5 @@
 (function() {
-	['app.b6f37687.js', 'chunk-vendors.e3473f2e.js'].forEach(function (src) {
+	['%APP_JS%', '%APP_BUNDLE_JS%'].forEach(function (src) {
 		let script = document.createElement("script");
 		script.setAttribute("src", `/static/dictionary/js/${src}`);
 		script.setAttribute("type", "text/javascript");
@@ -7,7 +7,7 @@
 		document.getElementsByTagName("head")[0].appendChild(script);
 	});
 
-	['app.a8aca2ee.css', 'chunk-vendors.7bcf2756.css'].forEach(function (href) {
+	['%APP_CSS%', '%APP_BUNDLE_CSS%'].forEach(function (href) {
 		let script = document.createElement("link");
 		script.setAttribute("href", `/static/dictionary/css/${href}`);
 		script.setAttribute("rel", "stylesheet");
