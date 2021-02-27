@@ -123,6 +123,11 @@ def get_words(request, packet_id):
                 if request.user.is_authenticated:
                     words = list(words.exclude(
                     userwordignore__user=request.user))
+                    if not words:
+                        result['errors'].append({
+                            'message':'',
+                            'code':''
+                        })
                 result['words'] = [word.to_dict(user=request.user) for word in words]
             elif not request.user.is_authenticated:
                 result['errors'].append(
@@ -203,35 +208,28 @@ def update_words(request):
                 if word.group is not None:
                     new_word = Word.objects.filter(
                         userdata__user=request.user, group=word.group
-                    ).order_by('-userwordrepetition__time')
+                    ).order_by('-userwordrepetition__time').distinct()
                     if new_word.exists() and new_word.first() != word:
                         word = new_word.first()
-                grade = word_data.get('grade')
-                mistakes = word_data.get('mistakes')
+                grade = word_data.get('grade', None)
+                mistakes = word_data.get('mistakes', None)
                 if mistakes < 0:
                     mistakes = None
-                delay = word_data.get('delay')
-                if delay < 0: # FIXME can be negative?
-                    DictionaryError.objects.create(
-                        user=request.user,
-                        message='Negative Delay'
-                    )
+                delay = word_data.get('delay', None)
+                if delay < 0:
                     delay = None
-                if UserWordRepetition.objects.filter(
-                        word=word, user=request.user,
-                        repetition_datetime__gt=timezone.now()).exists():
-                    errors.append(dict(
-                        pk=word.pk,
-                        message=consts.TOO_EARLY_MESSAGE,
-                        code=consts.TOO_EARLY_CODE,
-                    ))
-                elif word.packet.is_activated(request.user) or word.packet.demo:
+                custom_grade = word_data.get('customGrade', None)
+                if not isinstance(custom_grade, int) or not 0 <= custom_grade <= 5:
+                    custom_grade = None
+                if word.packet.is_activated(request.user) or word.packet.demo:
                     user_words_data.append(UserWordData(
                         word=word,
                         user_id=request.user.id,
                         grade=grade,
                         mistakes=mistakes,
                         delay=delay,
+                        custom_grade=custom_grade,
+                        timezone=request.user.timezone
                     ))
                 else:
                     errors.append(dict(
@@ -272,48 +270,69 @@ def update_words(request):
         for user_word_data in user_words_data:
             e_factor = user_word_data.e_factor
             quality = user_word_data.quality
-            mean_quality = user_word_data.mean_quality
-            if user_word_data.grade:
-                repetition = user_word_data.update_or_create_repetition()
+            mean_quality = user_word_data.mean_quality # FIXME returns -1
+            delay = user_word_data.delay
+
+            repetition = user_word_data.update_or_create_repetition()
+            if repetition:
                 repetition_datetime = repetition.repetition_datetime
                 repetition_time = repetition.time
             else:
                 repetition_datetime = None
                 repetition_time = None
+
             words.append(dict(
                 pk=user_word_data.word_id,
+                grade=user_word_data.grade,
+                customGrade=user_word_data.custom_grade,
+                delay=delay,
+                quality=quality,
                 nextRepetition=repetition_datetime,
                 repetitionTime=repetition_time,
-                e_factor=e_factor,
-                quality=quality,
-                mean_quality=mean_quality
+                eFactor=e_factor,
+                meanQuality=mean_quality,
+                history=[dict(
+                    datetime=d.datetime,
+                    grade=d.grade,
+                    userGrade=d.custom_grade,
+                    delay=d.delay,
+                    quality=d.quality,
+                    nextRepetition=d.sm2_word_data.next_repetition,
+                    repetitionTime=d.sm2_word_data.repetition_time,
+                    eFactor=d.e_factor,
+                    meanQuality=d.mean_quality
+                ) for d in user_word_data.user_word_dataset]
             ))
         return JsonResponse(dict(words=words, errors=errors), safe=False)
     except Exception as e:
-        DictionaryError.objects.create(
-            user=request.user if request.user.is_authenticated else None,
-            message=f'Fatal Error while Updating Words:\n'
-                    f'REQUEST DATA:\n'
-                    f'method: {request.method}\n'
-                    f'body:\n'
-                    f'==============\n'
-                    f'{request.body}\n'
-                    f'==============\n'
-                    f'user:{request.user}\n'
-                    f'GET PARAMS:\n'
-                    f'==============\n'
-                    f'{request.GET}\n'
-                    f'==============\n'
-                    f'POST PARAMS:\n'
-                    f'==============\n'
-                    f'{request.POST}\n'
-                    f'==============\n'
-                    f'TRACEBACK:\n'
-                    f'==================\n'
-                    f'{traceback.format_exc()}'
-                    f'==================\n'
-        )
+        create_dictionary_error(request)
         raise e
+
+
+def create_dictionary_error(request):
+    DictionaryError.objects.create(
+        user=request.user if request.user.is_authenticated else None,
+        message=f'Fatal Error while Updating Words:\n'
+                f'REQUEST DATA:\n'
+                f'method: {request.method}\n'
+                f'body:\n'
+                f'==============\n'
+                f'{request.body}\n'
+                f'==============\n'
+                f'user:{request.user}\n'
+                f'GET PARAMS:\n'
+                f'==============\n'
+                f'{request.GET}\n'
+                f'==============\n'
+                f'POST PARAMS:\n'
+                f'==============\n'
+                f'{request.POST}\n'
+                f'==============\n'
+                f'TRACEBACK:\n'
+                f'==================\n'
+                f'{traceback.format_exc()}'
+                f'==================\n'
+    )
 
 
 def clear_all(request):

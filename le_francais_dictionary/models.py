@@ -18,9 +18,10 @@ from le_francais_dictionary.consts import GENRE_CHOICES, \
 	PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
 	GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE, TENSE_CHOICES, \
 	TYPE_CHOICES
-from le_francais_dictionary.utils import sm2_next_repetition_date, \
-	format_text2speech, sm2_ef_q_mq, create_or_update_repetition, \
+from le_francais_dictionary.utils import format_text2speech, \
+	create_or_update_repetition, \
 	remove_parenthesis, clean_filename
+from .sm2 import WordSM2
 from polly import const as polly_const
 from polly.models import PollyTask
 
@@ -118,30 +119,6 @@ class WordGroup(models.Model):
 		return f'{[w.word for w in self.word_set.all().order_by("order")]}'
 
 
-class UnifiedWord(models.Model):
-	word = models.CharField(max_length=120)
-	translation = models.CharField(max_length=120)
-	definition_num = models.IntegerField(null=True, blank=True, default=None)
-	group = models.ForeignKey('WordGroup', on_delete=models.CASCADE)
-	word_polly_url = models.URLField(max_length=200, null=True, default=None)
-	translation_polly_url = models.URLField(max_length=200, null=True,
-	                                        default=None)
-
-	@property
-	def ru_filename(self):
-		if self.translation_polly_url:
-			return self.translation_polly_url.rsplit('/', 1)[-1]
-		else:
-			return None
-
-	@property
-	def fr_filename(self):
-		if self.translation_polly_url:
-			return self.word_polly_url.rsplit('/', 1)[-1]
-		else:
-			return None
-
-
 class EmptyUni:
 	word = None
 	translation = None
@@ -213,6 +190,7 @@ class Word(models.Model):
 		self._repetitions_count = {}
 		self._first_translation = None
 		self._repetitions = {}
+		self._uni = None
 
 	def mistake_ratio(self, mistakes):
 		word = self.word
@@ -265,10 +243,15 @@ class Word(models.Model):
 
 	@property
 	def uni(self):
-		if self.group:
-			return self.group.unifiedword_set.get(definition_num__exact=self.definition_num)
-		else:
-			return EmptyUni()
+		if self._uni is None:
+			if self.group:
+				try:
+					self._uni = self.group.unifiedword_set.get(definition_num__exact=self.definition_num)
+				except UnifiedWord.DoesNotExist:
+					self._uni = EmptyUni()
+			else:
+				self._uni = EmptyUni()
+		return self._uni
 
 	@property
 	def filename(self):
@@ -400,6 +383,10 @@ class Word(models.Model):
 			'translations': [translation_dict],
 			'packet': self.packet.pk,
 			'userData': None,
+			'unifiedWord': self.uni.word,
+			'unifiedTranslation': self.uni.translation,
+			'unifiedWordPollyUrl': self.uni.word_polly_url,
+			'unifiedTranslationPollyUrl': self.uni.translation_polly_url,
 		}
 		if user and user.is_authenticated:
 			repetition: UserWordRepetition = self.get_repetition(user)
@@ -813,18 +800,23 @@ class UserWordData(models.Model):
 	grade = models.IntegerField()
 	mistakes = models.IntegerField()
 	delay = models.IntegerField(null=True)
+	custom_grade = models.IntegerField(null=True, default=None)
+	timezone = models.CharField(null=True, max_length=32)
 
 	def __init__(self, *args, **kwargs):
 		super(UserWordData, self).__init__(*args, **kwargs)
-		self._e_factor = -1
-		self._quality = -1
-		self._mean_quality = -1
+		self._sm2_word_data = None
 		self._user_word_dataset = None
 
 	def __str__(self):
 		return f'UserWordData: {self.user} -- {self.word} -- G/M/D: {self.grade}/' \
 		       f'{self.mistakes}/{self.delay} -- Datetime: {self.datetime}'
 
+	@property
+	def sm2_word_data(self):
+		if self._sm2_word_data is None:
+			self._sm2_word_data = WordSM2(self.user_word_dataset)
+		return self._sm2_word_data
 
 	@property
 	def user_word_dataset(self):
@@ -836,50 +828,32 @@ class UserWordData(models.Model):
 
 	@property
 	def e_factor(self):
-		if self._e_factor == -1:
-			if self.grade:
-				dataset = self.user_word_dataset
-				self._e_factor, self._quality, self._mean_quality = sm2_ef_q_mq(dataset)
-			else:
-				self._e_factor, self._quality = None, None
-		return self._e_factor
+		return self.sm2_word_data.e_factor
 
 	@property
 	def mean_quality(self):
-		if self._mean_quality == -1:
-			if self.grade:
-				dataset = self.user_word_dataset
-				self._e_factor, self._quality, self._mean_quality = sm2_ef_q_mq(
-					dataset)
-		return self._mean_quality
+		return self.sm2_word_data.mean_quality
 
 	@property
 	def quality(self):
-		if self._quality == -1:
-			dataset = self.user_word_dataset
-			self._e_factor, self._quality, self._mean_quality = sm2_ef_q_mq(dataset)
-		return self._quality
+		return self.sm2_word_data.last_quality
 
 	def get_e_factor(self):
 		return self.e_factor
 
-	# FIXME method can return None
 	def get_repetition_datetime_and_time(self):
-		dataset = self.user_word_dataset
-		repetition_datetime, time = sm2_next_repetition_date(dataset)
-		return repetition_datetime, time
+		return self.sm2_word_data.next_repetition, self.sm2_word_data.repetition_time
 
 	def get_tz_aware_repetition_datetime_and_time(self) -> (datetime, int):
 		repetition_datetime, time = self.get_repetition_datetime_and_time()
 		if repetition_datetime is None:
 			return None, None
-		user = self.user
 		repetition_datetime = timezone.make_aware(
 			timezone.make_naive(
-				repetition_datetime, user.pytz_timezone
+				repetition_datetime, self.user.pytz_timezone
 			).replace(
 				hour=0, minute=0, second=0, microsecond=0),
-			user.pytz_timezone)
+			self.user.pytz_timezone)
 		return repetition_datetime, time
 
 	def update_or_create_repetition(self):
@@ -980,19 +954,8 @@ class VerbPacket(models.Model):
 
 
 class Verb(models.Model):
-
-	TYPE_AFFIRMATIVE = 0
-	TYPE_NEGATIVE = 1
-	TYPE_CHOICES = [
-		(TYPE_AFFIRMATIVE, 'affirmative'),
-		(TYPE_NEGATIVE, 'negative')
-	]
-
 	verb = models.CharField(max_length=64)
-	type = models.IntegerField(choices=[
-		(0, 'affirmative'),
-		(1, 'negative'),
-	], default=0)
+	type = models.IntegerField(choices=TYPE_CHOICES, default=0)
 
 	regular = models.BooleanField(default=True)
 	translation = models.CharField(max_length=64, null=True)
@@ -1037,11 +1000,12 @@ class Verb(models.Model):
 			"type": self.type,
 		}
 
-	def to_voice(self, save=True):
+	def to_voice(self, save=True, translation_language=LANGUAGE_CODE_RU, translation_genre=GENRE_MASCULINE):
 		voice_string = self.verb.lower()
 		voice_string = re.sub(r'\(.*\)', '', voice_string)
 		voice_string = voice_string.strip()
-		shtooka_url = shtooka_by_title_in_path(title=voice_string, ftp_path=FTP_FR_VERBS_PATH)
+
+		shtooka_url = shtooka_by_title_in_path(title=voice_string, ftp_path=FTP_FR_VERBS_PATH, verbs=True)
 		if shtooka_url:
 			self.audio_url = shtooka_url
 			self.polly = None
@@ -1050,22 +1014,34 @@ class Verb(models.Model):
 				voice_string,
 				filename=self.verb.replace(' ', '_').replace('\'', '_').replace('\\', '_'),
 				language=LANGUAGE_CODE_FR,
-				genre='f',
+				genre=GENRE_MASCULINE,
 				file_id=str(self.pk),
 				file_title=self.verb,
 				ftp_path=FTP_FR_VERBS_PATH,
 				speacking_rate=1
 			)
-		self.translation_audio_url = google_cloud_tts(
-			self.translation_text or self.translation,
-			filename=self.translation.replace(' ', '_'),
-			language=LANGUAGE_CODE_RU,
-			genre='m',
-			file_id=str(self.pk),
-			file_title=self.translation,
+
+		translation_shtooka_url = shtooka_by_title_in_path(
+			title=self.translation_text or self.translation,
 			ftp_path=FTP_RU_VERBS_PATH,
-			speacking_rate=1
+			language_code=translation_language,
+			verbs=True
 		)
+
+		if not translation_shtooka_url:
+			self.translation_audio_url = google_cloud_tts(
+				self.translation_text or self.translation,
+				filename=self.translation.replace(' ', '_'),
+				language=translation_language,
+				genre=translation_genre,
+				file_id=str(self.pk),
+				file_title=self.translation,
+				ftp_path=FTP_RU_VERBS_PATH if translation_language == LANGUAGE_CODE_RU else FTP_FR_VERBS_PATH,
+				speacking_rate=1
+			)
+		else:
+			self.translation_audio_url = translation_shtooka_url
+
 		if save:
 			self.save()
 		return self
@@ -1114,14 +1090,16 @@ class VerbForm(models.Model):
 			"tense": self.tense,
 		}
 
-	def to_voice(self, save=True):
+	def to_voice(self, save=True, translation_language=LANGUAGE_CODE_RU, translation_genre=GENRE_MASCULINE):
 		voice_string = self.form.lower()
 		voice_string = re.sub(r'\(.*\)', '', voice_string)
 		voice_string = voice_string.strip()
+
 		shtooka_url = shtooka_by_title_in_path(
 			title=voice_string,
 			ftp_path=FTP_FR_VERBS_PATH,
 		)
+
 		if not shtooka_url:
 			if self.verb.verbform_set.filter(is_shown=True).order_by('order').last() == self:
 				voice_string += '.'
@@ -1131,7 +1109,7 @@ class VerbForm(models.Model):
 				voice_string,
 				filename=self.form.replace(' ', '_').replace('\'', '_').replace('\\', '_'),
 				language=LANGUAGE_CODE_FR,
-				genre='f',
+				genre=GENRE_MASCULINE,
 				file_id=str(self.pk),
 				file_title=self.form,
 				ftp_path=FTP_FR_VERBS_PATH,
@@ -1139,16 +1117,27 @@ class VerbForm(models.Model):
 			)
 		else:
 			self.audio_url = shtooka_url
-		self.translation_audio_url = google_cloud_tts(
-			self.translation_text or self.translation,
-			filename=self.translation.replace(' ', '_'),
-			language=LANGUAGE_CODE_RU,
-			genre='m',
-			file_id=str(self.pk),
-			file_title=self.translation,
+
+		translation_shtooka_url = shtooka_by_title_in_path(
+			title=self.translation_text or self.translation,
 			ftp_path=FTP_RU_VERBS_PATH,
-			speacking_rate=1
+			language_code=translation_language
 		)
+
+		if not translation_shtooka_url:
+			self.translation_audio_url = google_cloud_tts(
+				self.translation_text or self.translation,
+				filename=self.translation.replace(' ', '_'),
+				language=translation_language,
+				genre=translation_genre,
+				file_id=str(self.pk),
+				file_title=self.translation,
+				ftp_path=FTP_RU_VERBS_PATH if translation_language == LANGUAGE_CODE_RU else FTP_FR_VERBS_PATH,
+				speacking_rate=1
+			)
+		else:
+			self.translation_audio_url=translation_shtooka_url
+
 		if save:
 			self.save(update_fields=['audio_url', 'translation_audio_url', 'polly'])
 		return self
