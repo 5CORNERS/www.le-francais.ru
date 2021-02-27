@@ -1,15 +1,18 @@
-pytz
+Pillow~=5.4
+shortuuid~=1.0.1
+anytree~=2.8.0
+pytz~=2020.5
 dj-database-url==0.4.1
 wagtail==2.1
 dj-email-url
 bs4==0.0.1
 xmltodict==0.10.2
-django >= 1.11.27, < 2.0.0
+django >= 1.11.29, < 2.0.0
 django-robots
 gunicorn==19.6.0
-psycopg2==2.8.4
-python-dotenv
-whitenoise
+psycopg2==2.8.6
+python-dotenv~=0.15.0
+whitenoise~=5.2.0
 sorl-thumbnail==12.4a1
 bbcode==1.0.24
 google-api-python-client==1.6.2
@@ -19,20 +22,19 @@ django-allauth==0.37.0 # 0.40.0 -- last django 1; 0.42.0 -- added yandex provide
 
 social-auth-core
 social-auth-app-django
-mutagen
+mutagen~=1.45.1
 markdown==2.6.11
-urllib3
+urllib3~=1.25.11
 pymdown-extensions==5.0.0
 django-mailer==1.2.6
 django-comments-xtd==2.7.2
-django-user-sessions
+django-user-sessions~=1.5.3
 django-cron
 django-timezone-field>=3.1, <4.0
 django-braces
-APScheduler==3.0.0
-regex
+regex~=2020.11.13
 google==3.0.0
-pysftp
+pysftp~=0.2.9
 
 django-user-agents
 django-annoying
@@ -44,12 +46,11 @@ django-compressor
 django-sass-processor
 
 django-storages
-boto3
+boto3~=1.16.49
 google-cloud-texttospeech
 eyed3
-django-bulk-update
+django-bulk-update~=2.2.0
 django-autocomplete-light==3.2.10
-django-simple-captcha
 django-bootstrap-form
 django-postman==3.5.1
 django-crispy-forms
@@ -58,14 +59,13 @@ django-htmlmin
 pydub
 brotlipy
 django-inline-svg
-Pillow
 django-npm
 
--e git+https://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26#egg=django_pure_pagination
 -e git+https://github.com/5CORNERS/pybbm.git#egg=pybbm
 -e git+https://github.com/AntonDumov/django-recaptcha3.git#egg=django-recaptcha3
--e git+https://github.com/AntonDumov/py3-validate-email.git#egg=validate-email
 
+git+git://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26
+git+git://github.com/AntonDumov/py3-validate-email.git
 git+git://github.com/zostera/django-bootstrap4.git@d3e77d458c00ef97facd35997deaea7b8e311d9e
 
 pymorphy2
@@ -77,4 +77,25 @@ webvtt-py
 # working with docx files -- fork with footnotes pr
 git+https://github.com/BayooG/bayoo-docx@master
 
-djangorestframework==3.11.0
+djangorestframework~=3.11.2
+
+paramiko~=2.7.1
+cryptography~=2.8
+six~=1.14.0
+bcrypt~=3.1.7
+setuptools~=51.0.0
+dnspython~=1.16.0
+idna~=2.9
+filelock~=3.0.12
+beautifulsoup4~=4.8.2
+requests~=2.23.0
+django-contrib-comments~=1.9.2
+lxml~=4.5.2
+httplib2~=0.17.0
+pandas~=1.0.3
+botocore~=1.19.49
+prawler~=0.6b0
+dictdiffer~=0.8.1
+numpy~=1.18.2
+freezegun~=0.3.15
+django-simple-captcha~=0.5.3
