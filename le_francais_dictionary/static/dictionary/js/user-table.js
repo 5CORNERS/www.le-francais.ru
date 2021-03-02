@@ -563,6 +563,10 @@ $(document).ready(function () {
         // Prevent actual form submission
         e.preventDefault();
     });
+    if (init_packets){
+        $('#id_packets').selectpicker('val', init_packets)
+        updateTable();
+    }
     loadFilterButton.init();
 
 });
