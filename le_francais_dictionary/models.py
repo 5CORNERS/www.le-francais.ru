@@ -55,11 +55,10 @@ class Packet(models.Model):
 			if self.lesson.payed(user):
 				data['activated'] = True
 				data['added'] = True
-				data['wordsLearned'] = self.words_learned(user)
 			else:
 				data['activated'] = False
 				data['added'] = False
-				data['wordsLearned'] = None
+			data['wordsLearned'] = self.words_learned(user)
 		else:
 			data['activated'] = None
 			data['added'] = None
