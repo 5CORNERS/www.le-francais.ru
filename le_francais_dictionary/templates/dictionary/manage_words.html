@@ -45,7 +45,7 @@
                             name="{{ form.packets.html_name }}"
                             id="{{ form.packets.auto_id }}" required>
                         {% for choice in form.fields.packets.choices %}
-                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                            <option value="{{ choice.0 }}" {% if choice.0 in init_packets %}checked{% endif %}>{{ choice.1 }}</option>
                         {% endfor %}
                     </select>
                     {% csrf_token %}
@@ -99,5 +99,10 @@
     <script>
         var csrf = "{{ csrf_token }}";
         var starFilterHtml = `<select data-noneSelectedText="Оценка" multiple class="selectpicker" data-sanitize="false" id="starFilter" name="star_filter">{% for choice in star_choices %}<option class="{% if not forloop.first %}star-choice{% endif %}" value="{{ choice.0 }}" data-content="{{ choice.1 }}">{{ choice.0 }}</option>{% endfor %}</select>`;
+        {% if init_packets %}
+            let init_packets = [ {% for p in init_packets %}{{ p }},{% endfor %} ];
+        {% else %}
+            let init_packets = null;
+        {% endif %}
     </script>
 {% endblock %}
