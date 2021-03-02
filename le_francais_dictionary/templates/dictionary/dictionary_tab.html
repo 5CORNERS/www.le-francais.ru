@@ -221,10 +221,12 @@
         $('#hide-flash-cards-info-button').tooltip('hide')
     });
     $('#collapse-button-one').click(function (e) {
+        $('#collapse-button-two').toggleClass('d-none').toggleClass('d-sm-inline-block')
         $('#collapse-button-one > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
         $('#collapse-button-two > i').removeClass('fa-arrow-up').addClass('fa-arrow-down');
     });
     $('#collapse-button-two').click(function (e) {
+        $('#collapse-button-one').toggleClass('d-none').toggleClass('d-sm-inline-block')
         $('#collapse-button-two > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
         $('#collapse-button-one > i').removeClass('fa-arrow-up').addClass('fa-arrow-down');
     });
