@@ -482,6 +482,8 @@ def get_app(request, packet_id):
 
 @login_required
 def manage_words(request):
+    init_lesson = None
+    init_packets = None
     star_choices = [
         ('None', 'Непройденные'),
         ('0@0', '<i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="far fa-star" aria-hidden="true" style="color: #ffc107;"></i>'),
@@ -504,9 +506,21 @@ def manage_words(request):
             return JsonResponse({'table': table_html, 'errors': form.errors}, safe=False)
     else:
         form = WordsManagementFilterForm(request.user)
+        init_lesson = request.GET.get('lesson', None)
+        if init_lesson is not None:
+            try:
+                init_lesson = int(init_lesson)
+                init_packets = Packet.objects.filter(
+                    lesson__lesson_number=init_lesson).values_list(
+                    'pk', flat=True)
+            except ValueError:
+                init_lesson = None
         table = form.table_dict()
     return render(request, 'dictionary/manage_words.html',
-                  {'form': form, 'table':table, 'star_choices': star_choices})
+                  {'form': form, 'table': table,
+                   'star_choices': star_choices,
+                   'init_lesson': init_lesson,
+                   'init_packets': init_packets})
 
 @csrf_exempt
 @login_required
