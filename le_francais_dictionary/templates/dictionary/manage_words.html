@@ -45,7 +45,7 @@
                             name="{{ form.packets.html_name }}"
                             id="{{ form.packets.auto_id }}" required>
                         {% for choice in form.fields.packets.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 in init_packets %}checked{% endif %}>{{ choice.1 }}</option>
+                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
                         {% endfor %}
                     </select>
                     {% csrf_token %}

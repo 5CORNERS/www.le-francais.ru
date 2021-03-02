@@ -482,7 +482,6 @@ def get_app(request, packet_id):
 
 @login_required
 def manage_words(request):
-    init_lesson = None
     init_packets = None
     star_choices = [
         ('None', 'Непройденные'),
@@ -507,6 +506,7 @@ def manage_words(request):
     else:
         form = WordsManagementFilterForm(request.user)
         init_lesson = request.GET.get('lesson', None)
+        init_packet = request.GET.get('lesson_pk', None)
         if init_lesson is not None:
             try:
                 init_lesson = int(init_lesson)
@@ -514,12 +514,18 @@ def manage_words(request):
                     lesson__lesson_number=init_lesson).values_list(
                     'pk', flat=True)
             except ValueError:
-                init_lesson = None
+                init_packets = None
+        elif init_packet is not None:
+            try:
+                init_packet = int(init_packet)
+                init_packets = Packet.objects.filter(
+                    pk=init_packet).values_list('pk', flat=True)
+            except ValueError:
+                init_packets = None
         table = form.table_dict()
     return render(request, 'dictionary/manage_words.html',
                   {'form': form, 'table': table,
                    'star_choices': star_choices,
-                   'init_lesson': init_lesson,
                    'init_packets': init_packets})
 
 @csrf_exempt
