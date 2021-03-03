@@ -59,6 +59,7 @@ class Packet(models.Model):
 				data['activated'] = False
 				data['added'] = False
 			data['wordsLearned'] = self.words_learned(user)
+			data['wordsChecked'] = self.words_checked(user)
 		else:
 			data['activated'] = None
 			data['added'] = None
@@ -95,6 +96,11 @@ class Packet(models.Model):
 				userwordignore__user=user
 			)).values(
 			'word').distinct().__len__()
+
+	def words_checked(self, user) -> int:
+		return len(self.word_set.filter(
+			Q(userdata__user=user) | Q(userwordignore__user=user)
+		).values('word').distinct())
 
 	class Meta:
 		ordering = ['lesson__lesson_number']
