@@ -245,16 +245,6 @@ function applyFilters(process, filters){
     });
 }
 
-
-function bind_play_icons() {
-    let play_icons = $('.play');
-    play_icons.unbind();
-    play_icons.click(event => {
-        let url = $(event.target).data('audiosrc');
-        voice(url)
-    });
-}
-
 function updateTable(afterInit=undefined, initialPageLength=50) {
     let form = $('#filterWordsForm');
     let url = Urls['dictionary:my_words']();
