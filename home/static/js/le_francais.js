@@ -10,6 +10,15 @@ function getPageId() {
     return $('meta[name="page-id"]').attr("content")
 }
 
+function bind_play_icons() {
+    let play_icons = $('.play[data-audiosrc]');
+    play_icons.unbind();
+    play_icons.click(event => {
+        let url = $(event.target).data('audiosrc');
+        voice(url)
+    });
+}
+
 window.setIntervalRun = function (interval, callbackFunction, args) {
     let internal = {
         interval: interval,
@@ -148,6 +157,7 @@ $(document).ready(function () {
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
     });
+    bind_play_icons()
 });
 
 (function () {
