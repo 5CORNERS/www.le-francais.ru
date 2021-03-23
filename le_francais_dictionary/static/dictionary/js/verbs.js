@@ -28,7 +28,7 @@
         [TENSE_IMPERATIVE]: "/static/dictionary/media/impératif_présent.mp3",
         [TENSE_INDICATIVE_IMPARFAIT]: "/static/dictionary/media/imparfait.mp3",
         [TENSE_INDICATIVE_FUTURE]: "/static/dictionary/media/futur_simple.mp3",
-        [TENSE_PARTICIPE_PASSE]: "/static/dictionary/media/silence.2b5bb705.mp3"
+        [TENSE_PARTICIPE_PASSE]: "/static/dictionary/media/silence.mp3"
     }
     const TENSE_NAMES = {
         [TENSE_INDICATIVE_PRESENT]: "Indicatif Présent",
@@ -39,7 +39,7 @@
         [TENSE_PARTICIPE_PASSE]: "Participe Passé"
     }
 
-    const SILENCE_URL = '/static/dictionary/media/silence.2b5bb705.mp3';
+    const SILENCE_URL = '/static/dictionary/media/silence.mp3';
     const silence = new Promise((resolve, reject) => {
         const howl = new Howl({
             src: [SILENCE_URL],
