@@ -10,6 +10,11 @@ function getPageId() {
     return $('meta[name="page-id"]').attr("content")
 }
 
+function voice(src){
+    let audio = new Audio(src);
+    audio.play();
+}
+
 function bind_play_icons() {
     let play_icons = $('.play[data-audiosrc]');
     play_icons.unbind();
