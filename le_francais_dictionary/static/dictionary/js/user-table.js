@@ -430,12 +430,6 @@ function get_filtered(dt){
     return  dt.api().rows({search:"applied"}).data().pluck(0).toArray();
 }
 
-let audio = undefined;
-function voice(src){
-    audio = new Audio(src);
-    audio.play();
-}
-
 $(document).ready(function () {
     $('#filterWordsForm').submit(function (ev) {
         ev.preventDefault();

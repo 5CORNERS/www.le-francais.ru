@@ -1144,3 +1144,7 @@ a.page-review:hover {
 #playerPlus p {
     margin-bottom: 0.8rem;
 }
+
+i.play {
+    cursor: pointer;
+}
