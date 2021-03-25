@@ -1147,4 +1147,7 @@ a.page-review:hover {
 
 i.play {
     cursor: pointer;
+    color: gray;
+    position: relative;
+    top: 1px;
 }
