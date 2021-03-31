@@ -4,9 +4,10 @@ from django import forms
 from django.db.models import Q
 from typing import List
 
-from le_francais_dictionary.models import Packet, UserWordRepetition, Word, \
+from le_francais_dictionary.models import Packet, UserWordRepetition, \
+	Word, \
 	UserWordData, UserWordIgnore, WordTranslation, WordGroup, \
-	prefetch_words_data
+	prefetch_words_data, get_repetition_words_query
 
 from .sm2 import sm2_ef_q_mq
 
@@ -49,7 +50,11 @@ class WordsManagementFilterForm(forms.Form):
 				Q(word__userdata__user=user) | Q(
 					lesson__payment__user=user)).distinct().order_by(
 				'lesson__lesson_number', 'name')
-		self.fields['packets'] = forms.MultipleChoiceField(choices=[(o.id, str(o.name)) for o in self.packets])
+		choices = [(o.id, str(o.name)) for o in self.packets]
+		# TODO: has_repetition_words method
+		if get_repetition_words_query(self.user).count() > 0:
+			choices = [(88888888, 'Слова для повторения')] + choices
+		self.fields['packets'] = forms.MultipleChoiceField(choices=choices)
 		# name, title, type, visible, sortable, filterable, p_filter_value, p_sort_value, p_value
 		self.COLUMNS_ATTRS = [
 			'name', 'title', 'type', 'visible', 'sortable', 'filterable',
@@ -75,12 +80,24 @@ class WordsManagementFilterForm(forms.Form):
 	def table_dict(self):
 		if self.is_valid():
 			data = self.cleaned_data
-			query = Word.objects.prefetch_related(
-				'userwordrepetition_set', 'userdata', 'userwordignore_set',
-				'wordtranslation_set', 'group'
-			).filter(packet_id__in=data['packets'])
+			if '88888888' in data['packets']:
+				packets_list: List[int] = data['packets']
+				packets_list.pop(packets_list.index('88888888'))
+				query = Word.objects.filter(
+					packet_id__in=packets_list
+				)
+				repetition_words = list(get_repetition_words_query(self.user))
+				packet_words = list(query)
+				words = repetition_words + packet_words
+				words = list(dict.fromkeys(words))
+			else:
+				query = Word.objects.prefetch_related(
+					'userwordrepetition_set', 'userdata',
+					'userwordignore_set',
+					'wordtranslation_set', 'group'
+				).filter(packet_id__in=data['packets'])
+				words = list(query.distinct().order_by('order'))
 			# time = datetime.now()
-			words = list(query.distinct().order_by('order'))
 			words = prefetch_words_data(words, self.user)
 			result = dict(
 				columns=[dict(
