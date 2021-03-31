@@ -1162,3 +1162,8 @@ span.underline.play {
 span.underline.play:hover {
     background-image: url("../svg/underline_1.svg");
 }
+
+span.underline.play:focus {
+  outline-offset: 1px;
+  outline: auto 1px Highlight;
+}
