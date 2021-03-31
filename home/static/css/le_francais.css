@@ -1151,3 +1151,14 @@ i.play {
     position: relative;
     top: 1px;
 }
+
+span.underline.play {
+    cursor: pointer;
+    background: url("../svg/underline_2.svg") 0 100% repeat no-repeat;
+    transition: 0.1s;
+    padding-bottom: 1px;
+}
+
+span.underline.play:hover {
+    background-image: url("../svg/underline_1.svg");
+}
