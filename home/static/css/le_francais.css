@@ -1157,6 +1157,8 @@ span.underline.play {
     background: url("../svg/underline_2.svg") 0 100% repeat no-repeat;
     transition: 0.1s;
     padding-bottom: 1px;
+    padding-left: 1px;
+    padding-right: 1px;
 }
 
 span.underline.play:hover {
@@ -1164,6 +1166,9 @@ span.underline.play:hover {
 }
 
 span.underline.play:focus {
-  outline-offset: 1px;
-  outline: auto 1px Highlight;
+  background-image: none;
+  outline: none;
+  border-radius: 4px;
+  background-color: #cbe7ff;
+  box-shadow: 1px 1px 5px 0px;
 }
