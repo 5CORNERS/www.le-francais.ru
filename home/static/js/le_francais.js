@@ -24,6 +24,7 @@ function bind_play_icons() {
     });
     play_icons.keypress(e => {
         if (e.charCode === 13 || e.charCode === 32){
+            e.preventDefault()
             let url = $(e.target).data('audiosrc');
             voice(url)
         }
