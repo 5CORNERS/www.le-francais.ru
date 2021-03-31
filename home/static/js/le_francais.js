@@ -23,7 +23,7 @@ function bind_play_icons() {
         voice(url)
     });
     play_icons.keypress(e => {
-        if (e === 13 || e === 32){
+        if (e.charCode === 13 || e.charCode === 32){
             let url = $(e.target).data('audiosrc');
             voice(url)
         }
