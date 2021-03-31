@@ -18,7 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # Create your views here.
 from le_francais_dictionary.forms import WordsManagementFilterForm
-from .consts import TENSE_PARTICIPE_PASSE, STAR_CHOICES
+from .consts import TENSE_PARTICIPE_PASSE
 from .models import Word, Packet, UserPacket, \
     UserWordData, UserWordRepetition, UserWordIgnore, \
     UserStandalonePacket, \
