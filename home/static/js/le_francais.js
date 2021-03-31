@@ -22,6 +22,12 @@ function bind_play_icons() {
         let url = $(event.target).data('audiosrc');
         voice(url)
     });
+    play_icons.keypress(e => {
+        if (e === 13 || e === 32){
+            let url = $(e.target).data('audiosrc');
+            voice(url)
+        }
+    })
 }
 
 window.setIntervalRun = function (interval, callbackFunction, args) {
