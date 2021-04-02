@@ -52,8 +52,8 @@ class WordsManagementFilterForm(forms.Form):
 				'lesson__lesson_number', 'name')
 		choices = [(o.id, str(o.name)) for o in self.packets]
 		# TODO: has_repetition_words method
-		if get_repetition_words_query(self.user).count() > 0:
-			choices = [(88888888, 'Слова для повторения')] + choices
+		if get_repetition_words_query(self.user, filter_excluded=False).count() > 0:
+			choices = [(88888888, 'Слова на повторение')] + choices
 		self.fields['packets'] = forms.MultipleChoiceField(choices=choices)
 		# name, title, type, visible, sortable, filterable, p_filter_value, p_sort_value, p_value
 		self.COLUMNS_ATTRS = [
@@ -86,7 +86,7 @@ class WordsManagementFilterForm(forms.Form):
 				query = Word.objects.filter(
 					packet_id__in=packets_list
 				)
-				repetition_words = list(get_repetition_words_query(self.user))
+				repetition_words = list(get_repetition_words_query(self.user, filter_excluded=False))
 				packet_words = list(query)
 				words = repetition_words + packet_words
 				words = list(dict.fromkeys(words))
