@@ -146,3 +146,31 @@ th:nth-child(4), th:nth-child(5) {
 th:nth-child(1) {
     padding: 5px !important;
 }
+
+.get-list-button {
+  > .text-medium {
+    display: none
+  }
+
+  > .text-large {
+    display: none
+  }
+}
+
+@media (min-width: 369px) {
+  .get-list-button > .text-medium {
+    display: inline;
+  }
+}
+
+@media (min-width: 415px) {
+  .get-list-button {
+    > .text-medium {
+      display: none
+    }
+
+    > .text-large {
+      display: inline
+    }
+  }
+}
