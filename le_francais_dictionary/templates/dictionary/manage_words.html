@@ -41,17 +41,20 @@
                       class="form-inline mb-2 d-flex">
                     <label class="sr-only"
                            for="{{ form.packets.auto_id }}">{{ form.packets.label }}</label>
-                    <select data-none-selected-text="Выберите уроки" multiple class="mb-2 mr-sm-2 selectpicker"
+                    <select data-none-selected-text="Выберите уроки" multiple class="mb-2 mr-2 selectpicker"
                             name="{{ form.packets.html_name }}"
-                            id="{{ form.packets.auto_id }}" required>
+                            id="{{ form.packets.auto_id }}"
+                            required
+                            data-width="197px"
+                            data-sanitize="false"
+                    >
                         {% for choice in form.fields.packets.choices %}
-                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                            <option value="{{ choice.0 }}" data-content="{{ choice.1 }}"></option>
                         {% endfor %}
                     </select>
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-primary mb-2 ml-2">Получить список слов
-                    </button>
-                <button class="btn btn-info mb-2 ml-2 ml-lg-auto text-truncate" id="getAndApplyFilters">Повторить последнюю выборку</button>
+                    <button type="submit" class="btn btn-primary mb-2 mr-sm-2">Получить<span class="d-none d-md-inline"> список слов</span></button>
+                <button class="btn btn-info mb-2 ml-lg-auto text-truncate" id="getAndApplyFilters">Повторить последнюю выборку</button>
                 </form>
             </div>
             <div class="col-12 words-footable">
