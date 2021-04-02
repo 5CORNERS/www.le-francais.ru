@@ -145,4 +145,25 @@ th:nth-child(1) {
   padding: 5px !important;
 }
 
+.get-list-button > .text-medium {
+  display: none;
+}
+.get-list-button > .text-large {
+  display: none;
+}
+
+@media (min-width: 369px) {
+  .get-list-button > .text-medium {
+    display: inline;
+  }
+}
+@media (min-width: 415px) {
+  .get-list-button > .text-medium {
+    display: none;
+  }
+  .get-list-button > .text-large {
+    display: inline;
+  }
+}
+
 /*# sourceMappingURL=user-table.css.map */
