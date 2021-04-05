@@ -10,9 +10,11 @@ from django.db.models import Count, Q, Case, Subquery, OuterRef, \
     IntegerField
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
+from django.http import JsonResponse, HttpResponse, \
+    HttpResponseNotFound, HttpResponseRedirect
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -503,10 +505,17 @@ def manage_words(request):
             except ValueError:
                 init_packets = None
         elif init_packet is not None:
+            if init_packet == '99999999':
+                return HttpResponseRedirect(
+                    redirect_to=f'{reverse("dictionary:my_words")}?last=true'
+                )
             try:
                 init_packet = int(init_packet)
-                init_packets = Packet.objects.filter(
-                    pk=init_packet).values_list('pk', flat=True)
+                if init_packet == 88888888:
+                    init_packets = [88888888]
+                else:
+                    init_packets = Packet.objects.filter(
+                        pk=init_packet).values_list('pk', flat=True)
             except ValueError:
                 init_packets = None
         table = form.table_dict()
