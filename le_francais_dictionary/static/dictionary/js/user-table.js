@@ -431,6 +431,7 @@ function get_filtered(dt){
 }
 
 $(document).ready(function () {
+    let getParams = new URLSearchParams(window.location.search)
     $('#filterWordsForm').submit(function (ev) {
         ev.preventDefault();
         updateTable();
@@ -552,5 +553,7 @@ $(document).ready(function () {
         updateTable();
     }
     loadFilterButton.init();
-
+    if(getParams.has('last') && getParams.get('last') === 'true'){
+        loadFilterButton.loadAndFilter()
+    }
 });
