@@ -1159,7 +1159,7 @@ def get_repetition_words_query(user, filter_excluded=True):
 		userwordrepetition__time__lt=5
 	).distinct()
 	if filter_excluded:
-		q.exclude(userwordignore__user=user)
+		q = q.exclude(userwordignore__user=user)
 	return q
 
 
