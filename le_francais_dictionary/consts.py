@@ -72,7 +72,7 @@ TOO_EARLY_MESSAGE = _(
     'You trying to repeat word, which repetition date has not come yet')
 NO_CUPS_MESSAGE = _('There are no cups left')
 NO_REPETITION_WORDS_MESSAGE = 'На сегодня нет слов на повторение, но вы не расслабляйтесь :)'
-ALL_WORDS_ARE_IGNORED_MESSAGE = ''
+ALL_WORDS_ARE_IGNORED_MESSAGE = 'В этом наборе карточек не осталось слов — они все исключены.'
 TENSE_INDICATIVE_PRESENT = 0
 TENSE_PASSE_COMPOSE = 1
 TENSE_IMPERATIVE = 2

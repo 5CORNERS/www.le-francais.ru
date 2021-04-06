@@ -127,8 +127,8 @@ def get_words(request, packet_id):
                     userwordignore__user=request.user))
                     if not words:
                         result['errors'].append({
-                            'message':'',
-                            'code':''
+                            'message':consts.ALL_WORDS_ARE_IGNORED_MESSAGE,
+                            'code':consts.ALL_WORDS_ARE_IGNORED_CODE,
                         })
                 result['words'] = [word.to_dict(user=request.user) for word in words]
             elif not request.user.is_authenticated:
