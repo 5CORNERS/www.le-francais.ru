@@ -48,7 +48,7 @@
 				float: left;
 			}
 		}
-	</style>
+    </style>
 	<style>
 		.card-description {
 			height: 5em;
@@ -60,6 +60,16 @@
 			box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
 			background-color: #f6f6f6;
 		}
+
+        .coffee-card-over-disabled {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top:0;
+            left: 0;
+            background-color: #ffffff6b;
+            cursor: pointer;
+        }
 
 		.card-image-container {
 			text-align: center;
@@ -142,6 +152,7 @@
         $('#collapse-button-two').click(function (e) {
             $('#collapse-button-two > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
         });
+
 	</script>
 {% endblock %}
 
@@ -173,6 +184,11 @@
 				<div class="row equal" style="margin-bottom: 10px">
 					{% for card in cards %}
 						<div class="col-6 col-md-6 col-lg-4 col-xl-5ths">
+                            {% if forloop.counter0 == 0 %}
+                                <div class="coffee-card-over-disabled" data-toggle="modal" data-target="#oneCupDisabledModal">
+
+                                </div>
+                            {% endif %}
 							<div class="coffee-card card-select" data-cardSelect>
 								<div class="card-container">
 									<div class="card-header">{{ card.title | safe }}</div>
@@ -211,6 +227,34 @@
 			</div>
 		</div>
 		{% include 'payments/tinkoff_payments_help.html' %}
+        <div class="modal fade" id="oneCupDisabledModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Извините, мы вынуждены были заблокировать вариант с одной чашечкой.</h5>
+                        <button type="button" class="close"
+                                data-dismiss="modal"
+                                aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Мы с трудом набираем средства на покрытие
+                            расходов по этому проекту <i data-toggle="popover" data-content='Оплата серверов, различные сервисы,
+                            электричество, налоги... (<a
+                                    href="{% slugurl 'who-do-you-think-we-are' %}">подробнее</a>)'
+                                                         data-html="true"
+                                                         class="fas fa-info-circle text-info"
+                                                         style="position: relative;top: 1px;"></i>
+                            — на
+                            вознаграждение за наш труд, увы, мало что
+                            остается. :( Пожалуйста, поддержите нас и
+                            выберите другой набор чашечек. Ведь больше
+                            чашечек — больше и бонусов! :)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 	</div>
 
 {% endblock %}
