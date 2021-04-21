@@ -54,7 +54,7 @@
 			height: 5em;
 		}
 
-		.card {
+		.coffee-card {
 			margin-bottom: 20px;
 			padding: 5px 5px 5px;
 			box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
@@ -96,7 +96,7 @@
 			padding: 20px;
 		}
 
-		.card:hover {
+		.coffee-card:hover {
 			box-shadow: 4px 8px 12px 0 rgba(0, 0, 0, 0.2)
 		}
 
@@ -135,6 +135,13 @@
 				}
 			})
 		}
+
+        $('#collapse-button-one').click(function (e) {
+            $('#collapse-button-one > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+        });
+        $('#collapse-button-two').click(function (e) {
+            $('#collapse-button-two > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+        });
 	</script>
 {% endblock %}
 
@@ -166,7 +173,7 @@
 				<div class="row equal" style="margin-bottom: 10px">
 					{% for card in cards %}
 						<div class="col-6 col-md-6 col-lg-4 col-xl-5ths">
-							<div class="card card-select" data-cardSelect>
+							<div class="coffee-card card-select" data-cardSelect>
 								<div class="card-container">
 									<div class="card-header">{{ card.title | safe }}</div>
 									{% if forloop.first %}
@@ -203,40 +210,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-lg-6">
-				<div class="alert alert-success"><p>Платежи можно совершать
-					<b>из любой страны и в любой валюте</b> — спишется сумма, эквивалентная рублевой по курсу рубля на день платежа. И это
-					<b>абсолютно безопасно</b> — реквизиты карты вводятся через защищенное шифрованное соединение на сайте банка.
-				</p></div>
-                <p>Если по каким-то субъективным причинам онлайн-платеж для вас
-                    неприемлем, в качестве плана «B» можно воспользоваться
-                    переводом с карты на карту на эти карточные номера
-                    (MasterCard и VISA соответственно).</p>
-				<div>
-					<ul>
-						<li><i class="fab fa-cc-visa" style="color:#2c79bb "></i> (Сбербанк)
-							<b>4274-3200-5750-5714</b></li>
-						<li><i class="fab fa-cc-mastercard"></i> (Tinkoff Bank)
-							<b>5536-9138-5540-4428</b></li>
-					</ul>
-                    <p>При всех таких переводах, пожалуйста, сообщайте ваш
-                        e-mail — иначе мы не сможем вас идентифицировать и
-                        сконвертировать ваш перевод в чашечки кофе.</p>
-                    <p><b>И пожалуйста, помните:</b> в отличие от онлайн
-                        платежа, который совершается мгновенно, этот способ
-                        подразумевает ручную правку базы, требует согласованных
-                        действий разных людей, усложняет ведение бухгалтерии и
-                        приводит к задержкам. Пожалуйста, используйте этот
-                        способ только в случае <u>крайней</u> необходимости.
-                    </p>
-				</div>
-			</div>
-			<div class="col-lg-6">
-				<p>Каждый раз, когда вы нажимаете на кнопку «Поблагодарить», мы получаем уведомление на почту и телефон и в ту же секунду узнаём о Вашем жесте.</p>
-				<div class="alert alert-warning">Пожалуйста, помните: над проектом в режиме полной занятости работает два человека. Это наша работа — помогать вам учить французский. Помогите и вы нам — других источников дохода у нас нет.</div>
-			</div>
-		</div>
+		{% include 'payments/tinkoff_payments_help.html' %}
 	</div>
 
 {% endblock %}
