@@ -175,7 +175,7 @@
 						</div>
 						<div class="col-lg-6">
 							<p>Наше благополучие — и ваш успех — зависят о вашей щедрости. <a
-									href="{% slugurl 'who-do-you-think-we-are' %}">Почитайте</a>, кто стоит за этим проектом и как этот проект устроен.
+									href="{% slugurl 'who-do-you-think-we-are' %}" target="_blank">Почитайте</a>, кто стоит за этим проектом и как этот проект устроен.
 							</p>
 						</div>
 					</div>
@@ -236,19 +236,19 @@
                                 aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <h5 class="modal-title">Извините, мы вынуждены были заблокировать вариант с одной чашечкой.</h5>
+                        <h5 class="modal-title">Извините, мы вынуждены были ограничить возможность выбора варианта с одной чашечкой.</h5>
                     </div>
                     <div class="modal-body">
                         <p>Мы с трудом набираем средства на покрытие
                             расходов по этому проекту <a tabindex="0"
                                                          data-toggle="popover"
                                                          data-content='Оплата серверов, различные сервисы,
-                            электричество, налоги...{% comment %} (<a
-                                    href="{% slugurl 'who-do-you-think-we-are' %}">подробнее</a>){% endcomment %}'
+                            электричество, налоги... (<a
+                                    href="{% slugurl 'who-do-you-think-we-are' %}" target="_blank">подробнее</a>)'
                                                          data-html="true"
                                                          class="fas fa-info-circle text-primary"
                                                          style="position: relative;top: 1px;"
-                                                         data-trigger="focus"
+                                                         data-trigger="click"
                                                          data-placement="auto"
                             ></a>
                             — на вознаграждение за наш труд, увы, мало
@@ -259,7 +259,10 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-dismiss="modal" class="btn btn-primary">
-                            Ясно!
+                            Ок, выберу другой
+                        </button>
+                        <button type="button" data-dismiss="modal" class="btn btn-link" onclick="initPayment({{ cards.0.item_id }})">
+                            Нет, хочу этот
                         </button>
                     </div>
                 </div>
