@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% load static site_tags %}
 {% load wagtailcore_tags %}
-{% block extra_head %}{% endblock %}
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/coffee_payments.css' %}">
+{% endblock %}
 {% block description %}{% endblock %}
 
 {% block extra_css %}
@@ -198,12 +200,7 @@
 				<div class="row equal" style="margin-bottom: 10px">
 					{% for card in cards %}
 						<div class="col-6 col-md-6 col-lg-4 col-xl-5ths">
-                            {% if forloop.counter0 == 0 %}
-                                <div class="coffee-card-over-disabled" data-toggle="modal" data-target="#oneCupDisabledModal">
-
-                                </div>
-                            {% endif %}
-							<div class="coffee-card card-select" data-cardSelect>
+							<div class="coffee-card card-select{% if forloop.counter0 == 0 %} coffee-card-disabled{% endif %}" data-cardSelect>
 								<div class="card-container">
 									<div class="card-header">{{ card.title | safe }}</div>
 									{% if forloop.first %}
@@ -227,7 +224,11 @@
 								</div>
 								<button type="submit"
 								        role="button"
+                                        {% if forloop.counter0 == 0 %}
+                                        data-toggle="modal" data-target="#oneCupDisabledModal"
+                                        {% else %}
 								        onclick="initPayment({{ card.item_id }})"
+                                        {% endif %}
 								        class="btn btn-primary btn-block">Беру!
 								</button>
 							</div>
@@ -280,15 +281,17 @@
             <div class="modal-dialog modal-lg" style="max-width: 650px" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
+                        <h5 class="modal-title">Инфраструктура le-francais.ru</h5>
                         <button type="button" class="close"
                                 data-dismiss="modal"
                                 aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <h5>Инфраструктура le-francais.ru</h5>
                     </div>
                     <div class="modal-body">
-                        <img src="{% static 'images/serversMap2.png' %}"
+                        <img class="d-none d-sm-inline" src="{% static 'images/serversMap2.png' %}"
+                             alt="">
+                        <img class="d-sm-none" src="{% static 'images/serversMapMobile.png' %}"
                              alt="">
                     </div>
                 </div>
