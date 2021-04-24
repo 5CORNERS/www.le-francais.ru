@@ -1,0 +1,16 @@
+.coffee-card-disabled > * {
+	opacity: 0.5;
+}
+
+.coffee-card-disabled > .btn {
+	opacity: 1;
+}
+
+.modal-header {
+	display: flex;
+	> button.close{
+		float: inherit;
+		margin-left: inherit !important;
+	}
+}
+
