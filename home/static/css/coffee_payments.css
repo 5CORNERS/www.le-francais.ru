@@ -1,0 +1,17 @@
+.coffee-card-disabled > * {
+  opacity: 0.5;
+}
+
+.coffee-card-disabled > .btn {
+  opacity: 1;
+}
+
+.modal-header {
+  display: flex;
+}
+.modal-header > button.close {
+  float: inherit;
+  margin-left: inherit !important;
+}
+
+/*# sourceMappingURL=coffee_payments.css.map */
