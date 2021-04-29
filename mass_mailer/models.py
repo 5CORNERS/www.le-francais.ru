@@ -137,6 +137,7 @@ class UsersFilter(models.Model):
 	manual_blacklist = models.TextField(blank=True, null=True, default=None)
 	ignore_subscriptions = models.BooleanField(default=False)
 	send_once = models.BooleanField(default=True)
+	send_to_not_validated = models.BooleanField(default=True)
 
 	send_only_first = models.IntegerField(null=True, blank=True, default=None)
 	do_not_send_to_pass_partout = models.BooleanField(default=False)
@@ -190,7 +191,9 @@ class UsersFilter(models.Model):
 					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_EQ1CUP:
 						payments = Payment.objects.filter(
 							status__in=['CONFIRMED', 'AUTHORIZED'],
-							receipt__receiptitem__site_quantity = 1
+							receipt__receiptitem__site_quantity = 1,
+							receipt__receiptitem__category='coffee_cups'
+
 						)
 						payments = self.first_last_payments_filter(
 							self.first_payment_was, self.last_payment_was,
@@ -202,7 +205,8 @@ class UsersFilter(models.Model):
 					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_GT1CUP:
 						payments = Payment.objects.filter(
 							status__in=['CONFIRMED', 'AUTHORIZED'],
-							receipt__receiptitem__site_quantity=1
+							receipt__receiptitem__site_quantity__gt=1,
+							receipt__receiptitem__category='coffee_cups'
 						)
 						payments = self.first_last_payments_filter(
 							self.first_payment_was, self.last_payment_was,
@@ -248,6 +252,7 @@ class UsersFilter(models.Model):
 	@staticmethod
 	def first_last_payments_filter(first_payment_date, last_payment_date,
 	                               payments_query):
+		# FIXME filter users which have payments outside range
 		if last_payment_date:
 			payments_query = payments_query.filter(
 				update_date__lte=timezone.make_aware(
@@ -258,6 +263,10 @@ class UsersFilter(models.Model):
 					datetime.combine(first_payment_date, datetime.min.time())))
 		return payments_query
 
+	@staticmethod
+	def filter_users_by_payments(users, payments):
+		users.exclude()
+
 	def get_recipients_for_message(self, message):
 		"""
 		:type message: Message
@@ -266,6 +275,12 @@ class UsersFilter(models.Model):
 		if self.send_once:
 			recipients = recipients.exclude(
 				pk__in=[log.recipient_id for log in MessageLog.objects.filter(Q(result=MessageLog.RESULT_SUCCESS) | Q(result=MessageLog.RESULT_DIDNT_SEND), message=message)])
+		if not self.send_to_not_validated:
+			recipients = recipients.exclude(
+				pk__in=MessageLog.objects.filter(
+					Q(result=MessageLog.RESULT_FAILURE)|Q(result=MessageLog.RESULT_DIDNT_SEND),
+					message=message).distinct().values_list('recipient_id', flat=True)
+			)
 		return recipients
 
 
@@ -335,6 +350,18 @@ class Message(models.Model):
 		return self._recipients
 
 	def send_manual(self, data_list:list):
+		# data_list syntax:
+		# [
+		# 	{
+		# 	'email': <email>,
+		# 	'name': <name>,
+		# 	'context':
+		# 		{
+		#			'subject': <subject>,
+		#			'domain': 'www.le-francais.ru',
+		#			'...': <...>,
+		# 		}
+		# },...]
 		backend: EmailBackend = self.get_backend()
 		sent_count = 0
 		errors_count = 0
@@ -467,7 +494,7 @@ class Message(models.Model):
 				try:
 					backend.send_messages([message])
 					sent_count += 1
-					MessageLog.objects.log(self, recipient, MessageLog.RESULT_SUCCESS)
+					MessageLog.objects.log(self, recipient, MessageLog.RESULT_SUCCESS, f'Message was sent to {recipient.email}')
 					time.sleep(1)
 				except (socket_error, smtplib.SMTPSenderRefused,
 				        smtplib.SMTPRecipientsRefused,
@@ -497,6 +524,18 @@ class Message(models.Model):
 	def get_context(self, recipient, additional_context=None, include_subject=True):
 		from tinkoff_merchant.models import Payment
 		last_payment = Payment.objects.filter(customer_key=str(recipient.user.pk), status__in=['CONFIRMED', 'AUTHORIZED']).order_by('update_date').last()
+
+		next_after_payment_activation = None
+		if last_payment:
+			from home.models import UserLesson
+			activated_lesson_number = last_payment.closest_activation
+			activated_lesson_number = activated_lesson_number != '-' and int(activated_lesson_number)
+			if activated_lesson_number:
+				next_after_payment_activation = UserLesson.objects.get(lesson__lesson_number=activated_lesson_number, user=recipient.user)
+		if recipient.user.first_name:
+			name = recipient.user.first_name
+		else:
+			name = recipient.user.username
 		context = dict(
 			domain="www.le-francais.ru",
 			user=recipient.user,
@@ -507,7 +546,11 @@ class Message(models.Model):
 					item.site_quantity for item in last_payment.items()) if last_payment else 0
 			},
 			unsubscribe_url=recipient.get_unsubscribe_url(),
-			username=recipient.user.name_for_emails,
+			first_name=recipient.user.first_name,
+			name=name,
+			cups_quantity=sum(
+					item.site_quantity for item in last_payment.items()) if last_payment else 0,
+			next_after_payment_activation=next_after_payment_activation
 		)
 		if include_subject:
 			context['subject'] = self.get_subject_for(recipient, additional_context)
