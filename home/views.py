@@ -28,8 +28,9 @@ from wagtail.contrib.sitemaps.sitemap_generator import \
 from wagtail.core.models import Page
 
 from custom_user.models import LogMessage, User
-from home.models import PageWithSidebar, LessonPage, ArticlePage, BackUrls, \
-    DefaultPage, IndexPage
+from home.models import PageWithSidebar, LessonPage, ArticlePage, \
+    BackUrls, \
+    DefaultPage, IndexPage, PodcastPage
 from home.src.site_import import import_content
 from pure_pagination import Paginator, PaginationMixin
 
@@ -69,6 +70,7 @@ class LeFrancaisWagtailSitemap(WagtailSitemap):
         q += list(PageWithSidebar.objects.filter(show_in_sitemap=True, live=True))
         q += list(DefaultPage.objects.filter(show_in_sitemap=True, live=True))
         q += list(IndexPage.objects.all())
+        q += list(PodcastPage.objects.all())
         return q
 
 
