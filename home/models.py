@@ -53,6 +53,7 @@ PAGE_CHOICES = (
     ('index_page', 'Title Page'),
     ('conjugation_index', 'Conjugation Title'),
     ('conjugation_verb', 'Conjugation Verb'),
+    ('podcast_page', 'Podcast Page'),
     ('none', 'None')
 )
 PLACEMENT_CHOICES = (
@@ -679,6 +680,52 @@ ArticlePage.settings_panels = ArticlePage.settings_panels + [
     FieldPanel('page_type'),
 ]
 
+class PodcastPage(Page):
+    body = StreamField([
+        ('advertisement', AdvertisementInline()),
+        ('paragraph', RichTextBlock()),
+        ('image', ImageChooserBlock()),
+        ('document', DocumentViewerBlock()),
+        ('html', RawHTMLBlock()),
+        ('audio', AudioBlock()),
+        ('video', VideoPlayerBlock()),
+        ('read_also', AlsoReadBlock()),
+        ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
+    ], blank=True)
+    menu_title = TextField(blank=True)
+    reference_title = TextField(null=True, blank=True)
+    subtitle = TextField(null=True, blank=True)
+    show_in_sitemap = BooleanField(default=True)
+    reference_image = ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        blank=True,
+        on_delete=SET_NULL,
+        related_name='+'
+    )
+    page_type = CharField(max_length=100, choices=PAGE_CHOICES, default='podcast_page')
+
+    def get_absolute_url(self):
+        return self.full_url
+
+    def get_nav_root(self) -> Page:
+        return get_nav_root(self)
+
+PodcastPage.content_panels = PodcastPage.content_panels + [
+    FieldPanel('reference_title'),
+    ImageChooserPanel('reference_image'),
+    FieldPanel('subtitle'),
+    StreamFieldPanel('body'),
+]
+PodcastPage.promote_panels = PodcastPage.promote_panels + [
+    FieldPanel('menu_title'),
+    FieldPanel('show_in_sitemap'),
+]
+PodcastPage.settings_panels = PodcastPage.settings_panels + [
+    FieldPanel('page_type'),
+]
 
 from django.db.models import PROTECT
 
