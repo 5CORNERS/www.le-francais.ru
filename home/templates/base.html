@@ -134,7 +134,31 @@
 </div>
 
 {% block payment_modals %}
-    {% if 'payment_success' in request.GET and request.GET.modal_open == 'success-payment-modal' %}
+    {% if 'payment_success' in request.GET %}
+        <div class="modal" id="success-donation-modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close"
+                                data-dismiss="modal"
+                                aria-label="Close"><span
+                                aria-hidden="true">&times;</span>
+                        </button>
+                        <h4>Спасибо за Ваше решение нас
+                            поддержать!</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Спасибо за Ваше пожертвование! Вы нам очень помогли!</p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary"
+                                data-dismiss="modal">Закрыть
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="modal" id="success-payment-modal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -162,7 +186,7 @@
                 </div>
             </div>
         </div>
-    {% elif "payment_fail" in request.GET  and request.GET.modal_open == 'fail-payment-modal' %}
+    {% elif "payment_fail" in request.GET %}
         <div class="modal" id="fail-payment-modal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -274,6 +298,13 @@
 	        history.pushState({}, title='',url="{{ full_path }}");
 	      })
 	    </script>
+    {% elif 'payment_success' in request.GET and request.GET.modal_open == 'success-donation-modal' %}
+        <script>
+			$(document).ready(function () {
+				$('#success-donation-modal').modal('show');
+				history.pushState({}, title = '', url = "{{ full_path }}?payment_success=true");
+			})
+		</script>
 	{% elif 'payment_fail' in request.GET and request.GET.modal_open == 'fail-payment-modal' %}
 	    <script>
 	      $(document).ready(function () {

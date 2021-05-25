@@ -2,7 +2,9 @@ from typing import List
 from decimal import *
 from django.db import models
 
-from .consts import TAXES, TAXATIONS, CATEGORIES, LESSON_TICKETS, COFFEE_CUPS
+from .consts import TAXES, TAXATIONS, CATEGORIES, LESSON_TICKETS, \
+	COFFEE_CUPS, DEFAULT_TAXATION, CATEGORIES_E_NAME, \
+	CATEGORIES_E_SKU_PREFIX
 from .settings import get_config
 from django.contrib.postgres.fields import JSONField
 
@@ -15,6 +17,7 @@ class Payment(models.Model):
 		'PaymentURL': 'payment_url',
 		'Message': 'message',
 		'Details': 'details',
+		'RebillID': 'rebill_id'
 	}
 	amount = models.IntegerField(verbose_name='Сумма в копейках', editable=False)
 	order_id = models.CharField(verbose_name='Номер заказа', max_length=100, unique=True, editable=False, blank=True, null=True)
@@ -32,6 +35,8 @@ class Payment(models.Model):
 	message = models.TextField(verbose_name='Краткое описание ошибки', blank=True, default='', editable=False)
 	details = models.TextField(verbose_name='Подробное описание ошибки', blank=True, default='', editable=False)
 	customer_key = models.CharField(verbose_name='Идентификатор покупателя', max_length=36, null=True, default=None, editable=False)
+	recurrent = models.BooleanField(verbose_name='Идентификатор родительского платежа', default=False)
+	rebill_id = models.CharField(verbose_name='Идентификатор автоплатежа', null=True, default=None, max_length=20)
 
 	creation_date = models.DateTimeField(verbose_name='Дата создания заказа', auto_now_add=True, null=True)
 	update_date = models.DateTimeField(verbose_name='Дата последнего обновления', auto_now=True, null=True)
@@ -54,7 +59,7 @@ class Payment(models.Model):
 	def is_paid(self) -> bool:
 		return self.status == 'CONFIRMED' or self.status == 'AUTHORIZED'
 
-	def with_receipt(self, email: str, taxation: str = None, phone: str = '') -> 'Payment':
+	def with_receipt(self, email: str, taxation: str = DEFAULT_TAXATION, phone: str = '') -> 'Payment':
 		if not self.id:
 			self.save()
 
@@ -76,8 +81,10 @@ class Payment(models.Model):
 			'OrderId': self.order_id,
 			'Description': self.description,
 		}
-		# if self.customer_key:
-		# 	json['CustomerKey'] = self.customer_key
+		if self.customer_key:
+			json['CustomerKey'] = self.customer_key
+		if self.recurrent:
+			json['Recurrent'] = 'Y'
 		if data:
 			json['DATA'] = data
 
@@ -185,7 +192,7 @@ class ReceiptItem(models.Model):
 		}
 
 	def e_sku(self):
-		return '{0}{1}'.format('C' if self.category==COFFEE_CUPS else 'T', self.site_quantity)
+		return '{0}{1}'.format(CATEGORIES_E_SKU_PREFIX[self.category], self.site_quantity if self.site_quantity else '')
 
 	def e_name(self):
-		return '{0} {1}'.format('Ticket' if self.category==LESSON_TICKETS else 'Coffee Cup', self.site_quantity)
+		return '{0}{1}'.format(CATEGORIES_E_NAME[self.category],f' {self.site_quantity}' if self.site_quantity else '')

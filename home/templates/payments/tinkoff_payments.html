@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
 {% load static site_tags %}
 {% load wagtailcore_tags %}
+{% load le_francais_donations %}
 {% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/coffee_payments.css' %}">
+    {% donation_head %}
 {% endblock %}
 {% block description %}{% endblock %}
 
@@ -168,7 +170,6 @@
                 $('#oneCupDisabledModal').modal('hide')
             })
         })
-
 	</script>
 {% endblock %}
 
@@ -242,6 +243,8 @@
 			</div>
 		</div>
 		{% include 'payments/tinkoff_payments_help.html' %}
+        <hr>
+        {% include 'payments/support_form.html' %}
         <div class="modal fade" id="oneCupDisabledModal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">

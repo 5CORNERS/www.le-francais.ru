@@ -1,0 +1,57 @@
+<div class="row">
+    <div class="col-12 donationsFormContainer">
+        <form id="donationForm" method="post"
+              action="{% url 'donations:donation_action' %}">
+            <ul class="nav nav-pills nav-justified mb-3"
+                id="donationFormTypePills">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#"
+                       id="donationFormTypePillsRecurrent"
+                       data-value="recurrent">Каждый месяц</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"
+                       id="donationFormTypePillsSingle"
+                       data-value="single">Один раз</a>
+                </li>
+            </ul>
+            <ul class="nav nav-pills nav-justified mb-3"
+                id="donationsFormAmountPills">
+                <li class="nav-item">
+                    <div class="nav-link">
+                        <input class="nav-input"
+                               id="donationsFormAmountPillsCustom"
+                               type="text" placeholder="Другая сумма"
+                               name="amount_dummy"
+                               aria-label="Другая сумма">
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"
+                       id="donationsFormAmountPills500"
+                       data-value="500">500 рублей</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="#"
+                       id="donationsFormAmountPills1000"
+                       data-value="1000">1000 рублей</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"
+                       id="donationsFormAmountPills3000"
+                       data-value="3000">3000 рублей</a>
+                </li>
+            </ul>
+            <input id="donationFormSuccessUrl" type="hidden" name="success_url" value="{{ success_url }}">
+            <input id="donationFormFailUrl" type="hidden" name="fail_url" value="{{ fail_url }}">
+            <input id="donationFormType" type="hidden" name="type"
+                   value="recurrent"> <input id="donationFormAmount"
+                                             type="hidden"
+                                             name="amount"
+                                             value="1000"> {% csrf_token %}
+            <button type="submit" class="btn btn-primary" id="donationsFormSubmit">
+                Поддержать!
+            </button>
+        </form>
+    </div>
+</div>
