@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% load static site_tags %}
-
-{% block extra_head %}{% endblock %}
+{% load le_francais_donations %}
+{% block extra_head %}
+    {% donation_head %}
+{% endblock %}
 {% block description %}{% endblock %}
 
 {% block extra_css %}
@@ -201,6 +203,7 @@
 				<div class="alert alert-warning">Пожалуйста, помните: над проектом в режиме полной занятости работает два человека. Это наша работа — помогать вам учить французский. Помогите и вы нам — других источников дохода у нас нет.</div>
 			</div>
 		</div>
+        {% include 'payments/support_form.html' %}
 		<div class="modal fade" id="description" tabindex="-1" role="dialog">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
@@ -212,7 +215,27 @@
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">Продолжить</button>
 					</div>
 				</div><!-- /.modal-content -->
-			</div><!-- /.modal-dialog -->
-		</div><!-- /.modal -->
+			</div>
+		</div>
+        <div class="modal fade" id="serversMapImageModal" tabindex="-1" role="dialog" aria-labelledby="serversMapImageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" style="max-width: 650px" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Инфраструктура le-francais.ru</h5>
+                        <button type="button" class="close"
+                                data-dismiss="modal"
+                                aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <img class="d-none d-sm-inline" src="{% static 'images/serversMap2.png' %}"
+                             alt="">
+                        <img class="d-sm-none" src="{% static 'images/serversMapMobile.png' %}"
+                             alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
 	</div>
 {% endblock %}
