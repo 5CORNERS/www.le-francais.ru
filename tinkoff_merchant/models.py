@@ -2,7 +2,9 @@ from typing import List
 from decimal import *
 from django.db import models
 
-from .consts import TAXES, TAXATIONS, CATEGORIES, LESSON_TICKETS, COFFEE_CUPS
+from .consts import TAXES, TAXATIONS, CATEGORIES, LESSON_TICKETS, \
+	COFFEE_CUPS, DEFAULT_TAXATION, CATEGORIES_E_NAME, \
+	CATEGORIES_E_SKU_PREFIX
 from .settings import get_config
 from django.contrib.postgres.fields import JSONField
 
@@ -57,7 +59,7 @@ class Payment(models.Model):
 	def is_paid(self) -> bool:
 		return self.status == 'CONFIRMED' or self.status == 'AUTHORIZED'
 
-	def with_receipt(self, email: str, taxation: str = None, phone: str = '') -> 'Payment':
+	def with_receipt(self, email: str, taxation: str = DEFAULT_TAXATION, phone: str = '') -> 'Payment':
 		if not self.id:
 			self.save()
 
@@ -190,7 +192,7 @@ class ReceiptItem(models.Model):
 		}
 
 	def e_sku(self):
-		return '{0}{1}'.format('C' if self.category==COFFEE_CUPS else 'T', self.site_quantity)
+		return '{0}{1}'.format(CATEGORIES_E_SKU_PREFIX[self.category], self.site_quantity if self.site_quantity else '')
 
 	def e_name(self):
-		return '{0} {1}'.format('Ticket' if self.category==LESSON_TICKETS else 'Coffee Cup', self.site_quantity)
+		return '{0}{1}'.format(CATEGORIES_E_NAME[self.category],f' {self.site_quantity}' if self.site_quantity else '')

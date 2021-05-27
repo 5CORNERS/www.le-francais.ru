@@ -31,9 +31,25 @@ TAXES = (
 )
 
 
+# le-francais.ru settings
+
 COFFEE_CUPS = 'coffee_cups'
 LESSON_TICKETS = 'tickets'
+DONATIONS = 'donations'
 CATEGORIES = (
     (COFFEE_CUPS, 'Чашки кофе'),
-    (LESSON_TICKETS, 'Тикеты')
+    (LESSON_TICKETS, 'Тикеты'),
+    (DONATIONS, 'Пожертвования')
 )
+CATEGORIES_E_NAME = {
+    COFFEE_CUPS: 'Coffee Cup',
+    LESSON_TICKETS: 'Ticket',
+    DONATIONS: 'Donation',
+}
+CATEGORIES_E_SKU_PREFIX = {
+    COFFEE_CUPS: 'C',
+    LESSON_TICKETS: 'T',
+    DONATIONS: 'D'
+}
+
+DEFAULT_TAXATION = TAXATION_USN_INCOME

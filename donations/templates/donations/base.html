@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h1">
+                Title
+            </h1>
+        </div>
+    </div>
+        <div class="row">
+            <div class="col-12">
+                <p>
+                    Description
+                </p>
+            </div>
+        </div>
+    {% include 'donations/form.html' %}
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'donations/style.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+    <script type="text/javascript" src="{% static 'donations/script.js' %}"></script>
+{% endblock %}
