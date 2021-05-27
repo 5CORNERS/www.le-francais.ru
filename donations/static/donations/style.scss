@@ -1,0 +1,58 @@
+@mixin placeholder {
+    &::-webkit-input-placeholder {@content}
+    &:-moz-placeholder           {@content}
+    &::-moz-placeholder          {@content}
+    &:-ms-input-placeholder      {@content}
+}
+
+.nav-item{
+  div.nav-link {
+    display: block;
+
+    .nav-input,.nav-input{
+      border: 0;
+      width: 100%;
+      outline-width: 0;
+      text-align: center;
+      background-color: transparent;
+    }
+
+    &.active {
+      .nav-input {
+        color: #fff;
+        @include placeholder {
+          color: #fff;
+          background-color: #337ab7;
+        }
+      }
+
+    }
+  }
+}
+
+#donationsFormAmountPills{
+  display: grid;
+  gap: 5px 5px;
+  grid-template-columns: repeat(2,1fr);
+
+  @media only screen and (min-width: 650px) {
+    grid-template-columns: repeat(4,1fr);
+  }
+}
+
+#donationsFormSubmit{
+  width: 100%;
+}
+
+.donationsFormContainer {
+  max-width: 650px;
+  margin: 0 auto 10px;
+  padding: 0 15px 0 15px;
+  padding-bottom: 15px;
+  text-align: center;
+  
+  @media only screen and (min-width: 650px) {
+    padding: 0 20px 0 20px;
+    margin-bottom: 20px;
+  }
+}

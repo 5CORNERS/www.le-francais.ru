@@ -96,6 +96,8 @@ urlpatterns = [
 
     url(r'^conjugaison/', include('conjugation.urls', namespace='conjugation')),
 
+    url(r'^support/', include('donations.urls', namespace='donations')),
+
 
     url(r'^le_nombres/', include('le_nombres.urls')),
     url(r'^', include(mass_mailer_urls, namespace='mass_mailer')),
