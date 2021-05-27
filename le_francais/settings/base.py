@@ -107,6 +107,7 @@ INSTALLED_APPS = [
     'conjugation',
     'le_francais_dictionary',
     'notifications',
+    'donations',
 
     'tinkoff_merchant',
     'django_js_reverse',
