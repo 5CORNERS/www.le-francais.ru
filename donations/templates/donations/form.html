@@ -21,8 +21,9 @@
                     <div class="nav-link">
                         <input class="nav-input"
                                id="donationsFormAmountPillsCustom"
-                               type="text" placeholder="Другая сумма"
+                               type="number" placeholder="Другая сумма"
                                name="amount_dummy"
+                               min="1"
                                aria-label="Другая сумма">
                     </div>
                 </li>
@@ -44,6 +45,7 @@
             </ul>
             <input id="donationFormSuccessUrl" type="hidden" name="success_url" value="{{ success_url }}">
             <input id="donationFormFailUrl" type="hidden" name="fail_url" value="{{ fail_url }}">
+            <input id="donationFormValidationRedirect" type="hidden" name="validation_redirect" value="{{ validation_redirect }}">
             <input id="donationFormType" type="hidden" name="type"
                    value="recurrent"> <input id="donationFormAmount"
                                              type="hidden"

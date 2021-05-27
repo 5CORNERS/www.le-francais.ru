@@ -20,6 +20,7 @@ class SubmitDonation(View):
 		recurrent = request.POST.get('type') == 'recurrent'
 		amount = int(request.POST.get('amount'))
 		email = request.user.email
+		validation_redirect = request.POST.get('validation_redirect')
 		description = f'Ежемесячное пожертвование le-francais.ru'
 		name = f'Одноразовое пожертвование le-francais.ru'
 		payment = TinkoffPayment.objects.create(
@@ -60,7 +61,7 @@ class SubmitDonation(View):
 			)
 			return redirect(payment.payment_url)
 		else:
-			return redirect('donations:donation_page')
+			return redirect(validation_redirect)
 
 
 @method_decorator(login_required, name='get')
