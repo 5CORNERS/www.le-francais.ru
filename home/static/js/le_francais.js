@@ -116,9 +116,9 @@ function addExpandedStateToNavdata(navData) {
 }
 
 function scrolling(document, history, location) {
-    const HISTORY_SUPPORT = !!(history && history.pushState);
+    let HISTORY_SUPPORT = !!(history && history.pushState);
 
-    const anchorScrolls = {
+    let anchorScrolls = {
         ANCHOR_REGEX: /^#[^ ]+$/,
         OFFSET_HEIGHT_PX: 71,
 
@@ -152,7 +152,10 @@ function scrolling(document, history, location) {
                 return false;
             }
 
-            match = document.getElementsByName(href.slice(1));
+            match = document.getElementById(href.slice(1));
+            if (!match){
+                match = document.getElementsByName(href.slice(1));
+            }
 
             if (match) {
                 anchorOffset = $(match).offset().top - this.getFixedOffset();
@@ -188,7 +191,7 @@ function scrolling(document, history, location) {
         }
     };
 
-    $.proxy(anchorScrolls, 'init');
+    $.proxy(anchorScrolls, 'init')()
 }
 
 $(document).ready(function () {
@@ -269,8 +272,7 @@ $(document).ready(function () {
 
     // Scrolling
 
-	scrolling(window.document, window.history, window.location);
-
+    scrolling(window.document, window.history, window.location)
 });
 
 (function () {
