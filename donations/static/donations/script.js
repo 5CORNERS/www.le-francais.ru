@@ -17,6 +17,7 @@ $(document).ready(() => {
         $amountPills.removeClass('active')
         $this.addClass('active')
         if ($this.data('value')){
+            $amountDummyInput.val('')
             $amountInput.val($this.data('value'))
             console.log($this.data('value'))
         }else{
