@@ -155,7 +155,7 @@
 						<div class="col-6 col-md-6 col-lg-4 col-xl-5ths">
 							<div class="card card-select" data-cardSelect>
 								<div class="card-container">
-									<div class="card-image-container"><img class="card-image" src="{% static card.image %}"></div>
+									<div class="card-image-container lazy-image-container"><img class="card-image" src="{% static card.image %}" alt="{{ card.title }}" data-aspect="1"></div>
 								</div>
 								<button type="submit" role="button" onclick="initPayment({{ card.item_id }})" class="btn btn-primary btn-block">Беру!</button>
 							</div>
