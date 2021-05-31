@@ -110,13 +110,13 @@ td {
 
 
 ul.hr {
-    margin: 0; /* Обнуляем значение отступов */
-    padding: 8px; /* Значение полей */
+    margin: 0;
+    padding: 8px;
 }
 
 ul.hr li {
-    display: inline; /* Отображать как строчный элемент */
-    margin-right: 16px; /* Отступ слева */
+    display: inline;
+    margin-right: 15px;
 }
 
 ul.hr li a {
@@ -1171,4 +1171,8 @@ span.underline.play:focus {
   border-radius: 4px;
   background-color: #cbe7ff;
   box-shadow: 1px 1px 5px 0px;
+}
+
+.btn-youtube {
+
 }
