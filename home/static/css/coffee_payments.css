@@ -1,17 +1,1 @@
-.coffee-card-disabled > * {
-  opacity: 0.5;
-}
-
-.coffee-card-disabled > .btn {
-  opacity: 1;
-}
-
-.modal-header {
-  display: flex;
-}
-.modal-header > button.close {
-  float: inherit;
-  margin-left: inherit !important;
-}
-
-/*# sourceMappingURL=coffee_payments.css.map */
+.coffee-card-disabled>*{opacity:.5}.coffee-card-disabled>.btn{opacity:1}.modal-header{display:flex}.modal-header>button.close{float:inherit;margin-left:inherit !important}.col-card{margin:auto auto 20px;width:50%;padding-left:7px;padding-right:7px}@media(min-width: 768px){.col-card{width:33.3333%}}@media(min-width: 992px){.col-card{width:20%;padding-left:15px;padding-right:15px}}@media(min-width: 1200px){.col-card{width:20%}}.card-break-small{width:0;height:0}@media only screen and (max-width: 768px){.card-break-small{width:100%}}.card-break-medium{width:0;height:0}@media(max-width: 992px){.card-break-medium{width:100%}}.card-price{padding:25px}/*# sourceMappingURL=coffee_payments.css.map */

@@ -1,16 +1,63 @@
 .coffee-card-disabled > * {
-	opacity: 0.5;
+  opacity: 0.5;
 }
 
 .coffee-card-disabled > .btn {
-	opacity: 1;
+  opacity: 1;
 }
 
 .modal-header {
-	display: flex;
-	> button.close{
-		float: inherit;
-		margin-left: inherit !important;
-	}
+  display: flex;
+
+  > button.close {
+    float: inherit;
+    margin-left: inherit !important;
+  }
 }
 
+.col-card {
+  margin: auto auto 20px;
+  // Small devices (landscape phones, 576px and up)
+  width: 50%;
+  padding-left: 7px;
+  padding-right: 7px;
+
+
+  // Medium devices (tablets, 768px and up)
+  @media (min-width: 768px) {
+    width: 33.3333%;
+  }
+
+  // Large devices (desktops, 992px and up)
+  @media (min-width: 992px) {
+    width: 20%;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  // Extra large devices (large desktops, 1200px and up)
+  @media (min-width: 1200px) {
+    width: 20%;
+  }
+
+}
+
+.card-break-small {
+  width: 0;
+  height: 0;
+  @media only screen and (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.card-break-medium {
+  width: 0;
+  height: 0;
+  @media (max-width: 992px) {
+    width: 100%;
+  }
+}
+
+.card-price{
+  padding: 25px;
+}

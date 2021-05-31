@@ -429,3 +429,7 @@ def do_assign(parser, token):
 register.tag('assign', do_assign)
 
 register.assignment_tag()
+
+@register.inclusion_tag('tags/payment_card.html', takes_context=False)
+def payment_card(card, n):
+	return dict(card=card, n=n)

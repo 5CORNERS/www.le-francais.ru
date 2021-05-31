@@ -1,0 +1,14 @@
+{% load static site_tags %}
+<div class="row equal" style="margin-bottom: 10px">
+    {% for card in cards %}
+        <div class="col-card">
+            {% payment_card card forloop.counter0 %}
+        </div>
+        {% if forloop.counter == 2 %}
+            <div class="card-break-small"></div>
+        {% endif %}
+        {% if forloop.counter == 3 %}
+            <div class="card-break-small card-break-medium"></div>
+        {% endif %}
+    {% endfor %}
+</div>
