@@ -21,7 +21,7 @@ class SubmitDonation(View):
 		amount = int(request.POST.get('amount'))
 		email = request.user.email
 		validation_redirect = request.POST.get('validation_redirect')
-		description = 'Ежемесячное пожертвование le-francais.ru' if reccurrent else 'Одноразовое пожертвование le-francais.ru'
+		description = 'Ежемесячное пожертвование le-francais.ru' if recurrent else 'Одноразовое пожертвование le-francais.ru'
 		payment = TinkoffPayment.objects.create(
 			amount = amount * 100,
 			description=description,
