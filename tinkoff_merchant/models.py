@@ -17,7 +17,7 @@ class Payment(models.Model):
 		'PaymentURL': 'payment_url',
 		'Message': 'message',
 		'Details': 'details',
-		'RebillID': 'rebill_id'
+		'RebillId': 'rebill_id'
 	}
 	amount = models.IntegerField(verbose_name='Сумма в копейках', editable=False)
 	order_id = models.CharField(verbose_name='Номер заказа', max_length=100, unique=True, editable=False, blank=True, null=True)
