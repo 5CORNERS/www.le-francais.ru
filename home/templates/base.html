@@ -4,6 +4,7 @@
 {% load i18n %}
 {% load pybb_tags i18n %}
 {% load user_agents %}
+{% load compress %}
 
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -67,13 +68,7 @@
 	<script src="{% static 'django_js_reverse/js/reverse.js' %}"></script>
 {% endblock %}
 {% block bootstrap_js %}
-    <script src="{% static 'components/js/jquery.js' %}"></script>
-    <script src="{% static "components/js/moment.js" %}"></script>
-    <script src="{% static "components/js/js.cookie.js" %}"></script>
-    <script src="{% static 'js/csrf.min.js' %}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
-    <script src="{% static 'components/js/bootstrap.js' %}" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="{% static 'lib/footable-bootstrap.v3.1.6/js/footable.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/js/base/base.min.js' %}"></script>
 {% endblock %}
 {% block bootstrap_css %}
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
@@ -90,7 +85,7 @@
 	    {# Global stylesheets #}
 	    <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
         <link rel="stylesheet" href="{% static 'components/css/font-awesome.css' %}">
-	    <link rel="stylesheet" type="text/css" href="{% static 'lib/footable-bootstrap.v3.1.6/css/footable.bootstrap.min.css' %}">
+	    <link rel="stylesheet" type="text/css" href="{% static 'components/css/footable.bootstrap.css' %}">
     {% endblock %}
 		{% get_full_path as full_path %}
     {% block canonical %}<link rel="canonical" href="{% split_canonical full_path %}"/>{% endblock %}
@@ -109,10 +104,6 @@
 
     {% block head_advertisments %}
 
-    {% endblock %}
-
-    {% block site_js %}
-        <script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
     {% endblock %}
 </head>
 

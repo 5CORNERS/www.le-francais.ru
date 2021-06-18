@@ -3,10 +3,6 @@
 
 {% block body_class %}template-homepage{% endblock %}
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
-{% block extra_js %}
-    <script type="text/javascript"
-            src="{% static 'components/js/bootstrap-treeview.min.js' %}"></script>
-{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'components/css/bootstrap-treeview.css' %}">

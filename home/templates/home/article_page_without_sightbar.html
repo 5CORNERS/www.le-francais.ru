@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% load i18n %}
+{% extends "base.html" %}{% load compress %}{% load i18n %}
 {% load comments %}
 {% load comments_xtd %}
 {% load static site_tags wagtailcore_tags %}
@@ -7,20 +6,17 @@
 {% block body_class %}template-homepage{% endblock %}
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
 {% block extra_js %}
-    <script type="text/javascript"
-            src="{% static 'components/js/bootstrap-treeview.min.js' %}"></script>
-    <script>
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip({html: true})
-        })
-    </script>
+    {% compress js file  %}
+        <script>
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip({html: true})
+            })
+        </script>
+    {% endcompress %}
 {% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'components/css/bootstrap-treeview.css' %}">
-{% endblock %}
-
-{% block extra_head %}
 {% endblock %}
 
 {% block meta %}

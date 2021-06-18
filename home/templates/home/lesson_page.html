@@ -5,8 +5,11 @@
 
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 {% block extra_head %}
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-    <script src="{% static 'js/lessons.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/js/lessons/lessons.min.js' %}"></script>
+    {% if self.has_verbs %}
+        <script type="text/javascript" src="{% static 'components/js/lesson_verbs/lesson_verbs.min.js' %}"></script>
+    {% endif %}
+
 	{% advert_head page %}
 {% endblock %}
 
@@ -38,8 +41,7 @@
     const COFFEE_SOUND_URL = '{% static 'snd/coffee.mp3' %}';
     const BY_ME_A_COFFEE_SVG = '{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}';
 	</script>
-	<script type="text/javascript"
-            src="{% static 'components/js/bootstrap-treeview.min.js' %}"></script>
+
     <script>
         addEventListener('audioplayerReady', function () {
             let audio = $('#newAudioTranscript')
@@ -66,6 +68,7 @@
             })
         })
     </script>
+
 	{% if request.GET.modal_open %}
 		{% with modal_id=request.GET.modal_open %}
 			<script>
