@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
-{% load static site_tags %}
+{% load static site_tags compress %}
 
 {% block extra_head %}
+    {% compress js file %}
 	<!-- Start GPT Tag -->
 <script>
   var gptadslots = [];
@@ -29,6 +30,7 @@
   });
 </script>
 <!-- End GPT Tag -->
+    {% endcompress %}
 {% endblock %}
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
 {% block extra_css %}

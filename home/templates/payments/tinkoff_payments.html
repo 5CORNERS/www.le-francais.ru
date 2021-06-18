@@ -1,5 +1,4 @@
-{% extends 'base.html' %}
-{% load static site_tags %}
+{% extends 'base.html' %}{% load compress %}{% load static site_tags %}
 {% load wagtailcore_tags %}
 {% load le_francais_donations %}
 {% block extra_head %}
@@ -124,7 +123,9 @@
 				}
 			})
 		}
-
+    </script>
+    {% compress js file %}
+    <script>
         $('#collapse-button-one').click(function (e) {
             $('#collapse-button-one > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
         });
@@ -146,6 +147,7 @@
             })
         })
 	</script>
+    {% endcompress %}
 {% endblock %}
 
 {% block title %}Запаситесь кофейком!{% endblock %}

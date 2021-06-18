@@ -30,11 +30,6 @@
 		const MUST_BE_PRONOUN = {{ must_be_pronoun|yesno:'true,false' }};
 		const VOICE_RANGE_ID = "{{ switches_form.voice.id_for_label }}";
 	</script>
-	<script async
-	        type="text/javascript"
-	        src="{% static 'js/le_francais.min.js' %}"></script>
-	<script type="text/javascript" src="{% static 'conjugation/js/table.js' %}"></script>
-
 {% endblock %}
 
 {% block content %}
