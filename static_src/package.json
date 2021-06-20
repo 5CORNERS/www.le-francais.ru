@@ -1,6 +1,6 @@
 {
   "name": "le-francais-static",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Package contains static sources for Le-Francais.ru",
   "main": "index.js",
   "scripts": {
