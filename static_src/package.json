@@ -27,7 +27,6 @@
     "webpack-stream": "^5.2.1"
   },
   "devDependencies": {
-    "bower": "~1.8.12",
     "google-closure-compiler": "^20210505.0.0",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^4.3.0",

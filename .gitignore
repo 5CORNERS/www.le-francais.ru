@@ -5,7 +5,7 @@ Procfile.local
 venv
 *.pyc
 /temp.html
-/temp2.html
+/temp2.json
 /avatar.jpg
 /.log
 /package-lock.json
