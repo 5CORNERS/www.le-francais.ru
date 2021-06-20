@@ -112,6 +112,7 @@ INSTALLED_APPS = [
     'tinkoff_merchant',
     'django_js_reverse',
     'mass_mailer',
+    "compressor",
 ]
 
 MIDDLEWARE = [
@@ -277,6 +278,7 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'sass_processor.finders.CssFinder',
+    'compressor.finders.CompressorFinder',
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -613,3 +615,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 NOTIFICATIONS_AUTO_CHECK_NEW = os.getenv('NOTIFICATIONS_AUTO_CHECK_NEW', '1') == '1'
 
 NPM_STATIC_FILES_PREFIX = 'jslib'
+
+# Django Comressor Settings
+
+COMPRESS_ENABLED = True
