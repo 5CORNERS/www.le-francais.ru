@@ -80,6 +80,8 @@ function see_more() {
 $(document).ready(function () {
 	if (window.localStorage.getItem('long_list') === 'true') {
 		see_more()
+	}else{
+		see_less()
 	}
 
 	// TODO: change form on hashchange
