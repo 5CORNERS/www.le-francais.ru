@@ -67,17 +67,18 @@ function errHandle(a) {
             console.log("Error " + a.error.code + "; details: " + a.error.message);
         }
 
+const LAZY_TABS = {
+    'tab-flash-cards': 'flash_cards',
+    'tab-verbs': 'verbs',
+    'tab-participe': 'participe',
+}
 
 $(document).ready(function () {
-    $('a#tab-flash-cards').one('show.bs.tab', function () {
-        reloadPage(LESSON_NUMBER, 'flash-cards');
-    });
-    $('a#tab-verbs').one('show.bs.tab', function () {
-        reloadPage(LESSON_NUMBER, 'verbs')
-    })
-    $('a#tab-participe').one('show.bs.tab', function (){
-        reloadPage(LESSON_NUMBER, 'participe')
-    })
+    for (const [tabClass, tabID] of Object.entries(LAZY_TABS)) {
+        $(`a#${tabClass}`).one('show.bs.tab', function () {
+            reloadPage(LESSON_NUMBER, tabID);
+        });
+    }
 
     let ua = window.navigator.userAgent;
     let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);

@@ -17,7 +17,8 @@ gulp.task('sass', () => {
 gulp.task('css', () => {
     return gulp.src([
         'css/**/*.css',
-        './node_modules/jquery-ui-dist/jquery-ui.min.css'
+        './node_modules/jquery-ui-dist/jquery-ui.min.css',
+        './node_modules/animate.css/animate.min.css'
     ])
         .pipe(minify())
         .pipe(gulp.dest(dist + '/css/'))
@@ -40,6 +41,15 @@ gulp.task('js-base', () => {
             js_output_file: 'base.min.js'
         }))
         .pipe(gulp.dest(dist + '/js/base/'))
+})
+
+gulp.task('js-index', () => {
+    return gulp.src(base_js_modules_src).pipe(closureCompiler({
+            compilation_level: 'SIMPLE_OPTIMIZATIONS',
+            output_wrapper: '(function(){\n%output%\n}).call(this)',
+            js_output_file: 'base.min.js'
+        }))
+        .pipe(gulp.dest(dist + '/js/index/'))
 })
 
 gulp.task('js-lessons', () => {

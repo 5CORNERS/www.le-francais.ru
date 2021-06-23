@@ -65,27 +65,27 @@
 
 
 {% block js_reverse %}
+    {% compress js inline %}
 	<script src="{% static 'django_js_reverse/js/reverse.js' %}"></script>
+    {% endcompress %}
 {% endblock %}
 {% block bootstrap_js %}
     <script type="text/javascript" src="{% static 'components/js/base/base.min.js' %}"></script>
 {% endblock %}
 {% block bootstrap_css %}
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
     <link rel="stylesheet" href="{% static 'components/css/bootstrap.css' %}">
+    {% compress css inline %}
     <link rel="stylesheet" type="text/css" href="{% static 'lib/bootstrap-social/bootstrap-social.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'components/css/animate.min.css' %}">
+    {% endcompress %}
 {% endblock %}
     {% block css %}
-
-        <link rel="stylesheet" href="{% static 'lib/audio/audioplayer.min.css' %}">
-
-        <!-- Latest compiled and minified CSS -->
-
-
-	    {# Global stylesheets #}
-	    <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
-        <link rel="stylesheet" href="{% static 'components/css/font-awesome.css' %}">
-	    <link rel="stylesheet" type="text/css" href="{% static 'components/css/footable.bootstrap.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/le_francais.min.css' %}">
+        {% compress css inline %}
+            <link rel="stylesheet" href="{% static 'lib/audio/audioplayer.min.css' %}">
+            <link rel="stylesheet" href="{% static 'components/css/font-awesome.css' %}">
+            <link rel="stylesheet" type="text/css" href="{% static 'components/css/footable.bootstrap.css' %}">
+        {% endcompress %}
     {% endblock %}
 		{% get_full_path as full_path %}
     {% block canonical %}<link rel="canonical" href="{% split_canonical full_path %}"/>{% endblock %}
