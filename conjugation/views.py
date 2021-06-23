@@ -139,6 +139,7 @@ def search(request):
 	return redirect(url)
 
 
+@csrf_exempt
 def verb_switches_form_view(request):
 	if request.method == 'POST':
 		form = SwitchesForm(request.POST)
