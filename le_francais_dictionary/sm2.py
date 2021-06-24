@@ -183,7 +183,7 @@ def sm2_response_quality(data, zeros_dataset, repetition_time=None):
 				break
 	elif mistakes and data.grade:
 		q += mistakes_grade(mistakes, data.word)
-	elif data.grade and delay is None:
+	elif data.grade and delay is None or delay == 0:
 		q = sm2_response_quality_obsolete(data, zeros_dataset)
 	elif not data.grade:
 		q = 0
