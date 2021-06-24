@@ -167,7 +167,7 @@ def sm2_response_quality(data, zeros_dataset, repetition_time=None):
 	q: int = 5
 	mistakes = data.mistakes - data.word.unrelated_mistakes
 	delay = data.delay
-	if data.custom_grade and isinstance(data.custom_grade, int) and 0 <= data.custom_grade <= 5:
+	if data.custom_grade is not None and isinstance(data.custom_grade, int) and 0 <= data.custom_grade <= 5:
 		q = data.custom_grade
 	elif zeros_dataset and data.grade:
 		q = 0
