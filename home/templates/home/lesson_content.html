@@ -114,8 +114,8 @@
                     {% if user.must_pay and self.need_payment %}
                         {% if userlesson %}
                             <li class="nav-item">
-                                <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-target=""
-                                   href="#mail-archive" role="tab"
+                                <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}"
+                                   href="#mail-archive" data-toggle="tab" role="tab"
                                    aria-controls="body">
                                     Доп. информация
                                 </a>
