@@ -34,6 +34,7 @@ gulp.task('js', () => {
         'node_modules/vue/dist/vue.js',
         'node_modules/vue-multiselect/dist/vue-multiselect.min.js',
         'node_modules/howler/dist/howler.js',
+        'node_modules/popper.js/dist/umd/popper.js'
         'src/js/**/*.js'
     ])
         .pipe(uglify())
