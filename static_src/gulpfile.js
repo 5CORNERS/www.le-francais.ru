@@ -28,7 +28,7 @@ const base_js_modules_src = [
     './node_modules/jquery/dist/jquery.js',
     './node_modules/bootstrap/dist/js/bootstrap.js',
     './node_modules/js-cookie/src/js.cookie.js',
-    './node_modules/popper.js/dist/popper.js',
+    './node_modules/popper.js/dist/umd/popper.js',
     './node_modules/moment/moment.js',
     './js/base/**/*.js'
 ]
