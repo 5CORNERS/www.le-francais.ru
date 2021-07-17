@@ -1,6 +1,6 @@
 {
   "name": "le-francais-static",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Package contains static sources for Le-Francais.ru",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "animate.css": "~4.1.1",
     "bootstrap": "^4",
     "bootstrap-select": "^1.13.12",
-    "bootstrap-treeview": "github:AntonDumov/bootstrap-treeview#1.2.1",
+    "bootstrap-treeview": "github:AntonDumov/bootstrap-treeview#1.2.2",
     "del": "^5.1.0",
     "howler": "^2.2.1",
     "jquery": "^3.5.1",
