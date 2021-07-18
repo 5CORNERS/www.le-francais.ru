@@ -125,11 +125,16 @@
 			})
 		}
 
+    </script>
+    <script>
         $('#collapse-button-one').click(function (e) {
             $('#collapse-button-one > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
         });
         $('#collapse-button-two').click(function (e) {
             $('#collapse-button-two > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+        });
+        $('#collapse-button-t-gratitude').click(function (e) {
+            $('#collapse-button-t-gratitude > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
         });
         $('#whyInfoPopoverLink').popover({
             content:'Оплата серверов, различные сервисы, электричество, налоги... (<a href="#serversMapImageModal" data-toogle="modal" id="serversMapImageLink" data-target="#serversMapImageModal">подробнее</a>)',
@@ -179,6 +184,8 @@
 		{% include 'payments/tinkoff_payments_help.html' %}
         <hr>
         {% include 'payments/support_form.html' %}
+        <hr>
+        {% include 'payments/teacher_gratitude.html' %}
         <div class="modal fade" id="oneCupDisabledModal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
