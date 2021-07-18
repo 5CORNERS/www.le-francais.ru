@@ -142,6 +142,17 @@
 			$('#{{ request.GET.open_modal }}').modal('show');
 		{% endif %}
 	</script>
+    <script>
+        $('#collapse-button-one').click(function (e) {
+            $('#collapse-button-one > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+        });
+        $('#collapse-button-two').click(function (e) {
+            $('#collapse-button-two > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+        });
+        $('#collapse-button-t-gratitude').click(function (e) {
+            $('#collapse-button-t-gratitude > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -203,7 +214,11 @@
 				<div class="alert alert-warning">Пожалуйста, помните: над проектом в режиме полной занятости работает два человека. Это наша работа — помогать вам учить французский. Помогите и вы нам — других источников дохода у нас нет.</div>
 			</div>
 		</div>
+        {% include 'payments/tinkoff_payments_help.html' %}
+        <hr>
         {% include 'payments/support_form.html' %}
+        <hr>
+        {% include 'payments/teacher_gratitude.html' %}
 		<div class="modal fade" id="description" tabindex="-1" role="dialog">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
