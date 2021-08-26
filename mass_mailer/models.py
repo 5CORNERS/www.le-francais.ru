@@ -523,12 +523,13 @@ class Message(models.Model):
 
 	def get_context(self, recipient, additional_context=None, include_subject=True):
 		from tinkoff_merchant.models import Payment
-		last_payment = Payment.objects.filter(customer_key=str(recipient.user.pk), status__in=['CONFIRMED', 'AUTHORIZED']).order_by('update_date').last()
+		from tinkoff_merchant.consts import COFFEE_CUPS
+		last_cup_payment = Payment.objects.filter(customer_key=str(recipient.user.pk), status__in=['CONFIRMED', 'AUTHORIZED'], receipt__receiptitem__category=COFFEE_CUPS).order_by('update_date').last()
 
 		next_after_payment_activation = None
-		if last_payment:
+		if last_cup_payment:
 			from home.models import UserLesson
-			activated_lesson_number = last_payment.closest_activation
+			activated_lesson_number = last_cup_payment.closest_activation
 			activated_lesson_number = activated_lesson_number != '-' and int(activated_lesson_number)
 			if activated_lesson_number:
 				next_after_payment_activation = UserLesson.objects.get(lesson__lesson_number=activated_lesson_number, user=recipient.user)
@@ -541,15 +542,14 @@ class Message(models.Model):
 			user=recipient.user,
 			profile=recipient,
 			last_payment={
-				'date': last_payment.update_date if last_payment else None,
+				'date': last_cup_payment.update_date if last_cup_payment else None,
 				'cups_count': sum(
-					item.site_quantity for item in last_payment.items()) if last_payment else 0
+					item.site_quantity for item in last_cup_payment.items()) if last_cup_payment else 0
 			},
 			unsubscribe_url=recipient.get_unsubscribe_url(),
 			first_name=recipient.user.first_name,
 			name=name,
-			cups_quantity=sum(
-					item.site_quantity for item in last_payment.items()) if last_payment else 0,
+			cups_quantity=recipient.user.cups_amount,
 			next_after_payment_activation=next_after_payment_activation
 		)
 		if include_subject:
