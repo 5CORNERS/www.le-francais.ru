@@ -1,8 +1,7 @@
 {% extends 'base.html' %}
-{% load static site_tags compress %}
+{% load static site_tags %}
 
 {% block extra_head %}
-    {% compress js file %}
 	<!-- Start GPT Tag -->
 <script>
   var gptadslots = [];
@@ -33,7 +32,6 @@
   });
 </script>
 <!-- End GPT Tag -->
-    {% endcompress %}
 {% endblock %}
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
 {% block extra_css %}
@@ -73,11 +71,20 @@
 						<div class="row">
 							<div class="col-9 text_description">
 								<div class="subcaption">
-									Нет, не точка. Не просто научиться говорить по-французски, а делать это с
-									наименьшими трудозатратами и получать от этого удовольствие. Важен будет не только (и не
-									столько)
-									результат, но и процесс. И все это безвозмездно, то есть даром
-									(понимай:&nbsp;<b>бесплатно</b>).
+                                    Нет, не точка. Не просто научиться
+                                    говорить по-французски, а делать
+                                    это с наименьшими трудозатратами и
+                                    получать от этого удовольствие.
+                                    Важен будет не только (и не
+                                    столько) результат, но и процесс.
+                                    И огромная часть из этого — на
+                                    весь курс уровня A1 —
+                                    <b>бесплатно</b> (лишь часть
+                                    дополнительных материалов, не
+                                    содержащих, впрочем, новой
+                                    информации, мы отдаем возмездно —
+                                    в обмен на весьма скромную
+                                    поддержку проекта).
 								</div>
 							</div>
 							<div class="col-3 cat-logo-collapse">
