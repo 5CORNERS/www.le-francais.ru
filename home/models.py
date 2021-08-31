@@ -71,6 +71,7 @@ BLOCK_AFTER_REPETITION_MATERIAL = 8
 BLOCK_AFTER_EXERCISE = 9
 BLOCK_AFTER_FLASHCARDS = 10
 
+
 @register_snippet
 class AdUnit(Model):
     name = CharField(max_length=100, unique=True)
@@ -132,6 +133,7 @@ class InlineAdvertisementSnippet(Model):
 
     def get_sizes(self):
         return self.adunit_sizes
+
 
 from home.blocks.AdvertisementBlocks import AdvertisementInline
 
@@ -420,9 +422,11 @@ class LessonPage(Page):
         ('collapse', CollapseBlock()),
     ], verbose_name='Народный конспект', null=True, blank=True)
     other_tabs = StreamField([('tab', TabBlock())], blank=True)
+
     @property
     def summary_full_url(self):
         return '//files.le-francais.ru' + self.summary if self.summary else None
+
     @property
     def repetition_material_full_url(self):
         return '//files.le-francais.ru' + self.repetition_material if self.repetition_material else None
@@ -496,7 +500,7 @@ class LessonPage(Page):
             return True
         return False
 
-    def serve(self, request:HttpRequest, *args, **kwargs):
+    def serve(self, request: HttpRequest, *args, **kwargs):
         # user = request.user
         # if user.is_authenticated and user.show_tickets != self.must_pay(user):
         # 	user.show_tickets = self.must_pay(user)
@@ -680,6 +684,7 @@ ArticlePage.settings_panels = ArticlePage.settings_panels + [
     FieldPanel('page_type'),
 ]
 
+
 class PodcastPage(Page):
     body = StreamField([
         ('advertisement', AdvertisementInline()),
@@ -713,6 +718,7 @@ class PodcastPage(Page):
     def get_nav_root(self) -> Page:
         return get_nav_root(self)
 
+
 PodcastPage.content_panels = PodcastPage.content_panels + [
     FieldPanel('reference_title'),
     ImageChooserPanel('reference_image'),
@@ -726,6 +732,16 @@ PodcastPage.promote_panels = PodcastPage.promote_panels + [
 PodcastPage.settings_panels = PodcastPage.settings_panels + [
     FieldPanel('page_type'),
 ]
+
+
+class HTMLPage(Page):
+    body = StreamField([('html', RawHTMLBlock()), ], blank=True)
+
+    def get_template(self, request, *args, **kwargs):
+        return 'home/landing_page.html'
+
+
+HTMLPage.content_panels = HTMLPage.content_panels + [StreamFieldPanel('body')]
 
 from django.db.models import PROTECT
 
@@ -776,7 +792,8 @@ class Payment(Model):
     def __str__(self):
         return 'Payment ' + str(self.id)
 
-    def get_params(self, success_url="https://www.le-francais.ru/payments?success", fail_url="https://www.le-francais.ru/payments?fail"):
+    def get_params(self, success_url="https://www.le-francais.ru/payments?success",
+                   fail_url="https://www.le-francais.ru/payments?fail"):
         merchant_id = settings.WALLET_ONE_MERCHANT_ID
 
         if self.cups_amount == 1:
@@ -804,7 +821,8 @@ class Payment(Model):
         self.save()
         currency_id = u'643'  # Russian rubles
         payment_no = self.id
-        description = "www.le-francais.ru -- Покупка " + message(self.cups_amount, 'чашечки', 'чашечек', 'чашечек') + " кофе."
+        description = "www.le-francais.ru -- Покупка " + message(self.cups_amount, 'чашечки', 'чашечек',
+                                                                 'чашечек') + " кофе."
         expired_date = self.expired_date().isoformat()
         customer_email = self.user.email
         success_url = success_url + "&payment_amount={0}&payment_id={1}".format(str(payment_amount), str(self.id))
