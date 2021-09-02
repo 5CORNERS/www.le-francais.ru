@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
@@ -40,7 +41,7 @@ class SubmitDonation(View):
 			customer_key=user_id,
 			recurrent=recurrent
 		).with_receipt(
-			email=email,
+			email=email if email else settings.DEFAULT_FROM_EMAIL,
 		).with_items(
 			[dict(
 				name=description,
