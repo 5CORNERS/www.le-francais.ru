@@ -13,6 +13,10 @@
   }
 }
 
+._content > .container {
+  max-width: 650px;
+}
+
 #donationForm {
   span.underline {
     cursor: pointer;
@@ -59,8 +63,9 @@
       }
     }
   }
-  .tooltip-inner{
-    padding: .5rem .5rem;
+
+  .tooltip-inner {
+    padding: .5rem .5rem .8rem;
   }
 }
 
@@ -80,13 +85,10 @@
 
 .donationsFormContainer {
   max-width: 650px;
-  margin: 0 auto 10px;
-  padding: 0 15px 0 15px;
-  padding-bottom: 15px;
+  margin: 0 0 10px;
   text-align: center;
 
   @media only screen and (min-width: 768px) {
-    padding: 0 20px 0 20px;
     margin-bottom: 20px;
   }
 }
