@@ -5,12 +5,12 @@
             <ul class="nav nav-pills nav-justified mb-3"
                 id="donationFormTypePills">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#"
+                    <a class="nav-link" href="#"
                        id="donationFormTypePillsRecurrent"
                        data-value="recurrent">Каждый месяц</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#"
+                    <a class="nav-link active" href="#"
                        id="donationFormTypePillsSingle"
                        data-value="single">Один раз</a>
                 </li>
@@ -21,9 +21,9 @@
                     <div class="nav-link">
                         <input class="nav-input"
                                id="donationsFormAmountPillsCustom"
-                               type="number" placeholder="Другая сумма"
-                               name="amount_dummy"
-                               min="1"
+                               type="number"
+                               placeholder="Другая сумма"
+                               name="amount_dummy" min="1"
                                aria-label="Другая сумма">
                     </div>
                 </li>
@@ -43,15 +43,60 @@
                        data-value="3000">3000 рублей</a>
                 </li>
             </ul>
-            <input id="donationFormSuccessUrl" type="hidden" name="success_url" value="{{ success_url }}">
-            <input id="donationFormFailUrl" type="hidden" name="fail_url" value="{{ fail_url }}">
-            <input id="donationFormValidationRedirect" type="hidden" name="validation_redirect" value="{{ validation_redirect }}">
-            <input id="donationFormType" type="hidden" name="type"
-                   value="recurrent"> <input id="donationFormAmount"
-                                             type="hidden"
-                                             name="amount"
-                                             value="1000"> {% csrf_token %}
-            <button type="submit" class="btn btn-primary" id="donationsFormSubmit">
+
+            <div class="form-group row">
+                <label class="col-sm-8 text-left"
+                       for="donationFormTarget">Выберите цель, на
+                    которую нам следует потратить вашу помощь (<span data-toggle="tooltip" title="Дай человеку рыбу, и он будет
+                сыт один день. Дай человеку удочку — и он будет сыт
+                всю жизнь. Наша «судочка» — это реклама. Вы решаете,
+                на что нам потратить Вашу помощь." data-container="#donationForm" data-boundary="viewport"
+                            class="underline" tabindex="0">что за цель?</span>)</label>
+                <div class="col-sm-4">
+                    <select class="custom-select"
+                            id="donationFormTarget" name="target"
+                            >
+                        <option value="1" selected>На жизнь</option>
+                        <option value="2">На удочку</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <textarea class="form-control"
+                          placeholder="Комментарий (по желанию)"
+                          id="donationFormComment" name="comment"
+                          rows="2"
+                          aria-label="Комментарий (по желанию)"></textarea>
+            </div>
+
+            <div class="form-group row">
+                <label for="donationFormEmail" class="col-sm-5 text-left">Укажите ваш e-mail (<span data-toggle="tooltip" title="Когда тебе помогают, очень хочется в ответ сказать
+                «Спасибо!» Не лишайте нас этой возможности — укажите
+                здесь Ваш e-mail, чтобы мы имели возможность Вас лично
+                поблагодарить." type="button"
+                            class="underline" data-container="#donationForm" data-boundary="viewport" tabindex="0">зачем?</span>)
+                </label>
+                <div class="col-sm-7">
+                    <input type="email" class="form-control"
+                       id="donationFormEmail" name="email"
+                       placeholder="E-mail" {% if request.user.is_authenticated %}value="{{ request.user.email }}"{% endif %}>
+                </div>
+            </div>
+
+            <input id="donationFormSuccessUrl" type="hidden"
+                   name="success_url" value="{{ success_url }}">
+            <input id="donationFormFailUrl" type="hidden"
+                   name="fail_url" value="{{ fail_url }}"> <input
+                id="donationFormValidationRedirect" type="hidden"
+                name="validation_redirect"
+                value="{{ validation_redirect }}"> <input
+                id="donationFormType" type="hidden" name="type"
+                value="single"> <input id="donationFormAmount"
+                                       type="hidden" name="amount"
+                                       value="1000"> {% csrf_token %}
+            <button type="submit" class="btn btn-primary"
+                    id="donationsFormSubmit">
                 Поддержать!
             </button>
         </form>
