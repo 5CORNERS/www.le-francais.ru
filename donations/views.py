@@ -11,7 +11,7 @@ from tinkoff_merchant.consts import DONATIONS
 from tinkoff_merchant.models import Payment as TinkoffPayment
 from tinkoff_merchant.services import MerchantAPI
 
-@method_decorator(login_required, name='post')
+
 class SubmitDonation(View):
 	def get(self, request):
 		return redirect('donations:donation_page')
@@ -19,13 +19,25 @@ class SubmitDonation(View):
 	def post(self, request, *args, **kwargs):
 		recurrent = request.POST.get('type') == 'recurrent'
 		amount = int(request.POST.get('amount'))
-		email = request.user.email
+		email = request.POST.get('email', None)
 		validation_redirect = request.POST.get('validation_redirect')
 		description = 'Ежемесячное пожертвование le-francais.ru' if recurrent else 'Одноразовое пожертвование le-francais.ru'
+		comment = request.POST.get('comment')
+		target = int(request.POST.get('target'))
+
+		if request.user.is_authenticated:
+			user = request.user
+			user_id = user.pk
+			if not email:
+				email = user.email
+		else:
+			user = None
+			user_id = None
+
 		payment = TinkoffPayment.objects.create(
 			amount = amount * 100,
 			description=description,
-			customer_key=request.user.pk,
+			customer_key=user_id,
 			recurrent=recurrent
 		).with_receipt(
 			email=email,
@@ -56,14 +68,16 @@ class SubmitDonation(View):
 			Donation.objects.create(
 				amount=amount,
 				payment=payment,
-				user=request.user,
+				user=user,
+				comment=comment,
+				target=target,
+				email=email
 			)
 			return redirect(payment.payment_url)
 		else:
 			return redirect(validation_redirect)
 
 
-@method_decorator(login_required, name='get')
 class DonationPage(View):
 	def get(self, request):
 		return render(request, 'donations/base.html')
