@@ -1,11 +1,8 @@
-from email.message import Message
 from email.utils import formataddr
 
 from django.contrib.auth import get_user_model
-from django.contrib.postgres.fields import JSONField
 from django.core.mail import EmailMessage
 from django.db import models
-from django.db.models import URLField
 from django.dispatch import receiver
 
 from tinkoff_merchant.signals import payment_confirm
