@@ -11,7 +11,7 @@ from tinkoff_merchant.consts import DONATIONS
 from tinkoff_merchant.models import Payment as TinkoffPayment
 from tinkoff_merchant.services import MerchantAPI
 
-@method_decorator(login_required, name='post')
+
 class SubmitDonation(View):
 	def get(self, request):
 		return redirect('donations:donation_page')
@@ -78,7 +78,6 @@ class SubmitDonation(View):
 			return redirect(validation_redirect)
 
 
-@method_decorator(login_required, name='get')
 class DonationPage(View):
 	def get(self, request):
 		return render(request, 'donations/base.html')
