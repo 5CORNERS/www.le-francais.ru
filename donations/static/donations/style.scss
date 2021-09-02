@@ -1,46 +1,76 @@
 @mixin placeholder {
-    &::-webkit-input-placeholder {@content}
-    &:-moz-placeholder           {@content}
-    &::-moz-placeholder          {@content}
-    &:-ms-input-placeholder      {@content}
+  &::-webkit-input-placeholder {
+    @content
+  }
+  &:-moz-placeholder {
+    @content
+  }
+  &::-moz-placeholder {
+    @content
+  }
+  &:-ms-input-placeholder {
+    @content
+  }
 }
 
-.nav-item{
-  div.nav-link {
-    display: block;
+#donationForm {
+  span.underline {
+    cursor: pointer;
+    background: url("./underline_2.svg") 0 100% repeat no-repeat;
+    transition: 0.1s;
+    padding-bottom: 1px;
+    padding-left: 1px;
+    padding-right: 1px;
 
-    .nav-input,.nav-input{
-      border: 0;
-      width: 100%;
-      outline-width: 0;
-      text-align: center;
-      background-color: transparent;
+    &:hover, &:focus {
+      background-image: url("./underline_1.svg");
     }
+  }
 
-    &.active {
-      .nav-input {
-        color: #fff;
-        @include placeholder {
-          color: #fff;
-          background-color: #337ab7;
-        }
+  .nav-item {
+    &>.nav-link {
+      background-color: #f0f0f0;
+      &.active{
+        background-color: #337ab7;
+      }
+    }
+    div.nav-link {
+      display: block;
+
+      .nav-input, .nav-input {
+        border: 0;
+        width: 100%;
+        outline-width: 0;
+        text-align: center;
+        background-color: transparent;
       }
 
+      &.active {
+        .nav-input {
+          color: #fff;
+          @include placeholder {
+            color: #fff;
+            background-color: #337ab7;
+          }
+        }
+
+      }
     }
   }
+
 }
 
-#donationsFormAmountPills{
+#donationsFormAmountPills {
   display: grid;
   gap: 5px 5px;
-  grid-template-columns: repeat(2,1fr);
+  grid-template-columns: repeat(2, 1fr);
 
   @media only screen and (min-width: 650px) {
-    grid-template-columns: repeat(4,1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
-#donationsFormSubmit{
+#donationsFormSubmit {
   width: 100%;
 }
 
@@ -50,7 +80,7 @@
   padding: 0 15px 0 15px;
   padding-bottom: 15px;
   text-align: center;
-  
+
   @media only screen and (min-width: 650px) {
     padding: 0 20px 0 20px;
     margin-bottom: 20px;
