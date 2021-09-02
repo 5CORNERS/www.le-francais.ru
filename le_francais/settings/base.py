@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.sitemaps',
     'django.contrib.postgres',
+    'django.contrib.humanize',
     'bootstrapform',
     'bootstrap4',
     'django.core.mail',
