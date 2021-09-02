@@ -51,34 +51,29 @@ class Donation(models.Model):
             self._recurrent = self.payment.recurrent
         return self._recurrent
 
-
-@receiver(payment_confirm)
-def send_support_notification(sender, **kwargs):
-    donation = kwargs['payment'].donation_set.first()
-    if donation is not None and isinstance(donation, Donation):
-
+    def send_email_notification(self):
         user = None
-        if donation.user:
-            user = user
+        if self.user is not None:
+            user = self.user
         else:
-            if donation.email:
+            if self.email:
                 try:
-                    user = User.objects.get(email=donation.email)
+                    user = User.objects.get(email=self.email)
                 except User.DoesNotExist:
                     pass
-            if donation.payment.email and user is None:
+            if self.payment.email and user is None:
                 try:
-                    user = User.objects.get(email=donation.payment.email)
+                    user = User.objects.get(email=self.payment.email)
                 except User.DoesNotExist:
                     pass
 
         user_email = None
-        if donation.email:
-            user_email = donation.email
+        if self.email:
+            user_email = self.email
         elif user is not None:
             user_email = user.email
-        elif donation.payment.email:
-            user_email = donation.payment.email
+        elif self.payment.email:
+            user_email = self.payment.email
 
         if user_email:
             reply_to = formataddr(pair=(None, user_email))
@@ -90,27 +85,42 @@ def send_support_notification(sender, **kwargs):
                 name = user.get_full_name()
             else:
                 name = user.get_username()
-        elif donation.email:
-            name = donation.email
+        elif self.email:
+            name = self.email
         else:
             name = 'Человек, пожелавший остаться неизвестным,'
 
-        if donation.target == DONATION_TARGET_LIFE:
+        if self.target == DONATION_TARGET_LIFE:
             target_description = 'на хлеб насущный'
-        elif donation.target == DONATION_TARGET_ADS:
+        elif self.target == DONATION_TARGET_ADS:
             target_description = 'на рекламу проекта'
         else:
             target_description = 'на неизвестную цель'
 
         EmailMessage(
             subject='Помощь проекту le-francais.ru',
-            body=f'{name} только что пожертвовал(а) проекту {donation.amount / 100} рублей {target_description}.\n'
+            body=f'{name} только что пожертвовал(а) проекту {message(self.amount)} {target_description}.\n'
                  f'\n'
                  f'Комментарий к пожертвованию:\n'
-                 f'{donation.comment}',
-            to=formataddr(('ILYA DUMOV', 'ilia.dumov@gmail.com')),
-            reply_to=reply_to
+                 f'{self.comment}',
+            to=[formataddr(('ILYA DUMOV', 'ilia.dumov@gmail.com'))],
+            reply_to=[reply_to] if reply_to else None
         ).send()
 
+def message(n, form1='рубль', form2='рубля', form5='рублей'):
+    n10 = n % 10
+    n100 = n % 100
+    if n10 == 1 and n100 != 11:
+        return '{0} {1}'.format(str(n), form1)
+    elif n10 in [2, 3, 4] and n100 not in [12, 13, 14]:
+        return '{0} {1}'.format(str(n), form2)
+    else:
+        return '{0} {1}'.format(str(n), form5)
+
+@receiver(payment_confirm)
+def send_support_notification(sender, **kwargs):
+    donation = kwargs['payment'].donation_set.first()
+    if donation is not None and isinstance(donation, Donation):
+        donation.send_email_notification()
     else:
         pass
