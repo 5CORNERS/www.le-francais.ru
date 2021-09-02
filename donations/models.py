@@ -52,30 +52,24 @@ class Donation(models.Model):
         return self._recurrent
 
     def send_email_notification(self):
-        user = None
         if self.user is not None:
             user = self.user
+        elif self.email:
+            try:
+                user = User.objects.get(email=self.email)
+            except User.DoesNotExist:
+                user = None
         else:
-            if self.email:
-                try:
-                    user = User.objects.get(email=self.email)
-                except User.DoesNotExist:
-                    pass
-            if self.payment.email and user is None:
-                try:
-                    user = User.objects.get(email=self.payment.email)
-                except User.DoesNotExist:
-                    pass
+            user = None
 
-        user_email = None
         if self.email:
             user_email = self.email
         elif user is not None:
             user_email = user.email
-        elif self.payment.email:
-            user_email = self.payment.email
+        else:
+            user_email = None
 
-        if user_email:
+        if user_email is not None:
             reply_to = formataddr(pair=(None, user_email))
         else:
             reply_to = None
@@ -107,6 +101,7 @@ class Donation(models.Model):
             reply_to=[reply_to] if reply_to else None
         ).send()
 
+
 def message(n, form1='рубль', form2='рубля', form5='рублей'):
     n10 = n % 10
     n100 = n % 100
@@ -116,6 +111,7 @@ def message(n, form1='рубль', form2='рубля', form5='рублей'):
         return '{0} {1}'.format(str(n), form2)
     else:
         return '{0} {1}'.format(str(n), form5)
+
 
 @receiver(payment_confirm)
 def send_support_notification(sender, **kwargs):
