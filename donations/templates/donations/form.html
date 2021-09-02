@@ -45,13 +45,13 @@
             </ul>
 
             <div class="form-group row">
-                <label class="col-sm-8 text-left col-form-label-two-rows"
+                <label class="col-md-8 text-left col-form-label-two-rows"
                        for="donationFormTarget">Выберите цель, на
                     которую нам следует потратить вашу помощь (<span data-toggle="tooltip" title="Дай человеку рыбу, и он будет
                 сыт один день. Дай человеку удочку — и он будет сыт
                 всю жизнь. Наша «удочка» — это реклама. Вы решаете, на что нам пустить Вашу помощь." data-container="#donationForm" data-boundary="viewport"
                             class="underline" tabindex="0">что за цель?</span>)</label>
-                <div class="col-sm-4">
+                <div class="col-md-4">
                     <select class="custom-select"
                             id="donationFormTarget" name="target"
                             >
@@ -70,13 +70,13 @@
             </div>
 
             <div class="form-group row">
-                <label for="donationFormEmail" class="col-sm-5 col-form-label text-left">Укажите ваш e-mail (<span data-toggle="tooltip" title="Когда тебе помогают, очень хочется в ответ сказать
+                <label for="donationFormEmail" class="col-sm-12 col-md-5 col-form-label text-left">Укажите ваш e-mail (<span data-toggle="tooltip" title="Когда тебе помогают, очень хочется в ответ сказать
                 «Спасибо!» Не лишайте нас этой возможности — укажите
                 здесь Ваш e-mail, чтобы мы имели возможность Вас лично
                 поблагодарить." type="button"
                             class="underline" data-container="#donationForm" data-boundary="viewport" tabindex="0">зачем?</span>)
                 </label>
-                <div class="col-sm-7">
+                <div class="col-sm-12 col-md-7">
                     <input type="email" class="form-control"
                        id="donationFormEmail" name="email"
                        placeholder="E-mail" {% if request.user.is_authenticated %}value="{{ request.user.email }}"{% endif %}>
