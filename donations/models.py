@@ -1,9 +1,23 @@
+from email.message import Message
+from email.utils import formataddr
+
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import JSONField
+from django.core.mail import EmailMessage
 from django.db import models
 from django.db.models import URLField
+from django.dispatch import receiver
+
+from tinkoff_merchant.signals import payment_confirm
 
 User = get_user_model()
+
+DONATION_TARGET_LIFE = 1
+DONATION_TARGET_ADS = 2
+DONATION_TARGETS_CHOICES = [
+	(DONATION_TARGET_LIFE, 'На жизнь'),
+	(DONATION_TARGET_ADS, 'На рекламу')
+]
 
 
 class Donation(models.Model):
@@ -20,6 +34,15 @@ class Donation(models.Model):
 		null=True,
 		default=None
 	)
+	email = models.EmailField(
+		null=True, default=None, blank=True
+	)
+	comment = models.TextField(
+		null=True, default=None, blank=True
+	)
+	target = models.PositiveSmallIntegerField(
+		choices=DONATION_TARGETS_CHOICES, default=DONATION_TARGET_LIFE
+	)
 
 	def __init__(self, *args, **kwargs):
 		super(Donation, self).__init__(*args, **kwargs)
@@ -30,3 +53,46 @@ class Donation(models.Model):
 		if self._recurrent is None:
 			self._recurrent = self.payment.recurrent
 		return self._recurrent
+
+
+@receiver(payment_confirm)
+def send_support_notification(sender, **kwargs):
+	donation = kwargs['payment'].donation_set.first()
+	if donation is not None and isinstance(donation, Donation):
+
+		user = None
+		if donation.user:
+			user = user
+		elif donation.email:
+			try:
+				user = User.objects.get(email=donation.email)
+			except User.DoesNotExist:
+				pass
+		elif donation.payment.email:
+			try:
+				user = User.objects.get(email=donation.payment.email)
+			except User.DoesNotExist:
+				pass
+
+		user_email = None
+		if donation.email:
+			user_email = donation.email
+		elif user is not None:
+			user_email = user.email
+		elif donation.payment.email:
+			user_email = donation.payment.email
+
+		if user is not None:
+			reply_to = formataddr(pair=(user.get_full_name(), user_email))
+		else:
+			reply_to = formataddr(pair=(None, user_email))
+
+		message = EmailMessage(
+			subject='',
+			body='',
+			to=formataddr(('ILYA DUMOV', 'ilia.dumov@gmail.com')),
+			reply_to=reply_to
+		).send()
+
+	else:
+		pass

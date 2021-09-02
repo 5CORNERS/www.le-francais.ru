@@ -1,23 +1,9 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static le_francais_donations %}
 
 {% block content %}
-    <div class="container">
-    <div class="row">
-        <div class="col-12">
-            <h1 class="h1">
-                Title
-            </h1>
-        </div>
-    </div>
-        <div class="row">
-            <div class="col-12">
-                <p>
-                    Description
-                </p>
-            </div>
-        </div>
-    {% include 'donations/form.html' %}
+    <div class="container mt-3">
+        {% include_donation_form %}
     </div>
 {% endblock %}
 
