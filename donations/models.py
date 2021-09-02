@@ -15,8 +15,8 @@ User = get_user_model()
 DONATION_TARGET_LIFE = 1
 DONATION_TARGET_ADS = 2
 DONATION_TARGETS_CHOICES = [
-    (DONATION_TARGET_LIFE, 'На жизнь'),
-    (DONATION_TARGET_ADS, 'На рекламу')
+    (DONATION_TARGET_LIFE, 'на хлеб насущный'),
+    (DONATION_TARGET_ADS, 'на рекламу проекта')
 ]
 
 
@@ -63,16 +63,17 @@ def send_support_notification(sender, **kwargs):
         user = None
         if donation.user:
             user = user
-        elif donation.email:
-            try:
-                user = User.objects.get(email=donation.email)
-            except User.DoesNotExist:
-                pass
-        elif donation.payment.email:
-            try:
-                user = User.objects.get(email=donation.payment.email)
-            except User.DoesNotExist:
-                pass
+        else:
+            if donation.email:
+                try:
+                    user = User.objects.get(email=donation.email)
+                except User.DoesNotExist:
+                    pass
+            if donation.payment.email and user is None:
+                try:
+                    user = User.objects.get(email=donation.payment.email)
+                except User.DoesNotExist:
+                    pass
 
         user_email = None
         if donation.email:
@@ -87,7 +88,6 @@ def send_support_notification(sender, **kwargs):
         else:
             reply_to = None
 
-        name = 'Человек, пожелавший остаться неизвестным,'
         if user:
             if user.first_name:
                 name = user.get_full_name()
@@ -95,11 +95,21 @@ def send_support_notification(sender, **kwargs):
                 name = user.get_username()
         elif donation.email:
             name = donation.email
-        target_description = 'на хлеб насущный' if donation.target == DONATION_TARGET_LIFE else 'на рекламу проекта'
+        else:
+            name = 'Человек, пожелавший остаться неизвестным,'
+
+        if donation.target == DONATION_TARGET_LIFE:
+            target_description = 'на хлеб насущный'
+        elif donation.target == DONATION_TARGET_ADS:
+            target_description = 'на рекламу проекта'
+        else:
+            target_description = 'на неизвестную цель'
+
         EmailMessage(
             subject='Помощь проекту le-francais.ru',
             body=f'{name} только что пожертвовал(а) проекту {donation.amount / 100} рублей {target_description}.\n'
                  f'\n'
+                 f'Комментарий к пожертвованию:\n'
                  f'{donation.comment}',
             to=formataddr(('ILYA DUMOV', 'ilia.dumov@gmail.com')),
             reply_to=reply_to
