@@ -1,9 +1,33 @@
-{% extends 'base.html' %}
-{% load static le_francais_donations %}
+{% extends 'base.html' %}{% load static le_francais_donations %}
 
 {% block content %}
     <div class="container mt-3">
-        {% include_donation_form %}
+        <div class="row">
+            <div class="col">
+                <h1 class="h1">
+                    ПОДДЕРЖИТЕ ВАШ ПРОЕКТ </h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <p>
+                    Последние несколько лет существования проекта
+                    показали, что он не может существовать без вашей
+                    поддержки (по крайней мере, пока). Но сегодня мы
+                    не просим денег на поддержание штанов — сегодня
+                    нам очень нужна ваша помощь на нашу первую
+                    рекламную кампанию. Мы хорошо умеем делать рекламу
+                    (посмотрите на наш новый лендинг), но без вас нам
+                    ее не запустить. Так что это такой
+                    краудфандинг. </p>
+                <p>
+                    Помогите нам стартовать с этим и стать
+                    независимыми! </p>
+            </div>
+        </div>
+        <div class="container mt-3">
+            {% include_donation_form %}
+        </div>
     </div>
 {% endblock %}
 
@@ -12,5 +36,6 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script type="text/javascript" src="{% static 'donations/script.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'donations/script.js' %}"></script>
 {% endblock %}

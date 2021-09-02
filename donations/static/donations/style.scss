@@ -28,12 +28,14 @@
   }
 
   .nav-item {
-    &>.nav-link {
+    & > .nav-link {
       background-color: #f0f0f0;
-      &.active{
+
+      &.active {
         background-color: #337ab7;
       }
     }
+
     div.nav-link {
       display: block;
 
@@ -57,7 +59,9 @@
       }
     }
   }
-
+  .tooltip-inner{
+    padding: .5rem .5rem;
+  }
 }
 
 #donationsFormAmountPills {
@@ -85,4 +89,10 @@
     padding: 0 20px 0 20px;
     margin-bottom: 20px;
   }
+}
+
+.col-form-label-two-rows {
+  margin-bottom: 0.375em;
+  font-size: inherit;
+  line-height: 1.15;
 }
