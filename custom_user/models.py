@@ -236,9 +236,6 @@ class User(AbstractUser):
 	def get_username(self):
 		return self.username
 
-	def get_full_name(self):
-		return self.username
-
 	def has_active_lessons(self):
 		if self.payed_lessons.filter(need_payment=True):
 			return True
