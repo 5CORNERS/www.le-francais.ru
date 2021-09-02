@@ -41,7 +41,7 @@ class SubmitDonation(View):
 			customer_key=user_id,
 			recurrent=recurrent
 		).with_receipt(
-			email=email if email else settings.DEFAULT_FROM_EMAIL,
+			email=email if email else parseaddr(settings.DEFAULT_FROM_EMAIL)[1],
 		).with_items(
 			[dict(
 				name=description,
