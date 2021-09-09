@@ -4,6 +4,7 @@ from pathlib import Path
 
 from django.core.management import BaseCommand
 from django.db.models.signals import post_save
+from django.utils import timezone
 
 from pybb.models import Post, Topic
 from pybb.signals import post_saved
@@ -18,7 +19,7 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 		s = ''
 		s += "Post ID,Image Link,Filename\n"
-		table = read_csv('forum/dat/images/list.txt')
+		table = read_csv('forum/dat/images/list.csv')
 		from pybb.signals import topic_saved
 		# FIXME: we should have specific signals to send notifications to topic/forum subscribers
 		# but for now, we must connect / disconnect the callback
@@ -38,24 +39,30 @@ class Command(BaseCommand):
 		post_save.connect(post_saved, sender=Post)
 
 		for post in Post.objects.all():
+			if post.created < timezone.now()-timezone.timedelta(weeks=8):
+				continue
 			for link in re.findall('\((((http://)|(https://))(.+?\.(png|jpeg|gif|jpg)))', post.body, re.I):
 				file_name = link[0].split('//')[1]
 				file_name = re.sub('/', '+', file_name)
+				file_name = re.sub(',', '_', file_name)
 				if link[0].startswith('https://files.le-francais.ru'):
 					continue
 				image_string = 'https://www.le-francais.ru' + str(post.get_absolute_url()) + '\t' + link[0]
 				file = Path('forum/dat/images/' + file_name[:])
-				if not file.is_file():
-					try:
+				try:
+					print(image_string, end='')
+					if not file.is_file():
 						opener= urllib.request.build_opener()
 						opener.addheaders = [('User-Agent', 'Mozilla/5.0')]
 						urllib.request.install_opener(opener)
 						urllib.request.urlretrieve(link[0], 'forum/dat/images/' + file_name[:])
-						print(image_string + ' Success!')
-						s += str(post.id) + ',' + link[0] + ',' + file_name[:] + '\n'
-					except:
-						print(image_string + ' UrlRetrieve Error')
-				else:
-					print(image_string + ' File already exist')
-		open('forum/dat/images/list.txt', 'w').write(s)
+						print(' Success!')
+					else:
+						print(' File already exist')
+						s += str(post.id) + ',' + link[
+							0] + ',' + file_name[:] + '\n'
+				except:
+					print(' Error')
+
+		open('forum/dat/images/list.csv', 'w').write(s)
 
