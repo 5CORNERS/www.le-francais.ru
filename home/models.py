@@ -70,6 +70,7 @@ BLOCK_AFTER_RESUME_POPULAIRE = 7
 BLOCK_AFTER_REPETITION_MATERIAL = 8
 BLOCK_AFTER_EXERCISE = 9
 BLOCK_AFTER_FLASHCARDS = 10
+STRICT_PLAYER_AFTER = 11
 
 
 @register_snippet
@@ -558,6 +559,10 @@ class LessonPage(Page):
         if self.flash_cards_is_included():
             if BLOCK_AFTER_FLASHCARDS >= self.lesson_number or self.payed(user):
                 context['block_flash_cards'] = False
+
+        context['strict_player'] = True
+        if STRICT_PLAYER_AFTER >= self.lesson_number or self.payed(user):
+            context['strict_player'] = False
 
         context['has_transcript'] = False
         if self.transcript_docx.name and self.has_transcript == False:
