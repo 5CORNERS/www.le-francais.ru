@@ -103,7 +103,8 @@
 				isLoop = $this.get(0).getAttribute('loop'),
 				isLoop = ((isLoop === '') || (isLoop === 'loop')) ? true : false,
 				isSupport = false,
-				setTime = $this.get(0).getAttribute('set-time');
+				setTime = $this.get(0).getAttribute('set-time'),
+				isStrict = $this.data('strict');
 
 			if (typeof audioFile === 'undefined') {
 				$this.find('source').each(function () {
@@ -129,7 +130,7 @@
 				theAudio = (isSupport) ? thePlayer.find('audio') : thePlayer.find('embed'),
 				theAudio = theAudio.get(0);
 
-			var lesson_number = $(theAudio).attr('number');
+			var lesson_number = $(theAudio).attr('number'), wasPlaying;
 
 			if ((typeof lesson_number !== typeof undefined) && (lesson_number !== false)) {
 				var $menuPlayer = thePlayer.clone();
@@ -159,6 +160,7 @@
 					timeDuration = thePlayer.find('.' + cssClass.timeDuration),
 					volumeButton = thePlayer.find('.' + cssClass.volumeButton),
 					volumeAdjuster = thePlayer.find('.' + cssClass.volumeAdjust + ' > div'),
+					downloadButton = thePlayer.find('.' + cssClass.downloadButton),
 					volumeDefault = 0,
 					adjustCurrentTime = function (e) {
 						theRealEvent = isTouch ? e.originalEvent.touches[0] : e;
@@ -250,6 +252,13 @@
 					}
 					return false;
 				});
+				
+				downloadButton.on('click', function (e) {
+					if (isStrict) {
+						e.preventDefault()
+						dispatchEvent(new Event('strictDownload'))
+					}
+				})
 
 				volumeAdjuster.on(eStart, function (e) {
 					adjustVolume(e);
@@ -282,9 +291,28 @@
 					return playerPlayPause(true);
 				});
 				$menuPlayer.find('.' + cssClass.tenSecondsBack).on('click', e => {
-				e.preventDefault();
-				return playerSeekBack(10);
-			});
+					e.preventDefault();
+					return playerSeekBack(10);
+				});
+
+				let hidden, visibilityChange;
+				if (typeof document.hidden !== 'undefined') {
+					hidden = 'hidden';
+					visibilityChange = 'visibilitychange';
+				} else if (typeof document.msHidden !== 'undefined') {
+					hidden = 'msHidden';
+					visibilityChange = 'msvisibilitychange';
+				} else if (typeof document.webkitHidden !== 'undefined') {
+					hidden = 'webkitHidden';
+					visibilityChange = 'webkitcisibilitychange'
+				}
+
+				if (typeof document.addEventListener === 'undefined' || hidden === undefined) {
+					console.log("Audio player requires a browser, such as Google Chrome or Firefox," +
+						" that supports the Page Visibility API");
+				} else if (isStrict) {
+					document.addEventListener(visibilityChange, handleVisibilityChange, false)
+				}
 			}
 
 			if (isAutoPlay) {
@@ -319,6 +347,10 @@
 						theAudio.Stop();
 					}
 				} else {
+                    if ((typeof lesson_number !== typeof undefined) && (lesson_number !== false) && document['hidden']){
+                        return false;
+					}
+
 					$(this).attr('title', params.strPause).find('a').html(params.strPause);
 
 					if (typeof $menuPlayer !== typeof undefined) {
@@ -347,6 +379,33 @@
 
 			function playerSeekBack(s) {
 				theAudio.currentTime -= s
+			}
+
+			function handleVisibilityChange() {
+				if (isStrict) {
+					if (document["hidden"] && thePlayer.hasClass(cssClass.playing)) {
+						playerStop()
+						wasPlaying = true
+					} else if (!document['hidden'] && !thePlayer.hasClass(cssClass.playing)) {
+						playerStart()
+						if (wasPlaying) {
+							dispatchEvent(new Event('unhiddenWasPlaying'))
+						}
+					}
+				}
+			}
+
+			function playerStop() {
+				playerPlayPause(false)
+				setTime = theAudio.currentTime
+				theAudio.src = ""
+				theAudio.load()
+			}
+
+			function playerStart() {
+				theAudio.src = audioFile
+				theAudio.load()
+				theAudio.currentTime = setTime
 			}
 
 			$this.replaceWith(thePlayer);
