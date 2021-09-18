@@ -357,5 +357,13 @@ $(document).ready(function () {
         });
     }
     $('.coffee-proceed').on('click', giveMeCoffee);
+
+    addEventListener('strictDownload', function (e) {
+        $('#strictDownloadModal').modal('show');
+    });
+
+    addEventListener('unhiddenWasPlaying', function (e) {
+        $('#hiddenWasListeningModal').modal('show');
+    });
 });
 
