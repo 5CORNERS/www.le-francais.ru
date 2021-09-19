@@ -31,7 +31,7 @@ class SawMessageView(View):
                     to=[request.user.email],
                     subject='Активация уроков на сайте le-francais.ru',
                     body=msg_body,
-                    from_email='ilia.dumov@le-francais.ru',
+                    from_email='ilia.dumov@mail.le-francais.ru',
                     reply_to=['support@le-francais.ru']
                 ).send(fail_silently=True)
             user.saw_message = True
