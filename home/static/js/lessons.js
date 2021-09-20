@@ -365,5 +365,24 @@ $(document).ready(function () {
     addEventListener('unhiddenWasPlaying', function (e) {
         $('#hiddenWasListeningModal').modal('show');
     });
+
+    $('#unhiddenWasPlaying').click(function (e) {
+        let $playPause = $('#lessonAudioBlock').find('#playpause')
+        $playPause.click()
+    })
+    $('#strictDownloadModelWhyThis').popover({
+        content: `Благодарность за уроки идет на <a href="#" class="link-primary" id="serversMapImageLink" >техническое обеспечение сайта</a> и вознаграждение тем, <a href="${WHO_DO_YOU_THINK_WE_ARE}" title="кто эти люди?" target="_blank"> кто над ним трудится</a>.`,
+        html:true,
+        placement:'auto',
+        trigger:'click'
+    }).on('shown.bs.popover', function () {
+        $('#serversMapImageLink').on('click', function () {
+            $('#strictPopoverModalWhyThis').popover('hide')
+            $('#serversMapImageModal').modal('show').on('hide.bs.modal', function () {
+                $('#strictDownloadModal').modal('show');
+            })
+            $('#strictDownloadModal').modal('hide');
+        })
+    })
 });
 
