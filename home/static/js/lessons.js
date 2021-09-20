@@ -371,18 +371,23 @@ $(document).ready(function () {
         $playPause.click()
     })
     $('#strictDownloadModelWhyThis').popover({
-        content: `Благодарность за уроки идет на <a href="#" class="link-primary" id="serversMapImageLink" >техническое обеспечение сайта</a> и вознаграждение тем, <a href="${WHO_DO_YOU_THINK_WE_ARE}" title="кто эти люди?" target="_blank"> кто над ним трудится</a>.`,
-        html:true,
-        placement:'auto',
-        trigger:'click'
+        content: `Ваша поддержка идет на техническое обеспечение сайта <a id="serversMapImageLink" tabindex="0"
+                                                         class="fas fa-info-circle text-primary"
+                                                         style="position: relative;top: 1px;"></a> и вознаграждение тем, <a href="${WHO_DO_YOU_THINK_WE_ARE}" title="кто эти люди?" target="_blank"> кто над ним трудится <i class="fas fa-external-link-alt"></i></a>.`,
+        html: true,
+        placement: 'top',
+        trigger: 'click'
     }).on('shown.bs.popover', function () {
         $('#serversMapImageLink').on('click', function () {
             $('#strictPopoverModalWhyThis').popover('hide')
-            $('#serversMapImageModal').modal('show').on('hide.bs.modal', function () {
-                $('#strictDownloadModal').modal('show');
+            $('#serversMapImageModal').modal('show').one('hide.bs.modal', function () {
+                $('#strictDownloadModal').modal('show')
             })
             $('#strictDownloadModal').modal('hide');
         })
+    })
+    $('#StrictDownloadModelCoffeeButton').on('click', function () {
+        $('#strictDownloadModal').modal('hide');
     })
 });
 
