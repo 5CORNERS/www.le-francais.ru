@@ -20,6 +20,7 @@
     const LESSON_NUMBER = {% if self.lesson_number %}{{ self.lesson_number }}{% else %}null{% endif %};
     const NEED_PAYMENT = {% if self.need_payment %}true{% else %}false{% endif %};
     const IS_AUTHENTICATED = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
+    const LESSON_LISTEN_URL = "https://files.le-francais.ru/listen.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}"
     var saw_message, cups_amount, cups_credit, must_pay, userlesson
     {% if request.user.is_authenticated %}
         saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
