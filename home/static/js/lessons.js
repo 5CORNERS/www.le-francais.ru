@@ -358,9 +358,12 @@ $(document).ready(function () {
     }
     $('.coffee-proceed').on('click', giveMeCoffee);
 
-    addEventListener('strictDownload', function (e) {
-        $('#strictDownloadModal').modal('show');
-    });
+
+    if (!NEED_PAYMENT === true && must_pay === true) {
+        addEventListener('strictDownload', function (e) {
+            $('#strictDownloadModal').modal('show');
+        });
+    }
 
     addEventListener('unhiddenWasPlaying', function (e) {
         $('#hiddenWasListeningModal').modal('show');
