@@ -148,7 +148,7 @@
 					if (!isStrict) {
 						thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="' + source + '&download=true' + '" class="' + cssClass.downloadButton + ' fa fa-download"></a></div><div class="audioplayer-space"></div>');
 					} else {
-						thePlayer.append('<div class="' + cssClass.download + '"><a download="true" class="' + cssClass.downloadButton + ' fa fa-download"></a></div>');
+						thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="#" class="' + cssClass.downloadButton + ' fa fa-download"></a></div>');
 					}
 					$(theAudio).attr('id', 'lesson-audio');
 					$(theAudio).attr('number', lesson_number);
@@ -254,13 +254,13 @@
 					}
 					return false;
 				});
-				
-				downloadButton.on('click', function (e) {
-					if (isStrict) {
+
+				if (isStrict) {
+					downloadButton.on('click.strict', function (e) {
 						e.preventDefault()
 						dispatchEvent(new Event('strictDownload'))
-					}
-				})
+					})
+				}
 
 				volumeAdjuster.on(eStart, function (e) {
 					adjustVolume(e);
