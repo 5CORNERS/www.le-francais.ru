@@ -99,12 +99,13 @@
 			var $this = $(this),
 				audioFile = $this.attr('src'),
 				isAutoPlay = $this.get(0).getAttribute('autoplay'),
-				isAutoPlay = ((isAutoPlay === '') || (isAutoPlay === 'autoplay')) ? true : false,
 				isLoop = $this.get(0).getAttribute('loop'),
-				isLoop = ((isLoop === '') || (isLoop === 'loop')) ? true : false,
 				isSupport = false,
 				setTime = $this.get(0).getAttribute('set-time'),
-				isStrict = $this.data('strict');
+				isStrict = $this.data('strict') === true;
+
+			isAutoPlay = ((isAutoPlay === '') || (isAutoPlay === 'autoplay'))
+			isLoop = ((isLoop === '') || (isLoop === 'loop'))
 
 			if (typeof audioFile === 'undefined') {
 				$this.find('source').each(function () {
@@ -140,18 +141,19 @@
 				thePlayer.find('audio').css({'width': 0, 'height': 0, 'visibility': 'hidden'});
 				thePlayer.append('<div class="' + cssClass.time + ' ' + cssClass.timeCurrent + '"></div><div class="' + cssClass.bar + '"><div class="' + cssClass.barLoaded + '"></div><div class="' + cssClass.barPlayed + '"></div></div><div class="' + cssClass.time + ' ' + cssClass.timeDuration + '"></div><div class="' + cssClass.volume + '"><div class="' + cssClass.volumeButton + '" title="' + params.strVolume + '"><a href="#">' + params.strVolume + '</a></div><div class="' + cssClass.volumeAdjust + '"><div><div></div></div></div></div>');
 
-				var downloadable = $(theAudio).attr('data-downloadable');
+				var downloadable = $(theAudio).data('downloadable');
 
-				if ((typeof downloadable !== typeof undefined) && (downloadable !== false) && (downloadable !== 'empty')) {
+				if (downloadable === true) {
 					var source = $(theAudio).find('source').attr('src');
-					thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="' + source + '&download=true' + '" class="' + cssClass.downloadButton + ' fa fa-download"></a></div><div class="audioplayer-space"></div>');
+					if (!isStrict) {
+						thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="' + source + '&download=true' + '" class="' + cssClass.downloadButton + ' fa fa-download"></a></div><div class="audioplayer-space"></div>');
+					} else {
+						thePlayer.append('<div class="' + cssClass.download + '"><a class="' + cssClass.downloadButton + ' fa fa-download"></a></div>');
+					}
 					$(theAudio).attr('id', 'lesson-audio');
 					$(theAudio).attr('number', lesson_number);
-				} else if (downloadable === 'empty') {
-					thePlayer.append('<div class="' + cssClass.download + '"><a download="true" class="' + cssClass.downloadButton + ' fa fa-download"></a></div>');
 				}
-				event = new CustomEvent('downloadButtonReady');
-				window.dispatchEvent(event);
+				window.dispatchEvent(new CustomEvent('downloadButtonReady'));
 
 				var theBar = thePlayer.find('.' + cssClass.bar),
 					barPlayed = thePlayer.find('.' + cssClass.barPlayed),
@@ -383,15 +385,16 @@
 
 			function handleVisibilityChange() {
 				if (isStrict) {
-					if (document["hidden"] && thePlayer.hasClass(cssClass.playing)) {
-						playerStop()
-						wasPlaying = true
-					} else if (!document['hidden'] && !thePlayer.hasClass(cssClass.playing)) {
-						playerStart()
-						if (wasPlaying) {
-							dispatchEvent(new Event('unhiddenWasPlaying'))
-						}
-					}
+					console.log(`Visibility Changed. Playing: ${thePlayer.hasClass(cssClass.playing)}`)
+					// 	if (document["hidden"] && thePlayer.hasClass(cssClass.playing)) {
+					// 		playerStop()
+					// 		wasPlaying = true
+					// 	} else if (!document['hidden'] && !thePlayer.hasClass(cssClass.playing)) {
+					// 		playerStart()
+					// 		if (wasPlaying) {
+					// 			dispatchEvent(new Event('unhiddenWasPlaying'))
+					// 		}
+					// 	}
 				}
 			}
 

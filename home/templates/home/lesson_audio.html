@@ -1,16 +1,14 @@
 {% load static site_tags %}
 <div class="block-audio">
-	<div class="row lesson-audio">
+	<div class="row lesson-audio" id="lessonAudioBlock">
 		<div class="col-lg-12">
             <audio onerror="reloadLessonUrl(this)"
                    preload="auto"
                    id="lesson-audio"
-                    data-downloadable
                     {% if strict_player %}
                    data-strict="true"
-                    {% else %}
-                   data-strict="false"
                     {% endif %}
+                   data-downloadable="true"
                    number="{{ self.lesson_number }}" {# TODO: add "data-" to custom attrubutes #}
                     {% if request.GET.t %}
                    set-time="{{ request.GET.t }}"
