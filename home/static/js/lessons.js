@@ -339,6 +339,8 @@ $(document).ready(function () {
                     $('#give-me-a-coffee-success-message').html(response.description);
                     $('#give-me-a-coffee-complete-modal').modal('show');
                     getSuccessButton();
+                    $('#lessonAudioBlock').find('.audioplayer-download-button').attr('href', LESSON_LISTEN_URL)
+                    userlesson = true;
                     reloadPage(LESSON_NUMBER);
                 } else if (response.result === 'ALREADY') {
                     $('#give-me-a-coffee-fail-message').html(response.description);
@@ -359,11 +361,12 @@ $(document).ready(function () {
     $('.coffee-proceed').on('click', giveMeCoffee);
 
 
-    if (!NEED_PAYMENT === true && must_pay === true) {
-        addEventListener('strictDownload', function (e) {
+    addEventListener('strictDownload', function (e) {
+        if (!NEED_PAYMENT === true && must_pay === true && !userlesson) {
             $('#strictDownloadModal').modal('show');
-        });
-    }
+        }
+    });
+
 
     addEventListener('unhiddenWasPlaying', function (e) {
         $('#hiddenWasListeningModal').modal('show');
