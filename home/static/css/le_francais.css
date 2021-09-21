@@ -1182,3 +1182,7 @@ span.underline.play:focus {
     width: 100%;
     height: 100%;
 }
+
+.popover-body {
+    font-size: 0.9rem;
+}
