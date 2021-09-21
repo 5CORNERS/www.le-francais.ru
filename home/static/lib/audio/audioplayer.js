@@ -99,11 +99,13 @@
 			var $this = $(this),
 				audioFile = $this.attr('src'),
 				isAutoPlay = $this.get(0).getAttribute('autoplay'),
-				isAutoPlay = ((isAutoPlay === '') || (isAutoPlay === 'autoplay')) ? true : false,
 				isLoop = $this.get(0).getAttribute('loop'),
-				isLoop = ((isLoop === '') || (isLoop === 'loop')) ? true : false,
 				isSupport = false,
-				setTime = $this.get(0).getAttribute('set-time');
+				setTime = $this.get(0).getAttribute('set-time'),
+				isStrict = $this.data('strict') === true;
+
+			isAutoPlay = ((isAutoPlay === '') || (isAutoPlay === 'autoplay'))
+			isLoop = ((isLoop === '') || (isLoop === 'loop'))
 
 			if (typeof audioFile === 'undefined') {
 				$this.find('source').each(function () {
@@ -129,7 +131,7 @@
 				theAudio = (isSupport) ? thePlayer.find('audio') : thePlayer.find('embed'),
 				theAudio = theAudio.get(0);
 
-			var lesson_number = $(theAudio).attr('number');
+			var lesson_number = $(theAudio).attr('number'), wasPlaying;
 
 			if ((typeof lesson_number !== typeof undefined) && (lesson_number !== false)) {
 				var $menuPlayer = thePlayer.clone();
@@ -139,18 +141,19 @@
 				thePlayer.find('audio').css({'width': 0, 'height': 0, 'visibility': 'hidden'});
 				thePlayer.append('<div class="' + cssClass.time + ' ' + cssClass.timeCurrent + '"></div><div class="' + cssClass.bar + '"><div class="' + cssClass.barLoaded + '"></div><div class="' + cssClass.barPlayed + '"></div></div><div class="' + cssClass.time + ' ' + cssClass.timeDuration + '"></div><div class="' + cssClass.volume + '"><div class="' + cssClass.volumeButton + '" title="' + params.strVolume + '"><a href="#">' + params.strVolume + '</a></div><div class="' + cssClass.volumeAdjust + '"><div><div></div></div></div></div>');
 
-				var downloadable = $(theAudio).attr('data-downloadable');
+				var downloadable = $(theAudio).data('downloadable');
 
-				if ((typeof downloadable !== typeof undefined) && (downloadable !== false) && (downloadable !== 'empty')) {
+				if (downloadable === true) {
 					var source = $(theAudio).find('source').attr('src');
-					thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="' + source + '&download=true' + '" class="' + cssClass.downloadButton + ' fa fa-download"></a></div><div class="audioplayer-space"></div>');
+					if (!isStrict) {
+						thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="' + source + '&download=true' + '" class="' + cssClass.downloadButton + ' fa fa-download"></a></div><div class="audioplayer-space"></div>');
+					} else {
+						thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="#" class="' + cssClass.downloadButton + ' fa fa-download"></a></div>');
+					}
 					$(theAudio).attr('id', 'lesson-audio');
 					$(theAudio).attr('number', lesson_number);
-				} else if (downloadable === 'empty') {
-					thePlayer.append('<div class="' + cssClass.download + '"><a download="true" class="' + cssClass.downloadButton + ' fa fa-download"></a></div>');
 				}
-				event = new CustomEvent('downloadButtonReady');
-				window.dispatchEvent(event);
+				window.dispatchEvent(new CustomEvent('downloadButtonReady'));
 
 				var theBar = thePlayer.find('.' + cssClass.bar),
 					barPlayed = thePlayer.find('.' + cssClass.barPlayed),
@@ -159,6 +162,7 @@
 					timeDuration = thePlayer.find('.' + cssClass.timeDuration),
 					volumeButton = thePlayer.find('.' + cssClass.volumeButton),
 					volumeAdjuster = thePlayer.find('.' + cssClass.volumeAdjust + ' > div'),
+					downloadButton = thePlayer.find('.' + cssClass.downloadButton),
 					volumeDefault = 0,
 					adjustCurrentTime = function (e) {
 						theRealEvent = isTouch ? e.originalEvent.touches[0] : e;
@@ -251,6 +255,13 @@
 					return false;
 				});
 
+				if (isStrict) {
+					downloadButton.on('click.strict', function (e) {
+						e.preventDefault()
+						dispatchEvent(new Event('strictDownload'))
+					})
+				}
+
 				volumeAdjuster.on(eStart, function (e) {
 					adjustVolume(e);
 					volumeAdjuster.on(eMove, function (e) {
@@ -282,9 +293,28 @@
 					return playerPlayPause(true);
 				});
 				$menuPlayer.find('.' + cssClass.tenSecondsBack).on('click', e => {
-				e.preventDefault();
-				return playerSeekBack(10);
-			});
+					e.preventDefault();
+					return playerSeekBack(10);
+				});
+
+				let hidden, visibilityChange;
+				if (typeof document.hidden !== 'undefined') {
+					hidden = 'hidden';
+					visibilityChange = 'visibilitychange';
+				} else if (typeof document.msHidden !== 'undefined') {
+					hidden = 'msHidden';
+					visibilityChange = 'msvisibilitychange';
+				} else if (typeof document.webkitHidden !== 'undefined') {
+					hidden = 'webkitHidden';
+					visibilityChange = 'webkitcisibilitychange'
+				}
+
+				if (typeof document.addEventListener === 'undefined' || hidden === undefined) {
+					console.log("Audio player requires a browser, such as Google Chrome or Firefox," +
+						" that supports the Page Visibility API");
+				} else if (isStrict) {
+					document.addEventListener(visibilityChange, handleVisibilityChange, false)
+				}
 			}
 
 			if (isAutoPlay) {
@@ -319,6 +349,10 @@
 						theAudio.Stop();
 					}
 				} else {
+                    if ((typeof lesson_number !== typeof undefined) && (lesson_number !== false) && document['hidden']){
+                        return false;
+					}
+
 					$(this).attr('title', params.strPause).find('a').html(params.strPause);
 
 					if (typeof $menuPlayer !== typeof undefined) {
@@ -347,6 +381,34 @@
 
 			function playerSeekBack(s) {
 				theAudio.currentTime -= s
+			}
+
+			function handleVisibilityChange() {
+				if (isStrict) {
+					console.log(`Visibility Changed. Playing: ${thePlayer.hasClass(cssClass.playing)}`)
+					// 	if (document["hidden"] && thePlayer.hasClass(cssClass.playing)) {
+					// 		playerStop()
+					// 		wasPlaying = true
+					// 	} else if (!document['hidden'] && !thePlayer.hasClass(cssClass.playing)) {
+					// 		playerStart()
+					// 		if (wasPlaying) {
+					// 			dispatchEvent(new Event('unhiddenWasPlaying'))
+					// 		}
+					// 	}
+				}
+			}
+
+			function playerStop() {
+				playerPlayPause(false)
+				setTime = theAudio.currentTime
+				theAudio.src = ""
+				theAudio.load()
+			}
+
+			function playerStart() {
+				theAudio.src = audioFile
+				theAudio.load()
+				theAudio.currentTime = setTime
 			}
 
 			$this.replaceWith(thePlayer);
