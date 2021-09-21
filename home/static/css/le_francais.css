@@ -950,14 +950,6 @@ details.no-details:not([open]) summary {
     display: block;
 }
 
-.modal-header {
-    display: block;
-}
-
-.modal-header > button.close {
-    float: right;
-    margin-left: -2rem !important;
-}
 
 .d-flex .flex-row > .navbar-nav .flex-row > .dropdown-toggle::after {
     vertical-align: 0;
@@ -1189,4 +1181,8 @@ span.underline.play:focus {
     left: 0;
     width: 100%;
     height: 100%;
+}
+
+.popover-body {
+    font-size: 0.9rem;
 }

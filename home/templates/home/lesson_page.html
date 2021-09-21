@@ -20,6 +20,7 @@
     const LESSON_NUMBER = {% if self.lesson_number %}{{ self.lesson_number }}{% else %}null{% endif %};
     const NEED_PAYMENT = {% if self.need_payment %}true{% else %}false{% endif %};
     const IS_AUTHENTICATED = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
+    const LESSON_LISTEN_URL = "https://files.le-francais.ru/listen.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}&download=true"
     var saw_message, cups_amount, cups_credit, must_pay, userlesson
     {% if request.user.is_authenticated %}
         saw_message = {% if request.user.saw_message %}true{% else %}false{% endif %};
@@ -37,6 +38,7 @@
     {% endif %}
     const COFFEE_SOUND_URL = '{% static 'snd/coffee.mp3' %}';
     const BY_ME_A_COFFEE_SVG = '{% static 'images/coffee-icons/buy_me_a_coffee-04.svg' %}';
+    const WHO_DO_YOU_THINK_WE_ARE = '{% slugurl "who-do-you-think-we-are" %}'
 	</script>
 	<script type="text/javascript"
             src="{% static 'components/js/bootstrap-treeview.min.js' %}"></script>
@@ -223,9 +225,9 @@
 				{% if user.is_authenticated %}
 					{% if user.has_coffee or 'payment_success' in request.GET %}
 						<div class="modal-header">
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 							<h4 class="modal-title" style="text-align: center">Ура!</h4>
-						</div>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        </div>
 						<div class="modal-body" style="text-align: center">
 							<p>Вы угощаете меня стаканчиком кофе за этот урок.</p>
 							<p>Все так?</p>
@@ -241,8 +243,8 @@
 					{% endif %}
 				{% else %}
 					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 						<h4 class="modal-title" style="text-align: center">Спасибо вам огромное за готовность нас поддержать!</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 					</div>
 					<div class="modal-body" style="padding-left:25px; padding-right:25px ">
 						<p>Чтобы продолжить, вам надо авторизоваться на сайте.</p>
@@ -261,9 +263,9 @@
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 					<h4 style="text-align: center">Мы вам очень признательны.</h4>
-				</div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
 				<div class="modal-body">
 					<p id="give-me-a-coffee-success-message">Считаем оставшиеся чашечки...</p>
 					<p>Учите французский и получайте удовольствие! :)</p>
@@ -278,9 +280,9 @@
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 					<h4 style="text-align: center">Что-то пошло не так!</h4>
-				</div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
 				<div class="modal-body">
 					<p id="give-me-a-coffee-fail-message"></p>
 				</div>
@@ -290,6 +292,67 @@
 			</div>
 		</div>
 	</div>
+    <div class="modal" tabindex="-1" id="hiddenWasListeningModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="close"
+                            data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            data-dismiss="modal" id="hiddenWasListeningPlay">Continue without
+                    </button>
+                    <button type="button" class="btn btn-primary">Give me coffee
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" tabindex="-1" id="strictDownloadModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Загрузка доступна тем, кто нас поддерживает.</h5>
+                    <button type="button" class="close"
+                            data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Каждый день мы работаем, чтобы уроки были
+                        удобнее и комфортнее. Ваша благодарность
+                        поможет нам — и откроет Вам доступ к
+                        дополнительным материалам, а также возможность
+                        скачивать записи уроков. <span
+                                class="arnaud-comment" id="strictDownloadModelWhyThis" tabindex="0">Почему так?</span>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <img class="new-svg-button" id="StrictDownloadModelCoffeeButton"
+                        {% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
+                             data-toggle="modal"
+                             data-target="#give-me-a-coffee-modal"
+                        {% elif user.is_authenticated and not user.has_coffee %}
+                            onclick="location.href='{% url 'coffee:check_amount' %}?next={{ request.path }}&s_t=0';"
+                        {% elif not user.is_authenticated %}
+                             data-toggle="modal"
+                             data-target="#give-me-a-coffee-modal"
+                        {% endif %}
+                         src="{% static 'svg/buy me coffee-07.svg' %}"
+                         title="Поблагодарить"
+					>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include 'modals/servers_map_image_modal.html' %}
 	{% if self.mail_archive and not user.is_authenticated %}
 		<div class="modal fade" id="default-login-required-modal" tabindex="-1" role="dialog">
 			<div class="modal-dialog" role="document">
@@ -313,18 +376,18 @@
                         <div class="modal-content">
                             {% if not user.saw_message %}
                                 <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                                 <h4>Спасибо за Ваше решение нас поддержать!</h4>
-                            </div>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                </div>
                             <div class="modal-body">
                                 <p>Добровольное пожертвование — это поступок, и мы это по-настоящему ценим.</p>
                                 <p>Теперь Вы можете благодарить нас за наш труд чашечками кофе :)</p>
                             </div>
                             {% else %}
                                 <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                                 <h4>Спасибо, что остаётесь с нами!</h4>
-                            </div>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                </div>
                             <div class="modal-body">
                                 <p>Вы не пожалеете. Мы продолжим наш каждодневный труд над проектом, чтбы позволить вам получить максимум знаний, быстрее выучить французский — и получать от этого удовольствие. :)</p>
                             </div>
@@ -339,7 +402,7 @@
                 <div class="modal" id="fail-payment-modal" tabindex="-1" role="dialog">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
-                            <div class="modal-header">Ошибка!
+                            <div class="modal-header"><h5>Ошибка!</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             </div>
                             <div class="modal-body">
@@ -358,9 +421,9 @@
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 						{% if not request.user.saw_message%}<h4>Спасибо за Ваше решение нас поддержать!</h4>{% else %}<h4>Спасибо, что остаётесь с нами!</h4>{% endif %}
-					</div>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
 					<div class="modal-body">
 						{% if not user.has_coffee and request.GET.modal_open == 'give-me-a-coffee-payment-success-modal' %}
 							<img id="ten-seconds-loading-img" style="width:100%;" src="{% static 'images/loading_icon.gif' %}" alt="">
@@ -444,9 +507,9 @@
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 						<h4>Ошибка</h4>
-					</div>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
 					<div class="modal-body">
 						<p>Что-то пошло не так.</p>
 						<p>:(</p>
@@ -497,9 +560,9 @@
 					<div class="modal-content">
 						{% if request.user.has_payed %}
 							<div class="modal-header" style="text-align: center;">
-								<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 								<h3>Пожалуйста, прочтите это!</h3></div>
-							<div class=" modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <div class=" modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
 								последнего.</p>
 
 								<p> Сегодня сто<em>и</em>т вопрос выживания всего проекта. Мы всё перепробовали. И у нас не осталось другого выхода —
@@ -528,9 +591,9 @@
 							</div>
 						{% else %}
 							<div class="modal-header" style="text-align: center">
-								<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 								<h3>Пожалуйста, прочтите это!</h3></div>
-							<div class="modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <div class="modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
 								последнего.</p>
 								<p> Сегодня сто<em>и</em>т вопрос выживания всего проекта. Мы всё перепробовали. И у нас не осталось другого выхода —
 									нам приходится сделать часть уроков платными. Их цена символическая — меньше стоимости одной поездки в автобусе
@@ -570,9 +633,18 @@
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						{% if request.user.has_payed %}
-							<div class="modal-header" style="text-align: center;"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h3>Пожалуйста, прочтите это!</h3></div>
 							<div class=" modal-body"><p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до
 								последнего.</p>
+                                <div class="modal-header"
+                                     style="text-align: center;">
+                                    <h3>Пожалуйста, прочтите это!</h3>
+                                    <button type="button"
+                                            class="close"
+                                            data-dismiss="modal"
+                                            aria-label="Close"><span
+                                            aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
 
 								<p> Сегодня сто<em>и</em>т вопрос выживания всего проекта. Мы всё перепробовали. И у нас не осталось другого выхода —
 									нам приходится сделать часть уроков платными. Увы, таких, как Вы — тех, кто помогал проекту добровольно, — оказалось очень немного. Нам не выжить.
@@ -599,7 +671,15 @@
 								<button data-dismiss="modal" data-saw-proceed="true" id="lesson-not-activated-activate-button" class="btn btn-secondary">Активировать</button>
 							</div>
 						{% else %}
-							<div class="modal-header" style="text-align: center"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h3>Пожалуйста, прочтите это!</h3></div>
+                            <div class="modal-header"
+                                 style="text-align: center">
+                                <h3>Пожалуйста, прочтите это!</h3>
+                                <button type="button" class="close"
+                                        data-dismiss="modal"
+                                        aria-label="Close"><span
+                                        aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
 							<div class="modal-body">
 								<p>Это то, чего вы ожидали от нас меньше всего, — и то, чего мы сами не хотели делать до последнего.</p>
 								<p> Сегодня сто<em>и</em>т вопрос выживания всего проекта. Мы всё перепробовали. И у нас не осталось другого выхода —
@@ -640,13 +720,13 @@
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						<div class="modal-header">
-							<button class="close success-message fail-message unsofficiant-cups login-need already-activated" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 							<h4 class="waiting-message" style="display: none;">Урок активируется</h4>
-							<h4 class="success-message" style="display: none;">Урок активирован</h4>
-							<h4 class="fail-message unsofficiant-cups" style="display: none;">Увы!</h4>
-							<h4 class="fail-message login-need" style="display: none;">Упс!</h4>
-							<h4 class="fail-message already-activated" style="display: none;">Хорошая новость!</h4>
-						</div>
+                            <h4 class="success-message" style="display: none;">Урок активирован</h4>
+                            <h4 class="fail-message unsofficiant-cups" style="display: none;">Увы!</h4>
+                            <h4 class="fail-message login-need" style="display: none;">Упс!</h4>
+                            <h4 class="fail-message already-activated" style="display: none;">Хорошая новость!</h4>
+                            <button class="close success-message fail-message unsofficiant-cups login-need already-activated" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        </div>
 						<div class="modal-body">
 							<div id="activated-message-waiting" class="waiting-message" style="display: none">
 								<p>Пожалуйста, подождите, это займёт несколько секунд.</p>
@@ -720,8 +800,6 @@
 					$('#lesson-audio').on('pause', showBottomMessage);
 				}, 50 * 1000);
 			});
-
-			$('.audioplayer-download-button').on('click', showBottomMessage);
 		});
 
 
