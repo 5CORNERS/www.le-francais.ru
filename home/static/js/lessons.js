@@ -339,6 +339,8 @@ $(document).ready(function () {
                     $('#give-me-a-coffee-success-message').html(response.description);
                     $('#give-me-a-coffee-complete-modal').modal('show');
                     getSuccessButton();
+                    $('#lessonAudioBlock').find('.audioplayer-download-button').attr('href', LESSON_LISTEN_URL).off('.strict');
+                    userlesson = true;
                     reloadPage(LESSON_NUMBER);
                 } else if (response.result === 'ALREADY') {
                     $('#give-me-a-coffee-fail-message').html(response.description);
@@ -357,5 +359,41 @@ $(document).ready(function () {
         });
     }
     $('.coffee-proceed').on('click', giveMeCoffee);
+
+
+    addEventListener('strictDownload', function (e) {
+        if (!NEED_PAYMENT === true && must_pay === true && !userlesson) {
+            $('#strictDownloadModal').modal('show');
+        }
+    });
+
+
+    addEventListener('unhiddenWasPlaying', function (e) {
+        $('#hiddenWasListeningModal').modal('show');
+    });
+
+    $('#unhiddenWasPlaying').click(function (e) {
+        let $playPause = $('#lessonAudioBlock').find('#playpause')
+        $playPause.click()
+    })
+    $('#strictDownloadModelWhyThis').popover({
+        content: `Ваша поддержка идет на техническое обеспечение сайта <a id="serversMapImageLink" tabindex="0"
+                                                         class="fas fa-info-circle text-primary"
+                                                         style="position: relative;top: 1px;"></a> и вознаграждение тем, <a href="${WHO_DO_YOU_THINK_WE_ARE}" title="кто эти люди?" target="_blank"> кто над ним трудится <i class="fas fa-external-link-alt"></i></a>.`,
+        html: true,
+        placement: 'top',
+        trigger: 'click'
+    }).on('shown.bs.popover', function () {
+        $('#serversMapImageLink').on('click', function () {
+            $('#strictPopoverModalWhyThis').popover('hide')
+            $('#serversMapImageModal').modal('show').one('hide.bs.modal', function () {
+                $('#strictDownloadModal').modal('show')
+            })
+            $('#strictDownloadModal').modal('hide');
+        })
+    })
+    $('#StrictDownloadModelCoffeeButton').on('click', function () {
+        $('#strictDownloadModal').modal('hide');
+    })
 });
 
