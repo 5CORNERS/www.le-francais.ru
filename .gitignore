@@ -27,3 +27,4 @@ home/data/devoirs.csv
 /temp/
 /mass_mailer/temp/
 !/html_files/resume_populaire/get_markers.py
+!/html_files/resume_populaire/update_markers.py
