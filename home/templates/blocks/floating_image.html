@@ -1,7 +1,7 @@
 {% load wagtailcore_tags wagtailimages_tags home_wagtail_tags %}
 {% image value.image original as tmp_image %}
 <div class="{{ value.float }} block_widescreen">
-    <figure class="figure" style="max-width: {{ value.width_large }}px;"><img src="{{ tmp_image.url }}" alt="{{ tmp_image.alt }}"
+    <figure class="figure" style="max-width: {{ value.width_large }}px;{% if not value.image_caption %}margin: 0;{% endif %}"><img src="{{ tmp_image.url }}" alt="{{ tmp_image.alt }}"
             class="figure-img"
             style="max-width: {{ value.width_large }}px;">
         {% if value.image_caption %}
@@ -15,7 +15,7 @@
 <div class="block_smallscreen">
     <figure class="figure"><img src="{{ tmp_image.url }}" alt="{{ tmp_image.alt }}"
             class="figure-img"
-            style="max-width: {{ value.width_small }}px;">
+            style="max-width: {{ value.width_small }}px;{% if not value.image_caption %}margin: 0;{% endif %}">
         {% if value.image_caption %}
             <figcaption
                     class="figure-caption">{{ value.image_caption }}</figcaption>{% endif %}
