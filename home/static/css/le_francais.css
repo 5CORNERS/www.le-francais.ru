@@ -966,12 +966,12 @@ button:disabled {
 
 .leftimg {
     float: left; /* Выравнивание по левому краю */
-    margin: 5px 15px 3px 0; /* Отступы вокруг картинки */
+    margin: 5px 15px 0 0; /* Отступы вокруг картинки */
 }
 
 .rightimg {
     float: right; /* Выравнивание по правому краю  */
-    margin: 5px 0 3px 10px; /* Отступы вокруг картинки */
+    margin: 5px 0 0 10px; /* Отступы вокруг картинки */
 }
 
 .block_widescreen {

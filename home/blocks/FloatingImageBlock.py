@@ -1,5 +1,5 @@
 from wagtail.core.blocks import StreamBlock, StructBlock, RichTextBlock, \
-	RawHTMLBlock, TextBlock, ChoiceBlock, IntegerBlock, CharBlock
+	RawHTMLBlock, TextBlock, ChoiceBlock, IntegerBlock, CharBlock, BooleanBlock
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.templatetags.wagtailimages_tags import ImageNode
 
@@ -19,6 +19,7 @@ class FloatingImageBlock(StructBlock):
 			('paragraph', RichTextBlock())
 		], required=True
 	)
+	min_height = BooleanBlock(required=False, default=False)
 
 	def get_context(self, value, parent_context=None):
 		context = super(FloatingImageBlock, self).get_context(value, parent_context=None)
@@ -36,6 +37,9 @@ class FloatingImageBlock(StructBlock):
 			attrs={},
 			output_var_name='sm_image'
 		)
+		context['value']['container_height'] = value['image'].height * (value['width_large'] / value['image'].width) + 8 + 5
+		if value['image_caption']:
+			context['value']['container_height'] += 35
 		return context
 
 	class Meta:
