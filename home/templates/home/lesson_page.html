@@ -296,21 +296,38 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Modal title</h5>
+                    <h5>Прослушивание в фоне доступно тем, кто нас
+                        поддерживает.</h5>
                     <button type="button" class="close"
                             data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Modal body text goes here.</p>
+                    <p>Каждый день мы работаем, чтобы уроки были
+                        удобнее и комфортнее. Ваша благодарность
+                        поможет нам — и откроет Вам доступ к
+                        дополнительным материалам, а также возможность
+                        слушать в фоне записи уроков. <span
+                                class="arnaud-comment"
+                                id="strictDownloadModelWhyThis"
+                                tabindex="0">Почему так?</span>
+                    </p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary"
-                            data-dismiss="modal" id="hiddenWasListeningPlay">Continue without
-                    </button>
-                    <button type="button" class="btn btn-primary">Give me coffee
-                    </button>
+                    <img class="new-svg-button"
+                         id="StrictDownloadModelCoffeeButton"
+                            {% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
+                         data-toggle="modal"
+                         data-target="#give-me-a-coffee-modal"
+                            {% elif user.is_authenticated and not user.has_coffee %}
+                         onclick="location.href='{% url 'coffee:check_amount' %}?next={{ request.path }}&s_t=0';"
+                            {% elif not user.is_authenticated %}
+                         data-toggle="modal"
+                         data-target="#give-me-a-coffee-modal"
+                            {% endif %}
+                         src="{% static 'svg/buy me coffee-07.svg' %}"
+                         title="Поблагодарить">
                 </div>
             </div>
         </div>

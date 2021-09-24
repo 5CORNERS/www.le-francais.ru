@@ -385,16 +385,17 @@
 
 			function handleVisibilityChange() {
 				if (isStrict) {
-					console.log(`Visibility Changed. Playing: ${thePlayer.hasClass(cssClass.playing)}`)
-					// 	if (document["hidden"] && thePlayer.hasClass(cssClass.playing)) {
-					// 		playerStop()
-					// 		wasPlaying = true
-					// 	} else if (!document['hidden'] && !thePlayer.hasClass(cssClass.playing)) {
-					// 		playerStart()
-					// 		if (wasPlaying) {
-					// 			dispatchEvent(new Event('unhiddenWasPlaying'))
-					// 		}
-					// 	}
+					console.log(`Visibility Changed. Playing: ${thePlayer.hasClass(cssClass.playing)}`);
+					if (document["hidden"] && thePlayer.hasClass(cssClass.playing)) {
+						playerStop();
+						wasPlaying = true;
+					} else if (!document['hidden'] && !thePlayer.hasClass(cssClass.playing)) {
+						playerStart()
+						if (wasPlaying) {
+							dispatchEvent(new Event('unhiddenWasPlaying'));
+							wasPlaying = false;
+						}
+					}
 				}
 			}
 
