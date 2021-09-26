@@ -46,8 +46,8 @@ class WordsManagementFilterForm(forms.Form):
 				lesson__payment__user=user)).distinct().order_by(
 				'lesson__lesson_number', 'name')
 		else:
-			self.packets = Packet.objects.filter(
-				Q(word__userdata__user=user) | Q(
+			self.packets = Packet.objects.filter(Q(demo=True) | Q(
+				word__userdata__user=user) | Q(
 					lesson__payment__user=user)).distinct().order_by(
 				'lesson__lesson_number', 'name')
 		choices = [(o.id, str(o.name)) for o in self.packets]
