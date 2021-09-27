@@ -307,17 +307,17 @@
                     <p>Каждый день мы работаем, чтобы уроки были
                         удобнее и комфортнее. Ваша благодарность
                         поможет нам — и откроет Вам доступ к
-                        дополнительным материалам, а также возможность
-                        слушать в фоне записи уроков. <span
+                        дополнительным материалам, а также даст
+                        возможность слушать в фоне записи уроков. <span
                                 class="arnaud-comment"
-                                id="strictDownloadModelWhyThis"
+                                id="hiddenWasListeningModalWhyThis"
                                 tabindex="0">Почему так?</span>
                     </p>
                 </div>
                 <div class="modal-footer">
                     <img class="new-svg-button"
-                         id="StrictDownloadModelCoffeeButton"
-                         data-dismiss="modal"
+                         id="hiddenWasListeningModalCoffeeButton"
+
                             {% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
                          data-toggle="modal"
                          data-target="#give-me-a-coffee-modal"
@@ -347,14 +347,13 @@
                     <p>Каждый день мы работаем, чтобы уроки были
                         удобнее и комфортнее. Ваша благодарность
                         поможет нам — и откроет Вам доступ к
-                        дополнительным материалам, а также возможность
-                        скачивать записи уроков. <span
+                        дополнительным материалам, а также даст
+                        возможность скачивать записи уроков. <span
                                 class="arnaud-comment" id="strictDownloadModelWhyThis" tabindex="0">Почему так?</span>
                     </p>
                 </div>
                 <div class="modal-footer">
                     <img class="new-svg-button" id="StrictDownloadModelCoffeeButton"
-                         data-dismiss="modal"
                         {% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
                              data-toggle="modal"
                              data-target="#give-me-a-coffee-modal"
