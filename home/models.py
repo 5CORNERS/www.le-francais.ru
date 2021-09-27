@@ -71,7 +71,7 @@ BLOCK_AFTER_REPETITION_MATERIAL = 8
 BLOCK_AFTER_EXERCISE = 9
 BLOCK_AFTER_FLASHCARDS = 10
 STRICT_PLAYER_AFTER = 12
-FORBID_BACKGROUND_LISTENING = 30
+FORBID_BACKGROUND_LISTENING_AFTER = 29
 
 
 @register_snippet
@@ -566,7 +566,7 @@ class LessonPage(Page):
             context['strict_player'] = False
 
         context['forbid_background'] = True
-        if FORBID_BACKGROUND_LISTENING >= self.lesson_number or self.payed(user):
+        if FORBID_BACKGROUND_LISTENING_AFTER >= self.lesson_number or self.payed(user):
             context['forbid_background'] = False
 
         context['has_transcript'] = False
