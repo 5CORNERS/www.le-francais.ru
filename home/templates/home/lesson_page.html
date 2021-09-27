@@ -317,6 +317,7 @@
                 <div class="modal-footer">
                     <img class="new-svg-button"
                          id="StrictDownloadModelCoffeeButton"
+                         data-dismiss="modal"
                             {% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
                          data-toggle="modal"
                          data-target="#give-me-a-coffee-modal"
@@ -353,6 +354,7 @@
                 </div>
                 <div class="modal-footer">
                     <img class="new-svg-button" id="StrictDownloadModelCoffeeButton"
+                         data-dismiss="modal"
                         {% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
                              data-toggle="modal"
                              data-target="#give-me-a-coffee-modal"
