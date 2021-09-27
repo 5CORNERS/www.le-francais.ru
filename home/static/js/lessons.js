@@ -339,7 +339,8 @@ $(document).ready(function () {
                     $('#give-me-a-coffee-success-message').html(response.description);
                     $('#give-me-a-coffee-complete-modal').modal('show');
                     getSuccessButton();
-                    $('#lessonAudioBlock').find('.audioplayer-download-button').attr('href', LESSON_LISTEN_URL).off('.strict');
+                    let $lessonAudioBlock = $('#lessonAudioBlock')
+                    $lessonAudioBlock.find('.audioplayer-download-button').attr('href', LESSON_LISTEN_URL).off('.strict');
                     userlesson = true;
                     reloadPage(LESSON_NUMBER);
                 } else if (response.result === 'ALREADY') {
