@@ -378,9 +378,19 @@ $(document).ready(function () {
         $playPause.click()
     })
     $('#strictDownloadModelWhyThis').popover({
-        content: `Ваша поддержка идет на техническое обеспечение сайта <a id="serversMapImageLink" tabindex="0"
-                                                         class="fas fa-info-circle text-primary"
-                                                         style="position: relative;top: 1px;"></a> и вознаграждение тем, <a href="${WHO_DO_YOU_THINK_WE_ARE}" title="кто эти люди?" target="_blank"> кто над ним трудится <i class="fas fa-external-link-alt"></i></a>.`,
+        content: `<p>Мы поддерживаем и улучшаем проект своими силами. Чтобы продолжать
+    работу над сайтом, нам важна Ваша поддержка.</p>
+
+<p>Благодарность за уроки идет на техническое обеспечение сайта <a
+        id="serversMapImageLink" tabindex="0"
+        class="fas fa-info-circle text-primary"
+        style="position: relative;top: 1px;"></a> и вознаграждение
+    тем, <a href="${WHO_DO_YOU_THINK_WE_ARE}" title="кто эти люди?"
+            target="_blank"> кто над ним трудится <i
+            class="fas fa-external-link-alt"></i></a>.</p>
+
+<p class="mb-0"><b>Однако, сейчас развитие проекта под угрозой.</b>
+    Поэтому мы будем рады, если Вы поддержите нас в этот период.</p>`,
         html: true,
         placement: 'top',
         trigger: 'click'
@@ -398,9 +408,19 @@ $(document).ready(function () {
     })
 
     $('#hiddenWasListeningModalWhyThis').popover({
-        content: `Ваша поддержка идет на техническое обеспечение сайта <a id="serversMapImageLink" tabindex="0"
-                                                         class="fas fa-info-circle text-primary"
-                                                         style="position: relative;top: 1px;"></a> и вознаграждение тем, <a href="${WHO_DO_YOU_THINK_WE_ARE}" title="кто эти люди?" target="_blank"> кто над ним трудится <i class="fas fa-external-link-alt"></i></a>.`,
+        content: `<p>Мы поддерживаем и улучшаем проект своими силами. Чтобы продолжать
+    работу над сайтом, нам важна Ваша поддержка.</p>
+
+<p>Благодарность за уроки идет на техническое обеспечение сайта <a
+        id="serversMapImageLink" tabindex="0"
+        class="fas fa-info-circle text-primary"
+        style="position: relative;top: 1px;"></a> и вознаграждение
+    тем, <a href="${WHO_DO_YOU_THINK_WE_ARE}" title="кто эти люди?"
+            target="_blank"> кто над ним трудится <i
+            class="fas fa-external-link-alt"></i></a>.</p>
+
+<p class="mb-0"><b>Однако, сейчас развитие проекта под угрозой.</b>
+    Поэтому мы будем рады, если Вы поддержите нас в этот период.</p>`,
         html: true,
         placement: 'top',
         trigger: 'click'
