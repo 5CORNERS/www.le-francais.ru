@@ -103,7 +103,7 @@
 				isSupport = false,
 				setTime = $this.get(0).getAttribute('set-time'),
 				isStrict = $this.data('strict') === true,
-				forbidBackground = $this.data('forbidBackground') === true;
+				forbidBackground = $this.data('forbid-background') === true;
 
 			isAutoPlay = ((isAutoPlay === '') || (isAutoPlay === 'autoplay'))
 			isLoop = ((isLoop === '') || (isLoop === 'loop'))
