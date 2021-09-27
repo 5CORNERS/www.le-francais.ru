@@ -385,7 +385,6 @@
 
 			function handleVisibilityChange() {
 				if (isStrict && ((userlesson === undefined || userlesson === false) && NEED_PAYMENT === false)) {
-					console.log(`Visibility Changed. Playing: ${thePlayer.hasClass(cssClass.playing)}`);
 					if (document["hidden"] && thePlayer.hasClass(cssClass.playing)) {
 						playerStop();
 						wasPlaying = true;
