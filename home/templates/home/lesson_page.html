@@ -779,15 +779,16 @@
 			{% comment %}Need login modal window{% endcomment %}
 		{% endif %}
 	{% endif %}
-	<div class="bottom-message" id="bottom-message" style="display: none">
-		<div class="bottom-message-content">
+	<div class="bottom-message row" id="bottom-message" style="display: none">
+		<div class="bottom-message-content col-12 col-md-9 col-xl-6">
 			<div class="bottom-message-description">
 				<div class="bottom-message-button-close" id="bottom-message-button-close" onclick="toggleBottomMessage()"><i class="fas fa-times"></i>
 				</div>
                 <div class="bottom-message-text">
                     <h5 class="text-center">Пожалуйста, поддержите наш проект — мы остро нуждаемся
                         в вашей помощи.</h5>
-                    <p>Нас двое. Мы работаем над этим проектом каждый день. <b>Это наша работа.</b> У нас нет
+                    <p>Нас двое. Мы работаем над этим проектом каждый день.
+                        <b>Это — наша работа.</b> У нас нет
                         других источников дохода, кроме ваших пожертвований.
                     </p>
                     <p>Наше благополучие и развитие этого проекта зависит
@@ -836,7 +837,8 @@
                 <a id="bottom-message-button-who"
                    href="/inside/who-do-you-think-we-are/" target="">
                     <div class="btn btn-sm btn-primary bottom-message-button">
-                        {% if is_pc or is_tablet %}Кто стоит за этим
+                        {% if request|is_pc or request|is_tablet %}Кто стоит
+                            за этим
                             проектом?
                         {% else %}Кто здесь?{% endif %}
                     </div>
