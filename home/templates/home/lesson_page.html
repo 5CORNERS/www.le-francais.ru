@@ -806,17 +806,30 @@
 		const uLP =
 			{% if user.is_authenticated and user.has_payed and request.user.last_payment.update_date %}new Date('{{ request.user.last_payment.update_date }}');{% else %}null;{% endif %}
 
-		addEventListener('audioplayerReady', function () {
-			$('#lesson-audio').one('play', function () {
-				setTimeout(function () {
-					$('#lesson-audio').on('pause', showBottomMessage);
-				}, 50 * 1000);
-			});
-		});
+        let $lessonAudioBlock = $('#lessonAudioBlock')
+        addEventListener('audioplayerReady', function () {
+            setTimeout(function () {
+                if ($lessonAudioBlock.find('.audioplayer').hasClass
+                ('audioplayer-playing')) {
+                    $lessonAudioBlock.find('.audioplayer-playpause').one
+                    ('click', function () {
+                        setTimeout(function () {
+                            if (!$lessonAudioBlock.find('.audioplayer')
+                                .hasClass('audioplayer-playing')) {
+                                showBottomMessage()
+                            }
+                        }, 1000)
+                    })
+                } else {
+                    showBottomMessage()
+                }
+            }, 50 * 1000)
+        });
 
 
 		function showBottomMessage() {
-			if (Cookies.get('bottom_message') == null && uHP === false) {
+			if (Cookies.get('bottom_message') == null && uHP === false &&
+                userlesson !== true) {
 				$('#bottom-message').slideDown(1000);
 			}
 		}
