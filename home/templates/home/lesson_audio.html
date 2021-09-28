@@ -8,6 +8,9 @@
                     {% if strict_player %}
                    data-strict="true"
                     {% endif %}
+                    {% if forbid_background %}
+                   data-forbid-background="true"
+                    {% endif %}
                    data-downloadable="true"
                    number="{{ self.lesson_number }}" {# TODO: add "data-" to custom attrubutes #}
                     {% if request.GET.t %}
