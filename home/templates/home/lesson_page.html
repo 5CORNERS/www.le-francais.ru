@@ -786,10 +786,22 @@
 				     onclick="toggleBottomMessage()"><i class="fas fa-times"></i>
 				</div>
                 <div class="bottom-message-text">
-                    <p>Мы поддерживаем и улучшаем проект своими силами. Чтобы продолжать работу над сайтом, нам важна
-                        Ваша поддержка. Благодарность за уроки идет на техническое обеспечение сайта и вознаграждение
-                        тем, кто над ним трудится. Однако, сейчас развитие проекта под угрозой. Поэтому мы будем очень
-                        признательны, если Вы поддержите нас в этот период.</p>
+                    <h4>Пожалуйста, поддержите наш проект — мы остро нуждаемся
+                        в вашей помощи.</h4>
+                    <p>Нас двое. Мы работаем над этим проектом каждый день — с
+                        утра и до вечера. <b>Это наша работа.</b> У нас нет
+                        других источников дохода, кроме ваших пожертвований.
+                    </p>
+                    <p>Наше благополучие и развитие этого проекта зависит
+                        только от вашей щедрости. </p>
+                    <p>Уже сегодня нам есть, что предложить вам взамен: это
+                        огромный корпус интерактивных упражнений на отработку
+                        лексики и грамматики, флэш-карточки со словами со
+                        звуковым и цветовым кодированием рода, карточки с
+                        глаголами, приложение «Мои слова», электронные
+                        конспекты — всё то, что сильно ускорят ваше продвижение
+                        в языке. </p>
+                    <p>Мы помогаем вам — вы поддерживаете нас ! :)</p>
                 </div>
 			</div>
 			<div class="bottom-message-buttons"><a id="bottom-message-button-who"
@@ -812,17 +824,30 @@
 		const uLP =
 			{% if user.is_authenticated and user.has_payed and request.user.last_payment.update_date %}new Date('{{ request.user.last_payment.update_date }}');{% else %}null;{% endif %}
 
-		addEventListener('audioplayerReady', function () {
-			$('#lesson-audio').one('play', function () {
-				setTimeout(function () {
-					$('#lesson-audio').on('pause', showBottomMessage);
-				}, 50 * 1000);
-			});
-		});
+        let $lessonAudioBlock = $('#lessonAudioBlock')
+        addEventListener('audioplayerReady', function () {
+            setTimeout(function () {
+                if ($lessonAudioBlock.find('.audioplayer').hasClass
+                ('audioplayer-playing')) {
+                    $lessonAudioBlock.find('.audioplayer-playpause').one
+                    ('click', function () {
+                        setTimeout(function () {
+                            if (!$lessonAudioBlock.find('.audioplayer')
+                                .hasClass('audioplayer-playing')) {
+                                showBottomMessage()
+                            }
+                        }, 1000)
+                    })
+                } else {
+                    showBottomMessage()
+                }
+            }, 50 * 1000)
+        });
 
 
 		function showBottomMessage() {
-			if (Cookies.get('bottom_message') == null && uHP === false) {
+			if (Cookies.get('bottom_message') == null && uHP === false &&
+                userlesson !== true) {
 				$('#bottom-message').slideDown(1000);
 			}
 		}
