@@ -830,7 +830,7 @@ details.no-details:not([open]) summary {
     margin-left: 5px;
     cursor: pointer;
     text-align: center;
-    border: 1px dotted #ffc107;
+    border: 1px solid #666c7d6e;
 }
 
 .bottom-message-text {
