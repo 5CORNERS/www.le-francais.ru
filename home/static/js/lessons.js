@@ -339,7 +339,8 @@ $(document).ready(function () {
                     $('#give-me-a-coffee-success-message').html(response.description);
                     $('#give-me-a-coffee-complete-modal').modal('show');
                     getSuccessButton();
-                    $('#lessonAudioBlock').find('.audioplayer-download-button').attr('href', LESSON_LISTEN_URL).off('.strict');
+                    let $lessonAudioBlock = $('#lessonAudioBlock')
+                    $lessonAudioBlock.find('.audioplayer-download-button').attr('href', LESSON_LISTEN_URL).off('.strict');
                     userlesson = true;
                     reloadPage(LESSON_NUMBER);
                 } else if (response.result === 'ALREADY') {
@@ -377,13 +378,27 @@ $(document).ready(function () {
         $playPause.click()
     })
     $('#strictDownloadModelWhyThis').popover({
-        content: `Ваша поддержка идет на техническое обеспечение сайта <a id="serversMapImageLink" tabindex="0"
-                                                         class="fas fa-info-circle text-primary"
-                                                         style="position: relative;top: 1px;"></a> и вознаграждение тем, <a href="${WHO_DO_YOU_THINK_WE_ARE}" title="кто эти люди?" target="_blank"> кто над ним трудится <i class="fas fa-external-link-alt"></i></a>.`,
+        content: `<p>Мы поддерживаем и улучшаем проект своими силами. Чтобы продолжать
+    работу над сайтом, нам важна Ваша поддержка.</p>
+
+<p>Благодарность за уроки идет на техническое обеспечение сайта <a
+        id="serversMapImageLink" tabindex="0"
+        class="fas fa-info-circle text-primary"
+        style="position: relative;top: 1px;"></a> и вознаграждение
+    тем, <a href="${WHO_DO_YOU_THINK_WE_ARE}" title="кто эти люди?"
+            target="_blank"> кто над ним трудится <i
+            class="fas fa-external-link-alt"></i></a>.</p>
+
+<p class="mb-0"><b>Однако, сейчас развитие проекта под угрозой.</b>
+    Поэтому мы будем рады, если Вы поддержите нас в этот период.</p>`,
         html: true,
         placement: 'top',
-        trigger: 'click'
+        trigger: 'click',
+        template:'<div class="popover" role="tooltip"><div class="arrow"></div><span class="pop-close close">×</span><div class="popover-body"></div></div>'
     }).on('shown.bs.popover', function () {
+        $('.pop-close').on('click', function () {
+            $('#strictDownloadModelWhyThis').popover('hide')
+        })
         $('#serversMapImageLink').on('click', function () {
             $('#strictPopoverModalWhyThis').popover('hide')
             $('#serversMapImageModal').modal('show').one('hide.bs.modal', function () {
@@ -394,6 +409,40 @@ $(document).ready(function () {
     })
     $('#StrictDownloadModelCoffeeButton').on('click', function () {
         $('#strictDownloadModal').modal('hide');
+    })
+
+    $('#hiddenWasListeningModalWhyThis').popover({
+        content: `<p>Мы поддерживаем и улучшаем проект своими силами. Чтобы продолжать
+    работу над сайтом, нам важна Ваша поддержка.</p>
+
+<p>Благодарность за уроки идет на техническое обеспечение сайта <a
+        id="serversMapImageLink" tabindex="0"
+        class="fas fa-info-circle text-primary"
+        style="position: relative;top: 1px;"></a> и вознаграждение
+    тем, <a href="${WHO_DO_YOU_THINK_WE_ARE}" title="кто эти люди?"
+            target="_blank"> кто над ним трудится <i
+            class="fas fa-external-link-alt"></i></a>.</p>
+
+<p class="mb-0"><b>Однако, сейчас развитие проекта под угрозой.</b>
+    Поэтому мы будем рады, если Вы поддержите нас в этот период.</p>`,
+        html: true,
+        placement: 'top',
+        trigger: 'click',
+        template:'<div class="popover" role="tooltip"><div class="arrow"></div><span class="pop-close close">×</span><div class="popover-body"></div></div>'
+    }).on('shown.bs.popover', function () {
+        $('.pop-close').on('click', function () {
+            $('#hiddenWasListeningModalWhyThis').popover('hide')
+        })
+        $('#serversMapImageLink').on('click', function () {
+            $('#strictPopoverModalWhyThis').popover('hide')
+            $('#serversMapImageModal').modal('show').one('hide.bs.modal', function () {
+                $('#hiddenWasListeningModal').modal('show')
+            })
+            $('#hiddenWasListeningModal').modal('hide');
+        })
+    })
+    $('#hiddenWasListeningModalCoffeeButton').on('click', function () {
+        $('#hiddenWasListeningModal').modal('hide');
     })
 });
 
