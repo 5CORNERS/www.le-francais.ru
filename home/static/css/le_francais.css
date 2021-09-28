@@ -851,6 +851,14 @@ details.no-details:not([open]) summary {
     padding: 3px 13px 3px 13px;
 }
 
+.bottom-message-popover > ul {
+    padding-left: 24px;
+}
+
+.bottom-message-popover > p {
+    padding-left: 6px
+}
+
 /*@media (min-width: 500px) {*/
 /*.bottom-message-buttons{*/
 /*text-align: left;*/

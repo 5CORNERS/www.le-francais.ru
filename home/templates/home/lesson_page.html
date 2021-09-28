@@ -6,7 +6,8 @@
 
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 {% block extra_head %}
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+	<!--suppress ALL, LongLine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script src="{% static 'js/lessons.min.js' %}"></script>
 	{% advert_head page %}
 {% endblock %}
@@ -799,7 +800,7 @@
                         предложить вам
                         взамен.<span
                             class="arnaud-comment" data-container="body"
-                            data-content="<div>
+                            data-content="<div class='bottom-message-popover'>
     <ul style='padding-left: 24px;'>
         <li>
             Большой корпус интерактивных упражнений;
