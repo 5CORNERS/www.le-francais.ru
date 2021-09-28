@@ -1197,3 +1197,13 @@ span.underline.play:focus {
 .popover-body {
     font-size: 0.9rem;
 }
+
+.popover > .close {
+    margin-bottom: 0;
+    font-size: 1.37rem;
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #ebebeb;
+    border-top-left-radius: calc(.3rem - 1px);
+    border-top-right-radius: calc(.3rem - 1px);
+    padding-right: 12px;
+}

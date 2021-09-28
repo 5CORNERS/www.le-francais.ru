@@ -298,7 +298,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5>Прослушивание в фоне доступно тем, кто нас
+                    <h5 class="mb-0">Прослушивание в фоне доступно тем, кто нас
                         поддерживает.</h5>
                     <button type="button" class="close"
                             data-dismiss="modal" aria-label="Close">
@@ -306,7 +306,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Каждый день мы работаем, чтобы уроки были
+                    <p class="mb-0">Каждый день мы работаем, чтобы уроки были
                         удобнее и комфортнее. Ваша благодарность
                         поможет нам — и откроет Вам доступ к
                         дополнительным материалам, а также даст
@@ -316,7 +316,7 @@
                                 tabindex="0">Почему так?</span>
                     </p>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer text-center">
                     <img class="new-svg-button"
                          id="hiddenWasListeningModalCoffeeButton"
 
@@ -329,7 +329,7 @@
                          data-toggle="modal"
                          data-target="#give-me-a-coffee-modal"
                             {% endif %}
-                         src="{% static 'svg/buy me coffee-07.svg' %}"
+                         src="{% static 'svg/buy me coffee-07-поблагодарить.svg' %}"
                          title="Поблагодарить">
                 </div>
             </div>
@@ -339,14 +339,14 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5>Загрузка доступна тем, кто нас поддерживает.</h5>
+                    <h5 class="mb-0">Загрузка доступна тем, кто нас поддерживает.</h5>
                     <button type="button" class="close"
                             data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Каждый день мы работаем, чтобы уроки были
+                    <p class="mb-0">Каждый день мы работаем, чтобы уроки были
                         удобнее и комфортнее. Ваша благодарность
                         поможет нам — и откроет Вам доступ к
                         дополнительным материалам, а также даст
@@ -354,7 +354,7 @@
                                 class="arnaud-comment" id="strictDownloadModelWhyThis" tabindex="0">Почему так?</span>
                     </p>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer text-center">
                     <img class="new-svg-button" id="StrictDownloadModelCoffeeButton"
                         {% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
                              data-toggle="modal"
@@ -365,7 +365,7 @@
                              data-toggle="modal"
                              data-target="#give-me-a-coffee-modal"
                         {% endif %}
-                         src="{% static 'svg/buy me coffee-07.svg' %}"
+                         src="{% static 'svg/buy me coffee-07-поблагодарить.svg' %}"
                          title="Поблагодарить"
 					>
                 </div>
