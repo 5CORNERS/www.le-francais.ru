@@ -2,6 +2,7 @@
 {% load site_tags forum_tags %}
 {% load wagtailcore_tags %}
 {% load static site_tags %}
+{% load user_agents %}
 
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 {% block extra_head %}
@@ -781,43 +782,68 @@
 	<div class="bottom-message" id="bottom-message" style="display: none">
 		<div class="bottom-message-content">
 			<div class="bottom-message-description">
-				<div class="bottom-message-button-close"
-				     id="bottom-message-button-close"
-				     onclick="toggleBottomMessage()"><i class="fas fa-times"></i>
+				<div class="bottom-message-button-close" id="bottom-message-button-close" onclick="toggleBottomMessage()"><i class="fas fa-times"></i>
 				</div>
                 <div class="bottom-message-text">
-                    <h4>Пожалуйста, поддержите наш проект — мы остро нуждаемся
-                        в вашей помощи.</h4>
-                    <p>Нас двое. Мы работаем над этим проектом каждый день — с
-                        утра и до вечера. <b>Это наша работа.</b> У нас нет
+                    <h5 class="text-center">Пожалуйста, поддержите наш проект — мы остро нуждаемся
+                        в вашей помощи.</h5>
+                    <p>Нас двое. Мы работаем над этим проектом каждый день. <b>Это наша работа.</b> У нас нет
                         других источников дохода, кроме ваших пожертвований.
                     </p>
                     <p>Наше благополучие и развитие этого проекта зависит
                         только от вашей щедрости. </p>
-                    <p>Уже сегодня нам есть, что предложить вам взамен: это
-                        огромный корпус интерактивных упражнений на отработку
-                        лексики и грамматики, флэш-карточки со словами со
-                        звуковым и цветовым кодированием рода, карточки с
-                        глаголами, приложение «Мои слова», электронные
-                        конспекты — всё то, что сильно ускорят ваше продвижение
-                        в языке. </p>
-                    <p>Мы помогаем вам — вы поддерживаете нас ! :)</p>
+                    <p>Уже сегодня нам
+                        есть,
+                        что
+                        предложить вам
+                        взамен.<span
+                            class="arnaud-comment" data-container="body"
+                            data-content="<div>
+    <ul style='padding-left: 24px;'>
+        <li>
+            Большой корпус интерактивных упражнений;
+        </li>
+        <li>
+            флэш-карточки со словами;
+        </li>
+        <li>
+            карточки с глаголами;
+        </li>
+        <li>
+            приложение «Мои слова»;
+        </li>
+        <li>
+            электронные конспекты для повторения;
+        </li>
+        <li>
+            Народный конспект.
+        </li>
+    </ul>
+    <p class='mb-0' style='padding-left: 6px'
+    >Всё то, что ускорит ваше продвижение в языке.</p>
+</div>" data-placement="top" data-toggle="popover" data-html="true">Что именно?</span>
+                         </p>
+                    <p class="mb-0">Мы помогаем вам — вы поддерживаете нас! :)</p>
                 </div>
 			</div>
-			<div class="bottom-message-buttons"><a id="bottom-message-button-who"
-			                                       href="{% slugurl 'who-do-you-think-we-are' %}" target="">
-				<div class="btn btn-primary bottom-message-button">
-					Узнайте, кто стоит за этим проектом
-				</div>
-			</a>
-				<a id="bottom-message-button-payments"
-				   href="{% url 'payments:payments' %}" target="_blank">
-					<div class="btn btn-primary bottom-message-button">
-						Поддержите нас
-					</div>
-				</a></div>
+            <div class="bottom-message-buttons">
+                <a id="bottom-message-button-payments" href="/payments/"
+                   target="_blank">
+                    <div class="btn btn-sm btn-primary bottom-message-button">
+                        Поддержите нас!
+                    </div>
+                </a>
+                <a id="bottom-message-button-who"
+                   href="/inside/who-do-you-think-we-are/" target="">
+                    <div class="btn btn-sm btn-primary bottom-message-button">
+                        {% if is_pc or is_tablet %}Кто стоит за этим
+                            проектом?
+                        {% else %}Кто здесь?{% endif %}
+                    </div>
+                </a></div>
 		</div>
 	</div>
+
 	{% if self.lesson_number > 6 and not self.need_payment %}<script>
 		const uHP =
 			{% if user.is_authenticated and user.has_payed %}true;{% else %}false;{% endif %}

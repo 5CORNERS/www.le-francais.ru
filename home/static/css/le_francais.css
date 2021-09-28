@@ -803,7 +803,7 @@ details.no-details:not([open]) summary {
     bottom: 0;
     height: auto;
     min-height: 21px;
-    z-index: 2147483647;
+    z-index: 1030;
     background: hsla(208, 56%, 93%, 1);
     color: rgb(51, 51, 51);
     line-height: 21px;
@@ -826,17 +826,20 @@ details.no-details:not([open]) summary {
     color: #666c7d;
     float: right;
     display: block;
-    padding: 5px 8px;
+    padding: 0 4px;
     margin-left: 5px;
-    /*border: grey solid;*/
-    /*border-radius: 100%;*/
     cursor: pointer;
     text-align: center;
+    border: 1px dotted #ffc107;
 }
 
 .bottom-message-text {
     display: block;
     padding: 5px 0 5px 0;
+}
+
+.bottom-message-text p {
+    margin-bottom: 0.6rem;
 }
 
 .bottom-message-buttons {
@@ -845,7 +848,7 @@ details.no-details:not([open]) summary {
 
 .bottom-message-button {
     margin-top: 10px;
-    padding: 10px 13px 10px 13px;
+    padding: 3px 13px 3px 13px;
 }
 
 /*@media (min-width: 500px) {*/
