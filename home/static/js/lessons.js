@@ -393,8 +393,12 @@ $(document).ready(function () {
     Поэтому мы будем рады, если Вы поддержите нас в этот период.</p>`,
         html: true,
         placement: 'top',
-        trigger: 'click'
+        trigger: 'click',
+        template:'<div class="popover" role="tooltip"><div class="arrow"></div><span class="pop-close close">×</span><div class="popover-body"></div></div>'
     }).on('shown.bs.popover', function () {
+        $('.pop-close').on('click', function () {
+            $('#strictDownloadModelWhyThis').popover('hide')
+        })
         $('#serversMapImageLink').on('click', function () {
             $('#strictPopoverModalWhyThis').popover('hide')
             $('#serversMapImageModal').modal('show').one('hide.bs.modal', function () {
@@ -423,8 +427,12 @@ $(document).ready(function () {
     Поэтому мы будем рады, если Вы поддержите нас в этот период.</p>`,
         html: true,
         placement: 'top',
-        trigger: 'click'
+        trigger: 'click',
+        template:'<div class="popover" role="tooltip"><div class="arrow"></div><span class="pop-close close">×</span><div class="popover-body"></div></div>'
     }).on('shown.bs.popover', function () {
+        $('.pop-close').on('click', function () {
+            $('#hiddenWasListeningModalWhyThis').popover('hide')
+        })
         $('#serversMapImageLink').on('click', function () {
             $('#strictPopoverModalWhyThis').popover('hide')
             $('#serversMapImageModal').modal('show').one('hide.bs.modal', function () {
