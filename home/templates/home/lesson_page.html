@@ -2,10 +2,12 @@
 {% load site_tags forum_tags %}
 {% load wagtailcore_tags %}
 {% load static site_tags %}
+{% load user_agents %}
 
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 {% block extra_head %}
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+	<!--suppress ALL, LongLine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script src="{% static 'js/lessons.min.js' %}"></script>
 	{% advert_head page %}
 {% endblock %}
@@ -296,21 +298,39 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Modal title</h5>
+                    <h5 class="mb-0">Прослушивание в фоне доступно тем, кто нас
+                        поддерживает.</h5>
                     <button type="button" class="close"
                             data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Modal body text goes here.</p>
+                    <p class="mb-0">Каждый день мы работаем, чтобы уроки были
+                        удобнее и комфортнее. Ваша благодарность
+                        поможет нам — и откроет Вам доступ к
+                        дополнительным материалам, а также даст
+                        возможность слушать в фоне записи уроков. <span
+                                class="arnaud-comment"
+                                id="hiddenWasListeningModalWhyThis"
+                                tabindex="0">Почему так?</span>
+                    </p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary"
-                            data-dismiss="modal" id="hiddenWasListeningPlay">Continue without
-                    </button>
-                    <button type="button" class="btn btn-primary">Give me coffee
-                    </button>
+                <div class="modal-footer text-center">
+                    <img class="new-svg-button"
+                         id="hiddenWasListeningModalCoffeeButton"
+
+                            {% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
+                         data-toggle="modal"
+                         data-target="#give-me-a-coffee-modal"
+                            {% elif user.is_authenticated and not user.has_coffee %}
+                         onclick="location.href='{% url 'coffee:check_amount' %}?next={{ request.path }}&s_t=0';"
+                            {% elif not user.is_authenticated %}
+                         data-toggle="modal"
+                         data-target="#give-me-a-coffee-modal"
+                            {% endif %}
+                         src="{% static 'svg/buy me coffee-07-поблагодарить.svg' %}"
+                         title="Поблагодарить">
                 </div>
             </div>
         </div>
@@ -319,22 +339,22 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5>Загрузка доступна тем, кто нас поддерживает.</h5>
+                    <h5 class="mb-0">Загрузка доступна тем, кто нас поддерживает.</h5>
                     <button type="button" class="close"
                             data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Каждый день мы работаем, чтобы уроки были
+                    <p class="mb-0">Каждый день мы работаем, чтобы уроки были
                         удобнее и комфортнее. Ваша благодарность
                         поможет нам — и откроет Вам доступ к
-                        дополнительным материалам, а также возможность
-                        скачивать записи уроков. <span
+                        дополнительным материалам, а также даст
+                        возможность скачивать записи уроков. <span
                                 class="arnaud-comment" id="strictDownloadModelWhyThis" tabindex="0">Почему так?</span>
                     </p>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer text-center">
                     <img class="new-svg-button" id="StrictDownloadModelCoffeeButton"
                         {% if user.is_authenticated and user.has_coffee or 'payment_success' in request.GET %}
                              data-toggle="modal"
@@ -345,7 +365,7 @@
                              data-toggle="modal"
                              data-target="#give-me-a-coffee-modal"
                         {% endif %}
-                         src="{% static 'svg/buy me coffee-07.svg' %}"
+                         src="{% static 'svg/buy me coffee-07-поблагодарить.svg' %}"
                          title="Поблагодарить"
 					>
                 </div>
@@ -760,51 +780,103 @@
 			{% comment %}Need login modal window{% endcomment %}
 		{% endif %}
 	{% endif %}
-	<div class="bottom-message" id="bottom-message" style="display: none">
-		<div class="bottom-message-content">
+	<div class="bottom-message row" id="bottom-message" style="display: none">
+		<div class="bottom-message-content col-12 col-md-9 col-xl-6">
 			<div class="bottom-message-description">
-				<div class="bottom-message-button-close"
-				     id="bottom-message-button-close"
-				     onclick="toggleBottomMessage()"><i class="fas fa-times"></i>
+				<div class="bottom-message-button-close" id="bottom-message-button-close" onclick="toggleBottomMessage()"><i class="fas fa-times"></i>
 				</div>
                 <div class="bottom-message-text">
-                    <p>Мы поддерживаем и улучшаем проект своими силами. Чтобы продолжать работу над сайтом, нам важна
-                        Ваша поддержка. Благодарность за уроки идет на техническое обеспечение сайта и вознаграждение
-                        тем, кто над ним трудится. Однако, сейчас развитие проекта под угрозой. Поэтому мы будем очень
-                        признательны, если Вы поддержите нас в этот период.</p>
+                    <h5 class="text-center">Пожалуйста, поддержите наш проект — мы остро нуждаемся
+                        в вашей помощи.</h5>
+                    <p>Нас двое. Мы работаем над этим проектом каждый день.
+                        <b>Это — наша работа.</b> У нас нет
+                        других источников дохода, кроме ваших пожертвований.
+                    </p>
+                    <p>Наше благополучие и развитие этого проекта зависит
+                        только от вашей щедрости. </p>
+                    <p>Уже сегодня нам
+                        есть,
+                        что
+                        предложить вам
+                        взамен.<span
+                            class="arnaud-comment" data-container="body"
+                            data-content="<div class='bottom-message-popover'>
+    <ul style='padding-left: 24px;'>
+        <li>
+            Большой корпус интерактивных упражнений;
+        </li>
+        <li>
+            флэш-карточки со словами;
+        </li>
+        <li>
+            карточки с глаголами;
+        </li>
+        <li>
+            приложение «Мои слова»;
+        </li>
+        <li>
+            электронные конспекты для повторения;
+        </li>
+        <li>
+            Народный конспект.
+        </li>
+    </ul>
+    <p class='mb-0' style='padding-left: 6px'
+    >Всё то, что ускорит ваше продвижение в языке.</p>
+</div>" data-placement="top" data-toggle="popover" data-html="true">Что именно?</span>
+                         </p>
+                    <p class="mb-0">Мы помогаем вам — вы поддерживаете нас! :)</p>
                 </div>
 			</div>
-			<div class="bottom-message-buttons"><a id="bottom-message-button-who"
-			                                       href="{% slugurl 'who-do-you-think-we-are' %}" target="">
-				<div class="btn btn-primary bottom-message-button">
-					Узнайте, кто стоит за этим проектом
-				</div>
-			</a>
-				<a id="bottom-message-button-payments"
-				   href="{% url 'payments:payments' %}" target="_blank">
-					<div class="btn btn-primary bottom-message-button">
-						Поддержите нас
-					</div>
-				</a></div>
+            <div class="bottom-message-buttons">
+                <a id="bottom-message-button-payments" href="/payments/"
+                   target="_blank">
+                    <div class="btn btn-sm btn-primary bottom-message-button">
+                        Поддержите нас!
+                    </div>
+                </a>
+                <a id="bottom-message-button-who"
+                   href="/inside/who-do-you-think-we-are/" target="">
+                    <div class="btn btn-sm btn-primary bottom-message-button">
+                        {% if request|is_pc or request|is_tablet %}Кто стоит
+                            за этим
+                            проектом?
+                        {% else %}Кто здесь?{% endif %}
+                    </div>
+                </a></div>
 		</div>
 	</div>
+
 	{% if self.lesson_number > 6 and not self.need_payment %}<script>
 		const uHP =
 			{% if user.is_authenticated and user.has_payed %}true;{% else %}false;{% endif %}
 		const uLP =
 			{% if user.is_authenticated and user.has_payed and request.user.last_payment.update_date %}new Date('{{ request.user.last_payment.update_date }}');{% else %}null;{% endif %}
 
-		addEventListener('audioplayerReady', function () {
-			$('#lesson-audio').one('play', function () {
-				setTimeout(function () {
-					$('#lesson-audio').on('pause', showBottomMessage);
-				}, 50 * 1000);
-			});
-		});
+        let $lessonAudioBlock = $('#lessonAudioBlock')
+        addEventListener('audioplayerReady', function () {
+            setTimeout(function () {
+                if ($lessonAudioBlock.find('.audioplayer').hasClass
+                ('audioplayer-playing')) {
+                    $lessonAudioBlock.find('.audioplayer-playpause').one
+                    ('click', function () {
+                        setTimeout(function () {
+                            if (!$lessonAudioBlock.find('.audioplayer')
+                                .hasClass('audioplayer-playing')) {
+                                showBottomMessage()
+                            }
+                        }, 1000)
+                    })
+                } else {
+                    showBottomMessage()
+                }
+            }, 50 * 1000)
+        });
 
 
 		function showBottomMessage() {
-			if (Cookies.get('bottom_message') == null && uHP === false) {
+			if (Cookies.get('bottom_message') == null && uHP === false &&
+                userlesson !== true) {
 				$('#bottom-message').slideDown(1000);
 			}
 		}

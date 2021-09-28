@@ -102,7 +102,8 @@
 				isLoop = $this.get(0).getAttribute('loop'),
 				isSupport = false,
 				setTime = $this.get(0).getAttribute('set-time'),
-				isStrict = $this.data('strict') === true;
+				isStrict = $this.data('strict') === true,
+				forbidBackground = $this.data('forbid-background') === true;
 
 			isAutoPlay = ((isAutoPlay === '') || (isAutoPlay === 'autoplay'))
 			isLoop = ((isLoop === '') || (isLoop === 'loop'))
@@ -384,17 +385,17 @@
 			}
 
 			function handleVisibilityChange() {
-				if (isStrict) {
-					console.log(`Visibility Changed. Playing: ${thePlayer.hasClass(cssClass.playing)}`)
-					// 	if (document["hidden"] && thePlayer.hasClass(cssClass.playing)) {
-					// 		playerStop()
-					// 		wasPlaying = true
-					// 	} else if (!document['hidden'] && !thePlayer.hasClass(cssClass.playing)) {
-					// 		playerStart()
-					// 		if (wasPlaying) {
-					// 			dispatchEvent(new Event('unhiddenWasPlaying'))
-					// 		}
-					// 	}
+				if (forbidBackground && ((userlesson === undefined || userlesson === false) && NEED_PAYMENT === false)) {
+					if (document["hidden"] && thePlayer.hasClass(cssClass.playing)) {
+						playerStop();
+						wasPlaying = true;
+					} else if (!document['hidden'] && !thePlayer.hasClass(cssClass.playing)) {
+						playerStart()
+						if (wasPlaying) {
+							dispatchEvent(new Event('unhiddenWasPlaying'));
+							wasPlaying = false;
+						}
+					}
 				}
 			}
 
