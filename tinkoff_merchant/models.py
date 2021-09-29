@@ -4,7 +4,9 @@ from django.db import models
 
 from .consts import TAXES, TAXATIONS, CATEGORIES, LESSON_TICKETS, \
 	COFFEE_CUPS, CATEGORIES_E_NAME, \
-	CATEGORIES_E_SKU_PREFIX
+	CATEGORIES_E_SKU_PREFIX, PAYMENT_STATUS_CHOICES, \
+	PAYMENT_STATUS_AUTHORIZED, PAYMENT_STATUS_CONFIRMED, \
+	PAYMENT_PAYED_STATUSES, PAYMENT_STATUS_NEW
 from .settings import get_config
 from django.contrib.postgres.fields import JSONField
 
@@ -24,7 +26,7 @@ class Payment(models.Model):
 	description = models.TextField(verbose_name='Описание', max_length=250, blank=True, default='', editable=False)
 
 	success = models.BooleanField(verbose_name='Без ошибок', default=False, editable=False)
-	status = models.CharField(verbose_name='Статус транзакции', max_length=20, default='', editable=False)
+	status = models.CharField(verbose_name='Статус транзакции', max_length=20, default='', editable=False, choices=PAYMENT_STATUS_CHOICES)
 	payment_id = models.CharField(
 		verbose_name='Номер транзакции', max_length=20, default='', editable=False)
 	error_code = models.CharField(verbose_name='Код ошибки', max_length=20, default='', editable=False)
@@ -60,10 +62,10 @@ class Payment(models.Model):
 		return self.get_email()
 
 	def can_redirect(self) -> bool:
-		return self.status == 'NEW' and self.payment_url
+		return self.status == PAYMENT_STATUS_NEW and self.payment_url
 
 	def is_paid(self) -> bool:
-		return self.status == 'CONFIRMED' or self.status == 'AUTHORIZED'
+		return self.status in PAYMENT_PAYED_STATUSES
 
 	def with_receipt(self, email: str, phone: str = '') -> 'Payment':
 		if not self.id:

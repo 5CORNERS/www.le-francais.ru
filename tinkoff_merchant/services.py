@@ -4,6 +4,7 @@ import types
 
 import requests
 
+from .consts import PAYMENT_STATUS_CONFIRMED
 from .utils import Encoder
 from .models import Payment
 from .settings import get_config
@@ -94,7 +95,7 @@ class MerchantAPI:
 
     def cancel(self, p: Payment) -> Payment:
         response = self._request('CANCEL', requests.post, {'PaymentId': p.payment_id}).json()
-        if p.status == 'CONFIRMED':
+        if p.status == PAYMENT_STATUS_CONFIRMED:
             payment_refund.send(self.__class__, payment=p)
         return self.update_payment_from_response(p, response)
 
