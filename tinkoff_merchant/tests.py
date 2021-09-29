@@ -5,6 +5,7 @@ from django.test import Client
 from django.test import TestCase
 from django.urls import reverse
 from custom_user.models import User
+from .consts import PAYMENT_STATUS_CONFIRMED
 from .models import Payment, Receipt, ReceiptItem
 from .services import MerchantAPI
 
@@ -44,5 +45,5 @@ class PaymentsTestCase(TestCase):
 
         payment.refresh_from_db()
 
-        self.assertEqual(payment.status, 'CONFIRMED')
+        self.assertEqual(payment.status, PAYMENT_STATUS_CONFIRMED)
         self.assertTrue(payment.success)
