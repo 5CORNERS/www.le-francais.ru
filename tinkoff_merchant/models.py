@@ -44,7 +44,10 @@ class Payment(models.Model):
 	update_date = models.DateTimeField(verbose_name='Дата последнего обновления', auto_now=True, null=True)
 	status_history = JSONField(default=list)
 
-	parent = models.ForeignKey('self', on_delete=models.SET_NULL, default=None, blank=True, null=True)
+	parent = models.ForeignKey('self', on_delete=models.SET_NULL,
+	                           default=None, blank=True, null=True,
+	                           related_name='children',
+	                           related_query_name='child')
 
 	class Meta:
 		verbose_name = 'Заказ'
