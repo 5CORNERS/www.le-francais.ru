@@ -3,7 +3,7 @@ from decimal import *
 from django.db import models
 
 from .consts import TAXES, TAXATIONS, CATEGORIES, LESSON_TICKETS, \
-	COFFEE_CUPS, DEFAULT_TAXATION, CATEGORIES_E_NAME, \
+	COFFEE_CUPS, CATEGORIES_E_NAME, \
 	CATEGORIES_E_SKU_PREFIX
 from .settings import get_config
 from django.contrib.postgres.fields import JSONField
