@@ -51,9 +51,13 @@ class Payment(models.Model):
 	def __str__(self):
 		return 'Заказ #{self.id}:{self.order_id}:{self.payment_id}'.format(self=self)
 
-	def email(self):
+	def get_email(self):
 		if self.receipt:
 			return self.receipt.email
+
+	@property
+	def email(self):
+		return self.get_email()
 
 	def can_redirect(self) -> bool:
 		return self.status == 'NEW' and self.payment_url

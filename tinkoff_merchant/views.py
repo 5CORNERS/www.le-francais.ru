@@ -63,7 +63,10 @@ def get_log(request:HttpRequest, year, month):
     for p in payments:
         for item in p.items():
             s += '{date}\t{amount}\tTinkoff\t{type}\t{closest_activation}\t{email}\n'.format(
-                date=defaultfilters.date(p.update_date, "Y-m-d H:i"), amount=int(p.amount/100), email=p.email(), closest_activation=p.closest_activation,
+                date=defaultfilters.date(p.update_date, "Y-m-d H:i"),
+                amount=int(p.amount/100),
+                email=p.email,
+                closest_activation=p.closest_activation,
                 type=item.category.split('_')[0]
             )
         total_income += int(p.amount/100)
