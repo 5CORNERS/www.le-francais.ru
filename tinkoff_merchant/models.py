@@ -61,14 +61,14 @@ class Payment(models.Model):
 	def is_paid(self) -> bool:
 		return self.status == 'CONFIRMED' or self.status == 'AUTHORIZED'
 
-	def with_receipt(self, email: str, taxation: str = DEFAULT_TAXATION, phone: str = '') -> 'Payment':
+	def with_receipt(self, email: str, phone: str = '') -> 'Payment':
 		if not self.id:
 			self.save()
 
 		if hasattr(self, 'receipt'):
 			return self
 
-		Receipt.objects.create(payment=self, email=email, phone=phone, taxation=taxation)
+		Receipt.objects.create(payment=self, email=email, phone=phone)
 
 		return self
 
