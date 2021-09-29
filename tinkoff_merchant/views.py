@@ -10,6 +10,8 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
+
+from .consts import PAYMENT_STATUS_CONFIRMED, PAYMENT_STATUS_REFUNDED
 from .models import Payment
 from .services import MerchantAPI
 from .signals import payment_update, payment_confirm, payment_refund
@@ -42,10 +44,10 @@ class Notification(View):
 
         self.merchant_api.update_payment_from_response(payment, data).save()
 
-        if old_status != 'CONFIRMED' and payment.status == 'CONFIRMED':
+        if old_status != PAYMENT_STATUS_CONFIRMED and payment.status == PAYMENT_STATUS_CONFIRMED:
             payment_confirm.send(self.__class__, payment=payment)
 
-        if old_status != 'REFUNDED' and payment.status == 'REFUNDED':
+        if old_status != PAYMENT_STATUS_REFUNDED and payment.status == PAYMENT_STATUS_REFUNDED:
             payment_refund.send(self.__class__, payment=payment)
 
         payment_update.send(self.__class__, payment=payment)
