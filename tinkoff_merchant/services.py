@@ -97,3 +97,14 @@ class MerchantAPI:
         if p.status == 'CONFIRMED':
             payment_refund.send(self.__class__, payment=p)
         return self.update_payment_from_response(p, response)
+
+    def charge(self, p: Payment) -> Payment:
+        if p.parent is None:
+            raise ValueError(f'parent field should be int, not None')
+        response = self._request('CHARGE', requests.post, {
+            'PaymentId': p.payment_id,
+            'RebillId': p.parent.rebill_id,
+            'SendEmail': True,
+            'InfoEmail': p.email,
+        }).json()
+        return self.update_payment_from_response(p, response)
