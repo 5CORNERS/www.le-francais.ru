@@ -454,7 +454,7 @@ class TinkoffPayments(View):
                 amount=ITEMS[item_id]['price'] * ITEMS[item_id]['quantity'],
                 description=description,
                 customer_key=str(request.user.id)).with_receipt(
-                email=request.user.email, taxation='usn_income').with_items(
+                email=request.user.email).with_items(
                 [
                     dict(
                         name=ITEMS[item_id]['name'],
