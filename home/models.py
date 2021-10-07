@@ -772,8 +772,8 @@ class HTMLPage(Page):
         return 'home/landing_page.html'
 
 
-HTMLPage.content_panels += [StreamFieldPanel('body')]
-HTMLPage.settings_panels += [FieldPanel('set_was_on_page_cookie')]
+HTMLPage.content_panels = HTMLPage.content_panels + [StreamFieldPanel('body')]
+HTMLPage.settings_panels = HTMLPage.settings_panels + [FieldPanel('set_was_on_page_cookie')]
 
 from django.db.models import PROTECT
 
