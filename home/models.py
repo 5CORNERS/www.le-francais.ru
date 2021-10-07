@@ -13,6 +13,8 @@ from django.db.models.fields import TextField, DateTimeField
 from django.dispatch import receiver
 from django.forms import CheckboxInput
 from django.http import HttpRequest
+from django.template.response import TemplateResponse
+from django.utils import timezone
 from modelcluster.fields import ParentalKey
 from pybb.models import Topic, Forum, Category
 from wagtail.admin.edit_handlers import StreamFieldPanel, FieldPanel, \
@@ -80,7 +82,7 @@ class AdUnit(Model):
     adunit_code = CharField(max_length=100, unique=True)
     adunit_sizes = CharField(max_length=500, default='')
 
-    size_mapping = ForeignKey('Mapping', blank=True, null=True, default=None)
+    size_mapping = ForeignKey('Mapping', blank=True, null=True, default=None, on_delete=SET_NULL)
 
     page_type = CharField(max_length=20, choices=PAGE_CHOICES, null=True, blank=True, default=None)
     placement = CharField(max_length=20, choices=PLACEMENT_CHOICES, null=True, blank=True, default=None)
@@ -747,11 +749,30 @@ PodcastPage.settings_panels = PodcastPage.settings_panels + [
 class HTMLPage(Page):
     body = StreamField([('html', RawHTMLBlock()), ], blank=True)
 
+    set_was_on_page_cookie = BooleanField(default=False)
+
+    def serve(self, request, *args, **kwargs):
+        if self.set_was_on_page_cookie:
+            was_on_pages = request.session.get('was_on_pages', {})
+            if not isinstance(was_on_pages, dict):
+                was_on_pages = {}
+            if not self.slug in was_on_pages:
+                was_on_pages[self.slug] = {
+                    'first_time': timezone.now().isoformat(),
+                    'last_time': None,
+                    'count': 1
+                }
+            else:
+                was_on_pages[self.slug]['last_time'] = timezone.now().isoformat()
+                was_on_pages[self.slug]['count'] += 1
+            request.session['was_on_pages'] = was_on_pages
+        return super(HTMLPage, self).serve(request, *args, **kwargs)
+
     def get_template(self, request, *args, **kwargs):
         return 'home/landing_page.html'
 
 
-HTMLPage.content_panels = HTMLPage.content_panels + [StreamFieldPanel('body')]
+HTMLPage.content_panels = HTMLPage.content_panels + [StreamFieldPanel('body'), FieldPanel('set_was_on_page_cookie')]
 
 from django.db.models import PROTECT
 
@@ -772,7 +793,7 @@ class UserLesson(Model):
 
 class Payment(Model):
     cups_amount = IntegerField()
-    user = ForeignKey('custom_user.User', related_name='payments')
+    user = ForeignKey('custom_user.User', related_name='payments', null=True, on_delete=SET_NULL)
     datetime_create = DateTimeField(auto_now_add=True)
     datetime_update = DateTimeField(auto_now=True)
     status = IntegerField(default=0)
@@ -858,7 +879,7 @@ class Payment(Model):
 class BackUrls(Model):
     success = URLField()
     fail = URLField()
-    payment = ForeignKey('tinkoff_merchant.Payment')
+    payment = ForeignKey('tinkoff_merchant.Payment', on_delete=CASCADE)
 
 
 class WagtailPageNavTree(Model):
