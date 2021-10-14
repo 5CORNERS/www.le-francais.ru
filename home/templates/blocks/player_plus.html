@@ -25,6 +25,7 @@
         <div class="col-12 mb-3">
             <div class="card speaker-{{ forloop.counter }}">
                 <div class="card-body" style="padding-top:0.8rem; padding-bottom: 0.8rem">
+                    {% if forloop.counter == 1 %}<button type="button" class="close" aria-label="Close" aria-controls="playerPlusSpeakersContainer{{ id }}" aria-expanded="true" data-toggle="collapse" data-target="#playerPlusSpeakersContainer{{ id }}" style="position: relative; display: block; top: -10px; right: -10px;"><span aria-hidden="true">&times;</span></button>{% endif %}
                     {{ speaker.html|safe }}
                 </div>
             </div>
@@ -39,7 +40,12 @@
         addEventListener('audioplayerReady', function () {
             let $audio = $(`#playerPlusAudio{{ id }}`);
             $audio.one('play', function (ev) {
-                $container.collapse('toggle')
+                $container.collapse('show')
+            })
+            $container.on('hide.bs.collapse', function () {
+                $audio.one('play', function (ev) {
+                    $container.collapse('show')
+                })
             })
             $audio.on('timeupdate', function (ev) {
                 let current = this.currentTime * 1000;
