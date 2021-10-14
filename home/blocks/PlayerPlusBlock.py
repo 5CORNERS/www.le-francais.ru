@@ -7,8 +7,8 @@ class SpeakerHTMLBlock(blocks.StructBlock):
     html = blocks.RawHTMLBlock()
     color_before = blocks.CharBlock(default='#212529')
     color_after = blocks.CharBlock(default='#212529')
-    opacity_before = blocks.IntegerBlock(default=0)
-    opacity_after = blocks.IntegerBlock(default=100)
+    opacity_before = blocks.FloatBlock(default=0, max_value=1, min_value=0)
+    opacity_after = blocks.FloatBlock(default=1, max_value=1, min_value=0)
 
 class PlayerPlusBlock(blocks.StructBlock):
     audio_url = blocks.URLBlock()
