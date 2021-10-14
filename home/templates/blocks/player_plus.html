@@ -19,11 +19,11 @@
         </audio>
     </div>
 </div>
-<div class="row" id="playerPlusSpeakersContainer{{ id }}">
+<div class="row collapse" id="playerPlusSpeakersContainer{{ id }}">
 
     {% for speaker in self.speakers %}
         <div class="col-12 mb-3">
-            <div class="card speaker-{{ forloop.counter }} collapse">
+            <div class="card speaker-{{ forloop.counter }}">
                 <div class="card-body">
                     {{ speaker.html|safe }}
                 </div>
@@ -39,7 +39,7 @@
         addEventListener('audioplayerReady', function () {
             let $audio = $(`#playerPlusAudio{{ id }}`);
             $audio.one('play', function (ev) {
-                $($container.find('.card')).collapse('toggle')
+                $container.collapse('toggle')
             })
             $audio.on('timeupdate', function (ev) {
                 let current = this.currentTime * 1000;
