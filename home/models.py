@@ -41,6 +41,7 @@ from tinkoff_merchant.signals import payment_confirm, payment_refund
 from .blocks.BootstrapCalloutBlock import BootstrapCalloutBlock
 from .blocks.CollapseBlock import CollapseBlock
 from .blocks.FloatingImageBlock import FloatingImageBlock
+from .blocks.PlayerPlusBlock import PlayerPlusBlock
 from .pay54 import Pay34API
 from .utils import message, parse_tab_delimited_srt_file, sub_html, create_document_from_transcript_srt, \
     get_html_and_map_from_docx
@@ -288,6 +289,7 @@ class PageWithSidebar(Page):
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
         ('bootstrap_callout', BootstrapCalloutBlock()),
+        ('player_plus', PlayerPlusBlock()),
     ], blank=True)
 
     def get_nav_root(self) -> Page:
@@ -354,6 +356,7 @@ class LessonPage(Page):
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
         ('bootstrap_callout', BootstrapCalloutBlock()),
+        ('player_plus', PlayerPlusBlock()),
     ], null=True, blank=True)
 
     body = StreamField([
@@ -368,6 +371,7 @@ class LessonPage(Page):
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
         ('bootstrap_callout', BootstrapCalloutBlock()),
+        ('player_plus', PlayerPlusBlock()),
     ], blank=True)
 
     dictionary = StreamField([
@@ -663,6 +667,7 @@ class ArticlePage(Page):
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
         ('bootstrap_callout', BootstrapCalloutBlock()),
+        ('player_plus', PlayerPlusBlock()),
     ], blank=True)
     without_sightbar = BooleanField(default=False)
 
