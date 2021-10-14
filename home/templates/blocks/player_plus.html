@@ -24,7 +24,7 @@
     {% for speaker in self.speakers %}
         <div class="col-12 mb-3">
             <div class="card speaker-{{ forloop.counter }}">
-                <div class="card-body">
+                <div class="card-body" style="padding-top:0.8rem; padding-bottom: 0.8rem">
                     {{ speaker.html|safe }}
                 </div>
             </div>
