@@ -1,0 +1,61 @@
+<style>
+    {% for speaker in self.speakers %}
+        #playerPlusSpeakersContainer{{ id }} .speaker-{{ forloop.counter }} .transcript-line {
+            color: {{ speaker.color_before }};
+            opacity: {{ speaker.opacity_before }};
+            transition-duration: 500ms;
+            transition-property: color, opacity;
+        }
+        #playerPlusSpeakersContainer{{ id }} .speaker-{{ forloop.counter }} .transcript-line-show {
+            color: {{ speaker.color_after }};
+            opacity: {{ speaker.opacity_after }};
+        }
+    {% endfor %}
+</style>
+<div class="row">
+    <div class="col-12">
+        <audio id="playerPlusAudio{{ id }}">
+            <source src="{{ self.audio_url }}">
+        </audio>
+    </div>
+</div>
+<div class="row" id="playerPlusSpeakersContainer{{ id }}">
+
+    {% for speaker in self.speakers %}
+        <div class="col-12 mb-3">
+            <div class="card speaker-{{ forloop.counter }} collapse">
+                <div class="card-body">
+                    {{ speaker.html|safe }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+</div>
+<script>
+    (function () {
+        let $container = $('#playerPlusSpeakersContainer{{ id }}')
+        let startsEndsMap = {{ self.map|safe }};
+        addEventListener('audioplayerReady', function () {
+            let $audio = $(`#playerPlusAudio{{ id }}`);
+            $audio.one('play', function (ev) {
+                $($container.find('.card')).collapse('toggle')
+            })
+            $audio.on('timeupdate', function (ev) {
+                let current = this.currentTime * 1000;
+                startsEndsMap.filter((item) => item.start <= current && item.end >= current).forEach((item) => {
+                    $(document.getElementById(item.id)).addClass(['transcript-line-show'])
+                });
+            });
+            $audio.on('seeking', function (ev) {
+                let current = this.currentTime * 1000;
+                startsEndsMap.filter((item) => item.start <= current).forEach((item) => {
+                    $(document.getElementById(item.id)).addClass(['transcript-line-show'])
+                })
+                startsEndsMap.filter((item) => item.end >= current).forEach((item) => {
+                    $(document.getElementById(item.id)).removeClass(['transcript-line-show'])
+                });
+            });
+        });
+    })()
+</script>
