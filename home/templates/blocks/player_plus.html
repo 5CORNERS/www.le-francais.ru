@@ -1,5 +1,13 @@
 <style>
     {% for speaker in self.speakers %}
+        #playerPlusSpeakersContainer{{ id }} p {
+            margin-bottom: 0.3rem;
+        }
+
+        #playerPlusSpeakersContainer{{ id }} p:last-child {
+            margin-bottom: 0;
+        }
+
         #playerPlusSpeakersContainer{{ id }} .speaker-{{ forloop.counter }} .transcript-line {
             color: {{ speaker.color_before }};
             opacity: {{ speaker.opacity_before }};

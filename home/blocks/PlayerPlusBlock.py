@@ -24,3 +24,4 @@ class PlayerPlusBlock(blocks.StructBlock):
 
     class Meta:
         template = 'blocks/player_plus.html'
+        icon = 'media'
