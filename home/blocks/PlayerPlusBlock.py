@@ -12,6 +12,8 @@ class SpeakerHTMLBlock(blocks.StructBlock):
 
 class PlayerPlusBlock(blocks.StructBlock):
     audio_url = blocks.URLBlock()
+    transition_duration = blocks.IntegerBlock(default=500, min_value=0)
+    shift_timings = blocks.IntegerBlock(default=0)
     speakers = blocks.ListBlock(SpeakerHTMLBlock)
     map = blocks.RawHTMLBlock()
 
