@@ -1157,7 +1157,7 @@ i.play {
 
 span.underline.play {
     cursor: pointer;
-    background: url("../svg/underline_2.svg") 0 100% repeat no-repeat;
+    background: url("../svg/underline_2.svg") repeat-x 0 100%;
     transition: 0.1s;
     padding-bottom: 1px;
     padding-left: 1px;
@@ -1196,6 +1196,16 @@ span.underline.play:focus {
 
 .popover-body {
     font-size: 0.9rem;
+}
+
+.popover > .close {
+    margin-bottom: 0;
+    font-size: 1.37rem;
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #ebebeb;
+    border-top-left-radius: calc(.3rem - 1px);
+    border-top-right-radius: calc(.3rem - 1px);
+    padding-right: 12px;
 }
 
 .popover > .close {
