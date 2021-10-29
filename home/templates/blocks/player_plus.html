@@ -11,7 +11,7 @@
         #playerPlusSpeakersContainer{{ id }} .speaker-{{ forloop.counter }} .transcript-line {
             color: {{ speaker.color_before }};
             opacity: {{ speaker.opacity_before }};
-            transition-duration: 500ms;
+            transition-duration: {{ self.transition_duration }}ms;
             transition-property: color, opacity;
         }
         #playerPlusSpeakersContainer{{ id }} .speaker-{{ forloop.counter }} .transcript-line-show {
@@ -45,6 +45,7 @@
     (function () {
         let $container = $('#playerPlusSpeakersContainer{{ id }}')
         let startsEndsMap = {{ self.map|safe }};
+        let shiftTimings = {% if self.shift_timings %}{{ self.shift_timings }}{% else %}0{% endif %};
         addEventListener('audioplayerReady', function () {
             let $audio = $(`#playerPlusAudio{{ id }}`);
             $audio.one('play', function (ev) {
@@ -57,7 +58,7 @@
             })
             $audio.on('timeupdate', function (ev) {
                 let current = this.currentTime * 1000;
-                startsEndsMap.filter((item) => item.start <= current && item.end >= current).forEach((item) => {
+                startsEndsMap.filter((item) => item.start <= current - shiftTimings && item.end >= current).forEach((item) => {
                     $(document.getElementById(item.id)).addClass(['transcript-line-show'])
                 });
             });
