@@ -1131,6 +1131,7 @@ a.page-review:hover {
     line-height: 0.1em;
     margin-right: 0.2em;
     vertical-align: -.4em;
+    margin-left: -20px;
 }
 
 .page-review_text:after {
