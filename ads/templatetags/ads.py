@@ -74,7 +74,10 @@ def include_ad(context, ad_unit_name, ad_unit_placement_code, sizes_str, floatin
             'height': creative.height,
         })
 
-    sizes_list = parse_sizes_to_list(sizes_str)
+    if sizes_str:
+        sizes_list = parse_sizes_to_list(sizes_str)
+    else:
+        sizes_list = None
 
     if not context['request'].user.is_staff:
         line_item.views = F('views') + 1
