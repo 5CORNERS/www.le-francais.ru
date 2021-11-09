@@ -90,7 +90,7 @@ class Creative(models.Model):
     utm_medium = models.CharField(max_length=256, blank=True, null=True)
     click_through_url = models.URLField(blank=False)
     image = models.ImageField(blank=True)
-    image_url = models.URLField(blank=True)
+    image_url = models.URLField(blank=True, help_text='Одно из полей image или image_url должно быть заполнено')
     line_item = models.ForeignKey(
         LineItem, related_name='creatives',
         related_query_name='creative', on_delete=models.SET_NULL, null=True, blank=True
