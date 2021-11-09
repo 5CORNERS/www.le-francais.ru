@@ -98,6 +98,7 @@ urlpatterns = [
 
     url(r'^support/', include('donations.urls', namespace='donations')),
 
+    url(r'^ads/', include('ads.urls', namespace='ads')),
 
     url(r'^le_nombres/', include('le_nombres.urls')),
     url(r'^', include(mass_mailer_urls, namespace='mass_mailer')),
