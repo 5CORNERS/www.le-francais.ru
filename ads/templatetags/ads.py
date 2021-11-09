@@ -23,7 +23,7 @@ def parse_sizes_to_list(sizes_str):
     return result
 
 @register.inclusion_tag('ads/include_ad.html', takes_context=True)
-def include_ad(context, ad_unit_name, ad_unit_placement_code, sizes_str, floating_image=None):
+def include_ad(context, ad_unit_name, ad_unit_placement_code, sizes_str, floating_image=None, utm_source=None):
     line_items = LineItem.objects.filter().order_by('-priority')
     if ad_unit_name:
         line_items = line_items.filter(Q(ad_units__contains=[ad_unit_name]) | Q(ad_units__len=0))
@@ -69,7 +69,7 @@ def include_ad(context, ad_unit_name, ad_unit_placement_code, sizes_str, floatin
     for creative in creatives:
         creatives_list.append({
             'image_url': creative.get_image_url(),
-            'click_through_url': creative.get_click_through_url(line_item),
+            'click_through_url': creative.get_click_through_url(line_item, utm_source),
             'width': creative.width,
             'height': creative.height,
         })
