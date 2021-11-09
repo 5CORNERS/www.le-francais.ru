@@ -41,6 +41,7 @@ from tinkoff_merchant.signals import payment_confirm, payment_refund
 from .blocks.BootstrapCalloutBlock import BootstrapCalloutBlock
 from .blocks.CollapseBlock import CollapseBlock
 from .blocks.FloatingImageBlock import FloatingImageBlock
+from .blocks.LeFrancaisAdUnit import LeFrancaisAdUnitBlock
 from .blocks.PlayerPlusBlock import PlayerPlusBlock
 from .pay54 import Pay34API
 from .utils import message, parse_tab_delimited_srt_file, sub_html, create_document_from_transcript_srt, \
@@ -290,6 +291,7 @@ class PageWithSidebar(Page):
         ('collapse', CollapseBlock()),
         ('bootstrap_callout', BootstrapCalloutBlock()),
         ('player_plus', PlayerPlusBlock()),
+        ('le_francais_ad_unit', LeFrancaisAdUnitBlock()),
     ], blank=True)
 
     def get_nav_root(self) -> Page:
@@ -357,6 +359,7 @@ class LessonPage(Page):
         ('collapse', CollapseBlock()),
         ('bootstrap_callout', BootstrapCalloutBlock()),
         ('player_plus', PlayerPlusBlock()),
+        ('le_francais_ad_unit', LeFrancaisAdUnitBlock()),
     ], null=True, blank=True)
 
     body = StreamField([
@@ -372,6 +375,7 @@ class LessonPage(Page):
         ('collapse', CollapseBlock()),
         ('bootstrap_callout', BootstrapCalloutBlock()),
         ('player_plus', PlayerPlusBlock()),
+        ('le_francais_ad_unit', LeFrancaisAdUnitBlock()),
     ], blank=True)
 
     dictionary = StreamField([
@@ -390,6 +394,7 @@ class LessonPage(Page):
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
         ('bootstrap_callout', BootstrapCalloutBlock()),
+        ('le_francais_ad_unit', LeFrancaisAdUnitBlock()),
     ], null=True, blank=True)
 
     mail_archive = StreamField([
@@ -407,6 +412,7 @@ class LessonPage(Page):
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
         ('bootstrap_callout', BootstrapCalloutBlock()),
+        ('le_francais_ad_unit', LeFrancaisAdUnitBlock()),
     ], null=True, blank=True)
 
     exercise = StreamField([
