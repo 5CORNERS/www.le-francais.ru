@@ -11,6 +11,21 @@ import django.db.models.deletion
 # Move them and any dependencies into this file, then update the
 # RunPython operations to refer to the local versions:
 # ads.migrations.0001_initial
+from ads.models import DEFAULT_PLACEMENTS_CHOICES
+
+
+def forward_func(apps, schema_editor):
+    Placement = apps.get_model('ads', 'Placement')
+    db_alias = schema_editor.connection.alias
+    Placement.objects.using(db_alias).bulk_create(
+        Placement(name=name, code=code) for code, name in DEFAULT_PLACEMENTS_CHOICES
+    )
+
+def reverse_func(apps, schema_editor):
+    Placement = apps.get_model('ads', 'Placement')
+    db_alias = schema_editor.connection.alias
+    codes = [code for code, name in DEFAULT_PLACEMENTS_CHOICES]
+    Placement.objects.filter(code__in=codes).delete()
 
 class Migration(migrations.Migration):
 
@@ -64,8 +79,8 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='creatives', related_query_name='creative', to='ads.LineItem'),
         ),
         migrations.RunPython(
-            code=ads.migrations.0001_initial.forward_func,
-            reverse_code=ads.migrations.0001_initial.reverse_func,
+            code=forward_func,
+            reverse_code=reverse_func,
         ),
         migrations.RenameField(
             model_name='creative',
