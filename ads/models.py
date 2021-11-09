@@ -86,6 +86,8 @@ def creative_image_validator():
 
 class Creative(models.Model):
     name = models.CharField(max_length=256)
+    utm_campaign = models.CharField(max_length=256, blank=True, null=True)
+    utm_medium = models.CharField(max_length=256, blank=True, null=True)
     click_through_url = models.URLField(blank=False)
     image = models.ImageField(blank=True)
     image_url = models.URLField(blank=True)
@@ -124,8 +126,8 @@ class Creative(models.Model):
         else:
             return ''
 
-    def get_click_through_url(self, line_item):
-        return reverse('ads:ad-counter-redirect', args=(line_item.pk, self.pk))
+    def get_click_through_url(self, line_item, utm_source):
+        return reverse('ads:ad-counter-redirect', args=(line_item.pk, self.pk, utm_source))
 
     def save(self, *args, **kwargs):
         self.set_dimensions()

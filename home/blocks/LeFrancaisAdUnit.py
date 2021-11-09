@@ -20,6 +20,7 @@ class AdUnitSizeBlock(blocks.StructBlock):
 class LeFrancaisAdUnitBlock(blocks.StructBlock):
     ad_unit_name = blocks.CharBlock()
     placement = blocks.ChoiceBlock(choices=get_placements(), required=False)
+    utm_source = blocks.CharBlock()
     floating_image = blocks.ChoiceBlock(choices=[
         ('left', 'Left'), ('center', 'Center'), ('right', 'Right')
     ], required=False, help_text='TODO')
@@ -38,6 +39,7 @@ class LeFrancaisAdUnitBlock(blocks.StructBlock):
             ))
 
         context['media_query'] = parsed_media_query_to_str(media_query)
+        context['floating_image'] = None
         return context
 
     class Meta:
