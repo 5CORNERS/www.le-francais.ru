@@ -1,0 +1,33 @@
+{% if not empty %}
+<a id="{{ id }}" target="_blank" href="{{ creatives.0.click_through_url }}">
+</a>
+    <script>
+        $(function f() {
+            let timerId, firstTime=true;
+            let $a = $("#{{ id }}");
+            let creativeList = {{ creatives_list_json|safe }};
+            $(window).resize(function () {
+                clearTimeout(timerId);
+                let resizeHandler = function () {
+                    let containerWidth = $a.parent().width();
+                    let creative = creativeList.sort(function (a, b) {
+                        return b['width'] - a['width']
+                    }).filter(function (creative) {
+                        return creative['width'] <= containerWidth
+                    })[0];
+                    if (firstTime || $a.has('img').length && creative['image_url'] !== $a.find('img').attr('src')){
+                        $a.empty();
+                        $a.append(`<img alt='Ad Image' src='${creative["image_url"]}' width='${creative["width"]}px' height='${creative["height"]}px'>`);
+                        $a.attr("href", creative["click_through_url"]);
+                        firstTime = false;
+                    }
+                }
+                if (!timerId) {
+                    resizeHandler()
+                } else {
+                    timerId = setTimeout(resizeHandler, 3000);
+                }
+            }).resize()
+        })
+    </script>
+{% endif %}
