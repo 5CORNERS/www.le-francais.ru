@@ -37,11 +37,12 @@ class LineItem(models.Model):
         max_length=255,
     ),
         help_text='Список slug\'ов страниц через запятую',
-        verbose_name='Do not show if user was on following pages',
+        verbose_name='Don\'t display if user had visited following pages',
         default=list,
         blank=True
     )
-    do_not_show_if_was_on_conjugations = models.BooleanField(default=False)
+    do_not_show_if_was_on_conjugations = models.BooleanField(
+        default=False, verbose_name='Don\'t display if user had visited conjugations pages')
 
     views = models.PositiveIntegerField(default=0)
     clicks = models.PositiveIntegerField(default=0)
