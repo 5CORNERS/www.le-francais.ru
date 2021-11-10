@@ -1091,9 +1091,15 @@ a.no-decoration {
     text-decoration: inherit;
 }
 
+.page-reviews {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
 .page-review {
-            padding: 3px;
-        }
+    padding: 3px;
+}
 
 a.page-review:focus,
 a.page-review:hover {
@@ -1102,15 +1108,18 @@ a.page-review:hover {
 
 .page-review {
     width: 27%;
-    margin-top: 10px;
+    margin-top: 0px;
     margin-right: 6%;
-    margin-bottom: 10px;
+    margin-bottom: 0px;
     min-height: 70px;
 }
 
-.page-review {
-    margin: 10px 0;
-    width: 100%;
+@media (max-width: 768px) {
+    .page-review {
+        margin: 10px 0;
+        width: 100%;
+    }
+
 }
 
 .page-review_text {
@@ -1125,24 +1134,56 @@ a.page-review:hover {
 
 .page-review_text:before {
     color: #bbb;
-    content: "\201C"; /* Непечатаемый символ слева */
+    content: "\201C";
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 4em;
-    line-height: 0.1em;
-    margin-right: 0.2em;
+    line-height: .1em;
+    margin-right: .2em;
     vertical-align: -.4em;
     margin-left: -20px;
 }
 
 .page-review_text:after {
     color: #bbb;
-    position: relative;
-    content: "\201D"; /* Непечатаемый символ справа */
+    content: "\201D";
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 4em;
-    line-height: 0.1em;
+    line-height: .1em;
     float: right;
     top: .45em;
+    margin-right: -15px;
+}
+
+@media (max-width: 575px) {
+    .page-review_text:after, .page-review_text:before {
+        display: none;
+
+    }
+
+}
+
+.page-reviews .carousel-control-prev {
+ filter: invert(50%);
+    top: initial !important;
+}
+
+.page-reviews .carousel-control-next {
+  filter: invert(50%);
+    top: initial !important;
+}
+
+.page-reviews .carousel-indicators {
+    filter: invert(50%);
+    bottom: -17px;
+}
+
+.page-reviews .carousel {
+    width: 100% !important;
+}
+
+.page-reviews .carousel-indicators > li {
+    height: 2px;
+    width: 2px;
 }
 
 #playerPlus p {
