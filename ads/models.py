@@ -50,6 +50,8 @@ class LineItem(models.Model):
     capping_week = models.IntegerField(blank=True, null=True, default=None)
     capping_month = models.IntegerField(blank=True, null=True, default=None)
 
+    do_not_display_to_registered_users = models.BooleanField(default=True)
+
     def __str__(self):
         return self.name
 

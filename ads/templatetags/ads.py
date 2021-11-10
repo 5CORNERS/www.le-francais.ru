@@ -30,6 +30,9 @@ def include_ad(context, ad_unit_name, ad_unit_placement_code, sizes_str, floatin
     if ad_unit_placement_code:
         line_items = line_items.filter(Q(placements__code=ad_unit_placement_code) | Q(placements__isnull=True))
 
+    if context['request'].user.is_authenticated:
+        line_items = line_items.exclude(do_not_display_to_registered_users=True)
+
     session = context['request'].session
 
     was_on_pages = session.get('was_on_pages', {})
