@@ -5,12 +5,21 @@
         $(function f() {
             let $a = $("#{{ id }}");
             let creativeList = {{ creatives_list_json|safe }};
+            if (creativeList.length === 0) {
+                return
+            }
             let containerWidth = $a.parent().width();
             let creatives = creativeList.sort(function (a, b) {
                 return b['width'] - a['width']
             }).filter(function (creative) {
                 return creative['width'] <= containerWidth
             });
+            let resultWidth = creatives[0]['width']
+            creatives = creatives.filter(
+                function (creative) {
+                    return resultWidth === creative['width']
+                }
+            )
             let creative = creatives[Math.floor(Math.random() * creatives.length)];
             $a.empty();
             $a.append(`<img alt='Ad Image' src='${creative["image_url"]}' width='${creative["width"]}px' height='${creative["height"]}px'>`);
