@@ -147,6 +147,7 @@ MIDDLEWARE = [
 
 SESSION_ENGINE = 'user_sessions.backends.db'
 SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_AGE = 2678400
 
 
 ROOT_URLCONF = 'le_francais.urls'
