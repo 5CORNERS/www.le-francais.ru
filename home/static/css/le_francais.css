@@ -1186,6 +1186,13 @@ a.page-review:hover {
     width: 2px;
 }
 
+#carouselReviewsOuter{
+    width: 100%;
+    transition: 0.6s ease-in-out;
+    height: 0;
+    overflow: hidden;
+}
+
 #playerPlus p {
     margin-bottom: 0.8rem;
 }
