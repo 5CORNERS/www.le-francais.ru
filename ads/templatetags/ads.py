@@ -70,7 +70,7 @@ def include_ad(context, ad_unit_name, ad_unit_placement_code, sizes_str, floatin
             cappings[line_item.name]['times'].append(now)
         session['ads_cappings'] = cappings
     else:
-        line_items.first()
+        line_item = line_items.first()
 
     creatives: List[Creative] = list(line_item.creatives.filter(disable=False))
 
