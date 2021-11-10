@@ -77,6 +77,23 @@ BLOCK_AFTER_FLASHCARDS = 10
 STRICT_PLAYER_AFTER = 12
 FORBID_BACKGROUND_LISTENING_AFTER = 18
 
+def save_visited_pages_history(request, page):
+    if page.set_was_on_page_cookie:
+        was_on_pages = request.session.get('was_on_pages', {})
+        if not isinstance(was_on_pages, dict):
+            was_on_pages = {}
+        if not page.slug in was_on_pages:
+            was_on_pages[page.slug] = {
+                'first_time': timezone.now().isoformat(),
+                'last_time': None,
+                'count': 1
+            }
+        else:
+            was_on_pages[page.slug][
+                'last_time'] = timezone.now().isoformat()
+            was_on_pages[page.slug]['count'] += 1
+        request.session['was_on_pages'] = was_on_pages
+
 
 @register_snippet
 class AdUnit(Model):
@@ -299,6 +316,13 @@ class PageWithSidebar(Page):
 
     without_right_sightbar = BooleanField(default=False)
 
+    set_was_on_page_cookie = BooleanField(default=True)
+
+    def serve(self, request, *args, **kwargs):
+        save_visited_pages_history(request, self)
+        return super(PageWithSidebar, self).serve(request, *args,
+                                              **kwargs)
+
     def get_template(self, request, *args, **kwargs):
         if self.without_right_sightbar:
             return 'home/page_with_sidebar_without_right_sidebar.html'
@@ -436,6 +460,13 @@ class LessonPage(Page):
         ('collapse', CollapseBlock()),
     ], verbose_name='Народный конспект', null=True, blank=True)
     other_tabs = StreamField([('tab', TabBlock())], blank=True)
+
+    set_was_on_page_cookie = BooleanField(default=True)
+
+    def serve(self, request, *args, **kwargs):
+        save_visited_pages_history(request, self)
+        return super(LessonPage, self).serve(request, *args,
+                                              **kwargs)
 
     @property
     def summary_full_url(self):
@@ -676,6 +707,12 @@ class ArticlePage(Page):
         ('player_plus', PlayerPlusBlock()),
     ], blank=True)
     without_sightbar = BooleanField(default=False)
+    set_was_on_page_cookie = BooleanField(default=True)
+
+    def serve(self, request, *args, **kwargs):
+        save_visited_pages_history(request, self)
+        return super(ArticlePage, self).serve(request, *args,
+                                              **kwargs)
 
     def get_absolute_url(self):
         return self.full_url
@@ -734,6 +771,11 @@ class PodcastPage(Page):
         related_name='+'
     )
     page_type = CharField(max_length=100, choices=PAGE_CHOICES, default='podcast_page')
+    set_was_on_page_cookie = BooleanField(default=True)
+
+    def serve(self, request, *args, **kwargs):
+        save_visited_pages_history(request, self)
+        return super(PodcastPage, self).serve(request, *args, **kwargs)
 
     def get_absolute_url(self):
         return self.full_url
@@ -763,20 +805,7 @@ class HTMLPage(Page):
     set_was_on_page_cookie = BooleanField(default=True)
 
     def serve(self, request, *args, **kwargs):
-        if self.set_was_on_page_cookie:
-            was_on_pages = request.session.get('was_on_pages', {})
-            if not isinstance(was_on_pages, dict):
-                was_on_pages = {}
-            if not self.slug in was_on_pages:
-                was_on_pages[self.slug] = {
-                    'first_time': timezone.now().isoformat(),
-                    'last_time': None,
-                    'count': 1
-                }
-            else:
-                was_on_pages[self.slug]['last_time'] = timezone.now().isoformat()
-                was_on_pages[self.slug]['count'] += 1
-            request.session['was_on_pages'] = was_on_pages
+        save_visited_pages_history(request, self)
         return super(HTMLPage, self).serve(request, *args, **kwargs)
 
     def get_template(self, request, *args, **kwargs):
