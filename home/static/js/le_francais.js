@@ -210,7 +210,7 @@ $(document).ready(function () {
             }
             if (!timerId){
                 resizeHandler()
-            }else{timerId = setTimeout(resizeHandler, 300);}
+            }else{timerId = setTimeout(resizeHandler, 3000);}
 
         }).resize();
     })
@@ -273,6 +273,20 @@ $(document).ready(function () {
     // Scrolling
 
     scrolling(window.document, window.history, window.location)
+
+    // Carousel Smooth Transitions
+    $(function () {
+        let $outer = $('#carouselReviewsOuter')
+        if ($outer.length) {
+            function slideHandler(event) {
+                $outer.height($(event.relatedTarget).height())
+            }
+
+            let $carousel = $('#carouselReviews');
+            $carousel.on('slid.bs.carousel', slideHandler);
+            slideHandler({"relatedTarget": $('#carouselReviewsFirstItem')[0]})
+        }
+    })
 });
 
 (function () {
