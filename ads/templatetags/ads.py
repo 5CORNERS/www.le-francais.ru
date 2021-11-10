@@ -45,29 +45,30 @@ def include_ad(context, ad_unit_name, ad_unit_placement_code, sizes_str, floatin
     if line_items.count() == 0:
         return {'empty': True}
 
-    cappings = session.get('ads_cappings', {})
-    if not isinstance(cappings, dict):
-        cappings = {}
+    if not context['request'].user.is_staff:
+        cappings = session.get('ads_cappings', {})
+        if not isinstance(cappings, dict):
+            cappings = {}
 
-    for line_item in line_items:
+        for line_item in line_items:
+            if not line_item.name in cappings:
+                break
+            elif line_item.check_cappings(cappings[line_item.name]['times']):
+                break
+            else:
+                return {'empty': True}
+
+        now = timezone.now().isoformat()
         if not line_item.name in cappings:
-            break
-        elif line_item.check_cappings(cappings[line_item.name]['times']):
-            break
+            cappings[line_item.name] = {
+                'first_time': now,
+                'last_time': None,
+                'times': [now]
+            }
         else:
-            return {'empty': True}
-
-    now = timezone.now().isoformat()
-    if not line_item.name in cappings:
-        cappings[line_item.name] = {
-            'first_time': now,
-            'last_time': None,
-            'times': [now]
-        }
-    else:
-        cappings[line_item.name]['last_time'] = now
-        cappings[line_item.name]['times'].append(now)
-    session['ads_cappings'] = cappings
+            cappings[line_item.name]['last_time'] = now
+            cappings[line_item.name]['times'].append(now)
+        session['ads_cappings'] = cappings
 
     creatives: List[Creative] = list(line_item.creatives.filter(disable=False))
 
