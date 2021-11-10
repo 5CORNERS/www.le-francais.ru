@@ -41,6 +41,7 @@ class LineItem(models.Model):
         default=list,
         blank=True
     )
+    do_not_show_if_was_on_conjugations = models.BooleanField(default=False)
 
     views = models.PositiveIntegerField(default=0)
     clicks = models.PositiveIntegerField(default=0)

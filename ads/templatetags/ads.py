@@ -33,8 +33,11 @@ def include_ad(context, ad_unit_name, ad_unit_placement_code, sizes_str, floatin
     session = context['request'].session
 
     was_on_pages = session.get('was_on_pages', {})
+    was_on_conjugations = session.get('was_on_conjugations', False)
     if was_on_pages:
         line_items = line_items.exclude(do_not_show_to__contains=list(was_on_pages.keys()))
+    if was_on_conjugations:
+        line_items = line_items.exclude(do_not_show_if_was_on_conjugations=True)
 
     if line_items.count() == 0:
         return {'empty': True}
