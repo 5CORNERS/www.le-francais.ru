@@ -25,6 +25,8 @@ class Placement(models.Model):
 
 class LineItem(models.Model):
     name = models.CharField(max_length=255)
+    label = models.CharField(max_length=256, null=True, blank=True,
+                             default=None)
     priority = models.PositiveIntegerField(default=0)
     placements = models.ManyToManyField(
         Placement, blank=True
@@ -90,6 +92,7 @@ def creative_image_validator():
 
 class Creative(models.Model):
     name = models.CharField(max_length=256)
+    label = models.CharField(max_length=256, null=True, blank=True, default=None)
     utm_campaign = models.CharField(max_length=256, blank=True, null=True)
     utm_medium = models.CharField(max_length=256, blank=True, null=True)
     click_through_url = models.URLField(blank=False)
