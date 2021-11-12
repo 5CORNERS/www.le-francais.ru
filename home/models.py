@@ -287,6 +287,13 @@ class PageWithSidebar(Page):
     menu_title = TextField(blank=True)
     is_nav_root = BooleanField(default=False)
     is_selectable = BooleanField(default=True)
+    reference_image = ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        blank=True,
+        on_delete=SET_NULL,
+        related_name='+'
+    )
     body = StreamField([
         ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
@@ -332,6 +339,7 @@ class PageWithSidebar(Page):
 PageWithSidebar.content_panels = Page.content_panels + [
     FieldPanel('without_right_sightbar'),
     FieldPanel('reference_title'),
+    ImageChooserPanel('reference_image'),
     FieldPanel('subtitle'),
     StreamFieldPanel('body'),
 ]
@@ -369,6 +377,14 @@ class LessonPage(Page):
     transcript_srt = FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
     transcript_docx = FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
     transcript_text = TextField(null=True, blank=True, default=None)
+
+    reference_image = ForeignKey(
+        'wagtailimages.Image',
+        null=True,
+        blank=True,
+        on_delete=SET_NULL,
+        related_name='+'
+    )
 
     comments_for_lesson = StreamField([
         ('advertisement', AdvertisementInline()),
@@ -640,6 +656,7 @@ class LessonPage(Page):
 
 LessonPage.content_panels = Page.content_panels + [
     FieldPanel('reference_title'),
+    ImageChooserPanel('reference_image'),
     FieldPanel('subtitle'),
     FieldPanel('audio_material'),
     StreamFieldPanel('comments_for_lesson'),
