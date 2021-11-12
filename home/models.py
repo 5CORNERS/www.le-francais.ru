@@ -261,11 +261,27 @@ class DefaultPage(Page):
     reference_title = TextField(null=True, blank=True)
     subtitle = TextField(null=True, blank=True)
     body = StreamField([
+        ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
+        ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
+        ('tabs', TabsBlock()),
+        ('translations', ListBlock(StructBlock([
+            ('word', RichTextBlock(required=True)),
+            ('translation', RichTextBlock(required=True))
+        ]), template="blocks/transcriptions.html")
+         ),
+        ('post', PostBlock()),
+        ('choosen_reviews', ChoosenReviews()),
+        ('read_also', AlsoReadBlock()),
+        ('floating_image', FloatingImageBlock()),
+        ('collapse', CollapseBlock()),
+        ('bootstrap_callout', BootstrapCalloutBlock()),
+        ('player_plus', PlayerPlusBlock()),
+        ('le_francais_ad_unit', LeFrancaisAdUnitBlock()),
     ], blank=True)
 
 
@@ -717,11 +733,20 @@ class ArticlePage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
+        ('tabs', TabsBlock()),
+        ('translations', ListBlock(StructBlock([
+            ('word', RichTextBlock(required=True)),
+            ('translation', RichTextBlock(required=True))
+        ]), template="blocks/transcriptions.html")
+         ),
+        ('post', PostBlock()),
+        ('choosen_reviews', ChoosenReviews()),
         ('read_also', AlsoReadBlock()),
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
         ('bootstrap_callout', BootstrapCalloutBlock()),
         ('player_plus', PlayerPlusBlock()),
+        ('le_francais_ad_unit', LeFrancaisAdUnitBlock()),
     ], blank=True)
     without_sightbar = BooleanField(default=False)
     set_was_on_page_cookie = BooleanField(default=True)
@@ -771,10 +796,20 @@ class PodcastPage(Page):
         ('html', RawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
+        ('tabs', TabsBlock()),
+        ('translations', ListBlock(StructBlock([
+            ('word', RichTextBlock(required=True)),
+            ('translation', RichTextBlock(required=True))
+        ]), template="blocks/transcriptions.html")
+         ),
+        ('post', PostBlock()),
+        ('choosen_reviews', ChoosenReviews()),
         ('read_also', AlsoReadBlock()),
         ('floating_image', FloatingImageBlock()),
         ('collapse', CollapseBlock()),
         ('bootstrap_callout', BootstrapCalloutBlock()),
+        ('player_plus', PlayerPlusBlock()),
+        ('le_francais_ad_unit', LeFrancaisAdUnitBlock()),
     ], blank=True)
     menu_title = TextField(blank=True)
     reference_title = TextField(null=True, blank=True)
