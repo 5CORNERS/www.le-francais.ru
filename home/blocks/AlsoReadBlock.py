@@ -30,6 +30,8 @@ class ArticleLink(StructBlock):
 			context['title'] = value['title']
 		if value['description']:
 			context['description'] = value['description']
+		if value['url']:
+			context['url'] = value['url']
 		return context
 
 	class Meta:
