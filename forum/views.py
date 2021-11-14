@@ -14,6 +14,7 @@ def statistics_page(request):
             ).filter(created__lte=form.cleaned_data['date_end'])
             users_pks = set([post.user.pk for post in posts_created_in_range])
             context['users_count'] = len(users_pks)
+            context['posts_count'] = posts_created_in_range.count()
     else:
         form = GetStatisticsForm()
     context['form'] = form
