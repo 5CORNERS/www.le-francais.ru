@@ -13,6 +13,10 @@ class FloatingImageBlock(StructBlock):
 		('rightimg', 'Float Right'),
 		('leftimg', 'Float Left')
 	])
+	small_image_position = ChoiceBlock(choices=[
+		('above', 'Image Above Content'),
+		('below', 'Image Below Content')
+	], default='above')
 	content = StreamBlock(
 		[
 			('html', RawHTMLBlock()),
