@@ -90,6 +90,7 @@ urlpatterns = [
     url(r'^forum/topic/(?P<topic_id>\d+)/post/add/$', AorAddPostView.as_view(), name='add_post'),
     url(r'^forum/post/(?P<pk>\d+)/edit/$', AorEditPostView.as_view(), name='edit_post'),
     url(r'^forum/post/move/processing/$', move_post_processing, name='move_post_processing'),
+    url(r'^forum/', include('forum.urls', namespace='forum', app_name='forum')),
     url(r'^forum/', include('pybb.urls', namespace='pybb')),
 
     url(r'^messages/', include('forum_messages.urls')),

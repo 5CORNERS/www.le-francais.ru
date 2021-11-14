@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% block content %}
+    <div class="container">
+        <div class="row mt-4">
+            <div class="col-12">
+                <form action="{% url 'forum:statistics' %}" method="post">
+                    {% csrf_token %} {{ form }} <input type="submit"
+                                                       value="Submit"/>
+                </form>
+            </div>
+        </div>
+
+        {% if users_count %}
+            <div class="row mt-2">
+                <div class="col-12">
+                    Уникальных пользователей: {{ users_count }}
+                </div>
+            </div>
+        {% endif %}</div>
+{% endblock %}
