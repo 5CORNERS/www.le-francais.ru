@@ -20,5 +20,36 @@
                     Постов: {{ posts_count }}
                 </div>
             </div>
-        {% endif %}</div>
+        {% endif %}
+
+    {% if posts_statistics_by_weeks %}
+        <table class="table">
+            <tr>
+                <th>
+                    Range Start
+                </th>
+                <th>
+                    Range End
+                </th>
+                <th>
+                    Users Count
+                </th>
+                <th>
+                    Posts Count
+                </th>
+            </tr>
+            {% for x in posts_statistics_by_weeks %}
+                <tr>
+                    <td>{{ x.range.0|date:"d-m-Y" }}</td>
+                    <td>{{ x.range.1|date:"d-m-Y" }}</td>
+                    <td>{{ x.users_count }}</td>
+                    <td>{{ x.posts_count }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    </div>
+
+
 {% endblock %}
