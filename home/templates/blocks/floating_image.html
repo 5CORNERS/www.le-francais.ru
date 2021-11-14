@@ -12,9 +12,13 @@
                         class="figure-caption">{{ value.image_caption }}</figcaption>{% endif %}
         </figure>
     </div>
-    {% for block in value.content %}
-        {% include_block block %}
-    {% endfor %}
+
+    {% if value.small_image_position == 'below' %}
+        {% for block in value.content %}
+            {% include_block block %}
+        {% endfor %}
+    {% endif %}
+
     <div class="block_smallscreen">
         <figure class="figure"><img src="{{ tmp_image.url }}"
                                     alt="{{ tmp_image.alt }}"
@@ -25,4 +29,11 @@
                         class="figure-caption">{{ value.image_caption }}</figcaption>{% endif %}
         </figure>
     </div>
+
+    {% if value.small_image_position == 'above' %}
+        {% for block in value.content %}
+            {% include_block block %}
+        {% endfor %}
+    {% endif %}
+
 </div>
