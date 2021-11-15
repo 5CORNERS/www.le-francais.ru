@@ -1,10 +1,10 @@
-{% extends 'base.html' %}
-{% load bootstrap4 %}
+{% extends 'base.html' %}{% load bootstrap4 %}
 {% block content %}
     <div class="container">
-        <div class="row mt-4">
+        <div class="row mt-4 mb-4">
             <div class="col-12">
-                <form action="{% url 'forum:statistics' %}" method="post">
+                <form action="{% url 'forum:statistics' %}"
+                      method="post">
                     {% csrf_token %} {{ form }} <input type="submit"
                                                        value="Submit"/>
                 </form>
@@ -12,7 +12,7 @@
         </div>
 
         {% if users_count %}
-            <div class="row mt-2">
+            <div class="row mt-2 mb-2">
                 <div class="col-12">
                     Уникальных пользователей: {{ users_count }}
                 </div>
@@ -22,32 +22,84 @@
             </div>
         {% endif %}
 
-    {% if posts_statistics_by_weeks %}
-        <table class="table">
-            <tr>
-                <th>
-                    Range Start
-                </th>
-                <th>
-                    Range End
-                </th>
-                <th>
-                    Users Count
-                </th>
-                <th>
-                    Posts Count
-                </th>
-            </tr>
-            {% for x in posts_statistics_by_weeks %}
-                <tr>
-                    <td>{{ x.range.0|date:"d-m-Y" }}</td>
-                    <td>{{ x.range.1|date:"d-m-Y" }}</td>
-                    <td>{{ x.users_count }}</td>
-                    <td>{{ x.posts_count }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% endif %}
+        <div class="row mb-2">
+            <div class="col">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="weeksTab"
+                           data-toggle="tab" href="#weeks" role="tab"
+                           aria-controls="weeks" aria-selected="true">По неделям</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="monthsTab"
+                           data-toggle="tab" href="#months" role="tab"
+                           aria-controls="months"
+                           aria-selected="false">По месяцам</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col">
+                <div class="tab-content" id="statisticsTabContent">
+
+                    {% if posts_statistics_by_weeks %}
+                        <div class="tab-pane fade show active"
+                             id="weeks" role="tabpanel"
+                             aria-labelledby="weeksTab">
+                            <table class="table">
+                                <tr>
+                                    <th>
+                                        Range Start
+                                    </th>
+                                    <th>
+                                        Range End
+                                    </th>
+                                    <th>
+                                        Users Count
+                                    </th>
+                                    <th>
+                                        Posts Count
+                                    </th>
+                                </tr>
+                                {% for x in posts_statistics_by_weeks %}
+                                    <tr>
+                                        <td>{{ x.range.0|date:"d-m-Y" }}</td>
+                                        <td>{{ x.range.1|date:"d-m-Y" }}</td>
+                                        <td>{{ x.users_count }}</td>
+                                        <td>{{ x.posts_count }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    {% if posts_statistics_by_months %}
+                        <div class="tab-pane fade" id="months"
+                             role="tabpanel"
+                             aria-labelledby="monthsTab">
+                            <table class="table">
+                                <tr>
+                                    <th>Year</th>
+                                    <th>Month</th>
+                                    <th>Users Count</th>
+                                    <th>Posts Count</th>
+                                </tr>
+                                {% for x in posts_statistics_by_months %}
+                                    <tr>
+                                        <td>{{ x.year }}</td>
+                                        <td>{{ x.month }}</td>
+                                        <td>{{ x.users_count }}</td>
+                                        <td>{{ x.posts_count }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+
+                    {% endif %}</div>
+            </div>
+        </div>
+
 
     </div>
 
