@@ -28,19 +28,36 @@ def statistics_page(request):
 
     today = timezone.now()
     first_post_date = all_posts.first().created
-    base = today + datetime.timedelta(days=6-today.weekday())
-    base = base.replace(hour=23, minute=59, second=59)
+    base_date = today + datetime.timedelta(days=6-today.weekday())
+    base_date = base_date.replace(hour=23, minute=59, second=59)
 
-    date_range = (base - datetime.timedelta(days=6, hours=23, minutes=59, seconds=59), base)
-    result = []
+    date_range = (
+        base_date - datetime.timedelta(days=6, hours=23, minutes=59, seconds=59),
+        base_date
+    )
+    result_by_weeks = []
     while date_range[1] > first_post_date:
         posts = list(filter(lambda x: date_range[0] <= x.created <= date_range[1], all_posts))
         users = list(set([post.user_id for post in posts]))
-        result.append(
+        result_by_weeks.append(
             {'range': date_range, 'users_count': len(users), 'posts_count': len(posts)}
         )
         date_range = (date_range[0]-datetime.timedelta(days=7), date_range[1]-datetime.timedelta(days=7))
-    context['posts_statistics_by_weeks'] = result
+    context['posts_statistics_by_weeks'] = result_by_weeks
+
+    result_by_months = []
+    current_year, current_month = today.year, today.month
+    while current_year >= first_post_date.year or current_month >= first_post_date.month:
+        posts = [post for post in all_posts if post.created.month == current_month and post.created.year == current_year]
+        users = list(set([post.user_id for post in posts]))
+        result_by_months.append(
+            {'year': current_year, 'month': current_month,
+             'users_count': len(users), 'posts_count': len(posts)}
+        )
+        next_date = (datetime.date(year=current_year, month=current_month, day=1) - datetime.timedelta(days=1)).replace(day=1)
+        current_year = next_date.year
+        current_month = next_date.month
+    context['posts_statistics_by_months'] = result_by_months
 
     return render(request, 'pybb/users_count.html',context)
 
