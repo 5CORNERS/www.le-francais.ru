@@ -8,7 +8,10 @@ class FloatingImageBlock(StructBlock):
 	image = ImageChooserBlock(required=True)
 	image_caption = CharBlock(required=False, help_text='Подпись под картинкой')
 	width_large = IntegerBlock(required=True, default=200)
+	width_large_as_percentages = BooleanBlock(default=False, required=False)
 	width_small = IntegerBlock(required=True, default=200)
+	width_small_as_percentages = BooleanBlock(default=False,
+	                                         required=False)
 	float = ChoiceBlock(choices=[
 		('rightimg', 'Float Right'),
 		('leftimg', 'Float Left')
