@@ -31,7 +31,7 @@ def statistics_page(request):
     base = today + datetime.timedelta(days=6-today.weekday())
     base = base.replace(hour=23, minute=59, second=59)
 
-    date_range = (base - datetime.timedelta(days=7, hours=23, minutes=59, seconds=59), base)
+    date_range = (base - datetime.timedelta(days=6, hours=23, minutes=59, seconds=59), base)
     result = []
     while date_range[1] > first_post_date:
         posts = list(filter(lambda x: date_range[0] <= x.created <= date_range[1], all_posts))
