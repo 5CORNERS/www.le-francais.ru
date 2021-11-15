@@ -1,12 +1,12 @@
-{% load wagtailcore_tags wagtailimages_tags home_wagtail_tags %}
-{% image value.image original as tmp_image %}
+{% load wagtailcore_tags wagtailimages_tags home_wagtail_tags %}{% image value.image original as tmp_image %}
 <div {% if value.min_height %}style="min-height: {{ value.container_height }}px"{% endif %}>
-    <div class="{{ value.float }} block_widescreen">
+    <div class="{{ value.float }} block_widescreen"
+         {% if value.width_large_as_percentages %}style="max-width: {{ value.width_large }}%"{% endif %}>
         <figure class="figure"
-                style="max-width: {{ value.width_large }}{% if value.width_large_as_percentages %}%{% else %}px{% endif %};{% if not value.image_caption %}margin: 0;{% endif %}">
+                style="{% if value.width_large_as_percentages %}max-width:100%{% else %}max-width: {{ value.width_large }}px{% endif %};{% if not value.image_caption %}margin: 0;{% endif %}">
             <img src="{{ tmp_image.url }}" alt="{{ tmp_image.alt }}"
                  class="figure-img"
-                 style="max-width: {{ value.width_large }}{% if value.width_large_as_percentages %}%{% else %}px{% endif %};">
+                 style="{% if value.width_large_as_percentages %}max-width: 100%{% else %}max-width: {{ value.width_large }}px{% endif %};">
             {% if value.image_caption %}
                 <figcaption
                         class="figure-caption">{{ value.image_caption }}</figcaption>{% endif %}
@@ -23,7 +23,7 @@
         <figure class="figure"><img src="{{ tmp_image.url }}"
                                     alt="{{ tmp_image.alt }}"
                                     class="figure-img"
-                                    style="max-width: {{ value.width_small }}{% if value.width_small_as_percentages %}%{% else %}px{% endif %};{% if not value.image_caption %}margin: 0;{% endif %}">
+                                    style="{% if value.width_small_as_percentages %}max-width: {{ value.width_small }}%{% else %}max-width: {{ value.width_small }}px{% endif %};{% if not value.image_caption %}margin: 0;{% endif %}">
             {% if value.image_caption %}
                 <figcaption
                         class="figure-caption">{{ value.image_caption }}</figcaption>{% endif %}
