@@ -95,13 +95,13 @@
                         </div>
                     </li>
                 {% endif %}
-                <li class="nav-item">
-                    <a class="nav-link t-shirt-icon px-2 px-lg-2"
-                       href="http://le-francais.vsemaykishop.ru"
-                       target="_blank">
-                        <i class="fas fa-tshirt"></i>
-                    </a>
-                </li>
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link t-shirt-icon px-2 px-lg-2"#}
+{#                       href="http://le-francais.vsemaykishop.ru"#}
+{#                       target="_blank">#}
+{#                        <i class="fas fa-tshirt"></i>#}
+{#                    </a>#}
+{#                </li>#}
                 <li class="nav-item">
                     <a class="nav-link coffee-icon swg px-2 px-lg-2"
                        href="{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal&s_t={% if request.user.is_authenticated and request.user.show_tickets or request.user.is_authenticated and request.user.low_price %}1{% else %}0{% endif %}"
