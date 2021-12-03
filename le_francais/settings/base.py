@@ -538,6 +538,7 @@ TINKOFF_PAYMENTS_CONFIG = {
         'INIT': 'https://securepay.tinkoff.ru/v2/Init',
         'GET_STATE': 'https://securepay.tinkoff.ru/v2/GetState',
         'CANCEL': 'https://securepay.tinkoff.ru/v2/Cancel',
+        'CHARGE': 'https://securepay.tinkoff.ru/v2/Charge'
     },
     'TAXATION': 'usn_income',
     'ITEM_TAX': 'none',
