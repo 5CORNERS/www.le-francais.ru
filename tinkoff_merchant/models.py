@@ -1,5 +1,7 @@
 from typing import List
 from decimal import *
+
+from django.contrib.auth import get_user_model
 from django.db import models
 
 from .consts import TAXES, TAXATIONS, CATEGORIES, LESSON_TICKETS, \
@@ -63,6 +65,14 @@ class Payment(models.Model):
 	@property
 	def email(self):
 		return self.get_email()
+
+	def get_user(self):
+		if self.customer_key:
+			return get_user_model().objects.get(pk=int(self.customer_key))
+
+	@property
+	def user(self):
+		return self.get_user()
 
 	def can_redirect(self) -> bool:
 		return self.status == PAYMENT_STATUS_NEW and self.payment_url
