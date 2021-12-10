@@ -77,7 +77,7 @@ class CaptchaTestForm(forms.Form):
 
 
 class ChangeUsername(forms.ModelForm):
-    username = forms.CharField(label=_('New username'))
+    username = forms.CharField(label=_('New username'), strip=True)
 
     class Meta:
         model = User
