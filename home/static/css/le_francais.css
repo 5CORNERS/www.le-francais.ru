@@ -993,7 +993,8 @@ button:disabled {
     display: none;
 }
 
-@media (max-width: 400px) {
+@media (max-width: 520px) {
+
     .block_widescreen {
         display: none;
     }
