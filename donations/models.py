@@ -119,8 +119,9 @@ def message(n, form1='рубль', form2='рубля', form5='рублей'):
 
 @receiver(payment_confirm)
 def send_support_notification(sender, **kwargs):
-    donation = kwargs['payment'].donation_set.first()
-    if donation is not None and isinstance(donation, Donation):
-        donation.send_email_notification()
+    if kwargs['payment'].donation_set.exists():
+        donation = kwargs['payment'].donation_set.first()
+        if donation is not None and isinstance(donation, Donation):
+            donation.send_email_notification()
     else:
         pass
