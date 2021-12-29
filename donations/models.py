@@ -11,9 +11,11 @@ User = get_user_model()
 
 DONATION_TARGET_LIFE = 1
 DONATION_TARGET_ADS = 2
+DONATION_TARGET_CROWDFUNDING = 3
 DONATION_TARGETS_CHOICES = [
     (DONATION_TARGET_LIFE, 'на хлеб насущный'),
-    (DONATION_TARGET_ADS, 'на рекламу проекта')
+    (DONATION_TARGET_ADS, 'на рекламу проекта'),
+    (DONATION_TARGET_CROWDFUNDING, 'на дооснащение студии')
 ]
 
 
@@ -88,6 +90,8 @@ class Donation(models.Model):
             target_description = 'на хлеб насущный'
         elif self.target == DONATION_TARGET_ADS:
             target_description = 'на рекламу проекта'
+        elif self.target == DONATION_TARGET_CROWDFUNDING:
+            target_description = 'на дооснащение студии'
         else:
             target_description = 'на неизвестную цель'
 
@@ -115,8 +119,9 @@ def message(n, form1='рубль', form2='рубля', form5='рублей'):
 
 @receiver(payment_confirm)
 def send_support_notification(sender, **kwargs):
-    donation = kwargs['payment'].donation_set.first()
-    if donation is not None and isinstance(donation, Donation):
-        donation.send_email_notification()
+    if kwargs['payment'].donation_set.exists():
+        donation = kwargs['payment'].donation_set.first()
+        if donation is not None and isinstance(donation, Donation):
+            donation.send_email_notification()
     else:
         pass
