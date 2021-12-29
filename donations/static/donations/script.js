@@ -25,6 +25,12 @@ $(document).ready(() => {
             console.log($(e.target).val())
         }
     })
+    $amountDummyInput.focus(e => {
+        $amountDummyInput.attr('placeholder', '')
+    })
+    $amountDummyInput.blur(e => {
+        $amountDummyInput.attr('placeholder', 'Другая сумма')
+    })
     $amountDummyInput.change(e => {
         $amountInput.val($(e.target).val())
         console.log($(e.target).val())
