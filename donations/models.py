@@ -11,9 +11,11 @@ User = get_user_model()
 
 DONATION_TARGET_LIFE = 1
 DONATION_TARGET_ADS = 2
+DONATION_TARGET_CROWDFUNDING = 3
 DONATION_TARGETS_CHOICES = [
     (DONATION_TARGET_LIFE, 'на хлеб насущный'),
-    (DONATION_TARGET_ADS, 'на рекламу проекта')
+    (DONATION_TARGET_ADS, 'на рекламу проекта'),
+    (DONATION_TARGET_CROWDFUNDING, 'на дооснащение студии')
 ]
 
 
