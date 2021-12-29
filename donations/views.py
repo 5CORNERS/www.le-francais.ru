@@ -26,7 +26,7 @@ class SubmitDonation(View):
 		validation_redirect = request.POST.get('validation_redirect')
 		description = 'Ежемесячное пожертвование le-francais.ru' if recurrent else 'Одноразовое пожертвование le-francais.ru'
 		comment = request.POST.get('comment')
-		target = int(request.POST.get('target'))
+		target = int(request.POST.get('target', 1))
 
 		if request.user.is_authenticated:
 			user = request.user

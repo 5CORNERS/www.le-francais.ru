@@ -44,22 +44,24 @@
                 </li>
             </ul>
 
-            <div class="form-group row">
-                <label class="col-md-8 text-left col-form-label-two-rows"
-                       for="donationFormTarget">Выберите цель, на
-                    которую нам следует потратить вашу помощь (<span data-toggle="tooltip" title="Дай человеку рыбу, и он будет
+            {% if show_target %}
+                <div class="form-group row">
+                    <label class="col-md-8 text-left col-form-label-two-rows"
+                           for="donationFormTarget">Выберите цель, на
+                        которую нам следует потратить вашу помощь (<span data-toggle="tooltip" title="Дай человеку рыбу, и он будет
                 сыт один день. Дай человеку удочку — и он будет сыт
-                всю жизнь. Наша «удочка» — это реклама. Вы решаете, на что нам пустить Вашу помощь." data-container="#donationForm" data-boundary="viewport"
-                            class="underline" tabindex="0">что за цель?</span>)</label>
-                <div class="col-md-4">
-                    <select class="custom-select"
-                            id="donationFormTarget" name="target"
-                            >
-                        <option value="1" selected>На жизнь</option>
-                        <option value="2">На рекламу</option>
-                    </select>
+                всю жизнь. Наша «удочка» сегодня — это оборудование для студии. Вы решаете, на что нам пустить Вашу помощь." data-container="#donationForm" data-boundary="viewport"
+                                class="underline" tabindex="0">что за цель?</span>)</label>
+                    <div class="col-md-4">
+                        <select class="custom-select"
+                                id="donationFormTarget" name="target"
+                                >
+                            <option value="1" {% if default_target == 1 %}selected{% endif %}>На жизнь</option>
+                            <option value="3" {% if default_target == 3 %}selected{% endif %}>На дооснащение студии</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
+            {% endif %}
 
             <div class="form-group mb-3">
                 <textarea class="form-control"
@@ -84,16 +86,16 @@
             </div>
 
             <input id="donationFormSuccessUrl" type="hidden"
-                   name="success_url" value="{{ success_url }}">
+                   name="success_url{{ form.success_url.html_name }}" value="{{ form.success_url.value }}">
             <input id="donationFormFailUrl" type="hidden"
-                   name="fail_url" value="{{ fail_url }}"> <input
-                id="donationFormValidationRedirect" type="hidden"
-                name="validation_redirect"
-                value="{{ validation_redirect }}"> <input
-                id="donationFormType" type="hidden" name="type"
-                value="single"> <input id="donationFormAmount"
-                                       type="hidden" name="amount"
-                                       value="1000"> {% csrf_token %}
+                   name="{{ form.fail_url.html_name }}" value="{{ form.fail_url.value }}">
+            <input
+                id="donationFormType" type="hidden" name="{{ form.type.html_name }}"
+                value="{{ form.type.value }}">
+            <input id="donationFormAmount"
+                                       type="hidden" name="{{ form.amount.html_name }}"
+                                       value="{{ form.amount.value }}">
+            {% csrf_token %}
             <button type="submit" class="btn btn-primary"
                     id="donationsFormSubmit">
                 Поддержать!
