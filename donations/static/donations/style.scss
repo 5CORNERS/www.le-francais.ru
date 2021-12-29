@@ -17,8 +17,7 @@
   max-width: 650px;
 }
 
-#donationForm {
-  span.underline {
+span.underline {
     cursor: pointer;
     background: url("./underline_2.svg") 0 100% repeat no-repeat;
     transition: 0.1s;
@@ -30,6 +29,8 @@
       background-image: url("./underline_1.svg");
     }
   }
+
+#donationForm {
 
   .nav-item {
     & > .nav-link {
