@@ -11,28 +11,61 @@
         </div>
         <div class="row">
             <div class="col">
-                <p>
-                    Последние несколько лет существования проекта
+
+                <p> Последние несколько лет существования проекта
                     показали, что он не может выжить без вашей
                     поддержки (по крайней мере, пока). Но сегодня <b>мы
-                    не просим денег на поддержание штанов</b> — сегодня
-                    нам очень нужна ваша помощь на нашу первую
-                    рекламную кампанию. Мы хорошо умеем делать рекламу
-                    (посмотрите на наш новый <a
-                        href="/welcome/%D1%83%D1%80%D0%BE%D0%BA%D0%B8-%D1%84%D1%80%D0%B0%D0%BD%D1%86%D1%83%D0%B7%D1%81%D0%BA%D0%BE%D0%B3%D0%BE-%D0%BF%D0%BE-%D1%86%D0%B5%D0%BD%D0%B5-%D1%87%D0%B0%D1%88%D0%BA%D0%B8-%D0%BA%D0%BE%D1%84%D0%B5/?utm_campaign=pour-le-prix-d%27un-cafe&utm_medium=link&utm_source=croudfunding">лендинг</a>),
-                    но без вас нам ее не запустить. Так что это такой
-                    <i>краудфандинг</i>. </p>
-                <p>
-                    Помогите нам стартовать с этим и стать
-                    независимыми! </p>
+                        не просим денег на поддержание штанов</b> —
+                    сегодня нам очень нужна ваша помощь, чтобы мы
+                    смогли дооснастить нашу студию.&nbsp;
+                </p>
+                <p>Мы неплохо умеем снимать (посмотрите на наш новый
+                    <a href="https://www.youtube.com/channel/UCX2cAgrJEcOJH24xOBnMoiw" target="_blank">канал
+                        на YouTube</a>), но из-за несовершенства
+                    оборудования тратим чудовищно много времени на
+                    монтаж и цветокоррекцию. Помогите нам вскладчину
+                    <span class="underline" tabindex="0" data-toggle="modal"
+                       data-target="#imageModal">дооснастить
+                        студию для производительного монтажа</span>
+                    — это поможет нам быстрее и лучше справляться с
+                    этими задачами и чаще радовать вас новыми
+                    интересными сюжетами.&nbsp;
+                </p>
+                <p>Пожалуйста, поучаствуйте в нашем
+                    краудфандинг-проекте — даже небольшой взнос нам
+                    поможет!
+                </p>
+
             </div>
         </div>
         <div class="mt-3">
-            {% include_donation_form %}
+            {% include_donation_form show_target=True default_target=3 %}
         </div>
         <div class="row">
             <div class="col">
-                Собрано на рекламу уже <b style="font-size: 22px">{% acquired 2|intcomma %} ₽</b>
+                Собрано на оборудование уже <b
+                    style="font-size: 22px">{% acquired 3|intcomma %}
+                ₽</b> из 42 990 ₽
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="imageModal" tabindex="-1"
+         aria-labelledby="imageModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalTitle"></h5>
+                    <button type="button" class="close"
+                            data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img style="margin-bottom: 15px" src="https://files.le-francais.ru/images/mail/loupdeck-540.png" alt="">
+                    <a href="https://loupedeck.com/shop/loupedeck-ct/"
+                       target="_blank">Customizable editing console
+                        Loupdeck CT</a>
+                </div>
             </div>
         </div>
     </div>
