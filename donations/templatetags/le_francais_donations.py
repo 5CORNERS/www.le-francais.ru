@@ -18,9 +18,11 @@ def include_donation_form(context,
                           default_target=None,
                           show_target=False):
     if support_form is None and context['request'].user.is_authenticated:
-        support_form = SupportForm(dict(email=context['request'].user.email))
+        support_form = SupportForm(dict(email=context['request'].user.email, amount=1000, type="single",
+                                        success_url=success_url, fail_url=fail_url))
     elif support_form is None:
-        support_form = SupportForm({})
+        support_form = SupportForm(dict(amount=1000, type="single",
+                                        success_url=success_url, fail_url=fail_url))
     return dict(
         request=context['request'],
         success_url=success_url,
