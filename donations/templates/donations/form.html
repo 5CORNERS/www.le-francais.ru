@@ -88,7 +88,7 @@
             </div>
 
             <input id="donationFormSuccessUrl" type="hidden"
-                   name="success_url{{ form.success_url.html_name }}" value="{{ form.success_url.value }}">
+                   name="{{ form.success_url.html_name }}" value="{{ form.success_url.value }}">
             <input id="donationFormFailUrl" type="hidden"
                    name="{{ form.fail_url.html_name }}" value="{{ form.fail_url.value }}">
             <input
