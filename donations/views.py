@@ -1,5 +1,6 @@
 from email.utils import parseaddr
 
+from django import urls
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -63,10 +64,10 @@ class SubmitDonation(View):
 			BackUrls.objects.create(
 				payment=payment,
 				success=request.scheme + "://" + request.META[
-					'HTTP_HOST'] + request.POST['success_url'],
+					'HTTP_HOST'] + request.POST.get('success_url', '/?modal_open=success-donation-modal&payment_success=true'),
 				fail=request.scheme + "://" + request.META[
 					'HTTP_HOST'] +
-				     request.POST['fail_url']
+				     request.POST.get('fail_url', '/?modal_open=fail-payment-modal&payment_fail=true')
 			)
 			Donation.objects.create(
 				amount=amount,
