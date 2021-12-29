@@ -90,6 +90,8 @@ class Donation(models.Model):
             target_description = 'на хлеб насущный'
         elif self.target == DONATION_TARGET_ADS:
             target_description = 'на рекламу проекта'
+        elif self.target == DONATION_TARGET_CROWDFUNDING:
+            target_description = 'на дооснащение студии'
         else:
             target_description = 'на неизвестную цель'
 
