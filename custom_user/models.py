@@ -336,22 +336,24 @@ class LogMessage(models.Model):
 @receiver(payment_confirm)
 def activate_tinkoff_payment(sender, **kwargs):
 	payment = kwargs['payment']
-	user = User.objects.get(id=int(payment.customer_key))
-	quantity = 0
-	items = list(payment.receipt.receiptitem_set.all())
-	for item in items:
-		if item.category in ['coffee_cups', 'tickets']:
-			quantity += item.site_quantity
-	user.add_cups(quantity)
+	if payment.customer_key:
+		user = User.objects.get(id=int(payment.customer_key))
+		quantity = 0
+		items = list(payment.receipt.receiptitem_set.all())
+		for item in items:
+			if item.category in ['coffee_cups', 'tickets']:
+				quantity += item.site_quantity
+		user.add_cups(quantity)
 
 
 @receiver(payment_refund)
 def deactivate_tinkoff_payment(sender, **kwargs):
 	payment = kwargs['payment']
-	user = User.objects.get(id=int(payment.customer_key))
-	quantity = 0
-	items = list(payment.receipt.receiptitem_set.all())
-	for item in items:
-		if item.category in ['coffee_cups', 'tickets']:
-			quantity += item.site_quantity
-	user.add_cups(-quantity)
+	if payment.customer.key:
+		user = User.objects.get(id=int(payment.customer_key))
+		quantity = 0
+		items = list(payment.receipt.receiptitem_set.all())
+		for item in items:
+			if item.category in ['coffee_cups', 'tickets']:
+				quantity += item.site_quantity
+		user.add_cups(-quantity)
