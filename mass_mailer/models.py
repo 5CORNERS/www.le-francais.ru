@@ -183,7 +183,7 @@ class UsersFilter(models.Model):
 							self.first_payment_was, self.last_payment_was,
 							payments_query)
 						wanted_pks = [int(p.customer_key) for p in
-						              payments_query]
+						              payments_query if p.customer_key if p.customer_key]
 						recipients = recipients.filter(id__in=wanted_pks)
 
 					elif recipients_filter == UsersFilter.USERS_WITHOUT_ACTIVATIONS:
@@ -201,7 +201,7 @@ class UsersFilter(models.Model):
 						payments = [p for p in list(payments_query) if
 						            p.closest_activation == '-']
 						recipients = recipients.filter(
-							id__in=[int(p.customer_key) for p in payments])
+							id__in=[int(p.customer_key) for p in payments if p.customer_key])
 
 					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_EQ1CUP:
 						payments = Payment.objects.filter(
@@ -214,7 +214,7 @@ class UsersFilter(models.Model):
 							self.first_payment_was, self.last_payment_was,
 							payments)
 						recipients = recipients.filter(
-							id__in=[int(p.customer_key) for p in payments]
+							id__in=[int(p.customer_key) for p in payments if p.customer_key]
 						)
 
 					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_GT1CUP:
@@ -227,7 +227,7 @@ class UsersFilter(models.Model):
 							self.first_payment_was, self.last_payment_was,
 							payments)
 						recipients = recipients.filter(
-							id__in=[int(p.customer_key) for p in payments]
+							id__in=[int(p.customer_key) for p in payments if p.customer_key]
 						)
 					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_EQ5CUP:
 						payments = Payment.objects.filter(
@@ -237,7 +237,7 @@ class UsersFilter(models.Model):
 						payments = self.first_last_payments_filter(
 							self.first_payment_was, self.last_payment_was,
 							payments)
-						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments])
+						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments if p.customer_key])
 					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_EQ10CUP:
 						payments = Payment.objects.filter(
 							status__in=['CONFIRMED', 'AUTHORIZED'],
@@ -246,7 +246,7 @@ class UsersFilter(models.Model):
 						payments = self.first_last_payments_filter(
 							self.first_payment_was, self.last_payment_was,
 							payments)
-						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments])
+						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments if p.customer_key])
 					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_EQ20CUP:
 						payments = Payment.objects.filter(
 							status__in=['CONFIRMED', 'AUTHORIZED'],
@@ -255,7 +255,7 @@ class UsersFilter(models.Model):
 						payments = self.first_last_payments_filter(
 							self.first_payment_was, self.last_payment_was,
 							payments)
-						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments])
+						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments if p.customer_key])
 					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_EQ50CUP:
 						payments = Payment.objects.filter(
 							status__in=['CONFIRMED', 'AUTHORIZED'],
@@ -264,7 +264,7 @@ class UsersFilter(models.Model):
 						payments = self.first_last_payments_filter(
 							self.first_payment_was, self.last_payment_was,
 							payments)
-						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments])
+						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments if p.customer_key])
 					elif recipients_filter == UsersFilter.USERS_WITHOUT_PAYMENTS:
 						payments = Payment.objects.filter(
 							status__in=['CONFIRMED', 'AUTHORIZED'],
@@ -272,7 +272,7 @@ class UsersFilter(models.Model):
 						payments = self.first_last_payments_filter(
 							self.first_payment_was, self.last_payment_was,
 							payments)
-						recipients = recipients.filter(~Q(id__in=[int(p.customer_key) for p in payments]))
+						recipients = recipients.filter(~Q(id__in=[int(p.customer_key) for p in payments if p.customer_key]))
 					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_LTE10:
 						all_payments = Payment.objects.filter(
 							status__in=['CONFIRMED', 'AUTHORIZED'],
@@ -291,7 +291,7 @@ class UsersFilter(models.Model):
 							less_then_equal_10_payments)
 						recipients = recipients.filter(~Q(
 							id__in=[int(p.customer_key) for p in
-							all_payments]) | Q(
+							all_payments if p.customer_key]) | Q(
 							id__in=[int(p.customer_key) for p in
 							less_then_equal_10_payments]))
 
