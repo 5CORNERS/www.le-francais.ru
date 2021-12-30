@@ -107,17 +107,29 @@ class EmailSettings(models.Model):
 
 
 class UsersFilter(models.Model):
+	USERS_WITH_PAYMENTS_LTE10 = '10'
 	USERS_WITHOUT_ACTIVATIONS = '0'
 	USERS_WITH_PAYMENTS = '1'
 	PAYMENTS_WITHOUT_ACTIVATIONS = '2'
 	USERS_WITH_PAYMENTS_EQ1CUP = '3'
 	USERS_WITH_PAYMENTS_GT1CUP = '4'
+	USERS_WITH_PAYMENTS_EQ5CUP = '5'
+	USERS_WITH_PAYMENTS_EQ10CUP = '6'
+	USERS_WITH_PAYMENTS_EQ20CUP = '7'
+	USERS_WITH_PAYMENTS_EQ50CUP = '8'
+	USERS_WITHOUT_PAYMENTS = '9'
 	FILTERS = [
 		(USERS_WITHOUT_ACTIVATIONS, 'Users w/o activations'),
 		(USERS_WITH_PAYMENTS, 'Users with payments'),
 		(PAYMENTS_WITHOUT_ACTIVATIONS, 'Payments w/o activations'),
 		(USERS_WITH_PAYMENTS_EQ1CUP, 'Users, which payed for 1 cup only'),
 		(USERS_WITH_PAYMENTS_GT1CUP, 'Users, which payed for more than 1 cups'),
+		(USERS_WITH_PAYMENTS_EQ5CUP, 'Users, which payed for 5 cups only'),
+		(USERS_WITH_PAYMENTS_EQ10CUP, 'Users, which payed for 10 cups only'),
+		(USERS_WITH_PAYMENTS_EQ20CUP, 'Users, which payed for 20 cups only'),
+		(USERS_WITH_PAYMENTS_EQ50CUP, 'Users, which payed for 50 cups only'),
+		(USERS_WITHOUT_PAYMENTS, 'Users w/o payments'),
+		(USERS_WITH_PAYMENTS_LTE10, 'Users with payments for 10 or less cups or tickets including 0')
 	]
 	name = models.CharField(max_length=64)
 	filters = ChoiceArrayField(
@@ -214,6 +226,72 @@ class UsersFilter(models.Model):
 						recipients = recipients.filter(
 							id__in=[int(p.customer_key) for p in payments]
 						)
+					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_EQ5CUP:
+						payments = Payment.objects.filter(
+							status__in=['CONFIRMED', 'AUTHORIZED'],
+							receipt__receiptitem__site_quantity=5
+						)
+						payments = self.first_last_payments_filter(
+							self.first_payment_was, self.last_payment_was,
+							payments)
+						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments])
+					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_EQ10CUP:
+						payments = Payment.objects.filter(
+							status__in=['CONFIRMED', 'AUTHORIZED'],
+							receipt__receiptitem__site_quantity=10
+						)
+						payments = self.first_last_payments_filter(
+							self.first_payment_was, self.last_payment_was,
+							payments)
+						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments])
+					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_EQ20CUP:
+						payments = Payment.objects.filter(
+							status__in=['CONFIRMED', 'AUTHORIZED'],
+							receipt__receiptitem__site_quantity=20
+						)
+						payments = self.first_last_payments_filter(
+							self.first_payment_was, self.last_payment_was,
+							payments)
+						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments])
+					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_EQ50CUP:
+						payments = Payment.objects.filter(
+							status__in=['CONFIRMED', 'AUTHORIZED'],
+							receipt__receiptitem__site_quantity=50
+						)
+						payments = self.first_last_payments_filter(
+							self.first_payment_was, self.last_payment_was,
+							payments)
+						recipients = recipients.filter(id__in=[int(p.customer_key) for p in payments])
+					elif recipients_filter == UsersFilter.USERS_WITHOUT_PAYMENTS:
+						payments = Payment.objects.filter(
+							status__in=['CONFIRMED', 'AUTHORIZED'],
+						)
+						payments = self.first_last_payments_filter(
+							self.first_payment_was, self.last_payment_was,
+							payments)
+						recipients = recipients.filter(~Q(id__in=[int(p.customer_key) for p in payments]))
+					elif recipients_filter == UsersFilter.USERS_WITH_PAYMENTS_LTE10:
+						all_payments = Payment.objects.filter(
+							status__in=['CONFIRMED', 'AUTHORIZED'],
+						)
+						less_then_equal_10_payments = Payment.objects.filter(
+							status__in=['CONFIRMED', 'AUTHORIZED'],
+							receipt__receiptitem__site_quantity__lte=10
+						)
+						all_payments = self.first_last_payments_filter(
+							self.first_payment_was,
+							self.last_payment_was,
+							all_payments)
+						less_then_equal_10_payments = self.first_last_payments_filter(
+							self.first_payment_was,
+							self.last_payment_was,
+							less_then_equal_10_payments)
+						recipients = recipients.filter(~Q(
+							id__in=[int(p.customer_key) for p in
+							all_payments]) | Q(
+							id__in=[int(p.customer_key) for p in
+							less_then_equal_10_payments]))
+
 			if not self.ignore_subscriptions:
 				recipients = recipients.exclude(pk__in=[p.user.pk for p in
 				                                        Profile.objects.filter(
