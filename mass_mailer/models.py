@@ -159,6 +159,8 @@ class UsersFilter(models.Model):
 	do_not_send_to_mailru = models.BooleanField(default=False)
 	do_not_send_to_comcast = models.BooleanField(default=False)
 
+	send_only_to_gmail = models.BooleanField(default=False)
+
 	def __str__(self):
 		return self.name
 
@@ -323,6 +325,8 @@ class UsersFilter(models.Model):
 				recipients = recipients.exclude(email__contains='@yandex.ru').exclude(email__contains='@ya.ru')
 			if self.do_not_send_to_comcast:
 				recipients = recipients.exclude( email__contains='@comcast.net')
+			if self.send_only_to_gmail:
+				recipients = recipients.filter(email__contains='@gmail.com')
 			recipients = recipients.exclude(is_active=False).order_by('-date_joined')
 			recipients = recipients.distinct()
 		return recipients
