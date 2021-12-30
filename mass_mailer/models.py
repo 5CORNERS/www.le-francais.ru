@@ -1,5 +1,6 @@
 import smtplib
 from datetime import datetime
+from email.utils import formataddr
 from ssl import socket_error
 
 from django.db.models import Q
@@ -477,8 +478,8 @@ class Message(models.Model):
 
 				email_message = EmailMultiAlternatives(
 					subject=Template(self.template_subject).render(Context(data['context'])),
-					from_email=f'{self.from_username} <{self.from_email}>',
-					to=[f'"{data["name"]}" <{data["email"]}>'],
+					from_email=formataddr((self.from_username, self.from_email)),
+					to=[formataddr((data["name"], data["email"]))],
 					headers=header,
 					reply_to=self.get_reply_to_header(),
 					body=Template(self.template_txt).render(Context(data['context']))
@@ -561,8 +562,9 @@ class Message(models.Model):
 					additional_context = None
 				email_message = EmailMultiAlternatives(
 					subject=self.get_subject_for(recipient.mailer_profile, additional_context),
-					from_email=f'{self.from_username} <{self.from_email}>',
-					to=[f'"{recipient.username}" <{recipient.email}>'],
+					from_email=formataddr(
+						(self.from_username, self.from_email)),
+					to=[formataddr((recipient.username, recipient.email))],
 					headers=header,
 					reply_to=self.get_reply_to_header(),
 					body=self.get_txt_body_for(recipient.mailer_profile, additional_context)
