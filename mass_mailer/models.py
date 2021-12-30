@@ -287,7 +287,7 @@ class UsersFilter(models.Model):
 class Message(models.Model):
 	name = models.CharField(max_length=64, blank=True, null=True, unique=True)
 
-	template_subject = models.CharField(max_length=64, blank=True)
+	template_subject = models.CharField(max_length=1000, blank=True)
 	template_html = models.TextField(blank=True, help_text='You can ')
 	template_txt = models.TextField(blank=True)
 
@@ -320,7 +320,7 @@ class Message(models.Model):
 		self._recipients = None
 
 	def __str__(self):
-		return f'{self.template_subject}'
+		return f'{self.name} — {self.template_subject}'
 
 	def get_reply_to_header(self):
 		if self.reply_to_email:
