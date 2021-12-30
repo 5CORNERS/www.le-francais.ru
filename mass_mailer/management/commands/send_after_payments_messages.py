@@ -11,6 +11,7 @@ from home.models import UserLesson
 from mass_mailer.models import EmailSettings, Message, MessageLog, Profile
 from django.contrib.auth import get_user_model
 
+from tinkoff_merchant.consts import COFFEE_CUPS, LESSON_TICKETS
 from tinkoff_merchant.models import Payment, Receipt, ReceiptItem
 
 User = get_user_model()
@@ -66,6 +67,8 @@ class Command(BaseCommand):
 def filter_users_with_payments_with_activations(message):
 	users_payments_activations = []
 	receipt_items = ReceiptItem.objects.select_related('receipt', 'receipt__payment').filter(
+		category__in=[COFFEE_CUPS, LESSON_TICKETS]
+	).filter(
 		receipt__payment__status__in=["AUTHORISED", "CONFIRMED"]
 	).filter(
 		receipt__payment__update_date__date=timezone.now().today()
