@@ -120,9 +120,10 @@ class Payment(models.Model):
 	@property
 	def closest_activation(self):
 		from home.models import UserLesson
-		closest_activation = UserLesson.objects.filter(user_id=int(self.customer_key), date__gt=self.update_date).select_related('lesson').order_by('date').first()
-		if closest_activation:
-			return closest_activation.lesson.lesson_number
+		if self.customer_key:
+			closest_activation = UserLesson.objects.filter(user_id=int(self.customer_key), date__gt=self.update_date).select_related('lesson').order_by('date').first()
+			if closest_activation:
+				return closest_activation.lesson.lesson_number
 		return '-'
 
 
