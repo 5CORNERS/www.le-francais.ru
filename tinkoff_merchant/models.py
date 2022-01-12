@@ -126,6 +126,11 @@ class Payment(models.Model):
 				return closest_activation.lesson.lesson_number
 		return '-'
 
+	@property
+	def children(self):
+		if self.recurrent:
+			return list(Payment.objects.filter(parent=self))
+
 
 class Receipt(models.Model):
 	payment = models.OneToOneField(to=Payment, on_delete=models.CASCADE, verbose_name='Заказ')
