@@ -63,7 +63,7 @@ class Command(BaseCommand):
                     ).exists()):
                 continue
 
-            print(f'\nCreating new children payment for {pp} -- {pp.amount/100}₽ -- {pp.creation_date.strftime("%Y-%m-%d")} -- {pp.user.username}')
+            print(f'\nCreating new children payment for {pp} -- {pp.amount/100}₽ -- {pp.creation_date.strftime("%Y-%m-%d")} -- {pp.user.username if pp.user else "anonymous"}')
             if pp.children.exists():
                 print(f'{pp} has followed children payments')
                 for child in pp.children.filter(status__in=PAYMENT_PAYED_STATUSES).order_by('creation_date'):
@@ -73,7 +73,7 @@ class Command(BaseCommand):
                 parent=pp,
                 description=options['description'],
                 amount=pp.amount,
-                customer_key=pp.customer_key
+                customer_key=pp.customer_key if pp.customer_key else None
             ).with_receipt(
                 email=pp.email,
             ).with_items(
