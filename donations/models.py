@@ -78,9 +78,9 @@ class Donation(models.Model):
 
         if user:
             if user.first_name:
-                name = user.get_full_name()
+                name = f'{user.get_full_name()} ({user.email})'
             else:
-                name = user.get_username()
+                name = f'{user.get_username()} ({user.email})'
         elif self.email:
             name = self.email
         else:
