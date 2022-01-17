@@ -1,7 +1,7 @@
 from django.core.management import BaseCommand
 from wagtail.core.models import Page
 
-from home.models import PageWithSidebar, LessonPage, ArticlePage
+from home.models import PageWithSidebar, LessonPage, ArticlePage, PodcastPage
 from home.utils import get_nav_tree
 
 def is_nav_root(page: Page) -> bool:
@@ -11,6 +11,8 @@ def is_nav_root(page: Page) -> bool:
 		return True
 	elif isinstance(page, ArticlePage) and page.is_nav_root:
 		return True
+	elif isinstance(page, PodcastPage):
+		return False
 	else:
 		return False
 
@@ -25,7 +27,8 @@ def get_nav_root(page: Page) -> Page:
 
 class Command(BaseCommand):
 	def handle(self, *args, **options):
-		for page in Page.objects.all():
+		for page in Page.objects.all().order_by('latest_revision_created_at'):
+			print(page.title)
 			root = get_nav_root(page)
 			page_tree = page.nav_tree
 			page_tree.tree = get_nav_tree(
