@@ -187,15 +187,14 @@ def get_navigation_object_from_page(root, current_page) -> dict:
     from home.models import PageWithSidebar
     from home.models import LessonPage
     from home.models import ArticlePage
-    if isinstance(root.specific, PageWithSidebar) or isinstance(root.specific,
-                                                                LessonPage) or isinstance(
-        root.specific, ArticlePage):
+    from home.models import PodcastPage
+    if (isinstance(root.specific, PageWithSidebar) or isinstance(root.specific, LessonPage) or isinstance(root.specific, ArticlePage) or isinstance(root.specific, PodcastPage)):
         menu_title = root.specific.menu_title
         if not isinstance(menu_title, str):
             menu_title = menu_title.decode()
         if menu_title != '':
             page_object["text"] = menu_title
-        if not root.specific.is_selectable:
+        if not getattr(root.specific, 'is_selectable', True):
             page_object["selectable"] = False
     if root.id == current_page.id:
         page_object["state"] = {
@@ -230,6 +229,7 @@ def parse_tab_delimited_srt_file(file):
             "speaker":row[COLUMN_SPEAKER]
         }
         c += 1
+    #return OrderedDict(sorted(result.items(), key=lambda x: x[1]['start']))
     return result
 
 
