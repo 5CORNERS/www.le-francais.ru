@@ -27,7 +27,7 @@ def get_nav_root(page: Page) -> Page:
 
 class Command(BaseCommand):
 	def handle(self, *args, **options):
-		for page in Page.objects.all().order_by('latest_revision_created_at'):
+		for page in Page.objects.all().order_by('-last_published_at'):
 			print(page.title)
 			root = get_nav_root(page)
 			page_tree = page.nav_tree
