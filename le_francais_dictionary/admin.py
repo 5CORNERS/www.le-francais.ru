@@ -3,9 +3,11 @@ import re
 from io import TextIOWrapper
 from typing import List, Dict
 
+from django import forms
 from django.conf.urls import url
 from django.contrib import admin
 from django.contrib.admin import DateFieldListFilter
+from django.contrib.admin.helpers import ActionForm
 from django.core.checks import messages
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
@@ -27,7 +29,10 @@ def get_number(s) -> int:
 def create_polly_task(modeladmin: admin.ModelAdmin, request, qs):
 	for p in qs:
 		p.create_polly_task()
-		
+
+class MoveToPacketForm(ActionForm):
+	packet = forms.ModelChoiceField(queryset=Packet.objects.all().order_by('lesson__lesson_number'))
+
 
 def delete_day_repetitions(modeladmin: admin.ModelAdmin, request, qs):
 	word: Word
@@ -110,7 +115,11 @@ class WordAdmin(admin.ModelAdmin):
 	list_select_related = []
 	readonly_fields = ['polly']
 	inlines = [WordTranslationInline]
-	actions = [create_polly_task]
+	action_form = MoveToPacketForm
+	actions = [create_polly_task, 'move_to_packet']
+
+	def move_to_packet(self, request, qs):
+		qs.update(packet=request.POST['packet'])
 
 	def get_urls(self):
 		urls = super(WordAdmin, self).get_urls()
