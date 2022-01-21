@@ -430,7 +430,7 @@
 </div>
 
 <hr>
-{% if display_%}<div class="row controls text-center">
+<div class="row controls text-center">
     <div class="col-12">
         <div role="group" class="btn-group">
             {% get_prev_lesson self.lesson_number as prev_lesson %}
@@ -446,7 +446,7 @@
 
         </div>
     </div>
-</div>{% endif %}
+</div>
 {% if self.has_own_topic %}
     <div class="row">
         <div class="col-12">{% include 'home/lesson_topic.html' with topic=self.topic %}</div></div>
