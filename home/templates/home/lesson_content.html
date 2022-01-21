@@ -21,7 +21,7 @@
                 <li class="nav-item">
                     <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab" href="#body"
                        role="tab" aria-controls="body">
-                        Диалог урока
+                        {% if self.body_tab_name %}{{ self.body_tab_name }}{% else %}Диалог урока{% endif %}
                     </a>
                 </li>
             {% endif %}
@@ -434,13 +434,13 @@
     <div class="col-12">
         <div role="group" class="btn-group">
             {% get_prev_lesson self.lesson_number as prev_lesson %}
-            <a class="btn btn-outline-secondary{% if not prev_lesson %} disabled{% endif %}" role="button" {% if not next_lesson %} aria-disabled="true" tabindex="-1"{% endif %}
+            <a class="btn btn-outline-secondary{% if not prev_lesson or not self.enable_previous_lesson_button %} disabled{% endif %}" role="button" {% if not next_lesson %} aria-disabled="true" tabindex="-1"{% endif %}
                href="{{ prev_lesson.get_url }}"
                style="user-select: auto;">Предыдущий урок</a>
 
 
             {% get_next_lesson self.lesson_number as next_lesson %}
-            <a class="btn btn-outline-secondary{% if not next_lesson %} disabled{% endif %}" role="button" {% if not next_lesson %} aria-disabled="true" tabindex="-1"{% endif %}
+            <a class="btn btn-outline-secondary{% if not next_lesson or not self.enable_next_lesson_button %} disabled{% endif %}" role="button" {% if not next_lesson %} aria-disabled="true" tabindex="-1"{% endif %}
                href="{{ next_lesson.get_url }}"
                style="user-select: auto;">Следующий урок</a>
 
