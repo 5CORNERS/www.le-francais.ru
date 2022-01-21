@@ -430,23 +430,23 @@
 </div>
 
 <hr>
-<div class="row controls text-center">
+{% if display_%}<div class="row controls text-center">
     <div class="col-12">
         <div role="group" class="btn-group">
             {% get_prev_lesson self.lesson_number as prev_lesson %}
             <a class="btn btn-outline-secondary{% if not prev_lesson or not self.enable_previous_lesson_button %} disabled{% endif %}" role="button" {% if not next_lesson %} aria-disabled="true" tabindex="-1"{% endif %}
                href="{{ prev_lesson.get_url }}"
-               style="user-select: auto;">Предыдущий урок</a>
+               style="user-select: auto;">{% if self.previous_lesson_button %}{{ self.previous_lesson_button }}{% else %}Предыдущий урок{% endif %}</a>
 
 
             {% get_next_lesson self.lesson_number as next_lesson %}
             <a class="btn btn-outline-secondary{% if not next_lesson or not self.enable_next_lesson_button %} disabled{% endif %}" role="button" {% if not next_lesson %} aria-disabled="true" tabindex="-1"{% endif %}
                href="{{ next_lesson.get_url }}"
-               style="user-select: auto;">Следующий урок</a>
+               style="user-select: auto;">{% if self.next_lesson_button %}{{ self.next_lesson_button }}{% else %}Следующий урок{% endif %}</a>
 
         </div>
     </div>
-</div>
+</div>{% endif %}
 {% if self.has_own_topic %}
     <div class="row">
         <div class="col-12">{% include 'home/lesson_topic.html' with topic=self.topic %}</div></div>
