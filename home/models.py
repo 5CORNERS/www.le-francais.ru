@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.dispatch import receiver
-from django.forms import CheckboxInput
+from django.forms import CheckboxInput, TextInput
 from django.http import HttpRequest
 from django.template.response import TemplateResponse
 from django.utils import timezone
@@ -400,7 +400,9 @@ class LessonPage(Page):
     )
 
     body_tab_name = models.CharField(max_length=64, null=True, blank=True)
+    previous_lesson_button = models.CharField(max_length=64, null=True, blank=True)
     enable_previous_lesson_button = models.BooleanField(default=True, blank=True)
+    next_lesson_button = models.CharField(max_length=64, null=True, blank=True)
     enable_next_lesson_button = models.BooleanField(default=True, blank=True)
 
     comments_for_lesson = StreamField([
@@ -709,7 +711,9 @@ LessonPage.settings_panels = LessonPage.settings_panels + [
     FieldPanel('transcript_srt'),
     FieldPanel('transcript_docx'),
     FieldPanel('enable_previous_lesson_button'),
-    FieldPanel('enable_next_lesson_button')
+    FieldPanel('previous_lesson_button', widget=TextInput(attrs={'placeholder':'Предыдущий урок'})),
+    FieldPanel('enable_next_lesson_button'),
+    FieldPanel('next_lesson_button',  widget=TextInput(attrs={'placeholder':'Следующий урок'})),
 ]
 
 
