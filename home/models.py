@@ -6,10 +6,7 @@ from io import StringIO, BytesIO
 from annoying.fields import AutoOneToOneField
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
-from django.db.models import CharField, SmallIntegerField, OneToOneField, \
-    IntegerField, BooleanField, SET_NULL, ForeignKey, URLField, \
-    Model, ImageField, CASCADE, FileField
-from django.db.models.fields import TextField, DateTimeField
+from django.db import models
 from django.dispatch import receiver
 from django.forms import CheckboxInput
 from django.http import HttpRequest
@@ -96,15 +93,15 @@ def save_visited_pages_history(request, page):
 
 
 @register_snippet
-class AdUnit(Model):
-    name = CharField(max_length=100, unique=True)
-    adunit_code = CharField(max_length=100, unique=True)
-    adunit_sizes = CharField(max_length=500, default='')
+class AdUnit(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    adunit_code = models.CharField(max_length=100, unique=True)
+    adunit_sizes = models.CharField(max_length=500, default='')
 
-    size_mapping = ForeignKey('Mapping', blank=True, null=True, default=None, on_delete=SET_NULL)
+    size_mapping = models.ForeignKey('Mapping', blank=True, null=True, default=None, on_delete=models.SET_NULL)
 
-    page_type = CharField(max_length=20, choices=PAGE_CHOICES, null=True, blank=True, default=None)
-    placement = CharField(max_length=20, choices=PLACEMENT_CHOICES, null=True, blank=True, default=None)
+    page_type = models.CharField(max_length=20, choices=PAGE_CHOICES, null=True, blank=True, default=None)
+    placement = models.CharField(max_length=20, choices=PLACEMENT_CHOICES, null=True, blank=True, default=None)
 
     panels = [
         FieldPanel('name'),
@@ -120,9 +117,9 @@ class AdUnit(Model):
 
 
 @register_snippet
-class Mapping(Model):
-    name = CharField(max_length=16, unique=True)
-    script = TextField(max_length=1000)
+class Mapping(models.Model):
+    name = models.CharField(max_length=16, unique=True)
+    script = models.fields.TextField(max_length=1000)
 
     panels = [
         FieldPanel('name'),
@@ -134,13 +131,13 @@ class Mapping(Model):
 
 
 @register_snippet
-class InlineAdvertisementSnippet(Model):
-    name = CharField(max_length=100, unique=True)
-    adunit_code = CharField(max_length=100, default='', blank=True, null=True)
-    adunit_sizes = CharField(max_length=500, default='', blank=True, null=True)
-    header = TextField(max_length=10000, blank=True)
-    body = TextField(max_length=5000, blank=True)
-    body_mobile = TextField(max_length=5000, blank=True)
+class InlineAdvertisementSnippet(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    adunit_code = models.CharField(max_length=100, default='', blank=True, null=True)
+    adunit_sizes = models.CharField(max_length=500, default='', blank=True, null=True)
+    header = models.fields.TextField(max_length=10000, blank=True)
+    body = models.fields.TextField(max_length=5000, blank=True)
+    body_mobile = models.fields.TextField(max_length=5000, blank=True)
 
     panels = [
         FieldPanel('name'),
@@ -162,11 +159,11 @@ from home.blocks.AdvertisementBlocks import AdvertisementInline
 
 
 @register_snippet
-class PageLayoutAdvertisementSnippet(Model):
-    name = CharField(max_length=100, unique=True, blank=False)
-    page_type = CharField(max_length=100, choices=PAGE_CHOICES, default='none')
-    placement = CharField(max_length=100, choices=PLACEMENT_CHOICES, default='none')
-    code = CharField(max_length=30, blank=True, default='')
+class PageLayoutAdvertisementSnippet(models.Model):
+    name = models.CharField(max_length=100, unique=True, blank=False)
+    page_type = models.CharField(max_length=100, choices=PAGE_CHOICES, default='none')
+    placement = models.CharField(max_length=100, choices=PLACEMENT_CHOICES, default='none')
+    code = models.CharField(max_length=30, blank=True, default='')
     head = StreamField([
         ('html', RawHTMLBlock()),
     ], blank=True)
@@ -174,7 +171,7 @@ class PageLayoutAdvertisementSnippet(Model):
         ('advertisement', AdvertisementInline()),
         ('html', RawHTMLBlock()),
     ], blank=True)
-    live = BooleanField(default=True)
+    live = models.BooleanField(default=True)
     panels = [
         FieldPanel('name'),
         FieldPanel('code'),
@@ -208,8 +205,8 @@ def get_nav_root(page: Page) -> Page:
 
 
 class IndexPage(Page):
-    page_type = CharField(max_length=100, choices=PAGE_CHOICES, default='index_page')
-    is_selectable = BooleanField(default=True)
+    page_type = models.CharField(max_length=100, choices=PAGE_CHOICES, default='index_page')
+    is_selectable = models.BooleanField(default=True)
     content_panels = Page.content_panels + [
         InlinePanel('related_pages', label="Related pages"),
         InlinePanel('reviews', label="Reviews"),
@@ -221,11 +218,11 @@ class IndexPage(Page):
 
 class IndexPageReferences(Orderable):
     page = ParentalKey(IndexPage, related_name='related_pages')
-    referenced_page = ForeignKey(
+    referenced_page = models.ForeignKey(
         'wagtailcore.Page',
         null=True,
         blank=True,
-        on_delete=SET_NULL,
+        on_delete=models.SET_NULL,
         related_name='+',
     )
     panels = [
@@ -235,13 +232,13 @@ class IndexPageReferences(Orderable):
 
 class IndexReviews(Orderable):
     page = ParentalKey(IndexPage, related_name='reviews')
-    url = URLField(null=True, blank=True)
-    text = CharField(null=True, blank=True, max_length=1024)
-    external = BooleanField(default=False)
-    show_in_sidebar = BooleanField(default=True)
+    url = models.URLField(null=True, blank=True)
+    text = models.CharField(null=True, blank=True, max_length=1024)
+    external = models.BooleanField(default=False)
+    show_in_sidebar = models.BooleanField(default=True)
     panels = [
         FieldPanel('url'),
-        FieldPanel('text', TextField),
+        FieldPanel('text', models.fields.TextField),
         FieldPanel('external', help_text='Will open in new tab'),
         FieldPanel('show_in_sidebar')
     ]
@@ -256,10 +253,10 @@ class IndexReviews(Orderable):
 
 
 class DefaultPage(Page):
-    show_in_sitemap = BooleanField(default=True)
+    show_in_sitemap = models.BooleanField(default=True)
     # Used to build a reference on main page
-    reference_title = TextField(null=True, blank=True)
-    subtitle = TextField(null=True, blank=True)
+    reference_title = models.fields.TextField(null=True, blank=True)
+    subtitle = models.fields.TextField(null=True, blank=True)
     body = StreamField([
         ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
@@ -296,18 +293,18 @@ DefaultPage.promote_panels = DefaultPage.promote_panels + [
 
 
 class PageWithSidebar(Page):
-    page_type = CharField(max_length=100, choices=PAGE_CHOICES, default='none')
-    show_in_sitemap = BooleanField(default=True)
-    reference_title = TextField(null=True, blank=True)
-    subtitle = TextField(null=True, blank=True)
-    menu_title = TextField(blank=True)
-    is_nav_root = BooleanField(default=False)
-    is_selectable = BooleanField(default=True)
-    reference_image = ForeignKey(
+    page_type = models.CharField(max_length=100, choices=PAGE_CHOICES, default='none')
+    show_in_sitemap = models.BooleanField(default=True)
+    reference_title = models.fields.TextField(null=True, blank=True)
+    subtitle = models.fields.TextField(null=True, blank=True)
+    menu_title = models.fields.TextField(blank=True)
+    is_nav_root = models.BooleanField(default=False)
+    is_selectable = models.BooleanField(default=True)
+    reference_image = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
         blank=True,
-        on_delete=SET_NULL,
+        on_delete=models.SET_NULL,
         related_name='+'
     )
     body = StreamField([
@@ -337,9 +334,9 @@ class PageWithSidebar(Page):
     def get_nav_root(self) -> Page:
         return get_nav_root(self)
 
-    without_right_sightbar = BooleanField(default=False)
+    without_right_sightbar = models.BooleanField(default=False)
 
-    set_was_on_page_cookie = BooleanField(default=True)
+    set_was_on_page_cookie = models.BooleanField(default=True)
 
     def serve(self, request, *args, **kwargs):
         save_visited_pages_history(request, self)
@@ -371,36 +368,40 @@ PageWithSidebar.settings_panels = PageWithSidebar.settings_panels + [
 
 
 class LessonPage(Page):
-    page_type = CharField(max_length=100, choices=PAGE_CHOICES, default='none')
-    show_in_sitemap = BooleanField(default=True)
-    menu_title = TextField(blank=True)
-    is_nav_root = BooleanField(default=False)
-    is_selectable = BooleanField(default=True)
-    reference_title = TextField(null=True, blank=True)
-    subtitle = TextField(null=True, blank=True)
-    lesson_number = SmallIntegerField(blank=True, null=True)
-    summary = CharField(max_length=100, null=True, blank=True)
-    repetition_material = CharField(max_length=100, null=True, blank=True, verbose_name='Révision')
-    audio_material = CharField(max_length=100, null=True, blank=True)
-    audio_new = URLField(blank=True, null=True, default=None)
+    page_type = models.CharField(max_length=100, choices=PAGE_CHOICES, default='none')
+    show_in_sitemap = models.BooleanField(default=True)
+    menu_title = models.fields.TextField(blank=True)
+    is_nav_root = models.BooleanField(default=False)
+    is_selectable = models.BooleanField(default=True)
+    reference_title = models.fields.TextField(null=True, blank=True)
+    subtitle = models.fields.TextField(null=True, blank=True)
+    lesson_number = models.SmallIntegerField(blank=True, null=True)
+    summary = models.CharField(max_length=100, null=True, blank=True)
+    repetition_material = models.CharField(max_length=100, null=True, blank=True, verbose_name='Révision')
+    audio_material = models.CharField(max_length=100, null=True, blank=True)
+    audio_new = models.URLField(blank=True, null=True, default=None)
 
-    need_payment = BooleanField(default=False)
+    need_payment = models.BooleanField(default=False)
 
-    has_transcript = BooleanField(default=False)
+    has_transcript = models.BooleanField(default=False)
     transcript = JSONField(default=[], blank=True)
-    transcript_html = TextField(default='', blank=True)
+    transcript_html = models.fields.TextField(default='', blank=True)
 
-    transcript_srt = FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
-    transcript_docx = FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
-    transcript_text = TextField(null=True, blank=True, default=None)
+    transcript_srt = models.FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
+    transcript_docx = models.FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
+    transcript_text = models.fields.TextField(null=True, blank=True, default=None)
 
-    reference_image = ForeignKey(
+    reference_image = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
         blank=True,
-        on_delete=SET_NULL,
+        on_delete=models.SET_NULL,
         related_name='+'
     )
+
+    body_tab_name = models.CharField(max_length=64, null=True, blank=True)
+    enable_previous_lesson_button = models.BooleanField(default=True, blank=True)
+    enable_next_lesson_button = models.BooleanField(default=True, blank=True)
 
     comments_for_lesson = StreamField([
         ('advertisement', AdvertisementInline()),
@@ -493,7 +494,7 @@ class LessonPage(Page):
     ], verbose_name='Народный конспект', null=True, blank=True)
     other_tabs = StreamField([('tab', TabBlock())], blank=True)
 
-    set_was_on_page_cookie = BooleanField(default=True)
+    set_was_on_page_cookie = models.BooleanField(default=True)
 
     def serve(self, request, *args, **kwargs):
         save_visited_pages_history(request, self)
@@ -511,10 +512,10 @@ class LessonPage(Page):
     def get_lesson_number(self):
         return self.slug.split("lecon-", 1)[1]
 
-    has_own_topic = BooleanField(default=False)
-    topic = OneToOneField(
+    has_own_topic = models.BooleanField(default=False)
+    topic = models.OneToOneField(
         Topic,
-        on_delete=SET_NULL,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
@@ -676,6 +677,7 @@ LessonPage.content_panels = Page.content_panels + [
     FieldPanel('subtitle'),
     FieldPanel('audio_material'),
     StreamFieldPanel('comments_for_lesson'),
+    FieldPanel('body_tab_name'),
     StreamFieldPanel('body'),
     StreamFieldPanel('dictionary'),
     FieldPanel('summary'),
@@ -706,23 +708,25 @@ LessonPage.settings_panels = LessonPage.settings_panels + [
     FieldPanel('audio_new'),
     FieldPanel('transcript_srt'),
     FieldPanel('transcript_docx'),
+    FieldPanel('enable_previous_lesson_button'),
+    FieldPanel('enable_next_lesson_button')
 ]
 
 
 class ArticlePage(Page):
-    page_type = CharField(max_length=100, choices=PAGE_CHOICES, default='article_page')
-    show_in_sitemap = BooleanField(default=True)
-    allow_comments = BooleanField('allow comments', default=True)
-    menu_title = TextField(blank=True)
-    is_nav_root = BooleanField(default=False)
-    is_selectable = BooleanField(default=True)
-    reference_title = TextField(null=True, blank=True)
-    subtitle = TextField(null=True, blank=True)
-    reference_image = ForeignKey(
+    page_type = models.CharField(max_length=100, choices=PAGE_CHOICES, default='article_page')
+    show_in_sitemap = models.BooleanField(default=True)
+    allow_comments = models.BooleanField('allow comments', default=True)
+    menu_title = models.fields.TextField(blank=True)
+    is_nav_root = models.BooleanField(default=False)
+    is_selectable = models.BooleanField(default=True)
+    reference_title = models.fields.TextField(null=True, blank=True)
+    subtitle = models.fields.TextField(null=True, blank=True)
+    reference_image = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
         blank=True,
-        on_delete=SET_NULL,
+        on_delete=models.SET_NULL,
         related_name='+'
     )
     body = StreamField([
@@ -748,8 +752,8 @@ class ArticlePage(Page):
         ('player_plus', PlayerPlusBlock()),
         ('le_francais_ad_unit', LeFrancaisAdUnitBlock()),
     ], blank=True)
-    without_sightbar = BooleanField(default=False)
-    set_was_on_page_cookie = BooleanField(default=True)
+    without_sightbar = models.BooleanField(default=False)
+    set_was_on_page_cookie = models.BooleanField(default=True)
 
     def serve(self, request, *args, **kwargs):
         save_visited_pages_history(request, self)
@@ -811,19 +815,19 @@ class PodcastPage(Page):
         ('player_plus', PlayerPlusBlock()),
         ('le_francais_ad_unit', LeFrancaisAdUnitBlock()),
     ], blank=True)
-    menu_title = TextField(blank=True)
-    reference_title = TextField(null=True, blank=True)
-    subtitle = TextField(null=True, blank=True)
-    show_in_sitemap = BooleanField(default=True)
-    reference_image = ForeignKey(
+    menu_title = models.fields.TextField(blank=True)
+    reference_title = models.fields.TextField(null=True, blank=True)
+    subtitle = models.fields.TextField(null=True, blank=True)
+    show_in_sitemap = models.BooleanField(default=True)
+    reference_image = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
         blank=True,
-        on_delete=SET_NULL,
+        on_delete=models.SET_NULL,
         related_name='+'
     )
-    page_type = CharField(max_length=100, choices=PAGE_CHOICES, default='podcast_page')
-    set_was_on_page_cookie = BooleanField(default=True)
+    page_type = models.CharField(max_length=100, choices=PAGE_CHOICES, default='podcast_page')
+    set_was_on_page_cookie = models.BooleanField(default=True)
 
     def serve(self, request, *args, **kwargs):
         save_visited_pages_history(request, self)
@@ -854,7 +858,7 @@ PodcastPage.settings_panels = PodcastPage.settings_panels + [
 class HTMLPage(Page):
     body = StreamField([('html', RawHTMLBlock()), ], blank=True)
 
-    set_was_on_page_cookie = BooleanField(default=True)
+    set_was_on_page_cookie = models.BooleanField(default=True)
 
     def serve(self, request, *args, **kwargs):
         save_visited_pages_history(request, self)
@@ -867,14 +871,12 @@ class HTMLPage(Page):
 HTMLPage.content_panels = HTMLPage.content_panels + [StreamFieldPanel('body')]
 HTMLPage.settings_panels = HTMLPage.settings_panels + [FieldPanel('set_was_on_page_cookie')]
 
-from django.db.models import PROTECT
 
-
-class UserLesson(Model):
-    user = ForeignKey('custom_user.User', related_name='payment', on_delete=PROTECT)
-    lesson = ForeignKey('home.LessonPage', related_name='payment', on_delete=PROTECT)
-    date = DateTimeField(auto_now_add=True)
-    remains = IntegerField(blank=True, null=True, default=None)
+class UserLesson(models.Model):
+    user = models.ForeignKey('custom_user.User', related_name='payment', on_delete=models.PROTECT)
+    lesson = models.ForeignKey('home.LessonPage', related_name='payment', on_delete=models.PROTECT)
+    date = models.fields.DateTimeField(auto_now_add=True)
+    remains = models.IntegerField(blank=True, null=True, default=None)
 
     def __str__(self):
         return '{0} {1} {2}'.format(self.user, self.lesson.lesson_number, self.remains)
@@ -884,17 +886,17 @@ class UserLesson(Model):
         self.save()
 
 
-class Payment(Model):
-    cups_amount = IntegerField()
-    user = ForeignKey('custom_user.User', related_name='payments', null=True, on_delete=SET_NULL)
-    datetime_create = DateTimeField(auto_now_add=True)
-    datetime_update = DateTimeField(auto_now=True)
-    status = IntegerField(default=0)
+class Payment(models.Model):
+    cups_amount = models.IntegerField()
+    user = models.ForeignKey('custom_user.User', related_name='payments', null=True, on_delete=models.SET_NULL)
+    datetime_create = models.fields.DateTimeField(auto_now_add=True)
+    datetime_update = models.fields.DateTimeField(auto_now=True)
+    status = models.IntegerField(default=0)
 
-    e_transaction_total = IntegerField(null=True, default=None)
+    e_transaction_total = models.IntegerField(null=True, default=None)
 
-    e_product_sku = CharField(max_length=20, null=True, default=None)
-    e_product_price = IntegerField(null=True, default=None)
+    e_product_sku = models.CharField(max_length=20, null=True, default=None)
+    e_product_price = models.IntegerField(null=True, default=None)
 
     def e_product_name(self):
         return "Coffee Cup"
@@ -969,14 +971,14 @@ class Payment(Model):
         return {'params': params}
 
 
-class BackUrls(Model):
-    success = URLField()
-    fail = URLField()
-    payment = ForeignKey('tinkoff_merchant.Payment', on_delete=CASCADE)
+class BackUrls(models.Model):
+    success = models.URLField()
+    fail = models.URLField()
+    payment = models.ForeignKey('tinkoff_merchant.Payment', on_delete=models.CASCADE)
 
 
-class WagtailPageNavTree(Model):
-    page = AutoOneToOneField(Page, on_delete=CASCADE, related_name='nav_tree')
+class WagtailPageNavTree(models.Model):
+    page = AutoOneToOneField(Page, on_delete=models.CASCADE, related_name='nav_tree')
     tree = JSONField(default={}, blank=True, null=True)
 
 
