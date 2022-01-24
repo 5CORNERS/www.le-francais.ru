@@ -39,17 +39,17 @@ class WordsManagementFilterForm(forms.Form):
 		super().__init__(*args, **kwargs)
 		self.user=user
 		if not self.user.must_pay:
-			self.packets = Packet.objects.all().order_by(
-				'lesson__lesson_number', 'name')
+			self.packets = Packet.objects.all()
 		elif self.user.has_lessons:
 			self.packets = Packet.objects.filter(Q(demo=True) | Q(
-				lesson__payment__user=user)).distinct().order_by(
-				'lesson__lesson_number', 'name')
+				lesson__payment__user=user)).distinct()
 		else:
 			self.packets = Packet.objects.filter(Q(demo=True) | Q(
 				word__userdata__user=user) | Q(
-					lesson__payment__user=user)).distinct().order_by(
-				'lesson__lesson_number', 'name')
+					lesson__payment__user=user)).distinct()
+		self.packets = self.packets.union(Packet.objects.filter(lesson__lesson_numbert__gte=1000)).order_by(
+			'lesson__lesson_number', 'name'
+		)
 		choices = [(o.id, str(o.name)) for o in self.packets]
 		# TODO: has_repetition_words method
 		if get_repetition_words_query(self.user, filter_excluded=False).count() > 0:
