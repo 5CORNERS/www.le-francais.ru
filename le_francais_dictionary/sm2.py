@@ -57,15 +57,15 @@ class WordSM2:
 				else:
 					# дата предыдущего повторения
 					last_repetition_date = answers_datetimes[-1]
-					# дата следующего (текущего) повторения
+					# дата следующего повторения по расписанию
 					current_repetition_date = repetitions_datetimes[-1]
-					# дельта между текущим ответом и датой предыдущего повторения
+					# дельта между датой предыдущего повторения и датой настоящего повторения
 					current_answer_delta = get_repetitions_delta(
 						last_repetition_date,
 						answer_datetime,
 						answer_timezone
 					)
-					# дельта между предыдущим и следующим (текущим) повторением
+					# дельта между датой предыдущего повторения и следующего повторения по расписанию
 					current_repetition_delta = get_repetitions_delta(
 						last_repetition_date,
 						current_repetition_date,
@@ -86,9 +86,11 @@ class WordSM2:
 						if n == 1 or n == 2:
 							pass
 						else:
-							# новая персчитанная дата повторения
+							# предыдущая дельта между повторениями по расписанию
+							last_repetition_delta = repetitions_datetimes[-2] - repetitions_datetimes[-3]
+							# новая пересчитанная дата повторения
 							new_current_repetition_date = repetition_datetime_to_date(last_repetition_date + timedelta(
-								days=current_repetition_delta.days * new_e_factor), answer_timezone)
+								days=last_repetition_delta.days * new_e_factor), answer_timezone)
 							if new_current_repetition_date < answer_datetime:
 								# если новая дата повторения оказывается раньше следующего
 								# засчитываем текущий ответ как после следующего повторения
