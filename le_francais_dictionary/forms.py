@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django import forms
-from django.db.models import Q
+from django.db.models import Q, F
 from typing import List
 
 from le_francais_dictionary.models import Packet, UserWordRepetition, \
@@ -39,15 +39,16 @@ class WordsManagementFilterForm(forms.Form):
 		super().__init__(*args, **kwargs)
 		self.user=user
 		if not self.user.must_pay:
-			self.packets = Packet.objects.all()
+			self.packets = Packet.objects.annotate(lesson__lesson_number=F('lesson__lesson_number')).all()
 		elif self.user.has_lessons:
-			self.packets = Packet.objects.filter(Q(demo=True) | Q(
+			self.packets = Packet.objects.annotate(lesson__lesson_number=F('lesson__lesson_number')).filter(Q(demo=True) | Q(
 				lesson__payment__user=user)).distinct()
 		else:
-			self.packets = Packet.objects.filter(Q(demo=True) | Q(
+			self.packets = Packet.objects.annotate(lesson__lesson_number=F('lesson__lesson_number')).filter(Q(demo=True) | Q(
 				word__userdata__user=user) | Q(
 					lesson__payment__user=user)).distinct()
-		self.packets = self.packets.union(Packet.objects.filter(lesson__lesson_number__gte=1000)).order_by(
+		podcasts_packets = Packet.objects.annotate(lesson__lesson_number=F('lesson__lesson_number')).filter(name__contains='S1')
+		self.packets = self.packets.union(podcasts_packets).order_by(
 			'lesson__lesson_number', 'name'
 		)
 		choices = [(o.id, str(o.name)) for o in self.packets]
