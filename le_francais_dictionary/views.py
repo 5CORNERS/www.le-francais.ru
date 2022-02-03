@@ -223,7 +223,7 @@ def update_words(request):
                 custom_grade = word_data.get('customGrade', None)
                 if not isinstance(custom_grade, int) or not 0 <= custom_grade <= 5:
                     custom_grade = None
-                if word.packet.is_activated(request.user) or word.packet.demo:
+                if word.packet.demo or word.packet.is_activated(request.user):
                     user_words_data.append(UserWordData(
                         word=word,
                         user_id=request.user.id,
