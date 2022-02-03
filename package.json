@@ -6,6 +6,6 @@
     "static_src/node_modules"
   ],
   "engines": {
-    "node": "14.16.x"
+    "node": "14.x"
   }
 }
