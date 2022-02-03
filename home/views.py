@@ -826,7 +826,8 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
     if not page.payed(user):
         for blocked in LESSON_PAGE_BLOCKED_CONTENT:
             for tab in result:
-                if tab['href'] == blocked[0] and page.lesson_number > blocked[1]:
+                if tab['href'] == blocked[0] and blocked[
+                    1] < page.lesson_number < blocked[2]:
                     tab['value'] = render_to_string(
                         'home/content_is_blocked.html', request=request)
     return result
@@ -845,11 +846,11 @@ def json_other_tabs(other_tabs):
 
 
 LESSON_PAGE_BLOCKED_CONTENT = [
-    ('additional_exercise', 0),
-    ('resume_populaire', 7),
-    ('repetition_material', 8),
-    ('exercise', 9),
-    ('flash-cards', 10)
+    ('additional_exercise', 0, 1000),
+    ('resume_populaire', 7, 1000),
+    ('repetition_material', 8, 1000),
+    ('exercise', 9, 1000),
+    ('flash-cards', 10, 1000)
 ]
 LESSON_PAGE_FIELDS = [
     # type, page attribute, href, title, transition
@@ -871,9 +872,7 @@ LESSON_PAGE_FIELDS = [
 
 def lesson_page_to_json(page: LessonPage, render_pdf, user, request, tab_id=None):
     if not tab_id:
-        json_tabs = json_default_tabs(page, user, request,
-                                      render_pdf) + json_other_tabs(
-            page.other_tabs)
+        json_tabs = json_default_tabs(page, user, request, render_pdf) + json_other_tabs(page.other_tabs)
     else:
         json_tabs = json_default_tabs(page, user, request,
                                       render_pdf, tab_id)
