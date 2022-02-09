@@ -5,6 +5,8 @@ from home.models import PageWithSidebar, LessonPage, ArticlePage, PodcastPage
 from home.utils import get_nav_tree
 
 def is_nav_root(page: Page) -> bool:
+	if isinstance(page, Page):
+		page = page.specific
 	if isinstance(page, PageWithSidebar) and page.is_nav_root:
 		return True
 	elif isinstance(page, LessonPage) and page.is_nav_root:
