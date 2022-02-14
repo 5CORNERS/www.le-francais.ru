@@ -51,6 +51,8 @@ class Payment(models.Model):
 	                           related_name='children',
 	                           related_query_name='child')
 
+	_user = models.ForeignKey('custom_user.User', on_delete=models.SET_NULL, default=None, blank=True, null=True, related_name='tinkoff_payments', related_query_name='tinkoff_payment')
+
 	class Meta:
 		verbose_name = 'Заказ'
 		verbose_name_plural = 'Заказы'
@@ -69,6 +71,7 @@ class Payment(models.Model):
 	def get_user(self):
 		if self.customer_key:
 			return get_user_model().objects.get(pk=int(self.customer_key))
+		return None
 
 	@property
 	def user(self):
