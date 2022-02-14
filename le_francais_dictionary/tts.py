@@ -1,7 +1,9 @@
 import json
 import os
 from pathlib import Path
+from typing import List, Tuple
 
+import requests
 from mutagen.mp3 import EasyMP3, HeaderNotFoundError
 from io import BytesIO
 
@@ -9,6 +11,8 @@ from unidecode import unidecode
 
 from le_francais_dictionary.consts import GENRE_MASCULINE, \
 	GENRE_FEMININE
+from le_francais_dictionary.utils import escape_non_url_characters, \
+	remove_parenthesis, clean_filename, copy_file
 
 from polly.const import LANGUAGE_CODE_FR as LANGUAGE_FR, \
 	LANGUAGE_CODE_RU as LANGUAGE_RU, \
@@ -63,9 +67,9 @@ def get_path(language_code, verbs=False):
 def get_url_path(language_code, verbs=False):
 	return URL_PATHS['verbs' if verbs else 'words'][language_code]
 
-def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, file_id=None, file_title=None, ftp_path=None, speacking_rate=None, ssml=False):
+def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, file_id=None, file_title=None, ftp_path=None, speaking_rate=None, ssml=False, verbs=False):
 	if check_if_file_exists(filename+'.mp3', ftp_path or get_path(language)):
-		return get_url_path(language) + filename + '.mp3'
+		return get_url_path(language, verbs=verbs) + filename + '.mp3'
 	from google.cloud import texttospeech
 	client = texttospeech.TextToSpeechClient()
 	voices = client.list_voices(language_code=language).voices
@@ -85,7 +89,7 @@ def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
 	)
 	audio_config = texttospeech.AudioConfig(
 		audio_encoding=texttospeech.AudioEncoding.MP3,
-		speaking_rate=speacking_rate or 0.9,
+		speaking_rate=speaking_rate or 0.9,
 	)
 	if ssml:
 		synthesis_input = texttospeech.SynthesisInput(
@@ -102,15 +106,17 @@ def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
 	except HeaderNotFoundError:
 		print(f'ERROR!! Can\'t voice: "{s}"' )
 		return None
-	return get_url_path(language) + filename
+	return get_url_path(language, verbs=verbs) + filename
 
 
 def shtooka_by_title_in_path(title, ftp_path, filename=None, language_code=LANGUAGE_FR, genre=GENRE_FEMININE, verbs=False):
-	title = unidecode(title).lower().strip()
+	title = title.lower().strip()
 	path = os.environ.get('SHTOOKA_PATH', None)
 	second_path = os.environ.get('SHTOOKA_PATH_SECOND', None)
 	if path is None:
 		return None
+	if ftp_path is None:
+		ftp_path = get_path(language_code, verbs)
 	titles_map = get_titles_map(path)
 	titles_map_second = get_titles_map(second_path)
 
@@ -121,8 +127,8 @@ def shtooka_by_title_in_path(title, ftp_path, filename=None, language_code=LANGU
 		else:
 			filename = filename+f'.{mp3_filename.split(".")[-1]}'
 		if genre == GENRE_FEMININE and not 'fem' in mp3_filename:
-			if check_if_file_exists(filename, ftp_path or get_path()):
-				delete_ftp_file(filename, ftp_path or get_path())
+			if check_if_file_exists(filename, ftp_path or get_path(language_code=language_code, verbs=verbs)):
+				delete_ftp_file(filename, ftp_path or get_path(language_code=language_code, verbs=verbs))
 			return None
 
 		put_to_ftp(filename,
@@ -137,8 +143,8 @@ def shtooka_by_title_in_path(title, ftp_path, filename=None, language_code=LANGU
 		else:
 			filename = filename+f'.{mp3_filename.split(".")[-1]}'
 		if genre == GENRE_FEMININE and not 'fem' in mp3_filename:
-			if check_if_file_exists(filename, ftp_path or get_path()):
-				delete_ftp_file(filename, ftp_path or get_path())
+			if check_if_file_exists(filename, ftp_path or get_path(language_code=language_code, verbs=verbs)):
+				delete_ftp_file(filename, ftp_path or get_path(language_code=language_code, verbs=verbs))
 			return None
 
 		put_to_ftp(filename, f'{second_path}/{mp3_filename}',
@@ -159,7 +165,7 @@ def get_titles_map(path):
 		for file in d.glob('*.mp3'):
 			mp3 = EasyMP3(file)
 			if 'title' in mp3.tags:
-				t = unidecode(mp3['title'][0]).strip('\r')
+				t = mp3['title'][0].lower().strip('\r')
 			else:
 				print(f'{file.name}')
 				continue
@@ -173,7 +179,10 @@ def get_titles_map(path):
 	return titles_map
 
 
-def amazon_polly_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, file_id=None, file_title=None, return_polly=False, ftp_path=None):
+def amazon_polly_tts(s, filename, language=LANGUAGE_FR,
+                     genre=GENRE_FEMININE, file_id=None,
+                     file_title=None, return_polly=False,
+                     ftp_path=None, verbs=False):
 	if genre == GENRE_MASCULINE:
 		voice_id = POLLY_FR_VOICE_MALE
 	elif genre == GENRE_FEMININE:
@@ -189,12 +198,12 @@ def amazon_polly_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
 		output_format=OUTPUT_FORMAT_MP3,
 	)
 	stream = polly_task.get_audio_stream()
-	save_to_ftp_path = ftp_path or get_path(language)
+	save_to_ftp_path = ftp_path or get_path(language, verbs)
 	filename = filename + '.mp3'
 	save_audio_stream_to_sftp(stream.read(), save_to_ftp_path, filename, file_id, file_title, voice_id, file_album='Amazon Polly')
 	if return_polly:
-		return get_url_path(language) + filename, polly_task
-	return get_url_path(language) + filename
+		return get_url_path(language, verbs) + filename, polly_task
+	return get_url_path(language, verbs) + filename
 
 
 def save_audio_stream_to_sftp(audio, path, filename, file_id, file_title,
@@ -322,3 +331,11208 @@ def pytts_voice_string(s, filename, tag_id, tag_title, language=LANGUAGE_FR, gen
 				  f'{e}')
 			return None
 	return get_url_path(language, verbs) + filename
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)
+
+
+def url_ok(url):
+    try:
+        r = requests.head(url)
+        return r.status_code == 200
+    except requests.exceptions.ConnectionError:
+        return False
+    except requests.exceptions.HTTPError:
+        return False
+
+
+def get_audio_links(words_list:List[Tuple[int, str, str]]):
+	result = []
+	for i, word, type_str in words_list:
+		is_verb = False
+		if type_str == 'v':
+			is_verb = True
+		url = get_url_path(language_code=LANGUAGE_FR, verbs=is_verb) + escape_non_url_characters(remove_parenthesis(word)) + '.mp3'
+		if url_ok(url) and False:
+			result.append((i, word, url))
+			continue
+		else:
+			ftp_path = get_path(LANGUAGE_FR, is_verb)
+			shtooka_url = shtooka_by_title_in_path(
+				title=word,
+				ftp_path=ftp_path,
+				filename=unidecode(remove_parenthesis(word)),
+				language_code=LANGUAGE_FR,
+				genre=None,
+				verbs=is_verb
+			)
+			if not shtooka_url:
+				url = amazon_polly_tts(
+					s=word,
+					filename=escape_non_url_characters(remove_parenthesis(word)),
+					language=LANGUAGE_FR,
+					genre=GENRE_FEMININE,
+					file_id=88888888,
+					file_title=word,
+					ftp_path=ftp_path,
+					verbs=is_verb
+				)
+			else:
+				url = shtooka_url
+			result.append((i, word, url))
+	return result
+
+
+def fr_local_polly():
+	CD_ID = 0
+	STRING_FOR_SYNTH = 3
+	FILENAME = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	import csv
+	from .models import Word
+	words = Word.objects.all()
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		print(i, end='\t')
+		if i == 1:
+			continue
+		cd_id = int(row[CD_ID])
+		word = next((w for w in words if w.cd_id == cd_id), None)
+		if word:
+			word.word_ssml = '<sapi>{txt}</sapi>'.format(txt=row[STRING_FOR_SYNTH])
+			filename = unidecode(row[FILENAME])+'.mp3'
+			word.create_polly_task(local=filename)
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/fr/' + filename
+			to_update.append(word)
+	from django_bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['word_ssml', '_polly_url'])
+
+
+def fr_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_FR_F_VOICE
+	else:
+		voice_name = PYTTX_FR_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def fr_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import Word
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	STRING_ROW = 3
+	FILENAME_ROW = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-FR.csv'
+	path = 'le_francais_dictionary/local/fr_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/fr_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	words = list(Word.objects.all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		word = next(
+			(word for word in words if word.cd_id == cd_id), None)
+		if word:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path + filename
+			word._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/FR/' + filename + '.mp3'
+			to_update.append(word)
+			if os.path.exists(filepath + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if word.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = fr_engine_change_voice(engine, word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(string, wav_path + filename + '.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(path + filename + '.mp3', format='mp3')
+			mp3 = eyed3.load(path + filename + '.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(word.word)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename + '.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def ru_engine_change_voice(engine, genre):
+	if genre == GENRE_FEMININE:
+		voice_name = PYTTX_RU_F_VOICE
+	else:
+		voice_name = PYTTX_RU_M_VOICE
+	for voice in engine.getProperty('voices'):
+		if voice.name == voice_name:
+			engine.setProperty('voice', voice.id)
+			return engine, voice_name
+
+
+def ru_local_pyttsx3():
+	import csv
+	import pyttsx3
+	from .models import WordTranslation
+	import os
+	import eyed3
+	CD_ID_ROW = 0
+	FILENAME_ROW = 5
+	STRING_ROW = 3
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-RU.csv'
+	path = 'le_francais_dictionary/local/ru_pyttsx3/'
+	wav_path = 'le_francais_dictionary/local/ru_pyttsx3_wav/'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	engine = pyttsx3.init()
+	rate = engine.getProperty('rate')
+	engine.setProperty('rate', 150)
+	engine.setProperty('volume', 0.8)
+	translations = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[STRING_ROW]:
+			print('!!!EMPTY_STRING!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		translation = next((tr for tr in translations if tr.word.cd_id == cd_id), None)
+		if translation:
+			filename = clean_filename(row[FILENAME_ROW])
+			filepath = path+filename
+			translation._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/RU/' + filename + '.mp3'
+			to_update.append(translation)
+			if os.path.exists(filepath+'.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			if translation.genre != GENRE_MASCULINE:
+				print('!!!WRONG_GENRE!!!')
+				continue
+			engine, voice_name = ru_engine_change_voice(engine, translation.word.genre)
+			string = '<sapi>' + row[STRING_ROW] + '</sapi>'
+			engine.save_to_file(row[STRING_ROW], wav_path+filename+'.wav')
+			engine.runAndWait()
+			from pydub import AudioSegment
+			wav_audio = AudioSegment.from_file(wav_path+filename+'.wav', format='wav')
+			wav_audio.export(path+filename+'.mp3', format='mp3')
+			mp3 = eyed3.load(path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = str(translation.translation)
+			mp3.tag.artist = voice_name
+			mp3.tag.album = 'pyttsx3'
+			mp3.tag.save(encoding='utf-8')
+			print(filename+'.mp3')
+	from bulk_update import helper
+	helper.bulk_update(to_update, update_fields=['_polly_url'])
+
+
+def googletts_get_ru_voice(voices, genre):
+	VOICE_MALE_NAME = 'ru-RU-Wavenet-B'
+	VOICE_FEMALE_NAME = 'ru-RU-Wavenet-A'
+	VOICE_NEUTRAL_NAME = 'ru-RU-Wavenet-D'
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def googletts_get_fr_voice(voices, genre):
+	VOICE_MALE_NAME = 'fr-FR-Wavenet-D'
+	VOICE_FEMALE_NAME = 'fr-FR-Wavenet-E'
+	VOICE_NEUTRAL_NAME = VOICE_MALE_NAME
+	if genre == GENRE_MASCULINE:
+		voice_name = VOICE_MALE_NAME
+	elif genre == GENRE_FEMININE:
+		voice_name = VOICE_FEMALE_NAME
+	else:
+		voice_name = VOICE_NEUTRAL_NAME
+	for voice in voices:
+		if voice.name == voice_name:
+			return voice
+
+
+def local_fr_googletts(language='FR'):
+	from google.cloud import texttospeech
+	from le_francais_dictionary.models import Word, WordTranslation
+	import csv
+	import os
+	import eyed3
+	from pydub import AudioSegment
+	voices_language_code = 'fr-FR' if language=='FR' else 'ru-RU'
+	CD_ID_ROW_INDEX = 0
+	STRING_ROW_INDEX = 3
+	FILENAME_ROW_INDEX = 5
+	csv_path = 'le_francais_dictionary/local/Dictionary updated - SYNTH-{0}.csv'.format(language)
+	mp3_path = 'le_francais_dictionary/local/to_update_ftp_ru_m_gootle/'.format(language)
+	wav_path = 'le_francais_dictionary/local/{0}_googletts_wav/'.format(language)
+	client = texttospeech.TextToSpeechClient()
+	voices = client.list_voices(language_code=voices_language_code).voices
+	if language == 'FR':
+		obj_list = list(Word.objects.all())
+	else:
+		obj_list = list(WordTranslation.objects.select_related('word').all())
+	to_update = []
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		cd_id = int(row[CD_ID_ROW_INDEX])
+		filename = clean_filename(row[FILENAME_ROW_INDEX])
+		obj = next((obj for obj in obj_list if obj.cd_id==cd_id), None)
+		if obj:
+			obj._polly_url = 'https://files.le-francais.ru/dictionnaires/sound/{0}/'.format(language) + filename + '.mp3'
+			to_update.append(obj)
+			if os.path.exists(mp3_path + filename + '.mp3'):
+				print('!!!ALREADY_EXIST!!!')
+				continue
+			string_to_synth = row[STRING_ROW_INDEX]
+			if not string_to_synth:
+				print('!!!EMPTY_STRING!!!')
+				continue
+			if '>' in string_to_synth:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					ssml='<speak>{0}</speak>'.format(string_to_synth)
+				)
+			else:
+				synthesis_input = texttospeech.types.SynthesisInput(
+					text=string_to_synth
+				)
+			if language == 'FR':
+				continue
+				if obj.genre == GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_fr_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='fr-FR',
+					name = voice.name,
+				)
+			elif language == 'RU':
+				if obj.genre != GENRE_MASCULINE:
+					print("!!!WRONG_GENRE!!!")
+					continue
+				voice = googletts_get_ru_voice(voices, obj.genre)
+				voice = texttospeech.types.VoiceSelectionParams(
+					language_code='ru-RU',
+					name=voice.name,
+				)
+			audio_config = texttospeech.types.AudioConfig(
+				audio_encoding=texttospeech.enums.AudioEncoding.LINEAR16,
+				speaking_rate=0.85 if language == 'FR' else 1,
+			)
+			response = client.synthesize_speech(synthesis_input, voice, audio_config)
+			with open(wav_path+filename+'.wav', 'wb') as out:
+				out.write(response.audio_content)
+				print(filename + '.mp3')
+			wav_audio = AudioSegment.from_file(wav_path + filename + '.wav',
+			                                   format='wav')
+			wav_audio.export(mp3_path + filename + '.mp3', format='mp3', bitrate='128',)
+			mp3 = eyed3.load(mp3_path+filename+'.mp3')
+			mp3.tag.track_num = (str(cd_id), None)
+			mp3.tag.title = obj.__str__()
+			mp3.tag.artist = voice.name
+			mp3.tag.album = 'Google Cloud TTS'
+			mp3.tag.save(encoding='utf-8')
+
+
+def local_copy_prerecorded():
+	CD_ID_ROW = 0
+	RU_ROW = 3
+	RU_UNIFIED_ROW = 3
+	FR_ROW = 2
+	FR_UNIFIED_ROW = 3
+	import os
+	import csv
+	from le_francais_dictionary.models import Word, UnifiedWord, WordTranslation
+	words_list: List[Word] = list(Word.objects.select_related('group').all())
+	translations_list: List[WordTranslation] = list(WordTranslation.objects.select_related('word').all())
+	unified_words_list: List[UnifiedWord] = list(UnifiedWord.objects.select_related('group').all())
+	csv_path = 'le_francais_dictionary/local/temp.csv'
+	csv_file = open(csv_path, 'r', encoding='utf-8')
+	ru_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/RU/'
+	fr_url_dir = 'https://files.le-francais.ru/dictionnaires/sound/FR/'
+	ru_dir = 'D:/Sound/RussianBX3/'
+	fr_dir = 'D:/Sound/SoundF3/'
+	ru_result_dir = 'le_francais_dictionary/local/ru_prerecorded/'
+	fr_result_dir = 'le_francais_dictionary/local/fr_prerecorded/'
+	to_update_words = []
+	to_update_translations = []
+	to_update_unified_words = []
+	not_existing = set()
+	for i, row in enumerate(csv.reader(csv_file), 1):
+		if i == 1:
+			continue
+		print(i, end='\t')
+		if not row[CD_ID_ROW]:
+			print('!!EMPTY CD_ID!!!')
+			continue
+		cd_id = int(row[CD_ID_ROW])
+		(
+			filename_ru,
+			filename_ru_unified,
+			filename_fr,
+			filename_fr_unified
+		) = (
+			row[RU_ROW],
+			row[RU_UNIFIED_ROW],
+			row[FR_ROW],
+			row[FR_UNIFIED_ROW]
+		)
+		word: Word = next(
+			(w for w in words_list if w.cd_id == cd_id), None)
+		if word and filename_fr:
+			word._polly_url = fr_url_dir + filename_fr.lower()
+			group_id = word.group_id
+			defenition_num = word.definition_num
+			to_update_words.append(word)
+			unified_word = next((uw for uw in unified_words_list if
+			                     (uw.group_id == group_id and
+			                      uw.definition_num == defenition_num)),
+			                    None)
+			if unified_word:
+				unified_word.word_polly_url = fr_url_dir + filename_fr_unified
+				unified_word.translation_polly_url = ru_url_dir + filename_ru_unified
+				to_update_unified_words.append(unified_word)
+		translation: WordTranslation = next((t for t in translations_list if t.word.cd_id == cd_id), None)
+		if translation and filename_ru:
+			translation._polly_url = ru_url_dir + filename_ru.lower()
+			to_update_translations.append(translation)
+		if (os.path.exists(ru_result_dir + filename_ru) and
+				os.path.exists(fr_result_dir + filename_fr) and
+				os.path.exists(ru_result_dir + filename_ru_unified) and
+				os.path.exists(fr_result_dir + filename_fr_unified)):
+			print('!!!FILES_ALREADY_EXISTS!!!')
+			continue
+		if filename_ru:
+			if not copy_file(ru_dir+filename_ru, ru_result_dir+filename_ru):
+				not_existing.add(filename_ru)
+		if filename_ru_unified:
+			if not copy_file(ru_dir + filename_ru_unified,
+			                 ru_result_dir + filename_ru_unified):
+				not_existing.add(filename_ru)
+		if filename_fr:
+			if not copy_file(fr_dir + filename_fr, fr_result_dir + filename_fr):
+				not_existing.add(filename_fr)
+		if filename_fr_unified:
+			if not copy_file(fr_dir + filename_fr_unified,
+			                 fr_result_dir + filename_fr_unified):
+				not_existing.add(filename_fr_unified)
+		print('Done!')
+	from django_bulk_update import helper
+	helper.bulk_update(to_update_words, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_translations, update_fields=['_polly_url'])
+	helper.bulk_update(to_update_unified_words, update_fields=['translation_polly_url', 'word_polly_url'])
+	print(not_existing)

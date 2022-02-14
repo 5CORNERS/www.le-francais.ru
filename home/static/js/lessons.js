@@ -75,6 +75,9 @@ $(document).ready(function () {
     $('a#tab-verbs').one('show.bs.tab', function () {
         reloadPage(LESSON_NUMBER, 'verbs')
     })
+    $('a#tab-my-words').one('show.bs.tab', function () {
+        reloadPage(LESSON_NUMBER, 'my-words')
+    })
 
     let ua = window.navigator.userAgent;
     let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);

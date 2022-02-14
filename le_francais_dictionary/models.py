@@ -20,7 +20,7 @@ from le_francais_dictionary.consts import GENRE_CHOICES, \
 	TYPE_CHOICES
 from le_francais_dictionary.utils import format_text2speech, \
 	create_or_update_repetition, \
-	remove_parenthesis, clean_filename
+	remove_parenthesis, clean_filename, escape_non_url_characters
 from .sm2 import WordSM2
 from polly import const as polly_const
 from polly.models import PollyTask
@@ -34,10 +34,10 @@ class Packet(models.Model):
 	name = models.CharField(max_length=128)
 	demo = models.BooleanField(default=False)
 	lesson = models.ForeignKey('home.LessonPage',
-	                           related_name='dictionary_packets', null=True)
+	                           related_name='dictionary_packets', null=True, on_delete=models.SET_NULL)
 
 	def __str__(self):
-		return '{self.name}'.format(self=self)
+		return f'{self.name}'
 
 	def to_dict(self, user=None) -> dict:
 		"""
@@ -76,7 +76,7 @@ class Packet(models.Model):
 		return self.word_set.all().count()
 
 	def is_activated(self, user) -> bool:
-		if self.lesson.payed(user):
+		if self.lesson and self.lesson.payed(user):
 			return True
 		else:
 			return False
@@ -107,8 +107,8 @@ class Packet(models.Model):
 
 
 class UserPacket(models.Model):
-	packet = models.ForeignKey(Packet)
-	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	packet = models.ForeignKey(Packet, on_delete=models.CASCADE)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 	@property
 	def words_learned(self) -> int:  # TODO
@@ -159,17 +159,13 @@ def del_ends(s):
 	return s
 
 
-def escape_non_url_characters(str):
-	return str.replace(' ', '_').replace('\\', '_').replace('/', '_')
-
-
 class Word(models.Model):
 	cd_id = models.IntegerField(
 		verbose_name='Color Dictionary ID',
 		primary_key=True)
 	word = models.CharField(max_length=120, verbose_name='Word')
 	word_ssml = models.CharField(max_length=1000, null=True, default=None, blank=True)
-	polly = models.ForeignKey(PollyTask, null=True, blank=True)
+	polly = models.ForeignKey(PollyTask, null=True, blank=True, on_delete=models.PROTECT)
 	_polly_url = models.URLField(max_length=200, null=True, default=None, blank=True)
 	# TODO: must be moved to WordTranslation Model
 	genre = models.CharField(choices=GENRE_CHOICES, max_length=10, null=True,
@@ -180,7 +176,7 @@ class Word(models.Model):
 	plural = models.BooleanField(default=False, verbose_name='Plural', blank=True)
 	grammatical_number = models.CharField(choices=GRAMMATICAL_NUMBER_CHOICES,
 	                                      max_length=4, null=True, blank=True)
-	packet = models.ForeignKey(Packet, null=True, default=None, blank=True)
+	packet = models.ForeignKey(Packet, null=True, default=None, blank=True, on_delete=models.PROTECT)
 
 	group = models.ForeignKey('WordGroup', on_delete=models.SET_NULL, null=True, blank=True)
 	definition_num = models.IntegerField(null=True, blank=True, default=None)
@@ -508,7 +504,14 @@ class Word(models.Model):
 					if save:
 						self.save()
 					return self
-		shtooka_url = shtooka_by_title_in_path(title=remove_parenthesis(self.word), ftp_path=FTP_FR_WORDS_PATH, language_code=LANGUAGE_CODE_FR, genre=self.genre, filename=filename)
+		shtooka_url = None
+		if not ('<speak>' in self.word_ssml
+		        and 'gender=' in self.word_ssml):
+			shtooka_url = shtooka_by_title_in_path(
+				title=remove_parenthesis(self.word),
+				ftp_path=FTP_FR_WORDS_PATH,
+				language_code=LANGUAGE_CODE_FR,
+				genre=self.genre, filename=filename)
 		if shtooka_url:
 			self._polly_url = shtooka_url
 		else:
@@ -535,7 +538,7 @@ class WordTranslation(models.Model):
 	word = models.ForeignKey(Word, on_delete=models.CASCADE)
 	translation = models.CharField(max_length=120, null=False, blank=False)
 	translations_ssml = models.CharField(max_length=1000, null=True, default=None, blank=True)
-	polly = models.ForeignKey(PollyTask, null=True, blank=True)
+	polly = models.ForeignKey(PollyTask, null=True, blank=True, on_delete=models.PROTECT)
 	_polly_url = models.URLField(null=True, default=None, blank=True)
 	packet = models.ForeignKey('Packet', on_delete=models.CASCADE, null=True)
 
@@ -636,7 +639,14 @@ class WordTranslation(models.Model):
 						self.save()
 					if voiced:
 						return self
-		shtooka_url = shtooka_by_title_in_path(title=remove_parenthesis(self.translation), ftp_path=FTP_FR_WORDS_PATH, language_code=LANGUAGE_CODE_FR, filename=filename)
+		shtooka_url = None
+		if not ('<speak>' in self.translations_ssml
+		        and 'gender=' in self.translations_ssml):
+			shtooka_url = shtooka_by_title_in_path(
+				title=remove_parenthesis(self.translation),
+				ftp_path=FTP_FR_WORDS_PATH,
+				language_code=LANGUAGE_CODE_FR,
+				filename=filename)
 		if shtooka_url:
 			self._polly_url = shtooka_url
 		else:
@@ -762,7 +772,7 @@ class UnifiedWord(models.Model):
 						file_title=remove_parenthesis(self.word),
 						genre=self.genre,
 						ftp_path=FTP_FR_WORDS_PATH,
-						speacking_rate=0.8
+						speaking_rate=0.8
 					)
 
 		translation_voiced_from_original = False
@@ -784,7 +794,7 @@ class UnifiedWord(models.Model):
 				genre=self.genre,
 				language=LANGUAGE_CODE_RU,
 				ftp_path=FTP_RU_WORDS_PATH,
-				speacking_rate=1,
+				speaking_rate=1,
 				ssml=False
 			)
 		if save:
@@ -799,8 +809,8 @@ class UserWordIgnore(models.Model):
 
 
 class UserWordData(models.Model):
-	word = models.ForeignKey(Word, related_name='userdata')
-	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='flash_cards_data')
+	word = models.ForeignKey(Word, related_name='userdata', on_delete=models.PROTECT)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='flash_cards_data', on_delete=models.PROTECT)
 	datetime = models.DateTimeField(auto_now_add=True)
 	grade = models.IntegerField()
 	mistakes = models.IntegerField()
@@ -870,7 +880,7 @@ class UserWordData(models.Model):
 
 
 class UserWordRepetition(models.Model):
-	word = models.ForeignKey(Word)
+	word = models.ForeignKey(Word, on_delete=models.PROTECT)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 	time = models.IntegerField(null=True, default=None)
 	repetition_date = models.DateField(null=True) # obsolete
@@ -934,10 +944,10 @@ class UserStandalonePacket(models.Model):
 
 
 class Example(models.Model):
-	word = models.ForeignKey(Word)
+	word = models.ForeignKey(Word, on_delete=models.CASCADE)
 	example = models.CharField(max_length=200)
 	translation = models.CharField(max_length=200)
-	user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
 
 
 class VerbPacket(models.Model):
@@ -1023,7 +1033,8 @@ class Verb(models.Model):
 				file_id=str(self.pk),
 				file_title=self.verb,
 				ftp_path=FTP_FR_VERBS_PATH,
-				speacking_rate=1
+				speaking_rate=1,
+				verbs=True
 			)
 
 		translation_shtooka_url = shtooka_by_title_in_path(
@@ -1042,7 +1053,8 @@ class Verb(models.Model):
 				file_id=str(self.pk),
 				file_title=self.translation,
 				ftp_path=FTP_RU_VERBS_PATH if translation_language == LANGUAGE_CODE_RU else FTP_FR_VERBS_PATH,
-				speacking_rate=1
+				speaking_rate=1,
+				verbs=True,
 			)
 		else:
 			self.translation_audio_url = translation_shtooka_url
@@ -1103,6 +1115,7 @@ class VerbForm(models.Model):
 		shtooka_url = shtooka_by_title_in_path(
 			title=voice_string,
 			ftp_path=FTP_FR_VERBS_PATH,
+			verbs=True
 		)
 
 		if not shtooka_url:
@@ -1118,7 +1131,8 @@ class VerbForm(models.Model):
 				file_id=str(self.pk),
 				file_title=self.form,
 				ftp_path=FTP_FR_VERBS_PATH,
-				speacking_rate=1
+				speaking_rate=1,
+				verbs=True
 			)
 		else:
 			self.audio_url = shtooka_url
@@ -1126,7 +1140,8 @@ class VerbForm(models.Model):
 		translation_shtooka_url = shtooka_by_title_in_path(
 			title=self.translation_text or self.translation,
 			ftp_path=FTP_RU_VERBS_PATH,
-			language_code=translation_language
+			language_code=translation_language,
+			verbs=True
 		)
 
 		if not translation_shtooka_url:
@@ -1138,7 +1153,8 @@ class VerbForm(models.Model):
 				file_id=str(self.pk),
 				file_title=self.translation,
 				ftp_path=FTP_RU_VERBS_PATH if translation_language == LANGUAGE_CODE_RU else FTP_FR_VERBS_PATH,
-				speacking_rate=1
+				speaking_rate=1,
+				verbs=True
 			)
 		else:
 			self.translation_audio_url=translation_shtooka_url

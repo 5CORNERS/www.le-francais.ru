@@ -7,6 +7,7 @@ from annoying.fields import AutoOneToOneField
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.db.models import Count, Sum
 from django.dispatch import receiver
 from django.forms import CheckboxInput, TextInput
 from django.http import HttpRequest
@@ -569,6 +570,9 @@ class LessonPage(Page):
 
     def get_word_packets(self) -> list:
         return list(self.dictionary_packets.all())
+
+    def get_words_count(self):
+        return self.dictionary_packets.annotate(Count('word')).aggregate(Sum('word__count'))['word__count__sum']
 
     def payed(self, user: User):
         if user.is_authenticated and (self in user.payed_lessons.all() or not user.must_pay):
