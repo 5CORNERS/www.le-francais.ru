@@ -1,0 +1,9 @@
+{% extends 'dictionary/manage_words.html' %}{% load static %}
+{% block filter_saving %}<script>const FILTER_SAVING_ON = false;</script>{% endblock %}
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'dictionary/css/user-table-standalone.css' %}">
+{% endblock %}
+{% block menu %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block container_class %}container-fluid{% endblock %}

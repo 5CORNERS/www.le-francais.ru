@@ -116,7 +116,7 @@
     {% endblock %}
 </head>
 
-<body class="{% block body_class %}{% endblock %}" data-spy="scroll" data-target="#myScrollspy" data-offset="15">
+<body class="body" data-spy="scroll" data-target="#myScrollspy" data-offset="15">
 <!-- Google Tag Manager (noscript) -->
 <noscript>
     <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WC2Q4XT"
@@ -205,8 +205,9 @@
         </div>
     {% endif %}
 {% endblock %}
+{% block footer %}
 {% include 'tags/footer.html' %}
-
+{% endblock %}
 {# Global javascript #}
 {% block js %}
 	<script async src="{% static 'lib/audio/audioplayer.min.js' %}"></script>

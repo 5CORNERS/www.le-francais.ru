@@ -15,6 +15,7 @@ urlpatterns = [
     url('^unmark-words/$', views.unmark_words, name='unmark_words'),
     url('^get-app/([0-9]*)$', views.get_app, name='get_app'),
     url('^my-words/$', views.manage_words, name='my_words'),
+    url('^my-words-standalone/(?P<lesson_number>[0-9]*)/$', views.manage_words_standalone, name='my_words_standalone'),
     url('^my-words-get-filters/$', views.get_filters, name='get_filters'),
     url('^my-words-save-filters/$', views.save_filters, name='save_filters'),
     url('^app/$', views.start_app, name='app'),

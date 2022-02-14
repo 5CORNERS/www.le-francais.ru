@@ -1,12 +1,9 @@
 import json
-import pdb
 import traceback
 from typing import List
-from bulk_update.helper import bulk_update
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db import models
-from django.db.models import Count, Q, Case, Subquery, OuterRef, \
+from django.db.models import Count, Subquery, OuterRef, \
     IntegerField
 from django.shortcuts import render
 from django.template.loader import render_to_string
@@ -16,16 +13,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse, \
     HttpResponseNotFound, HttpResponseRedirect
 
-from django.utils.translation import ugettext_lazy as _
-
 # Create your views here.
 from le_francais_dictionary.forms import WordsManagementFilterForm
 from .consts import TENSE_PARTICIPE_PASSE, STAR_CHOICES
 from .models import Word, Packet, UserPacket, \
     UserWordData, UserWordRepetition, UserWordIgnore, \
     UserStandalonePacket, \
-    WordTranslation, prefetch_words_data, VerbPacket, WordGroup, \
-    UserDayRepetition, get_repetition_words_query, VerbPacketRelation, \
+    prefetch_words_data, VerbPacket, UserDayRepetition, get_repetition_words_query, VerbPacketRelation, \
     DictionaryError
 from . import consts
 from home.models import UserLesson
@@ -493,6 +487,7 @@ def manage_words(request):
         if request.is_ajax():
             return JsonResponse({'table': table_html, 'errors': form.errors}, safe=False)
     else:
+        # TODO: podcasts support
         form = WordsManagementFilterForm(request.user)
         init_lesson = request.GET.get('lesson', None)
         init_packet = request.GET.get('lesson_pk', None)
@@ -638,3 +633,16 @@ def save_filters(request):
     userpacket.filters = filters
     userpacket.save()
     return HttpResponse(status=200)
+
+
+def manage_words_standalone(request, lesson_number):
+    star_choices = STAR_CHOICES
+    form = WordsManagementFilterForm(request.user)
+    init_lesson = int(lesson_number)
+    init_packets = Packet.objects.filter(
+        lesson__lesson_number=init_lesson).values_list(
+        'pk', flat=True)
+    return render(request, 'dictionary/manage_words_standalone.html',
+                  {'form': form, 'table': form.table_dict(),
+                   'star_choices': star_choices,
+                   'init_packets': init_packets})

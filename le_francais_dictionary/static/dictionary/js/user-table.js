@@ -111,6 +111,10 @@ let loadFilterButton = {
         })
     },
     saveFilters: function(){
+        if (FILTER_SAVING_ON === false){
+            loadFilterButton.afterSavingError();
+            return;
+        }
         $.ajax(Urls['dictionary:save_filters'](), {
             method: 'POST',
             data: JSON.stringify({
