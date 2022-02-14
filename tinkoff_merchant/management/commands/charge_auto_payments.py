@@ -50,7 +50,7 @@ class Command(BaseCommand):
         for pp in parent_payments:
             # TODO: make this into payment object method
             # if we already have more recent parent payment
-            if pp.customer_key in charged_user_ids:
+            if pp.customer_key is not None and pp.customer_key in charged_user_ids:
                 continue
             else:
                 charged_user_ids.add(pp.customer_key)
