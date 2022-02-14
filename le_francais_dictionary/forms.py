@@ -38,14 +38,16 @@ class WordsManagementFilterForm(forms.Form):
 	def __init__(self, user, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.user=user
-		if not self.user.must_pay:
+		if self.user.is_authenticated and not self.user.must_pay:
 			self.packets = Packet.objects.all()
-		elif self.user.has_lessons:
+		elif self.user.is_authenticated and self.user.has_lessons:
 			self.packets = Packet.objects.filter(Q(demo=True) | Q(
 				lesson__payment__user=user)).distinct()
-		else:
+		elif self.user.is_authenticated:
 			self.packets = Packet.objects.filter(Q(demo=True) | Q(
 					lesson__payment__user=user)).distinct()
+		else:
+			self.packets = Packet.objects.filter(demo=True).distinct()
 		choices = [(o.id, str(o.name)) for o in self.packets]
 		# TODO: has_repetition_words method
 		if get_repetition_words_query(self.user, filter_excluded=False).count() > 0:
