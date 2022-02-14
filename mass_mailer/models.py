@@ -3,7 +3,8 @@ from datetime import datetime
 from email.utils import formataddr
 from ssl import socket_error
 
-from django.db.models import Q
+from django.db.models import Q, Count, Sum, Case, When, F, \
+	DecimalField, IntegerField
 from django.utils import timezone
 from typing import Tuple
 
@@ -22,6 +23,7 @@ from django.forms import SelectMultiple, MultipleChoiceField
 from django.template import Context, Template
 from django.utils.module_loading import import_string
 from django.shortcuts import reverse
+from user_sessions.models import Session
 from validate_email import validate_email
 
 User = get_user_model()
@@ -142,6 +144,9 @@ class UsersFilter(models.Model):
 
 	joined_before = models.DateField(null=True, blank=True)
 	joined_after = models.DateField(null=True, blank=True)
+
+	last_activity_before = models.DateField(null=True, blank=True)
+	last_activity_after = models.DateField(null=True, blank=True)
 
 	has_name_for_emails = models.BooleanField(default=False)
 
@@ -293,7 +298,7 @@ class UsersFilter(models.Model):
 							id__in=[int(p.customer_key) for p in
 							all_payments if p.customer_key]) | Q(
 							id__in=[int(p.customer_key) for p in
-							less_then_equal_10_payments]))
+							less_then_equal_10_payments if p.customer_key]))
 
 			if not self.ignore_subscriptions:
 				recipients = recipients.exclude(pk__in=[p.user.pk for p in
@@ -311,6 +316,14 @@ class UsersFilter(models.Model):
 				recipients = recipients.filter(
 					date_joined__gte=self.joined_after
 				)
+			if self.last_activity_before:
+				...
+				# sessions = Session.objects.select_related('user').filter(
+				# 	last_activity__gt=self.last_activity_before,
+				# 	user__isnull=False
+				# ).distinct('user').values('user')
+			if self.last_activity_after:
+				...
 			if self.manual_blacklist:
 				blacklist = self.manual_blacklist.split(",")
 				recipients = recipients.exclude(email__in=blacklist)
@@ -328,8 +341,15 @@ class UsersFilter(models.Model):
 				recipients = recipients.exclude( email__contains='@comcast.net')
 			if self.send_only_to_gmail:
 				recipients = recipients.filter(email__contains='@gmail.com')
-			recipients = recipients.exclude(is_active=False).order_by('-date_joined')
-			recipients = recipients.distinct()
+			# if True:
+			# 	recipients = recipients.annotate(
+			# 		payments_amount_sum=Sum(Case(When(
+			# 			tinkoff_payment__status__in=['CONFIRMED',
+			# 			                             'AUTHORISED'],
+			# 			then=F('tinkoff_payment__amount')),
+			# 			output_field=IntegerField(),
+			# 			default=0))
+			# 	).filter(payments_amount_sum__gt=0).order_by('payments_amount_sum')
 		return recipients
 
 	@staticmethod
@@ -475,11 +495,18 @@ class Message(models.Model):
 				if self.extra_headers:
 					for name, value in self.extra_headers.items():
 						header[name] = value
-
+				if self.from_username.isascii():
+					from_email = formataddr((self.from_username, self.from_email))
+				else:
+					from_email = self.from_email
+				if data["name"].isascii():
+					to = formataddr((data["name"], data["email"]))
+				else:
+					to = data["email"]
 				email_message = EmailMultiAlternatives(
 					subject=Template(self.template_subject).render(Context(data['context'])),
-					from_email=formataddr((self.from_username, self.from_email)),
-					to=[formataddr((data["name"], data["email"]))],
+					from_email=from_email,
+					to=[to],
 					headers=header,
 					reply_to=self.get_reply_to_header(),
 					body=Template(self.template_txt).render(Context(data['context']))
@@ -560,11 +587,18 @@ class Message(models.Model):
 					additional_context = users_context[recipient.pk]
 				else:
 					additional_context = None
+				if self.from_username.isascii():
+					from_email = formataddr((self.from_username, self.from_email))
+				else:
+					from_email = self.from_email
+				if recipient.username.isascii():
+					to = formataddr((recipient.username, recipient.email))
+				else:
+					to = recipient.email
 				email_message = EmailMultiAlternatives(
 					subject=self.get_subject_for(recipient.mailer_profile, additional_context),
-					from_email=formataddr(
-						(self.from_username, self.from_email)),
-					to=[formataddr((recipient.username, recipient.email))],
+					from_email=from_email,
+					to=[to],
 					headers=header,
 					reply_to=self.get_reply_to_header(),
 					body=self.get_txt_body_for(recipient.mailer_profile, additional_context)
