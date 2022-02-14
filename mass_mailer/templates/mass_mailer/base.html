@@ -1,8 +1,10 @@
+{% block all %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+{% block head %}
     <meta charset="UTF-8">
-    <title>{% block titile %}{% endblock %}</title>
+    <title>{% block titile %}{{ subject }}{% endblock %}</title>
     <link rel="apple-touch-icon" sizes="180x180"
           href="//{{ domain }}{% url 'favicon:apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32"
@@ -13,6 +15,7 @@
           href="//{{ domain }}{% url 'favicon:android-chrome-192x192.png' %}">
     <link rel="icon" type="image/png" sizes="16x16"
           href="//{{ domain }}{% url 'favicon:favicon-16x16.png' %}">
+    {% block supercss %}
     <style>
         img {
             max-width: 100%;
@@ -45,7 +48,12 @@
           text-align: left;
       }
     </style>
+    {% endblock %}
+{% endblock %}
+{% block extra_head %}
+{% endblock %}
 </head>
+{% block superbody %}
 <body>
 {% block body %}
 {% endblock %}
@@ -63,4 +71,6 @@
     </div>
 {% endblock %}
 </body>
+{% endblock %}
 </html>
+{% endblock %}
