@@ -267,19 +267,20 @@
 			{% assign pane_class "tab-pane fade" %}
 		{% endif %}
         {% if self.flash_cards_is_included %}
-            <div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
-                <div class="lazy-flash-cards col-12">
-                    <div class="alert alert-primary">Пожалуйста, дождитесь загрузки приложения. При медленном
-                        соединении это может занять некторое время...</div>
-                </div>
-            </div>
             <div id="my-words" class="{{ pane_class }}" role="tabpanel">
                 <div class="lazy-my-words col-12">
                     <div class="alert alert-primary">Пожалуйста, дождитесь загрузки приложения. При медленном
                         соединении это может занять некторое время...</div>
                 </div>
             </div>
+            <div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
+                <div class="lazy-flash-cards col-12">
+                    <div class="alert alert-primary">Пожалуйста, дождитесь загрузки приложения. При медленном
+                        соединении это может занять некторое время...</div>
+                </div>
+            </div>
         {% endif %}
+
         {% if self.has_verbs %}
             <div id="verbs" class="{{ pane_class }}" role="tabpanel">
                 <div class="lazy-verbs col-12">
