@@ -53,16 +53,16 @@
             {% endif %}
             {% if self.flash_cards_is_included %}
                 <li class="nav-item">
+                    <a class="nav-link" id="tab-my-words"
+                       data-toggle="tab" href="#my-words" role="tab"
+                       aria-controls="my-words">Новые слова</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" id="tab-flash-cards" data-toggle="tab"
                        href="#flash-cards" role="tab"
                        aria-controls="flash-cards">
                         Карточки со словами
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="tab-my-words"
-                       data-toggle="tab" href="#my-words" role="tab"
-                       aria-controls="my-words">Новые слова</a>
                 </li>
             {% endif %}
             {% if self.repetition_material %}
