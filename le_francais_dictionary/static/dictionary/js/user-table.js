@@ -87,6 +87,11 @@ let loadFilterButton = {
         });
     },
     getFilters: function(complete, args=[]){
+        if (FILTER_SAVING_ON === false){
+            tableFilters = tableFiltersInit.valueOf();
+                    tableFiltersLoaded = false;
+            return;
+        }
         $.ajax(Urls['dictionary:get_filters'](), {
             method: 'POST',
             dataType: 'json',

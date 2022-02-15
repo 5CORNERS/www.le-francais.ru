@@ -50,7 +50,7 @@ class WordsManagementFilterForm(forms.Form):
 			self.packets = Packet.objects.filter(demo=True).distinct()
 		choices = [(o.id, str(o.name)) for o in self.packets]
 		# TODO: has_repetition_words method
-		if get_repetition_words_query(self.user, filter_excluded=False).count() > 0:
+		if self.user.is_authenticated and get_repetition_words_query(self.user, filter_excluded=False).count() > 0:
 			choices = [(88888888, 'Слова на повторение')] + choices
 		self.fields['packets'] = forms.MultipleChoiceField(choices=choices)
 		# name, title, type, visible, sortable, filterable, p_filter_value, p_sort_value, p_value
