@@ -6,7 +6,7 @@
     <script type="text/javascript"
         src="{% static 'components/js/jquery.simple-checkbox-table.js' %}"></script>
     <script type="text/javascript"
-            src="{% static 'dictionary/js/user-table.js' %}"></script>
+            src="{% static 'dictionary/js/user-table.min.js' %}"></script>
     <script>
         var csrf = "{{ csrf_token }}";
         var starFilterHtml = `<select data-noneSelectedText="Оценка" multiple class="selectpicker" data-sanitize="false" id="starFilter" name="star_filter">{% for choice in star_choices %}<option class="{% if not forloop.first %}star-choice{% endif %}" value="{{ choice.0 }}" data-content="{{ choice.1 }}">{{ choice.0 }}</option>{% endfor %}</select>`;
