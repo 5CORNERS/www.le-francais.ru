@@ -1,6 +1,7 @@
 import json
 import traceback
 from typing import List
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Subquery, OuterRef, \
@@ -9,6 +10,8 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse, \
     HttpResponseNotFound, HttpResponseRedirect
@@ -476,19 +479,24 @@ def get_app(request, packet_id):
                       {'packet_id': packet_id, 'mode': 'learn'})
 
 
-@login_required
-def manage_words(request):
-    init_packets = None
-    star_choices = STAR_CHOICES
-    if request.method == 'POST':
+class ManageWords(View):
+    def post(self, request):
         form = WordsManagementFilterForm(request.user, request.POST)
         table = form.table_dict()
-        table_html = render_to_string('dictionary/words_table.html', {'table': table}, request)
+        table_html = render_to_string('dictionary/words_table.html',
+                                      {'table': table}, request)
         if request.is_ajax():
-            return JsonResponse({'table': table_html, 'errors': form.errors}, safe=False)
-    else:
+            return JsonResponse(
+                {'table': table_html, 'errors': form.errors},
+                safe=False)
+        else:
+            return self.get(request)
+
+    @method_decorator(login_required)
+    def get(self, request):
         # TODO: podcasts support
         form = WordsManagementFilterForm(request.user)
+        init_packets = None
         init_lesson = request.GET.get('lesson', None)
         init_packet = request.GET.get('lesson_pk', None)
         if init_lesson is not None:
@@ -514,10 +522,11 @@ def manage_words(request):
             except ValueError:
                 init_packets = None
         table = form.table_dict()
-    return render(request, 'dictionary/manage_words.html',
-                  {'form': form, 'table': table,
-                   'star_choices': star_choices,
-                   'init_packets': init_packets})
+
+        return render(request, 'dictionary/manage_words.html',
+                      {'form': form, 'table': table,
+                       'star_choices': STAR_CHOICES,
+                       'init_packets': init_packets})
 
 @csrf_exempt
 @login_required
