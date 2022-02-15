@@ -16,6 +16,9 @@ function showDeleted(checked) {
     }
 }
 
+function visibleCheckboxes(x) {
+    dt.api().column(0).visible(x);
+}
 
 function emptyTable(s) {
     $table.find('tbody').empty().html(
@@ -333,6 +336,8 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                 initComplete: function () {
                     dt = this;
                     let $dt = $(dt)
+                    let tableCompleteEvent = new Event('tableComplete')
+                    document.dispatchEvent(tableCompleteEvent)
                     saveFilters('beforeLoad', ['id_packets'], []);
                     // adding star filter
                     this.api().columns(-1).every(function () {
