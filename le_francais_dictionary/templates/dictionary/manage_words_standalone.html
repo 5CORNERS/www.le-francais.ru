@@ -1,5 +1,10 @@
 {% extends 'dictionary/manage_words.html' %}{% load static %}
 {% block filter_saving %}<script>const FILTER_SAVING_ON = false;</script>{% endblock %}
+{% block extra_js %}
+    {{ block.super }}
+    <script type="text/javascript"
+            src="{% static 'dictionary/js/user-table-standalone.min.js' %}"></script>
+{% endblock %}
 {% block extra_css %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'dictionary/css/user-table-standalone.min.css' %}">
