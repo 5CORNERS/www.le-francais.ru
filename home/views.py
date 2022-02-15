@@ -788,17 +788,8 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
     has_words_or_lessons = None
     if user.is_authenticated:
         has_words_or_lessons = user.has_words_or_lessons
-    if has_words_or_lessons and (tab_id is None or tab_id == 'my-words'):
-        result.append(dict(
-            attr='my-words', type='html', href='my-words',
-            title='Новые слова', value=render_to_string(
-                'home/my-words-iframe.html', context={
-                    'lesson_number': page.lesson_number,
-                    'words_count': page.get_words_count()
-                }
-                )
-        ))
-    if has_words_or_lessons and (tab_id is None or tab_id == 'flash-cards'):
+    # render flash-cards tab:
+    if tab_id is None or tab_id == 'flash-cards':
         result.append(dict(
             attr='flash-cards', type='html', href='flash-cards', title='Карточки со словами',
             value=render_to_string('dictionary/dictionary_tab.html', context={
@@ -831,6 +822,16 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
                                        }, request=request),
                 transition=False
             ))
+    if tab_id is None or tab_id == 'my-words':
+        result.append(dict(
+            attr='my-words', type='html', href='my-words',
+            title='Новые слова', value=render_to_string(
+                'home/my-words-iframe.html', context={
+                    'lesson_number': page.lesson_number,
+                    'words_count': page.get_words_count()
+                }
+                )
+        ))
 
     if not page.payed(user):
         for blocked in LESSON_PAGE_BLOCKED_CONTENT:
