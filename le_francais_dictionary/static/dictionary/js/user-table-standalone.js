@@ -1,5 +1,7 @@
 $(document).ready(function () {
-    $(dt).on('draw.dt', function () {
+    $(document).on('tableComplete', function () {
         showDeleted(true);
+        visibleCheckboxes(false);
     })
 })
+
