@@ -1,9 +1,14 @@
 {% extends 'dictionary/manage_words.html' %}{% load static %}
-{% block filter_saving %}<script>const FILTER_SAVING_ON = false;</script>{% endblock %}
+{% block filter_saving %}<script>
+    const FILTER_SAVING_ON = false;
+</script>{% endblock %}
 {% block extra_js %}
     {{ block.super }}
     <script type="text/javascript"
             src="{% static 'dictionary/js/user-table-standalone.min.js' %}"></script>
+    <script>
+    const USER_IS_AUTHENTICATED = {{ request.user.is_authenticated|yesno:"true;,false;" }}
+    </script>
 {% endblock %}
 {% block extra_css %}
     {{ block.super }}
