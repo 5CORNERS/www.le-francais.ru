@@ -20,6 +20,11 @@ function visibleCheckboxes(x) {
     dt.api().column(0).visible(x);
 }
 
+function visibleWordData(x) {
+    dt.api().column(5).visible(x);
+    dt.api().column(6).visible(x);
+}
+
 function emptyTable(s) {
     $table.find('tbody').empty().html(
         '<tr>' +

@@ -21,3 +21,7 @@ body {
 .bottom-controls {
     display: none;
 }
+
+#wordsTable_wrapper #alert {
+    display: none !important;
+}
