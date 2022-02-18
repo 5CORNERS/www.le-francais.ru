@@ -46,7 +46,7 @@
                 <li class="nav-item">
                     <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" id="tab-verbs" data-toggle="tab"
                        href="#verbs" role="tab"
-                       aria-controls="verbs">
+                       aria-controls="verbs" onclick="clickTab('verbs')">
                         Глаголы
                     </a>
                 </li>
@@ -55,12 +55,12 @@
                 <li class="nav-item">
                     <a class="nav-link" id="tab-my-words"
                        data-toggle="tab" href="#my-words" role="tab"
-                       aria-controls="my-words">Новые слова</a>
+                       aria-controls="my-words" onclick="clickTab('my-words')">Новые слова</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="tab-flash-cards" data-toggle="tab"
                        href="#flash-cards" role="tab"
-                       aria-controls="flash-cards">
+                       aria-controls="flash-cards" onclick="clickTab('flash-cards')">
                         Карточки со словами
                     </a>
                 </li>
