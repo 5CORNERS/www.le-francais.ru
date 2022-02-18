@@ -828,7 +828,9 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
             title='Новые слова', value=render_to_string(
                 'home/my-words-iframe.html', context={
                     'lesson_number': page.lesson_number,
-                    'words_count': page.get_words_count()
+                    'words_count': page.get_words_count(),
+                    'lesson': page.lesson_number,
+                    'is_authenticated': request.user.is_authenticated,
                 }
                 )
         ))
