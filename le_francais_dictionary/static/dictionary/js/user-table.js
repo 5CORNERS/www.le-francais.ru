@@ -16,6 +16,14 @@ function showDeleted(checked) {
     }
 }
 
+function visibleCheckboxes(x) {
+    dt.api().column(0).visible(x);
+}
+
+function visibleWordData(x) {
+    dt.api().column(5).visible(x);
+    dt.api().column(6).visible(x);
+}
 
 function emptyTable(s) {
     $table.find('tbody').empty().html(
@@ -87,6 +95,11 @@ let loadFilterButton = {
         });
     },
     getFilters: function(complete, args=[]){
+        if (FILTER_SAVING_ON === false){
+            tableFilters = tableFiltersInit.valueOf();
+                    tableFiltersLoaded = false;
+            return;
+        }
         $.ajax(Urls['dictionary:get_filters'](), {
             method: 'POST',
             dataType: 'json',
@@ -111,6 +124,10 @@ let loadFilterButton = {
         })
     },
     saveFilters: function(){
+        if (FILTER_SAVING_ON === false){
+            loadFilterButton.afterSavingError();
+            return;
+        }
         $.ajax(Urls['dictionary:save_filters'](), {
             method: 'POST',
             data: JSON.stringify({
@@ -324,6 +341,8 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                 initComplete: function () {
                     dt = this;
                     let $dt = $(dt)
+                    let tableCompleteEvent = new Event('tableComplete')
+                    document.dispatchEvent(tableCompleteEvent)
                     saveFilters('beforeLoad', ['id_packets'], []);
                     // adding star filter
                     this.api().columns(-1).every(function () {

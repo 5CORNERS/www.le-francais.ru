@@ -86,8 +86,8 @@
             </div>
         </div>
     {% endif %}
-    {% if lesson_page.several_word_packets %}
-        {% get_packets lesson_page as packets %}
+    {% if page.several_word_packets %}
+        {% get_packets page as packets %}
         <div class="col-12" style="margin-bottom: 1rem">
             {% for packet in packets %}
                 <button type="button" class="btn btn-secondary btn-lg"
@@ -98,7 +98,7 @@
              style="margin-bottom: 1rem"></div>
     {% else %}
         <div class="col-12" style="margin-bottom: 1rem" id="dictionary-app">
-            {% get_packets lesson_page as packet %}
+            {% get_packets page as packet %}
             {% include 'dictionary/dictionary_app.html' with packet_id=packet.id mode='learn' %}
         </div>
     {% endif %}

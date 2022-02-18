@@ -34,10 +34,34 @@
                 <i class="arrow-icon"></i>
             </button>
             <div class="col-12 col-md-9 col-xl-6 col-xlg-6 main">
+            {% if self.has_dictionary_words %}
+                <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link" href="#body">
+                        Body
+                    </a>
+                    <a class="nav-link" href="#flash-cards">
+                        Flash Cards
+                    </a>
+                </li>
+
+                </ul>
+            {% endif %}
                 {% breadcrumb calling_page=self %}
                 <h1>{{ page.title }}</h1>
-                {% for block in page.body %}{% include_block block %}{% endfor %}
-                {% page_advert_body 'body_bottom' page.page_type %}
+
+                <div class="tab-pane active fade show" role="tabpanel" id="body">
+                    {% for block in page.body %}{% include_block block %}
+                    {% endfor %}{% page_advert_body 'body_bottom' page.page_type %}
+                </div>
+
+
+
+            {% if self.has_dictionary_words %}
+                <div class="tab-pane fade" role="tabpanel" id="flash-cards">
+                    {% include 'dictionary/dictionary_tab.html' with page=self hide_info=request.COOKIES.hide_flash_cards_info hide_my_woeds_alert_auth=request.COOKIES.hide_my_words_alert_auth hide_my_words_alert_not_auth=request.COOKIES.hide_my_words_alert_not_auth user=request.user request=request has_words_or_lesson=None %}
+                </div>
+            {% endif %}
             </div>
             <div class="d-none d-xl-flex col-xl-3 sidebar-right">
 		        <div class="sidebar-last-topics block">

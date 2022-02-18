@@ -1,0 +1,7 @@
+{% load le_francais_dictionary %}
+<iframe style="border:0;width: 100%; height: {% iframe_height words_count %}px" src="{% url 'dictionary:my_words_standalone' lesson_number %}"></iframe>
+{% if is_authenticated %}
+<a href="{% url 'dictionary:my_words' %}?lesson={{ lesson }}">Открыть в «Моих словах»</a>
+{% else %}
+    <a href="{% url 'account_login' %}?next={% url 'dictionary:my_words' %}?lesson={{ lesson }}">Войдите, чтобы открыть в «Моих словах»</a>
+{% endif %}
