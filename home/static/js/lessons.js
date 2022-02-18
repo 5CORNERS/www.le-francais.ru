@@ -1,3 +1,11 @@
+let reloadedTabs = []
+const lazyTabs = [
+    {elementID: 'tab-flash-cards', tabID: 'flash-cards'},
+    {elementID: 'tab-verbs', tabID: 'verbs'},
+    {elementID: 'tab-my-words', tabID: 'my-words'}
+]
+let clickedTabs = []
+
 function reloadPage(lesson_number, tabID = 0) {
     $.ajax({
         type: 'GET',
@@ -33,9 +41,13 @@ function reloadPage(lesson_number, tabID = 0) {
                         })
                     }
                     $(`div.tab-pane#${tab.href}`).html(tab.value);
+                    reloadedTabs.push({
+                        elementID: navLink.attr('id'), tabID: tab.href
+                    })
                 }
             });
             $('[data-toggle="popover"]').popover()
+
         }
     });
 }
@@ -64,19 +76,15 @@ function reloadLessonUrl() {
 }
 
 function errHandle(a) {
-            console.log("Error " + a.error.code + "; details: " + a.error.message);
-        }
+    console.log("Error " + a.error.code + "; details: " + a.error.message);
+}
 
 
 $(document).ready(function () {
-    $('a#tab-flash-cards').one('show.bs.tab', function () {
-        reloadPage(LESSON_NUMBER, 'flash-cards');
-    });
-    $('a#tab-verbs').one('show.bs.tab', function () {
-        reloadPage(LESSON_NUMBER, 'verbs')
-    })
-    $('a#tab-my-words').one('show.bs.tab', function () {
-        reloadPage(LESSON_NUMBER, 'my-words')
+    lazyTabs.forEach(function (value, index) {
+        $(`a#${value.elementID}`).one('show.bs.tab', function () {
+            clickTab(value.tabID)
+        })
     })
 
     let ua = window.navigator.userAgent;
@@ -134,7 +142,7 @@ $(document).ready(function () {
                 },
                 datatype: 'json',
                 cache: false,
-                headers: { "cache-control": "no-cache" },
+                headers: {"cache-control": "no-cache"},
                 async: !iOSSafari,
                 success: function (r) {
                     if (r.result === 'SUCCESS') {
@@ -335,7 +343,7 @@ $(document).ready(function () {
             async: !iOSSafari,
             datatype: "json",
             cache: false,
-            headers: { "cache-control": "no-cache" },
+            headers: {"cache-control": "no-cache"},
             success: function (response) {
                 if (response.result === 'SUCCESS') {
                     playCoffeeSound();
@@ -359,9 +367,10 @@ $(document).ready(function () {
             error: function (response, error) {
                 $('#give-me-a-coffee-fail-message').html(error);
                 $('#give-me-a-coffee-fail-modal').modal('show');
-            },
+            }
         });
     }
+
     $('.coffee-proceed').on('click', giveMeCoffee);
 
 
@@ -397,7 +406,7 @@ $(document).ready(function () {
         html: true,
         placement: 'top',
         trigger: 'click',
-        template:'<div class="popover" role="tooltip"><div class="arrow"></div><span class="pop-close close">×</span><div class="popover-body"></div></div>'
+        template: '<div class="popover" role="tooltip"><div class="arrow"></div><span class="pop-close close">×</span><div class="popover-body"></div></div>'
     }).on('shown.bs.popover', function () {
         $('.pop-close').on('click', function () {
             $('#strictDownloadModelWhyThis').popover('hide')
@@ -431,7 +440,7 @@ $(document).ready(function () {
         html: true,
         placement: 'top',
         trigger: 'click',
-        template:'<div class="popover" role="tooltip"><div class="arrow"></div><span class="pop-close close">×</span><div class="popover-body"></div></div>'
+        template: '<div class="popover" role="tooltip"><div class="arrow"></div><span class="pop-close close">×</span><div class="popover-body"></div></div>'
     }).on('shown.bs.popover', function () {
         $('.pop-close').on('click', function () {
             $('#hiddenWasListeningModalWhyThis').popover('hide')
