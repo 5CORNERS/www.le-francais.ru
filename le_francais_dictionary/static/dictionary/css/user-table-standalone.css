@@ -1,0 +1,27 @@
+.uppertable {
+    display: none !important;
+}
+
+.filter1 {
+    display: none;
+}
+
+.dataTables_length {
+    display: none;
+}
+
+.dataTables_info {
+    display: none;
+}
+
+body {
+    padding-top: 0;
+}
+
+.bottom-controls {
+    display: none;
+}
+
+#wordsTable_wrapper #alert {
+    display: none !important;
+}

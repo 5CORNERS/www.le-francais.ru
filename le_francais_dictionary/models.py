@@ -20,7 +20,7 @@ from le_francais_dictionary.consts import GENRE_CHOICES, \
 	TYPE_CHOICES
 from le_francais_dictionary.utils import format_text2speech, \
 	create_or_update_repetition, \
-	remove_parenthesis, clean_filename
+	remove_parenthesis, clean_filename, escape_non_url_characters
 from .sm2 import WordSM2
 from polly import const as polly_const
 from polly.models import PollyTask
@@ -34,10 +34,10 @@ class Packet(models.Model):
 	name = models.CharField(max_length=128)
 	demo = models.BooleanField(default=False)
 	lesson = models.ForeignKey('home.LessonPage',
-	                           related_name='dictionary_packets', null=True)
+	                           related_name='dictionary_packets', null=True, on_delete=models.SET_NULL)
 
 	def __str__(self):
-		return '{self.name}'.format(self=self)
+		return f'{self.name}'
 
 	def to_dict(self, user=None) -> dict:
 		"""
@@ -76,7 +76,7 @@ class Packet(models.Model):
 		return self.word_set.all().count()
 
 	def is_activated(self, user) -> bool:
-		if self.lesson.payed(user):
+		if self.lesson and self.lesson.payed(user):
 			return True
 		else:
 			return False
@@ -107,8 +107,8 @@ class Packet(models.Model):
 
 
 class UserPacket(models.Model):
-	packet = models.ForeignKey(Packet)
-	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	packet = models.ForeignKey(Packet, on_delete=models.CASCADE)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 	@property
 	def words_learned(self) -> int:  # TODO
@@ -159,17 +159,13 @@ def del_ends(s):
 	return s
 
 
-def escape_non_url_characters(str):
-	return str.replace(' ', '_').replace('\\', '_').replace('/', '_')
-
-
 class Word(models.Model):
 	cd_id = models.IntegerField(
 		verbose_name='Color Dictionary ID',
 		primary_key=True)
 	word = models.CharField(max_length=120, verbose_name='Word')
 	word_ssml = models.CharField(max_length=1000, null=True, default=None, blank=True)
-	polly = models.ForeignKey(PollyTask, null=True, blank=True)
+	polly = models.ForeignKey(PollyTask, null=True, blank=True, on_delete=models.PROTECT)
 	_polly_url = models.URLField(max_length=200, null=True, default=None, blank=True)
 	# TODO: must be moved to WordTranslation Model
 	genre = models.CharField(choices=GENRE_CHOICES, max_length=10, null=True,
@@ -180,7 +176,7 @@ class Word(models.Model):
 	plural = models.BooleanField(default=False, verbose_name='Plural', blank=True)
 	grammatical_number = models.CharField(choices=GRAMMATICAL_NUMBER_CHOICES,
 	                                      max_length=4, null=True, blank=True)
-	packet = models.ForeignKey(Packet, null=True, default=None, blank=True)
+	packet = models.ForeignKey(Packet, null=True, default=None, blank=True, on_delete=models.PROTECT)
 
 	group = models.ForeignKey('WordGroup', on_delete=models.SET_NULL, null=True, blank=True)
 	definition_num = models.IntegerField(null=True, blank=True, default=None)
@@ -299,19 +295,21 @@ class Word(models.Model):
 			return None
 
 	def mean_quality(self, user):
-		if self.last_user_data(user):
+		if user.is_authenticated and self.last_user_data(user):
 			return float(round(self.last_user_data(user).mean_quality * 2) / 2)
 		else:
 			return None
 
 	def mean_quality_filter_value(self, user):
 		q = self.mean_quality(user)
-		if q is not None:
+		if user.is_authenticated and q is not None:
 			return str(float(q)).replace('.', '@')
 		else:
 			return 'None'
 
 	def get_repetition(self, user):
+		if user.is_anonymous:
+			return None
 		if not user.pk in self._repetitions.keys():
 			if self.group:
 				repetition = UserWordRepetition.objects.filter(
@@ -363,6 +361,8 @@ class Word(models.Model):
 			return None
 
 	def is_marked(self, user):
+		if user.is_anonymous:
+			return False
 		if not user.pk in self._is_marked.keys():
 			if self.userwordignore_set.filter(user=user).exists():
 				self._is_marked[user.pk] = True
@@ -508,7 +508,14 @@ class Word(models.Model):
 					if save:
 						self.save()
 					return self
-		shtooka_url = shtooka_by_title_in_path(title=remove_parenthesis(self.word), ftp_path=FTP_FR_WORDS_PATH, language_code=LANGUAGE_CODE_FR, genre=self.genre, filename=filename)
+		shtooka_url = None
+		if not ('<speak>' in self.word_ssml
+		        and 'gender=' in self.word_ssml):
+			shtooka_url = shtooka_by_title_in_path(
+				title=remove_parenthesis(self.word),
+				ftp_path=FTP_FR_WORDS_PATH,
+				language_code=LANGUAGE_CODE_FR,
+				genre=self.genre, filename=filename)
 		if shtooka_url:
 			self._polly_url = shtooka_url
 		else:
@@ -535,7 +542,7 @@ class WordTranslation(models.Model):
 	word = models.ForeignKey(Word, on_delete=models.CASCADE)
 	translation = models.CharField(max_length=120, null=False, blank=False)
 	translations_ssml = models.CharField(max_length=1000, null=True, default=None, blank=True)
-	polly = models.ForeignKey(PollyTask, null=True, blank=True)
+	polly = models.ForeignKey(PollyTask, null=True, blank=True, on_delete=models.PROTECT)
 	_polly_url = models.URLField(null=True, default=None, blank=True)
 	packet = models.ForeignKey('Packet', on_delete=models.CASCADE, null=True)
 
@@ -636,7 +643,14 @@ class WordTranslation(models.Model):
 						self.save()
 					if voiced:
 						return self
-		shtooka_url = shtooka_by_title_in_path(title=remove_parenthesis(self.translation), ftp_path=FTP_FR_WORDS_PATH, language_code=LANGUAGE_CODE_FR, filename=filename)
+		shtooka_url = None
+		if not ('<speak>' in self.translations_ssml
+		        and 'gender=' in self.translations_ssml):
+			shtooka_url = shtooka_by_title_in_path(
+				title=remove_parenthesis(self.translation),
+				ftp_path=FTP_FR_WORDS_PATH,
+				language_code=LANGUAGE_CODE_FR,
+				filename=filename)
 		if shtooka_url:
 			self._polly_url = shtooka_url
 		else:
@@ -762,7 +776,7 @@ class UnifiedWord(models.Model):
 						file_title=remove_parenthesis(self.word),
 						genre=self.genre,
 						ftp_path=FTP_FR_WORDS_PATH,
-						speacking_rate=0.8
+						speaking_rate=0.8
 					)
 
 		translation_voiced_from_original = False
@@ -784,7 +798,7 @@ class UnifiedWord(models.Model):
 				genre=self.genre,
 				language=LANGUAGE_CODE_RU,
 				ftp_path=FTP_RU_WORDS_PATH,
-				speacking_rate=1,
+				speaking_rate=1,
 				ssml=False
 			)
 		if save:
@@ -799,8 +813,8 @@ class UserWordIgnore(models.Model):
 
 
 class UserWordData(models.Model):
-	word = models.ForeignKey(Word, related_name='userdata')
-	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='flash_cards_data')
+	word = models.ForeignKey(Word, related_name='userdata', on_delete=models.PROTECT)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='flash_cards_data', on_delete=models.PROTECT)
 	datetime = models.DateTimeField(auto_now_add=True)
 	grade = models.IntegerField()
 	mistakes = models.IntegerField()
@@ -870,7 +884,7 @@ class UserWordData(models.Model):
 
 
 class UserWordRepetition(models.Model):
-	word = models.ForeignKey(Word)
+	word = models.ForeignKey(Word, on_delete=models.PROTECT)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 	time = models.IntegerField(null=True, default=None)
 	repetition_date = models.DateField(null=True) # obsolete
@@ -934,10 +948,10 @@ class UserStandalonePacket(models.Model):
 
 
 class Example(models.Model):
-	word = models.ForeignKey(Word)
+	word = models.ForeignKey(Word, on_delete=models.CASCADE)
 	example = models.CharField(max_length=200)
 	translation = models.CharField(max_length=200)
-	user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
 
 
 class VerbPacket(models.Model):
@@ -1023,7 +1037,8 @@ class Verb(models.Model):
 				file_id=str(self.pk),
 				file_title=self.verb,
 				ftp_path=FTP_FR_VERBS_PATH,
-				speacking_rate=1
+				speaking_rate=1,
+				verbs=True
 			)
 
 		translation_shtooka_url = shtooka_by_title_in_path(
@@ -1042,7 +1057,8 @@ class Verb(models.Model):
 				file_id=str(self.pk),
 				file_title=self.translation,
 				ftp_path=FTP_RU_VERBS_PATH if translation_language == LANGUAGE_CODE_RU else FTP_FR_VERBS_PATH,
-				speacking_rate=1
+				speaking_rate=1,
+				verbs=True,
 			)
 		else:
 			self.translation_audio_url = translation_shtooka_url
@@ -1103,6 +1119,7 @@ class VerbForm(models.Model):
 		shtooka_url = shtooka_by_title_in_path(
 			title=voice_string,
 			ftp_path=FTP_FR_VERBS_PATH,
+			verbs=True
 		)
 
 		if not shtooka_url:
@@ -1118,7 +1135,8 @@ class VerbForm(models.Model):
 				file_id=str(self.pk),
 				file_title=self.form,
 				ftp_path=FTP_FR_VERBS_PATH,
-				speacking_rate=1
+				speaking_rate=1,
+				verbs=True
 			)
 		else:
 			self.audio_url = shtooka_url
@@ -1126,7 +1144,8 @@ class VerbForm(models.Model):
 		translation_shtooka_url = shtooka_by_title_in_path(
 			title=self.translation_text or self.translation,
 			ftp_path=FTP_RU_VERBS_PATH,
-			language_code=translation_language
+			language_code=translation_language,
+			verbs=True
 		)
 
 		if not translation_shtooka_url:
@@ -1138,7 +1157,8 @@ class VerbForm(models.Model):
 				file_id=str(self.pk),
 				file_title=self.translation,
 				ftp_path=FTP_RU_VERBS_PATH if translation_language == LANGUAGE_CODE_RU else FTP_FR_VERBS_PATH,
-				speacking_rate=1
+				speaking_rate=1,
+				verbs=True
 			)
 		else:
 			self.translation_audio_url=translation_shtooka_url
@@ -1164,72 +1184,75 @@ def get_repetition_words_query(user, filter_excluded=True):
 
 
 def prefetch_words_data(words, user):
-	groups = list(WordGroup.objects.filter(word__in=words))
-	groups_words = list(Word.objects.filter(group__in=groups))
-	groups_words_repetitions = list(
-		UserWordRepetition.objects.prefetch_related('word__group').filter(
-			user=user, word__in=groups_words).order_by('-time'))
-	groups_user_data = list(
-		UserWordData.objects.prefetch_related('word__group').filter(
-			user=user, word__in=groups_words).order_by('-datetime')
-	)
-	translations = list(WordTranslation.objects.filter(word__in=words))
-	ignored = list(
-		UserWordIgnore.objects.filter(user=user, word__in=words))
-	user_data = list(
-		UserWordData.objects.select_related('word').filter(user=user, word__in=words).order_by(
-			'-datetime'))
-	user_repetitions = list(
-		UserWordRepetition.objects.filter(user=user, word__in=words))
-	word: Word
+	translations = list(
+	WordTranslation.objects.filter(word__in=words))
 	for word in words:
-		group = next(
-			(group for group in groups if group.pk == word.group_id),
-			None)
-		if group:
-			group_repetition = next(
-				(rep for rep in groups_words_repetitions if
-				 rep.word.group_id == group.pk), None)
-			if group_repetition:
-				word._repetitions[user.pk] = \
-					group_repetition
-			else:
-				word._repetitions[user.pk] = None
-			# don't really sure about this
-			group_user_dataset = [ud for ud in groups_user_data if ud.word.group_id == group.pk]
-			if group_user_dataset:
-				last_word_user_data = group_user_dataset[0]
-				last_word_user_data._user_word_dataset = group_user_dataset
-				word._last_user_data[user.pk] = last_word_user_data
-			else:
-				word._last_user_data[user.pk] = None
-		else:
-			user_word_repetitions = [uwr for uwr in user_repetitions if
-			                         uwr.word_id == word.pk]
-			if user_word_repetitions:
-				word._repetitions[user.pk] = \
-					user_word_repetitions[0]
-			else:
-				word._repetitions[user.pk] = None
-			word_user_data = [ud for ud in user_data if
-			                  ud.word_id == word.pk]
-			if word_user_data:
-				last_word_user_data = word_user_data[0]
-				last_word_user_data._user_word_dataset = word_user_data
-				word._last_user_data[user.pk] = last_word_user_data
-			else:
-				word._last_user_data[user.pk] = None
-
-		if word.pk in [i.word_id for i in ignored]:
-			word._is_marked[user.pk] = True
-		else:
-			word._is_marked[user.pk] = False
 		word_translations = [wt for wt in translations if
 		                     wt.word_id == word.pk]
 		if word_translations:
 			word._first_translation = word_translations[0]
 		else:
 			word._first_translation = None
+	if user.is_authenticated:
+		groups = list(WordGroup.objects.filter(word__in=words))
+		groups_words = list(Word.objects.filter(group__in=groups))
+		groups_words_repetitions = list(
+			UserWordRepetition.objects.prefetch_related('word__group').filter(
+				user=user, word__in=groups_words).order_by('-time'))
+		groups_user_data = list(
+			UserWordData.objects.prefetch_related('word__group').filter(
+				user=user, word__in=groups_words).order_by('-datetime')
+		)
+		ignored = list(
+			UserWordIgnore.objects.filter(user=user, word__in=words))
+		user_data = list(
+			UserWordData.objects.select_related('word').filter(user=user, word__in=words).order_by(
+				'-datetime'))
+		user_repetitions = list(
+			UserWordRepetition.objects.filter(user=user, word__in=words))
+		word: Word
+		for word in words:
+			group = next(
+				(group for group in groups if group.pk == word.group_id),
+				None)
+			if group:
+				group_repetition = next(
+					(rep for rep in groups_words_repetitions if
+					 rep.word.group_id == group.pk), None)
+				if group_repetition:
+					word._repetitions[user.pk] = \
+						group_repetition
+				else:
+					word._repetitions[user.pk] = None
+				# don't really sure about this
+				group_user_dataset = [ud for ud in groups_user_data if ud.word.group_id == group.pk]
+				if group_user_dataset:
+					last_word_user_data = group_user_dataset[0]
+					last_word_user_data._user_word_dataset = group_user_dataset
+					word._last_user_data[user.pk] = last_word_user_data
+				else:
+					word._last_user_data[user.pk] = None
+			else:
+				user_word_repetitions = [uwr for uwr in user_repetitions if
+				                         uwr.word_id == word.pk]
+				if user_word_repetitions:
+					word._repetitions[user.pk] = \
+						user_word_repetitions[0]
+				else:
+					word._repetitions[user.pk] = None
+				word_user_data = [ud for ud in user_data if
+				                  ud.word_id == word.pk]
+				if word_user_data:
+					last_word_user_data = word_user_data[0]
+					last_word_user_data._user_word_dataset = word_user_data
+					word._last_user_data[user.pk] = last_word_user_data
+				else:
+					word._last_user_data[user.pk] = None
+
+			if word.pk in [i.word_id for i in ignored]:
+				word._is_marked[user.pk] = True
+			else:
+				word._is_marked[user.pk] = False
 	return words
 
 

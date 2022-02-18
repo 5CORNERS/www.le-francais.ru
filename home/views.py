@@ -34,7 +34,6 @@ from home.models import PageWithSidebar, LessonPage, ArticlePage, \
 from home.src.site_import import import_content
 from pure_pagination import Paginator, PaginationMixin
 
-from le_francais_dictionary.consts import TENSE_PARTICIPE_PASSE
 from pybb import defaults, util as pybb_util
 from pybb.forms import PostForm
 from pybb.models import Post, Topic
@@ -786,15 +785,15 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
                 attr=attr, type=type, href=href, title=title, value=value or None,
                 transition=transition
             ))
+    has_words_or_lessons = None
+    if user.is_authenticated:
+        has_words_or_lessons = user.has_words_or_lessons
     # render flash-cards tab:
     if tab_id is None or tab_id == 'flash-cards':
-        has_words_or_lessons = None
-        if user.is_authenticated:
-            has_words_or_lessons = user.has_words_or_lessons
         result.append(dict(
             attr='flash-cards', type='html', href='flash-cards', title='Карточки со словами',
             value=render_to_string('dictionary/dictionary_tab.html', context={
-                'lesson_page': page,
+                'page': page,
                 'hide_info': request.COOKIES.get(
                     'hide_flash_cards_info', None),
                 'hide_my_words_alert_auth': request.COOKIES.get(
@@ -823,6 +822,19 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
                                        }, request=request),
                 transition=False
             ))
+    if tab_id is None or tab_id == 'my-words':
+        result.append(dict(
+            attr='my-words', type='html', href='my-words',
+            title='Новые слова', value=render_to_string(
+                'home/my-words-iframe.html', context={
+                    'lesson_number': page.lesson_number,
+                    'words_count': page.get_words_count(),
+                    'lesson': page.lesson_number,
+                    'is_authenticated': request.user.is_authenticated,
+                }
+                )
+        ))
+
     if not page.payed(user):
         for blocked in LESSON_PAGE_BLOCKED_CONTENT:
             for tab in result:
@@ -850,7 +862,8 @@ LESSON_PAGE_BLOCKED_CONTENT = [
     ('resume_populaire', 7, 1000),
     ('repetition_material', 8, 1000),
     ('exercise', 9, 1000),
-    ('flash-cards', 10, 1000)
+    ('flash-cards', 10, 1000),
+    ('my-words', 10, 1000)
 ]
 LESSON_PAGE_FIELDS = [
     # type, page attribute, href, title, transition
