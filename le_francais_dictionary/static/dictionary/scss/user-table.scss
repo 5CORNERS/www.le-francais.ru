@@ -139,11 +139,11 @@ th .bootstrap-select {
     padding: 0.2rem;
 }
 
-th:nth-child(4), th:nth-child(5) {
-    min-width: 150px !important;
-}
+//th:nth-child(4), th:nth-child(5) {
+//    min-width: 150px !important;
+//}
 
-th:nth-child(1) {
+th.dt-checkboxes-cell {
     padding: 5px !important;
 }
 
