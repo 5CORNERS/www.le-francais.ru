@@ -29,11 +29,11 @@ function visibleWordData(x) {
 
 function switchColorCoding(x){
     if (x === true) {
-        $('.genre-disabled').removeClass('genre-disabled').addClass('genre-enabled')
-        $('.pos-disabled').removeClass('pos-disabled').addClass('pos-enabled')
+        $('.genre-cc-disabled').removeClass('genre-cc-disabled').addClass('genre-cc-enabled')
+        $('.pos-cc-disabled').removeClass('pos-cc-disabled').addClass('pos-cc-enabled')
     } else if (x === false) {
-        $('.genre-enabled').removeClass('genre-enabled').addClass('genre-disabled')
-        $('.pos-enabled').removeClass('pos-enabled').addClass('pos-disabled')
+        $('.genre-cc-enabled').removeClass('genre-cc-enabled').addClass('genre-cc-disabled')
+        $('.pos-cc-enabled').removeClass('pos-cc-enabled').addClass('pos-cc-disabled')
     }
     colorCodingEnabled = x;
 }

@@ -179,7 +179,7 @@ th.dt-checkboxes-cell {
   font-style: italic;
 }
 
-.pos-enabled {
+.pos-cc-enabled {
   transition: color 0.5s;
 
   &.pos-verb {
@@ -187,7 +187,7 @@ th.dt-checkboxes-cell {
   }
 }
 
-.genre-enabled {
+.genre-cc-enabled {
   transition: color 0.5s;
 
   &.genre-masculine {
@@ -210,14 +210,12 @@ th.dt-checkboxes-cell {
   }
 }
 
-.genre-disabled {
+.genre-cc-disabled {
   transition: color 0.5s;
-  font-style: inherit;
   color: inherit;
 }
 
-.pos-disabled {
+.pos-cc-disabled {
   transition: color 0.5s;
-  font-style: inherit;
   color: inherit;
 }
