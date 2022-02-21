@@ -29,6 +29,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+ADJECTIVE_GENRE_PARENTHESIS_PATTERN = '(\(.+?\))'
 
 class Packet(models.Model):
 	name = models.CharField(max_length=128)
@@ -299,6 +300,17 @@ class Word(models.Model):
 	@property
 	def html_class(self):
 		return f'{self.genre_html_class} {self.pos_html_class}'.strip()
+
+
+	@property
+	def table_html(self):
+		if self.part_of_speech == PARTOFSPEECH_ADJECTIVE and self.genre == GENRE_BOTH:
+			return re.sub(
+				ADJECTIVE_GENRE_PARENTHESIS_PATTERN,
+				r'<span class="genre-cc-enabled genre-feminine pos-cc-enabled pos-adj">\1</span>',
+				self.word
+			)
+		return self.word
 
 	def last_user_data(self, user):
 		"""
@@ -599,6 +611,16 @@ class WordTranslation(models.Model):
 	@property
 	def html_class(self):
 		return self.word.html_class
+
+	@property
+	def table_html(self):
+		if self.word.part_of_speech == PARTOFSPEECH_ADJECTIVE and self.word.genre == GENRE_BOTH:
+			return re.sub(
+				ADJECTIVE_GENRE_PARENTHESIS_PATTERN,
+				r'<span class="genre-cc-enabled genre-feminine pos-cc-enabled pos-adj">\1</span>',
+				self.translation
+			)
+		return self.translation
 
 	def to_dict(self):
 		return {
