@@ -203,7 +203,7 @@ th.dt-checkboxes-cell {
     }
   }
 
-  &.genre-both, &.genre-epicene {
+  &.genre-epicene {
     &.pos-nom, &.pos-adj {
       color: #743ea9;
     }
@@ -211,11 +211,11 @@ th.dt-checkboxes-cell {
 }
 
 .genre-cc-disabled {
-  transition: color 0.5s;
+  transition: color 0.2s;
   color: inherit;
 }
 
 .pos-cc-disabled {
-  transition: color 0.5s;
+  transition: color 0.2s;
   color: inherit;
 }
