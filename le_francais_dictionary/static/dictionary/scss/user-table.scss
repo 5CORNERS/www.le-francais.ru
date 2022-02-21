@@ -193,13 +193,13 @@ th.dt-checkboxes-cell {
   &.genre-masculine {
     &.pos-nom, &.pos-adj {
       //color: #a81d45;
-      color: var(--red);
+      color: #0c71c0
     }
   }
 
   &.genre-feminine {
     &.pos-nom, &.pos-adj {
-      color: #0c71c0
+      color: var(--red);
     }
   }
 
