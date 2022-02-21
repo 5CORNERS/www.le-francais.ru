@@ -17,7 +17,7 @@ from le_francais_dictionary.consts import GENRE_CHOICES, \
 	PARTOFSPEECH_CHOICES, \
 	PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
 	GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE, TENSE_CHOICES, \
-	TYPE_CHOICES
+	TYPE_CHOICES, GENRE_EPICENE, GENRE_BOTH
 from le_francais_dictionary.utils import format_text2speech, \
 	create_or_update_repetition, \
 	remove_parenthesis, clean_filename, escape_non_url_characters
@@ -277,6 +277,28 @@ class Word(models.Model):
 		if self._first_translation is None:
 			self._first_translation = self.wordtranslation_set.first()
 		return self._first_translation
+
+	@property
+	def pos_html_class(self):
+		if self.part_of_speech is not None:
+			return f'pos-enabled pos-{self.part_of_speech}'
+		return ''
+
+	@property
+	def genre_html_class(self):
+		if self.genre == GENRE_EPICENE:
+			return 'genre-enabled genre-epicene'
+		elif self.genre == GENRE_BOTH:
+			return 'genre-enabled genre-both'
+		elif self.genre == GENRE_MASCULINE:
+			return 'genre-enabled genre-masculine'
+		elif self.genre == GENRE_FEMININE:
+			return 'genre-enabled genre-feminine'
+		return ''
+
+	@property
+	def html_class(self):
+		return f'{self.genre_html_class} {self.pos_html_class}'.strip()
 
 	def last_user_data(self, user):
 		"""
@@ -573,6 +595,10 @@ class WordTranslation(models.Model):
 			return self.word.cd_id
 		else:
 			return None
+
+	@property
+	def html_class(self):
+		return self.word.html_class
 
 	def to_dict(self):
 		return {

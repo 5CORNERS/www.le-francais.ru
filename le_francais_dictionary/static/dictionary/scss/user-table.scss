@@ -104,14 +104,14 @@ tr.selected .fa-star, tr.selected .fa-star-half-alt {
   color: #dda601 !important;
 }
 
-table .filter-option-inner-inner{
+table .filter-option-inner-inner {
   font-weight: bold;
   color: #212529;
 }
 
 div.dataTables_wrapper div.dataTables_info {
-    padding-top: 0 !important;
-    white-space: nowrap;
+  padding-top: 0 !important;
+  white-space: nowrap;
 }
 
 #getAndApplyFilters {
@@ -119,11 +119,11 @@ div.dataTables_wrapper div.dataTables_info {
 }
 
 .play {
-    margin-right: 10px;
-    margin-top: 4px;
-    float: left;
-    color: #6c757dad;
-    cursor: pointer;
+  margin-right: 10px;
+  margin-top: 4px;
+  float: left;
+  color: #6c757dad;
+  cursor: pointer;
 }
 
 th#stars {
@@ -136,7 +136,7 @@ th .bootstrap-select {
 }
 
 .table-sm td, .table-sm th {
-    padding: 0.2rem;
+  padding: 0.2rem;
 }
 
 //th:nth-child(4), th:nth-child(5) {
@@ -144,7 +144,7 @@ th .bootstrap-select {
 //}
 
 th.dt-checkboxes-cell {
-    padding: 5px !important;
+  padding: 5px !important;
 }
 
 .get-list-button {
@@ -173,4 +173,51 @@ th.dt-checkboxes-cell {
       display: inline
     }
   }
+}
+
+.pos-phrase {
+  font-style: italic;
+}
+
+.pos-enabled {
+  transition: color 0.5s;
+
+  &.pos-verb {
+    color: #0f8710
+  }
+}
+
+.genre-enabled {
+  transition: color 0.5s;
+
+  &.genre-masculine {
+    &.pos-nom, &.pos-adj {
+      //color: #a81d45;
+      color: var(--red);
+    }
+  }
+
+  &.genre-feminine {
+    &.pos-nom, &.pos-adj {
+      color: #0c71c0
+    }
+  }
+
+  &.genre-both, &.genre-epicene {
+    &.pos-nom, &.pos-adj {
+      color: #743ea9;
+    }
+  }
+}
+
+.genre-disabled {
+  transition: color 0.5s;
+  font-style: inherit;
+  color: inherit;
+}
+
+.pos-disabled {
+  transition: color 0.5s;
+  font-style: inherit;
+  color: inherit;
 }

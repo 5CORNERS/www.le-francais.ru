@@ -86,6 +86,13 @@
                                    for="showDeleted">Показывать
                                 исключенные</label>
                         </div>
+                    <div class="form-check-inline mb-1 mr-sm-2">
+                            <input class="form-check-input" type="checkbox"
+                                   id="enableColorCoding" checked
+                            >
+                            <label class="form-check-label"
+                                   for="enableColorCoding">Цветовое кодирование</label>
+                        </div>
                 </div>
                 <div class="table-responsive">
                     {% include 'dictionary/words_table.html' with table=table %}
