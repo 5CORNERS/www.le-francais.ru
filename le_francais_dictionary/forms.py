@@ -61,8 +61,8 @@ class WordsManagementFilterForm(forms.Form):
 			# ('_checkbox', "<input type='checkbox'>",'text',  True, False, False, None, None, '<input type="checkbox">'),
 			('id', 'ID', None, False, False, False, None, None, attrgetter('pk')),
 			('deleted', 'Удалено', None, False, False, False, methodcaller('is_marked', self.user), None, methodcaller('is_marked', self.user)),
-			('word', 'Слово', None, True, True, True, None, None, attrgetter('word')),
-			('translation', 'Перевод', None, True, True, True,  None, None, attrgetter('first_translation.translation')),
+			('word', 'Слово', attrgetter('html_class'), True, True, True, None, None, attrgetter('word')),
+			('translation', 'Перевод', attrgetter('html_class'), True, True, True,  None, None, attrgetter('first_translation.translation')),
 			('repetitions', '<i class="lamp-icon" title="На сколько вы продвинулись в запоминании слова"></i>', None, True, True, True, methodcaller('repetitions_count', self.user), None, methodcaller('repetitions_count', self.user)),
 			('stars', 'Оценка <button class="btn funnel-filter-button" id="starsFilterContainer"></button>', 'cell-stars', True, True, True,  methodcaller('mean_quality_filter_value', self.user), methodcaller('mean_quality_filter_value', self.user), methodcaller('mean_quality', self.user)),
 		]
@@ -112,7 +112,7 @@ class WordsManagementFilterForm(forms.Form):
 						value=column[-1] if not callable(column[-1]) else column[-1](word),
 						filter_value=column[-3] if not callable(column[-3]) else column[-3](word),
 						visible=column[3],
-						cls=column[2],
+						cls=column[2] if not callable(column[2]) else column[2](word),
 					) for column in self.COLUMNS]
 				) for word in words],
 				empty='Выберите уроки (можно одновременно выбирать несколько) и нажмите на кнопку «Получить список слов».',
