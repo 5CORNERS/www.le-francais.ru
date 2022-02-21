@@ -190,7 +190,7 @@ th.dt-checkboxes-cell {
 .genre-cc-enabled {
   transition: color 0.5s;
 
-  &.genre-masculine {
+  &.genre-masculine, &.genre-both {
     &.pos-nom, &.pos-adj {
       //color: #a81d45;
       color: #0c71c0

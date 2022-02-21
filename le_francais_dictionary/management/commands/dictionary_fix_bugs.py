@@ -21,6 +21,7 @@ COL_FR_MP3 = 'FR MP3'
 COL_PLACE = 'Место'
 COL_DETAILS = 'Детали'
 COL_ACTION = 'ACTION'
+COL_GENRE = 'GEN'
 
 DETAILS_MASCULINE_TO_FEMININE = 'ж.р. произносится м. голосом'
 DETAILS_FEMININE_TO_MASCULINE = 'м.р. произносится ж. голосом'
@@ -120,3 +121,7 @@ class Command(BaseCommand):
                     url = RU_WORDS_URL + row[COL_RU_MP3]
                     translation._polly_url = url
                 translation.save()
+
+            if row[COL_GENRE]:
+                word.genre = row[COL_GENRE]
+                word.save()
