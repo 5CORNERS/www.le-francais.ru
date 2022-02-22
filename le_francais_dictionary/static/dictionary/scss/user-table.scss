@@ -76,9 +76,56 @@ table.dataTable.stripe tbody > tr.odd.selected, table.dataTable.stripe tbody > t
   background-color: #337ab759;
 }
 
-table.dataTable.hover tbody > tr.selected:hover, table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover, table.dataTable.display tbody > tr > .selected:hover {
-  color: white;
-  background-color: #0271d0;
+.pos-phrase {
+  font-style: italic;
+}
+
+.pos-cc-enabled {
+  transition: color 0.5s;
+
+  &.pos-verb {
+    color: #0f8710
+  }
+
+  tr.selected:hover > & {
+    color: inherit;
+  }
+}
+
+.genre-cc-enabled {
+  transition: color 0.5s;
+
+  &.genre-masculine, &.genre-both {
+    &.pos-nom, &.pos-adj {
+      //color: #a81d45;
+      color: #0c71c0
+    }
+  }
+
+  &.genre-feminine {
+    &.pos-nom, &.pos-adj {
+      color: var(--red);
+    }
+  }
+
+  &.genre-epicene {
+    &.pos-nom, &.pos-adj {
+      color: #743ea9;
+    }
+  }
+  tr.selected:hover > & {
+    color: inherit;
+  }
+}
+
+.genre-cc-disabled {
+  transition: color 0.2s;
+  color: inherit;
+}
+
+.pos-cc-disabled {
+  transition: color 0.2s;
+  color: inherit;
 }
 
 table.dataTable.hover tbody > tr.selected:hover, table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover, table.dataTable.display tbody > tr > .selected:hover {
@@ -173,49 +220,4 @@ th.dt-checkboxes-cell {
       display: inline
     }
   }
-}
-
-.pos-phrase {
-  font-style: italic;
-}
-
-.pos-cc-enabled {
-  transition: color 0.5s;
-
-  &.pos-verb {
-    color: #0f8710
-  }
-}
-
-.genre-cc-enabled {
-  transition: color 0.5s;
-
-  &.genre-masculine, &.genre-both {
-    &.pos-nom, &.pos-adj {
-      //color: #a81d45;
-      color: #0c71c0
-    }
-  }
-
-  &.genre-feminine {
-    &.pos-nom, &.pos-adj {
-      color: var(--red);
-    }
-  }
-
-  &.genre-epicene {
-    &.pos-nom, &.pos-adj {
-      color: #743ea9;
-    }
-  }
-}
-
-.genre-cc-disabled {
-  transition: color 0.2s;
-  color: inherit;
-}
-
-.pos-cc-disabled {
-  transition: color 0.2s;
-  color: inherit;
 }
