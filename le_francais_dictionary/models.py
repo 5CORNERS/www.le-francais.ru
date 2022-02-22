@@ -508,11 +508,12 @@ class Word(models.Model):
 			voice_string = f'<speak>{self.word}</speak>'
 		voice_url = google_cloud_tts(
 			voice_string,
-			filename=f'{self.word}_synth',
+			ssml=True,
+			filename=f'{escape_non_url_characters(remove_parenthesis(self.word))}_synth',
 			language=LANGUAGE_CODE_FR,
 			genre=self.genre,
 			file_id=self.cd_id,
-			file_title=self.word,
+			file_title=remove_parenthesis(self.word),
 			ftp_path=FTP_FR_WORDS_PATH,
 		)
 		self._polly_url = voice_url
@@ -660,11 +661,12 @@ class WordTranslation(models.Model):
 			voice_string = f'<speak>{self.translation}</speak>'
 		voice_url = google_cloud_tts(
 			voice_string,
-			filename=f'{self.translation}_synth',
+			ssml=True,
+			filename=f'{escape_non_url_characters(remove_parenthesis(self.translation))}_synth',
 			language=LANGUAGE_CODE_RU,
 			genre=self.genre,
 			file_id=self.cd_id,
-			file_title=self.translation,
+			file_title=remove_parenthesis(self.translation),
 			ftp_path=FTP_RU_WORDS_PATH,
 		)
 		self._polly_url = voice_url
