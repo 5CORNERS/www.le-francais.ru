@@ -1,9 +1,10 @@
-var dt;
-var $globalCheckbox;
-var $selectStars;
-var $table = $('#wordsTable');
-var style = getComputedStyle(document.body);
-var checked_ids = [];
+let dt;
+let $globalCheckbox;
+let $selectStars;
+let $table = $('#wordsTable');
+let style = getComputedStyle(document.body);
+let checked_ids = [];
+let colorCodingEnabled = true;
 
 
 function showDeleted(checked) {
@@ -14,6 +15,7 @@ function showDeleted(checked) {
         let pattern = '^False$';
         dt.api().column(2).search(pattern, true, false).draw()
     }
+    switchColorCoding(colorCodingEnabled)
 }
 
 function visibleCheckboxes(x) {
@@ -23,6 +25,17 @@ function visibleCheckboxes(x) {
 function visibleWordData(x) {
     dt.api().column(5).visible(x);
     dt.api().column(6).visible(x);
+}
+
+function switchColorCoding(x){
+    if (x === true) {
+        $('.genre-cc-disabled').removeClass('genre-cc-disabled').addClass('genre-cc-enabled')
+        $('.pos-cc-disabled').removeClass('pos-cc-disabled').addClass('pos-cc-enabled')
+    } else if (x === false) {
+        $('.genre-cc-enabled').removeClass('genre-cc-enabled').addClass('genre-cc-disabled')
+        $('.pos-cc-enabled').removeClass('pos-cc-enabled').addClass('pos-cc-disabled')
+    }
+    colorCodingEnabled = x;
 }
 
 function emptyTable(s) {
@@ -94,7 +107,7 @@ let loadFilterButton = {
             }
         });
     },
-    getFilters: function(complete, args=[]){
+    getFilters: function(after_complete, args=[]){
         if (FILTER_SAVING_ON === false){
             tableFilters = tableFiltersInit.valueOf();
                     tableFiltersLoaded = false;
@@ -119,7 +132,7 @@ let loadFilterButton = {
                 }
             },
             complete: function () {
-                complete(...args)
+                after_complete(...args)
             }
         })
     },
@@ -157,6 +170,7 @@ let loadFilterButton = {
             savingFiltersEnabled = true;
         }, -1); // FIXME: find a way to select checkboxes on hidden pages
         loadFilterButton.setStateNoFilters()
+        switchColorCoding(colorCodingEnabled)
     },
     loadAndFilter: function () {
         loadFilterButton.setStateLoading();
@@ -375,6 +389,13 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                         add_selected_filtered_alert(dt)
                     });
 
+                    let $enableColorCodingInput = $('#enableColorCoding')
+                    switchColorCoding($enableColorCodingInput[0].checked)
+                    $enableColorCodingInput.on('change', function (e) {
+                        e.preventDefault();
+                        switchColorCoding(this.checked)
+                    })
+
                     bind_play_icons();
                     $dt.on('page.dt', (e, settings) => {
                         setTimeout(bind_play_icons, 1000)
@@ -398,6 +419,7 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                     if (afterInit !== undefined) {
                         afterInit()
                     }
+                    switchColorCoding(colorCodingEnabled)
                 }
             })
         },

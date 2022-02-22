@@ -21,6 +21,7 @@ COL_FR_MP3 = 'FR MP3'
 COL_PLACE = 'Место'
 COL_DETAILS = 'Детали'
 COL_ACTION = 'ACTION'
+COL_GENRE = 'GEN'
 
 DETAILS_MASCULINE_TO_FEMININE = 'ж.р. произносится м. голосом'
 DETAILS_FEMININE_TO_MASCULINE = 'м.р. произносится ж. голосом'
@@ -78,7 +79,7 @@ class Command(BaseCommand):
                 word.genre = GENRE_FEMININE
             elif details == DETAILS_FEMININE_TO_MASCULINE and word.genre == GENRE_FEMININE:
                 word.genre = GENRE_MASCULINE
-            if row[COL_FR_MP3] or row[COL_FR_REWRITE] or row[COL_FR_SYNTH_STRING] or place in [PLACE_FR, PLACE_RU_FR]:
+            if row[COL_FR_MP3] or row[COL_FR_REWRITE] or row[COL_FR_SYNTH_STRING] or place in [PLACE_FR, PLACE_RU_FR] or row[COL_GENRE]:
                 if row[COL_FR_REWRITE]:
                     word.word = row[COL_FR_REWRITE]
                 if row[COL_FR_SYNTH_STRING]:
@@ -97,6 +98,8 @@ class Command(BaseCommand):
                         new_file.close()
                     url = FR_WORDS_URL + row[COL_FR_MP3]
                     word._polly_url = url
+                if row[COL_GENRE]:
+                    word.genre = row[COL_GENRE]
                 word.save()
 
             if row[COL_RU_REWRITE] or row[COL_RU_SYNTH_STRING] or row[COL_RU_MP3] or place in [PLACE_RU, PLACE_RU_FR]:

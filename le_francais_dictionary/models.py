@@ -17,7 +17,7 @@ from le_francais_dictionary.consts import GENRE_CHOICES, \
 	PARTOFSPEECH_CHOICES, \
 	PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
 	GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE, TENSE_CHOICES, \
-	TYPE_CHOICES
+	TYPE_CHOICES, GENRE_EPICENE, GENRE_BOTH
 from le_francais_dictionary.utils import format_text2speech, \
 	create_or_update_repetition, \
 	remove_parenthesis, clean_filename, escape_non_url_characters
@@ -29,6 +29,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+ADJECTIVE_GENRE_PARENTHESIS_PATTERN = '(\(.+?\))'
 
 class Packet(models.Model):
 	name = models.CharField(max_length=128)
@@ -278,6 +279,39 @@ class Word(models.Model):
 			self._first_translation = self.wordtranslation_set.first()
 		return self._first_translation
 
+	@property
+	def pos_html_class(self):
+		if self.part_of_speech is not None:
+			return f'pos-cc-enabled pos-{self.part_of_speech}'
+		return ''
+
+	@property
+	def genre_html_class(self):
+		if self.genre == GENRE_EPICENE:
+			return 'genre-cc-enabled genre-epicene'
+		elif self.genre == GENRE_BOTH:
+			return 'genre-cc-enabled genre-both'
+		elif self.genre == GENRE_MASCULINE:
+			return 'genre-cc-enabled genre-masculine'
+		elif self.genre == GENRE_FEMININE:
+			return 'genre-cc-enabled genre-feminine'
+		return ''
+
+	@property
+	def html_class(self):
+		return f'{self.genre_html_class} {self.pos_html_class}'.strip()
+
+
+	@property
+	def table_html(self):
+		if self.part_of_speech == PARTOFSPEECH_ADJECTIVE and self.genre == GENRE_BOTH:
+			return re.sub(
+				ADJECTIVE_GENRE_PARENTHESIS_PATTERN,
+				r'<span class="genre-cc-enabled genre-feminine pos-cc-enabled pos-adj">\1</span>',
+				self.word
+			)
+		return self.word
+
 	def last_user_data(self, user):
 		"""
 		Returns:
@@ -474,11 +508,12 @@ class Word(models.Model):
 			voice_string = f'<speak>{self.word}</speak>'
 		voice_url = google_cloud_tts(
 			voice_string,
-			filename=f'{self.word}_synth',
+			ssml=True,
+			filename=f'{escape_non_url_characters(remove_parenthesis(self.word))}_synth',
 			language=LANGUAGE_CODE_FR,
 			genre=self.genre,
 			file_id=self.cd_id,
-			file_title=self.word,
+			file_title=remove_parenthesis(self.word),
 			ftp_path=FTP_FR_WORDS_PATH,
 		)
 		self._polly_url = voice_url
@@ -574,6 +609,20 @@ class WordTranslation(models.Model):
 		else:
 			return None
 
+	@property
+	def html_class(self):
+		return self.word.html_class
+
+	@property
+	def table_html(self):
+		if self.word.part_of_speech == PARTOFSPEECH_ADJECTIVE and self.word.genre == GENRE_BOTH:
+			return re.sub(
+				ADJECTIVE_GENRE_PARENTHESIS_PATTERN,
+				r'<span class="genre-cc-enabled genre-feminine pos-cc-enabled pos-adj">\1</span>',
+				self.translation
+			)
+		return self.translation
+
 	def to_dict(self):
 		return {
 			'translation': self.translation,
@@ -612,11 +661,12 @@ class WordTranslation(models.Model):
 			voice_string = f'<speak>{self.translation}</speak>'
 		voice_url = google_cloud_tts(
 			voice_string,
-			filename=f'{self.translation}_synth',
+			ssml=True,
+			filename=f'{escape_non_url_characters(remove_parenthesis(self.translation))}_synth',
 			language=LANGUAGE_CODE_RU,
 			genre=self.genre,
 			file_id=self.cd_id,
-			file_title=self.translation,
+			file_title=remove_parenthesis(self.translation),
 			ftp_path=FTP_RU_WORDS_PATH,
 		)
 		self._polly_url = voice_url
