@@ -13,9 +13,9 @@
 	<script>
 	function clickTab (tabID) {
         if (!clickedTabs.includes(tabID)){
+            clickedTabs.push(tabID)
             $(document).ready(function(a) {
               reloadPage(LESSON_NUMBER, tabID)
-              clickedTabs.push(tabID)
             })
         }
 	}
