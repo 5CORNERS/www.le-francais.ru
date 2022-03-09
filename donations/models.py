@@ -53,6 +53,14 @@ class Donation(models.Model):
             self._recurrent = self.payment.recurrent
         return self._recurrent
 
+    @property
+    def sum(self):
+        amount = self.amount
+        if self.recurrent:
+            for child in self.payment.children:
+                amount += child.amount / 100
+        return amount
+
     def send_email_notification(self):
         if self.user is not None:
             user = self.user

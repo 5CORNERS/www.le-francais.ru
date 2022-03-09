@@ -1,0 +1,95 @@
+.project-meta{
+  @media (min-width: 568px) {
+    padding-right: 0;
+    padding-left: 0;
+  }
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 16px;
+  }
+  @media (min-width: 900px) {
+    flex: 0 0 370px;
+    max-width: 370px;
+  }
+  @media (min-width: 1024px) {
+    max-width: 400px;
+    flex-basis: 400px;
+    padding-top: 20px;
+    padding-left: 32px;
+  }
+  @media (min-width: 1230px){
+    max-width: 430px;
+    flex-basis: 430px;
+    padding: 20px 30px 0 60px;
+  }
+}
+
+.project-meta-grid {  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+  gap: 0 0;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "Collected Collected Collected"
+    "Progress-Bar Progress-Bar Progress-Bar"
+    "Info1 Info2 Info3"
+    "Button Button Button";
+}
+
+.Collected { grid-area: Collected; }
+
+.Progress-Bar {  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0 0;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "Needed . Percents"
+    "Bar Bar Bar";
+  grid-area: Progress-Bar;
+}
+
+.Bar { grid-area: Bar; }
+
+.Needed { grid-area: Needed; justify-self: start}
+
+.Percents { grid-area: Percents; justify-self: end}
+
+.Info1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0px 0px;
+  grid-template-areas:
+    "info11"
+    "info12";
+  grid-area: Info1;
+}
+.info11 { grid-area: info11; }
+.info12 { grid-area: info12; }
+.Info2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0px 0px;
+  grid-template-areas:
+    "info21"
+    "info22";
+  grid-area: Info2;
+}
+.info21 { grid-area: info21; }
+.info22 { grid-area: info22; }
+.Info3 {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0px 0px;
+  grid-area: Info3;
+}
+.info31 { grid-area: 1 / 1 / 2 / 2; }
+.info32 { grid-area: 2 / 1 / 3 / 2; }
+
+.Button { grid-area: Button; }
