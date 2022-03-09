@@ -1,0 +1,67 @@
+{% extends 'base.html' %}{% load static %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'donations/crowdfunding.css' %}">
+{% endblock %}
+{% block content %}
+    <div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h1">Заголовок</h1>
+            <p>Подзаголовок</p>
+        </div>
+    </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="project-card d-flex flex-wrap mb-4">
+                    <div class="project-media">
+                        <img src="https://dummyimage.com/600x400/000/fff" alt="">
+                    </div>
+                    <div class="project-meta">
+                        <div class="project-meta-grid">
+                            <div class="Collected h2">23097р</div>
+                            <div class="Progress-Bar">
+                                <div class="Bar">
+                                    <div class="progress">
+                                        <div class="progress-bar"
+                                             role="progressbar"
+                                             style="width: 25%"
+                                             aria-valuenow="25"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                <div class="Needed">Из 40000р</div>
+                                <div class="Percents">50%</div>
+                            </div>
+                            <div class="Info1">
+                                <div class="info11">20 раз</div>
+                                <div class="info12">поддержали</div>
+                            </div>
+                            <div class="Info2">
+                                <div class="info21">5 дней</div>
+                                <div class="info22">осталось</div>
+                            </div>
+                            <div class="Info3">
+                                <div class="info31">29 декабря</div>
+                                <div class="info32">запущен</div>
+                            </div>
+                            <div class="Button">
+                                <a href="">
+                                    <button type="button"
+                                            class="btn btn-lg btn-primary">
+                                        Помочь проекту
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                {% lorem 5 p random %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

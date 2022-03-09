@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views import View
 
+from donations.forms import SupportForm, CrowdFundingForm
 from donations.models import Donation
 from home.models import BackUrls
 from tinkoff_merchant.consts import DONATIONS
@@ -21,6 +22,7 @@ class SubmitDonation(View):
 		return redirect('donations:donation_page')
 
 	def post(self, request, *args, **kwargs):
+		form = SupportForm(request.POST)
 		recurrent = request.POST.get('type') == 'recurrent'
 		amount = int(request.POST.get('amount'))
 		email = request.POST.get('email', None)
@@ -83,10 +85,20 @@ class SubmitDonation(View):
 
 
 class DonationPage(View):
-	def get(self, request):
-		return render(request, 'donations/base.html')
+	def get(self, request, template_name='base.html'):
+		form = SupportForm({})
+		return render(request, f'donations/{template_name}', {'form': form})
 
 
-# class DonationApiGetInfo(View):
-# 	def get(self, request):
-# 		return ...
+
+def crowdfunding_page(request):
+	return render(request, 'donations/crowdfunding.html')
+
+
+def crowdfunding_form(request):
+	return render(request, 'donations/crowdfunding_form.html')
+
+
+def crowdfunding_submit(request):
+	if request.method=='GET':
+		return redirect(urls.reverse('donations:crowdfunding_form'))
