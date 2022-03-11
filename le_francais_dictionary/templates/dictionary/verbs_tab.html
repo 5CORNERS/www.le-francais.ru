@@ -85,12 +85,13 @@
 									<div class="col text-center">
 										<div class="word-card sex-none">
 											<div class="dummy-row">&nbsp;</div>
-											{% verbatim %}<span class="word-card-phrase">{{ card.verb ?? card.form }}</span>{% endverbatim %}
+											{% verbatim %}<span class="word-card-phrase">{{ getVerbOrForm() }}</span>{% endverbatim %}
 
 										  <br><br><br><br><br>
 
 										  <span class="play-button">
-										  	<img v-if="pause" src="{% static 'dictionary/img/play.svg' %}" v-on:click="togglePause()">
+                                            <img class="fa-spinner fa-pulse" v-if="loadingProgress < loadingProgressMax" src="{% static 'dictionary/img/spinner-solid.svg' %}">
+										  	<img v-else-if="pause" src="{% static 'dictionary/img/play.svg' %}" v-on:click="togglePause()">
 										  	<img v-else src="{% static 'dictionary/img/pause.svg' %}" v-on:click="togglePause()">
 										  </span>
 
@@ -127,6 +128,12 @@
                                                     инфинитивов</label>
                                             </div>
                                         </div>
+                                        <div class="input-group mt-2">
+                                            <div type="checkbox" class="custom-control custom-checkbox">
+                                                <input id="iosModeInput" type="checkbox" class="custom-control-input" v-model="safeMode">
+                                                <label class="custom-control-label" for="iosModeInput">Включить безопасный режим</label>
+                                            </div>
+                                        </div>
                                         <div class="input-group mt-2" v-if="type === TYPE_CHECKING">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text">Пауза на раздумье (задержка перед ответом):</span>
@@ -159,18 +166,25 @@
 			</div>
 		</div>
 	</div>
+    <script src="{% static "components/js/howler.js" %}" type="text/javascript" async></script>
+    <script src="{% static "components/js/vue.js" %}" type="text/javascript" async></script>
     <script>
+        let ua = window.navigator.userAgent;
+        let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+        let webkit = !!ua.match(/WebKit/i);
+        let iOSSafari = iOS && webkit && !ua.match(/CriOS/i);
         [
-            '{% static "components/js/howler.js" %}',
-            '{% static "components/js/vue.js" %}',
-            '{% static "dictionary/js/verbs.js" %}',
+            '{% static "dictionary/js/verbs.min.js" %}'
         ].forEach(src => {
             let script = document.createElement("script");
             script.setAttribute("src", src);
             script.setAttribute("type", "text/javascript");
             script.setAttribute("async", "true");
+            script.setAttribute("id", "verbsScript");
+            script.setAttribute("data-safe-mode", iOSSafari.toString())
             document.getElementsByTagName("head")[0].appendChild(script);
         })
+
     </script>
     </div>
 </div>

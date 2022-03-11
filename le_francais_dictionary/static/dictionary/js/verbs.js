@@ -1,15 +1,15 @@
 (async function () {
 
-    var url_string = window.location.href;
-    var url = new URL(url_string);
-    var $dictApp = $('#dict-app')
+    let url_string = window.location.href;
+    let url = new URL(url_string);
+    let $dictApp = $('#dict-app')
+    let playingInstance = 0
     const currentLessonNumber = $dictApp.data('lesson-number')
     const currentPacketID = $dictApp.data('packet-id');
     const showNegativeDefault = $dictApp.data('show-negative')
     const translateInfinitivesDefault = $dictApp.data('translate-infinitives')
+    const safeMode = $('#verbsScript').data('safe-mode')
 
-    const response = await fetch('/dictionary/verbs/' + currentPacketID);
-    const data = await response.json();
     const LISTENING = 0;
     const CHECKING = 1;
 
@@ -59,7 +59,7 @@
                         src: [TENSE_AUDIO_URLS[tense_key]],
                         preload: true,
                         loop: false,
-                        buffer: true,
+                        buffer: false,
                         html5: true,
                         onload: () => resolve(howl),
                         onloaderror: () => resolve(silence)
@@ -69,64 +69,12 @@
         ))
     )
 
-    var createSound = async function(url) {
-        return new Promise((resolve, reject) => {
-            const howl = new Howl({
-                src: [url],
-                preload: true,
-                loop: false,
-                buffer: true,
-                html5: true,
-                onload: () => resolve(howl),
-                onloaderror: () => resolve(silence)
-            })
-        })
-    }
-
-    let loadCards = async function (packetId, more_lessons = undefined) {
-        let verbs = []
-        let r
-        if (more_lessons !== undefined && typeof more_lessons === 'number') {
-            r = await fetch(`/dictionary/verbs/${packetId}/${more_lessons}`);
-        } else {
-            r = await fetch(`/dictionary/verbs/${packetId}/`)
-        }
-        let d = await r.json();
-        d.verbs.forEach(function (form) {
-            verbs = verbs.concat(form)
-            verbs = verbs.concat(form.forms)
-        });
-
-        return [verbs.map((form) => {
-            return {
-                ...form,
-                flipped: false,
-                formSound: createSound(form.pollyUrl),
-                translationSound: createSound(form.trPollyUrl)
-            }
-        }), d.packets, d.verbListHTML];
-    };
-
     const getAudionDuration = (audio) => {
         return new Promise((resolve, reject) => {
             audio.onloadedmetadata = () => {
                 resolve(audio.duration);
             }
         });
-    }
-
-    async function playSound(sound) {
-        if ((sound === undefined) || (sound === null)) {
-            return 0;
-        }
-        return new Promise((resolve, reject) => {
-            sound.then((howl) => {
-                howl.once('end', () => {
-                    resolve(howl.duration())
-                })
-                howl.play()
-            })
-        })
     }
 
     new Vue({
@@ -170,16 +118,32 @@
             hasParticipe: false,
             selectedLoadMoreOptions:[],
             playing: false,
-            verbListHTML: ''
+            playingSound: undefined,
+            verbListHTML: '',
+            loadingProgress: 0,
+            loadingProgressMax:0,
+            safeMode:false,
         },
 
         async mounted() {
-            let values = await loadCards(currentPacketID);
+            let safeModeLocalStorage = localStorage.getItem('verbsSafeModeEnabled')
+            if (safeModeLocalStorage) {
+                this.safeMode = safeModeLocalStorage;
+            } else {
+                this.safeMode = safeMode;
+            }
+            let values = await this.loadCards(currentPacketID);
             this.cards = values[0];
             this.packets = values[1];
             // this.verbListHTML = values[2]
             this.loadMoreOptions = this.getLoadMoreOptions();
             this.init();
+        },
+
+        watch: {
+            safeMode: function () {
+                localStorage.setItem('verbsSafeModeEnabled', this.safeMode)
+            }
         },
 
         methods: {
@@ -192,6 +156,96 @@
                 this.translation = this.cards[0]['translation']
                 console.log(this.cards);
                 this.hasParticipe = this.cards.filter(card => card.tense === TENSE_PARTICIPE_PASSE).length > 0
+            },
+
+            loadCards: async function (packetId, more_lessons = undefined) {
+                let verbs = []
+                let r
+                if (more_lessons !== undefined && typeof more_lessons === 'number') {
+                    r = await fetch(`/dictionary/verbs/${packetId}/${more_lessons}`);
+                } else {
+                    r = await fetch(`/dictionary/verbs/${packetId}/`)
+                }
+                let d = await r.json();
+                d.verbs.forEach(function (form) {
+                    verbs = verbs.concat(form)
+                    verbs = verbs.concat(form.forms)
+                });
+
+                return [verbs.map((form) => {
+                    return {
+                        ...form,
+                        _this: this,
+                        flipped: false,
+                        _formSound: undefined,
+                        _translationSound: undefined,
+                        get formSound () {
+                            if (this._formSound === undefined) {
+                                this._formSound = this._this.createSound(form.pollyUrl);
+                            }
+                            this._formSound.then((howl) => {
+                                if (howl.state() === 'unloaded' && (this._this.loadingProgress >= this._this.loadingProgressMax || !this.safeMode)) {
+                                    howl.load()
+                                }
+                            })
+                            return this._formSound
+                        },
+                        get translationSound () {
+                            if (this._translationSound === undefined) {
+                                this._translationSound = this._this.createSound(form.trPollyUrl)
+                            }
+                            this._translationSound.then((howl) => {
+                                if (howl.state() === 'unloaded' && (this._this.loadingProgress >= this._this.loadingProgressMax || !this.safeMode)) {
+                                    howl.load()
+                                }
+                            })
+                            return this._translationSound
+                        }
+                    }
+                }), d.packets, d.verbListHTML];
+            },
+
+            createSound: async function (url) {
+                this.loadingProgressMax = this.loadingProgressMax + 1
+                return new Promise((resolve, reject) => {
+                    const howl = new Howl({
+                        src: [url],
+                        preload: true,
+                        loop: false,
+                        buffer: false,
+                        html5: false,
+                        onload: () => {
+                            this.loadingProgress = this.loadingProgress + 1;
+                            resolve(howl)
+                        },
+                        onloaderror: () => resolve(silence)
+                    })
+                })
+            },
+
+            playSound: async function (soundPromise) {
+                if ((soundPromise === undefined) || (soundPromise === null)) {
+                    return 0;
+                }
+                return new Promise((resolve, reject) => {
+                    soundPromise.then((howl) => {
+                        if (howl.state() === 'unloaded') {
+                            howl.load()
+                        }
+                        this.playingSound = howl;
+                        howl.once('end', () => {
+                            console.log(`getting duration of a sound: ${howl}`);
+                            resolve(howl.duration());
+                            if (this.safeMode) {
+                                howl.unload()
+                            }
+                            soundPromise = undefined
+                        })
+                        console.log(`playing a sound: ${howl}`);
+                        window.howl_to_play = howl;
+                        howl.play()
+                    })
+                })
             },
 
             getCurrentParticipeCard: function () {
@@ -312,6 +366,10 @@
                 return words[2];
             },
 
+            getVerbOrForm: function () {
+                return this.card.verb ? this.card.verb : this.card.form;
+            },
+
             message: function (n){
                 if (n >= 5) {
                     return 'пяти'
@@ -371,13 +429,36 @@
                 this.cardsRepeat = this.cards.slice().map((i) => {
                     return {
                         ...i,
+                        _this: this,
                         form: i.translation,
                         verb: i.translation,
                         translation: i.verb || i.form,
                         pollyUrl: i.trPollyUrl,
                         trPollyUrl: i.pollyUrl,
-                        formSound: i.translationSound,
-                        translationSound: i.formSound
+                        _formSound: undefined,
+                        _translationSound: undefined,
+                        get formSound () {
+                            if (this._formSound === undefined){
+                                this._formSound = this._this.createSound(this.pollyUrl)
+                            }
+                            this._formSound.then((howl) => {
+                                if (howl.state() === 'unloaded' && (this._this.loadingProgress >= this._this.loadingProgressMax || !this.safeMode)) {
+                                    howl.load()
+                                }
+                            })
+                            return this._formSound
+                        },
+                        get translationSound () {
+                            if (this._translationSound === undefined) {
+                                this._translationSound = this._this.createSound(this.trPollyUrl)
+                            }
+                            this._translationSound.then((howl) => {
+                                if (howl.state() === 'unloaded' && (this._this.loadingProgress >= this._this.loadingProgressMax || !this.safeMode)) {
+                                    howl.load()
+                                }
+                            })
+                            return this._translationSound
+                        }
                     }
                 })
                 this.shuffle(this.cardsRepeat)
@@ -387,7 +468,7 @@
                 if (!this.pause) {
                     this.pause = true;
                 }
-                let values = await loadCards(currentPacketID);
+                let values = await this.loadCards(currentPacketID);
                 this.cards = values[0];
                 this.packets = values[1];
                 this.init();
@@ -403,7 +484,7 @@
                 if (moreLessons===null) {
                     moreLessons = undefined
                 }
-                let values = await loadCards(currentPacketID, moreLessons);
+                let values = await this.loadCards(currentPacketID, moreLessons);
                 this.cards = values[0];
                 this.packets = values[1];
                 this.init();
@@ -452,12 +533,20 @@
 
 
             togglePause: function () {
+                if (this.loadingProgress < this.loadingProgressMax && this.safeMode){
+                    return
+                }
                 this.pause = !this.pause;
                 if (this.pause === false) {
                     if (this.type === LISTENING) {
-                        this.playCards(this.cards);
+                        this.playCards('togglePause');
                     } else {
-                        this.playCards(this.cardsRepeat);
+                        this.playCards('togglePause');
+                    }
+                } else {
+                    if (this.playing){
+                        this.playing = false;
+                        this.playingSound = undefined
                     }
                 }
             },
@@ -501,7 +590,8 @@
                         }
                     }
                     if (!this.pause) {
-                        this.playCards();
+                        console.log(`Playing next card: ${this.currentCard}`)
+                        this.playCards('playNextCard');
                     }
                 }
             },
@@ -537,13 +627,13 @@
 
             play: async function (sound){
                 if(!this.pause){
-                    return playSound(sound)
+                    return this.playSound(sound)
                 }else{
                     return 0
                 }
             },
 
-            playCards: function () {
+            playCards: function (source='none') {
                 if (this.playing){
                     return
                 }
@@ -552,14 +642,19 @@
                 }
 
                 if (!this.showNegative && this.getCurrentCard().type === CARD_TYPE_NEGATIVE) {
+                    console.log('Playing next card')
                     return this.playNextCard()
                 }
                 if (!this.showParticipe && this.getCurrentCard().tense === TENSE_PARTICIPE_PASSE){
+                    console.log('Playing next card')
                     return this.playNextCard()
                 }else if (this.showParticipe && this.getCurrentCard().tense !== TENSE_PARTICIPE_PASSE){
+                    console.log('Playing next card')
                     return this.playNextCard()
                 }
                 if (!this.pause) {
+                    playingInstance = playingInstance + 1
+                    console.log(`playing instance: ${playingInstance}, source: ${source}`)
                     this.getCurrentCard().flipped = false;
                     this.showCurrentCard()
                     if (this.card.isShownOnDrill || this.type === CHECKING) {
@@ -569,7 +664,7 @@
                         let beforeTranslationTimeout;
                         [afterVerbTimeout, beforeTranslationTimeout] = this.getCardTimeouts(this.currentCard, this.type === LISTENING ? this.cards : this.cardsRepeat)
                         // произносим время, если предыдузая карточка была другого времени
-                        
+
                         let tenseUrl = undefined
                         let tenseSound = undefined
                         let afterTenseTimeout = 0
@@ -628,7 +723,8 @@
                                                 setTimeout(function () {
                                                     _this.playing = false;
                                                     if (!_this.pause){
-                                                        _this.playNextCard()
+                                                        console.log('Playing next card')
+                                                        return _this.playNextCard()
                                                     }
                                                 }, afterVerbTimeout + translationDuration);
                                             }.bind(_this), translationDuration)
@@ -638,6 +734,7 @@
                             }, tenseDuration + afterTenseTimeout)
                         }.bind(_this))
                     }else{
+                        console.log('Playing next card')
                         return this.playNextCard()
                     }
                 }
