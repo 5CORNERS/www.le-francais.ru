@@ -10,6 +10,7 @@
     <script>
         var csrf = "{{ csrf_token }}";
         var starFilterHtml = `<select data-noneSelectedText="Оценка" multiple class="selectpicker" data-sanitize="false" id="starFilter" name="star_filter">{% for choice in star_choices %}<option class="{% if not forloop.first %}star-choice{% endif %}" value="{{ choice.0 }}" data-content="{{ choice.1 }}">{{ choice.0 }}</option>{% endfor %}</select>`;
+        const tableType = "const"
         {% if init_packets %}
             let init_packets = [ {% for p in init_packets %}{{ p }},{% endfor %} ];
         {% else %}
