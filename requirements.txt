@@ -64,9 +64,9 @@ django-npm
 -e git+https://github.com/5CORNERS/pybbm.git#egg=pybbm
 -e git+https://github.com/AntonDumov/django-recaptcha3.git#egg=django-recaptcha3
 
-git+git://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26
-git+git://github.com/AntonDumov/py3-validate-email.git
-git+git://github.com/zostera/django-bootstrap4.git@d3e77d458c00ef97facd35997deaea7b8e311d9e
+git+https://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26
+git+https://github.com/AntonDumov/py3-validate-email.git
+git+https://github.com/zostera/django-bootstrap4.git@d3e77d458c00ef97facd35997deaea7b8e311d9e
 
 pymorphy2
 pymorphy2-dicts
@@ -99,3 +99,5 @@ dictdiffer~=0.8.1
 numpy~=1.18.2
 freezegun~=0.3.15
 django-simple-captcha~=0.5.3
+django-classy-tags~=1.0.0
+django-request-id
