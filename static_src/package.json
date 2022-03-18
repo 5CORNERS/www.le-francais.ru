@@ -14,21 +14,26 @@
     "bootstrap": "^4",
     "bootstrap-select": "^1.13.12",
     "bootstrap-treeview": "github:AntonDumov/bootstrap-treeview#1.2.1",
-    "bower": "^1.8.8",
     "del": "^5.1.0",
-    "gulp": "^4.0.2",
-    "gulp-minify-css": "^1.2.4",
-    "gulp-sass": "^4.0.2",
-    "gulp-uglify": "^3.0.2",
     "howler": "^2.2.1",
     "jquery": "^3.4.1",
     "jquery.simple-checkbox-table": "github:toshiyukihina/jquery-simple-checkbox-table",
     "js-cookie": "^2.2.1",
     "moment": "^2.24.0",
     "popper.js": "^1",
-    "vue": "2.5.13",
+    "vue": "2.6.14",
     "vue-multiselect": "^2.1.6",
-    "webpack-stream": "^5.2.1"
+    "webpack-stream": "^5.2.1",
+    "datatables.net-bs4": "^1.11.5"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "bower": "^1.8.8",
+    "gulp": "^4.0.2",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-sass": "^4.0.2",
+    "gulp-uglify": "^3.0.2"
+  },
+  "overrides": {
+    "graceful-fs": "^4.2.9"
+  }
 }
