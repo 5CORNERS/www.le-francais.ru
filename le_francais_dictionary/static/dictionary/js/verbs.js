@@ -127,8 +127,8 @@
 
         async mounted() {
             let safeModeLocalStorage = localStorage.getItem('verbsSafeModeEnabled')
-            if (safeModeLocalStorage) {
-                this.safeMode = safeModeLocalStorage;
+            if (safeModeLocalStorage === 'true') {
+                this.safeMode = true;
             } else {
                 this.safeMode = safeMode;
             }
@@ -161,7 +161,7 @@
             loadCards: async function (packetId, more_lessons = undefined) {
                 let verbs = []
                 let d
-                if (verbs_data === undefined){
+                if (typeof verbs_data === 'undefined'){
                     let r
                     if (more_lessons !== undefined && typeof more_lessons === 'number') {
                         r = await fetch(`/dictionary/verbs/${packetId}/${more_lessons}`);
