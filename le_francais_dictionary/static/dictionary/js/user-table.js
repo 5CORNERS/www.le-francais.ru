@@ -346,7 +346,7 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                 ],
                 'select': 'multi+shift',
                 'searching': true,
-                'ordering': false,
+                'ordering':  isVerbs(),
                 'paging': true,
                 "pageLength": initialPageLength,
                 "lengthMenu": [ [50, 100, 250, 500, -1], [50, 100, 250, 500, "Все"] ],
