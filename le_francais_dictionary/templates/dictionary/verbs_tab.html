@@ -166,26 +166,6 @@
 			</div>
 		</div>
 	</div>
-    <script src="{% static "components/js/howler.js" %}" type="text/javascript" async></script>
-    <script src="{% static "components/js/vue.js" %}" type="text/javascript" async></script>
-    <script>
-        let ua = window.navigator.userAgent;
-        let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
-        let webkit = !!ua.match(/WebKit/i);
-        let iOSSafari = iOS && webkit && !ua.match(/CriOS/i);
-        [
-            '{% static "dictionary/js/verbs.min.js" %}'
-        ].forEach(src => {
-            let script = document.createElement("script");
-            script.setAttribute("src", src);
-            script.setAttribute("type", "text/javascript");
-            script.setAttribute("async", "true");
-            script.setAttribute("id", "verbsScript");
-            script.setAttribute("data-safe-mode", iOSSafari.toString())
-            document.getElementsByTagName("head")[0].appendChild(script);
-        })
-
-    </script>
     </div>
 </div>
 <div class="col-12">
@@ -230,6 +210,28 @@
         </div>
     </div>
 </div>
+<script src="{% static "components/js/howler.js" %}"
+        type="text/javascript" async></script>
+<script src="{% static "components/js/vue.js" %}"
+        type="text/javascript" async></script>
+<script>
+    let ua = window.navigator.userAgent;
+    let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+    let webkit = !!ua.match(/WebKit/i);
+    let iOSSafari = iOS && webkit && !ua.match(/CriOS/i);
+    [
+        '{% static "dictionary/js/verbs.js" %}'
+    ].forEach(src => {
+        let script = document.createElement("script");
+        script.setAttribute("src", src);
+        script.setAttribute("type", "text/javascript");
+        script.setAttribute("async", "true");
+        script.setAttribute("id", "verbsScript");
+        script.setAttribute("data-safe-mode", iOSSafari.toString())
+        document.getElementsByTagName("head")[0].appendChild(script);
+    })
+
+</script>
 <script>
     $('#verbs-collapse-button-one').click(function (e) {
         $('#verbs-collapse-button-one > i').toggleClass('fa-arrow-down').toggleClass('fa-arrow-up');

@@ -160,17 +160,22 @@
 
             loadCards: async function (packetId, more_lessons = undefined) {
                 let verbs = []
-                let r
-                if (more_lessons !== undefined && typeof more_lessons === 'number') {
-                    r = await fetch(`/dictionary/verbs/${packetId}/${more_lessons}`);
-                } else {
-                    r = await fetch(`/dictionary/verbs/${packetId}/`)
+                let d
+                if (verbs_data === undefined){
+                    let r
+                    if (more_lessons !== undefined && typeof more_lessons === 'number') {
+                        r = await fetch(`/dictionary/verbs/${packetId}/${more_lessons}`);
+                    } else {
+                        r = await fetch(`/dictionary/verbs/${packetId}/`)
+                    }
+                    d = await r.json();
+                }else{
+                    d = verbs_data
                 }
-                let d = await r.json();
                 d.verbs.forEach(function (form) {
-                    verbs = verbs.concat(form)
-                    verbs = verbs.concat(form.forms)
-                });
+                        verbs = verbs.concat(form)
+                        verbs = verbs.concat(form.forms)
+                    });
 
                 return [verbs.map((form) => {
                     return {

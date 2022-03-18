@@ -6,6 +6,9 @@ let style = getComputedStyle(document.body);
 let checked_ids = [];
 let colorCodingEnabled = true;
 
+const isVerbs = function () {
+    return tableType === "verbs"
+}
 
 function showDeleted(checked) {
     if (checked) {
@@ -16,6 +19,26 @@ function showDeleted(checked) {
         dt.api().column(2).search(pattern, true, false).draw()
     }
     switchColorCoding(colorCodingEnabled)
+}
+
+function hideRegular(checked) {
+    if (checked) {
+        let pattern = '^False$';
+        dt.api().column(3).search(pattern, true, false).draw()
+    } else {
+        let pattern = '^True|False$';
+        dt.api().column(3).search(pattern, true, false).draw()
+    }
+}
+
+function hideNegative(checked) {
+    if (checked) {
+        let pattern = '^0$';
+        dt.api().column(2).search(pattern, true, false).draw()
+    } else {
+        let pattern = '^0|1$';
+        dt.api().column(2).search(pattern, true, false).draw()
+    }
 }
 
 function visibleCheckboxes(x) {
@@ -228,7 +251,7 @@ function select(elm, value){
 }
 
 function saveFilters(process, filterIds, filterAttrs, value=undefined, checked=undefined){
-    if (!savingFiltersEnabled){
+    if (!savingFiltersEnabled || isVerbs()){
         return
     }
     $.each(filterIds, function (i, filterId) {
@@ -278,7 +301,8 @@ function applyFilters(process, filters){
 
 function updateTable(afterInit=undefined, initialPageLength=50) {
     let form = $('#filterWordsForm');
-    let url = Urls['dictionary:my_words']();
+    let url;
+    url = isVerbs() ? Urls['dictionary:my_verbs']() : Urls['dictionary:my_words']();
 
     $.ajax(url, {
         type: 'POST',
@@ -288,7 +312,9 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
             $table.html(r.table);
             if (dt !== undefined) {
                 dt.api().destroy();
-                $selectStars.remove();
+                if (!isVerbs()) {
+                    $selectStars.remove();
+                }
             }
             $table.DataTable({
                 'dom':
@@ -314,12 +340,13 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                         'checkboxes': {
                             'selectRow': true,
                             'selectAllRender': '<div class="checkbox"><input type="checkbox" id="checkbox-select-all" class="dt-checkboxes"><label></label></div>'
-                        }
+                        },
+                        'orderable': false
                     }
                 ],
                 'select': 'multi+shift',
                 'searching': true,
-                'ordering':  false,
+                'ordering': false,
                 'paging': true,
                 "pageLength": initialPageLength,
                 "lengthMenu": [ [50, 100, 250, 500, -1], [50, 100, 250, 500, "Все"] ],
@@ -327,11 +354,11 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                     "processing": "Подождите...",
                     "search": "Поиск:",
                     "lengthMenu": "Показывать: _MENU_",
-                    "info": "Слова с _START_ до _END_ из _TOTAL_",
-                    "infoEmpty": "Слова с 0 до 0 из 0",
+                    "info": `${isVerbs() ? 'Глаголы' : 'Слова'} с _START_ до _END_ из _TOTAL_`,
+                    "infoEmpty": `${isVerbs() ? 'Глаголы' : 'Слова'} с 0 до 0 из 0`,
                     "infoFiltered": "(отфильтровано из _MAX_ записей)",
                     "infoPostFix": "",
-                    "loadingRecords": "Загрузка слов...",
+                    "loadingRecords": `Загрузка ${isVerbs() ? 'глаголов' : 'слов'}...`,
                     "zeroRecords": "Слова отсутствуют.",
                     "emptyTable": "В таблице отсутствуют данные",
                     "paginate": {
@@ -346,9 +373,9 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                     },
                     "select": {
                         "rows": {
-                            "_": "Выбрано слов: %d",
-                            "0": "Кликните по слову для выбора",
-                            "1": "Выбрано одно слово"
+                            "_": `Выбрано ${isVerbs() ? 'глаголов' : 'слов'}: %d`,
+                            "0": `Кликните по ${isVerbs() ? 'глаголу' : 'слову'} для выбора`,
+                            "1": isVerbs() ? "Выбран один глагол" : "Выбрано одно слово"
                         }
                     }
                 },
@@ -357,44 +384,61 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                     let $dt = $(dt)
                     let tableCompleteEvent = new Event('tableComplete')
                     document.dispatchEvent(tableCompleteEvent)
-                    saveFilters('beforeLoad', ['id_packets'], []);
-                    // adding star filter
-                    this.api().columns(-1).every(function () {
-                        let column = this;
-                        $(column.header()).empty();
-                        $(starFilterHtml).appendTo($(column.header())).selectpicker({
-                            'noneSelectedText': "Оценка",
-                            'header': 'Оценка',
-                            'selectedTextFormat': 'count > 1',
-                        }).on('change', function () {
-                            saveFilters('afterLoad', [this.id], []);
-                            let pattern = $(this).find(':selected').map(function () {
-                                return $(this).text()
-                            }).get().join('|');
-                            if (pattern === ''){
-                                dt.api().column(-1).search(pattern, false, true).draw();
-                            }else {
-                                pattern = `^${pattern}$`;
-                                dt.api().column(-1).search(pattern, true, false).draw();
-                            }
+                    if (!isVerbs()) {
+                        saveFilters('beforeLoad', ['id_packets'], []);
+                        // adding star filter
+                        this.api().columns(-1).every(function () {
+                            let column = this;
+                            $(column.header()).empty();
+                            $(starFilterHtml).appendTo($(column.header())).selectpicker({
+                                'noneSelectedText': "Оценка",
+                                'header': 'Оценка',
+                                'selectedTextFormat': 'count > 1'
+                            }).on('change', function () {
+                                saveFilters('afterLoad', [this.id], []);
+                                let pattern = $(this).find(':selected').map(function () {
+                                    return $(this).text()
+                                }).get().join('|');
+                                if (pattern === '') {
+                                    dt.api().column(-1).search(pattern, false, true).draw();
+                                } else {
+                                    pattern = `^${pattern}$`;
+                                    dt.api().column(-1).search(pattern, true, false).draw();
+                                }
+                                add_selected_filtered_alert(dt)
+                            });
+                            $selectStars = $('#starFilter');
+                        });
+                        showDeleted($('#showDeleted')[0].checked);
+                        $('#showDeleted').on('change', function (e) {
+                            e.preventDefault();
+                            saveFilters('afterLoad', [this.id], ['checked']);
+                            showDeleted(this.checked);
                             add_selected_filtered_alert(dt)
                         });
-                        $selectStars = $('#starFilter');
-                    });
-                    showDeleted($('#showDeleted')[0].checked);
-                    $('#showDeleted').on('change', function (e) {
-                        e.preventDefault();
-                        saveFilters('afterLoad', [this.id], ['checked']);
-                        showDeleted(this.checked);
-                        add_selected_filtered_alert(dt)
-                    });
 
-                    let $enableColorCodingInput = $('#enableColorCoding')
-                    switchColorCoding($enableColorCodingInput[0].checked)
-                    $enableColorCodingInput.on('change', function (e) {
-                        e.preventDefault();
-                        switchColorCoding(this.checked)
-                    })
+                        let $enableColorCodingInput = $('#enableColorCoding')
+                        switchColorCoding($enableColorCodingInput[0].checked)
+                        $enableColorCodingInput.on('change', function (e) {
+                            e.preventDefault();
+                            switchColorCoding(this.checked)
+                        })
+                        switchColorCoding(colorCodingEnabled)
+                    }else{
+                        let $hideRegularCheckbox = $('#hideRegular')
+                        hideRegular($hideRegularCheckbox[0].checked)
+                        $hideRegularCheckbox.on('change', function (e) {
+                            e.preventDefault();
+                            hideRegular(this.checked)
+                        });
+                        let $hideNegativeCheckbox = $('#hideNegative');
+                        hideNegative($hideNegativeCheckbox[0].checked);
+                        $hideNegativeCheckbox.on('change', function (e){
+                            e.preventDefault();
+                            hideNegative(this.checked)
+                        })
+                    }
+
 
                     bind_play_icons();
                     $dt.on('page.dt', (e, settings) => {
@@ -419,7 +463,7 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                     if (afterInit !== undefined) {
                         afterInit()
                     }
-                    switchColorCoding(colorCodingEnabled)
+
                 }
             })
         },
@@ -481,7 +525,7 @@ $(document).ready(function () {
         let ids=get_selected_filtered(dt);
         if(ids.length === 0){
             $('#startApp').popover({
-                'content': "Вы не выбрали ни одного слова",
+                'content': `Вы не выбрали ни одного ${isVerbs() ? 'глагола' : 'слова'}`,
                 'placement': 'auto',
                 'trigger': 'manual',
                 'container': 'body',
@@ -490,7 +534,7 @@ $(document).ready(function () {
             setTimeout(function () {
                 $('#startApp').popover('hide').popover('dispose')
             }, 2000)
-        }else{
+        }else if (!isVerbs()){
             $('#startApp').popover('dispose');
             $.ajax(Urls['dictionary:app'](), {
             type: 'POST',
@@ -506,8 +550,15 @@ $(document).ready(function () {
             },
             beforeSend: emptyTable('')
 
-        })
-}
+        })} else {
+            let url = Urls['dictionary:app_verbs']()
+            let getParams = new URLSearchParams()
+            ids.forEach(function (id, i) {
+                getParams.append('v', id.toString())
+            })
+            url += '?' + getParams.toString()
+            window.location.href = url
+        }
     });
     $('#markWords').on('click', function () {
         let ids=get_selected_filtered(dt);
