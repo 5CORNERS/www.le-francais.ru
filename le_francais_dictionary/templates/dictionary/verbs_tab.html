@@ -131,7 +131,7 @@
                                         <div class="input-group mt-2">
                                             <div type="checkbox" class="custom-control custom-checkbox">
                                                 <input id="iosModeInput" type="checkbox" class="custom-control-input" v-model="safeMode">
-                                                <label class="custom-control-label" for="iosModeInput">Включить безопасный режим</label>
+                                                <label class="custom-control-label" for="iosModeInput">Устранение неполадок</label>
                                             </div>
                                         </div>
                                         <div class="input-group mt-2" v-if="type === TYPE_CHECKING">
@@ -147,7 +147,7 @@
                                                 <option value="5" selected>5 секунд</option>
                                             </select>
                                         </div>
-                                        <div class="input-group mt-2" v-if="!showParticipe">
+                                        <div class="input-group mt-2 d-none" v-if="!showParticipe">
                                             <div class="input-group-prepend" :disabled="moreVerbsLoaded">
                                                 <button class="btn btn-primary" type="button" v-on:click="loadMoreCards"
                                                 >Добавить глаголы из:</button>
@@ -156,7 +156,8 @@
                                                 <option selected disabled>Выберите число предыдущих уроков</option>
                                                 <option v-for="option in loadMoreOptions" v-bind:value="option.loadMore" v-text="option.name"></option>
                                             </select>
-                                        </div>
+                                        </div><br>
+                                        <a class="mt-2" href="{% url 'dictionary:my_verbs' %}">Перейти в приложение Мои Глаголы</a>
                                     </div>
                                 </div>
 							</div>
