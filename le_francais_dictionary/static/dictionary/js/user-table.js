@@ -345,6 +345,7 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                     }
                 ],
                 'order': [[1, 'asc']],
+                'ordering': isVerbs(),
                 'select': 'multi+shift',
                 'searching': true,
                 'paging': true,
