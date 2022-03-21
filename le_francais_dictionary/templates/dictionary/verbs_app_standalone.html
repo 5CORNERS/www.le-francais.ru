@@ -20,7 +20,7 @@
                                 href="{% url 'dictionary:app_verbs' %}">Карточки с глаголами</a>
                     </ol>
                 </nav>
-                {% include 'dictionary/verbs_tab.html' %}
+                {% include 'dictionary/verbs_tab.html' with hide_load_more=True %}
             </div>
         </div>
     </div>

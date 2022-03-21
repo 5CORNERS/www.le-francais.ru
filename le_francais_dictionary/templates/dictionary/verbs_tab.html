@@ -147,13 +147,13 @@
                                                 <option value="5" selected>5 секунд</option>
                                             </select>
                                         </div>
-                                        <div class="input-group mt-2 d-none" v-if="!showParticipe">
-                                            <div class="input-group-prepend" :disabled="moreVerbsLoaded">
-                                                <button class="btn btn-primary" type="button" v-on:click="loadMoreCards"
+                                        <div class="input-group mt-2{% if hide_load_more %} d-none{% endif %}" v-if="!showParticipe">
+                                            <div class="input-group-prepend">
+                                                <button class="btn btn-primary" :disabled="!isLoadMoreSelected() || moreVerbsLoaded" type="button" v-on:click="loadMoreCards"
                                                 >Добавить глаголы из:</button>
                                             </div>
-                                            <select class="custom-select" :disabled="moreVerbsLoaded">
-                                                <option selected disabled>Выберите число предыдущих уроков</option>
+                                            <select class="custom-select" :disabled="moreVerbsLoaded" v-model="loadMoreValue">
+                                                <option selected disabled value="0">Выберите кол-во предыдущих уроков</option>
                                                 <option v-for="option in loadMoreOptions" v-bind:value="option.loadMore" v-text="option.name"></option>
                                             </select>
                                         </div><br>
