@@ -67,13 +67,20 @@
   font-size: 0.8rem;
 }
 
-table.dataTable tbody > tr.selected, table.dataTable tbody > tr > .selected {
+table.dataTable tbody > tr.selected, table.dataTable tbody > tr > .selected, table.dataTable tbody > tr.even.selected, table.dataTable.stripe tbody > tr.even > .selected, table.dataTable.display tbody > tr.even.selected, table.dataTable.display tbody > tr.even > .selected {
   background-color: #428bca4d;
   color: #212529;
+  &.sorting_1 {
+    background-color: #428bca4d;
+  }
 }
+
 
 table.dataTable.stripe tbody > tr.odd.selected, table.dataTable.stripe tbody > tr.odd > .selected, table.dataTable.display tbody > tr.odd.selected, table.dataTable.display tbody > tr.odd > .selected {
   background-color: #337ab759;
+  &.sorting_1 {
+    background-color: #337ab759;
+  }
 }
 
 .pos-phrase {
@@ -135,6 +142,10 @@ table.dataTable.hover tbody > tr.selected:hover, table.dataTable.hover tbody > t
 
 .table-responsive {
   min-height: 440px;
+
+  &.verbs-table {
+    min-height: 200px;
+  }
 }
 
 .dataTables_length {
@@ -204,13 +215,13 @@ th.dt-checkboxes-cell {
   }
 }
 
-@media (min-width: 369px) {
+@media (min-width: 380px) {
   .get-list-button > .text-medium {
     display: inline;
   }
 }
 
-@media (min-width: 415px) {
+@media (min-width: 439px) {
   .get-list-button {
     > .text-medium {
       display: none

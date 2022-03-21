@@ -2,14 +2,14 @@ const gulp = require('gulp');
 const webpack = require('webpack-stream');
 const sass = require('gulp-sass');
 const uglify = require('gulp-uglify');
-const minify = require('gulp-minify-css');
+const cleanCSS = require('gulp-clean-css');
 const del = require('del');
 const dist = '../static_compiled/components';
 
 gulp.task('sass', () => {
     return gulp.src('sass/**/*.scss')
         .pipe(sass().on('error', sass.logError))
-        .pipe(minify())
+        .pipe(cleanCSS({compatibility: 'ie8'}))
         .pipe(gulp.dest(dist + '/css/'));
 });
 
@@ -18,7 +18,7 @@ gulp.task('css', () => {
         'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
         'css/**/*.css',
     ])
-        .pipe(minify())
+        .pipe(cleanCSS({compatibility: 'ie8'}))
         .pipe(gulp.dest(dist + '/css/'))
 });
 

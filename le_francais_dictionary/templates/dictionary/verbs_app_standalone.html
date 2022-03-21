@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_head %}
+    <script>
+        const verbs_data=JSON.parse(`{{ data|safe }}`)
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Французский
+                            язык</a></li>
+                        <li class="breadcrumb-item"><a
+                                href="{% url 'dictionary:my_verbs' %}">Мои
+                            глаголы</a></li>
+                        <li class="breadcrumb-item active"><a
+                                href="{% url 'dictionary:app_verbs' %}">Карточки с глаголами</a>
+                    </ol>
+                </nav>
+                {% include 'dictionary/verbs_tab.html' with hide_load_more=True default_show_negative=True default_translate_infinitives=True %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
