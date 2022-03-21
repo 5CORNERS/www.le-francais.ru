@@ -17,13 +17,15 @@ from django.http import JsonResponse, HttpResponse, \
     HttpResponseNotFound, HttpResponseRedirect
 
 # Create your views here.
-from le_francais_dictionary.forms import WordsManagementFilterForm
+from le_francais_dictionary.forms import WordsManagementFilterForm, \
+    VerbsManagementFilterForm
 from .consts import TENSE_PARTICIPE_PASSE, STAR_CHOICES
 from .models import Word, Packet, UserPacket, \
     UserWordData, UserWordRepetition, UserWordIgnore, \
     UserStandalonePacket, \
-    prefetch_words_data, VerbPacket, UserDayRepetition, get_repetition_words_query, VerbPacketRelation, \
-    DictionaryError
+    prefetch_words_data, VerbPacket, UserDayRepetition, \
+    get_repetition_words_query, VerbPacketRelation, \
+    DictionaryError, verb_to_packet_relations_to_dict
 from . import consts
 from home.models import UserLesson
 
@@ -528,6 +530,25 @@ class ManageWords(View):
                        'star_choices': STAR_CHOICES,
                        'init_packets': init_packets})
 
+
+class ManageVerbs(View):
+    @method_decorator(login_required)
+    def get(self, request):
+        form = VerbsManagementFilterForm(request.user)
+        return render(request, 'dictionary/manage_verbs.html', {
+            'form': form, 'table': form.table_dict()
+        })
+
+    def post(self, request):
+        form = VerbsManagementFilterForm(request.user, request.POST)
+        table = form.table_dict()
+        table_html = render_to_string('dictionary/verbs_table.html',
+                                      {'table':table}, request)
+        if request.is_ajax():
+            return JsonResponse({'table': table_html, 'errors': form.errors}, safe=False)
+        else:
+            return self.get(request)
+
 @csrf_exempt
 @login_required
 def start_app(request):
@@ -580,6 +601,11 @@ def get_verbs(request, packet_id:int, more_lessons:int=None):
             result['verbs'] = result['verbs'] + packet.to_dict()
     else:
         result['verbs'] = packet.to_dict()
+    attach_info(request, result)
+    return JsonResponse(result, status=200)
+
+
+def attach_info(request, result):
     activated_lessons_pks = []
     tenses = list(set(verb['tense'] for verb in result['verbs']))
     if request.user.is_authenticated:
@@ -606,7 +632,7 @@ def get_verbs(request, packet_id:int, more_lessons:int=None):
         'activated': p.lesson.pk in activated_lessons_pks,
     } for p in packets]
     result['verbListHTML'] = ""
-    return JsonResponse(result, status=200)
+    return result
 
 
 def get_repetition_words_count(request):
@@ -655,3 +681,15 @@ def manage_words_standalone(request, lesson_number):
                   {'form': form, 'table': form.table_dict(),
                    'star_choices': star_choices,
                    'init_packets': init_packets})
+
+
+def start_app_verbs(request):
+    query = VerbPacketRelation.objects.filter(
+        pk__in=map(int, request.GET.getlist('v')))
+    data = {
+        "user": {},
+        "verbs": verb_to_packet_relations_to_dict(query),
+        "errors": [],
+    }
+    data = attach_info(request, data)
+    return render(request, 'dictionary/verbs_app_standalone.html', {'data': json.dumps(data)})

@@ -1,13 +1,14 @@
 from datetime import datetime
 
 from django import forms
-from django.db.models import Q, F
+from django.db.models import Q, F, Case, When
 from typing import List
 
 from le_francais_dictionary.models import Packet, UserWordRepetition, \
 	Word, \
 	UserWordData, UserWordIgnore, WordTranslation, WordGroup, \
-	prefetch_words_data, get_repetition_words_query
+	prefetch_words_data, get_repetition_words_query, VerbPacket, Verb, \
+	VerbPacketRelation
 
 from .sm2 import sm2_ef_q_mq
 
@@ -160,3 +161,97 @@ class DictionaryWordForm(forms.Form):
 
 
 DictionaryWordFormset = forms.formset_factory(DictionaryWordForm)
+
+def get_tense_display_value(values):
+	v = values['verbpacketrelation__tense']
+	return dict(
+		VerbPacketRelation._meta.get_field('tense').flatchoices
+	).get(v, v)
+
+def get_regular_display_value(values):
+	v = values['regular']
+	if v:
+		return 'Regular'
+	return 'Irregular'
+
+def get_regular_filter_value(values):
+	v = values['regular']
+	return v
+
+def get_type_display_value(values):
+	v = values['type']
+	return dict(
+		Verb._meta.get_field('type').flatchoices
+	).get(v, v)
+
+def get_type_filter_value(values):
+	return values['type']
+
+class VerbsManagementFilterForm(forms.Form):
+
+	def __init__(self, user, *args, **kwargs):
+		super(VerbsManagementFilterForm, self).__init__(*args, **kwargs)
+		self.user = user
+		self.packets = VerbPacket.objects.all().order_by('lesson__lesson_number')
+		packet_choices = [(o.id, o.name) for o in self.packets]
+		self.fields['packets'] = forms.MultipleChoiceField(choices=packet_choices)
+		self.COLUMNS = [
+			('id', 'ID', None, False, False, False, None, None, methodcaller('get', 'verbpacketrelation__pk')),
+			('type', 'TYPE', None, False, False, False, get_type_filter_value, None, get_type_display_value),
+			('regular', 'Правильный/Неправильный', None, False, False, False, get_regular_filter_value, None, get_regular_display_value),
+			('verb', 'Глагол', None, True, True, True, None, None, methodcaller('get', 'verb')),
+			('tense', 'Время', None, True, True, True, None, None, get_tense_display_value),
+			('translation', 'Перевод', None, True, True, True, None, None, methodcaller('get', 'translation')),
+		]
+
+
+	def table_dict(self):
+		if self.is_valid():
+			data = self.cleaned_data
+			verbs_list = Verb.objects.annotate().filter(packets__in=data['packets']).values(
+				'verbpacketrelation__tense', 'verbpacketrelation__pk',
+				'verb', 'translation',
+				'polly',
+				'audio_url',
+				'translation_polly',
+				'translation_audio_url',
+				'type',
+				'regular'
+				).order_by('verbpacketrelation__order')
+			result = dict(
+				columns=[dict(
+					id=column[0],
+					title=column[1],
+					visible=column[3]
+				) for column in self.COLUMNS],
+				rows=[dict(
+					id=verb['verbpacketrelation__pk'],
+					ru_audio_src=verb['translation_audio_url'],
+					fr_audio_src=verb['audio_url'],
+					cells=[dict(
+						id=column[0],
+						value=column[-1] if not callable(
+							column[-1]) else column[-1](verb),
+						filter_value=column[-3] if not callable(
+							column[-3]) else column[-3](verb),
+						visible=column[3],
+						cls=column[2] if not callable(column[2]) else column[2](verb),
+					) for column in self.COLUMNS]
+				) for verb in verbs_list],
+				empty='',
+				empty_body='',
+			)
+		else:
+			result = dict(
+				columns=[dict(
+					id=column[0],
+					title=column[1],
+					visible=column[3]
+				) for column in self.COLUMNS],
+				rows=[],
+				empty_header='''Выберите уроки (можно одновременно выбирать
+							              несколько) и нажмите на кнопку «Получить список
+							              глаголов».''',
+				empty_body='''''',
+			)
+		return result
