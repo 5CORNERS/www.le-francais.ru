@@ -574,9 +574,9 @@
                 this.showCurrentCard()
 
                 if (this.type === LISTENING) {
-                    this.progressStep = 100 / (verbs.length - 1);
+                    this.progressStep = 100 / (this.cards.length - 1);
                 } else {
-                    this.progressStep = 100 / verbs.length;
+                    this.progressStep = 100 / this.cards.length;
                 }
             },
 

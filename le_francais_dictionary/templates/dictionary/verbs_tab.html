@@ -157,7 +157,9 @@
                                                 <option v-for="option in loadMoreOptions" v-bind:value="option.loadMore" v-text="option.name"></option>
                                             </select>
                                         </div><br>
+                                    {% if hide_load_more %}
                                         <a class="mt-2" href="{% url 'dictionary:my_verbs' %}">Перейти в приложение Мои Глаголы</a>
+                                    {% endif %}
                                     </div>
                                 </div>
 							</div>
