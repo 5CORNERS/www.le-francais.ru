@@ -360,7 +360,7 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                     "infoFiltered": "(отфильтровано из _MAX_ записей)",
                     "infoPostFix": "",
                     "loadingRecords": `Загрузка ${isVerbs() ? 'глаголов' : 'слов'}...`,
-                    "zeroRecords": "Слова отсутствуют.",
+                    "zeroRecords": `${isVerbs() ? 'Глаголы' : 'Слова'} отсутствуют.`,
                     "emptyTable": "В таблице отсутствуют данные",
                     "paginate": {
                         "first": "Первая",
