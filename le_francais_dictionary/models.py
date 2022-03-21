@@ -1004,21 +1004,29 @@ class Example(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
 
 
+def verb_to_packet_relations_to_dict(verb_to_packet_relations):
+	result = []
+	for verb_to_packet in verb_to_packet_relations:
+		# if verb_to_packet.verb.audio_url is None:
+		# 	continue
+		verb_dict = verb_to_packet.verb.to_dict()
+		verb_dict['tense'] = verb_to_packet.tense
+		verb_dict['forms'] = []
+		for form in verb_to_packet.verb.verbform_set.filter(
+				tense=verb_to_packet.tense).order_by('order'):
+			verb_dict['forms'].append(form.to_dict())
+		result.append(verb_dict)
+	return result
+
+
 class VerbPacket(models.Model):
 	name = models.CharField(max_length=32)
 	lesson = models.ForeignKey('home.LessonPage', on_delete=models.SET_NULL, null=True)
 
 	def to_dict(self):
-		result = []
-		for verb_to_packet in VerbPacketRelation.objects.filter(packet=self).order_by('order'):
-			# if verb_to_packet.verb.audio_url is None:
-			# 	continue
-			verb_dict = verb_to_packet.verb.to_dict()
-			verb_dict['tense'] = verb_to_packet.tense
-			verb_dict['forms'] = []
-			for form in verb_to_packet.verb.verbform_set.filter(tense=verb_to_packet.tense).order_by('order'):
-				verb_dict['forms'].append(form.to_dict())
-			result.append(verb_dict)
+		verb_to_packet_relations = VerbPacketRelation.objects.filter(packet=self).order_by('order')
+		result = verb_to_packet_relations_to_dict(
+			verb_to_packet_relations)
 		return result
 
 
@@ -1116,6 +1124,10 @@ class Verb(models.Model):
 		if save:
 			self.save()
 		return self
+
+	@property
+	def tenses_list(self):
+		return self.verbform_set.all().values_list('tense').distinct()
 
 
 class VerbPacketRelation(models.Model):
