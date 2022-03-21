@@ -223,7 +223,7 @@
     let webkit = !!ua.match(/WebKit/i);
     let iOSSafari = iOS && webkit && !ua.match(/CriOS/i);
     [
-        '{% static "dictionary/js/verbs.js" %}'
+        '{% static "dictionary/js/verbs.min.js" %}'
     ].forEach(src => {
         let script = document.createElement("script");
         script.setAttribute("src", src);
