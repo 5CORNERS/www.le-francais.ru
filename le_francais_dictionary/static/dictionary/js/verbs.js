@@ -137,6 +137,7 @@
             this.packets = values[1];
             // this.verbListHTML = values[2]
             this.loadMoreOptions = this.getLoadMoreOptions();
+            this.loadMoreValue = 0;
             this.init();
         },
 
@@ -408,7 +409,7 @@
             },
 
             isLoadMoreSelected: function() {
-
+                return this.loadMoreValue !== 0
             },
 
             getLoadMoreOptions: function () {
@@ -485,7 +486,7 @@
                 if (!this.pause) {
                     this.pause = true;
                 }
-                let moreLessons = this.loadMoreValue.loadMore
+                let moreLessons = this.loadMoreValue
                 if (moreLessons===null) {
                     moreLessons = undefined
                 }
