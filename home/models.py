@@ -406,6 +406,8 @@ class LessonPage(Page):
     next_lesson_button = models.CharField(max_length=64, null=True, blank=True)
     enable_next_lesson_button = models.BooleanField(default=True, blank=True)
 
+    users = models.ManyToManyField(to=User, through='home.UserLesson')
+
     comments_for_lesson = StreamField([
         ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
