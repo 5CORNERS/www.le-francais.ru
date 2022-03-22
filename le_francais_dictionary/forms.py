@@ -193,6 +193,8 @@ class VerbsManagementFilterForm(forms.Form):
 		super(VerbsManagementFilterForm, self).__init__(*args, **kwargs)
 		self.user = user
 		self.packets = VerbPacket.objects.all().order_by('lesson__lesson_number')
+		if user.must_pay:
+			self.packets = self.packets.filter(Q(lesson__users=user) | Q(lesson__lesson_number__lte=11)).distinct()
 		packet_choices = [(o.id, o.name) for o in self.packets]
 		self.fields['packets'] = forms.MultipleChoiceField(choices=packet_choices)
 		self.COLUMNS = [

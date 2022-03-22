@@ -863,7 +863,8 @@ LESSON_PAGE_BLOCKED_CONTENT = [
     ('repetition_material', 8, 1000),
     ('exercise', 9, 1000),
     ('flash-cards', 10, 1000),
-    ('my-words', 10, 1000)
+    ('my-words', 10, 1000),
+    ('verbs', 11, 1000)
 ]
 LESSON_PAGE_FIELDS = [
     # type, page attribute, href, title, transition
