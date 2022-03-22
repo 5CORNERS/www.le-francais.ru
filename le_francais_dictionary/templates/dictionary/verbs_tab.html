@@ -1,6 +1,6 @@
 {% load static wagtailcore_tags%}
 <link rel="stylesheet" type="text/css" href="{% static 'dictionary/css/verbs.css' %}">
-<div class="col-12">
+{% comment %}<div class="col-12">
     <div id="verbs-cards-alert" class="alert alert-info alert-dismissible fade show" role="alert">
         <p><b>Это бета-версия карточек для запоминания глаголов v.1.0b.</b></p>
         <p>В дополнение к предыдущей версии (v.0.8) мы исправили «молчание»
@@ -25,7 +25,7 @@
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
-</div>
+</div>{% endcomment %}
 <div class="col-12">
     <div id="verbs-cards-info"
          class="alert alert-success alert-dismissible fade show"
