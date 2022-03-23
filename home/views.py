@@ -142,14 +142,22 @@ def get_nav_data(request):
         page_tree.save()
     return HttpResponse(content=json.dumps(page_tree.tree))
 
+IP_HEADERS_LIST = [
+'HTTP_X_FORWARDED_FOR',
+'REMOTE_ADDR',
+'HTTP_X_FORWARDED',
+'HTTP_CLIENT_IP',
+'HTTP_FORWARDED_FOR',
+'HTTP_FORWARDED',
+]
 
 @csrf_exempt
 def listen_request(request, test=False):
     lesson_number = request.POST['number'].strip()
     session_key = request.POST['key'].strip()
 
-    ipadress_list = json.loads(request.POST.get('ipadress_list', '[]'))
-    ipadress = ipadress_list[0]
+    remote_meta = json.loads(request.POST.get('ipadress_list', '[]'))
+    ipadress = request.POST.get('ipadress', '')
 
     session = Session.objects.filter(session_key=session_key).first()
     lesson = LessonPage.objects.filter(lesson_number=lesson_number).first()
@@ -162,11 +170,12 @@ def listen_request(request, test=False):
                 "user": str(session.user) if session else None,
                 "ip": session.ip,
                 "remote_ip": ipadress,
-                "remote_ip_list": ipadress_list,
                 "activated_lesson": session.user is not None and lesson in session.user.payed_lessons.all(),
                 "2_hours_check": "True" if datetime.now(
                     timezone.utc) - session.last_activity < timedelta(
                     hours=2) else "False",
+                'request.META': {k:request.META.get(k, '') for k in IP_HEADERS_LIST},
+                'remote_request.META': remote_meta
             },
             safe=True,
         )
