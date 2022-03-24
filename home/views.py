@@ -226,7 +226,7 @@ xhr.send()
 def get_lesson_url(request):
     lesson_number = request.POST['lesson_number']
     return JsonResponse(dict(
-        lesson_url='http://192.168.0.27:8080/listen.php?number=' + str(
+        lesson_url='https://files.le-francais.ru/listen.php?number=' + str(
             lesson_number) + '&key=' + request.session.session_key))
 
 
