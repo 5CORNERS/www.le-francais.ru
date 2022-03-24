@@ -3,6 +3,8 @@ from django.middleware import csrf
 from django_session_header.middleware import SessionHeaderMixin
 from user_sessions.middleware import SessionMiddleware
 
+from home.consts import IP_HEADERS_LIST
+
 try:
     from importlib import import_module
 except ImportError:
@@ -78,3 +80,4 @@ class CustomSessionMiddleware(SessionHeaderMiddleware):
             user_agent=request.META.get('HTTP_USER_AGENT', ''),
             session_key=session_key
         )
+        request.session['request_ips'] = {k:request.META.get(k, '') for k in IP_HEADERS_LIST}
