@@ -22,6 +22,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from oauth2client.client import OAuth2WebServerFlow
 from social_core.utils import setting_name
+from user_sessions.backends.db import SessionStore
 from user_sessions.models import Session
 from wagtail.contrib.sitemaps.sitemap_generator import \
     Sitemap as WagtailSitemap
@@ -151,7 +152,9 @@ def listen_request(request, test=False):
     remote_meta = json.loads(request.POST.get('ipadress_list', '[]'))
     ipadress = request.POST.get('ipadress', '')
 
-    session = Session.objects.filter(session_key=session_key).first()
+    session = SessionStore(session_key=session_key)
+    session_object = Session.objects.get(session_key=session_key)
+    session_user = User.objects.get(pk=session.user_id) if session.user_id else None
     lesson = LessonPage.objects.filter(lesson_number=lesson_number).first()
 
     if test:
@@ -159,12 +162,12 @@ def listen_request(request, test=False):
             data={
                 "lesson_number": lesson_number,
                 "remote_session_key": session_key,
-                "user": str(session.user) if session else None,
+                "user": session_user,
                 "ip": session.ip,
                 "remote_ip": ipadress,
-                "activated_lesson": session.user is not None and lesson in session.user.payed_lessons.all(),
+                "activated_lesson": session_user is not None and lesson in session_user.payed_lessons.all(),
                 "2_hours_check": "True" if datetime.now(
-                    timezone.utc) - session.last_activity < timedelta(
+                    timezone.utc) - session_object.last_activity < timedelta(
                     hours=2) else "False",
                 'request.META': session.get('request_ips', None),
                 'remote_request.META': remote_meta
