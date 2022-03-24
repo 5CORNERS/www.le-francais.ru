@@ -142,14 +142,6 @@ def get_nav_data(request):
         page_tree.save()
     return HttpResponse(content=json.dumps(page_tree.tree))
 
-IP_HEADERS_LIST = [
-'HTTP_X_FORWARDED_FOR',
-'REMOTE_ADDR',
-'HTTP_X_FORWARDED',
-'HTTP_CLIENT_IP',
-'HTTP_FORWARDED_FOR',
-'HTTP_FORWARDED',
-]
 
 @csrf_exempt
 def listen_request(request, test=False):
@@ -174,7 +166,7 @@ def listen_request(request, test=False):
                 "2_hours_check": "True" if datetime.now(
                     timezone.utc) - session.last_activity < timedelta(
                     hours=2) else "False",
-                'request.META': {k:request.META.get(k, '') for k in IP_HEADERS_LIST},
+                'request.META': session['request_ips'] if 'request_ips' in session else None,
                 'remote_request.META': remote_meta
             },
             safe=True,
@@ -369,7 +361,7 @@ def coffee_amount_check(request):
                     's_t', '0'))
 
 
-from .consts import ITEMS, CUPS_IDS
+from .consts import ITEMS, CUPS_IDS, IP_HEADERS_LIST
 
 
 class TinkoffPayments(View):
