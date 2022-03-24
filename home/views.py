@@ -166,7 +166,7 @@ def listen_request(request, test=False):
                 "2_hours_check": "True" if datetime.now(
                     timezone.utc) - session.last_activity < timedelta(
                     hours=2) else "False",
-                'request.META': session['request_ips'] if 'request_ips' in session else None,
+                'request.META': session.get('request_ips', None),
                 'remote_request.META': remote_meta
             },
             safe=True,
