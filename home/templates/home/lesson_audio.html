@@ -26,14 +26,14 @@
 							{% if not user.is_authenticated %}
 								src="{% files_le_francais_url %}/lecons/coupe/french-{{ self.lesson_number }}_coupe.mp3"
 							{% elif not user.must_pay %}
-								src="{% files_le_francais_url %}/listen.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}"
+								src="{% files_le_francais_url %}/listen_v2.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}"
 							{% elif not userlesson %}
 								src="{% files_le_francais_url %}/lecons/coupe/french-{{ self.lesson_number }}_coupe.mp3"
 							{% else %}
-								src="{% files_le_francais_url %}/listen.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}"
+								src="{% files_le_francais_url %}/listen_v2.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}"
 							{% endif %}
 						{% else %}
-							src="{% files_le_francais_url %}/listen.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}"
+							src="{% files_le_francais_url %}/listen_v2.php?number={{ self.lesson_number }}&key={{ request.session.session_key }}"
 						{% endif %}
 					{% endif %} type="audio/mpeg">
 			</audio>
