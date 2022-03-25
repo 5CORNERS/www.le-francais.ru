@@ -9,7 +9,7 @@ from django.conf import settings
 from custom_user.models import User
 from home.models import IndexReviews, AdUnit
 from home.models import PageLayoutAdvertisementSnippet, LessonPage, Payment
-from home.utils import get_signature
+from home.utils import get_signature, files_le_francais_url
 from pybb.models import Topic, Post
 
 register = template.Library()
@@ -433,3 +433,5 @@ register.assignment_tag()
 @register.inclusion_tag('tags/payment_card.html', takes_context=False)
 def payment_card(card, n):
 	return dict(card=card, n=n)
+
+register.simple_tag(files_le_francais_url, False, 'files_le_francais_url')

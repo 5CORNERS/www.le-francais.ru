@@ -619,3 +619,6 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 NOTIFICATIONS_AUTO_CHECK_NEW = os.getenv('NOTIFICATIONS_AUTO_CHECK_NEW', '1') == '1'
 
 NPM_STATIC_FILES_PREFIX = 'jslib'
+
+FILES_LE_FRANCAIS_HTTPS = os.getenv('FILES_LE_FRANCAIS_HTTPS', 'True') == 'True'
+FILES_LE_FRANCAIS_SITENAME = os.getenv('FILES_LE_FRANCAIS_SITENAME', 'files.le-francais.ru')

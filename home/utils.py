@@ -13,6 +13,15 @@ from lxml import etree
 from markdown import Markdown
 
 from home.consts import COLUMN_TEXT, COLUMN_START, COLUMN_END, COLUMN_SPEAKER
+from le_francais.settings.base import FILES_LE_FRANCAIS_HTTPS, \
+    FILES_LE_FRANCAIS_SITENAME
+
+
+def files_le_francais_url(path=''):
+	if FILES_LE_FRANCAIS_HTTPS:
+		return f'https://{FILES_LE_FRANCAIS_SITENAME}{path}'
+	else:
+		return f'http://{FILES_LE_FRANCAIS_SITENAME}{path}'
 
 
 def get_signature(params, secret_key=settings.WALLET_ONE_SECRET_KEY):
