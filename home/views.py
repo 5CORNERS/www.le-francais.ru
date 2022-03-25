@@ -227,7 +227,7 @@ xhr.send()
 def get_lesson_url(request):
     lesson_number = request.POST['lesson_number']
     return JsonResponse(dict(
-        lesson_url=f'{files_le_francais_url("")}/listen.php?number=' + str(
+        lesson_url=f'{files_le_francais_url("")}/listen_v2.php?number=' + str(
             lesson_number) + '&key=' + request.session.session_key))
 
 
@@ -935,7 +935,7 @@ def redirect2static(path):
 def lesson_transcript_prototype(request, lesson_number):
     page = LessonPage.objects.get(lesson_number=lesson_number)
     errors, html, start_ends_map = page.get_transcript_html_errors_map()
-    audio_url = f'https://files.le-francais.ru/listen.php?number={ page.lesson_number }&key={ request.session.session_key }'
+    audio_url = f'{files_le_francais_url("")}/listen_v2.php?number={ page.lesson_number }&key={ request.session.session_key }'
     if page.audio_new:
         audio_url = page.audio_new
     return render(request, 'home/lesson_transcript_prototype.html', {
