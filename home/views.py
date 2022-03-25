@@ -46,7 +46,7 @@ from .forms import ChangeUsername
 from django.contrib.admin.views.decorators import staff_member_required
 from home.models import UserLesson
 from .models import Payment
-from .utils import message_left, get_nav_tree
+from .utils import message_left, get_nav_tree, files_le_francais_url
 
 if "mailer" in settings.INSTALLED_APPS:
     from mailer import send_mail
@@ -149,27 +149,33 @@ def listen_request(request, test=False):
     lesson_number = request.POST['number'].strip()
     session_key = request.POST['key'].strip()
 
-    remote_meta = json.loads(request.POST.get('ipadress_list', '[]'))
-    ipadress = request.POST.get('ipadress', '')
+    remote_meta = json.loads(request.POST.get('ipaddress_list', '[]'))
+    ipaddress = request.POST.get('ipaddress', '')
 
-    session = SessionStore(session_key=session_key)
-    session_object = Session.objects.get(session_key=session_key)
-    session_user = User.objects.get(pk=session.user_id) if session.user_id else None
     lesson = LessonPage.objects.filter(lesson_number=lesson_number).first()
+
+    try:
+        session_object = Session.objects.get(session_key=session_key)
+    except Session.DoesNotExist:
+        if not lesson.need_payment:
+            return HttpResponse('full', status=200)
+        return HttpResponse('short', status=403)
+
+    session_user = session_object.user
 
     if test:
         return JsonResponse(
             data={
                 "lesson_number": lesson_number,
                 "remote_session_key": session_key,
-                "user": session_user,
-                "ip": session.ip,
-                "remote_ip": ipadress,
+                "user": session_user.username,
+                "ip": session_object.ip,
+                "remote_ip": ipaddress,
                 "activated_lesson": session_user is not None and lesson in session_user.payed_lessons.all(),
                 "2_hours_check": "True" if datetime.now(
                     timezone.utc) - session_object.last_activity < timedelta(
                     hours=2) else "False",
-                'request.META': session.get('request_ips', None),
+                'request.META': session_object.get_decoded().get('request_ips', None),
                 'remote_request.META': remote_meta
             },
             safe=True,
@@ -177,21 +183,21 @@ def listen_request(request, test=False):
 
     if request.POST.get('download'):
         LogMessage(
-            user=session.user,
+            user=session_object.user,
             message=str(lesson_number),
             type=2,
             session_key=request.session.session_key
         ).save()
 
-    if not lesson.need_payment or not session.user.must_pay:
+    if not lesson.need_payment or not session_object.user.must_pay:
         return HttpResponse('full', status=200)
 
     # Temporarily supress ip check
-    if datetime.now(timezone.utc) - session.last_activity < timedelta(
-            hours=2) and lesson in session.user.payed_lessons.all():
+    if datetime.now(timezone.utc) - session_object.last_activity < timedelta(
+            hours=2) and lesson in session_object.user.payed_lessons.all():
         return HttpResponse('full', status=200)
 
-    if session.user is not None and lesson in session.user.payed_lessons.all() and session.ip == ipadress:
+    if session_object.user is not None and lesson in session_object.user.payed_lessons.all() and session_object.ip == ipaddress:
         return HttpResponse('full', status=200)
     return HttpResponse('short', status=403)
 
@@ -205,23 +211,23 @@ def listen_request_check(request):
 @csrf_exempt
 def listen_request_test(request, number):
     return HttpResponse(
-        content='''<pre id="json"></pre>
+        content=f'''<pre id="json"></pre>
 <script>
 var xhr = new XMLHttpRequest();
-xhr.open('GET', 'https://files.le-francais.ru/listen_test.php?key={0}&number={1}');
+xhr.open('GET', '{files_le_francais_url('')}/listen_test.php?key={request.session.session_key}&number={number}');
 xhr.onload = function() {{
 var data = JSON.parse(JSON.parse(xhr.responseText));
 document.getElementById("json").innerHTML = JSON.stringify(data, undefined, 2);
 }}
 xhr.send()
-</script>'''.format(request.session.session_key, number)
+</script>'''
     )
 
 
 def get_lesson_url(request):
     lesson_number = request.POST['lesson_number']
     return JsonResponse(dict(
-        lesson_url='https://files.le-francais.ru/listen.php?number=' + str(
+        lesson_url=f'{files_le_francais_url("")}/listen.php?number=' + str(
             lesson_number) + '&key=' + request.session.session_key))
 
 
