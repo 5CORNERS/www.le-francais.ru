@@ -1,3 +1,4 @@
+geoip2
 Pillow~=5.4
 shortuuid~=1.0.1
 anytree~=2.8.0
