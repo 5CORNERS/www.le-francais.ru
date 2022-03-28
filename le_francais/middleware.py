@@ -98,7 +98,7 @@ class CustomSessionMiddleware(SessionHeaderMiddleware):
                 if (now - last_check).days > 7:
                     g = GeoIP2()
                     geoip_dict['last_check'] = now.isoformat()
-                    for k, v in g.city(ip).values():
+                    for k, v in g.city(ip).items():
                         geoip_dict[k] = v
                     request.session['geoip'] = geoip_dict
             else:
@@ -106,7 +106,7 @@ class CustomSessionMiddleware(SessionHeaderMiddleware):
                 geoip_dict = {
                     'last_check': now.isoformat()
                 }
-                for k, v in g.city(ip).values():
+                for k, v in g.city(ip).items():
                     geoip_dict[k] = v
                 request.session['geoip'] = geoip_dict
         except geoip2.errors.AddressNotFoundError:
