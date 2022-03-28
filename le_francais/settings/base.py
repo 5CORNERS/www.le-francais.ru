@@ -124,7 +124,6 @@ MIDDLEWARE = [
     # 'django.contrib.sessions.middleware.SessionMiddleware',
     # 'le_francais.middleware.SessionHeaderMiddleware',
     'le_francais.middleware.CustomSessionMiddleware',
-    'le_francais.middleware.GeoIpSessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -144,6 +143,7 @@ MIDDLEWARE = [
     # 'home.middleware.CanonicalDomainMiddleware',
     # 'django_mobile.middleware.SetFlavourMiddleware',
 
+    'le_francais.middleware.GeoIpSessionMiddleware',
     'custom_user.middleware.GetPush4SiteId',
 ]
 
