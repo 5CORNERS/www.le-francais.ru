@@ -218,8 +218,9 @@
 							<a href="//vk.com/le_francais_ru" class="btn btn-social btn-sm btn-vk"><span
 									class="fab fa-vk"></span>Наша группа вам в помощь!</a>
 							<a href="//www.facebook.com/groups/lefrancais.ru/"
-							   class="btn btn-social btn-sm btn-facebook"><span
-									class="fab fa-facebook"></span>...а то вот ещё есть</a>
+							   class="btn btn-social btn-sm btn-facebook">{% if country_code == 'RU '%}<span title="Запрещена в России"
+									>FB</span>{% else %}<span
+									class="fab fa-facebook"></span>{% endif %}...а то вот ещё есть</a>
 						</p>
 					</div>
                     <div class="col-12">

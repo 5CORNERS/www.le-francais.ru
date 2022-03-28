@@ -87,9 +87,13 @@ class CustomSessionMiddleware(SessionHeaderMiddleware):
         )
         request.session['request_ips'] = {k:request.META.get(k, '') for k in IP_HEADERS_LIST}
 
+
+class GeoIpSessionMiddleware(MiddlewareMixin):
+    def process_request(self, request):
         # This product includes GeoLite2 data created by MaxMind, available from
         # https://www.maxmind.com
         now = timezone.now()
+        ip = request.session.ip
         try:
             if 'geoip' in request.session:
                 geoip_dict = request.session['geoip']

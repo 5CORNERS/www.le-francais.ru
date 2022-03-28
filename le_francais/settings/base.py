@@ -122,8 +122,9 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     # 'django.contrib.sessions.middleware.SessionMiddleware',
-    'le_francais.middleware.SessionHeaderMiddleware',
+    # 'le_francais.middleware.SessionHeaderMiddleware',
     'le_francais.middleware.CustomSessionMiddleware',
+    'le_francais.middleware.GeoIpSessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -173,6 +174,8 @@ TEMPLATES = [
                 'pybb.context_processors.processor',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
+
+                'le_francais.context_processors.geoip'
             ],
             'libraries': {
                 'conjugation_tags': 'conjugation.templatetags.conjugation_tags',
