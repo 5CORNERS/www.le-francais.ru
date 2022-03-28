@@ -115,7 +115,10 @@ class GeoIpSessionMiddleware(MiddlewareMixin):
                 request.session['geoip'] = geoip_dict
 
             user = request.user
-            if (user.country_code, user.city, user.region) != (geoip_dict['country_code'], geoip_dict['city'], geoip_dict['region']):
+            if user.is_authenticated and (
+            user.country_code, user.city, user.region) != (
+            geoip_dict['country_code'], geoip_dict['city'],
+            geoip_dict['region']):
                 user.country_code = geoip_dict['country_code']
                 user.city = geoip_dict['city']
                 user.country_name = geoip_dict['country_name']
