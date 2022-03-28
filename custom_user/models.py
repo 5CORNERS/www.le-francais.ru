@@ -112,6 +112,11 @@ class User(AbstractUser):
 		default=False, editable=True,
 		verbose_name='Статус пенсионера/студента')
 
+	country_name = models.CharField(max_length=2000, default=None, null=True, blank=True)
+	country_code = models.CharField(max_length=2000, default=None, null=True, blank=True)
+	city = models.CharField(max_length=2000, default=None, null=True, blank=True)
+	region = models.CharField(max_length=2000, default=None, null=True, blank=True)
+
 	def switch_low_price(self):
 		if self._low_price:
 			self._low_price = False
