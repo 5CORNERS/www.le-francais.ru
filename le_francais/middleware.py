@@ -1,5 +1,10 @@
+import datetime
+
+import geoip2.errors
 from django.conf import settings
+from django.contrib.gis.geoip2 import GeoIP2
 from django.middleware import csrf
+from django.utils import timezone
 from django_session_header.middleware import SessionHeaderMixin
 from user_sessions.middleware import SessionMiddleware
 
@@ -81,3 +86,28 @@ class CustomSessionMiddleware(SessionHeaderMiddleware):
             session_key=session_key
         )
         request.session['request_ips'] = {k:request.META.get(k, '') for k in IP_HEADERS_LIST}
+
+        # This product includes GeoLite2 data created by MaxMind, available from
+        # https://www.maxmind.com
+        now = timezone.now()
+        try:
+            if 'geoip' in request.session:
+                geoip_dict = request.session['geoip']
+                last_check = datetime.datetime.fromisoformat(
+                    geoip_dict['last_check'])
+                if (now - last_check).days > 7:
+                    g = GeoIP2()
+                    geoip_dict['last_check'] = now.isoformat()
+                    for k, v in g.city(ip).values():
+                        geoip_dict[k] = v
+                    request.session['geoip'] = geoip_dict
+            else:
+                g = GeoIP2()
+                geoip_dict = {
+                    'last_check': now.isoformat()
+                }
+                for k, v in g.city(ip).values():
+                    geoip_dict[k] = v
+                request.session['geoip'] = geoip_dict
+        except geoip2.errors.AddressNotFoundError:
+            pass
