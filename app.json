@@ -12,6 +12,9 @@
     },
     {
       "url": "heroku/python"
+    },
+    {
+      "url": "https://github.com/danstiner/heroku-buildpack-geoip-geolite2.git"
     }
   ],
   "environments": {
