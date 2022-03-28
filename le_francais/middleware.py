@@ -113,5 +113,13 @@ class GeoIpSessionMiddleware(MiddlewareMixin):
                 for k, v in g.city(ip).items():
                     geoip_dict[k] = v
                 request.session['geoip'] = geoip_dict
+
+            user = request.user
+            if (user.country_code, user.city, user.region) != (geoip_dict['country_code'], geoip_dict['city'], geoip_dict['region']):
+                user.country_code = geoip_dict['country_code']
+                user.city = geoip_dict['city']
+                user.country_name = geoip_dict['country_name']
+                user.region = geoip_dict['region']
+                user.save()
         except geoip2.errors.AddressNotFoundError:
             pass
