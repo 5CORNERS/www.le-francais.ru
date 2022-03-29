@@ -1,5 +1,6 @@
 import json
 
+import tabulate
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
@@ -59,22 +60,33 @@ class Notification(View):
 def get_log(request:HttpRequest, year, month):
     payments = list(Payment.objects.select_related('receipt').filter(
         Q(status='CONFIRMED') | Q(status='AUTHORIZED'), update_date__year=int(year), update_date__month=int(month)).order_by('update_date'))
-    s = ''
+    s = [(
+        'datetime',
+        'amount',
+        'email',
+        'next_lesson',
+        'category',
+        'country',
+        'city'
+    )]
     today_income = 0
     total_income = 0
     for p in payments:
         for item in p.items():
-            s += '{date}\t{amount}\tTinkoff\t{type}\t{closest_activation}\t{email}\n'.format(
-                date=defaultfilters.date(p.update_date, "Y-m-d H:i"),
-                amount=int(p.amount/100),
-                email=p.email,
-                closest_activation=p.closest_activation,
-                type=item.category.split('_')[0]
-            )
+            s.append((
+                defaultfilters.date(p.update_date, "Y-m-d H:i"),
+                int(p.amount / 100),
+                p.email,
+                p.closest_activation,
+                item.category.split('_')[0],
+                p.user.country_name if p.user else 'n/a',
+                p.user.city if p.user else 'n/a'
+            ))
         total_income += int(p.amount/100)
         if p.update_date.day == timezone.now().day:
             today_income += int(p.amount/100)
-    s += f'----------------------------\n'
+    s = tabulate.tabulate(s, headers='firstrow')
+    s += f'\n----------------------------\n'
     s += f'Today Income: {today_income}\n'
     s += f'Total Income: {total_income}\n'
     s += f'Average Daily: {total_income/timezone.now().day}'
