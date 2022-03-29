@@ -69,7 +69,9 @@ class Payment(models.Model):
 		return self.get_email()
 
 	def get_user(self):
-		if self.customer_key:
+		if self._user:
+			return self._user
+		elif self.customer_key:
 			return get_user_model().objects.get(pk=int(self.customer_key))
 		return None
 
