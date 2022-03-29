@@ -66,6 +66,7 @@ def get_log(request:HttpRequest, year, month):
         'email',
         'next_lesson',
         'category',
+        'recurrent',
         'country',
         'city'
     )]
@@ -79,6 +80,7 @@ def get_log(request:HttpRequest, year, month):
                 p.email,
                 p.closest_activation,
                 item.category.split('_')[0],
+                p.recurrent or bool(p.rebill_id),
                 p.user.country_name if p.user else 'n/a',
                 p.user.city if p.user else 'n/a'
             ))
