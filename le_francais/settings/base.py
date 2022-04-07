@@ -371,7 +371,7 @@ PYBB_SMILES = dict()
 PYBB_DEFAULT_AUTOSUBSCRIBE = True
 PYBB_DEFAULT_TITLE = 'Французский язык — Форум'
 PYBB_PERMISSION_HANDLER = 'forum.permissions.CustomPermissionHandler'
-PYBB_FROM_EMAIL = 'Le-francais.ru » Форум <no-reply@mail.le-francais.ru>'
+PYBB_FROM_EMAIL = os.getenv('PYBB_FROM_EMAIL', 'Le-francais.ru » Форум <no-reply@mail.le-francais.ru>')
 # PYBB_PROFILE_RELATED_NAME = 'profile'
 
 from profiles.utils import check_user
@@ -386,7 +386,7 @@ POSTMAN_DISALLOW_ANONYMOUS = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 MASS_EMAIL_BACKEND = EMAIL_BACKEND
-DEFAULT_FROM_EMAIL = 'Le-francais.ru <no-reply@mail.le-francais.ru>'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Le-francais.ru <no-reply@mail.le-francais.ru>')
 
 email_config = dj_email_url.config()
 
