@@ -574,8 +574,8 @@ td.forum-last-post, td.topic-last-post {
     }
 
     .flip2 {
-        -webkit-animation: flip2 60s cubic-bezier(0.23, 1, 0.32, 1.2) infinite;
-        animation: flip2 60s cubic-bezier(0.23, 1, 0.32, 1.2) infinite;
+        -webkit-animation: flip2 120s cubic-bezier(0.23, 1, 0.32, 1.2) infinite;
+        animation: flip2 120s cubic-bezier(0.23, 1, 0.32, 1.2) infinite;
         padding-left: 0;
     }
 
