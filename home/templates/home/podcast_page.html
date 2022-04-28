@@ -28,11 +28,7 @@
             <div class="sidebar-wrapper col-md-3 _no-padding">
                 <div id="sidebar"></div>
             </div>
-            <button class="sidebar-collapse-button" type="button" data-toggle="toggle"
-                    data-target=".sidebar-wrapper" aria-controls="sidebar" aria-expanded="false"
-                    aria-label="Toggle sidebar">
-                <i class="arrow-icon"></i>
-            </button>
+            {% include 'home/sidebar_collapse_button.html' %}
             <div class="col-12 col-md-9 col-xl-6 col-xlg-6 main">
             {% if self.has_dictionary_words %}
                 <ul class="nav nav-tabs">
