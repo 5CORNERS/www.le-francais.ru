@@ -206,11 +206,7 @@
 			<div class="sidebar-wrapper col-xs-12 col-sm-12 col-md-3 col-xl-3 _no-padding">
 				<div id="sidebar"></div>
 			</div>
-			<button class="sidebar-collapse-button" type="button" data-toggle="toggle"
-			        data-target=".sidebar-wrapper" aria-controls="sidebar" aria-expanded="false"
-			        aria-label="Toggle sidebar">
-				<i class="arrow-icon"></i>
-			</button>
+			{% include 'home/sidebar_collapse_button.html' %}
 			<div class="col-12 col-md-9 col-xl-6 main">
 				{% breadcrumb calling_page=self %}
 				<h1 class="h1-small">{{ page.title|safe }}</h1>
