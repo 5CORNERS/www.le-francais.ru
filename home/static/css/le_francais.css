@@ -553,6 +553,74 @@ td.forum-last-post, td.topic-last-post {
     .sidebar-collapse-button[aria-expanded="true"] .arrow-icon {
         background: url("/static/images/chevron-left.png");
     }
+
+    .sidebar-collapse-button > div {
+        overflow: hidden;
+        position: relative;
+        float: right;
+        height: 34px;
+        padding-top: 10px;
+        margin-top: -10px;
+    }
+
+    .sidebar-collapse-button > div li {
+        font-family: Serif, serif;
+        color: #eee;
+        font-weight: 700;
+        padding: 0 10px;
+        height: 45px;
+        margin-bottom: 45px;
+        display: block;
+    }
+
+    .flip2 {
+        -webkit-animation: flip2 60s cubic-bezier(0.23, 1, 0.32, 1.2) infinite;
+        animation: flip2 60s cubic-bezier(0.23, 1, 0.32, 1.2) infinite;
+        padding-left: 0;
+    }
+
+    @-webkit-keyframes flip2 {
+        0% {
+            margin-top: -180px;
+        }
+        5% {
+            margin-top: -90px;
+        }
+        50% {
+            margin-top: -90px;
+        }
+        55% {
+            margin-top: 0;
+        }
+        99.99% {
+            margin-top: 0;
+        }
+        100% {
+            margin-top: -270px;
+        }
+    }
+
+    @keyframes flip2 {
+        0% {
+            margin-top: -180px;
+        }
+        5% {
+            margin-top: -90px;
+        }
+        50% {
+            margin-top: -90px;
+        }
+        55% {
+            margin-top: 0;
+        }
+        99.99% {
+            margin-top: 0;
+        }
+        100% {
+            margin-top: -270px;
+        }
+    }
+
 }
 
 .navbar-brand-text {
@@ -1267,3 +1335,4 @@ span.underline.play:focus {
     border-top-right-radius: calc(.3rem - 1px);
     padding-right: 12px;
 }
+
