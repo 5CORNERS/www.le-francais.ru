@@ -1,5 +1,5 @@
 cd "$1" || exit 1
-echo "-----> Updating geoip2 database"
+echo "-----> Updating Geoip2 database"
 python manage.py update_geoip2_databases
 echo "-----> Compiling SCSS"
 python manage.py compilescss
