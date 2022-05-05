@@ -5,12 +5,13 @@ from urllib.request import urlretrieve
 from django.core.management import BaseCommand
 
 
-def download(url, to):
-    Path(to).mkdir(parents=True, exist_ok=True)
+def download(url, to, filename):
+    os.makedirs(to, exist_ok=True)
     try:
-        urlretrieve(url, to)
+        urlretrieve(url, f'{to}/{filename}')
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False
 
 
@@ -18,10 +19,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if download(
             os.environ.get('GEOIP_CITY_DOWNLOAD_LINK'),
-            f'{os.environ.get("GEOIP_GEOLITE2_PATH")}/{os.environ.get("GEOIP_GEOLITE2_CITY_FILENAME")}'
+            os.environ.get("GEOIP_GEOLITE2_PATH"),
+            os.environ.get('GEOIP_GEOLITE2_CITY_FILENAME')
         ) and download(
             os.environ.get('GEOIP_COUNTRY_DOWNLOAD_LINK'),
-            f'{os.environ.get("GEOIP_GEOLITE2_PATH")}/{os.environ.get("GEOIP_GEOLITE2_COUNTRY_FILENAME")}'
+            os.environ.get("GEOIP_GEOLITE2_PATH"),
+            os.environ.get("GEOIP_GEOLITE2_COUNTRY_FILENAME")
         ):
             print("Done")
         else:
