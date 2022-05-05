@@ -1,6 +1,6 @@
 cd "$1" || exit 1
 echo "-----> Updating geoip2 database"
-pyhton manage.py update_geoip2_database
+pyhton manage.py update_geoip2_databases
 echo "-----> Compiling SCSS"
 python manage.py compilescss
 echo "-----> Collecting static files"
