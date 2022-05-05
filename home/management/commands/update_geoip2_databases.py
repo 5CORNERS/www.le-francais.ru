@@ -1,10 +1,12 @@
 import os
+from pathlib import Path
 from urllib.request import urlretrieve
 
 from django.core.management import BaseCommand
 
 
 def download(url, to):
+    Path(to).mkdir(parents=True, exist_ok=True)
     try:
         urlretrieve(url, to)
         return True
