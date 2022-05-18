@@ -4,7 +4,7 @@ class InvisibleRawHTMLBlock(RawHTMLBlock):
     def get_context(self, value, parent_context=None):
         context = super(InvisibleRawHTMLBlock, self).get_context(
             value, parent_context)
-        if 'already_payed' in context.keys() and context['already_payed']:
+        if 'lesson_was_payed_by_user' in context.keys() and context['lesson_was_payed_by_user']:
             pass
         else:
             context['value'] = ''
