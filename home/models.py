@@ -39,6 +39,7 @@ from tinkoff_merchant.signals import payment_confirm, payment_refund
 from .blocks.BootstrapCalloutBlock import BootstrapCalloutBlock
 from .blocks.CollapseBlock import CollapseBlock
 from .blocks.FloatingImageBlock import FloatingImageBlock
+from .blocks.InvisibleRawHTMLBlock import InvisibleRawHTMLBlock
 from .blocks.LeFrancaisAdUnit import LeFrancaisAdUnitBlock
 from .blocks.PlayerPlusBlock import PlayerPlusBlock
 from .pay54 import Pay34API
@@ -167,10 +168,12 @@ class PageLayoutAdvertisementSnippet(models.Model):
     code = models.CharField(max_length=30, blank=True, default='')
     head = StreamField([
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
     ], blank=True)
     body = StreamField([
         ('advertisement', AdvertisementInline()),
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
     ], blank=True)
     live = models.BooleanField(default=True)
     panels = [
@@ -264,6 +267,7 @@ class DefaultPage(Page):
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('tabs', TabsBlock()),
@@ -314,6 +318,7 @@ class PageWithSidebar(Page):
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('tabs', TabsBlock()),
@@ -414,6 +419,7 @@ class LessonPage(Page):
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('post', PostBlock()),
@@ -430,6 +436,7 @@ class LessonPage(Page):
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('post', PostBlock()),
@@ -446,6 +453,7 @@ class LessonPage(Page):
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('translations', ListBlock(StructBlock([
@@ -464,6 +472,7 @@ class LessonPage(Page):
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('translations', ListBlock(StructBlock([
@@ -480,18 +489,21 @@ class LessonPage(Page):
     exercise = StreamField([
         ('paragraph', RichTextBlock()),
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
         ('learning_apps', LearningAppsBlock())
     ], verbose_name='Домашка', null=True, blank=True)
 
     additional_exercise = StreamField([
         ('paragraph', RichTextBlock()),
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
     ], verbose_name='Exercises De Lecon', null=True, blank=True)
     resume_populaire = StreamField([
         ('paragraph', RichTextBlock()),
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('floating_image', FloatingImageBlock()),
@@ -745,6 +757,7 @@ class ArticlePage(Page):
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('tabs', TabsBlock()),
@@ -808,6 +821,7 @@ class PodcastPage(Page):
         ('image', ImageChooserBlock()),
         ('document', DocumentViewerBlock()),
         ('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()),
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('tabs', TabsBlock()),
@@ -866,7 +880,8 @@ PodcastPage.settings_panels = PodcastPage.settings_panels + [
 
 
 class HTMLPage(Page):
-    body = StreamField([('html', RawHTMLBlock()), ], blank=True)
+    body = StreamField([('html', RawHTMLBlock()),
+        ('invisible_html', InvisibleRawHTMLBlock()), ], blank=True)
 
     set_was_on_page_cookie = models.BooleanField(default=True)
 
