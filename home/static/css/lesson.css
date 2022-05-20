@@ -252,3 +252,91 @@ a.page-review:hover {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch
 }
+
+.table {
+  --mdb-table-bg: transparent;
+  --mdb-table-accent-bg: transparent;
+  --mdb-table-striped-color: #212529;
+  --mdb-table-striped-bg: rgba(0, 0, 0, 0.02);
+  --mdb-table-active-color: #212529;
+  --mdb-table-active-bg: rgba(0, 0, 0, 0.1);
+  --mdb-table-hover-color: #212529;
+  --mdb-table-hover-bg: rgba(0, 0, 0, 0.025);
+  width: 100%;
+  margin-bottom: 1rem;
+  color: #212529;
+  vertical-align: top;
+  border-color: #e0e0e0;
+}
+.table > :not(caption) > * > * {
+  padding: 1rem 1.4rem;
+  background-color: var(--mdb-table-bg);
+  border-bottom-width: 1px;
+  box-shadow: inset 0 0 0 9999px var(--mdb-table-accent-bg);
+}
+.table > tbody {
+  vertical-align: inherit;
+}
+.table > thead {
+  vertical-align: bottom;
+}
+.table > :not(:first-child) {
+  border-top: 2px solid inherit;
+}
+
+.table > :not(caption) > * > * {
+  padding: 1rem 1.4rem;
+}
+
+.table th {
+  font-weight: 500;
+}
+
+.table tbody {
+  font-weight: 400;
+}
+
+.table-sm > :not(caption) > * > * {
+  padding: 0.5rem 1.4rem;
+}
+
+.table-primary {
+  background-color: #d0e0fc;
+}
+
+.table-secondary {
+  background-color: #f0d8ff;
+}
+
+.table-success {
+  background-color: #ccf1db;
+}
+
+.table-info {
+  background-color: #d7f2fb;
+}
+
+.table-warning {
+  background-color: #ffeecc;
+}
+
+.table-danger {
+  background-color: #fed6dd;
+}
+
+.table-light {
+  background-color: #f9f9f9;
+}
+
+.table-dark {
+  background-color: #262626;
+}
+
+.table-hover > tbody > tr {
+  transition: 0.5s;
+}
+
+.table-hover > tbody > tr:hover {
+  --mdb-table-accent-bg: transparent;
+  background-color: var(--mdb-table-hover-bg);
+}
