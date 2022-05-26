@@ -653,7 +653,7 @@ class LessonPage(Page):
                 context['block_exercise'] = False
         context['block_additional_exercise'] = True
         if self.additional_exercise:
-            if self.payed(user):
+            if 6 >= self.lesson_number or self.payed(user):
                 context['block_additional_exercise'] = False
         context['block_resume_populaire'] = True
         if self.resume_populaire:
