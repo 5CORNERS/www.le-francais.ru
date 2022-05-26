@@ -163,8 +163,7 @@
                 </li>
             {% endif %}
             {% if self.additional_exercise %}
-                <li class="nav-item"
-                    {% if block_additional_exercise %}style="display: none"{% endif %}>
+                <li class="nav-item">
                     <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
                        href="#exercises_de_lecon" role="tab" id="tab-exercises-de-lesson"
                        aria-controls="exercises_de_lecon">
