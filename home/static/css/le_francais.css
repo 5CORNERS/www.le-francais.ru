@@ -1294,6 +1294,10 @@ span.underline.play:focus {
   box-shadow: 1px 1px 5px 0px;
 }
 
+span.underline.play *{
+    pointer-events: none;
+}
+
 .btn-youtube {
 
 }
