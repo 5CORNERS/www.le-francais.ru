@@ -453,6 +453,8 @@ class LessonPage(Page):
         ('le_francais_ad_unit', LeFrancaisAdUnitBlock()),
     ], blank=True)
 
+    dictionary_tab_name = models.CharField(max_length=64, blank=True, null=True)
+
     dictionary = StreamField([
         ('advertisement', AdvertisementInline()),
         ('paragraph', RichTextBlock()),
@@ -710,6 +712,7 @@ LessonPage.content_panels = Page.content_panels + [
     StreamFieldPanel('comments_for_lesson'),
     FieldPanel('body_tab_name'),
     StreamFieldPanel('body'),
+    FieldPanel('dictionary_tab_name'),
     StreamFieldPanel('dictionary'),
     FieldPanel('summary'),
     FieldPanel('repetition_material'),
