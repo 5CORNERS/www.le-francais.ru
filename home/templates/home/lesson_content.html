@@ -30,7 +30,7 @@
                     <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab" href="#dictionary"
                        role="tab"
                        aria-controls="body">
-                        Словарик
+                        {% if self.dictionary_tab_name %}{{ self.dictionary_tab_name }}{% else %}Словарик{% endif %}
                     </a>
                 </li>
             {% endif %}
