@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tinkoff Log {{ year }} {{ month|stringformat:"02d" }}</title>
+
+</head>
+<body>
+<table style="margin-bottom: 10px">
+    <thead style="margin-bottom: 1.5rem">
+    {% for h in header %}
+        <td>{{ h }}</td>
+    {% endfor %}
+    </thead>
+    <tbody>
+    {% for row in rows %}
+        <tr>
+            {% for data in row %}
+                <td>{{ data }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<div>
+    Today Income: {{ today }}<br> Total Income: {{ total }}<br>
+    Average Daily: {{ average_daily }}
+</div>
+</body>
+</html>

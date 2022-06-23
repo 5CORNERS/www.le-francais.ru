@@ -1,10 +1,11 @@
 import json
+from calendar import monthrange
 
 import tabulate
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.template import defaultfilters
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -58,9 +59,11 @@ class Notification(View):
 
 @user_passes_test(lambda u: u.is_superuser)
 def get_log(request:HttpRequest, year, month):
+    year = int(year)
+    month = int(month)
     payments = list(Payment.objects.select_related('receipt').filter(
-        Q(status='CONFIRMED') | Q(status='AUTHORIZED'), update_date__year=int(year), update_date__month=int(month)).order_by('update_date'))
-    s = [(
+        Q(status='CONFIRMED') | Q(status='AUTHORIZED'), update_date__year=year, update_date__month=month).order_by('update_date'))
+    header = (
         'datetime',
         'amount',
         'email',
@@ -69,12 +72,13 @@ def get_log(request:HttpRequest, year, month):
         'recurrent',
         'country',
         'city'
-    )]
+    )
     today_income = 0
     total_income = 0
+    rows = []
     for p in payments:
         for item in p.items():
-            s.append((
+            rows.append((
                 defaultfilters.date(p.update_date, "Y-m-d H:i"),
                 int(p.amount / 100),
                 p.email,
@@ -87,9 +91,18 @@ def get_log(request:HttpRequest, year, month):
         total_income += int(p.amount/100)
         if p.update_date.day == timezone.now().day:
             today_income += int(p.amount/100)
-    s = tabulate.tabulate(s, headers='firstrow')
-    s += f'\n----------------------------\n'
-    s += f'Today Income: {today_income}\n'
-    s += f'Total Income: {total_income}\n'
-    s += f'Average Daily: {total_income/timezone.now().day}'
-    return HttpResponse(s, status=200, content_type='text/plain')
+    # s = tabulate.tabulate(s, headers='firstrow')
+    # s += f'\n----------------------------\n'
+    # s += f'Today Income: {today_income}\n'
+    # s += f'Total Income: {total_income}\n'
+    # s += f'Average Daily: {total_income/timezone.now().day}'
+    if timezone.now().month == month and timezone.now().year == year:
+        average_daily_income = total_income / timezone.now().day
+    else:
+        average_daily_income = total_income / monthrange(year, month)[1]
+    return render(request, 'tinkoff/log.html', {
+        'header': header, 'rows': rows, 'today': today_income,
+        'total': total_income,
+        'average_daily': average_daily_income,
+        'year': year, 'month': month
+    })
