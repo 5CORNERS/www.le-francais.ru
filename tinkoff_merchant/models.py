@@ -76,6 +76,13 @@ class Payment(models.Model):
 		return None
 
 	@property
+	def username(self):
+		if self.user is not None:
+			return self.user.username
+		else:
+			return None
+
+	@property
 	def user(self):
 		return self.get_user()
 
