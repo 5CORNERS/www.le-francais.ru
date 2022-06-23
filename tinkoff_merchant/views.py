@@ -64,11 +64,7 @@ def get_log(request:HttpRequest, year, month):
     payments = list(Payment.objects.select_related('receipt').filter(
         Q(status='CONFIRMED') | Q(status='AUTHORIZED'), update_date__year=year, update_date__month=month).order_by('update_date'))
     header = (
-        'datetime',
-        'amount',
-        'email',
-        'next_lesson',
-        'category',
+        'DATE','SUM','BANK','TYPE','LESSON','EMAIL', 'username',
         'recurrent',
         'country',
         'city'
@@ -81,9 +77,11 @@ def get_log(request:HttpRequest, year, month):
             rows.append((
                 defaultfilters.date(p.update_date, "Y-m-d H:i"),
                 int(p.amount / 100),
-                p.email,
-                p.closest_activation,
+                'Tinkoff',
                 item.category.split('_')[0],
+                p.closest_activation,
+                p.email,
+                p.username,
                 p.recurrent or bool(p.rebill_id),
                 p.user.country_name if p.user else 'n/a',
                 p.user.city if p.user else 'n/a'
