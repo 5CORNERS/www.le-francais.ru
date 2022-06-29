@@ -56,11 +56,12 @@
             src="{% static 'components/js/bootstrap-treeview.min.js' %}"></script>
     <script>
         addEventListener('audioplayerReady', function () {
-            let audio = $('#newAudioTranscript')
-            let startsEndsMap = {{ transcript_map|safe }}
+            let audio = $('#newAudioTranscript');
+            let startsEndsMap = {{ transcript_map|safe }};
+            let $playerPlusTab = $('#playerPlusTab');
             audio.one('playing', function (){
                 $(document).keypress(function (event){
-                    if (event.keyCode === 32) {
+                    if (event.keyCode === 32 && $playerPlusTab.hasClass('active')) {
                         event.preventDefault()
                         audio[0].paused ? audio.trigger('play') : audio.trigger('pause')
                     }
