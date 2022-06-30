@@ -14,7 +14,7 @@ ITEMS = {
 		category='coffee_cups',
 		order_type_id=1,
 		quantity=1,
-		price=29500,
+		price=34500,
 		site_quantity=5,
 	),
 	3: dict(
@@ -23,7 +23,7 @@ ITEMS = {
 		category='coffee_cups',
 		order_type_id=1,
 		quantity=1,
-		price=49000,
+		price=59000,
 		site_quantity=10,
 	),
 	4: dict(
@@ -32,7 +32,7 @@ ITEMS = {
 		category='coffee_cups',
 		order_type_id=1,
 		quantity=1,
-		price=78000,
+		price=98000,
 		site_quantity=20,
 	),
 	5: dict(
@@ -41,7 +41,7 @@ ITEMS = {
 		category='coffee_cups',
 		order_type_id=1,
 		quantity=1,
-		price=169000,
+		price=195000,
 		site_quantity=50,
 	),
 	6: dict(
@@ -59,7 +59,7 @@ ITEMS = {
 		category='tickets',
 		order_type_id=1,
 		quantity=1,
-		price=29500,
+		price=34500,
 		site_quantity=5,
 	),
 	8: dict(
@@ -68,7 +68,7 @@ ITEMS = {
 		category='tickets',
 		order_type_id=1,
 		quantity=1,
-		price=49000,
+		price=59000,
 		site_quantity=10,
 	),
 	9: dict(
@@ -77,7 +77,7 @@ ITEMS = {
 		category='tickets',
 		order_type_id=1,
 		quantity=1,
-		price=78000,
+		price=98000,
 		site_quantity=20,
 	),
 	10: dict(
@@ -86,7 +86,7 @@ ITEMS = {
 		category='tickets',
 		order_type_id=1,
 		quantity=1,
-		price=169000,
+		price=195000,
 		site_quantity=50,
 	),
 	11: dict(
