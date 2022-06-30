@@ -1,6 +1,6 @@
 ITEMS = {
 	1: dict(
-		name='Добровольное пожертвование в поддержку проекта 68р',
+		name='Добровольное пожертвование в поддержку проекта 78р',
 		description='le-francais.ru — Покупка 1 виртуальной чашечки кофе',
 		category='coffee_cups',
 		order_type_id=1,
@@ -9,7 +9,7 @@ ITEMS = {
 		site_quantity=1,
 	),
 	2: dict(
-		name='Добровольное пожертвование в поддержку проекта 295р',
+		name='Добровольное пожертвование в поддержку проекта 345р',
 		description='le-francais.ru — Покупка 5 виртуальных чашечек кофе',
 		category='coffee_cups',
 		order_type_id=1,
@@ -18,7 +18,7 @@ ITEMS = {
 		site_quantity=5,
 	),
 	3: dict(
-		name='Добровольное пожертвование в поддержку проекта 490р',
+		name='Добровольное пожертвование в поддержку проекта 590р',
 		description='le-francais.ru — Покупка 10 виртуальных чашечек кофе',
 		category='coffee_cups',
 		order_type_id=1,
@@ -27,7 +27,7 @@ ITEMS = {
 		site_quantity=10,
 	),
 	4: dict(
-		name='Добровольное пожертвование в поддержку проекта 780р',
+		name='Добровольное пожертвование в поддержку проекта 980р',
 		description='le-francais.ru — Покупка 20 виртуальных чашечек кофе',
 		category='coffee_cups',
 		order_type_id=1,
@@ -36,7 +36,7 @@ ITEMS = {
 		site_quantity=20,
 	),
 	5: dict(
-		name='Добровольное пожертвование в поддержку проекта 1690р',
+		name='Добровольное пожертвование в поддержку проекта 1950р',
 		description='le-francais.ru — Покупка 50 виртуальных чашечек кофе',
 		category='coffee_cups',
 		order_type_id=1,
