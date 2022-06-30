@@ -5,7 +5,7 @@ ITEMS = {
 		category='coffee_cups',
 		order_type_id=1,
 		quantity=1,
-		price=6800,
+		price=7800,
 		site_quantity=1,
 	),
 	2: dict(
@@ -50,7 +50,7 @@ ITEMS = {
 		category='tickets',
 		order_type_id=1,
 		quantity=1,
-		price=6800,
+		price=7800,
 		site_quantity=1,
 	),
 	7: dict(
