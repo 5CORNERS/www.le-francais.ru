@@ -142,15 +142,15 @@ def payment_params(context, payment):
 	merchant_id = settings.WALLET_ONE_MERCHANT_ID
 
 	if payment.cups_amount == 1:
-		payment_amount = 68
+		payment_amount = 78
 	elif payment.cups_amount == 5:
-		payment_amount = 295
+		payment_amount = 345
 	elif payment.cups_amount == 10:
-		payment_amount = 490
+		payment_amount = 590
 	elif payment.cups_amount == 20:
-		payment_amount = 780
+		payment_amount = 980
 	elif payment.cups_amount == 50:
-		payment_amount = 1690
+		payment_amount = 1950
 
 	currency_id = u'643'  ## Russian rubles
 	payment_no = payment.id
