@@ -384,17 +384,17 @@ class TinkoffPayments(View):
                          description=None,
                          price1="По цене стаканчика кофе в <b>McDonalds</b>",
                          price2=78, item_id=6),
-                    dict(title="5 билетов", image="images/ticket-5-69.png",
+                    dict(title="5 билетов", image="images/tickets-5-69.png",
                          description=None, price1="по 69 ₽", price2=345,
                          item_id=7),
-                    dict(title="10 билетов", image="images/ticket-10-59.png",
+                    dict(title="10 билетов", image="images/tickets-10-59.png",
                          description=None, price1="по 59 ₽", price2=590,
                          item_id=8),
-                    dict(title="20 билетов", image="images/ticket-20-49.png",
+                    dict(title="20 билетов", image="images/tickets-20-49.png",
                          description=None, price1="по 49 ₽", price2=980,
                          item_id=9),
-                    dict(title="50 билетов", image="images/ticket-50-39.png",
-                         description=None, price1="по 39 ₽", price2=195000,
+                    dict(title="50 билетов", image="images/tickets-50-39.png",
+                         description=None, price1="по 39 ₽", price2=1950,
                          item_id=10),
                 ])
                 return render(request,
@@ -437,7 +437,7 @@ class TinkoffPayments(View):
                      item_id=4),
                 dict(title="50 чашечек", image="images/coffee_50.png",
                      description='''Хватит, чтобы угощать целый год.''',
-                     price1="по 39 ₽", price2=195000, item_id=5),
+                     price1="по 39 ₽", price2=1950, item_id=5),
             ])
             return render(request, 'payments/tinkoff_payments.html', data)
 
