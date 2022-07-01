@@ -382,7 +382,7 @@ class TinkoffPayments(View):
                 data = dict(tickets=True, cards=[
                     dict(title="1 билет", image="images/ticket-1-78.png",
                          description=None,
-                         price1="По цене стаканчика кофе в <b>McDonalds</b>",
+                         price1="<s>По цене стаканчика кофе в <b>McDonalds</b></s>",
                          price2=78, item_id=6),
                     dict(title="5 билетов", image="images/tickets-5-69.png",
                          description=None, price1="по 69 ₽", price2=345,
@@ -423,7 +423,7 @@ class TinkoffPayments(View):
             data = dict(tickets=False, cards=[
                 dict(title="1 чашечка", image="images/coffee_1.png",
                      description=None,
-                     price1="По цене стаканчика кофе в <b>McDonalds</b>",
+                     price1="<s>По цене стаканчика кофе в <b>McDonalds</b></s>",
                      price2=78,
                      item_id=1),
                 dict(title="5 чашечек", image="images/coffee_5.png",
@@ -529,7 +529,7 @@ class PaymentsView(View):
         data = dict(cards=[
             {'title': "1 чашечка", 'image': "images/coffee_1.png",
              'description': None,
-             'price1': "По цене стаканчика кофе в <b>McDonalds</b>",
+             'price1': "<s>По цене стаканчика кофе в <b>McDonalds</b></s>",
              'cups_amount': 1, 'price2': 68},
             {'title': "5 чашечек", 'image': "images/coffee_5.png",
              'description': None, 'price1': "по 59 ₽", 'cups_amount': 5,
