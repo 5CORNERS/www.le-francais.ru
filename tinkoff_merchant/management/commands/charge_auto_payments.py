@@ -8,7 +8,7 @@ from tinkoff_merchant.consts import PAYMENT_PAYED_STATUSES, CATEGORIES
 from tinkoff_merchant.models import Payment
 from tinkoff_merchant.services import MerchantAPI
 
-DELTA = timedelta(days=30)
+DELTA = timedelta(days=25)
 NOW = timezone.now()
 
 class Command(BaseCommand):
@@ -92,9 +92,9 @@ class Command(BaseCommand):
             if new_payment.success:
                 new_payment = api.charge(new_payment)
                 if new_payment.success:
-                    print(f'SUCCESS -- {new_payment.status}')
+                    print(f'SUCCESS -- {new_payment.status} -- {new_payment.order_id}')
                 else:
-                    print(f'ERROR -- {new_payment.status} -- {new_payment.error_code} -- {new_payment.message} -- {new_payment.details}')
+                    print(f'ERROR -- {new_payment.status} -- {new_payment.order_id} -- {new_payment.error_code} -- {new_payment.message} -- {new_payment.details}')
             else:
                 print(f'ERROR -- {new_payment.status} -- {new_payment.error_code} -- {new_payment.message} -- {new_payment.details}')
             new_payment.save()
