@@ -14,9 +14,9 @@ make_cancel.short_description = 'Отменить платеж'
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'order_id', 'get_amount_rub', 'success', 'status', 'payment_id', 'creation_date', 'update_date', 'email', 'recurrent']
+    list_display = ['id', 'order_id', 'get_amount_rub', 'success', 'status', 'payment_id', 'creation_date', 'update_date', 'email', 'recurrent', 'rebill_id', 'username']
     list_filter = ['status', 'success', 'recurrent']
-    search_fields = ['order_id', 'payment_id']
+    search_fields = ['order_id', 'payment_id', 'rebill_id']
     actions = [make_cancel]
 
     def get_amount_rub(self, obj):
