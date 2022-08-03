@@ -15,7 +15,7 @@ from django.shortcuts import redirect, render
 from home.models import LessonPage
 from .forms import DictionaryCsvImportForm, DictionaryWordFormset
 from .models import Word, WordTranslation, Packet, WordGroup, \
-	UnifiedWord, Verb, VerbForm, DictionaryError
+	UnifiedWord, Verb, VerbForm, DictionaryError, UserWordData, UserWordRepetition, UserDayRepetition
 
 from django_bulk_update import helper as update_helper
 import time
@@ -347,7 +347,13 @@ class VerbFormInline(admin.TabularInline):
 
 @admin.register(Verb)
 class VerbAdmin(admin.ModelAdmin):
-	inlines = [VerbFormInline]
+	search_fields = ['verb', 'translation']
+	readonly_fields = ['packet', 'packets']
+	# inlines = [VerbFormInline]
+
+@admin.register(VerbForm)
+class VerbFormAdmin(admin.ModelAdmin):
+	search_fields = ['verb', 'translation']
 
 @admin.register(DictionaryError)
 class DictionaryErrorAdmin(admin.ModelAdmin):

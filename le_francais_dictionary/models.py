@@ -1046,6 +1046,9 @@ class Verb(models.Model):
 	                                      related_name='dictionary_verb_translation_set')
 	translation_audio_url = models.URLField(null=True)
 
+	def __str__(self):
+		return self.verb
+
 	def __init__(self, *args, **kwargs):
 		super(Verb, self).__init__(*args, **kwargs)
 		self._forms = None
@@ -1153,6 +1156,9 @@ class VerbForm(models.Model):
 	                                      on_delete=models.SET_NULL,
 	                                      related_name='dictionary_verb_form_translation_set')
 	translation_audio_url = models.URLField(null=True)
+
+	def __str__(self):
+		return self.verb
 
 	def to_dict(self):
 		polly_url = self.audio_url if self.audio_url else self.polly.url if self.polly else None
