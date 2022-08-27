@@ -61,8 +61,11 @@ class Payment(models.Model):
 		return 'Заказ #{self.id}:{self.order_id}:{self.payment_id}'.format(self=self)
 
 	def get_email(self):
+		if self.user is not None:
+			return self.user.email
 		if self.receipt:
 			return self.receipt.email
+		return None
 
 	@property
 	def email(self):
