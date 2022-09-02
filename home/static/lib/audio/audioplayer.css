@@ -14,8 +14,21 @@
 }
 
 .audioplayer-mini {
-    width: 4em;
+    width: 7em;
     margin: 0 auto;
+}
+
+/*.audioplayer-time-divider {*/
+/*    width: 6px;*/
+/*}*/
+
+@media screen and (max-width: 329px) {
+    .audioplayer-mini {
+        width: 4em;
+    }
+    .audioplayer-mini > .audioplayer-time {
+        display: none;
+    }
 }
 
 .audioplayer > div {
