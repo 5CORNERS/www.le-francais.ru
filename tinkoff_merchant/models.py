@@ -45,6 +45,8 @@ class Payment(models.Model):
 	creation_date = models.DateTimeField(verbose_name='Дата создания заказа', auto_now_add=True, null=True)
 	update_date = models.DateTimeField(verbose_name='Дата последнего обновления', auto_now=True, null=True)
 	status_history = JSONField(default=list)
+	response_history = JSONField(default=list)
+	request_history = JSONField(default=list)
 
 	parent = models.ForeignKey('self', on_delete=models.SET_NULL,
 	                           default=None, blank=True, null=True,

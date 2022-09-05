@@ -60,7 +60,7 @@ class MerchantAPI:
             base.append(['TerminalKey', self.terminal_key])
 
         for k, v in data.items():
-            if k == 'Token':
+            if k in ['Token', 'Shops', 'Receipt', 'DATA']:
                 continue
             if isinstance(v, bool):
                 base.append([k, str(v).lower()])
@@ -80,6 +80,7 @@ class MerchantAPI:
             if resp_field in response:
                 setattr(p, model_field, response.get(resp_field))
         p.status_history.append(dict(status=response.get('Status'), datetime=str(datetime.now())))
+        p.response_history.append(dict(response=response, datetime=str(datetime.now())))
         return p
 
     def token_correct(self, token: str, data: dict) -> bool:
