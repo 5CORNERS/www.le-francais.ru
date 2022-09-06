@@ -387,6 +387,7 @@ POSTMAN_DISALLOW_ANONYMOUS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 MASS_EMAIL_BACKEND = EMAIL_BACKEND
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Le-francais.ru <no-reply@mail.le-francais.ru>')
+DEFAULT_REPLY_TO_EMAIL = os.getenv('DEFAULT_REPLY_TO_EMAIL', 'support@le-francais.ru')
 
 email_config = dj_email_url.config()
 
