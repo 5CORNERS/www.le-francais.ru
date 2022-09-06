@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col">
+                <p>Спасибо Вам огромное за готовность поддержать наш
+                    проект!
+                </p>
+
+                <p>На этой странице Вы сможете получить реквизиты для
+                    банковского перевода в валюте. Эти реквизиты
+                    содержат персональные данные, поэтому мы не
+                    решились их выкладывать в открытый доступ. По
+                    нажатию на кнопку &laquo;получить данные&raquo;
+                    будет отправлено письмо с реквизитами на адрес,
+                    под которым Вы зарегистрированы на сайте.
+                </p>
+
+                <p>В качестве альтернативы Вы можете написать мне <a
+                        href="https://t.me/ILYA_DUMOV" rel="nofollow"
+                        target="_blank" title="Мой Telegram">в
+                    Telegram</a>, <a
+                        href="https://www.le-francais.ru/messages/write/ILYA%20DUMOV/"
+                        rel="nofollow" target="_blank"
+                        title="написать мне в личку">в личку</a> или
+                    на почту <img alt="мой адрес email"
+                                  src="https://files.le-francais.ru/photos/illustrations/my_email.png"
+                                  title="мой адрес email"> &mdash; и я
+                    сообщу Вам реквизиты.
+                </p>
+
+                <p>Еще раз спасибо за поддержку!</p>
+                <form action="{% url 'donations:bank_transfer_get_email' %}"
+                      method="post" class="mb-2">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <select class="custom-select"
+                                id="inputGroupSelectCurrencies"
+                                aria-label="Выберите валюту"
+                                name="currency" style="max-width: 11em">
+                            <option hidden>Выберите валюту
+                            </option>
+                            {% for currency in currencies %}
+                                {% if forloop.counter == 5 %}
+                                    <option disabled>---</option>
+                                {% endif %}
+                                <option value="{{ currency }}">{{ currency }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-group-append">
+                            <button id="inputGroupSelectCurrenciesSubmitButton"
+                                    disabled class="btn btn-primary"
+                                    type="submit">Получить реквизиты
+                                счета
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+                {% if 'success' in request.GET %}
+                    <div class="alert alert-success" role="alert">
+                        Письмо с реквизитами было отправлено на
+                        адрес {{ request.user.email }}.
+                    </div>{% endif %}
+                {% if 'error' in request.GET %}
+                    <div class="alert alert-danger" role="alert">Не
+                        удалось отправить письмо с реквизитами
+                    </div>{% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        $('#inputGroupSelectCurrencies').change(function () {
+            $('#inputGroupSelectCurrenciesSubmitButton').prop('disabled', false)
+        })
+    </script>
+{% endblock %}
