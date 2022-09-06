@@ -39,9 +39,9 @@ class Command(BaseCommand):
 		post_save.connect(post_saved, sender=Post)
 
 		for post in Post.objects.all():
-			if post.created < timezone.now()-timezone.timedelta(weeks=8):
+			if post.created < timezone.now()-timezone.timedelta(weeks=24):
 				continue
-			for link in re.findall('\((((http://)|(https://))(.+?\.(png|jpeg|gif|jpg)))', post.body, re.I):
+			for link in re.findall('\((((http://)|(https://))(\S+?\.(png|jpeg|gif|jpg)))', post.body, re.I):
 				file_name = link[0].split('//')[1]
 				file_name = re.sub('/', '+', file_name)
 				file_name = re.sub(',', '_', file_name)
