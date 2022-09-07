@@ -3,6 +3,7 @@
 {% block content %}
     <div class="container mt-4">
         <div class="row">
+        {% if request.user.is_authenticated %}
             <div class="col">
                 <p>Спасибо Вам огромное за готовность поддержать наш
                     проект!
@@ -67,7 +68,23 @@
                     <div class="alert alert-danger" role="alert">Не
                         удалось отправить письмо с реквизитами
                     </div>{% endif %}
+                <p>Здесь пока представлены только четыре варианта
+                    валют, но в реальности мы можем принимать переводы
+                    еще в двенадцати: AUD, CNH, CZK, DKK, GBP, HKD,
+                    HUF, ILS, JPY, MXN, NOK, NZD, PLN, RON, SEK, SGD,
+                    TRY, ZAR. Если Ваша валюта из этого списка, пишите
+                    &mdash; и я сообщу Вам реквизиты счета для
+                    перевода в указанной валюте.
+                </p>
             </div>
+        {% else %}
+            <div class="col">
+                <p>
+                    Эта страница видна только зарегистрированным
+                    пользователям.
+                </p>
+            </div>
+        {% endif %}
         </div>
     </div>
 {% endblock %}
