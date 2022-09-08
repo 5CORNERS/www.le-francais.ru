@@ -11,7 +11,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-from custom_user.consts import MESSAGE_FOR_NOT_PAYED, MESSAGE_FOR_PAYED
+from custom_user.consts import MESSAGE_FOR_NOT_PAYED
 from custom_user.forms import ForceLoginForm
 from custom_user.models import User, LogMessage
 from django.utils.translation import ugettext_lazy as _
@@ -26,18 +26,22 @@ class SawMessageView(View):
             if user.saw_message:
                 return HttpResponse(status=403)
             msg_body = MESSAGE_FOR_NOT_PAYED
+            message = EmailMessage(
+                to=[request.user.email],
+                subject='Активация уроков на сайте le-francais.ru',
+                body=msg_body,
+                from_email='Le-francais.ru <support@le-francais.ru>',
+                reply_to=['support@le-francais.ru']
+            )
             if not user.is_staff:
-                EmailMessage(
-                    to=[request.user.email],
-                    subject='Активация уроков на сайте le-francais.ru',
-                    body=msg_body,
-                    from_email='ilia.dumov@mail.le-francais.ru',
-                    reply_to=['support@le-francais.ru']
-                ).send(fail_silently=True)
+                message.send(fail_silently=True)
+            else:
+                message.send(fail_silently=False)
             user.saw_message = True
+            user.show_tickets = True
             user.saw_message_datetime = datetime.now()
             user.save()
-            if user.days_since_joined() > 7:
+            if user.days_since_joined() > 7 and not user.has_payed():
                 user.add_cups(1)
             return HttpResponse(b'OK', status=200)
         elif request.POST['action'] == 'get_state':
