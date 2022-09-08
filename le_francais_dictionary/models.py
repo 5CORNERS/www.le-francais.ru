@@ -184,6 +184,9 @@ class Word(models.Model):
 
 	order = models.IntegerField(null=True, default=None)
 
+	class Meta:
+		ordering = ['order']
+
 	def __init__(self, *args, **kwargs):
 		super(Word, self).__init__(*args, **kwargs)
 		self._unrelated = None
