@@ -641,6 +641,8 @@ class LessonPage(Page):
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request)
         user = request.user
+        first_need_payment_lesson_number = LessonPage.objects.filter(
+            need_payment=True).order_by('lesson_number').first().lesson_number
 
         context['already_payed'] = False
         if request.user.is_authenticated and (request.user.has_cups or request.user.payed_lessons.all()):
@@ -651,23 +653,23 @@ class LessonPage(Page):
             context['lesson_was_payed_by_user'] = True
         context['block_exercise'] = True
         if self.exercise:
-            if BLOCK_AFTER_EXERCISE >= self.lesson_number or self.payed(user):
+            if (BLOCK_AFTER_EXERCISE >= self.lesson_number or self.payed(user)) or self.lesson_number < first_need_payment_lesson_number:
                 context['block_exercise'] = False
         context['block_additional_exercise'] = True
         if self.additional_exercise:
-            if 6 >= self.lesson_number or self.payed(user):
+            if (6 >= self.lesson_number or self.payed(user)) or self.lesson_number < first_need_payment_lesson_number:
                 context['block_additional_exercise'] = False
         context['block_resume_populaire'] = True
         if self.resume_populaire:
-            if BLOCK_AFTER_RESUME_POPULAIRE >= self.lesson_number or self.payed(user):
+            if (BLOCK_AFTER_RESUME_POPULAIRE >= self.lesson_number or self.payed(user)) or self.lesson_number < first_need_payment_lesson_number:
                 context['block_resume_populaire'] = False
         context['block_repetition_material'] = True
         if self.repetition_material:
-            if BLOCK_AFTER_REPETITION_MATERIAL >= self.lesson_number or self.payed(user):
+            if (BLOCK_AFTER_REPETITION_MATERIAL >= self.lesson_number or self.payed(user)) or self.lesson_number < first_need_payment_lesson_number:
                 context['block_repetition_material'] = False
         context['block_flash_cards'] = True
         if self.flash_cards_is_included():
-            if BLOCK_AFTER_FLASHCARDS >= self.lesson_number or self.payed(user):
+            if (BLOCK_AFTER_FLASHCARDS >= self.lesson_number or self.payed(user)) or self.lesson_number < first_need_payment_lesson_number:
                 context['block_flash_cards'] = False
 
         context['strict_player'] = True

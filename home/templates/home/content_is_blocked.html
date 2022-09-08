@@ -1,5 +1,24 @@
 {% load wagtailcore_tags static%}
 <div class="alert alert-success block-message-alert">
+{% if self.need_payment %}
+    <p>Каждый день мы работаем, чтобы уроки были удобнее и комфортнее. Ваша поддержка поможет нам и откроет Вам доступ ко всем материалам урока.<span
+				class="arnaud-comment"
+				data-container="body"
+				data-toggle="popover"
+				data-placement="top"
+				data-html="true"
+                data-content='<p>Мы поддерживаем и улучшаем проект своими силами. Чтобы продолжать работу над сайтом, нам не обойтись без Вашей поддержки.</p>
+
+<p>Средства от покупки билетиков идут на техническое обеспечение сайта и вознаграждение тем, кто над ним трудится.</p>
+
+<p>Сегодня развитие проекта под угрозой. Поэтому мы будем очень Вам признательны, если Вы продолжите свое обучение на сайте и поддержите нас в этот период.</p>
+
+<p>Мы ввели интуитивно понятную метафору — билетики, которые Вы приобретаете книжечками и «компостируете» по одному на страничке урока, чтобы активировать его и сделать доступным все его материалы.</p>'
+		>Почему так?</span></p>
+    <img class="new-svg-button activate-button{% if userlesson %} activated{% endif %}"
+         src="{% if userlesson %}{% static 'images/buttons/activated.svg' %}{% else %}{% static 'images/buttons/activate.svg' %}{% endif %}"
+         data-activate-lesson="button">
+{% else %}
 	<p>Каждый день мы работаем, чтобы уроки были удобнее и комфортнее. Ваша благодарность поможет нам и откроет Вам доступ к дополнительным материалам.<span
 				class="arnaud-comment"
 				data-container="body"
@@ -22,4 +41,5 @@
 				 src="{% static 'svg/say thank you.svg' %}"
 				 alt="Поблагодарите нас за наш труд"
 		>
+{% endif %}
 </div>

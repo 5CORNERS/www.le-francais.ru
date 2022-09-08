@@ -289,7 +289,7 @@ class ActivateLesson(View):
     def post(self, request):
         lesson = LessonPage.objects.get(
             lesson_number=request.POST['lesson_number'])
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             if lesson not in request.user.payed_lessons.all():
                 if request.user.cup_amount >= 1 or request.user.cup_credit >= 1:
                     try:
@@ -851,7 +851,7 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
                 if tab['href'] == blocked[0] and blocked[
                     1] < page.lesson_number < blocked[2]:
                     tab['value'] = render_to_string(
-                        'home/content_is_blocked.html', request=request)
+                        'home/content_is_blocked.html', {'self': page}, request=request)
     return result
 
 

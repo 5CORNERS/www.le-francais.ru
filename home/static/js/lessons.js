@@ -224,6 +224,9 @@ $(document).ready(function () {
             $('#tab-flash-cards').removeAttr('data-toggle');
             $('#tab-exercises-de-lesson').removeAttr('data-toggle');
             $('#tab-exercise').removeAttr('data-toggle');
+            $('#tab-my-words').removeAttr('data-toggle');
+            $('#tab-verbs').removeAttr('data-toggle');
+            $('#tab-resume-populaire').removeAttr('data-toggle');
             $('#tab-flash-cards').click(function (e) {
                 e.preventDefault();
                 activateLesson('tab')
@@ -233,6 +236,18 @@ $(document).ready(function () {
                 activateLesson('tab')
             });
             $('#tab-exercise').click(function (e) {
+                e.preventDefault();
+                activateLesson('tab')
+            });
+            $('#tab-my-words').click(function (e) {
+                e.preventDefault();
+                activateLesson('tab')
+            });
+            $('#tab-verbs').click(function (e) {
+                e.preventDefault();
+                activateLesson('tab')
+            });
+            $('#tab-resume-populaire').click(function (e) {
                 e.preventDefault();
                 activateLesson('tab')
             });
