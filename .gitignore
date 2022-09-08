@@ -4,7 +4,7 @@ db.sqlite3
 Procfile.local
 venv
 *.pyc
-/temp.html
+/output.html
 /temp2.html
 /avatar.jpg
 /.log
@@ -28,3 +28,4 @@ home/data/devoirs.csv
 /mass_mailer/temp/
 !/html_files/resume_populaire/get_markers.py
 !/html_files/resume_populaire/update_markers.py
+/geoip/
