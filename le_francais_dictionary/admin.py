@@ -348,7 +348,7 @@ class VerbFormInline(admin.TabularInline):
 @admin.register(Verb)
 class VerbAdmin(admin.ModelAdmin):
 	search_fields = ['verb', 'translation']
-	readonly_fields = ['packet', 'packets']
+	readonly_fields = ['packet', 'packets', 'polly', 'translation_polly']
 	# inlines = [VerbFormInline]
 
 @admin.register(VerbForm)
