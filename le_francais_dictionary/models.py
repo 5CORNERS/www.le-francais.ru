@@ -1032,6 +1032,9 @@ class VerbPacket(models.Model):
 			verb_to_packet_relations)
 		return result
 
+	def __str__(self):
+		return self.name
+
 
 class Verb(models.Model):
 	verb = models.CharField(max_length=64)
