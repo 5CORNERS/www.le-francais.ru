@@ -32,17 +32,15 @@
             {% include_donation_form show_target=False default_target=3 %}
         </div>
         <div class="row">
-            <div class="col">
-                <br>
+            <div class="col mt-2">
                 <p>Если вы можете совершить пожертвование в
                     иностранной валюте, у нас есть мультивалютный
                     счет, на который можно совершать банковские
                     переводы. <b>Поступления в валюте для нас особенно
-                        важны</b> (<span data-toggle="tooltip"
-                                         title="Это для нас единственный источник средств для оплаты серверов, лицензий и многих других платных сервисов, которые используются в проекте и которые в большей своей части находятся за рубежом."
-                                         class="underline"
-                                         data-boundary="viewport"
-                                         tabindex="0">почему?</span>).
+                        важны</b> (<span class="underline"
+                                         tabindex="0"
+                                         id="whyItsImportant"
+                    >почему?</span>). <a id="serversMapImageButton" data-toggle="modal" class="fas fa-info-circle server-map-image-link" data-target="#serversMapImageModal"></a>
                 </p>
                 <p>Реквизиты мультивалютного счета и список
                     поддерживаемых валют можно получить <a
@@ -63,6 +61,29 @@
 {#            </div>#}
 {#        </div>#}
     </div>
+    <div class="modal fade" id="serversMapImageModal" tabindex="-1"
+         role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="max-width: 650px"
+             role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Инфраструктура
+                        le-francais.ru</h5>
+                    <button type="button" class="close"
+                            data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img class="d-none d-sm-inline"
+                         src="{% static 'images/serversMap2.png' %}"
+                         alt=""> <img class="d-sm-none"
+                                      src="{% static 'images/serversMapMobile.png' %}"
+                                      alt="">
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_css %}
@@ -70,6 +91,9 @@
 {% endblock %}
 
 {% block extra_js %}
+    <script>
+    const SERVERS_MAP_LINK = "{% static "images/serversMap2.png" %}";
+    </script>
     <script type="text/javascript"
             src="{% static 'donations/script.js' %}"></script>
 {% endblock %}
