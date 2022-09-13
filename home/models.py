@@ -69,10 +69,10 @@ PLACEMENT_CHOICES = (
     ('in_house_sidebar', 'In-House Sidebar')
 )
 
-BLOCK_AFTER_RESUME_POPULAIRE = 7
-BLOCK_AFTER_REPETITION_MATERIAL = 8
-BLOCK_AFTER_EXERCISE = 9
-BLOCK_AFTER_FLASHCARDS = 10
+BLOCK_RESUME_POPULAIRE_AFTER = 7
+BLOCK_REPETITION_MATERIAL_AFTER = 8
+BLOCK_EXERCISE_AFTER = 9
+BLOCK_FLASHCARDS_AFTER = 10
 STRICT_PLAYER_AFTER = 12
 FORBID_BACKGROUND_LISTENING_AFTER = 18
 
@@ -653,7 +653,7 @@ class LessonPage(Page):
             context['lesson_was_payed_by_user'] = True
         context['block_exercise'] = True
         if self.exercise:
-            if (BLOCK_AFTER_EXERCISE >= self.lesson_number or self.payed(user)):
+            if (BLOCK_EXERCISE_AFTER >= self.lesson_number or self.payed(user)):
                 context['block_exercise'] = False
         context['block_additional_exercise'] = True
         if self.additional_exercise:
@@ -661,15 +661,15 @@ class LessonPage(Page):
                 context['block_additional_exercise'] = False
         context['block_resume_populaire'] = True
         if self.resume_populaire:
-            if (BLOCK_AFTER_RESUME_POPULAIRE >= self.lesson_number or self.payed(user)):
+            if (BLOCK_RESUME_POPULAIRE_AFTER >= self.lesson_number or self.payed(user)):
                 context['block_resume_populaire'] = False
         context['block_repetition_material'] = True
         if self.repetition_material:
-            if (BLOCK_AFTER_REPETITION_MATERIAL >= self.lesson_number or self.payed(user)):
+            if (BLOCK_REPETITION_MATERIAL_AFTER >= self.lesson_number or self.payed(user)):
                 context['block_repetition_material'] = False
         context['block_flash_cards'] = True
         if self.flash_cards_is_included():
-            if (BLOCK_AFTER_FLASHCARDS >= self.lesson_number or self.payed(user)):
+            if (BLOCK_FLASHCARDS_AFTER >= self.lesson_number or self.payed(user)):
                 context['block_flash_cards'] = False
 
         context['strict_player'] = True
