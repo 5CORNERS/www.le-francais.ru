@@ -653,23 +653,23 @@ class LessonPage(Page):
             context['lesson_was_payed_by_user'] = True
         context['block_exercise'] = True
         if self.exercise:
-            if (BLOCK_AFTER_EXERCISE >= self.lesson_number or self.payed(user)) or self.lesson_number < first_need_payment_lesson_number:
+            if (BLOCK_AFTER_EXERCISE >= self.lesson_number or self.payed(user)):
                 context['block_exercise'] = False
         context['block_additional_exercise'] = True
         if self.additional_exercise:
-            if (6 >= self.lesson_number or self.payed(user)) or self.lesson_number < first_need_payment_lesson_number:
+            if (6 >= self.lesson_number or self.payed(user)):
                 context['block_additional_exercise'] = False
         context['block_resume_populaire'] = True
         if self.resume_populaire:
-            if (BLOCK_AFTER_RESUME_POPULAIRE >= self.lesson_number or self.payed(user)) or self.lesson_number < first_need_payment_lesson_number:
+            if (BLOCK_AFTER_RESUME_POPULAIRE >= self.lesson_number or self.payed(user)):
                 context['block_resume_populaire'] = False
         context['block_repetition_material'] = True
         if self.repetition_material:
-            if (BLOCK_AFTER_REPETITION_MATERIAL >= self.lesson_number or self.payed(user)) or self.lesson_number < first_need_payment_lesson_number:
+            if (BLOCK_AFTER_REPETITION_MATERIAL >= self.lesson_number or self.payed(user)):
                 context['block_repetition_material'] = False
         context['block_flash_cards'] = True
         if self.flash_cards_is_included():
-            if (BLOCK_AFTER_FLASHCARDS >= self.lesson_number or self.payed(user)) or self.lesson_number < first_need_payment_lesson_number:
+            if (BLOCK_AFTER_FLASHCARDS >= self.lesson_number or self.payed(user)):
                 context['block_flash_cards'] = False
 
         context['strict_player'] = True
