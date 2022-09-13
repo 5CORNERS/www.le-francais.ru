@@ -35,4 +35,21 @@ $(document).ready(() => {
         $amountInput.val($(e.target).val())
         console.log($(e.target).val())
     })
+    $('#whyItsImportant').popover({
+        content: `Это для нас единственный источник средств для оплаты серверов, лицензий и многих других платных сервисов, которые используются в проекте и которые в большей своей части находятся за рубежом.<img class="server-map-image-link" alt='' src='${SERVERS_MAP_LINK}'>`,
+        placement: 'top',
+        trigger: 'focus',
+        html: true,
+        boundary: 'viewport'
+    }).on('shown.bs.popover', function () {
+        $('.pop-close').on('click', function () {
+            $('#whyItsImportant').popover('hide')
+        })
+        $('.server-map-image-link').click(function () {
+            $('#whyItsImportant').popover('hide')
+            $('#serversMapImageModal').modal('show').one('hide.bs.modal', function () {
+                // $('#whyItsImportant').popover('show')
+            })
+        })
+    })
 })
