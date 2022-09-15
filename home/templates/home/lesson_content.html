@@ -230,7 +230,7 @@
 						{% for block in self.body %}{% include_block block %}{% endfor %}
 					{% endif %}
 				{% else %}
-					{% if self.need_payment and not user.is_authenticatedand and not self.lesson_number < 62 %}
+					{% if self.need_payment and not user.is_authenticated and and not self.lesson_number < 62 %}
 						{% include_30_block self.body 400 %}
 						<div class="row">
 							<div class="col-lg-12"><p>Доступ к материалам урока могут получить только зарегистрированные пользователи.</p></div>
