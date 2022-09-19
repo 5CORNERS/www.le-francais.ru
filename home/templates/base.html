@@ -204,6 +204,32 @@
             </div>
         </div>
     {% endif %}
+    <div class="bottom-message row" id="cookiesMessage"
+         style="display: none;background-color: #ffffffbf">
+        <div class="bottom-message-content col-12 col-md-9 col-xl-6">
+            <div class="bottom-message-description">
+                <div class="bottom-message-text text-left">
+                    <img class="mr-4" src="{% static 'images/cookie.png' %}" alt="cookie" style="height:50px;float:left">
+                    We use cookies on this site to enhance your user experience.
+                    <div class="btn btn-sm btn-primary bottom-message-button mt-0"
+                     id="cookiesMessageOk">
+                    OK
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if not request.session.session_key %}
+        <script>
+            $(document).ready(function () {
+                let message = $('#cookiesMessage');
+                message.slideDown(1000);
+                $('#cookiesMessageOk').click(function (e) {
+                    message.slideUp(1000);
+                })
+            })
+        </script>
+    {% endif %}
 {% endblock %}
 {% block footer %}
 {% include 'tags/footer.html' %}
@@ -249,6 +275,7 @@
             }
         })
     </script>{% endif %}
+
 {% endblock %}
 {% block extra_js %}
     {# Override this in templates to add extra javascript #}
