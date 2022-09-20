@@ -1,55 +1,65 @@
 {% load site_tags %}
 {% if not hide %}
 <script id="script-{{ id }}">
-	let ad_elements_{{ id }} = [
-		{% for ad in ads %}
-			$("<div style='margin-bottom: 10px' id='{{ ids|index:forloop.counter0 }}' class='__{{ ad.placement }}'</div>"),
-		{% endfor %}
-	];
-	let parent_container_{{ id }} = $('#script-{{ id }}').parent();
-    {% if is_sidebar %}
-	let last_{{ id }} = ad_elements_{{ id }}.pop();
-	let n_{{ id }} = ~~(parent_container_{{ id }}.height()/1000);
-	parent_container_{{ id }}.append(ad_elements_{{ id }}[0]);
-	var i;
-	for (i = 1; i < n_{{ id }} && i < ad_elements_{{ id }}.length; i++){
-		parent_container_{{ id }}.append(ad_elements_{{ id }}[i]);
-	}
-	if (i < n_{{ id }}) {
-		parent_container_{{ id }}.append(last_{{ id }})
-	}
-    {% else %}
-        for (i=0; i < ad_elements_{{ id }}.length; i++){
-            parent_container_{{ id }}.append(ad_elements_{{ id }}[i])
+	$(function () {
+        let scriptID = '{{ id }}';
+        let isSidebar
+        {% if is_sidebar %}
+        isSidebar = true;
+        {% else %}
+        isSidebar = false;
+        {% endif %}
+        let adElements = [
+            {% for ad in ads %}
+            $("<div style='margin-bottom: 10px' id='{{ ids|index:forloop.counter0 }}' class='__{{ ad.placement }}'</div>"),
+            {% endfor %}
+        ];
+        let parentContainer = $(`#script-${scriptID}`).parent();
+        if (isSidebar) {
+            let last = adElements.pop();
+            let maxNumber = ~~(parentContainer.height() / 1000);
+            parentContainer.append(adElements[0]);
+            let i;
+            for (i = 1; i < maxNumber && i < adElements.length;i++) {
+                parentContainer.append(adElements[i]);
+            }
+            if (i < maxNumber) {
+                parentContainer.append(last)
+            }
+        } else {
+            for (const adElement of adElements) {
+                parentContainer.append(adElement)
+            }
         }
-    {% endif %}
+    })
 </script>
 <script>
-	var gptadslots = [];
-	var googletag = googletag || {cmd: []};
-	googletag.cmd.push(function () {
-	{% for mapping in mappings %}
-		{% if mapping %}var {{ mapping.name }} = {{ mapping.script }};{% endif %}
-	{% endfor %}
-	{% for ad in ads %}
-		gptadslots.push(googletag.defineSlot('/21671132665/{{ ad.adunit_code }}', {{ ad.adunit_sizes }}, '{{ ids|index:forloop.counter0 }}')
-			{% if ad.size_mapping %}.defineSizeMapping({{ ad.size_mapping.name }}){% endif %}
-			.addService(googletag.pubads()));
-	{% endfor %}
-		googletag.pubads().enableLazyLoad({
-			fetchMarginPercent: 500,
-			renderMarginPercent: 200,
-			mobileScaling: 2.0
-		});
-		googletag.enableServices();
-	});
+    $(function () {
+        var gptadslots = [];
+        var googletag = googletag || {cmd: []};
+        googletag.cmd.push(function () {
+        {% for mapping in mappings %}
+            {% if mapping %}var {{ mapping.name }} = {{ mapping.script }};{% endif %}
+        {% endfor %}
+        {% for ad in ads %}
+            gptadslots.push(googletag.defineSlot('/22823653324/{{ ad.adunit_code }}', {{ ad.adunit_sizes }}, '{{ ids|index:forloop.counter0 }}')
+                {% if ad.size_mapping %}.defineSizeMapping({{ ad.size_mapping.name }}){% endif %}
+                .addService(googletag.pubads()));
+        {% endfor %}
+            googletag.pubads().enableLazyLoad({
+                fetchMarginPercent: 500,
+                renderMarginPercent: 200,
+                mobileScaling: 2.0
+            });
+            googletag.enableServices();
+        });
 
-	let adunits_{{ id }} = document.querySelectorAll('div[id^="{{ id }}-"]');
-	for (let i = 0; i < adunits_{{ id }}.length; i++) {
-		googletag.cmd.push(function () {
-			googletag.display(adunits_{{ id }}[i].getAttribute('id'));
-		});
-	}
-
+        let adunits_{{ id }} = document.querySelectorAll('div[id^="{{ id }}-"]');
+        for (let i = 0; i < adunits_{{ id }}.length; i++) {
+            googletag.cmd.push(function () {
+                googletag.display(adunits_{{ id }}[i].getAttribute('id'));
+            });
+        }}
+    )
 </script>
 {% endif %}
