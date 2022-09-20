@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-17 16:28+0300\n"
-"PO-Revision-Date: 2020-04-17 18:00+0300\n"
+"POT-Creation-Date: 2022-09-20 15:35+0300\n"
+"PO-Revision-Date: 2022-09-20 15:39+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ru\n"
@@ -49,7 +49,7 @@ msgstr "Ссылка"
 msgid "url your name links to (optional)"
 msgstr "url-ссылка на ваше имя (необязательно)"
 
-#: .\forms.py:51 .\templates\home\article_page.html:53
+#: .\forms.py:51
 msgid "Your comment"
 msgstr "Напишите комментарий"
 
@@ -118,15 +118,15 @@ msgstr ""
 "Сейчас у вас нет прикрепленного e-mail адреса. Рекомендуем добавить, чтобы "
 "начать получать уведомления, сброс пароля и прочее."
 
-#: .\templates\account\email.html:62
+#: .\templates\account\email.html:61
 msgid "Add E-mail Address"
 msgstr "Добавить e-mail адрес"
 
-#: .\templates\account\email.html:69
+#: .\templates\account\email.html:68
 msgid "Add E-mail"
 msgstr "Добавить e-mail"
 
-#: .\templates\account\email.html:82
+#: .\templates\account\email.html:81
 msgid "Do you really want to remove the selected e-mail address?"
 msgstr "Вы действительно хотите открепить этот e-mail адрес?"
 
@@ -157,23 +157,27 @@ msgstr "Изменить пароль"
 msgid "Signup"
 msgstr "Зарегестрироваться"
 
+#: .\templates\base.html:213
+msgid "We use cookies on this site to enhance your user experience."
+msgstr "Мы используем технологию cookie, чтобы обеспечить вам наилучшие впечатления на нашем сайте."
+
 #: .\templates\comments\_form.html:65
 msgid "send"
 msgstr "отправить"
 
-#: .\templates\comments\form.html:68
+#: .\templates\comments\_form.html:66
 msgid "preview"
 msgstr "предв. просмотр"
 
-#: .\templates\comments\preview.html:5 .\templates\comments\preview.html:9
+#: .\templates\comments\_preview.html:5 .\templates\comments\_preview.html:9
 msgid "Preview your comment"
 msgstr "Предварительный просмотр комментария"
 
-#: .\templates\comments\preview.html:11
+#: .\templates\comments\_preview.html:11
 msgid "Preview your comment for:"
 msgstr "Предварительный просмотр комментария:"
 
-#: .\templates\comments\preview.html:22
+#: .\templates\comments\_preview.html:22
 msgid "Empty comment."
 msgstr "Пустой комментарий."
 
@@ -328,9 +332,9 @@ msgstr "Ответ на комментарий"
 msgid "Reply to comment"
 msgstr "Ответить на комментарий"
 
-#: templates/pybb/post_template.html:85
-msgid "quote entire message (not recommended)"
-msgstr "цитировать сообщение целиком (избегайте оверквотинга!)"
+#: .\templates\pybb\breadcrumb.html:5
+msgid "Forum"
+msgstr "Форум"
 
 #: .\templates\pybb\edit_profile.html:4
 msgid "Profile editing"
@@ -394,8 +398,8 @@ msgid ""
 "User %(username)s post a new topic in forum to which you are subscribed "
 "(%(forum_name)s)."
 msgstr ""
-"%(username)s создал(а) новую тему на форуме, на который вы подписаны"
-"(%(forum_name)s)."
+"%(username)s создал(а) новую тему на форуме, на который вы "
+"подписаны(%(forum_name)s)."
 
 #: .\templates\pybb\mail_templates\forum_subscription_email_body.html:5
 #: .\templates\pybb\mail_templates\subscription_email_body.html:5
@@ -478,7 +482,7 @@ msgstr "Выберите тему, куда перенести сообщени�
 #: .\templates\pybb\move_post_pg.html:45 .\templates\pybb\move_post_pg.html:61
 #: .\templates\pybb\post_template.html:113 .\templates\pybb\topic_list.html:10
 #: .\templates\pybb\topic_topic.html:32 .\templates\pybb\topic_topic.html:56
-#: .\templates\pybb\user_posts.html:20 .\templates\pybb\user_topics.html:22
+#: .\templates\pybb\user_posts.html:26 .\templates\pybb\user_topics.html:22
 #: .\templates\tags\related_post.html:45 .\templates\tags\topic_block.html:23
 msgid "Posts"
 msgstr "Сообщения"
@@ -507,6 +511,10 @@ msgstr "Удалить"
 #: .\templates\pybb\post_template.html:65
 msgid "Edit"
 msgstr "Изменить"
+
+#: .\templates\pybb\post_template.html:70
+msgid "quote entire message (not recommended)"
+msgstr "цитировать сообщение целиком (избегайте оверквотинга!)"
 
 #: .\templates\pybb\post_template.html:74
 msgid "quote selected"
@@ -539,38 +547,41 @@ msgstr "Участник с"
 msgid "blocked"
 msgstr "заблокирован"
 
-#: .\templates\pybb\topic.html:30 .\templates\pybb\topic_topic.html:65
+#: .\templates\pybb\topic.html:31 .\templates\pybb\topic_topic.html:65
 #: .\templates\tags\topic_block.html:32
 msgid "Unstick topic"
 msgstr "Снять закрепление"
 
-#: .\templates\pybb\topic.html:32 .\templates\pybb\topic_topic.html:68
+#: .\templates\pybb\topic.html:33 .\templates\pybb\topic_topic.html:68
 #: .\templates\tags\topic_block.html:35
 msgid "Stick topic"
 msgstr "Закрепить тему"
 
-#: .\templates\pybb\topic.html:36 .\templates\pybb\topic_topic.html:72
+#: .\templates\pybb\topic.html:37 .\templates\pybb\topic_topic.html:72
 #: .\templates\tags\topic_block.html:39
 msgid "Open topic"
 msgstr "Открыть тему"
 
-#: .\templates\pybb\topic.html:38 .\templates\pybb\topic_topic.html:75
+#: .\templates\pybb\topic.html:39 .\templates\pybb\topic_topic.html:75
 #: .\templates\tags\topic_block.html:42
 msgid "Close topic"
 msgstr "Закрыть тему"
 
-#: .\templates\pybb\topic.html:41 .\templates\pybb\topic_topic.html:79
-#: .\templates\pybb\user.html:79 .\templates\tags\top_menu.html:60
+#: .\templates\pybb\topic.html:42 .\templates\pybb\topic_topic.html:79
+#: .\templates\pybb\user.html:79 .\templates\tags\top_menu.html:67
 #: .\templates\tags\topic_block.html:46
 msgid "Admin"
 msgstr "Админка"
 
-#: .\templates\pybb\topic.html:52
-msgid "Subscribe"
-msgstr "Получать уведомления"
-
+#: .\templates\pybb\topic.html:51 .\templates\pybb\topic_topic.html:88
+#: .\templates\tags\topic_block.html:55
 msgid "Unsubscribe"
 msgstr "Отписаться от уведомлений в этой теме"
+
+#: .\templates\pybb\topic.html:53 .\templates\pybb\topic_topic.html:90
+#: .\templates\tags\topic_block.html:57
+msgid "Subscribe"
+msgstr "Получать уведомления"
 
 #: .\templates\pybb\topic_last_message_info.html:12
 msgid "posted by"
@@ -608,7 +619,7 @@ msgstr "Автор"
 msgid "posted in"
 msgstr "написал в"
 
-#: .\templates\pybb\topic_topic.html:111 .\templates\tags\topic_block.html:78
+#: .\templates\pybb\topic_topic.html:109 .\templates\tags\topic_block.html:76
 msgid "Subscribers"
 msgstr "Подписчики"
 
@@ -648,7 +659,17 @@ msgstr "сообщения"
 msgid "topics"
 msgstr "темы"
 
-#: .\templates\tags\top_menu.html:85
+#: .\templates\tags\top_menu.html:69
+#, fuzzy
+#| msgid "Login"
+msgid "Force Login"
+msgstr "Войти"
+
+#: .\templates\tags\top_menu.html:71
+msgid "Admin Commands"
+msgstr ""
+
+#: .\templates\tags\top_menu.html:96
 #: .\templates\templates\ajax_registration_modal.html:12
 #: .\templates\templates\socialauth_success.html:3
 msgid "Login"
