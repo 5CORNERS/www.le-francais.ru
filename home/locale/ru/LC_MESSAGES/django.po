@@ -159,7 +159,7 @@ msgstr "Зарегестрироваться"
 
 #: .\templates\base.html:213
 msgid "We use cookies on this site to enhance your user experience."
-msgstr "Мы используем технологию cookie, чтобы обеспечить вам наилучшие впечатления на нашем сайте."
+msgstr "Мы используем куки, чтобы пользоваться сайтом было удобно."
 
 #: .\templates\comments\_form.html:65
 msgid "send"

@@ -205,7 +205,7 @@
         </div>
     {% endif %}
     <div class="bottom-message row" id="cookiesMessage"
-         style="display: none;background-color: #ffffffbf">
+         style="display: none;background-color: #333333eb;color:#ddd">
         <div class="bottom-message-content col-12 col-md-9 col-xl-6">
             <div class="bottom-message-description">
                 <div class="bottom-message-text text-left">
@@ -227,7 +227,7 @@
 {% block js %}
 	<script async src="{% static 'lib/audio/audioplayer.min.js' %}"></script>
 	    {% get_full_path as full_path %}
-    {% if not request.session.session_key %}
+    {% if not country_code in 'RU,KZ,GE,UA,BY' and not request.session.session_key %}
         <script>
             $(document).ready(function () {
                 let message = $('#cookiesMessage');
