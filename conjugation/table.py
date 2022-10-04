@@ -300,7 +300,7 @@ class Person:
 		for r in ['<b>', '</b>', '<i>', '</i>']:
 			verb_form = verb_form.replace(r, '')
 
-		if not self.v.aspirate_h or verb_form[0] in VOWELS_LIST:
+		if verb_form[0] in VOWELS_LIST and not self.v.aspirate_h:
 			first_char_is_vowel = VOWEL
 		else:
 			first_char_is_vowel = NOT_VOWEL
