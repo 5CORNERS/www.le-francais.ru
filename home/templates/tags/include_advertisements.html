@@ -31,15 +31,12 @@
                 parentContainer.append(adElement)
             }
         }
-    })
-</script>
-<script>
-    $(function () {
-        var gptadslots = [];
-        var googletag = googletag || {cmd: []};
+
+        let gptadslots = [];
+        let googletag = googletag || {cmd: []};
         googletag.cmd.push(function () {
         {% for mapping in mappings %}
-            {% if mapping %}var {{ mapping.name }} = {{ mapping.script }};{% endif %}
+            {% if mapping %}let {{ mapping.name }} = {{ mapping.script }};{% endif %}
         {% endfor %}
         {% for ad in ads %}
             gptadslots.push(googletag.defineSlot('/22823653324/{{ ad.adunit_code }}', {{ ad.adunit_sizes }}, '{{ ids|index:forloop.counter0 }}')
@@ -61,5 +58,6 @@
             });
         }}
     )
+
 </script>
 {% endif %}
