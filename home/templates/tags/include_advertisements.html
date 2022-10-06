@@ -1,46 +1,38 @@
 {% load site_tags %}
 {% if not hide %}
 <script id="script-{{ id }}">
-
-    let script_{{ id }} = function () {
-        let scriptID = '{{ id }}';
-        let isSidebar
+	let ad_elements_{{ id }} = [
+		{% for ad in ads %}
+			$("<div style='margin-bottom: 10px' id='{{ ids|index:forloop.counter0 }}' class='__{{ ad.placement }}'</div>"),
+		{% endfor %}
+	];
+	let parent_container_{{ id }} = $('#script-{{ id }}').parent();
         {% if is_sidebar %}
-        isSidebar = true;
+	let last_{{ id }} = ad_elements_{{ id }}.pop();
+	let n_{{ id }} = ~~(parent_container_{{ id }}.height()/1000);
+	parent_container_{{ id }}.append(ad_elements_{{ id }}[0]);
+	var i;
+	for (i = 1; i < n_{{ id }} && i < ad_elements_{{ id }}.length; i++){
+		parent_container_{{ id }}.append(ad_elements_{{ id }}[i]);
+	}
+	if (i < n_{{ id }}) {
+		parent_container_{{ id }}.append(last_{{ id }})
+	}
         {% else %}
-        isSidebar = false;
-        {% endif %}
-        let adElements = [
-            {% for ad in ads %}
-            $("<div style='margin-bottom: 10px' id='{{ ids|index:forloop.counter0 }}' class='__{{ ad.placement }}'</div>"),
-            {% endfor %}
-        ];
-        let parentContainer = $(`#script-${scriptID}`).parent();
-        if (isSidebar) {
-            let last = adElements.pop();
-            let maxNumber = ~~(parentContainer.height() / 1000);
-            parentContainer.append(adElements[0]);
-            let i;
-            for (i = 1; i < maxNumber && i < adElements.length;i++) {
-                parentContainer.append(adElements[i]);
-            }
-            if (i < maxNumber) {
-                parentContainer.append(last)
-            }
-        } else {
-            for (const adElement of adElements) {
-                parentContainer.append(adElement)
-            }
+        for (i=0; i < ad_elements_{{ id }}.length; i++){
+            parent_container_{{ id }}.append(ad_elements_{{ id }}[i])
         }
-
-        let gptadslots = [];
-        let googletag = googletag || {cmd: []};
+        {% endif %}
+</script>
+<script>
+	var gptadslots = [];
+	var googletag = googletag || {cmd: []};
         googletag.cmd.push(function () {
         {% for mapping in mappings %}
-            {% if mapping %}let {{ mapping.name }} = {{ mapping.script }};{% endif %}
+		{% if mapping %}var {{ mapping.name }} = {{ mapping.script }};{% endif %}
         {% endfor %}
         {% for ad in ads %}
-            gptadslots.push(googletag.defineSlot('/22823653324/{{ ad.adunit_code }}', {{ ad.adunit_sizes }}, '{{ ids|index:forloop.counter0 }}')
+		gptadslots.push(googletag.defineSlot('/22823653324/{{ ad.adunit_code }}', {{ ad.adunit_sizes }}, '{{ ids|index:forloop.counter0 }}')
                 {% if ad.size_mapping %}.defineSizeMapping({{ ad.size_mapping.name }}){% endif %}
                 .addService(googletag.pubads()));
         {% endfor %}
@@ -52,14 +44,12 @@
             googletag.enableServices();
         });
 
-        let adUnits = document.querySelectorAll('div[id^="{{ id }}-"]');
-        for (let i = 0; i < adUnits.length; i++) {
+	let adunits_{{ id }} = document.querySelectorAll('div[id^="{{ id }}-"]');
+	for (let i = 0; i < adunits_{{ id }}.length; i++) {
             googletag.cmd.push(function () {
-                googletag.display(adUnits[i].getAttribute('id'));
+			googletag.display(adunits_{{ id }}[i].getAttribute('id'));
             });
         }
-    }
-    script_{{ id }}()
 
 </script>
 {% endif %}
