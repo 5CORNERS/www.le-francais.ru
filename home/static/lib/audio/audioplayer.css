@@ -26,9 +26,6 @@
     .audioplayer-mini {
         width: 4em;
     }
-    .audioplayer-mini > .audioplayer-time {
-        display: none;
-    }
 }
 
 .audioplayer > div {
@@ -109,6 +106,12 @@
     text-align: center;
     z-index: 2;
     top: 0;
+}
+
+@media screen and (max-width: 329px) {
+    .audioplayer-mini > .audioplayer-time {
+        display: none;
+    }
 }
 
 .audioplayer-time-current {
