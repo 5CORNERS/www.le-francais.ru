@@ -292,6 +292,7 @@ $(document).ready(function () {
             "</div>" +
             "</button>");
         $("#coffee-button").replaceWith(new_button);
+        $("#coffeeButtonHelp").hide()
     }
 
     function playCoffeeSound() {

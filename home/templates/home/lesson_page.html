@@ -3,6 +3,7 @@
 {% load wagtailcore_tags %}
 {% load static site_tags %}
 {% load user_agents %}
+{% load svg %}
 
 {% block title %}Французский язык - {% if not self.seo_title %}Урок {{ self.lesson_number }}{% else %}{{ self.seo_title }}{% endif %}{% endblock %}
 {% block extra_head %}
@@ -123,17 +124,17 @@
             height: 40px;
         }
 
-        .new-svg-button:hover {
+        .coffee-button-shadow:hover {
             -webkit-filter: drop-shadow(5px 5px 5px #7d7d7d);
             filter: drop-shadow(5px 5px 5px #7d7d7d);
         }
 
-        .new-svg-button:active {
+        .coffee-button-shadow:active {
             -webkit-filter: drop-shadow(2px 2px 2px #7d7d7d);
             filter: drop-shadow(2px 2px 2px #7d7d7d);
         }
 
-        .new-svg-button:focus {
+        .coffee-button-shadow:focus {
             outline: -webkit-focus-ring-color auto 5px;
         }
 
@@ -378,6 +379,44 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="modal fade" id="coffeButtonHelpModal" tabindex="-1" role="dialog" aria-labelledby="coffeeButtonHelp">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+            <div class="modal-header">
+        <h5 class="mb-0">Как это работает</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+</div>
+<div class="modal-body">
+<p>Мы используем давно прижившуюся метафору
+        «Угостите меня чашечкой кофе!» для
+        поддержки нашего проекта.</p>
+    <img class="mb-2" alt="Кнопка «Поблагодарить»" src="{% static "images/payments-buy-me-coffe-160px.png" %}" title="Кнопка «Поблагодарить">
+    <p>Работает это так.</p>
+    <p>Вы запасаетесь каким-то
+        количеством виртуальных чашечек (по кнопочке <span style="display: inline-block;width: 18px;">{% svg 'coffee icon' %}</span> в шапке страницы справа), а затем
+        «тратите» их на уроках — дарите эдакий
+        маленький квант помощи, как бы угощаете
+        меня чашечкой кофе.</p>
+
+    <p>Когда Вы нажимаете эту кнопку, «расходуется»
+        одна виртуальная чашечка — и открываются
+        табики со всеми дополнительными
+        материалами (если они были закрыты; иногда появляются и новые,
+        которых было не видно); реклама из текста
+        тоже убирается — это происходит после
+        перезагрузки страницы.</p>
+    <p>На каждый такой клик я получаю уведомление
+        на почту и на часы — они вибрируют, и я
+        вижу, кто нас сейчас поблагодарил за урок.
+        :)</p>
+    <p>Поддерживайте нас! Расходуйте ваши чашечки,
+        учите французский быстрее и с большей
+        эффективностью! И — получайте от процесса
+        удовольствие! :)</p>
+</div>
+</div></div>
     </div>
     {% include 'modals/servers_map_image_modal.html' %}
 	{% if self.mail_archive and not user.is_authenticated %}
