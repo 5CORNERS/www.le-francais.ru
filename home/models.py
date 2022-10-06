@@ -1,11 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+import re
 from io import StringIO, BytesIO
 
 from annoying.fields import AutoOneToOneField
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
 from django.db import models
 from django.db.models import Count, Sum
 from django.dispatch import receiver
@@ -40,7 +41,8 @@ from .blocks.BootstrapCalloutBlock import BootstrapCalloutBlock
 from .blocks.CollapseBlock import CollapseBlock
 from .blocks.FloatingImageBlock import FloatingImageBlock
 from .blocks.InvisibleRawHTMLBlock import InvisibleRawHTMLBlock, VisibleRawHTMLBlock
-from .blocks.LeFrancaisAdUnit import LeFrancaisAdUnitBlock
+from .blocks.LeFrancaisAdUnit import LeFrancaisAdUnitBlock, \
+    AdUnitSizeBlock
 from .blocks.PlayerPlusBlock import PlayerPlusBlock
 from .pay54 import Pay34API
 from .utils import message, parse_tab_delimited_srt_file, sub_html, create_document_from_transcript_srt, \
@@ -125,7 +127,8 @@ class Mapping(models.Model):
 
     panels = [
         FieldPanel('name'),
-        FieldPanel('script')
+        FieldPanel('script'),
+        StreamFieldPanel('sizes')
     ]
 
     def __str__(self):
@@ -184,9 +187,28 @@ class PageLayoutAdvertisementSnippet(models.Model):
         FieldPanel('page_type'),
         FieldPanel('placement'),
         FieldPanel('live'),
+        FieldPanel('sizes'),
         StreamFieldPanel('head'),
         StreamFieldPanel('body'),
     ]
+    sizes = JSONField(default=list, blank=True)
+
+    def get_sizes(self):
+        import json
+        result = []
+        for ad_id in self.get_ad_ids():
+            pattern = re.compile(f"(\[.+]),\s?'div-gpt-ad-{ad_id[1]}-{ad_id[2]}'")
+            match = re.search(pattern, str(self.head))
+            if bool(match) and match.group(1)[0]=='[':
+                result.append((f'{ad_id[1]}-{ad_id[2]}', json.loads(match.group(1))))
+            else:
+                result.append((f'{ad_id[1]}-{ad_id[2]}', None))
+        return result
+
+
+
+    def get_ad_ids(self):
+        return re.finditer(r"display\('div-gpt-ad-(\d{13})-(\d)'\)", str(self.body))
 
     def __str__(self):
         return self.name
