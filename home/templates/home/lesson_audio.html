@@ -87,12 +87,14 @@
                              data-toggle="modal"
                              data-target="#give-me-a-coffee-modal"
                             tabindex="0"
+                            alt="Чашечка кофе — в благодарность за наш труд"
                         {% elif user.is_authenticated and not user.has_coffee %}
                             onclick="location.href='{% url 'coffee:check_amount' %}?next={{ request.path }}&s_t=0';"
                         {% elif not user.is_authenticated %}
                              data-toggle="modal"
                              data-target="#give-me-a-coffee-modal"
                             tabindex="0"
+                            alt="Чашечка кофе — в благодарность за наш труд"
                         {% endif %}
                          src="{% static 'svg/buy me coffee-07.svg' %}"
                          title="Поблагодарить"
