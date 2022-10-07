@@ -125,6 +125,10 @@ class Mapping(models.Model):
     name = models.CharField(max_length=16, unique=True)
     script = models.fields.TextField(max_length=1000)
 
+    sizes = StreamField([
+        ('size', AdUnitSizeBlock())
+    ], blank=True)
+
     panels = [
         FieldPanel('name'),
         FieldPanel('script'),
