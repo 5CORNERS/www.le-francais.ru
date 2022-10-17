@@ -24,6 +24,8 @@ def make_get_status(modeladmin: admin.ModelAdmin, request, qs):
 
     bulk_update.helper.bulk_update(to_update)
 
+make_get_status.short_description = 'Получить статус платежа'
+
 def make_cancel(modeladmin: admin.ModelAdmin, request, qs):
     for p in qs:
         MerchantAPI().cancel(p)
