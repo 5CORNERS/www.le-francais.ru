@@ -126,7 +126,7 @@ class Mapping(models.Model):
     script = models.fields.TextField(max_length=1000)
 
     sizes = StreamField([
-        ('size', AdUnitSizeBlock())
+        ('sizes', AdUnitSizeBlockAdvanced())
     ], blank=True)
 
     panels = [
@@ -134,6 +134,23 @@ class Mapping(models.Model):
         FieldPanel('script'),
         StreamFieldPanel('sizes')
     ]
+    @property
+    def sizes_json(self):
+        if not self.sizes:
+            return None
+        result = []
+        for size in self.sizes:
+            part_1 = []
+            if size.value['type']:
+                part_1.append(size.value['type'])
+            else:
+                part_1.append('v')
+            part_1.append(size.value['window_or_container_size'].split('x'))
+            part_2 = []
+            for simple_size in size.value['sizes']:
+                part_2.append([simple_size['width'], simple_size['height'], simple_size['width_percents']])
+            result.append([part_1, part_2])
+        return result
 
     def __str__(self):
         return self.name
