@@ -17,6 +17,21 @@ class AdUnitSizeBlock(blocks.StructBlock):
     window_or_container_size = blocks.CharBlock(required=False, help_text='320px')
     ad_unit_size = blocks.CharBlock(required=True, help_text='250px, 100%, ...')
 
+
+class SimpleSizeBlock(blocks.StructBlock):
+    width = blocks.IntegerBlock()
+    width_percents = blocks.BooleanBlock(required=False, )
+    height = blocks.IntegerBlock()
+
+class AdUnitSizeBlockAdvanced(blocks.StructBlock):
+    type = blocks.ChoiceBlock(choices=[
+        ('v', 'viewport size greater than'),
+        ('c', 'parent container size greater than or equal'),
+    ], required=False)
+    window_or_container_size = blocks.CharBlock(required=False, help_text='320x0 (width greater or equal than 320 and height greater or equal then 0)')
+    sizes = blocks.ListBlock(SimpleSizeBlock)
+
+
 class LeFrancaisAdUnitBlock(blocks.StructBlock):
     ad_unit_name = blocks.CharBlock()
     placement = blocks.ChoiceBlock(choices=get_placements(), required=False)
@@ -40,6 +55,14 @@ class LeFrancaisAdUnitBlock(blocks.StructBlock):
 
         context['media_query'] = parsed_media_query_to_str(media_query)
         context['floating_image'] = None
+
+        value['adsense'] = True
+        value['adsense_page_type'] = None
+        value['adsense_placement'] = None
+        value['adsense_inline_adunit_name'] = None
+        value['adsense_in_house'] = None
+
+
         return context
 
     class Meta:
