@@ -42,7 +42,7 @@ from .blocks.CollapseBlock import CollapseBlock
 from .blocks.FloatingImageBlock import FloatingImageBlock
 from .blocks.InvisibleRawHTMLBlock import InvisibleRawHTMLBlock, VisibleRawHTMLBlock
 from .blocks.LeFrancaisAdUnit import LeFrancaisAdUnitBlock, \
-    AdUnitSizeBlock
+    AdUnitSizeBlock, AdUnitSizeBlockAdvanced
 from .blocks.PlayerPlusBlock import PlayerPlusBlock
 from .pay54 import Pay34API
 from .utils import message, parse_tab_delimited_srt_file, sub_html, create_document_from_transcript_srt, \
