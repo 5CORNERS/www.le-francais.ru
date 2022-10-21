@@ -569,6 +569,10 @@ class LessonPage(Page):
 
     set_was_on_page_cookie = models.BooleanField(default=True)
 
+    def __init__(self, *args, **kwargs):
+        super(LessonPage, self).__init__(*args, **kwargs)
+        self._users_payed = {}
+
     def serve(self, request, *args, **kwargs):
         save_visited_pages_history(request, self)
         return super(LessonPage, self).serve(request, *args,
@@ -610,6 +614,7 @@ class LessonPage(Page):
         ul = UserLesson(user=user, lesson=self)
         ul.fill_remains()
         ul.save()
+        self._users_payed[user.pk] = True
 
         if self.need_payment and user.must_pay:
             show_tickets = True
@@ -645,9 +650,11 @@ class LessonPage(Page):
         return self.dictionary_packets.annotate(Count('word')).aggregate(Sum('word__count'))['word__count__sum']
 
     def payed(self, user: User):
-        if user.is_authenticated and (self in user.payed_lessons.all() or not user.must_pay):
-            return True
-        return False
+        if user.is_anonymous:
+            return False
+        if not user.pk in self._users_payed:
+            self._users_payed[user.pk] = self in user.payed_lessons.all() or not user.must_pay
+        return self._users_payed[user.pk]
 
     def must_pay(self, user: User):
         if user.must_pay and self.need_payment:

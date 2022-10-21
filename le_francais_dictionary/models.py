@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import List, Optional
 
 from polly.const import LANGUAGE_CODE_FR, LANGUAGE_CODE_RU
 from .tts import google_cloud_tts, shtooka_by_title_in_path, \
@@ -39,6 +39,11 @@ class Packet(models.Model):
 
 	def __str__(self):
 		return f'{self.name}'
+
+	def __init__(self, *args, **kwargs):
+		super(Packet, self).__init__(*args, **kwargs)
+		self._user_words_learned = {}
+		self._user_words_checked = {}
 
 	def to_dict(self, user=None) -> dict:
 		"""
@@ -91,17 +96,25 @@ class Packet(models.Model):
 	_fully_voiced.boolean = True
 	fully_voiced = property(_fully_voiced)
 
-	def words_learned(self, user) -> int:
-		return self.word_set.filter(
+	def words_learned(self, user) -> Optional[int]:
+		if user.is_anonymous:
+			return None
+		if not user.pk in self._user_words_learned:
+			self._user_words_learned[user.pk] = self.word_set.filter(
 			Q(userdata__user=user, userdata__grade=1) | Q(
 				userwordignore__user=user
 			)).values(
-			'word').distinct().__len__()
+			'word').distinct().count()
+		return self._user_words_learned[user.pk]
 
-	def words_checked(self, user) -> int:
-		return len(self.word_set.filter(
+	def words_checked(self, user) -> Optional[int]:
+		if user.is_anonymous:
+			return None
+		if not user.pk in self._user_words_checked:
+			self._user_words_checked[user.pk] = len(self.word_set.filter(
 			Q(userdata__user=user) | Q(userwordignore__user=user)
 		).values('word').distinct())
+		return self._user_words_checked[user.pk]
 
 	class Meta:
 		ordering = ['lesson__lesson_number']
