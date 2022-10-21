@@ -307,7 +307,7 @@ def get_autocomplete_list(request):
 	# TODO: add Cross-Site protection
 	list_len = 50
 	_term = request.GET['term'].lower()
-	term = switch_keyboard_layout(_term).replace('’', '\'')
+	term = switch_keyboard_layout(_term[:255] if len(_term) > 255 else _term).replace('’', '\'')
 	term = unidecode(term)
 	reflexive = False
 	pronoun = False
