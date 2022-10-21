@@ -150,9 +150,9 @@ def search_verbs(s, reflexive=None, return_first=False, is_pronoun=False):
 	except Verb.DoesNotExist:
 		try:
 			verbs_for_search = list(Verb.objects.raw(
-				f"SELECT * FROM conjugation_verb "
-				f"WHERE position(main_part_no_accents in '{s_unaccent}')=1 "
-				f"ORDER BY CHAR_LENGTH (main_part) DESC"
+				'''SELECT * FROM conjugation_verb
+				WHERE position(main_part_no_accents in %s)=1
+				ORDER BY CHAR_LENGTH (main_part) DESC''', [s_unaccent]
 			))
 			for searching_verb in verbs_for_search:
 				form = searching_verb.find_form(s)
