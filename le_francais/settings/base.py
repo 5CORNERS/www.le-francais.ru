@@ -114,6 +114,8 @@ INSTALLED_APPS = [
     'tinkoff_merchant',
     'django_js_reverse',
     'mass_mailer',
+
+    'log_errors'
 ]
 
 MIDDLEWARE = [
@@ -145,6 +147,7 @@ MIDDLEWARE = [
 
     'le_francais.middleware.GeoIpSessionMiddleware',
     'custom_user.middleware.GetPush4SiteId',
+    'log_errors.middleware.Log500ErrorsMiddleware',
 ]
 
 SESSION_ENGINE = 'user_sessions.backends.db'
