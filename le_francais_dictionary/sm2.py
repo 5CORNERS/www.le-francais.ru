@@ -80,7 +80,10 @@ class WordSM2:
 							new_repetition_date = answer_datetime + timedelta(
 								days=current_repetition_delta.days * new_e_factor)
 					else:
-						current_next_ratio = current_answer_delta / current_repetition_delta
+						try:
+							current_next_ratio = current_answer_delta / current_repetition_delta
+						except ZeroDivisionError:
+							current_next_ratio = 0
 						new_e_factor = e_factor + (
 									new_e_factor - e_factor) * current_next_ratio
 						if n == 1 or n == 2:
