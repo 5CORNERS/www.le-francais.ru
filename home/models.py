@@ -651,7 +651,7 @@ class LessonPage(Page):
 
     def payed(self, user: User):
         if user.is_anonymous:
-            return False
+            return None
         if not user.pk in self._users_payed:
             self._users_payed[user.pk] = self in user.payed_lessons.all() or not user.must_pay
         return self._users_payed[user.pk]

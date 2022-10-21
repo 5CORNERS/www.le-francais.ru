@@ -113,10 +113,11 @@ def get_progress(request):
         ).values('word', 'packet_id').distinct()
 
     for packet in packets:
-        if user.must_pay:
-            packet.lesson._users_payed[user.pk] = packet.lesson in payed_lessons
-        else:
-            packet.lesson._users_payed[user.pk] = True
+        if user.is_authenticated:
+            if user.must_pay:
+                packet.lesson._users_payed[user.pk] = packet.lesson in payed_lessons
+            else:
+                packet.lesson._users_payed[user.pk] = True
         packet._user_words_learned[user.pk] = sum(word['packet_id'] == packet.pk for word in learned_words)
         packet._user_words_checked[user.pk] = sum(word['packet_id'] == packet.pk for word in checked_words)
 
