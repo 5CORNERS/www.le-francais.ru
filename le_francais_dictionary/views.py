@@ -5,7 +5,7 @@ from typing import List
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Subquery, OuterRef, \
-    IntegerField
+    IntegerField, Q
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -92,11 +92,31 @@ def add_packets(request):
 def get_progress(request):
     # FIXME prefetch related objects
     result = {'isAuthenticated': request.user.is_authenticated, 'packets': []}
-    packets = Packet.objects.prefetch_related(
-        'lesson__paid_users',
-        'userpacket_set',
-        'word_set',
-    ).all().order_by('lesson__lesson_number')
+
+    packets = list(
+        Packet.objects.select_related('lesson').all().order_by(
+            'lesson__lesson_number'))
+    user = request.user
+
+    payed_lessons = []
+    learned_words = []
+    checked_words = []
+    if user.is_authenticated:
+        if user.must_pay:
+            payed_lessons = user.payed_lessons.all()
+        learned_words = Word.objects.filter(
+            Q(userdata__user=user, userdata__grade=1) | Q(
+                userwordignore__user=user
+            )).values('word', 'packet_id').distinct()
+        checked_words = Word.objects.filter(
+            Q(userdata__user=user) | Q(userwordignore__user=user)
+        ).values('word', 'packet_id').distinct()
+
+    for packet in packets:
+        packet.lesson._users_payed[user.pk] = packet.lesson in payed_lessons
+        packet._user_words_learned[user.pk] = sum(word['packet_id'] == packet.pk for word in learned_words)
+        packet._user_words_checked[user.pk] = sum(word['packet_id'] == packet.pk for word in checked_words)
+
     for packet in packets:
         result['packets'].append(packet.to_dict(user=request.user))
     return JsonResponse(result)
