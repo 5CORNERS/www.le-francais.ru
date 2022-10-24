@@ -121,9 +121,9 @@ class Tense:
 				 reflexive: bool = None, negative: bool = None, question: bool = None,
 				 passive: bool = None, pronoun: bool = None, verb_exceptions=None, key=None):
 		if key:
-			verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive, negative, question, passive, pronoun = key.split('_')
-			reflexive, negative, question, passive, pronoun = reflexive=='True', negative=='True', question=='True', passive=='True', pronoun=='True'
-			v = Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents)
+			verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive, negative, question, passive, pronoun, homonym = key.split('_')
+			reflexive, negative, question, passive, pronoun, homonym = reflexive == 'True', negative == 'True', question == 'True', passive == 'True', pronoun == 'True', None if homonym == 'None' else int(homonym)
+			v = Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents, homonym=homonym)
 		self.v = v
 		self.verb_exceptions = verb_exceptions
 		self.tense_name = tense_name
@@ -140,7 +140,7 @@ class Tense:
 	@property
 	def key(self):
 		if not self._key:
-			self._key = f'{self.v.infinitive_no_accents}_{self.mood_name}_{self.tense_name}_{self.gender}_{self.reflexive}_{self.negative}_{self.question}_{self.passive}_{self.pronoun}'
+			self._key = f'{self.v.infinitive_no_accents}_{self.mood_name}_{self.tense_name}_{self.gender}_{self.reflexive}_{self.negative}_{self.question}_{self.passive}_{self.pronoun}_{self.v.homonym}'
 		return self._key
 
 	def is_empty(self):
