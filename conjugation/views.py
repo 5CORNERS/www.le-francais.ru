@@ -2,7 +2,7 @@ from io import BytesIO
 
 from dal import autocomplete
 from django.forms import modelformset_factory
-from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedirect, FileResponse, HttpResponse, \
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponse, \
 	HttpResponsePermanentRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -189,8 +189,14 @@ def verb_page(request, feminin, question, negative, passive, reflexive, pronoun,
 	except Verb.MultipleObjectsReturned:
 		try:
 			verb = Verb.objects.get(infinitive=verb)
-		except:
-			verb = Verb.objects.filter(infinitive_no_accents=word_no_accent).first()
+		except Verb.DoesNotExist:
+			try:
+				if homonym:
+					verb = Verb.objects.get(infinitive_no_accents=word_no_accent, homonym=2)
+				else:
+					verb = Verb.objects.get(infinitive_no_accents=word_no_accent, homonym=1)
+			except Verb.DoesNotExist:
+				verb = Verb.objects.filter(infinitive_no_accents=word_no_accent).first()
 	if request.POST:
 		switches_form = SwitchesForm(request.POST)
 		if switches_form.is_valid():

@@ -191,13 +191,15 @@ def search_verbs(s, reflexive=None, return_first=False, is_pronoun=False):
 def search_verbs_with_forms(s, limit=50, exact=False):
 	"""
 	Find and returns all verbs with forms starting with the search string
+
+	:param exact: if True finds only forms which is equal to s
 	:param limit: sql request limit
 	:param s: utf decoded search string
 	:type s: str
 	:return: list of tuple (verb, forms)
 		WHERE
-		Verb verb is verb object
-		list forms is list of tuples (form, mood, tense, person, n)
+		verb is Verb object;
+		forms is list of tuples (form, mood, tense, person, n)
 			WHERE
 			str form is founded form of the verb;
 			str mood is name of the mood;
@@ -279,6 +281,7 @@ def autocomplete_verb(
 		search_string, is_reflexive, limit, show_startswith_infinitive=99,
 		show_startswith_forms=99, show_starts_with_levenshtein=5,
 		show_startswith_contains=5, is_pronoun=False):
+
 	autocomplete_list_startswith = autocomplete_forms_startswith(
 		search_string,
 		is_reflexive,
@@ -344,7 +347,7 @@ def get_url_from_switches(infinitive, negative, question, passive, reflexive, fe
         negative=negative,
         passive=passive,
         question=question,
-        verb=infinitive
+        verb=infinitive,
     ))
 
 
