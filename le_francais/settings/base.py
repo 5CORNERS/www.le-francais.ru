@@ -178,7 +178,8 @@ TEMPLATES = [
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
 
-                'le_francais.context_processors.geoip'
+                'le_francais.context_processors.geoip',
+                'le_francais.context_processors.gpt_disabled'
             ],
             'libraries': {
                 'conjugation_tags': 'conjugation.templatetags.conjugation_tags',

@@ -190,6 +190,9 @@ class PageLayoutAdvertisementSnippet(models.Model):
     page_type = models.CharField(max_length=100, choices=PAGE_CHOICES, default='none')
     placement = models.CharField(max_length=100, choices=PLACEMENT_CHOICES, default='none')
     code = models.CharField(max_length=30, blank=True, default='')
+    mapping_sizes = StreamField([
+        ('mapping_sizes', AdUnitSizeBlockAdvanced())
+    ], blank=True)
     head = StreamField([
         ('html', RawHTMLBlock()),
         ('visible_html', VisibleRawHTMLBlock()),
@@ -211,8 +214,27 @@ class PageLayoutAdvertisementSnippet(models.Model):
         FieldPanel('sizes'),
         StreamFieldPanel('head'),
         StreamFieldPanel('body'),
+        StreamFieldPanel('mapping_sizes')
     ]
     sizes = JSONField(default=list, blank=True)
+
+    @property
+    def sizes_json(self):
+        if not self.mapping_sizes:
+            return None
+        result = []
+        for size in self.mapping_sizes:
+            part_1 = []
+            if size.value['type']:
+                part_1.append(size.value['type'])
+            else:
+                part_1.append('v')
+            part_1.append(size.value['window_or_container_size'].split('x'))
+            part_2 = []
+            for simple_size in size.value['sizes']:
+                part_2.append([simple_size['width'], simple_size['height'], simple_size['width_percents']])
+            result.append([part_1, part_2])
+        return result
 
     def get_sizes(self):
         import json

@@ -1,3 +1,6 @@
+from home.utils import is_gpt_disabled
+
+
 def geoip(request):
     if 'geoip' in request.session:
         return {
@@ -13,3 +16,8 @@ def geoip(request):
             'city': None,
             'region': None
         }
+
+def gpt_disabled(request):
+    return {
+        'is_gpt_disabled': is_gpt_disabled(request)
+    }
