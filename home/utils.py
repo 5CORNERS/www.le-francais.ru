@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 import binascii
 from hashlib import md5
@@ -15,6 +16,14 @@ from markdown import Markdown
 from home.consts import COLUMN_TEXT, COLUMN_START, COLUMN_END, COLUMN_SPEAKER
 from le_francais.settings.base import FILES_LE_FRANCAIS_HTTPS, \
     FILES_LE_FRANCAIS_SITENAME
+
+def is_gpt_disabled(request):
+    session = request.session
+    geoip_dict = session.get('geoip', None)
+    if ((geoip_dict and geoip_dict.get('country_code') in os.environ.get('BLOCKED_COUNTRY_CODES').split(',')
+    ) or request.GET.get('test_gpt_disabled', None) == '1'):
+        return True
+    return False
 
 
 def files_le_francais_url(path=''):
