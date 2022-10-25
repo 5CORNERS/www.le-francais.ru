@@ -181,7 +181,6 @@ $(window).ready(function () {
       )["data"]("ui-menu-item", b)["append"]("<a href='" + b["url"] + "'>" + b["html"] + "</a>")["appendTo"](a);
     };
     $searchVerb.on('focus', e=>{
-      console.log('Focused on input');
-      $searchVerb.autocomplete('search', '');
+      $searchVerb.autocomplete('search', e.target.value);
     })
 });
