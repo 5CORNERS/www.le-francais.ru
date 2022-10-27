@@ -1,13 +1,22 @@
-from datetime import timedelta
+import uuid
 
 import dateutil.parser
 import requests
+import shortuuid
 from PIL import Image
+from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.http import HttpRequest
+from django.template.loader import render_to_string
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
+
+from .consts import LOG_TYPE_CHOICES
+
+User = get_user_model()
 
 DEFAULT_PLACEMENTS_CHOICES = [
     ('conjugations_table_sidebar', 'Conjugations Table Sidebar'),
@@ -23,8 +32,25 @@ class Placement(models.Model):
         return self.name
 
 
+def calculate_times(times, now=None):
+    if now is None:
+        now = timezone.now()
+    in_day = 0
+    in_week = 0
+    in_month = 0
+    for time in times:
+        delta = now - time
+        if delta.days < 30:
+            in_month += 1
+        if delta.days < 7:
+            in_week += 1
+        if delta.days < 1:
+            in_day += 1
+    return in_day, in_week, in_month
+
+
 class LineItem(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     label = models.CharField(max_length=256, null=True, blank=True,
                              default=None)
     priority = models.PositiveIntegerField(default=0)
@@ -55,27 +81,23 @@ class LineItem(models.Model):
 
     do_not_display_to_registered_users = models.BooleanField(default=True)
 
+    labels = ArrayField(models.CharField(max_length=256), blank=True,
+                        default=list)
+
+    targeting_country = models.CharField(max_length=256, null=True, blank=True)
+    targeting_city = models.CharField(max_length=256, null=True, blank=True)
+
     def __str__(self):
         return self.name
 
-    def check_cappings(self, times):
+    def check_cappings(self, times) -> bool:
         if not (self.capping_day and self.capping_week and self.capping_month):
             return True
 
-        times = [dateutil.parser.isoparse(time) for time in times]
-        now = timezone.now()
-
-        in_day = 0
-        in_week = 0
-        in_month = 0
+        parsed_times = []
         for time in times:
-            delta = now - time
-            if delta.days < 30:
-                in_month += 1
-            if delta.days < 7:
-                in_week += 1
-            if delta.days < 1:
-                in_day += 1
+            parsed_times.append(dateutil.parser.isoparse(time) if isinstance(time, str) else time)
+        in_day, in_week, in_month = calculate_times(parsed_times)
         if self.capping_day is not None and in_day > self.capping_day:
             return False
         elif self.capping_week is not None and in_month > self.capping_week:
@@ -92,12 +114,15 @@ def creative_image_validator():
 
 class Creative(models.Model):
     name = models.CharField(max_length=256)
-    label = models.CharField(max_length=256, null=True, blank=True, default=None)
     utm_campaign = models.CharField(max_length=256, blank=True, null=True)
     utm_medium = models.CharField(max_length=256, blank=True, null=True)
-    click_through_url = models.URLField(blank=False)
-    image = models.ImageField(blank=True)
+
+    image_click_through_url = models.URLField(blank=True)
+    image = models.ImageField(blank=True) # TODO: changing filename
     image_url = models.URLField(blank=True, help_text='Одно из полей image или image_url должно быть заполнено')
+
+    html = models.TextField(blank=True, default=None, null=True)
+
     line_item = models.ForeignKey(
         LineItem, related_name='creatives',
         related_query_name='creative', on_delete=models.SET_NULL, null=True, blank=True
@@ -109,6 +134,15 @@ class Creative(models.Model):
 
     views = models.PositiveIntegerField(default=0)
     clicks = models.PositiveIntegerField(default=0)
+
+    labels = ArrayField(models.CharField(max_length=256), blank=True, default=list)
+    fluid = models.BooleanField(default=False, blank=True)
+
+    uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.unique_class = shortuuid.uuid()
 
     @property
     def width(self):
@@ -149,3 +183,42 @@ class Creative(models.Model):
             img:Image.Image = Image.open(response.raw)
             self._width = img.width
             self._height = img.height
+
+    def serve_body(self, request: HttpRequest):
+        return render_to_string(
+            'ads/creative_body.html',
+            {'self': self},
+            request,
+        )
+
+    def serve_head(self, request: HttpRequest):
+        return render_to_string(
+            'ads/creative_head.html',
+            {'self': self},
+            request,
+        )
+
+
+class Log(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
+    ip = models.GenericIPAddressField()
+    country = models.CharField(null=True, max_length=128)
+    city = models.CharField(null=True, max_length=128)
+    datetime = models.DateTimeField(auto_now_add=True)
+    line_item = models.ForeignKey(LineItem, on_delete=models.SET_NULL, null=True)
+    creative = models.ForeignKey(Creative, on_delete=models.SET_NULL, null=True)
+    log_type = models.CharField(choices=LOG_TYPE_CHOICES, max_length=10)
+
+    def serve_body(self, request: HttpRequest):
+        return render_to_string(
+            'ads/creative_body.html',
+            {'self': self},
+            request,
+        )
+
+    def serve_head(self, request: HttpRequest):
+        return render_to_string(
+            'ads/creative_head.html',
+            {'self': self},
+            request,
+        )
