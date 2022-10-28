@@ -35,23 +35,20 @@ class AdUnitSizeBlockAdvanced(blocks.StructBlock):
 class LeFrancaisAdUnitBlock(blocks.StructBlock):
     ad_unit_name = blocks.CharBlock()
     placement = blocks.ChoiceBlock(choices=get_placements(), required=False)
+    placements = blocks.ListBlock(blocks.ChoiceBlock(choices=get_placements()), required=False, default=[])
     utm_source = blocks.CharBlock()
     floating_image = blocks.ChoiceBlock(choices=[
         ('left', 'Left'), ('center', 'Center'), ('right', 'Right')
     ], required=False, help_text='TODO')
-    sizes = blocks.ListBlock(AdUnitSizeBlock)
+    sizes = blocks.ListBlock(AdUnitSizeBlockAdvanced)
 
     def get_context(self, value, parent_context=None):
         context = super(LeFrancaisAdUnitBlock, self).get_context(value,
                                                            parent_context=None)
         context = {**context, **parent_context}
         media_query = []
-        for size in value['sizes']:
-            media_query.append((
-                size['type'],
-                size['window_or_container_size'],
-                size['ad_unit_size']
-            ))
+
+        value['sizes'] = sizes_json(value['sizes'])
 
         context['media_query'] = parsed_media_query_to_str(media_query)
         context['floating_image'] = None
@@ -61,6 +58,7 @@ class LeFrancaisAdUnitBlock(blocks.StructBlock):
         value['adsense_placement'] = None
         value['adsense_inline_adunit_name'] = None
         value['adsense_in_house'] = None
+        value['placements'] = '|'.join([p for p in value['placements'] if p is not None])
 
 
         return context
@@ -68,3 +66,21 @@ class LeFrancaisAdUnitBlock(blocks.StructBlock):
     class Meta:
         icon = 'image'
         template = 'blocks/le_francais_ad_unit.html'
+
+
+def sizes_json(sizes):
+    if not sizes:
+        return None
+    result = []
+    for size in sizes:
+        part_1 = []
+        if size['type']:
+            part_1.append(size['type'])
+        else:
+            part_1.append('v')
+        part_1.append(size['window_or_container_size'].split('x'))
+        part_2 = []
+        for simple_size in size['sizes']:
+            part_2.append([simple_size['width'], simple_size['height'], simple_size['width_percents']])
+        result.append([part_1, part_2])
+    return result

@@ -29,10 +29,11 @@ def option_url(context, option):
     return get_url_from_switches(infinitive, negative, question, passive, reflexive, feminin)
 
 
-@register.inclusion_tag('tags/conjugation_advert_body.html')
-def conjugation_advertisement_body(code):
+@register.inclusion_tag('tags/conjugation_advert_body.html', takes_context=True)
+def conjugation_advertisement_body(context, code):
     try:
-        return dict(body=PageLayoutAdvertisementSnippet.objects.filter(code=code).exclude(live=False)[0].body)
+        snippet = PageLayoutAdvertisementSnippet.objects.filter(code=code).exclude(live=False).first()
+        return dict(body=snippet.body, snippet=snippet, gpt_disabled=context.get('is_gpt_disabled'), request=context.get('request'))
     except:
         return dict(body=None)
 

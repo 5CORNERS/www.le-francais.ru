@@ -4,13 +4,16 @@
 {% load user_agents %}
 {% load bootstrap4 %}
 {% load svg %}
+{% load ads %}
 {% block title %}{% include 'conjugation/conjugation_title.html' %}{% endblock %}
 {% block description %}{% include 'conjugation/conjugation_descritpion.html' %}{% endblock %}
 
 {% block head_advertisments %}
-    {% conjugation_advertisement_head "lf_fr_conj_rsb_01" %}
-	{% conjugation_advertisement_head "lf_fr_conj_rsb_02" %}
-	{% conjugation_advertisement_head "lf_fr_conj_mob_01" %}
+    {% if not is_gpt_disabled %}
+        {% conjugation_advertisement_head "lf_fr_conj_rsb_01" %}
+        {% conjugation_advertisement_head "lf_fr_conj_rsb_02" %}
+        {% conjugation_advertisement_head "lf_fr_conj_mob_01" %}
+    {% endif %}
 {% endblock %}
 
 {% block extra_js %}

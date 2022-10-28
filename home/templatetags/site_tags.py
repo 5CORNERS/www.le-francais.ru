@@ -9,7 +9,8 @@ from django.conf import settings
 from custom_user.models import User
 from home.models import IndexReviews, AdUnit
 from home.models import PageLayoutAdvertisementSnippet, LessonPage, Payment
-from home.utils import get_signature, files_le_francais_url
+from home.utils import get_signature, files_le_francais_url, \
+	is_gpt_disabled
 from pybb.models import Topic, Post
 
 register = template.Library()
@@ -55,6 +56,7 @@ def include_advertisements(context, contains=None, page_type=None, placement=Non
 		except:
 			pass
 	return {
+		'gpt_disabled': is_gpt_disabled(context.request),
 		'id': random_id, 'ads': snippets,
 		'mappings': list(set(ad.size_mapping for ad in snippets)),
 		'ids': [random_id + '-' + str(i) for i in range(len(snippets))],
@@ -213,13 +215,13 @@ def include_30_block(context, stream_value, words_count):
 @register.inclusion_tag('tags/advert_body.html', takes_context=True)
 def page_advert_body(context, placement, page_type):
 	try:
-		test = dict(body=PageLayoutAdvertisementSnippet.objects.filter(
-			placement=placement, page_type=page_type).exclude(live=False)[0].body)
+		snippet = PageLayoutAdvertisementSnippet.objects.filter(placement=placement, page_type=page_type).exclude(live=False).first()
 		return dict(
-			body=PageLayoutAdvertisementSnippet.objects \
-				.filter(placement=placement, page_type=page_type) \
-				.exclude(live=False)[0].body,
-			placement=placement
+			body=snippet.body,
+			placement=placement,
+			snippet=snippet,
+			gpt_disabled=context.get('is_gpt_disabled'),
+			request=context.get('request')
 		)
 	except:
 		return dict(body=None)

@@ -1,55 +1,73 @@
-{% load site_tags %}
+{% load site_tags ads %}
 {% if not hide %}
-<script id="script-{{ id }}">
-	let ad_elements_{{ id }} = [
-		{% for ad in ads %}
-			$("<div style='margin-bottom: 10px' id='{{ ids|index:forloop.counter0 }}' class='__{{ ad.placement }}'</div>"),
-		{% endfor %}
-	];
-	let parent_container_{{ id }} = $('#script-{{ id }}').parent();
+    <script id="script-{{ id }}">
+        let ad_elements_{{ id }} = [
+            {% for ad in ads %}
+                {% if gpt_disabled %}
+                    $(`{% include_ad ad.adunit_code ad.placement ad.size_mapping.sizes_json adsense=True adsense_page_type=ad.page_type adsense_placement=ad.placement wo_script=True %}`).addClass('div-{{ id }}'),
+                {% else %}
+                    $("<div style='margin-bottom: 10px' id='{{ ids|index:forloop.counter0 }}' class='__{{ ad.placement }}'</div>"),
+                {% endif %}
+            {% endfor %}
+        ];
+        let parent_container_{{ id }} = $('#script-{{ id }}').parent();
         {% if is_sidebar %}
-	let last_{{ id }} = ad_elements_{{ id }}.pop();
-	let n_{{ id }} = ~~(parent_container_{{ id }}.height()/1000);
-	parent_container_{{ id }}.append(ad_elements_{{ id }}[0]);
-	var i;
-	for (i = 1; i < n_{{ id }} && i < ad_elements_{{ id }}.length; i++){
-		parent_container_{{ id }}.append(ad_elements_{{ id }}[i]);
-	}
-	if (i < n_{{ id }}) {
-		parent_container_{{ id }}.append(last_{{ id }})
-	}
+            let last_{{ id }} = ad_elements_{{ id }}.pop();
+            let n_{{ id }} = ~~(parent_container_{{ id }}.height() / 1000);
+            parent_container_{{ id }}.append(ad_elements_{{ id }}[0]);
+            var i;
+            for (i = 1; i < n_{{ id }} && i < ad_elements_{{ id }}.length; i++) {
+                parent_container_{{ id }}.append(ad_elements_{{ id }}[i]);
+            }
+            if (i < n_{{ id }}) {
+                parent_container_{{ id }}.append(last_{{ id }})
+            }
         {% else %}
-        for (i=0; i < ad_elements_{{ id }}.length; i++){
-            parent_container_{{ id }}.append(ad_elements_{{ id }}[i])
-        }
+            for (i = 0; i < ad_elements_{{ id }}.length; i++) {
+                parent_container_{{ id }}.append(ad_elements_{{ id }}[i])
+            }
         {% endif %}
-</script>
-<script>
-	var gptadslots = [];
-	var googletag = googletag || {cmd: []};
-        googletag.cmd.push(function () {
-        {% for mapping in mappings %}
-		{% if mapping %}var {{ mapping.name }} = {{ mapping.script }};{% endif %}
-        {% endfor %}
-        {% for ad in ads %}
-		gptadslots.push(googletag.defineSlot('/22823653324/{{ ad.adunit_code }}', {{ ad.adunit_sizes }}, '{{ ids|index:forloop.counter0 }}')
-                {% if ad.size_mapping %}.defineSizeMapping({{ ad.size_mapping.name }}){% endif %}
-                .addService(googletag.pubads()));
-        {% endfor %}
-            googletag.pubads().enableLazyLoad({
-                fetchMarginPercent: 500,
-                renderMarginPercent: 200,
-                mobileScaling: 2.0
-            });
-            googletag.enableServices();
-        });
-
-	let adunits_{{ id }} = document.querySelectorAll('div[id^="{{ id }}-"]');
-	for (let i = 0; i < adunits_{{ id }}.length; i++) {
+    </script>
+    {% if not gpt_disabled %}
+        <script>
+            var gptadslots = [];
+            var googletag = googletag || {cmd: []};
             googletag.cmd.push(function () {
-			googletag.display(adunits_{{ id }}[i].getAttribute('id'));
+                {% for mapping in mappings %}
+                    {% if mapping %}
+                        var {{ mapping.name }} = {{ mapping.script }};
+                    {% endif %}
+                {% endfor %}
+                {% for ad in ads %}
+                    gptadslots.push(googletag.defineSlot('/22823653324/{{ ad.adunit_code }}', {{ ad.adunit_sizes }}, '{{ ids|index:forloop.counter0 }}')
+                    {% if ad.size_mapping %}.defineSizeMapping
+                        ({{ ad.size_mapping.name }}){% endif %}
+                        .addService(googletag.pubads()));
+                {% endfor %}
+                googletag.pubads().enableLazyLoad({
+                    fetchMarginPercent: 500,
+                    renderMarginPercent: 200,
+                    mobileScaling: 2.0
+                });
+                googletag.enableServices();
             });
-        }
 
-</script>
+            let adunits_{{ id }} = document.querySelectorAll('div[id^="{{ id }}-"]');
+            for (let i = 0; i < adunits_{{ id }}.length; i++) {
+                googletag.cmd.push(function () {
+                    googletag.display(adunits_{{ id }}[i].getAttribute('id'));
+                });
+            }
+
+        </script>
+    {% else %}
+        <script>
+            $(function (){
+                let adunits_{{ id }} = document.querySelectorAll('div[class^="div-{{ id }}"]');
+                for (let i = 0; i < adunits_{{ id }}.length; i++) {
+                    includeAd(adunits_{{ id }}[i].getAttribute('id'))
+                }
+            })
+        </script>
+    {% endif %}
 {% endif %}

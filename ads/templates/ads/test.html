@@ -1,3 +1,5 @@
 {% extends 'base.html' %}
 {% load ads %}
-{% block content %}{% include_ad 'test_ad_unit' 'test_placement' "" %}{% endblock %}
+{% block content %}
+    {% include_ad ad_unit_name='test_ad_unit' ad_unit_placement_codes='test_placement' sizes_str='540px, 728px, 100%' adsense=True %}
+{% endblock %}

@@ -1,37 +1,35 @@
 {% extends 'base.html' %}
-{% load static site_tags %}
+{% load static site_tags ads %}
 
 {% block extra_head %}
-	<!-- Start GPT Tag -->
-<script>
-  var gptadslots = [];
-  var googletag = googletag || {cmd:[]};
-</script>
-<script>
-  googletag.cmd.push(function() {
- var mapping = googletag.sizeMapping().
-    addSize([0,0],    []).
-    addSize([303, 0], [[320, 50]]).
-    addSize([728, 0], [[728, 90]]).
-    addSize([992, 0], []).build();
-    //Adslot 1 declaration
-    gptadslots.push(googletag.defineSlot('/22823653324/lf_fr_main_rsb_01', [[300,250],[300,600],[336,280],[160,600],[120,600]], 'div-gpt-ad-7192401-1')
-                             .addService(googletag.pubads()));
-    //Adslot 2 declaration
-    gptadslots.push(googletag.defineSlot('/22823653324/lf_fr_main_rsb_02', [[300,250],[300,600],[336,280],[160,600],[120,600]], 'div-gpt-ad-7192401-2')
-                             .addService(googletag.pubads()));
-    //Adslot 3 declaration
-    gptadslots.push(googletag.defineSlot('/22823653324/lf_fr_main_mobile_top', [[728,90],[320,50]], 'div-gpt-ad-7192401-3')
-                             .defineSizeMapping(mapping).addService(googletag.pubads()));
-    //Adslot 4 declaration
-    gptadslots.push(googletag.defineSlot('/22823653324/lf_fr_main_bottom', [320, 50], 'div-gpt-ad-1630090735120-0')
-                             .addService(googletag.pubads()));
+    {% if not is_gpt_disabled %}
+        <!-- Start GPT Tag -->
+        <script>
+            var gptadslots = [];
+            var googletag = googletag || {cmd: []};
+        </script>
+        <script>
+            googletag.cmd.push(function () {
+                var mapping = googletag.sizeMapping().addSize([0, 0], []).addSize([303, 0], [[320, 50]]).addSize([728, 0], [[728, 90]]).addSize([992, 0], []).build();
+                //Adslot 1 declaration
+                gptadslots.push(googletag.defineSlot('/22823653324/lf_fr_main_rsb_01', [[300, 250], [300, 600], [336, 280], [160, 600], [120, 600]], 'div-gpt-ad-7192401-1')
+                    .addService(googletag.pubads()));
+                //Adslot 2 declaration
+                gptadslots.push(googletag.defineSlot('/22823653324/lf_fr_main_rsb_02', [[300, 250], [300, 600], [336, 280], [160, 600], [120, 600]], 'div-gpt-ad-7192401-2')
+                    .addService(googletag.pubads()));
+                //Adslot 3 declaration
+                gptadslots.push(googletag.defineSlot('/22823653324/lf_fr_main_mobile_top', [[728, 90], [320, 50]], 'div-gpt-ad-7192401-3')
+                    .defineSizeMapping(mapping).addService(googletag.pubads()));
+                //Adslot 4 declaration
+                gptadslots.push(googletag.defineSlot('/22823653324/lf_fr_main_bottom', [320, 50], 'div-gpt-ad-1630090735120-0')
+                    .addService(googletag.pubads()));
 
-    googletag.pubads().enableSingleRequest();
-    googletag.enableServices();
-  });
-</script>
-<!-- End GPT Tag -->
+                googletag.pubads().enableSingleRequest();
+                googletag.enableServices();
+            });
+        </script>
+        <!-- End GPT Tag -->
+    {% endif %}
 {% endblock %}
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
 {% block extra_css %}
@@ -46,16 +44,20 @@
 			<div class="col-12 col-offset-336 main">
 				<div class="row top-mobile-advert-row">
 					<div class="top-mobile-advert-div">
-						<!-- GPT AdSlot 3 for Ad unit 'lf_fr_main_mobile_top' ### Size: [[728,90],[320,50]] -->
-						<!-- Adslot's refresh function: googletag.pubads().refresh([gptadslots[2]]) -->
-						<div id='div-gpt-ad-7192401-3'>
-							<script>
-								googletag.cmd.push(function () {
-									googletag.display('div-gpt-ad-7192401-3');
-								});
-							</script>
-						</div>
-						<!-- End AdSlot 3 -->
+                        {% if not is_gpt_disabled %}
+                            <!-- GPT AdSlot 3 for Ad unit 'lf_fr_main_mobile_top' ### Size: [[728,90],[320,50]] -->
+                            <!-- Adslot's refresh function: googletag.pubads().refresh([gptadslots[2]]) -->
+                            <div id='div-gpt-ad-7192401-3'>
+                                <script>
+                                    googletag.cmd.push(function () {
+                                        googletag.display('div-gpt-ad-7192401-3');
+                                    });
+                                </script>
+                            </div>
+                            <!-- End AdSlot 3 -->
+                        {% else %}
+                            {% include_ad 'lf_fr_main_mobile_top' '' '[[["v",[0,0]],[]],[["v",[303,0]],[[320,250]]],[["v",[728,0]],[[728,90]]],[["v",[992,0]],[]]]'  %}
+                        {% endif %}
 					</div>
 				</div>
 				<div class="row title">
@@ -227,13 +229,19 @@
                     </div>
 				</div>
                 <div class="row">
+                    {% if not is_gpt_disabled %}
                         <div id='div-gpt-ad-1630090735120-0'
                              style='min-width: 320px; min-height: 50px;'>
                         </div>
+                    {% else %}
+{#                        {% include_ad "lf_fr_main_bottom" "" '[[["v",[0,0]],[[320,50]]]]' %}#}
+                    {% endif %}
                 </div>
 			</div>
 			<div class="d-none d-sm-none d-md-flex col-fixed-336 sidebar-right">
-				{% page_advert_body 'sidebar' page.page_type %}
+                <div class="advert_top">
+				    {% page_advert_body 'sidebar' page.page_type %}
+                </div>
 			</div>
 		</div>
 	</div>
