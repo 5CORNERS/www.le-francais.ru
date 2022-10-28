@@ -16,7 +16,7 @@ class CreativeInline(admin.TabularInline):
 class LineItemAdmin(admin.ModelAdmin):
     readonly_fields = ['views', 'clicks']
     inlines = [CreativeInline]
-    form = GeoAdder
+    # form = GeoAdder
 
 @admin.register(Placement)
 class PlacementAdmin(admin.ModelAdmin):
