@@ -1,8 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+import json
 import re
 from io import StringIO, BytesIO
+from typing import Optional, Any
 
 from annoying.fields import AutoOneToOneField
 from django.conf import settings
@@ -118,6 +120,14 @@ class AdUnit(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def size_list(self) -> Optional[list]:
+        try:
+            sizes_list = json.loads(self.adunit_sizes)
+            return sizes_list
+        except json.decoder.JSONDecodeError:
+            return None
 
 
 @register_snippet

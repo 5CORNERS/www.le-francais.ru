@@ -1,0 +1,9 @@
+<div class="container-{{ self.unique_class }}">
+    {% if self.html %}
+        {{ self.html | safe }}
+    {% else %}
+        <a href="{% url 'ads:image_click_through' self.uuid %}"> <img
+                src="{% url 'ads:image_redirect' self.uuid %}"
+                alt="image-{{ self.unique_class }}"> </a>
+    {% endif %}
+</div>
