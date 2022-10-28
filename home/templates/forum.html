@@ -27,7 +27,7 @@
 	})(window, document, 'script', 'dataLayer', 'GTM-WC2Q4XT');</script>
 	<!-- End Google Tag Manager -->
 	<!-- Google Publisher Tag -->
-	<script async="async"
+	<script async="async" id="googleTagServicesScript"
 	        src="https://www.googletagservices.com/tag/js/gpt.js"></script>
 
 	<meta charset="utf-8"/>
@@ -72,6 +72,19 @@
 	{% block meta %}
 		{# Override this in templates to add extra stylesheets #}
 	{% endblock %}
+
+    {% block extra_head %}
+
+    {% endblock %}
+
+    {% block head_advertisments %}
+
+    {% endblock %}
+
+    {% block site_js %}
+        <script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
+        <script async type="text/javascript" src="{% static 'ads.js' %}"></script>
+    {% endblock %}
 </head>
 
 <body class="{% block body_class %}{% endblock %}"
