@@ -27,8 +27,8 @@
         f.parentNode.insertBefore(j, f);
     })(window, document, 'script', 'dataLayer', 'GTM-WC2Q4XT');</script>
     <!-- End Google Tag Manager -->
-		<!-- Google Publisher Tag -->
-		<script async="async" src="https://www.googletagservices.com/tag/js/gpt.js"></script>
+    <!-- Google Publisher Tag -->
+    <script id="googleTagServicesScript" async="async" src="https://www.googletagservices.com/tag/js/gpt.js"></script>
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <title>{% block title %}{% if self.seo_title %}{{ self.seo_title }}{% elif self.title %}{{ self.title }}{% else %}Французский язык{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>
@@ -113,6 +113,7 @@
 
     {% block site_js %}
         <script async type="text/javascript" src="{% static 'js/le_francais.min.js' %}"></script>
+        <script async type="text/javascript" src="{% static 'ads.js' %}"></script>
     {% endblock %}
 </head>
 
