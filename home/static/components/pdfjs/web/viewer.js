@@ -15151,7 +15151,7 @@ document.webL10n = function (window, document, undefined) {
     var data = gL10nData[key];
 
     if (!data) {
-      console.warn('#' + key + ' is undefined.');
+      // console.warn('#' + key + ' is undefined.');
 
       if (!fallback) {
         return null;
@@ -15205,7 +15205,7 @@ document.webL10n = function (window, document, undefined) {
         return gL10nData[arg];
       }
 
-      console.log('argument {{' + arg + '}} for #' + key + ' is undefined.');
+      // console.log('argument {{' + arg + '}} for #' + key + ' is undefined.');
       return matched_text;
     });
   }
