@@ -81,6 +81,8 @@ def sizes_json(sizes):
         part_1.append(size['window_or_container_size'].split('x'))
         part_2 = []
         for simple_size in size['sizes']:
-            part_2.append([simple_size['width'], simple_size['height'], simple_size['width_percents']])
+            w, h , w_p = simple_size.get('width'), simple_size.get('height'), simple_size.get('width_percents')
+            if w is not None and h is not None:
+                part_2.append([w, h, w_p])
         result.append([part_1, part_2])
     return result
