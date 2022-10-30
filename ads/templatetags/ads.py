@@ -207,7 +207,10 @@ def include_ad(ad_unit_name, ad_unit_placement_codes,
         sizes_list = parse_sizes_to_list(sizes_str)
     else:
         sizes_list = []
-    ad_unit_placement_codes = json.dumps(ad_unit_placement_codes.split('|'))
+    try:
+        ad_unit_placement_codes = json.dumps(ad_unit_placement_codes.split('|'))
+    except:
+        ad_unit_placement_codes = []
 
     return {
         'ad_unit_placement_codes': ad_unit_placement_codes,
