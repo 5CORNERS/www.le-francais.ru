@@ -58,7 +58,7 @@ def get_creative_dict(request) -> Dict:
         max_width = 10000
     page_view_id = request.GET.get('page_view_id')
     now_isoformat = timezone.now().isoformat()
-    line_items = LineItem.objects.all()
+    line_items = LineItem.objects.filter(disable=False)
     if name:
         line_items = line_items.filter(
             Q(ad_units__contains=[name]) | Q(

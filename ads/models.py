@@ -79,13 +79,15 @@ class LineItem(models.Model):
     capping_week = models.IntegerField(blank=True, null=True, default=None)
     capping_month = models.IntegerField(blank=True, null=True, default=None)
 
-    do_not_display_to_registered_users = models.BooleanField(default=True)
+    do_not_display_to_registered_users = models.BooleanField(default=False)
 
     labels = ArrayField(models.CharField(max_length=256), blank=True,
                         default=list)
 
     targeting_country = models.CharField(max_length=256, null=True, blank=True)
     targeting_city = models.CharField(max_length=256, null=True, blank=True)
+
+    disable = models.BooleanField(default=False, blank=True)
 
     def __str__(self):
         return self.name
