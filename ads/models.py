@@ -156,8 +156,15 @@ class Creative(models.Model):
             self.save()
         return self._height
 
+    @property
+    def line_item_name(self):
+        if self.line_item:
+            return self.line_item.name
+        else:
+            return None
+
     def __str__(self):
-        return self.name
+        return f'{self.name}:{self.line_item_name}'
 
     def get_image_url(self):
         if self.image_url:
