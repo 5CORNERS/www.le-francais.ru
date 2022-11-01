@@ -29,7 +29,7 @@ class LineItemAdmin(admin.ModelAdmin):
         'labels',
         'targeting_country',
         'targeting_city',
-        'disable'
+        'disable', 'utm_campaign', 'utm_medium'
     ]
     # form = GeoAdder
 
