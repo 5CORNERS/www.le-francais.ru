@@ -1,3 +1,4 @@
+import os.path
 import uuid
 
 import dateutil.parser
@@ -113,14 +114,19 @@ class LineItem(models.Model):
 def creative_image_validator():
     ...
 
+def creative_image_file_update(instance, filename):
+    path = "YWR2ZXJ0aXNlbWVudA"
+    ext = filename.split('.')[-1]
+    new_name = f'{shortuuid.random()}.{ext}'
+    return f"{path}/{new_name}"
 
 class Creative(models.Model):
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=256, blank=False)
     utm_campaign = models.CharField(max_length=256, blank=True, null=True)
     utm_medium = models.CharField(max_length=256, blank=True, null=True)
 
     image_click_through_url = models.URLField(blank=True)
-    image = models.ImageField(blank=True) # TODO: changing filename
+    image = models.ImageField(blank=True, upload_to=creative_image_file_update) # TODO: changing filename
     image_url = models.URLField(blank=True, help_text='Одно из полей image или image_url должно быть заполнено')
 
     html = models.TextField(blank=True, default=None, null=True)
