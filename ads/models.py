@@ -90,6 +90,9 @@ class LineItem(models.Model):
 
     disable = models.BooleanField(default=False, blank=True)
 
+    utm_campaign = models.CharField(max_length=256, null=True, blank=True)
+    utm_medium = models.CharField(max_length=256, null=True, blank=True)
+
     def __str__(self):
         return self.name
 
@@ -122,8 +125,8 @@ def creative_image_file_update(instance, filename):
 
 class Creative(models.Model):
     name = models.CharField(max_length=256, blank=False)
-    utm_campaign = models.CharField(max_length=256, blank=True, null=True)
-    utm_medium = models.CharField(max_length=256, blank=True, null=True)
+    utm_campaign = models.CharField(max_length=256, blank=True, null=True, help_text="Will override line item values")
+    utm_medium = models.CharField(max_length=256, blank=True, null=True, help_text="Will override line item values")
 
     image_click_through_url = models.URLField(blank=True)
     image = models.ImageField(blank=True, upload_to=creative_image_file_update) # TODO: changing filename

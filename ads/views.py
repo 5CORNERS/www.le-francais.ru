@@ -21,6 +21,8 @@ class AdCounterRedirectView(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         creative = get_object_or_404(Creative, pk=kwargs['creative'])
         line_item = get_object_or_404(LineItem, pk=kwargs['line_item'])
+        utm_campaign = creative.utm_campaign or creative.line_item.utm_campaign
+        utm_medium = creative.utm_medium or creative.line_item.utm_medium
         utm_source = kwargs['source']
 
         if not self.request.user.is_staff:
@@ -32,7 +34,7 @@ class AdCounterRedirectView(RedirectView):
             line_item.save(update_fields=['clicks'])
 
         return creative.image_click_through_url \
-               + f'?utm_campaign={creative.utm_campaign}&utm_medium={creative.utm_medium}&utm_source={utm_source}'
+               + f'?utm_campaign={utm_campaign}&utm_medium={utm_medium}&utm_source={utm_source}'
 
 
 class TestView(TemplateView):
@@ -166,11 +168,11 @@ def get_creative_dict(request) -> Dict:
         # TODO: choosing by random
 
         # storing labels
-        chosen_labels = set(chosen_creative.labels) & set(
+        chosen_labels = set(chosen_creative.labels) | set(
             chosen_creative.line_item.labels)
         if chosen_labels:
             used_labels[page_view_id]['labels'] = list(
-                set(used_labels[page_view_id]['labels']) & chosen_labels
+                set(used_labels[page_view_id]['labels']) | chosen_labels
             )
             used_labels[page_view_id]['datetime'] = now_isoformat
         session['ads_labels'] = used_labels
