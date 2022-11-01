@@ -167,7 +167,7 @@ def get_creative_dict(request) -> Dict:
 
         # storing labels
         chosen_labels = set(chosen_creative.labels) & set(
-            chosen_creative.line_item.labels) if chosen_creative.labels is not None else None
+            chosen_creative.line_item.labels)
         if chosen_labels:
             used_labels[page_view_id]['labels'] = list(
                 set(used_labels[page_view_id]['labels']) & chosen_labels
