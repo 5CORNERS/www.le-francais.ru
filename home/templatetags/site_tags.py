@@ -223,7 +223,7 @@ def page_advert_body(context, placement, page_type):
 			snippet=snippet,
 			gpt_disabled=context.get('is_gpt_disabled'),
 			request=context.get('request'),
-			utm_source=f"{snippet.name}@{context.get('request').path}"
+			utm_source=f"{snippet.name}:{context.get('request').path}"
 		)
 	except:
 		return dict(body=None)
