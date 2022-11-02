@@ -8,7 +8,7 @@ UserModel = get_user_model()
 
 class ExceptionLog(models.Model):
     type = models.fields.CharField(max_length=255, blank=True)
-    value = models.fields.CharField(max_length=255, blank=True)
+    value = models.fields.CharField(max_length=2048, blank=True)
     path = models.fields.TextField(blank=True)
     request_params = JSONField(default={}, blank=True)
     traceback = models.fields.TextField(blank=True)
