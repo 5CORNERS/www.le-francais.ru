@@ -33,7 +33,7 @@ def option_url(context, option):
 def conjugation_advertisement_body(context, code):
     try:
         snippet = PageLayoutAdvertisementSnippet.objects.filter(code=code).exclude(live=False).first()
-        return dict(body=snippet.body, snippet=snippet, gpt_disabled=context.get('is_gpt_disabled'), request=context.get('request'), utm_source=f"{snippet.name}@{context.get('request').path}")
+        return dict(body=snippet.body, snippet=snippet, gpt_disabled=context.get('is_gpt_disabled'), request=context.get('request'), utm_source=f"{snippet.name}:{context.get('request').path}")
     except:
         return dict(body=None)
 
