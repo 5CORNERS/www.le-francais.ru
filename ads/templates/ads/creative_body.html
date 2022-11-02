@@ -2,7 +2,7 @@
     {% if self.html %}
         {{ self.html | safe }}
     {% else %}
-        <a href="{% url 'ads:image_click_through' self.uuid %}"> <img
+        <a href="{{ click_url }}"> <img
                 src="{% url 'ads:image_redirect' self.uuid %}"
                 alt="image-{{ self.unique_class }}"> </a>
     {% endif %}

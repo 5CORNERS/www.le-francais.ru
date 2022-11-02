@@ -19,11 +19,14 @@ class AdCounterRedirectView(RedirectView):
     ?utm_campaign=campaign&utm_medium=medium&utm_source=source
     """
     def get_redirect_url(self, *args, **kwargs):
-        creative = get_object_or_404(Creative, pk=kwargs['creative'])
-        line_item = get_object_or_404(LineItem, pk=kwargs['line_item'])
+        creative = get_object_or_404(Creative, uuid=kwargs['uuid'])
+        line_item = creative.line_item
         utm_campaign = creative.utm_campaign or creative.line_item.utm_campaign
         utm_medium = creative.utm_medium or creative.line_item.utm_medium
-        utm_source = kwargs['source']
+        if 'utm_source' in kwargs:
+            utm_source = f"&utm_source={kwargs['utm_source']}"
+        else:
+            utm_source = ""
 
         if not self.request.user.is_staff:
 
@@ -34,7 +37,7 @@ class AdCounterRedirectView(RedirectView):
             line_item.save(update_fields=['clicks'])
 
         return creative.image_click_through_url \
-               + f'?utm_campaign={utm_campaign}&utm_medium={utm_medium}&utm_source={utm_source}'
+               + f'?utm_campaign={utm_campaign}&utm_medium={utm_medium}{utm_source}'
 
 
 class TestView(TemplateView):
@@ -54,6 +57,7 @@ def get_creative_dict(request) -> Dict:
     name = request.GET.get('ad_unit_name')
     placements = request.GET.getlist('placement')
     sizes = request.GET.getlist('sizes')
+    utm_source = request.GET.get('ad_unit_utm_source')
     try:
         max_width = float(request.GET.get('max_width'))
     except ValueError:
@@ -212,11 +216,13 @@ def get_creative_dict(request) -> Dict:
             ip=session.ip,
             country=country,
             city=city,
+            ad_unit_name=name,
         )
 
         return {'empty': False,
-                'body_html': chosen_creative.serve_body(request),
+                'body_html': chosen_creative.serve_body(request, utm_source),
                 'head_html': chosen_creative.serve_head(request),
+                'utm_source': utm_source,
                 }
     else:
         return {'empty': True}

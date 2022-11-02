@@ -216,7 +216,7 @@ def include_ad(ad_unit_name, ad_unit_placement_codes,
         'ad_unit_placement_codes': ad_unit_placement_codes,
         'ad_unit_name': ad_unit_name,
         'sizes_list': json.dumps(sizes_list),
-        'floating_image': floating_image, 'utm_source': utm_source,
+        'floating_image': floating_image, 'ad_unit_utm_source': utm_source,
         'adsense': adsense, 'id': shortuuid.uuid(),
         'wo_script':wo_script
     }

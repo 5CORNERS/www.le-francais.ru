@@ -2,7 +2,7 @@
 
 {% if block.value.disable == False %}
     {% if gpt_disabled %}
-        {% include_ad ad_unit_name=block.value.advertisement.name ad_unit_placement_codes='inline_block' %}
+        {% include_ad ad_unit_name=block.value.advertisement.name ad_unit_placement_codes='inline_block' utm_source=utm_source %}
     {% else %}
         {% if request|is_pc %}
             <div class="inline-ads">
