@@ -62,6 +62,7 @@ def include_advertisements(context, contains=None, page_type=None, placement=Non
 		'ids': [random_id + '-' + str(i) for i in range(len(snippets))],
 		'hide': False,
 		'is_sidebar': is_sidebar,
+		'request': context.get('request')
 	}
 
 
@@ -221,7 +222,8 @@ def page_advert_body(context, placement, page_type):
 			placement=placement,
 			snippet=snippet,
 			gpt_disabled=context.get('is_gpt_disabled'),
-			request=context.get('request')
+			request=context.get('request'),
+			utm_source=f"{snippet.name}@{context.get('request').path}"
 		)
 	except:
 		return dict(body=None)

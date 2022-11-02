@@ -48,6 +48,7 @@ function loadAd(div) {
             }),
             ad_unit_name: $div.data('unit-name'),
             placement: $div.data('unit-placement'),
+            ad_unit_utm_source: $div.data('unit-utm-source'),
             page_view_id: window.pageViewID,
             max_width: $div.data('container-width')
         },

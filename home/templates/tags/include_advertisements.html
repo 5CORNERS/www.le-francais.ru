@@ -4,7 +4,9 @@
         let ad_elements_{{ id }} = [
             {% for ad in ads %}
                 {% if gpt_disabled %}
-                    $(`{% include_ad ad.adunit_code ad.placement ad.size_mapping.sizes_json adsense=True adsense_page_type=ad.page_type adsense_placement=ad.placement wo_script=True %}`).addClass('div-{{ id }}'),
+                    {% with ad.adunit_code|add:":"|add:request.path as utm_source %}
+                        $(`{% include_ad ad.adunit_code ad.placement ad.size_mapping.sizes_json utm_source=utm_source adsense=True adsense_page_type=ad.page_type adsense_placement=ad.placement wo_script=True %}`).addClass('div-{{ id }}'),
+                    {% endwith %}
                 {% else %}
                     $("<div style='margin-bottom: 10px' id='{{ ids|index:forloop.counter0 }}' class='__{{ ad.placement }}'</div>"),
                 {% endif %}

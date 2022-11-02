@@ -202,10 +202,19 @@ class Creative(models.Model):
             self._width = img.width
             self._height = img.height
 
-    def serve_body(self, request: HttpRequest):
+    def serve_body(self, request: HttpRequest, utm_source=None):
+        if utm_source is not None:
+            click_url = reverse('ads:creative-click-through', kwargs={
+                'uuid': self.uuid, 'utm_source': utm_source
+            })
+        else:
+            click_url = reverse('ads:creative-click-through_wo_utm', kwargs={
+                'uuid': self.uuid
+            })
         return render_to_string(
             'ads/creative_body.html',
-            {'self': self},
+            {'self': self, 'utm_source': utm_source,
+             'click_url':click_url},
             request,
         )
 
@@ -226,6 +235,7 @@ class Log(models.Model):
     line_item = models.ForeignKey(LineItem, on_delete=models.SET_NULL, null=True)
     creative = models.ForeignKey(Creative, on_delete=models.SET_NULL, null=True)
     log_type = models.CharField(choices=LOG_TYPE_CHOICES, max_length=10)
+    ad_unit_name = models.CharField(max_length=128, null=True, blank=True)
 
     def serve_body(self, request: HttpRequest):
         return render_to_string(
