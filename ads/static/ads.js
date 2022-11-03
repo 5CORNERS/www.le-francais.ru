@@ -37,33 +37,51 @@ function includeAd(id) {
     observer.observe($div.get(0))
 }
 
-function loadAd(div) {
-    let $div = $(div);
-    let sizes = $div.data('sizes')
-    $.ajax(Urls['ads:getCreative'](), {
-        method: 'GET',
-        data: {
-            sizes: sizes.map((size, i) => {
-                return `${size[0]}x${size[1]}:${size[2]}`
-            }),
-            ad_unit_name: $div.data('unit-name'),
-            placement: $div.data('unit-placement'),
-            ad_unit_utm_source: $div.data('unit-utm-source'),
-            page_view_id: window.pageViewID,
-            max_width: $div.data('container-width')
-        },
-        traditional: true,
-        dataType: 'json',
-        statusCode: {
-            200: (data) => {
-                if (data['head_html']) {
-                    $('head').append(data['head_html'])
-                }
-                $div.append(data['body_html']);
-            },
-            404: () => {
+let queuedLoads = [];
+let timerId;
 
-            }
+function loadAd(div) {
+    queuedLoads.push(div);
+    if (timerId){
+        return
+    }
+
+    timerId = setInterval(() => {
+        if (!queuedLoads.length) {
+            clearInterval(timerId);
+            timerId = null;
+            return;
         }
-    })
+        let nextDiv = queuedLoads.shift();
+
+        let $div = $(nextDiv);
+        let sizes = $div.data('sizes')
+        $.ajax(Urls['ads:getCreative'](), {
+            method: 'GET',
+            data: {
+                sizes: sizes.map((size, i) => {
+                    return `${size[0]}x${size[1]}:${size[2]}`
+                }),
+                ad_unit_name: $div.data('unit-name'),
+                placement: $div.data('unit-placement'),
+                ad_unit_utm_source: $div.data('unit-utm-source'),
+                page_view_id: window.pageViewID,
+                max_width: $div.data('container-width')
+            },
+            traditional: true,
+            dataType: 'json',
+            statusCode: {
+                200: (data) => {
+                    if (data['head_html']) {
+                        $('head').append(data['head_html'])
+                    }
+                    $div.append(data['body_html']);
+                },
+                404: () => {
+
+                }
+            }
+        })
+
+    }, 1000)
 }
