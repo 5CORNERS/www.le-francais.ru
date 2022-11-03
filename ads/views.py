@@ -183,7 +183,7 @@ def get_creative_dict(request) -> Dict:
         else:
             creatives_list.sort(key=lambda c: c.width, reverse=True)
             max_chosen_width = creatives_list[0].width
-            chosen_creative = random.choice([c for c in creatives_list if c.width == max_chosen_width])
+            chosen_creative = random.choice([c for c in creatives_list if c.width == max_chosen_width or c.fluid])
         # TODO: choosing by random
 
         # storing labels
