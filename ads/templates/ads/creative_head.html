@@ -1,14 +1,13 @@
-{% if self.fluid or self.html != None %}
-    <style>
-        .container-{{ self.unique_class }} {
-            width: 100%;
-        }
-    </style>
-{% else %}
-    <style>
-        .container-{{ self.unique_class }} {
-            width: {{ self.width }}px;
-            height: {{ self.height }}px;
-        }
-    </style>
-{% endif %}
+<style>
+    .container-{{ self.unique_class }} {
+    {% if not fluid %}
+        width: {{ width }}px;
+        height: {{ height }}px;
+    {% else %}
+        min-width: {{ min-width }}px;
+        min-height: {{ min-height }}px;
+        max-width: {{ max-width }}px;
+        max-height: {{ max-height }}px;
+    {% endif %}
+    }
+</style>

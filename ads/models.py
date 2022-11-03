@@ -223,10 +223,29 @@ class Creative(models.Model):
             request,
         )
 
-    def serve_head(self, request: HttpRequest):
+    def serve_head(self, request: HttpRequest, sizes):
+        if sizes:
+            max_width = max([s['width'] for s in sizes if not s['fluid']])
+            min_width = min([s['width'] for s in sizes if not s['fluid']])
+            max_height = max([s['height'] for s in sizes if not s['fluid']])
+            min_height = min([s['height'] for s in sizes if not s['fluid']])
+        else:
+            max_width = None
+            min_width = None
+            max_height = None
+            min_height = None
         return render_to_string(
             'ads/creative_head.html',
-            {'self': self},
+            dict(
+                self=self,
+                max_width=max_width,
+                min_width=min_width,
+                max_height=max_height,
+                min_height=min_height,
+                width=self.width,
+                height=self.height,
+                fluid=self.fluid
+            ),
             request,
         )
 
