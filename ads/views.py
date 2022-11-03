@@ -64,7 +64,7 @@ def get_creative_dict(request) -> Dict:
         max_width = 10000
     page_view_id = request.GET.get('page_view_id')
     now_isoformat = timezone.now().isoformat()
-    line_items = LineItem.objects.filter(disable=False)
+    line_items = LineItem.objects.filter(disable=False).order_by('-priority')
     if name:
         line_items = line_items.filter(
             Q(ad_units__contains=[name]) | Q(
@@ -163,6 +163,13 @@ def get_creative_dict(request) -> Dict:
         used_labels[page_view_id]['datetime'] = now_isoformat
 
     if creatives_list:
+
+        chosen_line_items = list(set(c.line_item for c in creatives_list))
+        chosen_line_items.sort(key=lambda l: l.priority, reverse=True)
+        if len(chosen_line_items) > 1:
+            chosen_line_item = chosen_line_items[0]
+            creatives_list = [c for c in creatives_list if c.line_item_id == chosen_line_item.pk]
+
         if sizes:
             chosen_creative = random.choice(creatives_list)
         else:
