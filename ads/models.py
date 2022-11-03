@@ -157,7 +157,9 @@ class Creative(models.Model):
 
     @property
     def width(self):
-        if self._width is None:
+        if (self.html or self.fluid) and self._width is None:
+            return 1
+        elif self._width is None:
             self.save()
         return self._width
 
@@ -201,6 +203,9 @@ class Creative(models.Model):
             img:Image.Image = Image.open(response.raw)
             self._width = img.width
             self._height = img.height
+        elif self.fluid or self.html:
+            self._width = None
+            self._height = None
 
     def serve_body(self, request: HttpRequest, utm_source=None):
         if utm_source is not None:
