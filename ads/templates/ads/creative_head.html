@@ -4,10 +4,18 @@
         width: {{ width }}px;
         height: {{ height }}px;
     {% else %}
-        min-width: {{ min-width }}px;
-        min-height: {{ min-height }}px;
-        max-width: {{ max-width }}px;
-        max-height: {{ max-height }}px;
+        {% if min_width %}
+            min-width: {{ min_width }}px;
+            max-width: {{ max_width }}px;
+        {% else %}
+            min-width: 100%;
+        {% endif %}
+        {% if min_height %}
+            min-height: {{ min_height }}px;
+            max-height: {{ max_height }}px;
+        {% else %}
+            min-height: 1px;
+        {% endif %}
     {% endif %}
     }
 </style>
