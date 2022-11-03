@@ -123,7 +123,7 @@ def get_creative_dict(request) -> Dict:
         ))
 
     creatives = Creative.objects.select_related('line_item').filter(
-        line_item_id__in=[li.pk for li in line_items_list]
+        line_item_id__in=[li.pk for li in line_items_list], disable=False
     ).order_by('-line_item__priority')
 
     fixed_width_sizes = []
