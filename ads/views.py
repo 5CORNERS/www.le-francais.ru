@@ -22,11 +22,15 @@ class AdCounterRedirectView(RedirectView):
         creative = get_object_or_404(Creative, uuid=kwargs['uuid'])
         line_item = creative.line_item
         utm_campaign = creative.utm_campaign or creative.line_item.utm_campaign
+        if utm_campaign is not None:
+            utm_campaign = f"utm_campaign={utm_campaign}"
         utm_medium = creative.utm_medium or creative.line_item.utm_medium
+        if utm_medium is not None:
+            utm_medium = f"utm_medium={utm_medium}"
         if 'utm_source' in kwargs:
-            utm_source = f"&utm_source={kwargs['utm_source']}"
+            utm_source = f"utm_source={kwargs['utm_source']}"
         else:
-            utm_source = ""
+            utm_source = None
 
         if not self.request.user.is_staff:
 
@@ -36,8 +40,12 @@ class AdCounterRedirectView(RedirectView):
             line_item.clicks = F('clicks') + 1
             line_item.save(update_fields=['clicks'])
 
-        return creative.image_click_through_url \
-               + f'?utm_campaign={utm_campaign}&utm_medium={utm_medium}{utm_source}'
+        get_args = [utm_campaign, utm_medium, utm_source]
+        get_string = "?" + "&".join([a for a in get_args if a is not None])
+        url = creative.image_click_through_url
+        if not url:
+            url = "https://example.com"
+        return url + get_string
 
 
 class TestView(TemplateView):
