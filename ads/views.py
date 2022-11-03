@@ -236,7 +236,7 @@ def get_creative_dict(request) -> Dict:
 
         return {'empty': False,
                 'body_html': chosen_creative.serve_body(request, utm_source),
-                'head_html': chosen_creative.serve_head(request),
+                'head_html': chosen_creative.serve_head(request, sizes),
                 'utm_source': utm_source,
                 }
     else:
