@@ -90,7 +90,7 @@ def get_drop_content_html(request):
 @csrf_exempt
 @require_POST
 def has_new_notifications(request):
-	if not NOTIFICATIONS_AUTO_CHECK_NEW:
+	if not NOTIFICATIONS_AUTO_CHECK_NEW or request.user.is_anonymous:
 		return JsonResponse({'hasNewNotifications': False}, status=200)
 	user_check = request.user.check_notifications
 	try:
