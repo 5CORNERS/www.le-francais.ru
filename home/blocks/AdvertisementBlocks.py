@@ -12,8 +12,12 @@ class AdvertisementInline(StructBlock):
 
     def get_context(self, value, parent_context=None):
         context = super(AdvertisementInline, self).get_context(value, parent_context)
-        context['gpt_disabled'] = is_gpt_disabled(parent_context['request'])
-        context['utm_source'] = f"inline-block:{parent_context['request'].path}"
+        if parent_context is not None:
+            context['gpt_disabled'] = is_gpt_disabled(parent_context['request'])
+            context['utm_source'] = f"inline-block:{parent_context['request'].path}"
+        else:
+            context['gpt_disabled'] = False
+            context['utm_source'] = None
         return context
 
     class Meta:
