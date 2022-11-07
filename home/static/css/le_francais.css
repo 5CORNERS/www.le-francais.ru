@@ -1266,6 +1266,10 @@ a.page-review:hover {
     margin-bottom: 0.8rem;
 }
 
+#playerPlus .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    line-height: 2;
+}
+
 i.play {
     cursor: pointer;
     color: gray;
