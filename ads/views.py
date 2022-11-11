@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.generic import RedirectView, TemplateView
 
-from .consts import LOG_TYPE_VIEW
+from .consts import LOG_TYPE_VIEW, LOG_TYPE_CLICK
 from .models import Creative, LineItem, Log
 from .utils import clear_session_data
 
@@ -19,6 +19,7 @@ class AdCounterRedirectView(RedirectView):
     ?utm_campaign=campaign&utm_medium=medium&utm_source=source
     """
     def get_redirect_url(self, *args, **kwargs):
+        user = self.request.user
         creative = get_object_or_404(Creative, uuid=kwargs['uuid'])
         line_item = creative.line_item
         utm_campaign = creative.utm_campaign or creative.line_item.utm_campaign
@@ -32,13 +33,23 @@ class AdCounterRedirectView(RedirectView):
         else:
             utm_source = None
 
-        if not self.request.user.is_staff:
+        if not user.is_staff:
 
             creative.clicks = F('clicks') + 1
             creative.save(update_fields=['clicks'])
 
             line_item.clicks = F('clicks') + 1
             line_item.save(update_fields=['clicks'])
+
+        log_id = kwargs.get('log_id', None)
+        if log_id is not None:
+            try:
+                log_object = Log.objects.get(pk=log_id)
+                log_object.clicked = True
+                log_object.click_datetime = timezone.now()
+                log_object.save(update_fields=['clicked', 'click_datetime'])
+            except Log.DoesNotExist:
+                pass
 
         get_args = [utm_campaign, utm_medium, utm_source]
         get_string = "?" + "&".join([a for a in get_args if a is not None])
@@ -65,6 +76,8 @@ def get_creative_dict(request) -> Dict:
     name = request.GET.get('ad_unit_name')
     placements = request.GET.getlist('placement')
     sizes = request.GET.getlist('sizes')
+    country_code = request.session['geoip'].get('country_code')
+    city = request.session['geoip'].get('city')
     utm_source = request.GET.get('ad_unit_utm_source')
     try:
         max_width = float(request.GET.get('max_width'))
@@ -73,6 +86,17 @@ def get_creative_dict(request) -> Dict:
     page_view_id = request.GET.get('page_view_id')
     now_isoformat = timezone.now().isoformat()
     line_items = LineItem.objects.filter(disable=False).order_by('-priority')
+
+    line_items = line_items.filter(
+        Q(targeting_country__isnull=True) | Q(targeting_country__contains=[country_code], targeting_invert=False)
+    ).exclude(
+        targeting_country__contains=[country_code], targeting_invert=True
+    ).filter(
+        Q(targeting_city__isnull=True) | Q(targeting_city__contains=[city], targeting_invert=False)
+    ).exclude(
+        targeting_city__contains=[country_code], targeting_invert=True
+    )
+
     if name:
         line_items = line_items.filter(
             Q(ad_units__contains=[name]) | Q(
@@ -218,12 +242,12 @@ def get_creative_dict(request) -> Dict:
             chosen_creative.line_item.save(update_fields=['views'])
         geoip_dict = request.session.get('geoip', None)
         if geoip_dict:
-            country = geoip_dict['country_name']
-            city = geoip_dict['city']
+            country = geoip_dict.get('country_name')
+            city = geoip_dict.get('city')
         else:
             country = None
             city = None
-        Log.objects.create(
+        log_object = Log.objects.create(
             log_type=LOG_TYPE_VIEW,
             creative=chosen_creative,
             line_item=chosen_creative.line_item,
@@ -232,12 +256,18 @@ def get_creative_dict(request) -> Dict:
             country=country,
             city=city,
             ad_unit_name=name,
+            ad_unit_placements=placements,
+            utm_data={
+                "utm_campaign": chosen_creative.utm_campaign or chosen_creative.line_item.utm_campaign,
+                "utm_medium": chosen_creative.utm_medium or chosen_creative.line_item.utm_medium,
+                "utm_source": utm_source
+            }
         )
 
         return {'empty': False,
-                'body_html': chosen_creative.serve_body(request, utm_source),
+                'body_html': chosen_creative.serve_body(request, utm_source, log_object.pk),
                 'head_html': chosen_creative.serve_head(request, sizes),
-                'utm_source': utm_source,
+                'utm_source': utm_source, 'log_id': log_object.pk
                 }
     else:
         return {'empty': True}
