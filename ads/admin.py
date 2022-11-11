@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from ads.forms import GeoAdder
-from ads.models import LineItem, Placement, Creative
+from ads.models import LineItem, Placement, Creative, Log
 
 
 class CreativeInline(admin.TabularInline):
@@ -40,3 +40,17 @@ class PlacementAdmin(admin.ModelAdmin):
 @admin.register(Creative)
 class CreativeAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(Log)
+class LogAdmin(admin.ModelAdmin):
+    list_display = [
+        'datetime',
+        'clicked',
+        'line_item',
+        'creative',
+        'user',
+        'country',
+        'city',
+    ]
+    list_filter = ['line_item', 'datetime', 'clicked']
+    readonly_fields = [field.name for field in Log._meta.fields]
