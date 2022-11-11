@@ -123,6 +123,9 @@ class GeoIpSessionMiddleware(MiddlewareMixin):
                 user.city = geoip_dict['city']
                 user.country_name = geoip_dict['country_name']
                 user.region = geoip_dict['region']
-                user.save()
+                user.save(update_fields=['country_code','city','country_name','region'])
         except geoip2.errors.AddressNotFoundError:
-            pass
+            geoip_dict = {
+                'last_check': now.isoformat()
+            }
+            request.session['geoip'] = geoip_dict

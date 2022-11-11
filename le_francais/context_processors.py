@@ -4,10 +4,10 @@ from home.utils import is_gpt_disabled
 def geoip(request):
     if 'geoip' in request.session:
         return {
-            'country_name': request.session['geoip']['country_name'],
-            'country_code': request.session['geoip']['country_code'],
-            'city': request.session['geoip']['city'],
-            'region': request.session['geoip']['region']
+            'country_name': request.session['geoip'].get('country_name'),
+            'country_code': request.session['geoip'].get('country_code'),
+            'city': request.session['geoip'].get('city'),
+            'region': request.session['geoip'].get('region')
         }
     else:
         return {

@@ -162,8 +162,7 @@ def get_ads(context, ad_unit_name, ad_unit_placement_code, sizes_str,
     for creative in creatives:
         creatives_list.append({
             'image_url': creative.get_image_url(),
-            'image_click_through_url': creative.get_click_through_url(
-                line_item, utm_source),
+            'image_click_through_url': creative.get_click_through_url(utm_source),
             'width': creative.width,
             'height': creative.height,
             'labels': creative.labels

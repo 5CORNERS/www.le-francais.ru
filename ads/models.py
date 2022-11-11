@@ -6,7 +6,7 @@ import requests
 import shortuuid
 from PIL import Image
 from django.contrib.auth import get_user_model
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpRequest
@@ -87,6 +87,7 @@ class LineItem(models.Model):
 
     targeting_country = models.CharField(max_length=256, null=True, blank=True)
     targeting_city = models.CharField(max_length=256, null=True, blank=True)
+    targeting_invert = models.BooleanField(default=False)
 
     disable = models.BooleanField(default=False, blank=True)
 
@@ -187,8 +188,15 @@ class Creative(models.Model):
         else:
             return ''
 
-    def get_click_through_url(self, line_item, utm_source):
-        return reverse('ads:ad-counter-redirect', args=(line_item.pk, self.pk, utm_source))
+    def get_click_through_url(self, utm_source=None, log_id=None):
+        # if utm_source is None:
+            return reverse('ads:creative-click-through_wo_utm', kwargs={
+                'uuid': self.uuid, 'log_id': log_id
+            })
+        # else:
+        #     return reverse('ads:creative-click-through', kwargs={
+        #         'uuid': self.uuid, 'utm_source': utm_source, 'log_id': log_id
+        #     })
 
     def save(self, *args, **kwargs):
         self.set_dimensions()
@@ -207,15 +215,8 @@ class Creative(models.Model):
             self._width = None
             self._height = None
 
-    def serve_body(self, request: HttpRequest, utm_source=None):
-        if utm_source is not None:
-            click_url = reverse('ads:creative-click-through', kwargs={
-                'uuid': self.uuid, 'utm_source': utm_source
-            })
-        else:
-            click_url = reverse('ads:creative-click-through_wo_utm', kwargs={
-                'uuid': self.uuid
-            })
+    def serve_body(self, request: HttpRequest, utm_source=None, log_id=None):
+        click_url = self.get_click_through_url(utm_source, log_id)
         return render_to_string(
             'ads/creative_body.html',
             {'self': self, 'utm_source': utm_source,
@@ -249,7 +250,12 @@ class Creative(models.Model):
             request,
         )
 
-
+def set_default_utm():
+    return dict(
+        utm_campaign=None,
+        utm_medium=None,
+        utm_source=None
+    )
 class Log(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     ip = models.GenericIPAddressField()
@@ -260,6 +266,10 @@ class Log(models.Model):
     creative = models.ForeignKey(Creative, on_delete=models.SET_NULL, null=True)
     log_type = models.CharField(choices=LOG_TYPE_CHOICES, max_length=10)
     ad_unit_name = models.CharField(max_length=128, null=True, blank=True)
+    ad_unit_placements = ArrayField(base_field=models.CharField(max_length=256), default=list)
+    clicked = models.BooleanField(default=False)
+    click_datetime = models.DateTimeField(default=None, null=True, blank=True)
+    utm_data = JSONField(default=set_default_utm)
 
     def serve_body(self, request: HttpRequest):
         return render_to_string(
