@@ -95,11 +95,11 @@ class GeoIpSessionMiddleware(MiddlewareMixin):
         now = timezone.now()
         ip = request.session.ip
         try:
-            if 'geoip' in request.session:
+            if 'geoip' in request.session and 'country_code' in request.session['geoip']:
                 geoip_dict = request.session['geoip']
                 last_check = datetime.datetime.fromisoformat(
                     geoip_dict['last_check'])
-                if (now - last_check).days > 7:
+                if (now - last_check).days > 1:
                     g = GeoIP2()
                     geoip_dict['last_check'] = now.isoformat()
                     for k, v in g.city(ip).items():
