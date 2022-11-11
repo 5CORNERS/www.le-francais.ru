@@ -284,3 +284,6 @@ class Log(models.Model):
             {'self': self},
             request,
         )
+
+    def __str__(self):
+        return f"Log Object:{self.pk}"
