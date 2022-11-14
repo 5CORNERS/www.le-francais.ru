@@ -183,13 +183,13 @@ def listen_request(request, test=False):
 
     if request.POST.get('download'):
         LogMessage(
-            user=session_object.user,
+            user=session_user,
             message=str(lesson_number),
             type=2,
             session_key=request.session.session_key
         ).save()
 
-    if not lesson.need_payment or not session_object.user.must_pay:
+    if session_user is not None and not (lesson.need_payment and session_user.must_pay):
         return HttpResponse('full', status=200)
 
     # Temporarily supress ip check
