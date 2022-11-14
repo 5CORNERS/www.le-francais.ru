@@ -58,6 +58,7 @@ class LineItem(models.Model):
     placements = models.ManyToManyField(
         Placement, blank=True
     )
+    placements_inverted = models.BooleanField(default=False)
     ad_units = ArrayField(base_field=models.CharField(
         max_length=255,
     ), help_text='List of AdUnit names.', default=list, blank=True)

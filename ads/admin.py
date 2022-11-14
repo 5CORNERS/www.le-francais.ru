@@ -17,7 +17,7 @@ class LineItemAdmin(admin.ModelAdmin):
     readonly_fields = ['views', 'clicks']
     inlines = [CreativeInline]
     fields = [
-        'name', 'priority', 'placements', 'ad_units',
+        'name', 'priority', 'placements', 'placements_inverted', 'ad_units',
         'do_not_show_to',
         'do_not_show_if_was_on_conjugations',
         'views',
@@ -29,6 +29,7 @@ class LineItemAdmin(admin.ModelAdmin):
         'labels',
         'targeting_country',
         'targeting_city',
+        'targeting_invert',
         'disable', 'utm_campaign', 'utm_medium'
     ]
     # form = GeoAdder

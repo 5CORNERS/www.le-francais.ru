@@ -104,9 +104,8 @@ def get_creative_dict(request) -> Dict:
             )
         )
     if placements:
-        line_items = line_items.filter(
-            Q(placements__code__in=placements) | Q(
-                placements__isnull=True)
+        line_items = line_items.exclude(placements__code__in=placements, placements_inverted=True).filter(
+            Q(placements__code__in=placements, placements_inverted=False) | Q(placements__isnull=True)
         )
 
     if request.user.is_authenticated:
