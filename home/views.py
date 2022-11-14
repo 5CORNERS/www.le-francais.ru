@@ -194,10 +194,10 @@ def listen_request(request, test=False):
 
     # Temporarily supress ip check
     if datetime.now(timezone.utc) - session_object.last_activity < timedelta(
-            hours=2) and lesson in session_object.user.payed_lessons.all():
+            hours=2) and (session_user is not None and lesson in session_user.payed_lessons.all()):
         return HttpResponse('full', status=200)
 
-    if session_object.user is not None and lesson in session_object.user.payed_lessons.all() and session_object.ip == ipaddress:
+    if session_user is not None and lesson in session_user.payed_lessons.all() and session_object.ip == ipaddress:
         return HttpResponse('full', status=200)
     return HttpResponse('short', status=403)
 
