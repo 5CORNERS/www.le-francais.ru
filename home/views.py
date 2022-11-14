@@ -161,7 +161,7 @@ def listen_request(request, test=False):
             return HttpResponse('full', status=200)
         return HttpResponse('short', status=403)
 
-    session_user = session_object.user
+    session_user: User = session_object.user
 
     if test:
         return JsonResponse(
@@ -189,7 +189,7 @@ def listen_request(request, test=False):
             session_key=request.session.session_key
         ).save()
 
-    if session_user is not None and not (lesson.need_payment and session_user.must_pay):
+    if not lesson.need_payment or (session_user is not None and session_user.must_pay):
         return HttpResponse('full', status=200)
 
     # Temporarily supress ip check
