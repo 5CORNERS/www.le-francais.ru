@@ -273,12 +273,15 @@ def sm2_next_repetition_date_obsolete(dataset) -> Union[
 
 
 def repetition_datetime_to_date(d, tz):
-	return make_aware(
-		make_naive(d, pytz.timezone(tz or 'UTC')).replace(
-			hour=0, minute=0, second=0, microsecond=0
-		),
-		pytz.timezone(tz or 'UTC')
-	)
+	try:
+		return make_aware(
+			make_naive(d, pytz.timezone(tz)).replace(
+				hour=0, minute=0, second=0, microsecond=0
+			),
+			pytz.timezone(tz)
+		)
+	except pytz.exceptions.UnknownTimeZoneError:
+		return repetition_datetime_to_date(d, 'UTC')
 
 
 DELAY_RANGE_MINUS_0 = (0, 5000, 0, 0) # 5
