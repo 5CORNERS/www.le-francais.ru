@@ -116,8 +116,8 @@ def get_creative_dict(request) -> Dict:
         # line_items = line_items.exclude(placements__code__in=[placements], placements_inverted=True).filter(
         #     Q(placements__code__in=[placements], placements_inverted=False) | Q(placements__isnull=True, placements_inverted=False)
         # )
-        line_items = line_items.exclude(placements__code__in=[placements], placements_inverted=True)
-        line_items = line_items.filter(Q(placements_inverted=True) | Q(placements__code__in=[placements], placements_inverted=False) | Q(placements__isnull=True))
+        line_items = line_items.exclude(placements__code__in=placements, placements_inverted=True)
+        line_items = line_items.filter(Q(placements_inverted=True) | Q(placements__code__in=placements, placements_inverted=False) | Q(placements__isnull=True))
 
     if request.user.is_authenticated:
         line_items = line_items.exclude(
