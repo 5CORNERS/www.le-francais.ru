@@ -97,16 +97,14 @@ def get_creative_dict(request) -> Dict:
     #     targeting_city__contains=[country_code], targeting_invert=True
     # )
 
-    line_items = line_items.exclude(
-        Q(targeting_country__contains=[country_code],
-          targeting_invert=True) | Q(targeting_city__contains=[city],
-                                     targeting_invert=True)
-    ).filter(
-        Q(targeting_country__contains=[country_code],
-          targeting_invert=False) | Q(targeting_city__contains=[city],
-                                      targeting_invert=False) | Q(
-            targeting_country__isnull=True, targeting_city__isnull=True)
-    )
+    if country_code is not None:
+        line_items = line_items.exclude(targeting_country__contains=[country_code], targeting_invert=True).filter(
+            Q(targeting_country__contains=[country_code], targeting_invert=False) | Q(targeting_country__isnull=True)
+        )
+    if city is not None:
+        line_items = line_items.exclude(targeting_city__contains=[city], targeting_invert=True).filter(
+            Q(targeting_city__contains=[city], targeting_invert=False) | Q(targeting_city__isnull=True)
+        )
 
     if name:
         line_items = line_items.filter(
