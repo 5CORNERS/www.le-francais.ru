@@ -495,8 +495,8 @@ def unmark_words(request):
 
 
 def get_app(request, packet_id):
-    if not UserPacket.objects.filter(user=request.user,
-                                     packet_id=packet_id).exists():
+    if request.user.is_authenticated and not UserPacket.objects.filter(
+            user=request.user, packet_id=packet_id).exists():
         UserPacket.objects.create(
             user=request.user,
             packet_id=packet_id
