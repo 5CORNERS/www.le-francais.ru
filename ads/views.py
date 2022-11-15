@@ -99,11 +99,11 @@ def get_creative_dict(request) -> Dict:
 
     if country_code is not None:
         line_items = line_items.exclude(targeting_country__contains=[country_code], targeting_invert=True).filter(
-            Q(targeting_country__contains=[country_code], targeting_invert=False) | Q(targeting_country__isnull=True)
+            Q(targeting_invert=True) | Q(targeting_country__contains=[country_code]) | Q(targeting_country__isnull=True)
         )
     if city is not None:
         line_items = line_items.exclude(targeting_city__contains=[city], targeting_invert=True).filter(
-            Q(targeting_city__contains=[city], targeting_invert=False) | Q(targeting_city__isnull=True)
+            Q(targeting_invert=True) | Q(targeting_city__contains=[city]) | Q(targeting_city__isnull=True)
         )
 
     if name:
@@ -113,9 +113,11 @@ def get_creative_dict(request) -> Dict:
             )
         )
     if placements:
-        line_items = line_items.exclude(placements__code__in=placements, placements_inverted=True).filter(
-            Q(placements__code__in=placements, placements_inverted=False) | Q(placements__isnull=True)
-        )
+        # line_items = line_items.exclude(placements__code__in=[placements], placements_inverted=True).filter(
+        #     Q(placements__code__in=[placements], placements_inverted=False) | Q(placements__isnull=True, placements_inverted=False)
+        # )
+        line_items = line_items.exclude(placements__code__in=[placements], placements_inverted=True)
+        line_items = line_items.filter(Q(placements_inverted=True) | Q(placements__code__in=[placements], placements_inverted=False) | Q(placements__isnull=True))
 
     if request.user.is_authenticated:
         line_items = line_items.exclude(
