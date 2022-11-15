@@ -87,14 +87,25 @@ def get_creative_dict(request) -> Dict:
     now_isoformat = timezone.now().isoformat()
     line_items = LineItem.objects.filter(disable=False).order_by('-priority')
 
-    line_items = line_items.filter(
-        Q(targeting_country__isnull=True) | Q(targeting_country__contains=[country_code], targeting_invert=False)
-    ).exclude(
-        targeting_country__contains=[country_code], targeting_invert=True
+    # line_items = line_items.filter(
+    #     Q(targeting_country__isnull=True) | Q(targeting_country__contains=[country_code], targeting_invert=False)
+    # ).exclude(
+    #     targeting_country__contains=[country_code], targeting_invert=True
+    # ).filter(
+    #     Q(targeting_city__isnull=True) | Q(targeting_city__contains=[city], targeting_invert=False)
+    # ).exclude(
+    #     targeting_city__contains=[country_code], targeting_invert=True
+    # )
+
+    line_items = line_items.exclude(
+        Q(targeting_country__contains=[country_code],
+          targeting_invert=True) | Q(targeting_city__contains=[city],
+                                     targeting_invert=True)
     ).filter(
-        Q(targeting_city__isnull=True) | Q(targeting_city__contains=[city], targeting_invert=False)
-    ).exclude(
-        targeting_city__contains=[country_code], targeting_invert=True
+        Q(targeting_country__contains=[country_code],
+          targeting_invert=False) | Q(targeting_city__contains=[city],
+                                      targeting_invert=False) | Q(
+            targeting_country__isnull=True, targeting_city__isnull=True)
     )
 
     if name:
