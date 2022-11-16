@@ -125,7 +125,9 @@ def get_creative_dict(request) -> Dict:
         )
 
     if line_items.count() == 0:
-        return {'empty': True}
+        return {'empty': True, 'country_code': country_code, 'city': city,
+                'name': name, 'placements': placements,
+                'is_authenticated': request.user.is_authenticated}
 
     session = request.session
     was_on_pages = session.get('was_on_pages', {})
@@ -280,12 +282,15 @@ def get_creative_dict(request) -> Dict:
                 'utm_source': utm_source, 'log_id': log_object.pk
                 }
     else:
-        return {'empty': True}
+        return {
+            'empty': True, 'was_on_pages': was_on_pages, 'was_on_conjugations': was_on_conjugations,
+            'cappings': cappings, 'sizes': sizes, 'used_labels': used_labels, 'page_view_id': page_view_id
+        }
 
 def get_creative(request):
     creative_dict = get_creative_dict(request)
     if creative_dict['empty']:
-        return HttpResponseNotFound()
+        return JsonResponse(data=creative_dict, status=404)
     else:
         return JsonResponse(data=creative_dict)
 
