@@ -1,5 +1,5 @@
-var CACHE_NAME = 'le_francais-conjugation-cache-v22';
-var urlsToCache = [
+let CACHE_NAME = 'le_francais-conjugation-cache-v25';
+let urlsMatchToCache = [
     '/static/conjugation/css/conjugation.min.css',
     '/static/conjugation/js/conjugation.min.js',
     '/static/conjugation/images/ui-anim_basic_16x16.gif',
@@ -15,15 +15,19 @@ var urlsToCache = [
     '/static/components/js/bootstrap.js',
     '/static/components/js/bootstrap-select.js',
     '/static/components/js/bootstrap-treeview.min.js',
-    '/static/components/js/jquery.js',
+    '/static/components/js/jquery.js'
 ];
+let urlsInToCache = [
+    '/static/',
+    '/verbs_autocomplete/'
+]
 
 self.addEventListener('install', function (event) {
     event.waitUntil(
         caches.delete(CACHE_NAME).then(function () {
             caches.open(CACHE_NAME).then(function (cache) {
                 console.log('Opened cache');
-                return cache.addAll(urlsToCache);
+                return cache.addAll(urlsMatchToCache);
             })
         })
     );
@@ -43,32 +47,36 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', function (event) {
-    event.respondWith(
-        caches.match(event.request)
-            .then(function (response) {
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request).then(
-                    function (response) {
-                        if (!response ||
-                            response.status !== 200 ||
-                            response.type !== 'basic' ||
-                            event.request.method !== 'GET' ||
-                            event.request.url.includes('/api/') ||
-                            !event.request.url.includes('/static/') &&
-                            !event.request.url.includes('/verbs_autocomplete/')
-                        ) {
-                            return response;
-                        }
-                        var responseToCache = response.clone();
-                        caches.open(CACHE_NAME)
-                            .then(function (cache) {
-                                cache.put(event.request, responseToCache);
-                            });
+    if (event.request.mode !== 'cors') {
+        event.respondWith(
+            caches.match(event.request)
+                .then(function (response) {
+                    if (response) {
                         return response;
                     }
-                );
-            })
-    );
+                    return fetch(event.request).then(
+                        function (response) {
+                            if (!response ||
+                                response.status !== 200 ||
+                                response.type !== 'basic' ||
+                                event.request.method !== 'GET' ||
+                                event.request.url.includes('/api/') ||
+                                !event.request.url.includes('/static/') &&
+                                !event.request.url.includes('/verbs_autocomplete/')
+                            ) {
+                                return response;
+                            }
+                            var responseToCache = response.clone();
+                            caches.open(CACHE_NAME)
+                                .then(function (cache) {
+                                    cache.put(event.request, responseToCache);
+                                });
+                            return response;
+                        }
+                    );
+                })
+            )
+        }else{
+        return;
+    }
 });
