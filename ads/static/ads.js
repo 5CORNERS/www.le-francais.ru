@@ -6,7 +6,7 @@ let observer = new IntersectionObserver((entries) => {
             observer.unobserve(div)
         }
     })
-}, {threshold: [0]})
+}, {threshold: [0], rootMargin: '600px 0px 600px 0px'})
 
 function getSizes(data, containerWidth, viewPortWidth, containerHeight = Number.MAX_VALUE, viewPortHeight = Number.MAX_VALUE) {
     const mapping = data.find(m => (
