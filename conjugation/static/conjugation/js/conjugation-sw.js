@@ -1,5 +1,5 @@
-let CACHE_NAME = 'le_francais-conjugation-cache-v25';
-let urlsMatchToCache = [
+const CACHE_NAME = 'le_francais-conjugation-cache-v26';
+const urlsMatchToCache = [
     '/static/conjugation/css/conjugation.min.css',
     '/static/conjugation/js/conjugation.min.js',
     '/static/conjugation/images/ui-anim_basic_16x16.gif',
@@ -17,21 +17,10 @@ let urlsMatchToCache = [
     '/static/components/js/bootstrap-treeview.min.js',
     '/static/components/js/jquery.js'
 ];
-let urlsInToCache = [
+const urlsInToCache = [
     '/static/',
     '/verbs_autocomplete/'
 ]
-
-self.addEventListener('install', function (event) {
-    event.waitUntil(
-        caches.delete(CACHE_NAME).then(function () {
-            caches.open(CACHE_NAME).then(function (cache) {
-                console.log('Opened cache');
-                return cache.addAll(urlsMatchToCache);
-            })
-        })
-    );
-});
 
 self.addEventListener('activate', event => {
     let cacheKeepList = [CACHE_NAME];
@@ -46,37 +35,34 @@ self.addEventListener('activate', event => {
     )
 });
 
-self.addEventListener('fetch', function (event) {
-    if (event.request.mode !== 'cors') {
-        event.respondWith(
-            caches.match(event.request)
-                .then(function (response) {
-                    if (response) {
-                        return response;
-                    }
-                    return fetch(event.request).then(
-                        function (response) {
-                            if (!response ||
-                                response.status !== 200 ||
-                                response.type !== 'basic' ||
-                                event.request.method !== 'GET' ||
-                                event.request.url.includes('/api/') ||
-                                !event.request.url.includes('/static/') &&
-                                !event.request.url.includes('/verbs_autocomplete/')
-                            ) {
-                                return response;
-                            }
-                            var responseToCache = response.clone();
-                            caches.open(CACHE_NAME)
-                                .then(function (cache) {
-                                    cache.put(event.request, responseToCache);
-                                });
-                            return response;
-                        }
-                    );
-                })
-            )
-        }else{
-        return;
+const putInCache = async (request, response) => {
+  const cache = await caches.open(CACHE_NAME);
+  await cache.put(request, response);
+};
+
+const fetchRequest = async ({ request }) => {
+    const responseFromCache = await caches.match(request);
+    if (responseFromCache) {
+        return responseFromCache
     }
+    try {
+        const responseFromNetwork = await fetch(request);
+        if (urlsInToCache.some(u => request.url.includes(u)) || urlsMatchToCache.some(u => request.url === u)) {
+            putInCache(request, responseFromNetwork.clone())
+        }
+        return responseFromNetwork
+    } catch (error) {
+        return new Response("Network Error", {
+            status:408,
+            headers: {"Content-Type": "text/plain"}
+        })
+    }
+}
+
+self.addEventListener('fetch', function (event) {
+    event.respondWith(
+        fetchRequest({
+            request: event.request
+        })
+    )
 });
