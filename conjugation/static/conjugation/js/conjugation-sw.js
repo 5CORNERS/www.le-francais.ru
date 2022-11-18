@@ -51,7 +51,7 @@ const fetchRequest = async ({ request }) => {
     }
     try {
         const responseFromNetwork = await fetch(request);
-        if (request.status === 200 && (urlsInToCache.some(u => request.url.includes(u)) || urlsMatchToCache.some(u => request.url === u))) {
+        if (urlsInToCache.some(u => request.url.includes(u)) || urlsMatchToCache.some(u => request.url === u)) {
             putInCache(request, responseFromNetwork.clone())
         }
         return responseFromNetwork
