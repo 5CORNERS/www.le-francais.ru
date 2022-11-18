@@ -1,4 +1,4 @@
-const CACHE_NAME = 'le_francais-conjugation-cache-v26';
+const CACHE_NAME = 'le_francais-conjugation-cache-v27';
 const urlsMatchToCache = [
     '/static/conjugation/css/conjugation.min.css',
     '/static/conjugation/js/conjugation.min.js',
@@ -19,7 +19,11 @@ const urlsMatchToCache = [
 ];
 const urlsInToCache = [
     '/static/',
-    '/verbs_autocomplete/'
+    '/verbs_autocomplete/',
+    '/polly/',
+]
+const urlsInFromNetwork = [
+
 ]
 
 self.addEventListener('activate', event => {
@@ -47,7 +51,7 @@ const fetchRequest = async ({ request }) => {
     }
     try {
         const responseFromNetwork = await fetch(request);
-        if (urlsInToCache.some(u => request.url.includes(u)) || urlsMatchToCache.some(u => request.url === u)) {
+        if (request.status === 200 && (urlsInToCache.some(u => request.url.includes(u)) || urlsMatchToCache.some(u => request.url === u))) {
             putInCache(request, responseFromNetwork.clone())
         }
         return responseFromNetwork
