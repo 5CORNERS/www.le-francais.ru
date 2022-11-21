@@ -250,15 +250,21 @@ class User(AbstractUser):
 		return list(TinkoffPayment.objects.filter(customer_key=self.id))
 
 	def get_user_datetime(self):
-		tz = self.timezone or 'UTC'
-		return timezone.make_naive(timezone.now(), pytz.timezone(tz))
+		tz = self.timezone
+		try:
+			return timezone.make_naive(timezone.now(), pytz.timezone(tz))
+		except pytz.exceptions.UnknownTimeZoneError:
+			return timezone.make_naive(timezone.now(), pytz.utc)
 
 	@property
 	def user_datetime(self):
 		return self.get_user_datetime()
 
 	def get_pytz_timezone(self):
-		return pytz.timezone(self.timezone or 'UTC')
+		try:
+			return pytz.timezone(self.timezone)
+		except pytz.exceptions.UnknownTimeZoneError:
+			return pytz.timezone('UTC')
 
 	@property
 	def pytz_timezone(self):
