@@ -999,11 +999,11 @@ details.no-details:not([open]) summary {
     transform: rotate(-60deg);
 }
 
-.lesson-tabs > .nav-item > .nav-link {
+.lesson-tabs > .nav-item > .nav-link, .conjugation-tabs > .nav-item > .nav-link {
     border-color: #dee2e6 #dee2e6 #dee2e6 #dee2e6;
 }
 
-.lesson-tabs > .nav-item > .nav-link.active {
+.lesson-tabs > .nav-item > .nav-link.active, .conjugation-tabs > .nav-item > .nav-link.active {
     border-color: #dee2e6 #dee2e6 #ffffff #dee2e6;
 }
 
@@ -1266,7 +1266,7 @@ a.page-review:hover {
     margin-bottom: 0.8rem;
 }
 
-#playerPlus .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+#playerPlus .h1,#playerPlus .h2,#playerPlus .h3,#playerPlus .h4,#playerPlus .h5,#playerPlus .h6{
     line-height: 2;
 }
 
@@ -1343,4 +1343,3 @@ span.underline.play *{
     border-top-right-radius: calc(.3rem - 1px);
     padding-right: 12px;
 }
-
