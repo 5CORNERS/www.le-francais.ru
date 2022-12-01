@@ -65,7 +65,9 @@ class CustomSessionMiddleware(SessionHeaderMiddleware):
         super(SessionHeaderMiddleware, self).process_request(request)
         engine = import_module(settings.SESSION_ENGINE)
         session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME, None)
-        if request.META.get('HTTP_X_FORWARDED_FOR'):
+        if request.META.get('HTTP_CF_CONNECTING_IP'):
+            ip = request.META.get('HTTP_CF_CONNECTING_IP')
+        elif request.META.get('HTTP_X_FORWARDED_FOR'):
             ip = request.META.get('HTTP_X_FORWARDED_FOR')
         elif request.META.get('REMOTE_ADDR'):
             ip = request.META.get('REMOTE_ADDR')
