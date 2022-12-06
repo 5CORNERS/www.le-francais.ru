@@ -1,3 +1,10 @@
+function trimByChar1(string, character) {
+  const arr = Array.from(string);
+  const first = arr.findIndex(char => char !== character);
+  const last = arr.reverse().findIndex(char => char !== character);
+  return (first === -1 && last === -1) ? '' : string.substring(first, string.length - last);
+}
+
 function getNavRootId() {
     return $('meta[name="nav-root-id"]').attr("content")
 }
@@ -120,7 +127,7 @@ function scrolling(document, history, location) {
 
     let anchorScrolls = {
         ANCHOR_REGEX: /^#[^ ]+$/,
-        OFFSET_HEIGHT_PX: 71,
+        OFFSET_HEIGHT_PX: 55,
 
         /**
          * Establish events, and fix initial scroll position if a hash is provided.
@@ -200,7 +207,7 @@ $(document).ready(function () {
         $(window).resize(function () {
             clearTimeout(timerId);
             let resizeHandler =function () {
-                $('div.lazy-image-container>img').each(() => {
+                $('div.lazy-image-container>iframe, div.lazy-image-container>img').each(function() {
                     let $img = $(this)
                     let $div = $img.parent()
                     let aspect = $div.data('aspect')
