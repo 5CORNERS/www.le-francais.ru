@@ -32,6 +32,9 @@ class AdCounterRedirectView(RedirectView):
             utm_source = f"utm_source={kwargs['utm_source']}"
         else:
             utm_source = None
+        #
+        # if creative.utm_source is not None:
+        #     utm_source = f"utm_source={creative.utm_source}"
 
         if not user.is_staff:
 

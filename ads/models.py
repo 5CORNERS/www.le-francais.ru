@@ -143,6 +143,7 @@ class Creative(models.Model):
     name = models.CharField(max_length=256, blank=False)
     utm_campaign = models.CharField(max_length=256, blank=True, null=True, help_text="Will override line item values")
     utm_medium = models.CharField(max_length=256, blank=True, null=True, help_text="Will override line item values")
+    # utm_source = models.CharField(max_length=256, blank=True, null=True, help_text="Will override ad unit value")
 
     image_click_through_url = models.URLField(blank=True)
     image = models.ImageField(blank=True, upload_to=creative_image_file_update) # TODO: changing filename
@@ -226,11 +227,13 @@ class Creative(models.Model):
             img:Image.Image = Image.open(response.raw)
             self._width = img.width
             self._height = img.height
-        elif self.fluid or self.html:
+        elif self.fluid or (self.html and self._width is None or self.height is None):
             self._width = None
             self._height = None
 
     def serve_body(self, request: HttpRequest, utm_source=None, log_id=None):
+        # if self.utm_source is not None:
+        #     utm_source = self.utm_source
         click_url = self.get_click_through_url(utm_source, log_id)
         return render_to_string(
             'ads/creative_body.html',
