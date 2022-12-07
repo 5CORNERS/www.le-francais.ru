@@ -124,19 +124,39 @@ def get_creative_dict(request) -> Dict:
             do_not_display_to_registered_users=True
         )
 
+        if request.user.donation_set.filter(cancelled=False).exists():
+            last_donation_days_ago = (
+                        timezone.now() - request.user.donation_set.filter(
+                    cancelled=False).order_by(
+                    "datetime_creation").last().datetime_creation).days
+            line_items = line_items.exclude(
+                Q(do_not_display_to_donating_users=True
+                  ) | Q(
+                    do_not_display_to_donating_users_days_ago__gt=last_donation_days_ago))
+
+    if request.user.is_anonymous:
+        line_items = line_items.exclude(
+            do_not_display_to_anonymous_users=True
+        )
+
     if line_items.count() == 0:
         return {'empty': True, 'country_code': country_code, 'city': city,
                 'name': name, 'placements': placements,
                 'is_authenticated': request.user.is_authenticated}
 
     session = request.session
-    was_on_pages = session.get('was_on_pages', {})
+    was_on_pages:dict = session.get('was_on_pages', {})
     was_on_conjugations = session.get('was_on_conjugations', False)
 
     if was_on_pages:
-        line_items = line_items.exclude(
-            do_not_show_to__contains=list(was_on_pages.keys())
-        )
+        for page, data in was_on_pages.items():
+            last_time = isoparse(data['last_time'] or data['first_time'])
+            days_ago = (timezone.now() - last_time).days
+
+            line_items = line_items.exclude(
+                less_than_n_days_ago=True, less_than_n_days_ago_value__gt=days_ago, do_not_show_to__contains=[page]
+            ).exclude(less_than_n_days_ago=False, do_not_show_to__contains=[page])
+
     if was_on_conjugations:
         line_items = line_items.exclude(
             do_not_show_if_was_on_conjugations=True)

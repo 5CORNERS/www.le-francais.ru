@@ -19,6 +19,8 @@ class LineItemAdmin(admin.ModelAdmin):
     fields = [
         'name', 'priority', 'placements', 'placements_inverted', 'ad_units',
         'do_not_show_to',
+        'less_than_n_days_ago',
+        'less_than_n_days_ago_value',
         'do_not_show_if_was_on_conjugations',
         'views',
         'clicks',
@@ -26,11 +28,14 @@ class LineItemAdmin(admin.ModelAdmin):
         'capping_week',
         'capping_month',
         'do_not_display_to_registered_users',
+        'do_not_display_to_anonymous_users',
         'labels',
         'targeting_country',
         'targeting_city',
         'targeting_invert',
-        'disable', 'utm_campaign', 'utm_medium'
+        'disable', 'utm_campaign', 'utm_medium',
+        'do_not_display_to_donating_users',
+        'do_not_display_to_donating_users_days_ago',
     ]
     # form = GeoAdder
 
