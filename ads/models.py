@@ -58,7 +58,7 @@ class LineItem(models.Model):
     placements = models.ManyToManyField(
         Placement, blank=True
     )
-    placements_inverted = models.BooleanField(default=False)
+    placements_inverted = models.BooleanField(default=False, verbose_name="Invert Placements")
     ad_units = ArrayField(base_field=models.CharField(
         max_length=255,
     ), help_text='List of AdUnit names.', default=list, blank=True)
@@ -67,12 +67,16 @@ class LineItem(models.Model):
         max_length=255,
     ),
         help_text='Список slug\'ов страниц через запятую',
-        verbose_name='Don\'t display if user had visited following pages',
+        verbose_name='Don\'t display if user visited following pages',
         default=list,
         blank=True
     )
+    less_than_n_days_ago = models.BooleanField(
+        default=False, verbose_name="Не показывать пользователям, видевших следующие страницы менее чем N дней назад")
+    less_than_n_days_ago_value = models.IntegerField(blank=True, null=True, verbose_name="Значение в днях")
+
     do_not_show_if_was_on_conjugations = models.BooleanField(
-        default=False, verbose_name='Don\'t display if user had visited conjugations pages')
+        default=False, verbose_name='Don\'t display if user visited conjugations pages')
 
     views = models.PositiveIntegerField(default=0)
     clicks = models.PositiveIntegerField(default=0)
@@ -82,18 +86,28 @@ class LineItem(models.Model):
     capping_month = models.IntegerField(blank=True, null=True, default=None)
 
     do_not_display_to_registered_users = models.BooleanField(default=False)
+    do_not_display_to_anonymous_users = models.BooleanField(default=False)
 
     labels = ArrayField(models.CharField(max_length=256), blank=True,
                         default=list)
 
     targeting_country = models.CharField(max_length=256, null=True, blank=True)
     targeting_city = models.CharField(max_length=256, null=True, blank=True)
-    targeting_invert = models.BooleanField(default=False)
+    targeting_invert = models.BooleanField(default=False, verbose_name='Invert Geo Targeting')
 
     disable = models.BooleanField(default=False, blank=True)
 
     utm_campaign = models.CharField(max_length=256, null=True, blank=True)
     utm_medium = models.CharField(max_length=256, null=True, blank=True)
+
+    do_not_display_to_donating_users = models.BooleanField(
+        default=False, blank=True,
+        verbose_name="Do not display to users who ever donate"
+    )
+    do_not_display_to_donating_users_days_ago = models.IntegerField(
+        null=True, blank=True,
+        verbose_name="Do not display to users, who donate less than N days age"
+    )
 
     def __str__(self):
         return self.name
