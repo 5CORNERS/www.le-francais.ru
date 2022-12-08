@@ -227,7 +227,7 @@ class Creative(models.Model):
             img:Image.Image = Image.open(response.raw)
             self._width = img.width
             self._height = img.height
-        elif self.fluid or (self.html and self._width is None or self.height is None):
+        elif self.fluid or self.html:
             self._width = None
             self._height = None
 
