@@ -2,9 +2,10 @@ import random
 from typing import Dict, List
 
 from dateutil.parser import isoparse
-from django.db.models import F, Q
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import F, Q, Count, Func
 from django.http import JsonResponse, HttpResponseNotFound, \
-    HttpResponseRedirect
+    HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.generic import RedirectView, TemplateView
@@ -122,6 +123,11 @@ def get_creative_dict(request) -> Dict:
         line_items = line_items.exclude(placements__code__in=placements, placements_inverted=True)
         line_items = line_items.filter(Q(placements_inverted=True) | Q(placements__code__in=placements, placements_inverted=False) | Q(placements__isnull=True))
 
+        line_items = line_items.annotate(placements_and_arr=ArrayAgg('placements_and')).annotate(placements_and_len=Func(F('placements_and_arr'), function='CARDINALITY')).exclude(placements_and_arr__contains=placements, placements_and_len=len(placements))
+        line_items = line_items.filter(Q(placements_and_inverted=True) | Q(
+            placements_and_arr__contains=placements, placements_and_inverted=False, placements_and_len=len(placements)
+        ) | Q(placements_and__isnull=True))
+
     if request.user.is_authenticated:
         line_items = line_items.exclude(
             do_not_display_to_registered_users=True
@@ -238,11 +244,11 @@ def get_creative_dict(request) -> Dict:
             creatives_list = [c for c in creatives_list if c.line_item_id == chosen_line_item.pk]
 
         if sizes:
-            chosen_creative = random.choice(creatives_list)
+            chosen_creative: Creative = random.choice(creatives_list)
         else:
             creatives_list.sort(key=lambda c: c.width, reverse=True)
             max_chosen_width = creatives_list[0].width
-            chosen_creative = random.choice([c for c in creatives_list if c.width == max_chosen_width or c.fluid])
+            chosen_creative: Creative = random.choice([c for c in creatives_list if c.width == max_chosen_width or c.fluid])
         # TODO: choosing by random
 
         # storing labels
@@ -295,7 +301,7 @@ def get_creative_dict(request) -> Dict:
             utm_data={
                 "utm_campaign": chosen_creative.utm_campaign or chosen_creative.line_item.utm_campaign,
                 "utm_medium": chosen_creative.utm_medium or chosen_creative.line_item.utm_medium,
-                "utm_source": utm_source
+                "utm_source": chosen_creative.utm_source or utm_source
             }
         )
 
@@ -325,3 +331,9 @@ def image_redirect(request, uuid):
 def image_click_through(request, uuid):
     creative = get_object_or_404(Creative, uuid=uuid)
     return HttpResponseRedirect(creative.image_click_through_url)
+
+
+def creative_get_iframe(request, uuid, log_id):
+    creative = get_object_or_404(Creative, uuid=uuid)
+    html = creative.get_iframe_content(int(log_id))
+    return HttpResponse(html, content_type='text/html')

@@ -1,4 +1,4 @@
-{% load site_tags wagtailcore_tags le_francais_dictionary %}
+{% load ads %}{% load site_tags wagtailcore_tags le_francais_dictionary %}
 {# self: LessonPage #}
 <div class="row">
     <div class="col-12">{% check_user_lesson request.user self as userlesson %}
@@ -208,8 +208,13 @@
 
 	<div class="col-12 tab-content">
 		{% assign pane_class "tab-pane active fade show" %}
+        {% assign is_first True %}
 		{% if self.comments_for_lesson %}
 			<div id="comments_for_lesson" class="{{ pane_class }}" role="tabpanel">
+                {% if is_first %}
+                    {% include_ad 'fluid_first_tab' self.page_type|add:'|'|add:'fluid_first_tab' '100%' %}
+                    {% assign is_first False %}
+                {% endif %}
 				{% for block in self.comments_for_lesson %}{% include_block block %}{% endfor %}
 				{% page_advert_body 'comments_for_lesson_bottom' page.page_type %}
 			</div>
@@ -227,6 +232,10 @@
 								</div>
 							</div>
 					{% else %}
+                        {% if is_first %}
+                            {% include_ad 'fluid_first_tab' self.page_type|add:'|'|add:'fluid_first_tab' '100%' %}
+                            {% assign is_first False %}
+                        {% endif %}
 						{% for block in self.body %}{% include_block block %}{% endfor %}
 					{% endif %}
 				{% else %}
@@ -239,6 +248,10 @@
 							</a></div>
 						</div>
 					{% else %}
+                        {% if is_first %}
+                            {% include_ad 'fluid_first_tab' self.page_type|add:'|'|add:'fluid_first_tab' '100%' %}
+                            {% assign is_first False %}
+                        {% endif %}
 						{% for block in self.body %}{% include_block block %}{% endfor %}
 					{% endif %}
 				{% endif %}

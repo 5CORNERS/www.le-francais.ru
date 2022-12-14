@@ -14,4 +14,6 @@ urlpatterns = [
     url(r'^get-html/', views.get_creative, name='get_creative'),
     url(r'^i/(?P<uuid>[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12})/$',
         views.image_redirect, name='image_redirect'),
+    url(r'^c-i/(?P<uuid>[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12})/(?P<log_id>\d+)/$',
+        views.creative_get_iframe, name='creative_get_iframe')
 ]

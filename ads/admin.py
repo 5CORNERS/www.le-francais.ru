@@ -9,7 +9,7 @@ class CreativeInline(admin.TabularInline):
     model = Creative
     fk_name = 'line_item'
     extra = 0
-    readonly_fields = ['views', 'clicks', 'width', 'height']
+    readonly_fields = ['views', 'clicks']
 
 
 @admin.register(LineItem)
@@ -17,7 +17,9 @@ class LineItemAdmin(admin.ModelAdmin):
     readonly_fields = ['views', 'clicks']
     inlines = [CreativeInline]
     fields = [
-        'name', 'priority', 'placements', 'placements_inverted', 'ad_units',
+        'name', 'priority', 'placements', 'placements_inverted',
+        'placements_and', 'placements_and_inverted',
+        'ad_units',
         'do_not_show_to',
         'less_than_n_days_ago',
         'less_than_n_days_ago_value',
