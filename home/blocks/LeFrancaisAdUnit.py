@@ -34,7 +34,6 @@ class AdUnitSizeBlockAdvanced(blocks.StructBlock):
 
 class LeFrancaisAdUnitBlock(blocks.StructBlock):
     ad_unit_name = blocks.CharBlock()
-    placement = blocks.ChoiceBlock(choices=get_placements(), required=False)
     placements = blocks.ListBlock(blocks.ChoiceBlock(choices=get_placements()), required=False, default=[])
     utm_source = blocks.CharBlock()
     floating_image = blocks.ChoiceBlock(choices=[

@@ -1,6 +1,9 @@
 <div class="container-{{ self.unique_class }}">
-    {% if self.html %}
-        {{ self.html | safe }}
+    {% if self.iframe %}
+            <iframe style="border: none;width: {% if self.fluid %}100%{% else %}{{ self.width }}px{% endif %};height: {{ self.height }}px"
+                    src="{{ iframe_url }}"></iframe>
+    {% elif html %}
+            {{ html | safe }}
     {% else %}
         <a href="{{ click_url }}"> <img
                 src="{% url 'ads:image_redirect' self.uuid %}"

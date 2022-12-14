@@ -10,6 +10,7 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpRequest
+from django.template import Template, Context
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -56,9 +57,16 @@ class LineItem(models.Model):
                              default=None)
     priority = models.PositiveIntegerField(default=0)
     placements = models.ManyToManyField(
-        Placement, blank=True
+        Placement, blank=True, verbose_name='Placements OR',
     )
-    placements_inverted = models.BooleanField(default=False, verbose_name="Invert Placements")
+    placements_inverted = models.BooleanField(default=False, verbose_name="Exclude Placements OR")
+
+    placements_and = models.ManyToManyField(
+        Placement, blank=True, verbose_name='Placements AND', default=None, null=True,
+        related_name='line_items_and', related_query_name='line_items_and_set'
+    )
+    placements_and_inverted = models.BooleanField(default=False, verbose_name='Exclude Placements AND')
+
     ad_units = ArrayField(base_field=models.CharField(
         max_length=255,
     ), help_text='List of AdUnit names.', default=list, blank=True)
@@ -143,13 +151,14 @@ class Creative(models.Model):
     name = models.CharField(max_length=256, blank=False)
     utm_campaign = models.CharField(max_length=256, blank=True, null=True, help_text="Will override line item values")
     utm_medium = models.CharField(max_length=256, blank=True, null=True, help_text="Will override line item values")
-    # utm_source = models.CharField(max_length=256, blank=True, null=True, help_text="Will override ad unit value")
+    utm_source = models.CharField(max_length=256, blank=True, null=True, help_text="Will override ad unit value")
 
     image_click_through_url = models.URLField(blank=True)
     image = models.ImageField(blank=True, upload_to=creative_image_file_update) # TODO: changing filename
     image_url = models.URLField(blank=True, help_text='Одно из полей image или image_url должно быть заполнено')
 
     html = models.TextField(blank=True, default=None, null=True)
+    iframe = models.BooleanField(blank=True, default=False)
 
     line_item = models.ForeignKey(
         LineItem, related_name='creatives',
@@ -157,8 +166,8 @@ class Creative(models.Model):
     )
     disable = models.BooleanField(default=False)
 
-    _width = models.IntegerField(editable=False, blank=True, null=True)
-    _height = models.IntegerField(editable=False, blank=True, null=True)
+    _width = models.IntegerField(blank=True, null=True, verbose_name='Width')
+    _height = models.IntegerField(blank=True, null=True, verbose_name='Height')
 
     views = models.PositiveIntegerField(default=0)
     clicks = models.PositiveIntegerField(default=0)
@@ -176,7 +185,7 @@ class Creative(models.Model):
     def width(self):
         if (self.html or self.fluid) and self._width is None:
             return 1
-        elif self._width is None:
+        elif self._width is None and not self.iframe and self.fluid:
             self.save()
         return self._width
 
@@ -205,14 +214,14 @@ class Creative(models.Model):
             return ''
 
     def get_click_through_url(self, utm_source=None, log_id=None):
-        # if utm_source is None:
+        if utm_source is None:
             return reverse('ads:creative-click-through_wo_utm', kwargs={
                 'uuid': self.uuid, 'log_id': log_id
             })
-        # else:
-        #     return reverse('ads:creative-click-through', kwargs={
-        #         'uuid': self.uuid, 'utm_source': utm_source, 'log_id': log_id
-        #     })
+        else:
+            return reverse('ads:creative-click-through', kwargs={
+                'uuid': self.uuid, 'utm_source': utm_source, 'log_id': log_id
+            })
 
     def save(self, *args, **kwargs):
         self.set_dimensions()
@@ -227,18 +236,26 @@ class Creative(models.Model):
             img:Image.Image = Image.open(response.raw)
             self._width = img.width
             self._height = img.height
+        elif self.fluid and self._height is not None:
+            self._width = None
         elif self.fluid or self.html:
             self._width = None
             self._height = None
 
     def serve_body(self, request: HttpRequest, utm_source=None, log_id=None):
-        # if self.utm_source is not None:
-        #     utm_source = self.utm_source
+        if self.utm_source is not None:
+            utm_source = self.utm_source
         click_url = self.get_click_through_url(utm_source, log_id)
+        if self.html and not self.iframe:
+            html = Template(self.html).render(Context(
+                {'click_url': click_url}
+            ))
+        else:
+            html = None
         return render_to_string(
             'ads/creative_body.html',
             {'self': self, 'utm_source': utm_source,
-             'click_url':click_url},
+             'click_url':click_url, 'html': html, 'log_id':log_id, 'iframe_url': self.get_iframe_url(log_id)},
             request,
         )
 
@@ -267,6 +284,19 @@ class Creative(models.Model):
             ),
             request,
         )
+
+    def get_iframe_url(self, log_id):
+        if log_id is None:
+            return ''
+        return reverse('ads:creative_get_iframe', kwargs={'log_id': log_id, 'uuid': self.uuid})
+
+    def get_iframe_content(self, log_id):
+        log = Log.objects.get(pk=log_id)
+        click_url = self.get_click_through_url(utm_source=log.utm_data['utm_source'], log_id=log_id)
+        return Template(self.html).render(Context(
+            {'click_url': click_url}
+        ))
+
 
 def set_default_utm():
     return dict(
