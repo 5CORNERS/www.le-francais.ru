@@ -1001,11 +1001,11 @@ details.no-details:not([open]) summary {
 }
 
 .lesson-tabs > .nav-item > .nav-link, .conjugation-tabs > .nav-item > .nav-link {
-    border-color: #dee2e6 #dee2e6 #dee2e6 #dee2e6;
+    border-color: #dee2e6 #dee2e6 #fff;
 }
 
 .lesson-tabs > .nav-item > .nav-link.active, .conjugation-tabs > .nav-item > .nav-link.active {
-    border-color: #dee2e6 #dee2e6 #ffffff #dee2e6;
+    border-color: #dee2e6 #dee2e6 #fff;
 }
 
 .nav-tabs .nav-link {
@@ -1344,3 +1344,14 @@ span.underline.play *{
     border-top-right-radius: calc(.3rem - 1px);
     padding-right: 12px;
 }
+
+#topMenu > div > div > ul > li.nav-item.dropdown.show > div.dropdown-menu  {
+    left: -59px
+}
+
+@media (min-width: 575px) {
+    #topMenu > div > div > ul > li.nav-item.dropdown.show > div.dropdown-menu {
+        left: 0
+    }
+}
+
