@@ -38,6 +38,7 @@ class LineItemAdmin(admin.ModelAdmin):
         'disable', 'utm_campaign', 'utm_medium',
         'do_not_display_to_donating_users',
         'do_not_display_to_donating_users_days_ago',
+        'do_not_display_to_paying_users',
     ]
     # form = GeoAdder
 
