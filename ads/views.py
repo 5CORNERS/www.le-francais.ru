@@ -143,6 +143,11 @@ def get_creative_dict(request) -> Dict:
                   ) | Q(
                     do_not_display_to_donating_users_days_ago__gt=last_donation_days_ago))
 
+        if request.user.has_payed():
+            line_items = line_items.exclude(
+                do_not_display_to_paying_users=True
+            )
+
     if request.user.is_anonymous:
         line_items = line_items.exclude(
             do_not_display_to_anonymous_users=True
