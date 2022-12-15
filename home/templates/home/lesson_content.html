@@ -209,10 +209,12 @@
 	<div class="col-12 tab-content">
 		{% assign pane_class "tab-pane active fade show" %}
         {% assign is_first True %}
+        {% with self.lesson_number|stringformat:'i' as lesson_number_str %}
+
 		{% if self.comments_for_lesson %}
 			<div id="comments_for_lesson" class="{{ pane_class }}" role="tabpanel">
                 {% if is_first %}
-                    {% include_ad 'fluid_first_tab' self.page_type|add:'|'|add:'fluid_first_tab' '100%' %}
+                    {% include_ad 'fluid_first_tab' self.page_type|add:'|'|add:'fluid_first_tab'|add:'|'|add:'lesson-'|add:lesson_number_str '100%' %}
                     {% assign is_first False %}
                 {% endif %}
 				{% for block in self.comments_for_lesson %}{% include_block block %}{% endfor %}
@@ -233,7 +235,7 @@
 							</div>
 					{% else %}
                         {% if is_first %}
-                            {% include_ad 'fluid_first_tab' self.page_type|add:'|'|add:'fluid_first_tab' '100%' %}
+                            {% include_ad 'fluid_first_tab' self.page_type|add:'|'|add:'fluid_first_tab'|add:'|'|add:'lesson-'|add:lesson_number_str '100%' %}
                             {% assign is_first False %}
                         {% endif %}
 						{% for block in self.body %}{% include_block block %}{% endfor %}
@@ -249,7 +251,7 @@
 						</div>
 					{% else %}
                         {% if is_first %}
-                            {% include_ad 'fluid_first_tab' self.page_type|add:'|'|add:'fluid_first_tab' '100%' %}
+                            {% include_ad 'fluid_first_tab' self.page_type|add:'|'|add:'fluid_first_tab'|add:'|'|add:'lesson-'|add:lesson_number_str '100%' %}
                             {% assign is_first False %}
                         {% endif %}
 						{% for block in self.body %}{% include_block block %}{% endfor %}
@@ -259,6 +261,7 @@
 			</div>
 			{% assign pane_class "tab-pane fade" %}
 		{% endif %}
+        {% endwith %}
 		{% if self.dictionary %}
 			<div id="dictionary" class="{{ pane_class }}" role="tabpanel">
 				{% for block in self.dictionary %}{% include_block block %}{% endfor %}
