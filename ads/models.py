@@ -117,9 +117,12 @@ class LineItem(models.Model):
         verbose_name="Do not display to users, who donate less than N days age"
     )
 
+    display_to_paying_users = models.BooleanField(
+        default=False, blank=True, verbose_name="Display only to users who ever payed for lessons"
+    )
     do_not_display_to_paying_users = models.BooleanField(
         default=False, blank=True,
-        verbose_name="Do not display to users who ever payed"
+        verbose_name="Do not display to users who ever payed for lessons"
     )
 
     def __str__(self):

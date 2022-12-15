@@ -147,6 +147,10 @@ def get_creative_dict(request) -> Dict:
             line_items = line_items.exclude(
                 do_not_display_to_paying_users=True
             )
+        else:
+            line_items = line_items.exclude(
+                display_to_paying_users=True
+            )
 
     if request.user.is_anonymous:
         line_items = line_items.exclude(
