@@ -2,7 +2,9 @@
 
 {% if block.value.disable == False %}
     {% if gpt_disabled %}
+        <div style="margin: 1em 0;">
         {% include_ad ad_unit_name=block.value.advertisement.name ad_unit_placement_codes='inline_block' utm_source=utm_source sizes_str='[[["v", [0, 0]],[[125,125],[180,150],[200,200],[250,250],[300,250],[336,280],[468,60],[728,90]]]]' %}
+        </div>
     {% else %}
         {% if request|is_pc %}
             <div class="inline-ads">
