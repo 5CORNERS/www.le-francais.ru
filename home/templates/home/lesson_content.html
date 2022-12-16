@@ -7,44 +7,43 @@
         {% endif %}</div>
     <div class="col-12">
         <ul class="nav nav-tabs lesson-tabs" role="tablist">
-        {% assign first_tab True %}
             {% if self.comments_for_lesson %}
-                <li class="nav-item">
-                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
+                <li class="nav-item" role="presentation">
+                    <a id="tab-comments_for_lesson" class="nav-link{% if self.first_tab == 'comments_for_lesson' %} active{% endif %}" data-toggle="tab"
                        href="#comments_for_lesson" role="tab"
-                       aria-controls="body">
+                       aria-controls="comments_for_lesson" aria-selected="true">
                         Комментарии к уроку
                     </a>
                 </li>
             {% endif %}
             {% if self.body %}
-                <li class="nav-item">
-                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab" href="#body"
-                       role="tab" aria-controls="body">
+                <li class="nav-item" role="presentation">
+                    <a id="tab-body" class="nav-link{% if self.first_tab == 'body' %} active{% endif %}" data-toggle="tab" href="#body"
+                       role="tab" aria-controls="body" aria-selected="{% if self.first_tab == 'body' %}true{% else %}false{% endif %}">
                         {% if self.body_tab_name %}{{ self.body_tab_name }}{% else %}Диалог урока{% endif %}
                     </a>
                 </li>
             {% endif %}
             {% if self.dictionary %}
-                <li class="nav-item">
-                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab" href="#dictionary"
+                <li class="nav-item" role="presentation">
+                    <a id="tab-dictionary" class="nav-link{% if self.first_tab == 'dictionary' %} active{% endif %}" data-toggle="tab" href="#dictionary"
                        role="tab"
-                       aria-controls="body">
+                       aria-controls="body" aria-selected="{% if self.first_tab == 'dictionary' %}true{% else %}false{% endif %}">
                         {% if self.dictionary_tab_name %}{{ self.dictionary_tab_name }}{% else %}Словарик{% endif %}
                     </a>
                 </li>
             {% endif %}
             {% if self.summary %}
-                <li class="nav-item">
-                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab" href="#resume"
-                       role="tab" aria-controls="body">
+                <li class="nav-item" role="presentation">
+                    <a id="tab-resume" class="nav-link{% if self.first_tab == 'summary' %} active{% endif %}" data-toggle="tab" href="#resume"
+                       role="tab" aria-controls="resume" aria-selected="{% if self.first_tab == 'summary' %}true{% else %}false{% endif %}">
                         Конспект
                     </a>
                 </li>
             {% endif %}
             {% if self.has_verbs %}
-                <li class="nav-item">
-                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" id="tab-verbs" data-toggle="tab"
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link{% if self.first_tab == 'verbs' %} active{% endif %}" id="tab-verbs" data-toggle="tab"
                        href="#verbs" role="tab"
                        aria-controls="verbs" onclick="clickTab('verbs')">
                         Глаголы
@@ -52,12 +51,12 @@
                 </li>
             {% endif %}
             {% if self.flash_cards_is_included %}
-                <li class="nav-item">
-                    <a class="nav-link" id="tab-my-words"
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link{% if self.first_tab == 'my_words' %} active{% endif %}" id="tab-my-words"
                        data-toggle="tab" href="#my-words" role="tab"
                        aria-controls="my-words" onclick="clickTab('my-words')">Новые слова</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" role="presentation">
                     <a class="nav-link" id="tab-flash-cards" data-toggle="tab"
                        href="#flash-cards" role="tab"
                        aria-controls="flash-cards" onclick="clickTab('flash-cards')">
@@ -68,47 +67,47 @@
             {% if self.repetition_material %}
                 {% if self.need_payment %}
                     {% if not user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" style="cursor: pointer"
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" style="cursor: pointer"
                                data-toggle="modal"
                                data-target="#listen-login-required-modal"
                                role="tab"
-                               aria-controls="body">
+                               aria-controls="revison" aria-selected="false" id="tab-revision">
                                 Материал для повторения
                             </a>
                         </li>
                     {% elif not user.must_pay %}
-                        <li class="nav-item">
-                            <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-toggle="tab"
                                href="#revision" role="tab"
-                               aria-controls="body">
+                               aria-controls="revison" aria-selected="false" id="tab-revision">
                                 Материал для повторения
                             </a>
                         </li>
                     {% elif not userlesson %}
-                        <li class="nav-item">
-                            <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" style="cursor: pointer"
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" style="cursor: pointer"
                                data-toggle="tab"
                                data-activate-lesson="tab"
                                 role="tab"
-                               aria-controls="body">
+                               aria-controls="revison" aria-selected="false" id="tab-revision">
                                 Материал для повторения
                             </a>
                         </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-toggle="tab"
                                href="#revision" role="tab"
-                               aria-controls="body">
+                               aria-controls="revison" aria-selected="false" id="tab-revision">
                                 Материал для повторения
                             </a>
                         </li>
                     {% endif %}
                 {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab" href="#revision"
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" data-toggle="tab" href="#revision"
                            role="tab"
-                           aria-controls="body">
+                           aria-controls="revison" aria-selected="false" id="tab-revision">
                             Материал для повторения
                         </a>
                     </li>
@@ -118,16 +117,16 @@
                 {% if user.is_authenticated %}
                     {% if user.must_pay and self.need_payment %}
                         {% if userlesson %}
-                            <li class="nav-item">
-                                <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}"
+                            <li class="nav-item" role="presentation">
+                                <a id="tab-mail-archive" class="nav-link"
                                    href="#mail-archive" data-toggle="tab" role="tab"
-                                   aria-controls="body">
+                                   aria-controls="mail-archive" aria-selected="false">
                                     Доп. информация
                                 </a>
                             </li>
                         {% else %}
-                            <li class="nav-item">
-                                <a style="cursor: pointer" class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}"
+                            <li class="nav-item" role="presentation">
+                                <a id="tab-mail-archive" style="cursor: pointer" class="nav-link"
                                    data-activate-lesson="tab"
                                    >
                                     Доп. информация
@@ -135,47 +134,47 @@
                             </li>
                         {% endif %}
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
+                        <li class="nav-item" role="presentation">
+                            <a id="tab-mail-archive" class="nav-link" data-toggle="tab"
                                href="#mail-archive" role="tab"
-                               aria-controls="body">
+                               aria-controls="mail-archive" aria-selected="false">
                                 Доп. информация
                             </a>
                         </li>
                     {% endif %}
                 {% else %}
-                    <li class="nav-item">
-                        <a style="cursor: pointer" class="nav-link"
+                    <li class="nav-item" role="presentation">
+                        <a id="tab-mail-archive" style="cursor: pointer" class="nav-link"
                            data-toggle="modal"
-                           data-target="#listen-login-required-modal">
+                           data-target="#listen-login-required-modal" aria-selected="false" role="tab">
                             Доп. информация
                         </a>
                     </li>
                 {% endif %}
             {% endif %}
             {% if self.exercise %}
-                <li class="nav-item">
+                <li class="nav-item" role="presentation">
                     <a class="nav-link"  data-toggle="tab" href="#exercise" id="tab-exercise"
                        role="tab"
-                       aria-controls="exercise">
+                       aria-controls="exercise" aria-selected="false">
                         Домашка
                     </a>
                 </li>
             {% endif %}
             {% if self.additional_exercise %}
-                <li class="nav-item">
-                    <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" data-toggle="tab"
                        href="#exercises_de_lecon" role="tab" id="tab-exercises-de-lesson"
-                       aria-controls="exercises_de_lecon">
+                       aria-controls="exercises_de_lecon" aria-selected="false">
                         Упражнения с урока
                     </a>
                 </li>
             {% endif %}
             {% if self.resume_populaire %}
-                <li class="nav-item">
+                <li class="nav-item" role="presentation">
                     <a id="tab-resume-populaire" class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
                        href="#resume-populaire" role="tab"
-                       aria-controls="resume-populaire">
+                       aria-controls="resume-populaire" aria-selected="false">
                         Народный Конспект
                     </a>
                 </li>
@@ -184,12 +183,12 @@
                 {% if not child_value.value.invisible_for_all or user.is_superuser %}
                     {% if not child_value.value.visible_only_if_payed or already_payed %}
                         {% if not child_value.value.visible_only_if_authorised or request.user.is_authenticated %}
-                            <li class="nav-item">
-                                <a class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}"
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="tab-{% if child_value.value.href == 'revision' %}summary{% else %}{{ child_value.value.href }}{% endif %}"
                                    data-toggle="tab"
                                    href="#{% if child_value.value.href == 'revision' %}summary{% else %}{{ child_value.value.href }}{% endif %}"
                                    role="tab"
-                                   aria-controls="{{ child_value.value.href }}"><span
+                                   aria-controls="{{ child_value.value.href }}" aria-selected="false"><span
                                         {% if child_value.value.invisible and user.is_superuser %}style="color: green" {% endif %}>{{ child_value.value.title }}</span></a>
                             </li>
                         {% endif %}
@@ -197,33 +196,26 @@
                 {% endif %}
             {% endfor %}
             {% if has_transcript %}
-                <li class="nav-item">
+                <li class="nav-item" role="presentation">
                     <a id="playerPlusTab" class="nav-link{% if first_tab %} active{% assign first_tab False %}{% endif %}" data-toggle="tab"
                        href="#playerPlus" role="tab"
-                       aria-controls="playerPlus">Player+</a>
+                       aria-controls="playerPlus" aria-selected="false">Player+</a>
                 </li>
             {% endif %}
         </ul>
     </div>
 
 	<div class="col-12 tab-content">
-		{% assign pane_class "tab-pane active fade show" %}
-        {% assign is_first True %}
         {% with self.lesson_number|stringformat:'i' as lesson_number_str %}
-
 		{% if self.comments_for_lesson %}
-			<div id="comments_for_lesson" class="{{ pane_class }}" role="tabpanel">
-                {% if is_first %}
+			<div id="comments_for_lesson" class="tab-pane active fade show" role="tabpanel" aria-labelledby="tab-comments_for_lesson">
                     {% include_ad 'fluid_first_tab' self.page_type|add:'|'|add:'fluid_first_tab'|add:'|'|add:'lesson-'|add:lesson_number_str '100%' %}
-                    {% assign is_first False %}
-                {% endif %}
 				{% for block in self.comments_for_lesson %}{% include_block block %}{% endfor %}
 				{% page_advert_body 'comments_for_lesson_bottom' page.page_type %}
 			</div>
-			{% assign pane_class "tab-pane fade" %}
 		{% endif %}
 		{% if self.body %}
-			<div id="body" class="{{ pane_class }}" role="tabpanel">
+			<div id="body" class="tab-pane fade{% if self.first_tab == 'body' %} active show{% endif %}" role="tabpanel" aria-labelledby="tab-body">
 				{% if user.must_pay and self.need_payment and not self.lesson_number < 62 %}
 					{% if not userlesson %}
 						{% include_30_block self.body 400 %}
@@ -234,9 +226,8 @@
 								</div>
 							</div>
 					{% else %}
-                        {% if is_first %}
+                        {% if self.first_tab == 'body' %}
                             {% include_ad 'fluid_first_tab' self.page_type|add:'|'|add:'fluid_first_tab'|add:'|'|add:'lesson-'|add:lesson_number_str '100%' %}
-                            {% assign is_first False %}
                         {% endif %}
 						{% for block in self.body %}{% include_block block %}{% endfor %}
 					{% endif %}
@@ -250,27 +241,24 @@
 							</a></div>
 						</div>
 					{% else %}
-                        {% if is_first %}
+                        {% if self.first_tab == 'body' %}
                             {% include_ad 'fluid_first_tab' self.page_type|add:'|'|add:'fluid_first_tab'|add:'|'|add:'lesson-'|add:lesson_number_str '100%' %}
-                            {% assign is_first False %}
                         {% endif %}
 						{% for block in self.body %}{% include_block block %}{% endfor %}
 					{% endif %}
 				{% endif %}
 				{% page_advert_body 'body_bottom' page.page_type %}
 			</div>
-			{% assign pane_class "tab-pane fade" %}
 		{% endif %}
         {% endwith %}
 		{% if self.dictionary %}
-			<div id="dictionary" class="{{ pane_class }}" role="tabpanel">
+			<div id="dictionary" class="tab-pane fade{% if self.first_tab == 'dictionary' %} active show{% endif %}" role="tabpanel" aria-labelledby="tab-dictionary">
 				{% for block in self.dictionary %}{% include_block block %}{% endfor %}
 				{% page_advert_body 'dictionary_bottom' page.page_type %}
 			</div>
-			{% assign pane_class "tab-pane fade" %}
 		{% endif %}
 		{% if self.summary %}
-			<div id="resume" class="{{ pane_class }}" role="tabpanel">
+			<div id="resume" class="tab-pane fade{% if self.first_tab == 'summary' %} active show{% endif %}" role="tabpanel" aria-labelledby="tab-resume">
 				<div>
 					{% page_advert_body 'resume_top' page.page_type %}
 					{% with "https://files.le-francais.ru"|add:self.summary as document_url %}
@@ -279,25 +267,23 @@
 					{% page_advert_body 'resume_bottom' page.page_type %}
 				</div>
 			</div>
-			{% assign pane_class "tab-pane fade" %}
 		{% endif %}
         {% if self.flash_cards_is_included %}
-            <div id="my-words" class="{{ pane_class }}" role="tabpanel">
+            <div id="my-words" class="tab-pane fade{% if self.first_tab == 'my_words' %} active show{% endif %}" role="tabpanel" aria-labelledby="tab-my-words">
                 <div class="lazy-my-words col-12">
                     <div class="alert alert-primary">Пожалуйста, дождитесь загрузки приложения. При медленном
                         соединении это может занять некоторое время...</div>
                 </div>
             </div>
-            <div id="flash-cards" class="{{ pane_class }}" role="tabpanel">
+            <div id="flash-cards" class="tab-pane fade" role="tabpanel" aria-labelledby="tab-flash-cards">
                 <div class="lazy-flash-cards col-12">
                     <div class="alert alert-primary">Пожалуйста, дождитесь загрузки приложения. При медленном
                         соединении это может занять некоторое время...</div>
                 </div>
             </div>
         {% endif %}
-
         {% if self.has_verbs %}
-            <div id="verbs" class="{{ pane_class }}" role="tabpanel">
+            <div id="verbs" class="tab-pane fade{% if self.first_tab == 'verbs' %} active show{% endif %}" role="tabpanel" aria-labelledby="tab-verbs">
                 <div class="lazy-verbs col-12">
                     <div class="alert alert-primary">Пожалуйста, дождитесь загрузки приложения. При медленном
                         соединении это может занять некторое время...</div>
@@ -308,7 +294,7 @@
 			{% if self.need_payment %}
 				{% if not user.is_authenticated %}
 				{% elif not user.must_pay %}
-					<div id="revision" class="{{ pane_class }}" role="tabpanel">
+					<div id="revision" class="tab-pane fade{% if self.first_tab == 'repetition_material' %} active show{% endif %}" role="tabpanel" aria-labelledby="tab-revision">
 						<div>
 							{% page_advert_body 'revision_top' page.page_type %}
 							{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
@@ -317,10 +303,9 @@
 							{% page_advert_body 'revision_body' page.page_type %}
 						</div>
 					</div>
-					{% assign pane_class "tab-pane" %}
 				{% elif not userlesson %}
 				{% else %}
-					<div id="revision" class="{{ pane_class }}" role="tabpanel">
+					<div id="revision" class="tab-pane fade{% if self.first_tab == 'repetition_material' %} active show{% endif %}" role="tabpanel" aria-labelledby="tab-revision">
 						<div>
 							{% page_advert_body 'revision_top' page.page_type %}
 							{% with "https://files.le-francais.ru"|add:self.repetition_material as document_url %}
@@ -329,10 +314,9 @@
 							{% page_advert_body 'revision_body' page.page_type %}
 						</div>
 					</div>
-					{% assign pane_class "tab-pane" %}
 				{% endif %}
 			{% else %}
-				<div id="revision" class="{{ pane_class }}" role="tabpanel">
+				<div id="revision" class="tab-pane fade{% if self.first_tab == 'repetition_material' %} active show{% endif %}" role="tabpanel" aria-labelledby="tab-revision">
 				{% if block_repetition_material %}
 					{% include 'home/content_is_blocked.html' %}
 				{% else %}
@@ -346,10 +330,9 @@
 				{% endif %}
 				</div>
 			{% endif %}
-			{% assign pane_class "tab-pane fade" %}
 		{% endif %}
 		{% if self.mail_archive and user.is_authenticated %}
-			<div id="mail-archive" class="{{ pane_class }}" role="tabpanel">
+			<div id="mail-archive" class="tab-pane fade" role="tabpanel" aria-labelledby="tab-mail-archive">
 				<h3>Дополнительная информация из&nbsp;почтовой рассылки</h3>
 				<div>
 					{% if user.must_pay and self.need_payment and not userlesson %}
@@ -364,11 +347,9 @@
 					{% endif %}
 				</div>
 			</div>
-			{% assign pane_class "tab-pane fade" %}
 		{% endif %}
 		{% if self.exercise %}
-
-				<div id="exercise" class="{{ pane_class }}" role="tabpanel">
+				<div id="exercise" class="tab-pane fade" role="tabpanel" aria-labelledby="tab-exercise">
 					{% if block_exercise %}
 						{% include 'home/content_is_blocked.html' %}
 					{% else %}
@@ -380,10 +361,9 @@
 						</div>
 					{% endif %}
 				</div>
-				{% assign pane_class "tab-pane fade" %}
 		{% endif %}
 		{% if self.additional_exercise %}
-			<div id="exercises_de_lecon" class="{{ pane_class }}" role="tabpanel">
+			<div id="exercises_de_lecon" class="tab-pane fade" role="tabpanel" aria-labelledby="tab-exercises-de-lesson">
 				{% if block_additional_exercise %}
 					{% include 'home/content_is_blocked.html' %}
 				{% else %}
@@ -394,10 +374,9 @@
 				</div>
 				{% endif %}
 			</div>
-            {% assign pane_class "tab-pane fade" %}
 		{% endif %}
 		{% if self.resume_populaire %}
-			<div id="resume-populaire" class="{{ pane_class }}" role="tabpanel">
+			<div id="resume-populaire" class="tab-pane fade" role="tabpanel" aria-labelledby="tab-resume-populaire">
 				{% if block_resume_populaire %}
 					{% include 'home/content_is_blocked.html' %}
 				{% else %}
@@ -408,14 +387,13 @@
 					</div>
 				{% endif %}
 			</div>
-            {% assign pane_class "tab-pane fade" %}
 		{% endif %}
 		{% for child_value in self.other_tabs %}
             {% if not child_value.value.invisible_for_all or user.is_superuser %}
                 {% if not child_value.value.visible_only_if_payed or already_payed %}
                     {% if not child_value.value.visible_only_if_authorised or request.user.is_authenticated %}
                         <div id="{% if child_value.value.href == 'revision' %}summary{% else %}{{ child_value.value.href }}{% endif %}"
-                             class="tab-pane fade" role="tabpanel">
+                             class="tab-pane fade" role="tabpanel" aria-labelledby="tab-{% if child_value.value.href == 'revision' %}summary{% else %}{{ child_value.value.href }}{% endif %}">
                             {% for block in child_value.value.body %}
                                 {% include_block block %}{% endfor %}
                         </div>
@@ -424,7 +402,7 @@
             {% endif %}
 		{% endfor %}
         {% if has_transcript %}
-            <div id="playerPlus" class="{{ pane_class }}" role="tabpanel">
+            <div id="playerPlus" class="tab-pane fade" role="tabpanel">
                 {% if request.user.is_staff %}<div class="row">
                     <div class="col">
                         {% for error in transcript_errors %}

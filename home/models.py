@@ -451,6 +451,22 @@ PageWithSidebar.settings_panels = PageWithSidebar.settings_panels + [
     FieldPanel('is_selectable'),
 ]
 
+TAB_ORDER = [
+    'comments_for_lesson',
+    'body',
+    'dictionary',
+    'summary',
+    ('my_words','flash_cards_is_included'),
+    ('flash_cards','flash_cards_is_included'),
+    ('verbs','has_verbs'),
+    'repetition_material',
+    'mail_archive',
+    'exercise',
+    'additional_exercise',
+    'resume_populaire',
+    ('playerPlus', 'has_transcript')
+]
+
 
 class LessonPage(Page):
     page_type = models.CharField(max_length=100, choices=PAGE_CHOICES, default='none')
@@ -604,6 +620,7 @@ class LessonPage(Page):
     def __init__(self, *args, **kwargs):
         super(LessonPage, self).__init__(*args, **kwargs)
         self._users_payed = {}
+        self._first_tab = None
 
     def serve(self, request, *args, **kwargs):
         save_visited_pages_history(request, self)
@@ -719,6 +736,25 @@ class LessonPage(Page):
         for d in parsed_srt.values():
             start_ends_map.append({'start': int(d['start']), 'end': int(d['end']), 'id': d['id']})
         return html, errors, start_ends_map
+
+    @property
+    def first_tab(self):
+        if self._first_tab is None:
+            for tab in TAB_ORDER:
+                if isinstance(tab, tuple):
+                    html_id = tab[0]
+                    condition = getattr(self, tab[1])
+                else:
+                    html_id = tab
+                    condition = getattr(self, tab)
+                if callable(condition):
+                    condition = bool(condition())
+                else:
+                    condition = bool(condition)
+                if condition:
+                    self._first_tab = html_id
+                    break
+        return self._first_tab
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request)
