@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponseBadRequest, HttpResponseNotFound
 from django.shortcuts import render, redirect
+from django.urls import reverse
 
 # Create your views here.
 from django.utils.decorators import method_decorator
@@ -32,7 +33,7 @@ class SubmitDonation(View):
 		recurrent = request.POST.get('type') == 'recurrent'
 		amount = int(request.POST.get('amount'))
 		email = request.POST.get('email', None)
-		validation_redirect = request.POST.get('validation_redirect')
+		validation_redirect = request.POST.get('validation_redirect', reverse('donations:donation_page'))
 		description = 'Ежемесячное пожертвование le-francais.ru' if recurrent else 'Одноразовое пожертвование le-francais.ru'
 		comment = request.POST.get('comment')
 		target = int(request.POST.get('target', 1))
