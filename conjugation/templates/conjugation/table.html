@@ -40,6 +40,77 @@
 
 {% endblock %}
 
+{% block extra_css %}
+
+    <style>
+        {% for mood in table.moods %}
+        /* fluid with one column */
+        .{{ mood.html_id }}.tenses-grid {
+            display: grid;
+        }
+        @media (min-width: {{ mood.two_columns_size|add:10 }}px){
+        /* fluid with two columns */
+            .{{ mood.html_id }}.tenses-grid {
+                grid-template-columns: {{ mood.max_odd_length }}px {{ mood.max_even_length }}px;
+            }
+        }
+        @media (min-width: 576px) {
+            /* 540px */
+        {% if mood.two_columns_size > 540 %}
+            .{{ mood.html_id }}.tenses-grid {
+                grid-template-columns: 1fr;
+            }
+        {% else %}
+            .{{ mood.html_id }}.tenses-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .{{ mood.html_id }} .tense-even {justify-self: start}
+        {% endif %}
+        }
+        @media (min-width: 768px) {
+            /* 720px */
+        {% if mood.two_columns_size > 720 %}
+            .{{ mood.html_id }}.tenses-grid {
+                grid-template-columns: 1fr;
+            }
+        {% else %}
+            .{{ mood.html_id }}.tenses-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .{{ mood.html_id }} .tense-even {justify-self: start}
+        {% endif %}
+        }
+        @media (min-width: 992px) {
+            /* 480px */
+        {% if mood.two_columns_size > 480 %}
+            .{{ mood.html_id }}.tenses-grid {
+                grid-template-columns: 1fr;
+            }
+        {% else %}
+            .{{ mood.html_id }}.tenses-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .{{ mood.html_id }} .tense-even {justify-self: start}
+        {% endif %}
+
+        }
+        @media (min-width: 1200px) {
+            /* 570px */
+        {% if mood.two_columns_size > 570 %}
+            .{{ mood.html_id }}.tenses-grid {
+                grid-template-columns: 1fr;
+            }
+        {% else %}
+            .{{ mood.html_id }}.tenses-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .{{ mood.html_id }} .tense-even {justify-self: start}
+        {% endif %}
+        }
+        {% endfor %}
+    </style>
+{% endblock %}
+
 {% block content %}
 	{% load i18n site_tags %}
 	<div class="container">
@@ -53,51 +124,20 @@
 				</div>
 				<div class="row">
 					<div class="col-12">
-						<h1 class="title">Спряжение {% if not request|is_mobile %}глагола{% endif %}
-                            <span
-                                    class="text-danger text-uppercase"
-                            >{% if reflexive %}{{ v.reflexiveverb.non_breakable_space_infinitive | safe}}{% elif pronoun %}s'en&nbsp;{{ v.infinitive }}{% else %}{{ v.infinitive }}{% endif %}</span>{% if not table.moods.5.tenses.0.is_empty %}&nbsp;<a class="link-play-pause"
-										   style="cursor: pointer; margin: -2px 0;"><span
-												style="height: 31px"
-												data-toggle="tooltip"
-												data-placement="top"
-												title="Послушать"
-												class="fa play-pause-icon"
-												aria-hidden="true"
-												data-key="{{ table.moods.5.tenses.0.key }}"
-												data-mood="{{ table.moods.5.tenses.0.mood_name }}"
-												data-tense="{{ table.moods.5.tenses.0.tense_name }}"
-										></span></a>{% endif %}</h1>
+                        <h1 class="title">{% include 'conjugation/verb_title.html' with reflexive=reflexive v=v pronoun=pronoun table=table %}</h1>
 					</div>
-					{% if not table.all_polly %}
-						<div class="col-12">
-							<div class="alert alert-warning alert-dismissable" role="alert">
-								<button type="button"
-								        class="close"
-								        data-dismiss="alert"
-								        aria-label="Close">
-									<span aria-hidden="true">&times;</span>
-								</button>
-								Озвучивание некоторых спряжений этого глагола до вас ни разу не запрашивали. Самый первый запуск озвучки выполняется около 20 с. После этого все работает быстро.
-							</div>
-						</div>{% endif %}
 				</div>
-					<div class="row d-lg-none">
-						<div class="col-12">
-							Читайте об особенностях спряжения <a href="#regle"><i class="fa fa-arrow-down"></i></a>
-						</div>
-					</div>
-				<div class="row">
+				<div class="row mb-0">
 					<div class="col-12">
-						<ul class="nav nav-tabs">
+						<ul class="nav nav-tabs conjugation-tabs">
 							<li class="nav-item active" id="less_tab">
 								<a style="cursor: pointer"
-								   class="nav-link noselect"
+								   class="nav-link noselect text-dark"
 								   onclick="see_less()">Сокращенная версия</a>
 							</li>
 							<li class="nav-item" id="more_tab">
 								<a style="cursor: pointer"
-								   class="nav-link noselect"
+								   class="nav-link noselect text-dark"
 								   onclick="see_more()">Полная версия</a>
 							</li>
 						</ul>
@@ -117,181 +157,26 @@
 							</ul>
 						</div>
 					{% endif %}
-					<div class="col-12" id="switchesRow">
-
-                        {% for badge in badges %}<span title="Изменить" data-toggle="collapse" href="#hiddenSwitches" class="badge badge-primary mr-1 mr-lg-2 badge-switches pt-1">{{ badge }}</span>{% endfor %}
-                        <button class="btn btn-sm btn-link ml-0 pr-1 pl-1" id="settingsButton"
-                                role="button" aria-expanded="true" title="Изменить" data-toggle="collapse" href="#hiddenSwitches">{% svg 'settings' %}
-                        </button>
-
-<div class="collapse" id="hiddenSwitches">
-    <div class="card card-body card-switches">
-        <form action="{{ request.path }}" method="post" id="switchesForm">
-            {% csrf_token %}
-
-            <div class="switches-name">Форма</div>
-            <div class="switches-container">
-                <div class="left-labels">
-                    <div class="left-label">
-                        Утверждение
-                    </div>
-                    <div class="left-label">
-                        Повествование
-                    </div>
-                </div>
-                <div class="input-labels">
-                    <div class="custom-control custom-switch verb-switch-container input-label-container">
-                        <input type="checkbox" class="custom-control-input"
-                               id="{{ switches_form.negative.id_for_label }}"
-                               {% if switches_form.negative.value %}checked{% endif %}
-                               name="{{ switches_form.negative.html_name }}"
-                        ><label
-                            class="custom-control-label switch-input-label"
-                            for="{{ switches_form.negative.id_for_label }}"></label>
-                    </div>
-                    <div class="custom-control custom-switch verb-switch-container input-label-container">
-                        <input type="checkbox" class="custom-control-input"
-                               id="{{ switches_form.question.id_for_label }}"
-                               {% if switches_form.question.value %}checked{% endif %}
-                               name="{{ switches_form.question.html_name }}"
-                        ><label
-                            class="custom-control-label switch-input-label"
-                            for="{{ switches_form.question.id_for_label }}"></label>
-                    </div>
-                </div>
-                <div class="right-labels">
-                    <div class="right-label">
-                        Отрицание
-                    </div>
-                    <div class="right-label">
-                        Вопрос
-                    </div>
-                    <div></div>
-                </div>
-            </div>
-
-            <div class="voice-range-name">Залог</div>
-            <div class="voice-range"><input
-                    class="custom-range"
-                    id="{{ switches_form.voice.id_for_label }}"
-                    value="{{ switches_form.voice.value }}" name="{{ switches_form.voice.html_name }}" type="range"
-                    min="0" max="2" step="1" list="num"/>
-                <datalist id="num">
-                    <option value="0" label="Активный" style="text-align: left">
-                    <option value="1" label="Пассивный"{% if not v.can_passive %} disabled{% endif %} style="text-align: center">
-                    <option value="2" label="Возвратный"{% if not v.can_reflexive and not v.can_be_pronoun %} disabled{% endif %} style="text-align: right">
-                </datalist>
-            </div>
-            <div style="display: none" class="pronoun custom-control custom-checkbox" id="pronounCheckbox">
-                <input class="custom-control-input" type="checkbox" id="{{ switches_form.pronoun.id_for_label }}" name="{{ switches_form.pronoun.html_name }}"{% if switches_form.pronoun.value %} checked{% endif %}>
-                <label class="custom-control-label" id="pronon-label" for="{{ switches_form.pronoun.id_for_label }}">s'en {{ v.infinitive }}</label>
-            </div>
-            <div class="switches-name">Род</div>
-            <div class="switches-container">
-                <div class="left-labels">
-                    <div class="left-label">
-                        Мужской
-                    </div>
-                </div>
-                <div class="input-labels">
-                    <div class="custom-control custom-switch input-label-container verb-switch-container">
-                        <input type="checkbox" class="custom-control-input"
-                               id="{{ switches_form.feminine.id_for_label }}"
-                               {% if switches_form.feminine.value %}checked{% endif %}
-                               name="{{ switches_form.feminine.html_name }}"
-                        ><label
-                            class="custom-control-label switch-input-label"
-                            for="{{ switches_form.feminine.id_for_label }}"></label>
-                    </div>
-                </div>
-                <div class="right-labels">
-                    <div class="right-label">
-                        Женский
-                    </div>
-                </div>
-            </div>
-            <div class="switches-submit-container">
-                <input type="submit" class="btn btn-primary" value="Применить">
-            </div>
-        </form>
-    </div>
-</div>
-
-                    </div>
+					{% include 'conjugation/switches.html' with switches_form=switches_form v=v badges=badges %}
 				</div>
-				<div class="row mood_name">
-					<div class="col-12">
-						<div>
-							<h2 style="margin-bottom: 3px">{{ table.moods.0.name | safe }}</h2>
-						</div>
-					</div>
-				</div>
+                {% if v.regle %}
+                    {% include 'conjugation/regle.html' with text=v.regle.text_rus infinitive=v.infinitive %}
+                {% endif %}
+
 			</div>
-			<div class="col-12 col-md-12 col-lg-6" style="text-align: center">
-                {% if request|is_pc %}
+            <div class="d-none d-lg-flex col-lg-6 text-center">
+                {% if request|is_pc or request|is_tablet %}
                     {% conjugation_advertisement_body "lf_fr_conj_rsb_01" %}
                 {% else %}
                     {% conjugation_advertisement_body "lf_fr_conj_mob_01" %}
                 {% endif %}
-			</div>
+            </div>
 		</div>
 
 		<div class="row">
 			<div class="col-12 col-md-12 col-lg-6">
-				<div class="row tenses">
-					{% for tense in table.moods.0.tenses %}
-						<div class="col-12 col-md-6 col-lg-6 col-xl-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}"
-						     {% if tense.is_in_short_list %}style="display: none" {% endif %}>
-							<div class="tense_name"><h5>{{ tense.name.upper }}
-								{% if not tense.is_empty %}<a class="link-play-pause"
-								                              style="cursor: pointer; margin: -2px 0;"><span
-										style="height: 19px"
-										data-toggle="tooltip"
-										data-placement="top"
-										title="Послушать"
-										class="fa play-pause-icon"
-										aria-hidden="true"
-										data-key="{{ tense.key }}"
-										data-mood="{{ tense.mood_name }}"
-										data-tense="{{ tense.tense_name }}"
-								></span></a>{% endif %}{% comment %}<img
-		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
-                            >{% endcomment %}</h5></div>
-                            <p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span><r class="tab-content">{% for i in forms_range %}<r class="tab-pane fade{% if i == 1 %} show active{% endif %} form{{ forloop.counter0 }}">{% if person.forms|length >= forloop.counter %}{{ person.forms|index:forloop.counter0|safe }}{% else %}{{ person.forms|index:-1|safe }}{% endif %}</r>{% endfor %}</r>{{ person.part_2 | safe }}<br>{% endfor %}</p>
-						</div>
-					{% endfor %}
-				</div>
-				{% for mood in table.moods|slice:'1:' %}
-					<div class="row mood_name">
-						<div class="col-12">
-							<div><h2>{% if mood.name == 'Subjonctif' %}
-                                <a title="Что такое Subjonctif — самое доступное объяснение в Рунете" href="/oh-la-la/subjonctif/?utm_campaign=conjugeur&utm_medium=button&utm_source=subjonctif">{{ mood.name | safe }}</a>{% else %}{{ mood.name | safe }}{% endif %}</h2></div>
-						</div>
-					</div>
-					<div class="row tenses">
-						{% for tense in mood.tenses %}
-							<div class="col-12 col-md-6 col-lg-6 col-xl-6 tense block {% if tense.is_in_short_list %}in_short_list{% endif %}"
-									{% if tense.is_in_short_list %}
-									 style="display: none"{% endif %}>
-								<div class="tense_name"><h5>{{ tense.name.upper }}
-									{% if not tense.is_empty %}<a class="link-play-pause"
-									                              style="cursor: pointer; margin: -2px 0;"><span
-											style="height: 19px"
-											data-toggle="tooltip"
-											data-placement="top"
-											title="Послушать"
-											class="fa play-pause-icon"
-											aria-hidden="true"
-											data-key="{{ tense.key }}"
-											data-mood="{{ tense.mood_name }}"
-											data-tense="{{ tense.tense_name }}"
-									></span></a>{% endif %}{% comment %}<img
-		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
-                            >{% endcomment %}</h5></div>
-								<p class="person">{% for person in tense.persons %}<span class="part_0">{{ person.part_0 | safe }}</span><r class="tab-content">{% for i in forms_range %}<r class="tab-pane fade{% if i == 1 %} show active{% endif %} form{{ forloop.counter0 }}">{% if person.forms|length >= forloop.counter %}{{ person.forms|index:forloop.counter0|safe }}{% else %}{{ person.forms|index:-1|safe}}{% endif %}</r>{% endfor %}</r>{{ person.part_2 | safe }}<br>{% endfor %}</p>
-							</div>
-						{% endfor %}
-					</div>
+				{% for mood in table.moods %}
+                    {% include 'conjugation/mood.html' with mood=mood with_name=True %}
 				{% endfor %}
 			</div>
 			<div class="col-12 col-md-12 col-lg-6">
@@ -299,18 +184,6 @@
 					<div class="col-12">
 						<h3>Коротко о главном</h3>
 						<p>{{ v.employs | safe }}</p>
-					</div>
-				</div>
-				<div id="regle" name="regle" class="row regle">
-					<div class="col-12" style="text-align: center">
-						{% if request|is_mobile %}
-{#							{% conjugation_advertisement_body "lf_fr_conj_mob_02" %}#}
-						{% endif %}
-					</div>
-					<div class="col-12">
-						{% if v.regle %}
-							<h3>Особенности спряжения глагола {{ v.infinitive }}</h3>
-							<p>{{ v.regle.text_rus | safe }}</p>{% endif %}
 					</div>
 				</div>
 				<div class="row novichkam">
@@ -336,4 +209,5 @@
 			</div>
 		</div>
 	</div>
+
 {% endblock %}

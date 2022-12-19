@@ -1,16 +1,14 @@
 import json
 import re
 from pathlib import Path
-from time import sleep
 
 import Prawler
 import requests
 from bs4 import BeautifulSoup, Tag
 from django.core.management import BaseCommand
-from proxy_requests import ProxyRequests
 from requests.utils import default_headers
 
-from conjugation.consts import VOWELS_LIST
+from conjugation.consts import VOWELS_LIST, COMPLICATED_TENSES
 from conjugation.models import Verb
 from conjugation.utils import search_verbs_with_forms
 
@@ -91,29 +89,6 @@ TEMPLATE_VERBS = {
 	'VERB_PAST_PARTICIPLE_S_F': ["participle", "past-participle", "2"],
 	'VERB_PAST_PARTICIPLE_P_M': ["participle", "past-participle", "1"],
 	'VERB_PAST_PARTICIPLE_P_F': ["participle", "past-participle", "3"]
-}
-COMPLICATED_TENSES = {
-	('indicative', 'past'): 'past-participle',
-	('indicative', 'composé-past'):'past-participle',
-	('indicative', 'antérieur-past'):'past-participle',
-	('indicative', 'antérieur-future'):'past-participle',
-	('indicative', 'pluperfect'):'past-participle',
-	('subjunctive', 'past'): 'past-participle',
-	('subjunctive', 'pluperfect'): 'past-participle',
-	('conditional', 'past-first'): 'past-participle',
-	('conditional', 'past-second'): 'past-participle',
-	('imperative', 'past'): 'past-participle',
-	('imperative', 'present'): 'imperative-present',
-	('infinitive', 'past'): 'past-participle',
-	('infinitive', 'present'): 'infinitive-present',
-	('gerund', 'past'): 'past-participle',
-	('gerund', 'present'): 'present-participle',
-	('participle', 'present'): 'present-participle',
-	('participle', 'past'): 'past-participle',
-
-
-
-
 }
 FORMULAS_SWITCHES = {
 	'':"",

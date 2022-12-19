@@ -4,10 +4,13 @@ from re import sub
 from django.db.models import Q
 
 from conjugation.consts import POLLY_EMPTY_MOOD_NAMES, VOWELS_LIST, \
-	TEMPLATE_NAME, SHORT_LIST, ETRE, AVOIR, VOWEL, NOT_VOWEL, GENDER_MASCULINE, VOICE_ACTIVE, VOICE_REFLEXIVE, \
-	VOICE_PASSIVE, GENDER_FEMININE, KEY_TO_PERSON, KEY_TO_MOOD_TENSE, KEY_TO_SWITCH
+	TEMPLATE_NAME, SHORT_LIST, ETRE, AVOIR, VOWEL, NOT_VOWEL, GENDER_MASCULINE, \
+	VOICE_ACTIVE, VOICE_REFLEXIVE, \
+	VOICE_PASSIVE, GENDER_FEMININE, KEY_TO_PERSON, KEY_TO_MOOD_TENSE, \
+	KEY_TO_SWITCH, TENSES
 from conjugation.models import Verb, PollyAudio, Except
 from conjugation.furmulas import *
+from conjugation.utils import get_string_size
 
 
 class Table:
@@ -19,21 +22,24 @@ class Table:
 			question: bool = False,
 			passive: bool = False,
 			pronoun: bool = False,
+			request=None
 	):
 		"""
+		:type request: HttpRequest
 		:param v: Verb object
 		:param gender: -1 if feminine 0 if masculine
 		:param reflexive: True|False
 		"""
 		self.v = v
 		self.t = v.template
+		self.request = request
 		self.verb_exceptions = list(v.get_exceptions())
 		self.moods = self.get_moods_list(gender, reflexive, negative, question, passive, pronoun, self.verb_exceptions)
 
 	def get_moods_list(self, gender, reflexive, negative, question, passive, pronoun, exeptions):
 		moods = []
 		for mood_name in FORMULAS.keys():
-			mood = Mood(self.v, mood_name, gender, reflexive, negative, question, passive, pronoun, exeptions)
+			mood = Mood(self.v, mood_name, gender, reflexive, negative, question, passive, pronoun, exeptions, request=self.request)
 			moods.append(mood)
 		return moods
 
@@ -89,23 +95,30 @@ def get_table(verb: Verb, negative: bool = False, question: bool = False, voice:
 
 class Mood:
 	def __init__(self, v, mood_name, gender: str, reflexive: bool, negative: bool, question: bool,
-				 passive: bool, pronoun: bool, verb_exceptions):
+				 passive: bool, pronoun: bool, verb_exceptions, request=None):
 		self.name = TEMPLATE_NAME[mood_name]
 		self.v = v
 		self.mood_name = mood_name
 		self.verb_exceptions= verb_exceptions
+		self.request = request
 		self.tenses = self.get_tenses_list(gender, reflexive, negative, question, passive, pronoun, verb_exceptions)
 
 	def get_tenses_list(self, gender, reflexive, negative, question, passive, pronoun, exceptions):
 		tenses = []
 		mood_dict = FORMULAS[self.mood_name]
 		for tense_name in mood_dict.keys():
-			tense = Tense(self.v, self.mood_name, tense_name, gender, reflexive, negative, question, passive, pronoun, exceptions)
+			tense = Tense(self, self.v, self.mood_name, tense_name, gender, reflexive,
+			              negative, question, passive, pronoun, exceptions,
+			              request=self.request)
 			tenses.append(tense)
 		return tenses
 
-	def __str__(self):
+	def __str__(self) -> str:
 		return self.mood_name
+
+	@property
+	def html_id(self):
+		return self.__str__().lower().replace(' ', '_')
 
 	def to_dict(self):
 		d = {}
@@ -113,17 +126,55 @@ class Mood:
 			d[tense.tense_name] = tense.to_dict()
 		return d
 
+	@property
+	def max_even_length(self):
+		return max([tense.max_size for tense in self.even_tenses()])
+
+	@property
+	def max_odd_length(self):
+		return max([tense.max_size for tense in self.odd_tenses()])
+
+	@property
+	def two_columns_size(self):
+		return self.max_even_length + self.max_odd_length
+
+	def three_column_sizes(self):
+		if len(self.tenses) // 3 == 0:
+			return None
+		for tense in self:
+			pass
+
+
+	def four_column_sizes(self):
+		if len(self.tenses) % 4 != 0:
+			return None
+		[a, b, c, d] = [0, 0, 0, 0]
+
+
+	def __iter__(self):
+		for tense in self.tenses:
+			yield tense
+
+	def odd_tenses(self):
+		for i in range(0, len(self.tenses), 2):
+			yield self.tenses[i]
+
+	def even_tenses(self):
+		for i in range(1, len(self.tenses), 2):
+			yield self.tenses[i]
 
 class Tense:
 	_key = None
 
-	def __init__(self, v: Verb = None, mood_name=None, tense_name=None, gender: str = GENDER_MASCULINE,
+	def __init__(self, mood: Mood = None, v: Verb = None, mood_name=None, tense_name=None, gender: str = GENDER_MASCULINE,
 				 reflexive: bool = None, negative: bool = None, question: bool = None,
-				 passive: bool = None, pronoun: bool = None, verb_exceptions=None, key=None):
+				 passive: bool = None, pronoun: bool = None, verb_exceptions=None, key=None, request=None):
 		if key:
 			verb_infinitive_no_accents, mood_name, tense_name, gender, reflexive, negative, question, passive, pronoun, homonym = key.split('_')
 			reflexive, negative, question, passive, pronoun, homonym = reflexive == 'True', negative == 'True', question == 'True', passive == 'True', pronoun == 'True', None if homonym == 'None' else int(homonym)
 			v = Verb.objects.get(infinitive_no_accents=verb_infinitive_no_accents, homonym=homonym)
+		self.mood = mood
+		self.request = request
 		self.v = v
 		self.verb_exceptions = verb_exceptions
 		self.tense_name = tense_name
@@ -136,6 +187,8 @@ class Tense:
 		self.pronoun = pronoun
 		self.name = TEMPLATE_NAME[tense_name]
 		self.persons = self.get_persons_list()
+		self._max_size = None
+		self.os = None
 
 	@property
 	def key(self):
@@ -201,9 +254,28 @@ class Tense:
 			d.append(person.to_dict())
 		return d
 
+	@property
+	def _name_size(self):
+		name:str = dict(TENSES)[self.tense_name]
+		return get_string_size(name.upper()+'000', request=self.request, font_size=20)
+
+	@property
+	def _max_form_size(self):
+		return max([get_string_size(person.to_dict(), request=self.request, font_size=16) for person in self.persons])
+
+	@property
+	def max_size(self):
+		if self._max_size is None:
+			self._max_size = max([self._name_size] + [self._max_form_size])
+		return self._max_size
+
+	@property
+	def html_id(self):
+		return self.__str__().lower().replace(' ', '_')
+
 
 import json
-FORMULAS_JSON = json.load(open('conjugation/formulas.json'))
+FORMULAS_JSON = json.load(open('conjugation/formulas.json', encoding='utf-8'))
 
 def switches_to_key(reflexive, negative, question, passive, pronoun):
 	keys = []

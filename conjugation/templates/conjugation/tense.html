@@ -1,0 +1,13 @@
+<div class="tense_name"><h5 style="width: {% if counter|divisibleby:2 %}{{ tense.mood.max_even_length }}{% else %}{{ tense.mood.max_odd_length }}{% endif %}px;px">{{ tense.name.upper }}
+    {% if not tense.is_empty %}<a class="link-play-pause"
+                                  style="cursor: pointer; margin: -2px 0;"><span
+            style="height: 19px" data-toggle="tooltip"
+            data-placement="top" title="Послушать"
+            class="fa play-pause-icon" aria-hidden="true"
+            data-key="{{ tense.key }}"
+            data-mood="{{ tense.mood_name }}"
+            data-tense="{{ tense.tense_name }}"></span></a>{% endif %}{% comment %}<img
+		                            class="blue_arrow" style="margin-top: -4px" src="{% static "images/right-left-arrow.gif" %}"
+                            >{% endcomment %}</h5></div>
+<p class="person" style="width: {% if counter|divisibleby:2 %}{{ tense.mood.max_even_length }}{% else %}{{ tense.mood.max_odd_length }}{% endif %}px;">{% for person in tense.persons %}
+    {% include 'conjugation/person.html' with person=person %}{% endfor %}</p>
