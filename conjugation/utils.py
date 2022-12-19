@@ -1,3 +1,4 @@
+from PIL import ImageFont, ImageDraw, Image
 from django.urls import reverse
 from unidecode import unidecode
 
@@ -379,3 +380,34 @@ def parse_switches(s):
 	if 'passive' in s and s['passive']:
 		passive = True
 	return gender, reflexive, question, negative, passive
+
+
+def get_font_by_request(request, font_size):
+	os = request.user_agent.get_os().lower()
+	path = 'conjugation/static/fonts/HelveticaNeue.ttf'
+	if request is not None:
+		if any(x in os for x in ['ios', 'os x']):
+			path = 'conjugation/static/fonts/SF-UI-Display-Regular.ttf'
+		elif 'windows' in os:
+			path = 'conjugation/static/fonts/segoeui.ttf'
+		elif 'android' in os:
+			path = 'conjugation/static/fonts/Roboto-Regular.ttf'
+		elif 'linux' in os:
+			path = 'conjugation/static/fonts/NotoSans-Regular.ttf'
+	font = ImageFont.truetype(path, font_size)
+	return font
+
+def get_string_size(string, request=None, font_size=None):
+	if font_size is None:
+		font_size = 20
+
+	font = get_font_by_request(request, font_size)
+	size = font.getsize(string)
+
+	# debug
+	im = Image.new('RGB', size, color = (73, 109, 137))
+	draw = ImageDraw.Draw(im)
+	draw.text((0,0), string, font=font, fill=(255,255,0))
+	im.save(f'temp/conjugations_test_images/{string.replace("?", "_")}.jpg')
+
+	return size[0]+5

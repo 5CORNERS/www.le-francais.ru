@@ -1,0 +1,18 @@
+{% if with_name %}<div class="row mood_name" id="{{ mood.html_id }}" data-max-length="{{ mood.max_form_length }}">
+    <div class="col-12">
+        <div><h2>{% if mood.name == 'Subjonctif' %}
+            <a title="Что такое Subjonctif — самое доступное объяснение в Рунете"
+               href="/oh-la-la/subjonctif/?utm_campaign=conjugeur&utm_medium=button&utm_source=subjonctif">{{ mood.name | safe }}</a>{% else %}
+            {{ mood.name | safe }}{% endif %}<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="#" href="#{{ mood.html_id }}" style="padding-left: 0.375em;"></a> </h2></div>
+    </div>
+</div>{% endif %}
+<div class="row">
+    <div class="col-12 {% comment %}pl-0{% endcomment %} pr-0 tenses">
+        <div class="tenses-grid {{ mood.html_id }}">{% for tense in mood.tenses %}
+            <div class="tense block{% if tense.is_in_short_list %} in_short_list{% endif %} {{ tense.html_id }}{% if forloop.counter|divisibleby:2 %} tense-even{% else %} tense-odd{% endif %}"
+                    {% if tense.is_in_short_list %}
+                 style="display: none"{% endif %}>
+                {% include 'conjugation/tense.html' with tense=tense counter=forloop.counter %}</div>
+        {% endfor %}</div>
+    </div>
+</div>
