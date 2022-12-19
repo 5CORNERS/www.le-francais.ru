@@ -198,7 +198,11 @@ def get_creative_dict(request) -> Dict:
             lambda li: li.check_cappings(
                 [isoparse(t) for t in cappings.get(
                     li.name,
-                    CAPPING_EMPTY.copy()
+                    {
+                        'first_time': None,
+                        'last_time': None,
+                        'times': []
+                    }
                 )['times']]
             ),
             line_items_list
@@ -249,7 +253,10 @@ def get_creative_dict(request) -> Dict:
         creatives_list
         ))
     else:
-        used_labels[page_view_id] = LABELS_EMPTY.copy()
+        used_labels[page_view_id] = {
+            'labels': [],
+            'datetime': None
+        }
         used_labels[page_view_id]['datetime'] = now_isoformat
 
     if creatives_list:
@@ -282,8 +289,10 @@ def get_creative_dict(request) -> Dict:
         try:
             line_item_capping = cappings[chosen_creative.line_item.name]
         except KeyError:
-            line_item_capping = CAPPING_EMPTY.copy()
-            line_item_capping['first_time'] = now_isoformat
+            line_item_capping = {'first_time': now_isoformat,
+                                 'last_time': None,
+                                 'times': []
+                                 }
         line_item_capping['last_time'] = now_isoformat
         line_item_capping['times'].append(now_isoformat)
         cappings[chosen_creative.line_item.name] = line_item_capping
