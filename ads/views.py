@@ -291,6 +291,7 @@ def get_creative_dict(request) -> Dict:
             session['ads_cappings'] = cappings
 
         clear_session_data(session)
+        request.session = session
 
         # count statistics
         if not request.user.is_staff:
