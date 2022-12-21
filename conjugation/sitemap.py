@@ -12,11 +12,44 @@ class ConjugationSitemap(Sitemap):
 
 # TODO:add all switch combinations in sitemap
 class ConjugationSwitchesSitemap(Sitemap):
+    limit=500
     def items(self):
-        return list(
-            itertools.chain.from_iterable((verb.get_all_urls()
-                                           for verb in Verb.objects.all()))
-        )
+        verb_queryset = Verb.objects.all().order_by('-count')
+        return verb_queryset
 
     def location(self, obj):
-        return obj
+        return obj.get_all_urls()
+
+    def _urls(self, page, protocol, domain):
+        urls = []
+        latest_lastmod = None
+        all_items_lastmod = True
+        for item in self.paginator.page(page).object_list:
+            first_url = True
+            for url in item.get_all_urls():
+                loc = "%s://%s%s" % (
+                protocol, domain, url)
+                if first_url:
+                    priority = 0.6
+                    first_url = False
+                else:
+                    priority = 0.5
+                lastmod = None
+                if all_items_lastmod:
+                    all_items_lastmod = lastmod is not None
+                    if (all_items_lastmod and
+                            (
+                                    latest_lastmod is None or lastmod > latest_lastmod)):
+                        latest_lastmod = lastmod
+                url_info = {
+                    'item': item,
+                    'location': loc,
+                    'lastmod': lastmod,
+                    'changefreq': None,
+                    'priority': str(priority if priority is not None else ''),
+                }
+                urls.append(url_info)
+        if all_items_lastmod and latest_lastmod:
+            self.latest_lastmod = latest_lastmod
+        return urls
+
