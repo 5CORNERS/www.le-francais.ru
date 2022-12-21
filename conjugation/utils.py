@@ -424,11 +424,3 @@ def get_string_size(string, request=None, font_size=None):
 	im.save(f'temp/conjugations_test_images/{string.replace("?", "_")}.jpg')
 
 	return size[0]+5
-
-def get_query_for_switch(switch):
-	kwargs = dict(
-		reflexive_only=False,
-		can_reflexive=True,
-		can_be_pronoun=True,
-
-	)
