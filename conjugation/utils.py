@@ -382,10 +382,17 @@ def parse_switches(s):
 	return gender, reflexive, question, negative, passive
 
 
-def get_font_by_request(request, font_size):
+OS_LIST = [
+	'ios','windows','android','linux'
+]
+
+def get_os_by_request(request):
 	os = request.user_agent.get_os().lower()
+	return os
+
+def get_font(font_size, os=None):
 	path = 'conjugation/static/fonts/HelveticaNeue.ttf'
-	if request is not None:
+	if os is not None:
 		if any(x in os for x in ['ios', 'os x']):
 			path = 'conjugation/static/fonts/SF-UI-Display-Regular.ttf'
 		elif 'windows' in os:
@@ -396,6 +403,12 @@ def get_font_by_request(request, font_size):
 			path = 'conjugation/static/fonts/NotoSans-Regular.ttf'
 	font = ImageFont.truetype(path, font_size)
 	return font
+
+
+def get_font_by_request(request, font_size):
+	os = get_os_by_request(request)
+	return get_font(font_size, os)
+
 
 def get_string_size(string, request=None, font_size=None):
 	if font_size is None:

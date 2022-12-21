@@ -416,6 +416,34 @@ class Verb(models.Model):
 			result.append((switch_key, switch))
 		return result
 
+	def get_all_urls(self):
+		available_switches = self.get_available_switches_configuration()
+		urls = []
+		for switch, k in available_switches:
+			is_active='active' in switch
+			is_pronominal = 'pronominal' in switch and not '_en' in switch
+			is_voix_passive = 'voix_passive' in switch
+			is_question = 'question' in switch
+			is_negation = 'negation' in switch
+			is_pronominal_en = 'pronominal_en' in switch
+			if is_active:
+				voice = VOICE_ACTIVE
+			elif is_pronominal or is_pronominal_en:
+				voice = VOICE_REFLEXIVE
+			else:
+				voice = VOICE_PASSIVE
+			genders = [GENDER_MASCULINE]
+			if self.can_feminin:
+				genders.append(GENDER_FEMININE)
+			for gender in genders:
+				urls.append(self.get_url(
+					voice=voice,
+					pronoun=is_pronominal_en,
+					negative=is_negation,
+					question=is_question,
+					gender=gender
+				))
+		return urls
 
 
 class Except(models.Model):

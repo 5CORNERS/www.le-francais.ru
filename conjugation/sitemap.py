@@ -1,3 +1,5 @@
+import itertools
+
 from django.contrib.sitemaps import Sitemap
 from .models import Verb, ReflexiveVerb
 from itertools import chain
@@ -10,20 +12,11 @@ class ConjugationSitemap(Sitemap):
 
 # TODO:add all switch combinations in sitemap
 class ConjugationSwitchesSitemap(Sitemap):
-    def get_urls(self, page=1, site=None, protocol=None):
-        ...
+    def items(self):
+        return list(
+            itertools.chain.from_iterable((verb.get_all_urls()
+                                           for verb in Verb.objects.all()))
+        )
 
-# TODO:add all switch combinations in sitemap
-class ConjugationSwitchesSitemap(Sitemap):
-    def get_urls(self, page=1, site=None, protocol=None):
-        ...
-
-# TODO:add all switch combinations in sitemap
-class ConjugationSwitchesSitemap(Sitemap):
-    def get_urls(self, page=1, site=None, protocol=None):
-        ...
-
-# TODO:add all switch combinations in sitemap
-class ConjugationSwitchesSitemap(Sitemap):
-    def get_urls(self, page=1, site=None, protocol=None):
-        ...
+    def location(self, obj):
+        return obj
