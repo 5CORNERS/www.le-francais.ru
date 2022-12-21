@@ -191,6 +191,8 @@ class Creative(models.Model):
 
     uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
 
+    priority = models.PositiveIntegerField(default=0)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.unique_class = shortuuid.uuid()

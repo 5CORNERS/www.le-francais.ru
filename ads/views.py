@@ -268,11 +268,15 @@ def get_creative_dict(request) -> Dict:
             creatives_list = [c for c in creatives_list if c.line_item_id == chosen_line_item.pk]
 
         if sizes:
-            chosen_creative: Creative = random.choice(creatives_list)
+            pass
         else:
             creatives_list.sort(key=lambda c: c.width, reverse=True)
             max_chosen_width = creatives_list[0].width
-            chosen_creative: Creative = random.choice([c for c in creatives_list if c.width == max_chosen_width or c.fluid])
+            creatives_list = [c for c in creatives_list if c.width == max_chosen_width or c.fluid]
+
+        max_creative_priority = max(c.priority for c in creatives_list)
+        creatives_with_max_priority = [c for c in creatives_list if c.priority==max_creative_priority]
+        chosen_creative: Creative = random.choice(creatives_with_max_priority)
         # TODO: choosing by random
 
         # storing labels
