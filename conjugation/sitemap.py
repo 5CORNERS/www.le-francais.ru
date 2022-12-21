@@ -10,7 +10,6 @@ class ConjugationSitemap(Sitemap):
         reflexive_verb_queryset = ReflexiveVerb.objects.all().select_related('verb')
         return list(chain(verb_queryset, reflexive_verb_queryset))
 
-# TODO:add all switch combinations in sitemap
 class ConjugationSwitchesSitemap(Sitemap):
     limit=500
     def items(self):
