@@ -11,7 +11,7 @@ from wagtail.contrib.sitemaps.views import sitemap
 from wagtail.core import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
-from conjugation.sitemap import ConjugationSitemap
+from conjugation.sitemap import ConjugationSwitchesSitemap
 from forum.sitemap_generator import ForumSitemap, TopicSitemap
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
@@ -40,8 +40,12 @@ urlpatterns = [
         'forum': ForumSitemap,
         'topic': TopicSitemap,
         'wagtail': WagtailSitemap,
-        'conjugation': ConjugationSitemap,
     }}),
+    url('^sitemap-conjugaison.xml', sitemap, {
+        'sitemaps': {
+        'conjugation': ConjugationSwitchesSitemap,
+        }
+    }),
 
     url('^update_sitemap\.xml$',
         TemplateView.as_view(template_name='static_sitemap.xml',
