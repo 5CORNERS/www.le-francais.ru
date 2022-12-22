@@ -10,7 +10,7 @@ from conjugation.consts import POLLY_EMPTY_MOOD_NAMES, VOWELS_LIST, \
 	KEY_TO_SWITCH, TENSES
 from conjugation.models import Verb, PollyAudio, Except
 from conjugation.furmulas import *
-from conjugation.utils import get_string_size
+from conjugation.utils import get_string_size, get_os_by_request
 
 
 class Table:
@@ -257,11 +257,41 @@ class Tense:
 	@property
 	def _name_size(self):
 		name:str = dict(TENSES)[self.tense_name]
-		return get_string_size(name.upper()+'000', request=self.request, font_size=20)
+		os = get_os_by_request(self.request)
+
+		v_html_sizes = self.v.html_sizes or {}
+		tense_sizes = v_html_sizes.get(self.key, {})
+		tense_os_sizes = tense_sizes.get(os, {})
+
+		if name in tense_os_sizes.keys():
+			name_size = tense_os_sizes[name]
+		else:
+			name_size = get_string_size(name.upper()+'000', request=self.request, font_size=20)
+			tense_os_sizes[name] = name_size
+			tense_sizes[os] = tense_os_sizes
+			v_html_sizes[self.key] = tense_sizes
+			self.v.html_sizes = v_html_sizes
+			self.v.save(update_fields=['html_sizes'])
+
+		return name_size
+
 
 	@property
 	def _max_form_size(self):
-		return max([get_string_size(person.to_dict(), request=self.request, font_size=16) for person in self.persons])
+		os = get_os_by_request(self.request)
+		v_html_sizes = self.v.html_sizes or {}
+		tense_sizes = v_html_sizes.get(self.key, {})
+		tense_os_sizes = tense_sizes.get(os, {})
+		if 'form' in tense_os_sizes.keys():
+			form_size = tense_os_sizes['form']
+		else:
+			form_size = max([get_string_size(person.to_dict(), request=self.request, font_size=16) for person in self.persons])
+			tense_os_sizes['form'] = form_size
+			tense_sizes[os] = tense_os_sizes
+			v_html_sizes[self.key] = tense_sizes
+			self.v.html_sizes = v_html_sizes
+			self.v.save(update_fields=['html_sizes'])
+		return form_size
 
 	@property
 	def max_size(self):
