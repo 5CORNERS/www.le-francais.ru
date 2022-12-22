@@ -51,7 +51,7 @@
         @media (min-width: {{ mood.two_columns_size|add:10 }}px){
         /* fluid with two columns */
             .{{ mood.html_id }}.tenses-grid {
-                grid-template-columns: {{ mood.max_odd_length }}px {{ mood.max_even_length }}px;
+                grid-template-columns: 1fr 1fr;
             }
         }
         @media (min-width: 576px) {

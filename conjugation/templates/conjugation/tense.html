@@ -1,4 +1,4 @@
-<div class="tense_name"><h5 style="width: {% if counter|divisibleby:2 %}{{ tense.mood.max_even_length }}{% else %}{{ tense.mood.max_odd_length }}{% endif %}px;px">{{ tense.name.upper }}
+<div class="tense_name"><h5 style="width: {% if counter|divisibleby:2 %}{{ tense.mood.max_even_length }}{% else %}{{ tense.mood.max_odd_length }}{% endif %}px;">{{ tense.name.upper }}
     {% if not tense.is_empty %}<a class="link-play-pause"
                                   style="cursor: pointer; margin: -2px 0;"><span
             style="height: 19px" data-toggle="tooltip"
