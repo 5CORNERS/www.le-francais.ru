@@ -388,6 +388,14 @@ OS_LIST = [
 
 def get_os_by_request(request):
 	os = request.user_agent.get_os().lower()
+	if any(x in os for x in ['ios', 'os x']):
+		return 'ios'
+	elif 'windows' in os:
+		return 'windows'
+	elif 'android' in os:
+		return 'android'
+	elif 'linux' in os:
+		return 'linux'
 	return os
 
 def get_font(font_size, os=None):
@@ -418,9 +426,9 @@ def get_string_size(string, request=None, font_size=None):
 	size = font.getsize(string)
 
 	# debug
-	im = Image.new('RGB', size, color = (73, 109, 137))
-	draw = ImageDraw.Draw(im)
-	draw.text((0,0), string, font=font, fill=(255,255,0))
-	im.save(f'temp/conjugations_test_images/{string.replace("?", "_")}.jpg')
+	# im = Image.new('RGB', size, color = (73, 109, 137))
+	# draw = ImageDraw.Draw(im)
+	# draw.text((0,0), string, font=font, fill=(255,255,0))
+	# im.save(f'temp/conjugations_test_images/{string.replace("?", "_")}.jpg')
 
 	return size[0]+5
