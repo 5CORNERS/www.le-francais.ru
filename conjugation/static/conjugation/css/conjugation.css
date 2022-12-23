@@ -8,10 +8,10 @@
     margin-top: 15px;
 }
 
-@media (max-width: 768px) {
-    .title {
+@media (max-width: 767px) {
+    h1.title {
         font-size: 24px;
-        margin-bottom: 15px;
+        margin-bottom: 1rem;
         margin-top: 5px;
     }
 
@@ -287,6 +287,7 @@ datalist option {
 
 .input-label-container {
     padding-left: 0;
+    text-align: center;
 }
 
 .switch-input-label {
@@ -302,9 +303,10 @@ datalist option {
 
 .left-labels,
 .input-labels,
-.righ-labels {
+.right-labels {
     display: flex;
     flex-direction: column;
+    gap: 0.35rem;
 }
 
 .input-labels {
@@ -327,14 +329,14 @@ datalist option {
 
 .switches-name, .voice-range-name {
     font-weight: bold;
-    margin-top: 0.5rem;
+    margin-top: 1rem;
     margin-bottom: 0.25rem;
     width: 300px;
 }
 
 .switches-submit-container {
     margin-top: 0.5rem;
-    text-align: right;
+    text-align: center;
     width: 300px;
 }
 
@@ -357,7 +359,7 @@ datalist option {
     }
 
     .card-switches {
-        padding: 0.2em;
+         padding-top: 0.2rem;
     }
 
     .voice-range {
@@ -366,7 +368,7 @@ datalist option {
 
     .switches-submit-container {
         text-align: center;
-        margin-top: 0.5rem;
+        margin-top: 1rem;
     }
 
     .voice-range input {
@@ -383,8 +385,22 @@ datalist option {
     height: 18px;
 }
 
+#settingsButton svg .cls-1 {
+    fill: var(--primary)
+}
+
 .badge-switches {
-    letter-spacing: 1px;
+    font-weight: 500;
     cursor: pointer;
-    padding-bottom: .35rem;
+    padding: 0.35em 0.6em 0.35em 0.6em;
+    margin-bottom: 0.4em;
+    margin-right: 0.4em;
+}
+
+#regleShowButton:focus{
+    box-shadow: unset;
+}
+
+#regleContent>p:last-child{
+    margin-bottom: 0;
 }

@@ -1,125 +1,113 @@
 {% load svg %}
-<div class="col-12" id="switchesRow">
 
-    {% for badge in badges %}<span title="Изменить" data-toggle="collapse"
-              href="#hiddenSwitches"
-              class="badge badge-primary mr-1 mr-lg-2 badge-switches pt-1"
-    >{{ badge }}</span>{% endfor %}<button class="btn btn-sm btn-link ml-0 pr-1 pl-1"
-            id="settingsButton" role="button" aria-expanded="true"
-            title="Изменить" data-toggle="collapse"
-            href="#hiddenSwitches">{% svg 'settings' %}
-    </button>
+{% for badge in badges %}
+    <span title="Изменить" data-toggle="collapse" href="#hiddenSwitches"
+          class="badge badge-pill badge-primary text-primary bg-white border border-primary mr-lg-2 badge-switches">{{ badge }}</span>{% endfor %}
+<button class="btn btn-sm btn-link ml-0 pr-1 pl-1" id="settingsButton"
+        role="button" aria-expanded="true" title="Изменить"
+        data-toggle="collapse" href="#hiddenSwitches">{% svg 'settings' %}
+</button>
 
-    <div class="collapse" id="hiddenSwitches">
-        <div class="card card-body card-switches">
-            <form action="{{ request.path }}" method="post"
-                  id="switchesForm">
-                {% csrf_token %}
+<div class="collapse" id="hiddenSwitches">
+    <div class="card card-body card-switches">
+        <form action="{{ request.path }}" method="post" id="switchesForm">
+            {% csrf_token %}
 
-                <div class="switches-name">Форма</div>
-                <div class="switches-container">
-                    <div class="left-labels">
-                        <div class="left-label">
-                            Утверждение
-                        </div>
-                        <div class="left-label">
-                            Повествование
-                        </div>
+            <div class="switches-name">Форма</div>
+            <div class="switches-container">
+                <div class="left-labels">
+                    <div class="left-label">
+                        Утверждение
                     </div>
-                    <div class="input-labels">
-                        <div class="custom-control custom-switch verb-switch-container input-label-container">
-                            <input type="checkbox"
-                                   class="custom-control-input"
-                                   id="{{ switches_form.negative.id_for_label }}"
-                                   {% if switches_form.negative.value %}checked{% endif %}
-                                   name="{{ switches_form.negative.html_name }}"><label
-                                class="custom-control-label switch-input-label"
-                                for="{{ switches_form.negative.id_for_label }}"></label>
-                        </div>
-                        <div class="custom-control custom-switch verb-switch-container input-label-container">
-                            <input type="checkbox"
-                                   class="custom-control-input"
-                                   id="{{ switches_form.question.id_for_label }}"
-                                   {% if switches_form.question.value %}checked{% endif %}
-                                   name="{{ switches_form.question.html_name }}"><label
-                                class="custom-control-label switch-input-label"
-                                for="{{ switches_form.question.id_for_label }}"></label>
-                        </div>
-                    </div>
-                    <div class="right-labels">
-                        <div class="right-label">
-                            Отрицание
-                        </div>
-                        <div class="right-label">
-                            Вопрос
-                        </div>
-                        <div></div>
+                    <div class="left-label">
+                        Повествование
                     </div>
                 </div>
+                <div class="input-labels">
+                    <div class="custom-control custom-switch verb-switch-container input-label-container">
+                        <input type="checkbox" class="custom-control-input"
+                               id="{{ switches_form.negative.id_for_label }}"
+                               {% if switches_form.negative.value %}checked{% endif %}
+                               name="{{ switches_form.negative.html_name }}"><label
+                            class="custom-control-label switch-input-label"
+                            for="{{ switches_form.negative.id_for_label }}"></label>
+                    </div>
+                    <div class="custom-control custom-switch verb-switch-container input-label-container">
+                        <input type="checkbox" class="custom-control-input"
+                               id="{{ switches_form.question.id_for_label }}"
+                               {% if switches_form.question.value %}checked{% endif %}
+                               name="{{ switches_form.question.html_name }}"><label
+                            class="custom-control-label switch-input-label"
+                            for="{{ switches_form.question.id_for_label }}"></label>
+                    </div>
+                </div>
+                <div class="right-labels">
+                    <div class="right-label">
+                        Отрицание
+                    </div>
+                    <div class="right-label">
+                        Вопрос
+                    </div>
+                    <div></div>
+                </div>
+            </div>
 
-                <div class="voice-range-name">Залог</div>
-                <div class="voice-range"><input class="custom-range"
-                                                id="{{ switches_form.voice.id_for_label }}"
-                                                value="{{ switches_form.voice.value }}"
-                                                name="{{ switches_form.voice.html_name }}"
-                                                type="range" min="0"
-                                                max="2" step="1"
-                                                list="num"/>
-                    <datalist id="num">
-                        <option value="0" label="Активный"
-                                style="text-align: left">
-                        <option value="1" label="Пассивный"
-                                {% if not v.can_passive %}
-                                disabled{% endif %}
-                                style="text-align: center">
-                        <option value="2" label="Возвратный"
-                                {% if not v.can_reflexive and not v.can_be_pronoun %}
-                                disabled{% endif %}
-                                style="text-align: right">
-                    </datalist>
-                </div>
-                <div style="display: none"
-                     class="pronoun custom-control custom-checkbox"
-                     id="pronounCheckbox">
-                    <input class="custom-control-input"
-                           type="checkbox"
-                           id="{{ switches_form.pronoun.id_for_label }}"
-                           name="{{ switches_form.pronoun.html_name }}"
-                            {% if switches_form.pronoun.value %}
-                           checked{% endif %}> <label
-                        class="custom-control-label" id="pronon-label"
-                        for="{{ switches_form.pronoun.id_for_label }}">s'en {{ v.infinitive }}</label>
-                </div>
-                <div class="switches-name">Род</div>
-                <div class="switches-container">
-                    <div class="left-labels">
-                        <div class="left-label">
-                            Мужской
-                        </div>
-                    </div>
-                    <div class="input-labels">
-                        <div class="custom-control custom-switch input-label-container verb-switch-container">
-                            <input type="checkbox"
-                                   class="custom-control-input"
-                                   id="{{ switches_form.feminine.id_for_label }}"
-                                   {% if switches_form.feminine.value %}checked{% endif %}
-                                   name="{{ switches_form.feminine.html_name }}"><label
-                                class="custom-control-label switch-input-label"
-                                for="{{ switches_form.feminine.id_for_label }}"></label>
-                        </div>
-                    </div>
-                    <div class="right-labels">
-                        <div class="right-label">
-                            Женский
-                        </div>
+            <div class="voice-range-name">Залог</div>
+            <div class="voice-range"><input class="custom-range"
+                                            id="{{ switches_form.voice.id_for_label }}"
+                                            value="{{ switches_form.voice.value }}"
+                                            name="{{ switches_form.voice.html_name }}"
+                                            type="range" min="0" max="2"
+                                            step="1" list="num"/>
+                <datalist id="num">
+                    <option value="0" label="Активный" style="text-align: left">
+                    <option value="1" label="Пассивный"
+                            {% if not v.can_passive %}
+                            disabled{% endif %}
+                            style="text-align: center">
+                    <option value="2" label="Возвратный"
+                            {% if not v.can_reflexive and not v.can_be_pronoun %}
+                            disabled{% endif %}
+                            style="text-align: right">
+                </datalist>
+            </div>
+            <div style="display: none"
+                 class="pronoun custom-control custom-checkbox"
+                 id="pronounCheckbox">
+                <input class="custom-control-input" type="checkbox"
+                       id="{{ switches_form.pronoun.id_for_label }}"
+                       name="{{ switches_form.pronoun.html_name }}"
+                        {% if switches_form.pronoun.value %}
+                       checked{% endif %}> <label class="custom-control-label"
+                                                  id="pronon-label"
+                                                  for="{{ switches_form.pronoun.id_for_label }}">s'en {{ v.infinitive }}</label>
+            </div>
+            <div class="switches-name">Род</div>
+            <div class="switches-container">
+                <div class="left-labels">
+                    <div class="left-label">
+                        Мужской
                     </div>
                 </div>
-                <div class="switches-submit-container">
-                    <input type="submit" class="btn btn-primary"
-                           value="Применить">
+                <div class="input-labels">
+                    <div class="custom-control custom-switch input-label-container verb-switch-container">
+                        <input type="checkbox" class="custom-control-input"
+                               id="{{ switches_form.feminine.id_for_label }}"
+                               {% if switches_form.feminine.value %}checked{% endif %}
+                               name="{{ switches_form.feminine.html_name }}"><label
+                            class="custom-control-label switch-input-label"
+                            for="{{ switches_form.feminine.id_for_label }}"></label>
+                    </div>
                 </div>
-            </form>
-        </div>
+                <div class="right-labels">
+                    <div class="right-label">
+                        Женский
+                    </div>
+                </div>
+            </div>
+            <div class="switches-submit-container">
+                <input type="submit" class="btn btn-primary" value="Применить">
+            </div>
+        </form>
     </div>
-
 </div>

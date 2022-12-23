@@ -263,10 +263,10 @@ class Tense:
 		tense_sizes = v_html_sizes.get(self.key, {})
 		tense_os_sizes = tense_sizes.get(os, {})
 
-		if name in tense_os_sizes.keys():
+		if name in tense_os_sizes.keys() and self.request.GET.get('sizes_override', None) is None:
 			name_size = tense_os_sizes[name]
 		else:
-			name_size = get_string_size(name.upper()+'000', request=self.request, font_size=20)
+			name_size = get_string_size(name.upper()+'00', request=self.request, font_size=20)
 			tense_os_sizes[name] = name_size
 			tense_sizes[os] = tense_os_sizes
 			v_html_sizes[self.key] = tense_sizes
@@ -282,7 +282,7 @@ class Tense:
 		v_html_sizes = self.v.html_sizes or {}
 		tense_sizes = v_html_sizes.get(self.key, {})
 		tense_os_sizes = tense_sizes.get(os, {})
-		if 'form' in tense_os_sizes.keys():
+		if 'form' in tense_os_sizes.keys() and self.request.GET.get('sizes_override', None) is None:
 			form_size = tense_os_sizes['form']
 		else:
 			form_size = max([get_string_size(person.to_dict(), request=self.request, font_size=16) for person in self.persons])
