@@ -109,105 +109,192 @@
         }
         {% endfor %}
     </style>
+    <style>
+    .container {  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 0 auto auto auto 0 auto auto auto 0;
+  gap: 0 20px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "ad_top_mobile conj-sidebar"
+    "search_form conj-sidebar"
+    "title conj-sidebar"
+    "regle_mobile conj-sidebar"
+    "tabs conj-sidebar"
+    "switches conj-sidebar"
+    "table conj-sidebar"
+    "ad_under_table conj-sidebar"
+    "feedback_mobile conj-sidebar";
+}
+
+.ad_top_mobile { grid-area: ad_top_mobile; }
+
+.search_form { grid-area: search_form; }
+
+.title { grid-area: title; }
+
+.tabs { grid-area: tabs; }
+
+.regle_mobile { grid-area: regle_mobile; }
+
+.switches { grid-area: switches; }
+
+.table { grid-area: table; }
+
+.ad_under_table { grid-area: ad_under_table; }
+
+.feedback_mobile { grid-area: feedback_mobile; }
+
+.conj-sidebar { grid-area: conj-sidebar; }
+
+.regle_mobile {
+    display: none;
+}
+
+.feedback_mobile {
+    display: none;
+}
+
+
+@media (max-width: 991px) {
+
+    .container{
+        grid-template-columns: 1fr 0;
+        gap: 0;
+        grid-template-rows: auto auto auto auto auto auto auto auto auto;
+    }
+
+    .conj-sidebar{
+        display: none;
+    }
+
+    .regle_mobile{
+        display: initial;
+    }
+
+    .feedback_mobile{
+        display: initial;
+    }
+}
+</style>
 {% endblock %}
+
+{#            <div class="d-none d-lg-flex col-lg-6 text-center">#}
+{#                {% if request|is_pc or request|is_tablet %}#}
+{#                    {% conjugation_advertisement_body "lf_fr_conj_rsb_01" %}#}
+{#                {% else %}#}
+{#                    {% conjugation_advertisement_body "lf_fr_conj_mob_01" %}#}
+{#                {% endif %}#}
+{#            </div>#}
 
 {% block content %}
 	{% load i18n site_tags %}
-	<div class="container">
 
-		<div class="row first_row">
-			<div class="col-12 col-md-12 col-lg-6">
-				<div class="row">
-					<div class="col-12">
-						{% include 'conjugation/verb_form.html' %}
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-12">
-                        <h1 class="title">{% include 'conjugation/verb_title.html' with reflexive=reflexive v=v pronoun=pronoun table=table %}</h1>
-					</div>
-				</div>
-				<div class="row mb-0">
-					<div class="col-12">
-						<ul class="nav nav-tabs conjugation-tabs">
-							<li class="nav-item active" id="less_tab">
-								<a style="cursor: pointer"
-								   class="nav-link noselect text-dark"
-								   onclick="see_less()">Сокращенная версия</a>
-							</li>
-							<li class="nav-item" id="more_tab">
-								<a style="cursor: pointer"
-								   class="nav-link noselect text-dark"
-								   onclick="see_more()">Полная версия</a>
-							</li>
-						</ul>
-					</div>
-				</div>
-				<div class="row">
-					{% if forms_count > 1 %}
-						<div class="col-12 mb-2">
-							<ul class="nav nav-pills">
-								{% for i in forms_range %}
-									<li style="cursor: pointer"
-									    class="nav-item verb-form-pill">
-										<a href="" class="nav-link{% if forloop.first %} active{% endif %} form-pills" id="formPill{{ forloop.counter0 }}" data-toggle="pill"
-										   data-t=".form{{ forloop.counter0 }}">Вариант {{ i }}</a>
-									</li>
-								{% endfor %}
-							</ul>
-						</div>
-					{% endif %}
-					{% include 'conjugation/switches.html' with switches_form=switches_form v=v badges=badges %}
-				</div>
-                {% if v.regle %}
-                    {% include 'conjugation/regle.html' with text=v.regle.text_rus infinitive=v.infinitive %}
-                {% endif %}
-
-			</div>
-            <div class="d-none d-lg-flex col-lg-6 text-center">
-                {% if request|is_pc or request|is_tablet %}
-                    {% conjugation_advertisement_body "lf_fr_conj_rsb_01" %}
-                {% else %}
-                    {% conjugation_advertisement_body "lf_fr_conj_mob_01" %}
-                {% endif %}
+    <div class="container pt-4">
+        <div class="ad_top_mobile"></div>
+        <div class="search_form">
+            {% include 'conjugation/verb_form.html' %}
+        </div>
+        <div class="title">
+            <h1 class="title">{% include 'conjugation/verb_title.html' with reflexive=reflexive v=v pronoun=pronoun table=table %}</h1>
+        </div>
+        <div class="tabs">
+            <ul class="nav nav-tabs conjugation-tabs mb-0">
+                <li class="nav-item active" id="less_tab">
+                    <a style="cursor: pointer"
+                       class="nav-link noselect text-dark" onclick="see_less()">Сокращенная
+                        версия</a>
+                </li>
+                <li class="nav-item" id="more_tab">
+                    <a style="cursor: pointer"
+                       class="nav-link noselect text-dark" onclick="see_more()">Полная
+                        версия</a>
+                </li>
+            </ul>
+        </div>
+        <div class="regle_mobile border pt-2 pl-2 pr-2 pb-2 mb-3" style="width: 100%; border-radius:20px; border-color: #337ab74d!important;">
+            {% include 'conjugation/regle.html' with text=v.regle.text_rus infinitive=v.infinitive employs=v.employs mobile=True %}
+        </div>
+        <div class="switches">
+            <div id="switchesRow" class="row mb-0 mt-2">
+                    <div class="col-12" id="switchesCol">
+                        {% include 'conjugation/switches.html' with switches_form=switches_form v=v badges=badges %}
+                    </div>
+                </div>
+        </div>
+        <div class="table">
+            {% for mood in table.moods %}
+                {% include 'conjugation/mood.html' with mood=mood with_name=True %}
+            {% endfor %}
+        </div>
+        <div class="ad_under_table"></div>
+        <div class="feedback_mobile">
+            {% include 'conjugation/feedback.html' %}
+        </div>
+        <div class="conj-sidebar">
+            <div class="ad_top"></div>
+            <div class="regle">
+                {% include 'conjugation/regle.html' with text=v.regle.text_rus infinitive=v.infinitive employs=v.employs mobile=False %}
             </div>
-		</div>
+            <div class="ad_middle"></div>
+            <div class="novichkam">
+                {% include 'conjugation/novichkam.html' %}
+            </div>
+            <div class="feedback">
+                {% include 'conjugation/feedback.html' %}
+            </div>
+            <div class="ad_bottom"></div>
+        </div>
 
-		<div class="row">
-			<div class="col-12 col-md-12 col-lg-6">
-				{% for mood in table.moods %}
+    </div>
+
+    {% comment %}<div class="container">
+        <div class="form_title_tabs_table">
+            <div class="ad_top_mobile"></div>
+            <div class="search_form">
+                {% include 'conjugation/verb_form.html' %}
+            </div>
+            <div class="title">
+                <h1 class="title">{% include 'conjugation/verb_title.html' with reflexive=reflexive v=v pronoun=pronoun table=table %}</h1>
+            </div>
+            <div class="tabs">
+                <ul class="nav nav-tabs conjugation-tabs mb-0">
+                    <li class="nav-item active" id="less_tab">
+                        <a style="cursor: pointer"
+                           class="nav-link noselect text-dark"
+                           onclick="see_less()">Сокращенная версия</a>
+                    </li>
+                    <li class="nav-item" id="more_tab">
+                        <a style="cursor: pointer"
+                           class="nav-link noselect text-dark"
+                           onclick="see_more()">Полная версия</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="regle_mobile">
+                <div class="text"></div>
+                <div class="ad_middle_mobile"></div>
+            </div>
+            <div class="switches">
+                <div id="switchesRow" class="row mb-0 mt-2">
+                    <div class="col-12" id="switchesCol">
+                        {% include 'conjugation/switches.html' with switches_form=switches_form v=v badges=badges %}
+                    </div>
+                </div>
+            </div>
+            <div class="table">
+                {% for mood in table.moods %}
                     {% include 'conjugation/mood.html' with mood=mood with_name=True %}
 				{% endfor %}
-			</div>
-			<div class="col-12 col-md-12 col-lg-6">
-				<div class="row emploi">
-					<div class="col-12">
-						<h3>Коротко о главном</h3>
-						<p>{{ v.employs | safe }}</p>
-					</div>
-				</div>
-				<div class="row novichkam">
-					<div class="col-md-12">
-						<h2>Новичкам</h2>
-						<p>Глядя на внушительный список времен, в которых спрягаются французские глаголы, загрустит любой новичок. Я поспешу таких успокоить: вам показали то, что ваша неокрепшая психика не должна была увидеть. :) Мы-то, взрослые, знаем, что реальная жизнь несоизмеримо проще: среднестатистический современный француз в беглой речи использует
-							<b>всего три времени</b>: настоящее, прошедшее (событийное) и будущее. Причем, последнее с легкостью заменяется на удивительный по простоте образования глагольный оборот с использованием спряжения одного единственного глагола «идти» в настоящем времени и инфинитива смыслового глагола.
-						</p>
-						<p>Таким образом, все знания сводятся к двум временам, которые надолго позволят вам абстрагироваться от всей прочей парадигмы спряжения и излагать практически любую вашу мысль без искажения смысла.</p>
-						<p>И еще одна хорошая новость: второе из этих двух времен — составное, а это значит, что не надо учить шесть форм глагола во всех лицах и числах — достаточно знать его причастие, которое у 90% глаголов звучит так же, как инфинитив. Это французский язык: снаружи кажется ужасно сложно и запутано, а копнешь — все уже упростили до нас.</p>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-12" style="text-align: center">
-{#						{% conjugation_advertisement_body "lf_fr_conj_rsb_02" %}#}
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-12">
-						{% include 'conjugation/feedback.html' %}
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+            </div>
+            <div class="ad_bottom_mobile"></div>
+            <div class="feedback_mobile"></div>
+        </div>
+        <div class="conj-sidebar">
+
+        </div>
+    </div>{% endcomment %}
+
+
 
 {% endblock %}

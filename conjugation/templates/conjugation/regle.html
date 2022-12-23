@@ -1,19 +1,18 @@
 {% load user_agents %}
-<div id="regle" class="row regle">
-    <div class="col-12">
-    <hr>
-
-            <button type="button" class="btn btn-secondary d-lg-none d-md-none d-flex justify-content-between"
+{% if mobile %}
+            <button type="button" class="btn btn-light d-flex text-body bg-white border-0 pb-0 pt-0 pl-0 pr-0"
                     id="regleShowButton" data-toggle="collapse" style="width: 100%"
                     data-target="#regleContent" aria-expanded="false"
-                    aria-controls="regleContent"><span>Особенности спряжения</span><span><i
+                    aria-controls="regleContent"><span class="h5 mb-0"><span><i
                     style="align-self: center" id="regleShowButtonArrow"
-                    class="{% if request|is_mobile %}fa fa-chevron-down{% else %}fa fa-chevron-up{% endif %}"></i></span></button>
+                    class="fa fa-chevron-right"></i></span>&nbsp;<span>Особенности спряжения</span></span></button>
+{% endif %}
+{% if mobile %}
     <div id="regleContent"
-         class="collapse{% if request|is_mobile %} hide{% else %} show{% endif %}">
-        <p>{{ text | safe }}</p>
-    </div>
-    <hr>
+         class="collapse {% if mobile %} hide{% else %} show{% endif %}">
+        {% include 'conjugation/emploi.html' with employs=v.employs %}
+        <h2>Особенности спряжения</h2>
+        {{ text | safe }}
     </div>
     <script>
         let $regleShowButtonArrow = $('#regleShowButtonArrow');
@@ -22,7 +21,11 @@
             $regleContent.show()
         }
         $regleContent.on('show.bs.collapse hide.bs.collapse', function () {
-            $regleShowButtonArrow.toggleClass('fa-chevron-down').toggleClass('fa-chevron-up')
+            $regleShowButtonArrow.toggleClass('fa-chevron-right').toggleClass('fa-chevron-down')
         })
     </script>
-</div>
+{% else %}
+    {% include 'conjugation/emploi.html' with employs=v.employs %}
+    <h2>Особенности спряжения</h2>
+    {{ text | safe }}
+{% endif %}
