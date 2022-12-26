@@ -11,8 +11,9 @@
     <div id="regleContent"
          class="collapse {% if mobile %} hide{% else %} show{% endif %}">
         {% include 'conjugation/emploi.html' with employs=v.employs %}
-        <h2>Особенности спряжения</h2>
+        <h3>Особенности спряжения</h3>
         {{ text | safe }}
+        <div class="middle_mobile"></div>
     </div>
     <script>
         let $regleShowButtonArrow = $('#regleShowButtonArrow');

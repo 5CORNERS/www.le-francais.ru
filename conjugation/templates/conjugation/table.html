@@ -109,53 +109,6 @@
         }
         {% endfor %}
     </style>
-    <style>
-        .container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: auto;
-            gap: 0 20px;
-            grid-auto-flow: row;
-            grid-template-areas:"conj-table conj-sidebar";
-        }
-
-        .conj-table {
-            grid-area: conj-table;
-        }
-
-        .conj-sidebar {
-            grid-area: conj-sidebar;
-        }
-
-        .regle_mobile {
-            display: none;
-        }
-
-        .feedback_mobile {
-            display: none;
-        }
-
-
-        @media (max-width: 991px) {
-
-            .container {
-                grid-template-columns: 1fr 0;
-                gap: 0;
-            }
-
-            .conj-sidebar {
-                display: none;
-            }
-
-            .regle_mobile {
-                display: initial;
-            }
-
-            .feedback_mobile {
-                display: initial;
-            }
-        }
-    </style>
 {% endblock %}
 
 {#            <div class="d-none d-lg-flex col-lg-6 text-center">#}
@@ -171,12 +124,16 @@
 
     <div class="container pt-4">
         <div class="conj-table">
-            <div class="ad_top_mobile"></div>
+            <div class="top_mobile"></div>
             <div class="search_form">
                 {% include 'conjugation/verb_form.html' %}
             </div>
             <div class="title">
-                <h1 class="title">{% include 'conjugation/verb_title.html' with reflexive=reflexive v=v pronoun=pronoun table=table %}</h1>
+                <h1>{% include 'conjugation/verb_title.html' with reflexive=reflexive v=v pronoun=pronoun table=table %}</h1>
+            </div>
+            <div class="regle_mobile border pt-2 pl-2 pr-2 pb-2 mb-3"
+                 style="width: 100%; border-radius:20px; border-color: #337ab74d!important;">
+                {% include 'conjugation/regle.html' with text=v.regle.text_rus infinitive=v.infinitive employs=v.employs mobile=True %}
             </div>
             <div class="tabs">
                 <ul class="nav nav-tabs conjugation-tabs mb-0">
@@ -192,10 +149,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="regle_mobile border pt-2 pl-2 pr-2 pb-2 mb-3"
-                 style="width: 100%; border-radius:20px; border-color: #337ab74d!important;">
-                {% include 'conjugation/regle.html' with text=v.regle.text_rus infinitive=v.infinitive employs=v.employs mobile=True %}
-            </div>
+
             <div class="switches">
                 <div id="switchesRow" class="row mb-0 mt-2">
                     <div class="col-12" id="switchesCol">
@@ -208,24 +162,26 @@
                     {% include 'conjugation/mood.html' with mood=mood with_name=True %}
                 {% endfor %}
             </div>
-            <div class="ad_under_table"></div>
+            <div class="under_table"></div>
             <div class="feedback_mobile">
                 {% include 'conjugation/feedback.html' %}
             </div>
         </div>
         <div class="conj-sidebar">
-            <div class="ad_top"></div>
+            <div class="top">
+
+            </div>
             <div class="regle">
                 {% include 'conjugation/regle.html' with text=v.regle.text_rus infinitive=v.infinitive employs=v.employs mobile=False %}
             </div>
-            <div class="ad_middle"></div>
+            <div class="middle"></div>
             <div class="novichkam">
                 {% include 'conjugation/novichkam.html' %}
             </div>
             <div class="feedback">
                 {% include 'conjugation/feedback.html' %}
             </div>
-            <div class="ad_bottom"></div>
+            <div class="bottom"></div>
         </div>
 
     </div>
