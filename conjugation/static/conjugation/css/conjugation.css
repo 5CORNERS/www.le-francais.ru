@@ -426,6 +426,9 @@ input#search-verb::placeholder {
     input#search-verb::placeholder {
         font-size: 14px
     }
+    .title {
+        font-size: 1.825rem;
+    }
 }
 
 .container {
