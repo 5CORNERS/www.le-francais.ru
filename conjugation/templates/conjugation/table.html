@@ -48,10 +48,13 @@
         .{{ mood.html_id }}.tenses-grid {
             display: grid;
         }
-        @media (min-width: {{ mood.two_columns_size|add:10 }}px){
+        @media (min-width: {{ mood.two_columns_size|add:9 }}px){
         /* fluid with two columns */
             .{{ mood.html_id }}.tenses-grid {
                 grid-template-columns: 1fr 1fr;
+            }
+            .tenses{
+                padding-left: 9px !important;
             }
         }
         @media (min-width: 576px) {
