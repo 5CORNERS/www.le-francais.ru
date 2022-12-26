@@ -220,7 +220,7 @@ class PageLayoutAdvertisementSnippet(models.Model):
         FieldPanel('name'),
         FieldPanel('code'),
         FieldPanel('page_type'),
-        # FieldPanel('placement'),
+        FieldPanel('placement'),
         FieldPanel('placements'),
         FieldPanel('live'),
         FieldPanel('sizes'),
