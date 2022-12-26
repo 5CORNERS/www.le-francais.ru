@@ -426,7 +426,7 @@ input#search-verb::placeholder {
     input#search-verb::placeholder {
         font-size: 14px
     }
-    .title {
+    .title h1 {
         font-size: 1.825rem;
     }
 }
@@ -491,4 +491,8 @@ input#search-verb::placeholder {
 
 #regleContent {
     padding-top: 1.4rem
+}
+
+.nav-tabs>.nav-item>.nav-link.active {
+    height: 2.7em;
 }
