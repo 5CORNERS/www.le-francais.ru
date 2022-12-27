@@ -207,7 +207,10 @@ def include_ad(ad_unit_name, ad_unit_placement_codes,
     else:
         sizes_list = []
     try:
-        ad_unit_placement_codes = json.dumps(ad_unit_placement_codes.split('|'))
+        if isinstance(ad_unit_placement_codes, list):
+            pass
+        else:
+            ad_unit_placement_codes = json.dumps(ad_unit_placement_codes.split('|'))
     except:
         ad_unit_placement_codes = []
 
