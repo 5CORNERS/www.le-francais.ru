@@ -8,10 +8,11 @@
                     class="fa fa-chevron-right"></i></span>&nbsp;<span>Особенности спряжения</span></span></button>
 {% endif %}
 {% if mobile %}
-    <div id="regleContent"
-         class="collapse {% if mobile %} hide{% else %} show{% endif %}">
+    <div id="regleContent" class="collapse" aria-expanded="false">
         {% include 'conjugation/emploi.html' with employs=v.employs %}
-        {% conjugation_advertisement_body 'conjugations_mobile_spoiler' %}
+        <div class="middle_spoiler">
+            {% conjugation_advertisement_body 'conjugations_mobile_spoiler' %}
+        </div>
         <h3>Особенности спряжения</h3>
         {{ text | safe }}
         <div class="middle_mobile"></div>
@@ -19,16 +20,15 @@
     <script>
         let $regleShowButtonArrow = $('#regleShowButtonArrow');
         let $regleContent = $('#regleContent')
-        if ($regleShowButtonArrow.is(':hidden') && $regleContent.is(':hidden')){
-            $regleContent.show()
-        }
         $regleContent.on('show.bs.collapse hide.bs.collapse', function () {
             $regleShowButtonArrow.toggleClass('fa-chevron-right').toggleClass('fa-chevron-down')
         })
     </script>
 {% else %}
     {% include 'conjugation/emploi.html' with employs=v.employs %}
-    {% conjugation_advertisement_body 'conjugations_sidebar_middle' %}
+    <div class="middle">
+        {% conjugation_advertisement_body 'conjugations_sidebar_middle' %}
+    </div>
     <h2>Особенности спряжения</h2>
     {{ text | safe }}
 {% endif %}

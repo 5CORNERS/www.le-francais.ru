@@ -448,6 +448,7 @@ input#search-verb::placeholder {
     grid-area: conj-sidebar;
 }
 
+
 .regle_mobile {
     display: none;
 }
@@ -455,6 +456,12 @@ input#search-verb::placeholder {
 .feedback_mobile {
     display: none;
 }
+
+.top_mobile{
+    display: none;
+}
+
+.under_table{display: flex; justify-content: center}
 
 
 @media (max-width: 991px) {
@@ -475,6 +482,26 @@ input#search-verb::placeholder {
     .feedback_mobile {
         display: block;
     }
+
+    .top_mobile {
+        display: flex;
+        justify-content: center;
+        margin-left: -10px;
+        margin-right: -10px;
+    }
+
+    .middle_spoiler {
+        display: flex;
+        justify-content: center;
+    }
+
+    .under_table {
+        display: none;
+    }
+}
+
+.top_mobile>div, .top>div, .middle>div{
+    margin-bottom: 0.8rem;
 }
 
 .title, .regle_mobile, .table {
