@@ -199,6 +199,7 @@ class PageLayoutAdvertisementSnippet(models.Model):
     name = models.CharField(max_length=100, unique=True, blank=False)
     page_type = models.CharField(max_length=100, choices=PAGE_CHOICES, default='none')
     placement = models.CharField(max_length=100, choices=PLACEMENT_CHOICES, default='none')
+    placements = models.ManyToManyField('ads.Placement', null=True, blank=True)
     code = models.CharField(max_length=30, blank=True, default='')
     mapping_sizes = StreamField([
         ('mapping_sizes', AdUnitSizeBlockAdvanced())
@@ -220,6 +221,7 @@ class PageLayoutAdvertisementSnippet(models.Model):
         FieldPanel('code'),
         FieldPanel('page_type'),
         FieldPanel('placement'),
+        FieldPanel('placements'),
         FieldPanel('live'),
         FieldPanel('sizes'),
         StreamFieldPanel('head'),

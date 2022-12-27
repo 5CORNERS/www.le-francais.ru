@@ -17,23 +17,6 @@ function getSizes(data, containerWidth, viewPortWidth, containerHeight = Number.
 
 function includeAd(id) {
     let $div = $(document.getElementById(id));
-    let containerWidth = $div.parent().width();
-    $div.data('container-width', containerWidth)
-    let sizes = $div.data('sizes');
-    if (typeof window.pageViewID === 'undefined') {
-        window.pageViewID = id;
-    }
-    if (typeof window.usedLabels === 'undefined') {
-        window.usedLabels = [];
-    }
-    let allowableSizes
-    if (Array.isArray(sizes) && sizes.length) {
-        allowableSizes = getSizes(sizes, containerWidth, window.innerWidth)
-    }else{
-        allowableSizes = []
-    }
-
-    $div.data('sizes', allowableSizes).data('container-width', containerWidth)
     observer.observe($div.get(0))
 }
 
@@ -58,11 +41,25 @@ function pushAdToQueue(div) {
 
 function loadAd(div) {
     let $div = $(div);
-    let sizes = $div.data('sizes')
+    let id = $div.id
+    if (typeof window.pageViewID === 'undefined') {
+        window.pageViewID = id;
+    }
+    let containerWidth = $div.parent().width();
+    $div.data('container-width', containerWidth)
+    let sizes = $div.data('sizes');
+    let allowableSizes
+    if (Array.isArray(sizes) && sizes.length) {
+        allowableSizes = getSizes(sizes, containerWidth, window.innerWidth)
+    }else{
+        allowableSizes = []
+    }
+
+    $div.data('sizes', allowableSizes).data('container-width', containerWidth)
     $.ajax(Urls['ads:getCreative'](), {
         method: 'GET',
         data: {
-            sizes: sizes.map((size, i) => {
+            sizes: allowableSizes.map((size, i) => {
                 return `${size[0]}x${size[1]}:${size[2]}`
             }),
             ad_unit_name: $div.data('unit-name'),

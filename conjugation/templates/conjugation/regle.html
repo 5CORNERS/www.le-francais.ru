@@ -1,0 +1,34 @@
+{% load conjugation_tags %}{% load user_agents %}
+{% if mobile %}
+            <button type="button" class="btn btn-light d-flex text-body bg-white border-0 pb-0 pt-0 pl-0 pr-0"
+                    id="regleShowButton" data-toggle="collapse" style="width: 100%"
+                    data-target="#regleContent" aria-expanded="false"
+                    aria-controls="regleContent"><span class="h5 mb-0"><span><i
+                    style="align-self: center" id="regleShowButtonArrow"
+                    class="fa fa-chevron-right"></i></span>&nbsp;<span>Особенности спряжения</span></span></button>
+{% endif %}
+{% if mobile %}
+    <div id="regleContent" class="collapse" aria-expanded="false">
+        {% include 'conjugation/emploi.html' with employs=v.employs %}
+        <div class="middle_spoiler">
+            {% conjugation_advertisement_body 'conjugations_mobile_spoiler' %}
+        </div>
+        <h3>Особенности спряжения</h3>
+        {{ text | safe }}
+        <div class="middle_mobile"></div>
+    </div>
+    <script>
+        let $regleShowButtonArrow = $('#regleShowButtonArrow');
+        let $regleContent = $('#regleContent')
+        $regleContent.on('show.bs.collapse hide.bs.collapse', function () {
+            $regleShowButtonArrow.toggleClass('fa-chevron-right').toggleClass('fa-chevron-down')
+        })
+    </script>
+{% else %}
+    {% include 'conjugation/emploi.html' with employs=v.employs %}
+    <div class="middle">
+        {% conjugation_advertisement_body 'conjugations_sidebar_middle' %}
+    </div>
+    <h2>Особенности спряжения</h2>
+    {{ text | safe }}
+{% endif %}
