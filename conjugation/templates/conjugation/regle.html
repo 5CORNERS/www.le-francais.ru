@@ -1,4 +1,4 @@
-{% load user_agents %}
+{% load conjugation_tags %}{% load user_agents %}
 {% if mobile %}
             <button type="button" class="btn btn-light d-flex text-body bg-white border-0 pb-0 pt-0 pl-0 pr-0"
                     id="regleShowButton" data-toggle="collapse" style="width: 100%"
@@ -11,6 +11,7 @@
     <div id="regleContent"
          class="collapse {% if mobile %} hide{% else %} show{% endif %}">
         {% include 'conjugation/emploi.html' with employs=v.employs %}
+        {% conjugation_advertisement_body 'conjugations_mobile_spoiler' %}
         <h3>Особенности спряжения</h3>
         {{ text | safe }}
         <div class="middle_mobile"></div>
@@ -27,6 +28,7 @@
     </script>
 {% else %}
     {% include 'conjugation/emploi.html' with employs=v.employs %}
+    {% conjugation_advertisement_body 'conjugations_sidebar_middle' %}
     <h2>Особенности спряжения</h2>
     {{ text | safe }}
 {% endif %}
