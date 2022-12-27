@@ -18,7 +18,7 @@ MASCULINE = 0
 
 class PollyAudio(models.Model):
 	key = models.CharField(max_length=128, primary_key=True)
-	polly = models.ForeignKey('polly.PollyTask', null=True)
+	polly = models.ForeignKey('polly.PollyTask', null=True, on_delete=models.CASCADE)
 
 
 TYPE_CHOICES = (
@@ -37,9 +37,9 @@ STATUS_CHOICES = (
 
 
 class Translation(models.Model):
-	verb = models.OneToOneField('conjugation.Verb', primary_key=True)
+	verb = models.OneToOneField('conjugation.Verb', primary_key=True, on_delete=models.CASCADE)
 	fr_word = models.CharField(max_length=100, blank=True)
-	fr_tag = models.OneToOneField('FrTag', null=True)
+	fr_tag = models.OneToOneField('FrTag', null=True, on_delete=models.CASCADE)
 	ru_word = models.CharField(max_length=800, null=True, default=None)
 	ru_tags = models.ManyToManyField('RuTag')
 	type = models.CharField(choices=TYPE_CHOICES, max_length=10, null=True, default=None)
@@ -55,8 +55,8 @@ class Translation(models.Model):
 
 
 class ChildrenRelation(models.Model):
-	translation = models.ForeignKey('Translation', related_name='parent')
-	child = models.ForeignKey('Translation', related_name='child')
+	translation = models.ForeignKey('Translation', related_name='parent', on_delete=models.CASCADE)
+	child = models.ForeignKey('Translation', related_name='child', on_delete=models.CASCADE)
 	order = models.IntegerField()
 
 
@@ -88,6 +88,13 @@ class Regle(models.Model):
 	text_rus = models.CharField(max_length=100000, default='')
 	text_fr = models.CharField(max_length=100000, default='')
 
+	def __str__(self):
+		verb = self.verb_set.order_by('-count').first()
+		if verb:
+			return verb.infinitive
+		else:
+			return 'Verb Not Found'
+
 
 class Template(models.Model):
 	name = models.CharField(max_length=200)
@@ -114,7 +121,7 @@ class Verb(models.Model):
 	count = models.IntegerField(default=0)
 	infinitive = models.CharField(max_length=100)
 	infinitive_no_accents = models.CharField(max_length=100, default='')
-	template = models.ForeignKey(Template)
+	template = models.ForeignKey(Template, on_delete=models.PROTECT)
 	aspirate_h = models.BooleanField(default=False)
 	maison = models.BooleanField(default=False)
 
@@ -164,6 +171,8 @@ class Verb(models.Model):
 
 	main_part = models.CharField(max_length=64)
 	main_part_no_accents = models.CharField(max_length=64)
+
+	html_sizes = JSONField(null=True, blank=True, default=dict)
 
 	@property
 	def can_be_active(self):
@@ -383,6 +392,58 @@ class Verb(models.Model):
 		if self.is_etre_verb or not self.conjugated_with_avoir:
 			return ETRE
 		return AVOIR
+
+	def get_available_switches_configuration(self):
+		result = []
+		for switch_key, switch in SWITCHES_CHOICES:
+			reflexive = 'REFLEXIVE' in switch
+			pronoun = 'S_EN' in switch
+			passive = 'PASSIVE' in switch
+			if self.reflexive_only and not (reflexive or pronoun):
+				continue
+			elif reflexive and not pronoun and not self.can_reflexive and not self.reflexive_only:
+				continue
+			elif not (self.reflexive_only or self.can_reflexive or self.can_be_pronoun) and reflexive:
+				continue
+			elif (reflexive == "se_" and self.reflexiveverb.is_short()) or (
+					reflexive == "s_" and not self.reflexiveverb.is_short()):
+				continue
+
+			if not self.can_passive and passive:
+				continue
+			if not self.can_be_pronoun and pronoun:
+				continue
+			result.append((switch_key, switch))
+		return result
+
+	def get_all_urls(self):
+		available_switches = self.get_available_switches_configuration()
+		urls = []
+		for switch, k in available_switches:
+			is_active='active' in switch
+			is_pronominal = 'pronominal' in switch and not '_en' in switch
+			is_voix_passive = 'voix_passive' in switch
+			is_question = 'question' in switch
+			is_negation = 'negation' in switch
+			is_pronominal_en = 'pronominal_en' in switch
+			if is_active:
+				voice = VOICE_ACTIVE
+			elif is_pronominal or is_pronominal_en:
+				voice = VOICE_REFLEXIVE
+			else:
+				voice = VOICE_PASSIVE
+			genders = [GENDER_MASCULINE]
+			if self.can_feminin:
+				genders.append(GENDER_FEMININE)
+			for gender in genders:
+				urls.append(self.get_url(
+					voice=voice,
+					pronoun=is_pronominal_en,
+					negative=is_negation,
+					question=is_question,
+					gender=gender
+				))
+		return urls
 
 
 class Except(models.Model):

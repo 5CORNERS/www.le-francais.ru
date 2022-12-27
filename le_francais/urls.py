@@ -11,7 +11,7 @@ from wagtail.contrib.sitemaps.views import sitemap
 from wagtail.core import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
-from conjugation.sitemap import ConjugationSitemap
+from conjugation.sitemap import ConjugationSwitchesSitemap
 from forum.sitemap_generator import ForumSitemap, TopicSitemap
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
@@ -30,18 +30,25 @@ from search import views as search_views
 from tinkoff_merchant.urls import urlpatterns as tinkoff_urls
 from le_francais_dictionary.urls import urlpatterns as dictionary_urls
 from mass_mailer.urls import urlpatterns as mass_mailer_urls
+from django.contrib.sitemaps import views as sitemaps_views
 
 extra = getattr(settings, setting_name('TRAILING_SLASH'), True) and '/' or ''
+
+sitemaps = {
+        'forum': ForumSitemap,
+        'topic': TopicSitemap,
+        'wagtail': WagtailSitemap,
+        'conjugation': ConjugationSwitchesSitemap,
+    }
+
 urlpatterns = [
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
     url(r'^ads\.txt$', TemplateView.as_view(template_name='ads.txt', content_type='text/plain')),
 
-    url('^sitemap\.xml$', sitemap, {'sitemaps': {
-        'forum': ForumSitemap,
-        'topic': TopicSitemap,
-        'wagtail': WagtailSitemap,
-        'conjugation': ConjugationSitemap,
-    }}),
+    url(r'^sitemap\.xml$', sitemaps_views.index, {'sitemaps': sitemaps}),
+    url(r'^sitemap-(?P<section>.+)\.xml$', sitemaps_views.sitemap,
+        {'sitemaps': sitemaps},
+        name='django.contrib.sitemaps.views.sitemap'),
 
     url('^update_sitemap\.xml$',
         TemplateView.as_view(template_name='static_sitemap.xml',

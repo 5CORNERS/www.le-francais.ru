@@ -1,5 +1,3 @@
-from io import BytesIO
-
 from dal import autocomplete
 from django.forms import modelformset_factory
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponse, \
@@ -275,7 +273,8 @@ def verb_page(request, feminin, question, negative, passive, reflexive, pronoun,
 			question=bool(question),
 			passive=bool(passive),
 			negative=bool(negative),
-			pronoun=bool(pronoun)
+			pronoun=bool(pronoun),
+			request=request
 		)
 		session = request.session
 		was_on_conjugations = session.get('was_on_conjugations', False)
@@ -299,6 +298,9 @@ def verb_page(request, feminin, question, negative, passive, reflexive, pronoun,
 				'negative': bool(negative),
 				'question': bool(question),
 				'feminine': bool(feminin),
+				# 0 — ACTIVE
+				# 1 — PASSIVE
+				# 2 — REFLEXIVE
 				'voice': 1 if passive else 2 if reflexive or pronoun else 0,
 				'pronoun': pronoun,
 			}),
@@ -307,7 +309,6 @@ def verb_page(request, feminin, question, negative, passive, reflexive, pronoun,
 
 
 def get_autocomplete_list(request):
-	# TODO: add Cross-Site protection
 	list_len = 50
 	_term = request.GET['term'].lower()
 	term = switch_keyboard_layout(_term[:255] if len(_term) > 255 else _term).replace('’', '\'')

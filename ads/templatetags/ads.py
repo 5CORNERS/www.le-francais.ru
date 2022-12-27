@@ -201,13 +201,16 @@ def include_ad(ad_unit_name, ad_unit_placement_codes,
                adsense_placement=None,
                adsense_inline_adunit_name=None,
                adsense_in_house=None,
-               wo_script=False):
+               wo_script=False, empty_div=False):
     if sizes_str is not None:
         sizes_list = parse_sizes_to_list(sizes_str)
     else:
         sizes_list = []
     try:
-        ad_unit_placement_codes = json.dumps(ad_unit_placement_codes.split('|'))
+        if isinstance(ad_unit_placement_codes, list):
+            pass
+        else:
+            ad_unit_placement_codes = json.dumps(ad_unit_placement_codes.split('|'))
     except:
         ad_unit_placement_codes = []
 

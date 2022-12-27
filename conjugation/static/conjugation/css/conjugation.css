@@ -8,10 +8,10 @@
     margin-top: 15px;
 }
 
-@media (max-width: 768px) {
-    .title {
+@media (max-width: 767px) {
+    h1.title {
         font-size: 24px;
-        margin-bottom: 15px;
+        margin-bottom: 1rem;
         margin-top: 5px;
     }
 
@@ -111,9 +111,8 @@ h4 {
     margin: 0 -1px;
 }
 
-
 .block {
-    padding-bottom: 20px;
+    /*padding-bottom: 20px;*/
 }
 
 .block > .block-head {
@@ -288,6 +287,7 @@ datalist option {
 
 .input-label-container {
     padding-left: 0;
+    text-align: center;
 }
 
 .switch-input-label {
@@ -303,9 +303,10 @@ datalist option {
 
 .left-labels,
 .input-labels,
-.righ-labels {
+.right-labels {
     display: flex;
     flex-direction: column;
+    gap: 0.35rem;
 }
 
 .input-labels {
@@ -328,14 +329,14 @@ datalist option {
 
 .switches-name, .voice-range-name {
     font-weight: bold;
-    margin-top: 0.5rem;
+    margin-top: 1rem;
     margin-bottom: 0.25rem;
     width: 300px;
 }
 
 .switches-submit-container {
     margin-top: 0.5rem;
-    text-align: right;
+    text-align: center;
     width: 300px;
 }
 
@@ -358,7 +359,7 @@ datalist option {
     }
 
     .card-switches {
-        padding: 0.2em;
+        padding-top: 0.2rem;
     }
 
     .voice-range {
@@ -367,7 +368,7 @@ datalist option {
 
     .switches-submit-container {
         text-align: center;
-        margin-top: 0.5rem;
+        margin-top: 1rem;
     }
 
     .voice-range input {
@@ -379,13 +380,146 @@ datalist option {
     }
 }
 
-#settingsButton svg{
+#settingsButton svg {
     width: 18px;
     height: 18px;
 }
 
+#settingsButton svg .cls-1 {
+    fill: var(--primary)
+}
+
 .badge-switches {
-    letter-spacing: 1px;
+    font-weight: 500;
     cursor: pointer;
-    padding-bottom: .35rem;
+    padding: 0.35em 0.6em 0.35em 0.6em;
+    margin-bottom: 0.4em;
+    margin-right: 0.4em;
+}
+
+#regleShowButton:focus {
+    box-shadow: unset;
+}
+
+#regleContent > p:last-child {
+    margin-bottom: 0;
+}
+
+input#search-verb::placeholder {
+    font-size: 14px;
+    vertical-align: center;
+}
+
+@media (max-width: 991px) {
+    input#search-verb::placeholder {
+        font-size: 19px
+    }
+}
+
+@media (max-width: 767px) {
+    input#search-verb::placeholder {
+        font-size: 14px
+    }
+}
+
+@media (max-width: 575px) {
+    input#search-verb::placeholder {
+        font-size: 14px
+    }
+    .title h1 {
+        font-size: 1.825rem;
+    }
+}
+
+.conj-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 0 20px;
+    grid-auto-flow: row;
+    grid-template-areas:"conj-table conj-sidebar";
+}
+
+.conj-table {
+    grid-area: conj-table;
+}
+
+.conj-sidebar {
+    grid-area: conj-sidebar;
+}
+
+
+.regle_mobile {
+    display: none;
+}
+
+.feedback_mobile {
+    display: none;
+}
+
+.top_mobile{
+    display: none;
+}
+
+.under_table{display: flex; justify-content: center}
+
+
+@media (max-width: 991px) {
+
+    .conj-container {
+        grid-template-columns: 1fr 0;
+        gap: 0;
+    }
+
+    .conj-sidebar {
+        display: none;
+    }
+
+    .regle_mobile {
+        display: block;
+    }
+
+    .feedback_mobile {
+        display: block;
+    }
+
+    .top_mobile {
+        display: flex;
+        justify-content: center;
+        margin-left: -10px;
+        margin-right: -10px;
+    }
+
+    .middle_spoiler {
+        display: flex;
+        justify-content: center;
+    }
+
+    .under_table {
+        display: none;
+    }
+}
+
+.top_mobile>div, .top>div, .middle>div{
+    margin-bottom: 0.8rem;
+}
+
+.title, .regle_mobile, .table {
+    margin-top: 1.4rem;
+}
+
+.tabs {
+    margin-top: 1.9rem
+}
+
+.switches {
+    margin-top: 0.4rem;
+}
+
+#regleContent {
+    padding-top: 1.4rem
+}
+
+.nav-tabs>.nav-item>.nav-link.active {
+    height: 2.7em;
 }

@@ -6,7 +6,7 @@ from django.core.management import BaseCommand
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        with open('currencies.csv', 'r', encoding='utf') as csv_file:
+        with open('Bank deposit — EUR-USD-CHF-CAD.csv', 'r', encoding='utf') as csv_file:
             reader = csv.reader(csv_file, dialect=csv.excel)
             result = {}
             for row in reader:
