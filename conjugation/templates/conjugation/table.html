@@ -10,9 +10,13 @@
 
 {% block head_advertisments %}
     {% if not is_gpt_disabled %}
-        {% conjugation_advertisement_head "lf_fr_conj_rsb_01" %}
-        {% conjugation_advertisement_head "lf_fr_conj_rsb_02" %}
-        {% conjugation_advertisement_head "lf_fr_conj_mob_01" %}
+        <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+        {% conjugation_advertisement_head "conjugations_sidebar_top" %}
+        {% conjugation_advertisement_head 'conjugations_sidebar_middle' %}
+        {% conjugation_advertisement_head 'conjugations_table_sidebar_bottom' %}
+        {% conjugation_advertisement_head 'conjugations_mobile_top' %}
+        {% conjugation_advertisement_head 'conjugations_mobile_spoiler' %}
+        {% conjugation_advertisement_head 'conjugations_mobile_bottom' %}
     {% endif %}
 {% endblock %}
 
@@ -127,7 +131,9 @@
 
     <div class="container pt-4">
         <div class="conj-table">
-            <div class="top_mobile"></div>
+            <div class="top_mobile">
+                {% conjugation_advertisement_body 'conjugations_mobile_top' %}
+            </div>
             <div class="search_form">
                 {% include 'conjugation/verb_form.html' %}
             </div>
@@ -165,26 +171,34 @@
                     {% include 'conjugation/mood.html' with mood=mood with_name=True %}
                 {% endfor %}
             </div>
-            <div class="under_table"></div>
+            <div class="under_table">
+                {% if v.regle_id == 26 and v.regle_id == 56 and v.regle_id == 127 %}
+                    {% conjugation_advertisement_body 'conjugations_table_sidebar_bottom' %}
+                {% endif %}
+            </div>
             <div class="feedback_mobile">
+                {% conjugation_advertisement_body 'conjugations_mobile_bottom' %}
                 {% include 'conjugation/feedback.html' %}
             </div>
         </div>
         <div class="conj-sidebar">
             <div class="top">
-
+                {% conjugation_advertisement_body 'conjugations_sidebar_top' %}
             </div>
             <div class="regle">
                 {% include 'conjugation/regle.html' with text=v.regle.text_rus infinitive=v.infinitive employs=v.employs mobile=False %}
             </div>
-            <div class="middle"></div>
             <div class="novichkam">
                 {% include 'conjugation/novichkam.html' %}
             </div>
             <div class="feedback">
                 {% include 'conjugation/feedback.html' %}
             </div>
-            <div class="bottom"></div>
+            <div class="bottom">
+                {% if v.regle_id != 26 and v.regle_id != 56 and v.regle_id != 127 %}
+                    {% conjugation_advertisement_body 'conjugations_table_sidebar_bottom' %}
+                {% endif %}
+            </div>
         </div>
 
     </div>
