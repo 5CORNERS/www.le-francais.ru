@@ -102,14 +102,14 @@ def get_creative_dict(request) -> Dict:
     # )
 
     if country_code is not None:
-        line_items = line_items.exclude(targeting_country__contains=[country_code], targeting_invert=True).filter(
-            Q(targeting_invert=True) | Q(targeting_country__contains=[country_code]) | Q(targeting_country__isnull=True)
+        line_items = line_items.exclude(targeting_country=country_code, targeting_invert=True).filter(
+            Q(targeting_invert=True) | Q(targeting_country=country_code) | Q(targeting_country__isnull=True)
         )
     else:
         line_items = line_items.filter(targeting_country__isnull=True)
     if city is not None:
-        line_items = line_items.exclude(targeting_city__contains=[city], targeting_invert=True).filter(
-            Q(targeting_invert=True) | Q(targeting_city__contains=[city]) | Q(targeting_city__isnull=True)
+        line_items = line_items.exclude(targeting_city=city, targeting_invert=True).filter(
+            Q(targeting_invert=True) | Q(targeting_city=city) | Q(targeting_city__isnull=True)
         )
     else:
         line_items = line_items.filter(targeting_city__isnull=True)
@@ -198,7 +198,11 @@ def get_creative_dict(request) -> Dict:
             lambda li: li.check_cappings(
                 [isoparse(t) for t in cappings.get(
                     li.name,
-                    CAPPING_EMPTY.copy()
+                    {
+                        'first_time': None,
+                        'last_time': None,
+                        'times': []
+                    }
                 )['times']]
             ),
             line_items_list
@@ -249,7 +253,10 @@ def get_creative_dict(request) -> Dict:
         creatives_list
         ))
     else:
-        used_labels[page_view_id] = LABELS_EMPTY.copy()
+        used_labels[page_view_id] = {
+            'labels': [],
+            'datetime': None
+        }
         used_labels[page_view_id]['datetime'] = now_isoformat
 
     if creatives_list:
@@ -261,11 +268,15 @@ def get_creative_dict(request) -> Dict:
             creatives_list = [c for c in creatives_list if c.line_item_id == chosen_line_item.pk]
 
         if sizes:
-            chosen_creative: Creative = random.choice(creatives_list)
+            pass
         else:
             creatives_list.sort(key=lambda c: c.width, reverse=True)
             max_chosen_width = creatives_list[0].width
-            chosen_creative: Creative = random.choice([c for c in creatives_list if c.width == max_chosen_width or c.fluid])
+            creatives_list = [c for c in creatives_list if c.width == max_chosen_width or c.fluid]
+
+        max_creative_priority = max(c.priority for c in creatives_list)
+        creatives_with_max_priority = [c for c in creatives_list if c.priority==max_creative_priority]
+        chosen_creative: Creative = random.choice(creatives_with_max_priority)
         # TODO: choosing by random
 
         # storing labels
@@ -282,8 +293,10 @@ def get_creative_dict(request) -> Dict:
         try:
             line_item_capping = cappings[chosen_creative.line_item.name]
         except KeyError:
-            line_item_capping = CAPPING_EMPTY.copy()
-            line_item_capping['first_time'] = now_isoformat
+            line_item_capping = {'first_time': now_isoformat,
+                                 'last_time': None,
+                                 'times': []
+                                 }
         line_item_capping['last_time'] = now_isoformat
         line_item_capping['times'].append(now_isoformat)
         cappings[chosen_creative.line_item.name] = line_item_capping
@@ -291,6 +304,7 @@ def get_creative_dict(request) -> Dict:
             session['ads_cappings'] = cappings
 
         clear_session_data(session)
+        request.session = session
 
         # count statistics
         if not request.user.is_staff:

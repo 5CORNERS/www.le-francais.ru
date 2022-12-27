@@ -142,11 +142,11 @@ class LineItem(models.Model):
         for time in times:
             parsed_times.append(dateutil.parser.isoparse(time) if isinstance(time, str) else time)
         in_day, in_week, in_month = calculate_times(parsed_times)
-        if self.capping_day is not None and in_day > self.capping_day:
+        if self.capping_day is not None and in_day >= self.capping_day:
             return False
-        elif self.capping_week is not None and in_month > self.capping_week:
+        elif self.capping_week is not None and in_month >= self.capping_week:
             return False
-        elif self.capping_month is not None and in_month > self.capping_month:
+        elif self.capping_month is not None and in_month >= self.capping_month:
             return False
         else:
             return True
@@ -190,6 +190,8 @@ class Creative(models.Model):
     fluid = models.BooleanField(default=False, blank=True)
 
     uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
+
+    priority = models.PositiveIntegerField(default=0)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
