@@ -1,6 +1,6 @@
 {% load wagtailcore_tags ads %}
 {% if gpt_disabled %}
-    {% include_ad snippet.code snippet.placement snippet.sizes_json utm_source=utm_source adsense=True adsense_page_type=snippet.page_type adsense_placement=snippet.placement wo_script=False empty_div=True%}
+    {% include_ad snippet.code placements snippet.sizes_json utm_source=utm_source adsense=True adsense_page_type=snippet.page_type adsense_placement=placements wo_script=False empty_div=True%}
 {% else %}
 {% for block in body %}
     {% include_block block %}
