@@ -431,7 +431,7 @@ input#search-verb::placeholder {
     }
 }
 
-.container {
+.conj-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto;
@@ -466,7 +466,7 @@ input#search-verb::placeholder {
 
 @media (max-width: 991px) {
 
-    .container {
+    .conj-container {
         grid-template-columns: 1fr 0;
         gap: 0;
     }
