@@ -62,7 +62,7 @@
                 <datalist id="num">
                     <option {% if v.reflexive_only %}disabled{% endif %} value="0" label="Активный" style="text-align: left">
                     <option value="1" label="Пассивный"
-                            {% if not v.can_passive %}
+                            {% if not v.can_passive or v.reflexive_only %}
                             disabled{% endif %}
                             style="text-align: center">
                     <option value="2" label="Возвратный"
