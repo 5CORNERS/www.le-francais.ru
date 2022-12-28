@@ -77,6 +77,10 @@ function see_more() {
 	window.localStorage.setItem('long_list', 'true');
 }
 
+const VOICE_RANGE_VALUE_ACTIVE = '0';
+const VOICE_RANGE_VALUE_PASSIVE = '1';
+const VOICE_RANGE_VALUE_REFLEXIVE = '2';
+
 $(document).ready(function () {
 	if (window.localStorage.getItem('long_list') === 'true') {
 		see_more()
@@ -146,26 +150,28 @@ $(document).ready(function () {
 	let $voice_range = $(`#${VOICE_RANGE_ID}`);
 	let last_val = $voice_range.val();
 	let $switchesForm = $('#switchesForm')
-	if (CAN_BE_PRONOUN && $voice_range.val() === '2') {
+	if (CAN_BE_PRONOUN && $voice_range.val() === VOICE_RANGE_VALUE_REFLEXIVE) {
 		$pronounCheckbox.show();
 		if (MUST_BE_PRONOUN) {
 			$pronounInput.prop('disabled', true)
 		}
 	}
 	$voice_range.change(ev => {
-		if ($voice_range.val() === '1' && !CAN_BE_PASSIVE && CAN_BE_REFLEXIVE) {
-			if (last_val === '0') {
-				$voice_range.val('2')
+		if (($voice_range.val() === VOICE_RANGE_VALUE_ACTIVE || $voice_range.val() === VOICE_RANGE_VALUE_PASSIVE) && REFLEXIVE_ONLY) {
+			$voice_range.val(VOICE_RANGE_VALUE_REFLEXIVE)
+		} else if ($voice_range.val() === VOICE_RANGE_VALUE_PASSIVE && !CAN_BE_PASSIVE && CAN_BE_REFLEXIVE) {
+			if (last_val === VOICE_RANGE_VALUE_ACTIVE) {
+				$voice_range.val(VOICE_RANGE_VALUE_REFLEXIVE)
 			} else {
-				$voice_range.val('0')
+				$voice_range.val(VOICE_RANGE_VALUE_ACTIVE)
 			}
-		} else if ($voice_range.val() === '2' && !CAN_BE_REFLEXIVE && CAN_BE_PASSIVE) {
-			if (last_val === '3') {
-				$voice_range.val('1')
+		} else if ($voice_range.val() === VOICE_RANGE_VALUE_REFLEXIVE && !CAN_BE_REFLEXIVE && CAN_BE_PASSIVE) {
+			if (last_val === VOICE_RANGE_VALUE_PASSIVE) {
+				$voice_range.val(VOICE_RANGE_VALUE_PASSIVE)
 			} else {
-				$voice_range.val('3')
+				$voice_range.val(VOICE_RANGE_VALUE_ACTIVE)
 			}
-		} else if (!CAN_BE_PASSIVE && !CAN_BE_REFLEXIVE && ($voice_range.val() === '2' || $voice_range.val() === '1')) {
+		} else if (!CAN_BE_PASSIVE && !CAN_BE_REFLEXIVE && ($voice_range.val() === VOICE_RANGE_VALUE_PASSIVE || $voice_range.val() === VOICE_RANGE_VALUE_REFLEXIVE)) {
 			$voice_range.val('0')
 		}
 		if (CAN_BE_PRONOUN && $voice_range.val() === '2') {
