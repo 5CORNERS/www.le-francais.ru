@@ -32,6 +32,10 @@ def option_url(context, option):
 @register.inclusion_tag('tags/conjugation_advert_body.html', takes_context=True)
 def conjugation_advertisement_body(context, code):
     try:
+        request = context.get('request')
+        user = request.user
+        if user.is_authenticated and user.has_payed and not code=='conjugations_sidebar_top':
+            return dict(body=None)
         snippet:PageLayoutAdvertisementSnippet = PageLayoutAdvertisementSnippet.objects.filter(code=code).exclude(live=False).first()
         placements = [p.code for p in snippet.placements.all()]
         return dict(body=snippet.body, snippet=snippet,
