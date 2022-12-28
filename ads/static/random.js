@@ -41,7 +41,7 @@ function pushAdToQueue(div) {
 
 function loadAd(div) {
     let $div = $(div);
-    let id = $div.id
+    let id = $div.attr('id')
     if (typeof window.pageViewID === 'undefined') {
         window.pageViewID = id;
     }
