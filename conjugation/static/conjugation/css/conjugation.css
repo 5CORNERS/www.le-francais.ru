@@ -334,8 +334,12 @@ datalist option {
     width: 300px;
 }
 
+.switches-name-form {
+    margin-top:0;
+}
+
 .switches-submit-container {
-    margin-top: 0.5rem;
+    margin-top: 1.25rem;
     text-align: center;
     width: 300px;
 }
@@ -351,6 +355,8 @@ datalist option {
 .card-switches {
     max-width: 342px;
     margin-top: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }
 
 @media (max-width: 420px) {
@@ -359,7 +365,7 @@ datalist option {
     }
 
     .card-switches {
-        padding-top: 0.2rem;
+        padding-top: 1rem;
     }
 
     .voice-range {
@@ -368,7 +374,7 @@ datalist option {
 
     .switches-submit-container {
         text-align: center;
-        margin-top: 1rem;
+        margin-top: 1.25rem;
     }
 
     .voice-range input {
