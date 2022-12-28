@@ -32,6 +32,7 @@
 		const IS_FEMININE = {{ feminin|yesno:'true,false' }};
 		const CAN_BE_PASSIVE = {{ v.can_passive|yesno:'true,false' }};
 		const CAN_BE_REFLEXIVE = {{ can_be_reflexive|yesno:'true,false' }};
+        const REFLEXIVE_ONLY = {{ reflexive_only|yesno:'true,false' }}
 		const CAN_BE_FEMININE = {{ v.can_feminin|yesno:'true,false' }};
 		const CAN_BE_PRONOUN = {{ v.can_be_pronoun|yesno:'true,false' }};
 		const MUST_BE_PRONOUN = {{ must_be_pronoun|yesno:'true,false' }};
@@ -40,7 +41,7 @@
 	<script async
 	        type="text/javascript"
 	        src="{% static 'js/le_francais.min.js' %}"></script>
-	<script type="text/javascript" src="{% static 'conjugation/js/table.js' %}"></script>
+	<script type="text/javascript" src="{% static 'conjugation/js/table.min.js' %}"></script>
 
 {% endblock %}
 

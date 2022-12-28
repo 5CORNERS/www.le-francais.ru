@@ -60,7 +60,7 @@
                                             type="range" min="0" max="2"
                                             step="1" list="num"/>
                 <datalist id="num">
-                    <option value="0" label="Активный" style="text-align: left">
+                    <option {% if v.reflexive_only %}disabled{% endif %} value="0" label="Активный" style="text-align: left">
                     <option value="1" label="Пассивный"
                             {% if not v.can_passive %}
                             disabled{% endif %}
