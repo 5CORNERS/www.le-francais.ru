@@ -103,11 +103,11 @@ class LineItem(models.Model):
     targeting_city = models.CharField(max_length=256, null=True, blank=True)
 
     targeting_countries = ArrayField(base_field=models.CharField(max_length=256),
-                                   default=list)
+                                   default=list, verbose_name='List of countries', blank=True)
     targeting_cities = ArrayField(base_field=models.CharField(max_length=256),
-                                default=list)
+                                default=list, verbose_name='List of cities', blank=True)
 
-    targeting_invert = models.BooleanField(default=False, verbose_name='Invert Geo Targeting')
+    targeting_invert = models.BooleanField(default=False, verbose_name='Location targeting work as exclusion')
 
     disable = models.BooleanField(default=False, blank=True)
 

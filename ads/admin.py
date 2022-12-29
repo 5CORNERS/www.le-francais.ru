@@ -18,6 +18,7 @@ class CreativeInline(admin.TabularInline):
 
 @admin.register(LineItem)
 class LineItemAdmin(admin.ModelAdmin):
+    form = GeoAdder
     readonly_fields = ['views', 'clicks']
     inlines = [CreativeInline]
     fields = [
@@ -36,16 +37,15 @@ class LineItemAdmin(admin.ModelAdmin):
         'do_not_display_to_registered_users',
         'do_not_display_to_anonymous_users',
         'labels',
-        'targeting_country',
-        'targeting_city',
-        'targeting_invert',
         'disable', 'utm_campaign', 'utm_medium',
         'do_not_display_to_donating_users',
         'do_not_display_to_donating_users_days_ago',
         'display_to_paying_users',
         'do_not_display_to_paying_users',
+        'targeting_countries',
+        'targeting_cities',
+        'targeting_invert',
     ]
-    # form = GeoAdder
 
 @admin.register(Placement)
 class PlacementAdmin(admin.ModelAdmin):
