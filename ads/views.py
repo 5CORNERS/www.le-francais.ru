@@ -102,17 +102,17 @@ def get_creative_dict(request) -> Dict:
     # )
 
     if country_code is not None:
-        line_items = line_items.exclude(targeting_country=country_code, targeting_invert=True).filter(
-            Q(targeting_invert=True) | Q(targeting_country=country_code) | Q(targeting_country__isnull=True)
+        line_items = line_items.exclude(targeting_countries__contains=[country_code], targeting_invert=True).filter(
+            Q(targeting_invert=True) | Q(targeting_countries__contains=[country_code]) | Q(targeting_countries__len=0)
         )
     else:
-        line_items = line_items.filter(targeting_country__isnull=True)
+        line_items = line_items.filter(targeting_countries__len=0)
     if city is not None:
-        line_items = line_items.exclude(targeting_city=city, targeting_invert=True).filter(
-            Q(targeting_invert=True) | Q(targeting_city=city) | Q(targeting_city__isnull=True)
+        line_items = line_items.exclude(targeting_cities__contains=[city], targeting_invert=True).filter(
+            Q(targeting_invert=True) | Q(targeting_cities__contains=[city]) | Q(targeting_cities__len=0)
         )
     else:
-        line_items = line_items.filter(targeting_city__isnull=True)
+        line_items = line_items.filter(targeting_city__len=0)
 
     if name:
         line_items = line_items.filter(
