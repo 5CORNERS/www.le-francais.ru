@@ -397,7 +397,7 @@ class Verb(models.Model):
 		result = []
 		for switch_key, switch in SWITCHES_CHOICES:
 			reflexive = 'REFLEXIVE' in switch
-			pronoun = 'S_EN' in switch
+			pronoun = 'S-EN' in switch
 			passive = 'PASSIVE' in switch
 			if self.reflexive_only and not (reflexive or pronoun):
 				continue
