@@ -506,7 +506,7 @@ input#search-verb::placeholder {
     }
 }
 
-.top_mobile>div, .top>div, .middle>div{
+.top_mobile>div, .top>div, .middle>div, .middle_spoiler>div{
     margin-bottom: 0.8rem;
 }
 
