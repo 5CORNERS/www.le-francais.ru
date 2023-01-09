@@ -167,7 +167,7 @@ class UsersFilter(models.Model):
 	has_name_for_emails = models.BooleanField(default=False)
 
 	blacklist = models.ManyToManyField(to=User, blank=True)
-	manual_email_list = models.TextField(max_length=1024, help_text='Comma-separated list of emails, for testing purposes.', default=None, null=True, blank=True)
+	manual_email_list = models.TextField(help_text='Comma-separated list of emails, for testing purposes.', default=None, null=True, blank=True)
 	manual_blacklist = models.TextField(blank=True, null=True, default=None)
 	ignore_subscriptions = models.BooleanField(default=False)
 	send_once = models.BooleanField(default=True)
@@ -357,15 +357,15 @@ class UsersFilter(models.Model):
 				recipients = recipients.exclude( email__contains='@comcast.net')
 			if self.send_only_to_gmail:
 				recipients = recipients.filter(email__contains='@gmail.com')
-			# if True:
-			# 	recipients = recipients.annotate(
-			# 		payments_amount_sum=Sum(Case(When(
-			# 			tinkoff_payment__status__in=['CONFIRMED',
-			# 			                             'AUTHORISED'],
-			# 			then=F('tinkoff_payment__amount')),
-			# 			output_field=IntegerField(),
-			# 			default=0))
-			# 	).filter(payments_amount_sum__gt=0).order_by('payments_amount_sum')
+			if True:
+				recipients = recipients.annotate(
+					payments_amount_sum=Sum(Case(When(
+						tinkoff_payment__status__in=['CONFIRMED',
+						                             'AUTHORISED'],
+						then=F('tinkoff_payment__amount')),
+						output_field=IntegerField(),
+						default=0))
+				).order_by('payments_amount_sum')
 		return recipients
 
 	@staticmethod
