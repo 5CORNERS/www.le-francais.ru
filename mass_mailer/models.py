@@ -54,21 +54,37 @@ class ChoiceArrayField(ArrayField):
 		# pylint:disable=bad-super-call
 		return super(ArrayField, self).formfield(**defaults)
 
+PROFILE_STATUS_OK = 'ok'
+PROFILE_STATUS_EMAIL_NOT_EXIST = 'not_exist'
+PROFILE_STATUS_CHOICES = [
+	(PROFILE_STATUS_OK, 'OK'),
+	(PROFILE_STATUS_EMAIL_NOT_EXIST, 'Email not exist')
+]
 class Profile(models.Model):
 	TAG_DEFAULT = 0
 	TAG_CHOICES = [
 		(TAG_DEFAULT, 'default'),
 	]
 	key = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
-	user = AutoOneToOneField(to=User, related_name='mailer_profile', on_delete=models.CASCADE)
+	user = AutoOneToOneField(to=User, related_name='mailer_profile', on_delete=models.CASCADE, null=True)
 	subscribed = models.BooleanField(default=True)
+	_email = models.EmailField(blank=True, null=True)
+	status = models.CharField(choices=PROFILE_STATUS_CHOICES, default=PROFILE_STATUS_OK, max_length=16)
 
 	def get_unsubscribe_url(self):
 		domain = 'www.le-francais.ru'
 		return 'https://' + domain + reverse("mass_mailer:unsubscribe", kwargs={"key": self.key})
 
+	@property
+	def email(self):
+		if self.user:
+			return self.user.email
+		else:
+			return self._email
+
 	def __str__(self):
-		return str(self.user)
+		if self.user:
+			return f"{self.user.username} <{self.email}>"
 
 
 class EmailSettings(models.Model):
