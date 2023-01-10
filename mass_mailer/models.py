@@ -66,7 +66,7 @@ class Profile(models.Model):
 		(TAG_DEFAULT, 'default'),
 	]
 	key = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
-	user = AutoOneToOneField(to=User, related_name='mailer_profile', on_delete=models.CASCADE, null=True)
+	user = AutoOneToOneField(to=User, related_name='mailer_profile', on_delete=models.CASCADE, null=True, blank=True)
 	subscribed = models.BooleanField(default=True)
 	_email = models.EmailField(blank=True, null=True)
 	status = models.CharField(choices=PROFILE_STATUS_CHOICES, default=PROFILE_STATUS_OK, max_length=16)
