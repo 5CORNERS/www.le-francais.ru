@@ -85,6 +85,8 @@ class Profile(models.Model):
 	def __str__(self):
 		if self.user:
 			return f"{self.user.username} <{self.email}>"
+		else:
+			return self.email
 
 
 class EmailSettings(models.Model):
