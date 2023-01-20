@@ -5,5 +5,8 @@ echo "-----> Collecting static files"
 python manage.py collectstatic --noinput -i static_src
 echo "-----> Installing Not deps packages"
 pip install django-session-header --no-dependencies
-echo "-----> Deleting static src folder"
+echo "-----> Deleting static src folders"
 rm -rf ./static_src
+rm -rf ./home/static
+rm -rf ./le_francais_dictionary/static
+rm -rf ./conjugation/static
