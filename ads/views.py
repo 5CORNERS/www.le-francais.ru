@@ -12,7 +12,7 @@ from django.views.generic import RedirectView, TemplateView
 
 from .consts import LOG_TYPE_VIEW, LOG_TYPE_CLICK
 from .models import Creative, LineItem, Log
-from .utils import clear_session_data
+from .utils import clear_session_data, calculate_times
 
 
 class AdCounterRedirectView(RedirectView):
@@ -88,7 +88,8 @@ def get_creative_dict(request) -> Dict:
     except ValueError:
         max_width = 10000
     page_view_id = request.GET.get('page_view_id')
-    now_isoformat = timezone.now().isoformat()
+    now = timezone.now()
+    now_isoformat = now.isoformat()
     line_items = LineItem.objects.filter(disable=False).order_by('-priority')
 
     # line_items = line_items.filter(
@@ -112,7 +113,7 @@ def get_creative_dict(request) -> Dict:
             Q(targeting_invert=True) | Q(targeting_cities__contains=[city]) | Q(targeting_cities__len=0)
         )
     else:
-        line_items = line_items.filter(targeting_city__len=0)
+        line_items = line_items.filter(targeting_cities__len=0)
 
     if name:
         line_items = line_items.filter(
@@ -300,6 +301,7 @@ def get_creative_dict(request) -> Dict:
         line_item_capping['last_time'] = now_isoformat
         line_item_capping['times'].append(now_isoformat)
         cappings[chosen_creative.line_item.name] = line_item_capping
+        cappings_day, cappings_week, cappings_month = calculate_times(line_item_capping['times'], now)
         if not request.user.is_staff or 'test' in request.GET:
             session['ads_cappings'] = cappings
 
@@ -333,7 +335,10 @@ def get_creative_dict(request) -> Dict:
                 "utm_campaign": chosen_creative.utm_campaign or chosen_creative.line_item.utm_campaign,
                 "utm_medium": chosen_creative.utm_medium or chosen_creative.line_item.utm_medium,
                 "utm_source": chosen_creative.utm_source or utm_source
-            }
+            },
+            capping_status_day=cappings_day,
+            capping_status_week=cappings_week,
+            capping_status_month=cappings_month
         )
 
         return {'empty': False,

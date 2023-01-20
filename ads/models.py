@@ -1,22 +1,18 @@
-import os.path
 import uuid
 
-import dateutil.parser
 import requests
 import shortuuid
 from PIL import Image
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField, JSONField
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpRequest
 from django.template import Template, Context
 from django.template.loader import render_to_string
-from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils import timezone
 
 from .consts import LOG_TYPE_CHOICES
+from .utils import parse_capping_times, calculate_times
 
 User = get_user_model()
 
@@ -32,23 +28,6 @@ class Placement(models.Model):
 
     def __str__(self):
         return self.name
-
-
-def calculate_times(times, now=None):
-    if now is None:
-        now = timezone.now()
-    in_day = 0
-    in_week = 0
-    in_month = 0
-    for time in times:
-        delta = now - time
-        if delta.days < 30:
-            in_month += 1
-        if delta.days < 7:
-            in_week += 1
-        if delta.days < 1:
-            in_day += 1
-    return in_day, in_week, in_month
 
 
 class LineItem(models.Model):
@@ -138,10 +117,8 @@ class LineItem(models.Model):
         if not (self.capping_day and self.capping_week and self.capping_month):
             return True
 
-        parsed_times = []
-        for time in times:
-            parsed_times.append(dateutil.parser.isoparse(time) if isinstance(time, str) else time)
-        in_day, in_week, in_month = calculate_times(parsed_times)
+
+        in_day, in_week, in_month = calculate_times(parse_capping_times(times))
         if self.capping_day is not None and in_day >= self.capping_day:
             return False
         elif self.capping_week is not None and in_month >= self.capping_week:
@@ -334,6 +311,10 @@ class Log(models.Model):
     clicked = models.BooleanField(default=False)
     click_datetime = models.DateTimeField(default=None, null=True, blank=True)
     utm_data = JSONField(default=set_default_utm)
+
+    capping_status_day = models.IntegerField(null=True, blank=True)
+    capping_status_week = models.IntegerField(null=True, blank=True)
+    capping_status_month = models.IntegerField(null=True, blank=True)
 
     def serve_body(self, request: HttpRequest):
         return render_to_string(

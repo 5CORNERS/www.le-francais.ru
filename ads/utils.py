@@ -1,3 +1,4 @@
+import dateutil.parser
 from dateutil.parser import isoparse
 from django.utils import timezone
 
@@ -36,3 +37,31 @@ def clear_session_data(session):
                 del cappings_data['times'][i]
         if len(cappings_data['times']) == 0:
             del session['ads_cappings'][line_item_name]
+
+
+def parse_capping_times(times):
+    parsed_times = []
+    for time in times:
+        parsed_times.append(
+            dateutil.parser.isoparse(time) if isinstance(time,
+                                                         str) else time)
+    return parsed_times
+
+
+def calculate_times(times, now=None):
+    if now is None:
+        now = timezone.now()
+    in_day = 0
+    in_week = 0
+    in_month = 0
+    for time in times:
+        if isinstance(time, str):
+            time = isoparse(time)
+        delta = now - time
+        if delta.days < 30:
+            in_month += 1
+        if delta.days < 7:
+            in_week += 1
+        if delta.days < 1:
+            in_day += 1
+    return in_day, in_week, in_month

@@ -74,32 +74,43 @@ def export_csv(modeladmin, request, queryset):
         'Country',
         'City',
     ])
-    for log_object in queryset.select_related('line_item', 'creative'):
-        log_object: Log
-        if log_object.user is not None:
-            username = log_object.user.username
+    log_objects = queryset.values(
+        'user__username', 'ad_unit_placements',
+        'line_item__name', 'datetime', 'clicked', 'creative_id',
+        'ad_unit_name', 'ip', 'country', 'city',
+        'capping_status_day', 'capping_status_week', 'capping_status_month'
+    )
+    creatives_pks = queryset.values_list('creative_id', flat=True).distinct()
+    creatives_dict = {c.pk: c for c in Creative.objects.filter(pk__in=list(creatives_pks))}
+    for log_object in log_objects:
+        creative: Creative = creatives_dict[log_object["creative_id"]]
+        if log_object['user__username'] is not None:
+            username = log_object['user__username']
         else:
             username = ''
-        if log_object.ad_unit_placements:
-            placements_str = ", ".join(log_object.ad_unit_placements)
+        if log_object['ad_unit_placements']:
+            placements_str = ", ".join(log_object['ad_unit_placements'])
         else:
             placements_str = ''
-        if log_object.line_item:
-            line_item_name = log_object.line_item.name
+        if log_object['line_item__name']:
+            line_item_name = log_object['line_item__name']
         else:
             line_item_name = ''
         writer.writerow([
-            log_object.datetime.strftime("%Y-%m-%d %H:%M:%S.%f"),
-            log_object.clicked,
+            log_object['datetime'].strftime("%Y-%m-%d %H:%M:%S.%f"),
+            log_object['clicked'],
             line_item_name,
-            log_object.creative.name,
-            f'{log_object.creative.width}x{log_object.creative.height}',
-            log_object.ad_unit_name,
+            creative.name,
+            f'{creative.width}x{creative.height}',
+            log_object['ad_unit_name'],
             placements_str,
             username,
-            log_object.ip,
-            log_object.country,
-            log_object.city
+            log_object['ip'] or '',
+            log_object['country'] or '',
+            log_object['city'] or '',
+            log_object['capping_status_day'] or '',
+            log_object['capping_status_week'] or '',
+            log_object['capping_status_month'] or ''
         ])
     return response
 
