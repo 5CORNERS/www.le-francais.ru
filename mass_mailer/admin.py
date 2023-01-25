@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from mass_mailer.models import Message, EmailSettings, UsersFilter, Profile, MessageLog
-
+from django.contrib.admin import DateFieldListFilter
 
 def send(modeladmin, request, qs):
 	for q in qs:
@@ -36,4 +36,6 @@ class MailerProfileAdmin(admin.ModelAdmin):
 class MessageLogAdmin(admin.ModelAdmin):
 	list_display = ['__str__', 'recipient', 'sent_datetime', 'result']
 	readonly_fields = ['message', 'recipient', 'sent_datetime']
+	list_filter = ['message', ('sent_datetime', DateFieldListFilter), 'result']
+	search_fields = ['message__name', 'recipient__username', 'recipient__email']
 	pass

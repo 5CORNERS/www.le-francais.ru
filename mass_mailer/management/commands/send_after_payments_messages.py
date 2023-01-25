@@ -80,9 +80,7 @@ def filter_users_with_payments_with_activations(message):
 		pk__in=[receipt_item.receipt.payment.customer_key for receipt_item in
 		        receipt_items]
 	).order_by('id').exclude(
-		pk__in=[log.recipient_id for log in MessageLog.objects.filter(
-			Q(result=MessageLog.RESULT_SUCCESS) | Q(
-				result=MessageLog.RESULT_DIDNT_SEND), message=message)]
+		pk__in=[log.recipient_id for log in MessageLog.objects.filter(result__in=MessageLog.RESULTS_SUCCESS, message=message)]
 	).exclude(
 		pk__in=[p.user.pk for p in Profile.objects.filter(
 			subscribed=False

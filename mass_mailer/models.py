@@ -23,6 +23,7 @@ from django.forms import SelectMultiple, MultipleChoiceField
 from django.template import Context, Template
 from django.utils.module_loading import import_string
 from django.shortcuts import reverse
+from postman.api import pm_broadcast
 from user_sessions.models import Session
 from validate_email import validate_email
 
@@ -185,6 +186,8 @@ class UsersFilter(models.Model):
 
 	send_only_to_gmail = models.BooleanField(default=False)
 
+	cups_amount_gte = models.IntegerField(null=True, blank=True, default=None)
+
 	def __str__(self):
 		return self.name
 
@@ -318,10 +321,6 @@ class UsersFilter(models.Model):
 							id__in=[int(p.customer_key) for p in
 							less_then_equal_10_payments if p.customer_key]))
 
-			if not self.ignore_subscriptions:
-				recipients = recipients.exclude(pk__in=[p.user.pk for p in
-				                                        Profile.objects.filter(
-					                                        subscribed=False)])
 			if self.blacklist.exists():
 				recipients = recipients.exclude(
 					pk__in=self.blacklist.all()
@@ -333,6 +332,10 @@ class UsersFilter(models.Model):
 			if self.joined_after:
 				recipients = recipients.filter(
 					date_joined__gte=self.joined_after
+				)
+			if self.cups_amount_gte:
+				recipients = recipients.filter(
+					_cup_amount__gte=self.cups_amount_gte
 				)
 			if self.last_activity_before:
 				...
@@ -395,11 +398,10 @@ class UsersFilter(models.Model):
 		recipients = self.get_recipients()
 		if self.send_once:
 			recipients = recipients.exclude(
-				pk__in=[log.recipient_id for log in MessageLog.objects.filter(Q(result=MessageLog.RESULT_SUCCESS) | Q(result=MessageLog.RESULT_DIDNT_SEND), message=message)])
+				pk__in=[log.recipient_id for log in MessageLog.objects.filter(result__in=MessageLog.RESULTS_SUCCESS, message=message)])
 		if not self.send_to_not_validated:
 			recipients = recipients.exclude(
-				pk__in=MessageLog.objects.filter(
-					Q(result=MessageLog.RESULT_FAILURE)|Q(result=MessageLog.RESULT_DIDNT_SEND),
+				pk__in=MessageLog.objects.filter(result__in=MessageLog.RESULTS_FAILURE,
 					message=message).distinct().values_list('recipient_id', flat=True)
 			)
 		return recipients
@@ -436,6 +438,11 @@ class Message(models.Model):
 
 	list_unsubscribe_header = models.BooleanField(default=False)
 
+	postman_broadcast = models.BooleanField(default=False, help_text="Private messages for users, who, for some reason, can't or won't receive emails")
+	postman_subject = models.CharField(max_length=120, blank=True)
+	postman_body = models.TextField(blank=True)
+	postman_sender = models.ForeignKey(User, related_name="postmaster_broadcast_messages", null=True, blank=True)
+
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._recipients = None
@@ -463,11 +470,20 @@ class Message(models.Model):
 	                 use_tls=use_tls, fail_silently=False, use_ssl=use_ssl, timeout=None,
 	                 ssl_keyfile=None, ssl_certfile=None)
 
+	def set_recipients(self):
+		self._recipients = self.recipients_filter.get_recipients_for_message(message=self)
+
 	def get_recipients(self):
 		if self._recipients is None:
 			if self.recipients_filter:
 				self._recipients = self.recipients_filter.get_recipients_for_message(
 					message=self)
+		return self._recipients.exclude(pk__in=[p.user.pk for p in  Profile.objects.filter(
+			subscribed=False, user__isnull=False)])
+
+	def get_recipients_without_filtering_profiles(self):
+		if self._recipients is None:
+			self.set_recipients()
 		return self._recipients
 
 	def send_manual(self, data_list:list):
@@ -568,16 +584,26 @@ class Message(models.Model):
 		"""
 		backend:EmailBackend = self.get_backend()
 		if not to:
-			recipients = self.get_recipients()
+			recipients = self.get_recipients_without_filtering_profiles()
 		else:
 			recipients = to
+
+		subscribed_recipients = recipients.exclude(pk__in=[p.user_id for p in
+		                                                   Profile.objects.filter(
+			                                                   subscribed=False, user__isnull=False)])
+		unsubscribed_recipients = recipients.filter(pk__in=[p.user.pk for p in
+		                                                    Profile.objects.filter(
+			                                                    subscribed=False, user__isnull=False)])
 		sent_count = 0
 		errors_count = 0
-		if not recipients:
+		postman_recipients = list(unsubscribed_recipients)
+		if not subscribed_recipients:
+			if postman_recipients and self.postman_broadcast:
+				self.sent_postman(postman_recipients)
 			return sent_count, errors_count
 		if self.recipients_filter and self.recipients_filter.send_only_first:
-			recipients = recipients[:self.recipients_filter.send_only_first]
-		chunks = [recipients[x:x+self.email_settings.messages_per_connection] for x in range(0, len(recipients), self.email_settings.messages_per_connection)]
+			subscribed_recipients = subscribed_recipients[:self.recipients_filter.send_only_first]
+		chunks = [subscribed_recipients[x:x+self.email_settings.messages_per_connection] for x in range(0, len(subscribed_recipients), self.email_settings.messages_per_connection)]
 		for chunk in chunks:
 			messages_with_recipients = []
 			for recipient in chunk:
@@ -592,6 +618,7 @@ class Message(models.Model):
 					MessageLog.objects.log(self, recipient, MessageLog.RESULT_FAILURE,
 										   log_message=str(f"Can't Validate EMail"))
 					errors_count += 1
+					postman_recipients.append(recipient)
 					continue
 				header = {
 					'Sender': f'{self.email_settings.get_sender_header()}',
@@ -642,7 +669,22 @@ class Message(models.Model):
 					print(f"SMTP Error: {str(error)}")
 			backend.close()
 			time.sleep(self.email_settings.delay_between_connections)
+
+		if postman_recipients and self.postman_broadcast:
+			self.sent_postman(postman_recipients)
 		return sent_count, errors_count
+
+	def sent_postman(self, recipients):
+		for recipient in recipients:
+			pm_broadcast(sender=self.postman_sender,
+			             recipients=recipient,
+			             subject=self.get_postman_subject_for(recipient),
+			             body=self.get_postman_body_for(recipient),
+			             skip_notification=True
+			             )
+			MessageLog.objects.log(self, recipient,
+			                       MessageLog.RESULT_POSTMAN_SUCCESS,
+			                       f'Message was sent to {recipient.email} by postman')
 
 	def get_subject_for(self, recipient, additional_context=None):
 		return Template(self.template_subject).\
@@ -655,6 +697,15 @@ class Message(models.Model):
 	def get_txt_body_for(self, recipient, additional_context=None):
 		return Template(self.template_txt).render(
 			Context(self.get_context(recipient, additional_context))
+		)
+
+	def get_postman_subject_for(self, recipient, additional_context=None):
+		return Template(self.postman_subject). \
+			render(Context(self.get_context(recipient.mailer_profile, additional_context,
+		                                    include_subject=False)))
+	def get_postman_body_for(self, recipient, additional_context=None):
+		return Template(self.postman_body).render(
+			Context(self.get_context(recipient.mailer_profile, additional_context))
 		)
 
 	def get_context(self, recipient, additional_context=None, include_subject=True):
@@ -714,11 +765,15 @@ class MessageLog(models.Model):
 	RESULT_SUCCESS = 1
 	RESULT_FAILURE = 2
 	RESULT_DIDNT_SEND = 3
+	RESULT_POSTMAN_SUCCESS = 4
 	RESULT_CHOICES = [
 		(RESULT_SUCCESS, 'Success'),
 		(RESULT_FAILURE, 'Failure'),
-		(RESULT_DIDNT_SEND, "Didn't send")
+		(RESULT_DIDNT_SEND, "Didn't send"),
+		(RESULT_POSTMAN_SUCCESS, "Success(P)")
 	]
+	RESULTS_SUCCESS = [RESULT_SUCCESS, RESULT_POSTMAN_SUCCESS]
+	RESULTS_FAILURE = [RESULT_FAILURE, RESULT_DIDNT_SEND]
 	message = models.ForeignKey('Message', on_delete=models.SET_NULL, null=True, blank=True)
 	recipient = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
