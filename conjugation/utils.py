@@ -402,13 +402,13 @@ def get_font(font_size, os=None):
 	path = 'conjugation/static/fonts/HelveticaNeue.ttf'
 	if os is not None:
 		if any(x in os for x in ['ios', 'os x']):
-			path = 'conjugation/static/fonts/SF-UI-Display-Regular.ttf'
+			path = 'conjugation/fonts/SF-UI-Display-Regular.ttf'
 		elif 'windows' in os:
-			path = 'conjugation/static/fonts/segoeui.ttf'
+			path = 'conjugation/fonts/segoeui.ttf'
 		elif 'android' in os:
-			path = 'conjugation/static/fonts/Roboto-Regular.ttf'
+			path = 'conjugation/fonts/Roboto-Regular.ttf'
 		elif 'linux' in os:
-			path = 'conjugation/static/fonts/NotoSans-Regular.ttf'
+			path = 'conjugation/fonts/NotoSans-Regular.ttf'
 	font = ImageFont.truetype(path, font_size)
 	return font
 
