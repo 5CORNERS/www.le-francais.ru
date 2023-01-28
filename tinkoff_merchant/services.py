@@ -36,7 +36,7 @@ class MerchantAPI:
             self._terminal_key = get_config()['TERMINAL_KEY']
         return self._terminal_key
 
-    def _request(self, url: str, method: types.FunctionType, data: dict) -> requests.Response:
+    def _request(self, url: str, method: types.FunctionType, data: dict, p:Payment=None) -> requests.Response:
         url = get_config()['URLS'][url]
 
         data.update({
@@ -48,6 +48,10 @@ class MerchantAPI:
 
         if r.status_code != 200:
             raise PaymentHTTPException('bad status code')
+
+        if p is not None:
+            p.request_history.append(dict(datetime=str(datetime.now()), url=url, data=data))
+            p.save(update_fields=['request_history'])
 
         return r
 
@@ -87,15 +91,15 @@ class MerchantAPI:
         return token == self._token(data)
 
     def init(self, p: Payment, data=None) -> Payment:
-        response = self._request('INIT', requests.post, p.to_json(data)).json()
+        response = self._request('INIT', requests.post, p.to_json(data), p).json()
         return self.update_payment_from_response(p, response)
 
     def status(self, p: Payment) -> Payment:
-        response = self._request('GET_STATE', requests.post, {'PaymentId': p.payment_id}).json()
+        response = self._request('GET_STATE', requests.post, {'PaymentId': p.payment_id}, p).json()
         return self.update_payment_from_response(p, response)
 
     def cancel(self, p: Payment) -> Payment:
-        response = self._request('CANCEL', requests.post, {'PaymentId': p.payment_id}).json()
+        response = self._request('CANCEL', requests.post, {'PaymentId': p.payment_id}, p).json()
         if p.status == PAYMENT_STATUS_CONFIRMED:
             payment_refund.send(self.__class__, payment=p)
         return self.update_payment_from_response(p, response)
@@ -108,5 +112,5 @@ class MerchantAPI:
             'RebillId': p.parent.rebill_id,
             'SendEmail': True,
             'InfoEmail': p.email,
-        }).json()
+        }, p).json()
         return self.update_payment_from_response(p, response)
