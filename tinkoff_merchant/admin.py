@@ -1,3 +1,10 @@
+import json
+
+from django.utils.safestring import mark_safe
+from pygments import highlight
+from pygments.lexers import JsonLexer
+from pygments.formatters import HtmlFormatter
+
 import bulk_update.helper
 from django.contrib import admin
 
@@ -49,9 +56,31 @@ class PaymentAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-    def get_readonly_fields(self, request, obj=None):
-        return [f.name for f in obj._meta.fields]
+    def get_fields(self, request, obj=None):
+        return [f.name for f in obj._meta.fields if
+                f.name not in ['request_history', 'response_history']] + [
+            'request_history_prettified', 'response_history_prettified']
 
+    def get_readonly_fields(self, request, obj=None):
+        return [f.name for f in obj._meta.fields if f.name not in ['request_history', 'response_history']] + ['request_history_prettified', 'response_history_prettified']
+
+    def request_history_prettified(self, instance:Payment):
+        return prettify_json_field('request_history', instance)
+
+    request_history_prettified.short_description='Request History'
+
+    def response_history_prettified(self, instance:Payment):
+        return prettify_json_field('response_history', instance)
+
+    response_history_prettified.short_description = 'Response History'
+
+def prettify_json_field(field_name, instance):
+    response = json.dumps(getattr(instance, field_name), sort_keys=True,
+                          indent=2)
+    formatter = HtmlFormatter(style='colorful')
+    response = highlight(response, JsonLexer(), formatter)
+    style = "<style>" + formatter.get_style_defs() + "</style><br>"
+    return mark_safe(style + response)
 
 class PermissionsMixin:
     def has_add_permission(self, request):
