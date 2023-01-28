@@ -12,6 +12,9 @@ from .consts import TAXES, TAXATIONS, CATEGORIES, LESSON_TICKETS, \
 from .settings import get_config
 from django.contrib.postgres.fields import JSONField
 
+from .utils import Encoder
+
+
 class Payment(models.Model):
 	RESPONSE_FIELDS = {
 		'Success': 'success',
@@ -44,9 +47,9 @@ class Payment(models.Model):
 
 	creation_date = models.DateTimeField(verbose_name='Дата создания заказа', auto_now_add=True, null=True)
 	update_date = models.DateTimeField(verbose_name='Дата последнего обновления', auto_now=True, null=True)
-	status_history = JSONField(default=list)
-	response_history = JSONField(default=list)
-	request_history = JSONField(default=list)
+	status_history = JSONField(default=list, encoder=Encoder)
+	response_history = JSONField(default=list, encoder=Encoder)
+	request_history = JSONField(default=list, encoder=Encoder)
 
 	parent = models.ForeignKey('self', on_delete=models.SET_NULL,
 	                           default=None, blank=True, null=True,
