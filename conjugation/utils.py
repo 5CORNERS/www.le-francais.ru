@@ -399,7 +399,7 @@ def get_os_by_request(request):
 	return os
 
 def get_font(font_size, os=None):
-	path = 'conjugation/fonts/fonts/HelveticaNeue.ttf'
+	path = 'conjugation/fonts/HelveticaNeue.ttf'
 	if os is not None:
 		if any(x in os for x in ['ios', 'os x']):
 			path = 'conjugation/fonts/SF-UI-Display-Regular.ttf'
