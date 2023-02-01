@@ -7,6 +7,7 @@ from zipfile import ZipFile
 
 from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
+from user_sessions.models import Session
 
 from mass_mailer.models import Profile
 
@@ -73,16 +74,32 @@ class Command(BaseCommand):
 						if notification_type in stats.keys():
 							stats[notification_type]['count'] += 1
 						else:
-							stats[notification_type] = {'count': 1, 'subs': {}, 'types': {}}
+							stats[notification_type] = {'count': 1, 'subs': {}, 'types': {}, 'notifications': []}
 
 						if notification_type == 'Complaint':
 							complaint_data = data['Message']['complaint']
 							complaint_sub_type = complaint_data.get('complaintSubType')
-							complaint_feedback_type = complaint_data.get('complaintFeedbackType')
+							feedback_type = complaint_data.get('complaintFeedbackType')
 							count_to_dict(complaint_sub_type, stats[notification_type]['subs'])
-							count_to_dict(complaint_feedback_type, stats[notification_type]['types'])
+							count_to_dict(feedback_type, stats[notification_type]['types'])
+							user_agent = complaint_data.get('userAgent')
 
-							recipients = [r['emailAddress'] for r in complaint_data.get('complaintRecipients', [])]
+							complaint_datetime = complaint_data.get('arrivalDate', complaint_data.get('timestamp'))
+
+							recipients = [r['emailAddress'] for r in complaint_data.get('complainedRecipients', [])]
+							for r in recipients:
+								userdata = self.get_user_data(r)
+								stats[notification_type][
+									'notifications'].append(
+										{
+											'email': r,
+											'timestamp': complaint_datetime,
+											'feedback_type': feedback_type,
+											'user_agent': user_agent,
+											'user': userdata,
+											'description': complaint_sub_type
+										}
+									)
 							recipients_to_filter_out = recipients_to_filter_out + recipients
 
 						elif notification_type == 'Bounce':
@@ -92,15 +109,31 @@ class Command(BaseCommand):
 							count_to_dict(bounce_type, stats[notification_type]['types'])
 							count_to_dict(bounce_sub_type, stats[notification_type]['subs'])
 
-							recipients = [r['emailAddress'] for r in bounce_data.get('bouncedRecipients', [])]
-
 							if bounce_type == 'Permanent':
-								recipients_to_filter_out = recipients_to_filter_out + recipients
+								for r in bounce_data.get('bouncedRecipients', []):
+									recipient_email = r['emailAddress']
+									try:
+										description = r['diagnosticCode']
+									except KeyError:
+										description = ''
+									userdata = self.get_user_data(recipient_email)
+									recipients_to_filter_out.append(recipient_email)
+									stats[notification_type][
+										'notifications'].append(
+										{
+											'email': recipient_email,
+											'timestamp': data['Message']['mail'].get('timestamp'),
+											'feedback_type': bounce_sub_type,
+											'user': userdata,
+											'description': description
+										}
+										)
 
 					except json.JSONDecodeError:
 						pass
-		print(json.dumps(stats, indent=4))
+		print(json.dumps(stats, indent=4, default=str), end='\n\n')
 
+		stats_yandex = {}
 		old_emls = get_emls_from_zips('mass_mailer/temp/to_parse')
 		old_recipients_to_filter_out = []
 		for eml in old_emls:
@@ -112,7 +145,24 @@ class Command(BaseCommand):
 						original_recipient = body_part.get("Original-Recipient")
 						status = body_part.get("Status")
 						if original_recipient is not None and status.split('.')[0] == "5":
-							old_recipients_to_filter_out.append(original_recipient.split(";")[-1])
+							original_recipient = original_recipient.split(";")[-1]
+							old_recipients_to_filter_out.append(original_recipient)
+							if status not in stats_yandex.keys():
+								stats_yandex[status] = {
+									'code': status,
+									'description': body_part.get('Diagnostic-Code'),
+									'recipients': [original_recipient],
+								}
+							else:
+								stats_yandex[status]['recipients'].append(original_recipient)
+
+		print(json.dumps(stats_yandex, indent=4))
+
+		with open('mass_mailer/temp/result_yandex.json', 'w', encoding='utf-8') as f:
+			json.dump(stats_yandex, f, indent=4, default=str)
+
+		with open('mass_mailer/temp/result.json', 'w', encoding='utf-8') as f:
+			json.dump(stats, f, indent=4, default=str)
 
 		recipients_to_filter_out = set(recipients_to_filter_out + old_recipients_to_filter_out)
 		for recipient in recipients_to_filter_out:
@@ -126,7 +176,31 @@ class Command(BaseCommand):
 					_email=recipient,
 				)
 				mailer_profile.subscribed = False
-			mailer_profile.save(update_fields=['subscribed'])
+			# mailer_profile.save(update_fields=['subscribed'])
+
+	def get_user_data(self, email):
+		try:
+			user = User.objects.get(email=email)
+			userdata = {
+				'username': user.username,
+				'cups': user.cups_amount,
+				'last_login': user.last_login,
+				'registered': user.date_joined,
+				'country': user.country_name
+			}
+			try:
+				last_session = Session.objects.get(user=user)
+				last_session_data = {
+					'last_activity': last_session.last_activity,
+					'ip': last_session.ip,
+					'user_agent': last_session.user_agent,
+				}
+			except Session.DoesNotExist:
+				last_session_data = None
+			userdata['session_data'] = last_session_data
+		except User.DoesNotExist:
+			userdata = None
+		return userdata
 
 
 def get_emls_from_zips(path):

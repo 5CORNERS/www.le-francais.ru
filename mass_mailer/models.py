@@ -71,6 +71,7 @@ class Profile(models.Model):
 	subscribed = models.BooleanField(default=True)
 	_email = models.EmailField(blank=True, null=True)
 	status = models.CharField(choices=PROFILE_STATUS_CHOICES, default=PROFILE_STATUS_OK, max_length=16)
+	comment = models.CharField(max_length=1024, blank=True, null=True)
 
 	def get_unsubscribe_url(self):
 		domain = 'www.le-francais.ru'
