@@ -4,7 +4,8 @@ from email.utils import formataddr
 from ssl import socket_error
 
 from django.db.models import Q, Count, Sum, Case, When, F, \
-	DecimalField, IntegerField
+	DecimalField, IntegerField, Max
+from django.db.models.functions import Cast
 from django.utils import timezone
 from typing import Tuple
 
@@ -167,6 +168,8 @@ class UsersFilter(models.Model):
 
 	last_activity_before = models.DateField(null=True, blank=True)
 	last_activity_after = models.DateField(null=True, blank=True)
+
+	min_lesson_number = models.IntegerField(null=True, blank=True)
 
 	has_name_for_emails = models.BooleanField(default=False)
 
@@ -338,6 +341,10 @@ class UsersFilter(models.Model):
 				recipients = recipients.filter(
 					_cup_amount__gte=self.cups_amount_gte
 				)
+			if self.min_lesson_number:
+				recipients = recipients.filter(log_messages__message__regex=r"^\d+$").distinct().annotate(max_lesson_logged=Max(
+					Cast('log_messages__message', models.IntegerField())
+				)).filter(max_lesson_logged__gte=self.min_lesson_number)
 			if self.last_activity_before:
 				...
 				# sessions = Session.objects.select_related('user').filter(
