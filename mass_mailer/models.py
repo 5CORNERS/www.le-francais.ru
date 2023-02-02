@@ -170,6 +170,7 @@ class UsersFilter(models.Model):
 	last_activity_after = models.DateField(null=True, blank=True)
 
 	min_lesson_number = models.IntegerField(null=True, blank=True)
+	logged_more_than_once = models.BooleanField(default=True, blank=True)
 
 	has_name_for_emails = models.BooleanField(default=False)
 
@@ -197,7 +198,7 @@ class UsersFilter(models.Model):
 
 	def get_recipients(self):
 		from tinkoff_merchant.models import Payment
-		recipients = User.objects.all()
+		recipients = User.objects.filter(is_active=True)
 		if self:
 			if self.manual_email_list:
 				email_list = [email.strip() for email in
@@ -381,6 +382,10 @@ class UsersFilter(models.Model):
 						output_field=IntegerField(),
 						default=0))
 				).order_by('payments_amount_sum')
+			if self.logged_more_than_once:
+				recipients = recipients.annotate(
+					last_login_date=Cast('last_login', models.DateField())
+				).exclude(Q(date_joined__date=F('last_login_date'))|Q(last_login__isnull=True))
 		return recipients
 
 	@staticmethod
