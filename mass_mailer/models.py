@@ -342,9 +342,11 @@ class UsersFilter(models.Model):
 					_cup_amount__gte=self.cups_amount_gte
 				)
 			if self.min_lesson_number:
-				recipients = recipients.filter(log_messages__message__regex=r"^\d+$").distinct().annotate(max_lesson_logged=Max(
-					Cast('log_messages__message', models.IntegerField())
-				)).filter(max_lesson_logged__gte=self.min_lesson_number)
+				recipients = recipients.filter(log_messages__message__regex=r"^\d+$").distinct().annotate(
+					max_lesson_logged=Max(Case(
+						When(Q(log_messages__type=2)|Q(log_messages__type=1, log_messages__value__gte=60), then=Cast('log_messages__message', models.IntegerField())),
+						default=0, output_field=models.IntegerField()
+					))).filter(max_lesson_logged__gte=self.min_lesson_number)
 			if self.last_activity_before:
 				...
 				# sessions = Session.objects.select_related('user').filter(
