@@ -85,7 +85,7 @@ def get_creative_dict(request) -> Dict:
     utm_source = request.GET.get('ad_unit_utm_source')
     try:
         max_width = float(request.GET.get('max_width'))
-    except ValueError:
+    except (ValueError, TypeError):
         max_width = 10000
     page_view_id = request.GET.get('page_view_id')
     now = timezone.now()
