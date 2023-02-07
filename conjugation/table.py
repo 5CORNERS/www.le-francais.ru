@@ -238,9 +238,9 @@ class Tense:
 				word = word[0].upper() + word[1:]
 			ssml += word
 			if n == 2 or n == 5:
-				ssml += '<break strength="strong"/> '
+				ssml += '<break/>. '
 			else:
-				ssml += '<break strength="medium"/> '
+				ssml += '<break/>, '
 		ssml = ssml[0:-1]
 		ssml += '</prosody></speak>'
 		return ssml
