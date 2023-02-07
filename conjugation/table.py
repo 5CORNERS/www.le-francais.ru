@@ -233,12 +233,15 @@ class Tense:
 		for n, person in enumerate(self.persons):
 			if person.part_0 == '-':
 				continue
-			ssml += sub('<.*?>', '', '{part0}{part1}{part2}'.format(part0=person.part_0, part1=person.forms[0], part2=person.part_2))
-			if n == 2:
-				ssml += '. '
+			word = sub('<.*?>', '', '{part0}{part1}{part2}'.format(part0=person.part_0, part1=person.forms[0], part2=person.part_2))
+			if n == 3 or n == 0:
+				word = word[0].upper() + word[1:]
+			ssml += word
+			if n == 2 or n == 5:
+				ssml += '<break strength="strong"/> '
 			else:
-				ssml += ', '
-		ssml = ssml[0:-2] + '.'
+				ssml += '<break strength="medium"/> '
+		ssml = ssml[0:-1]
 		ssml += '</prosody></speak>'
 		return ssml
 
