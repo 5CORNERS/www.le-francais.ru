@@ -19,6 +19,16 @@ class Command(BaseCommand):
                     elif b.value.source[0:2] == '﻿-':
                         b.value.source = '﻿\u2014' + b.value.source[2:]
                     set_block(i, b, l.body)
+                elif b.block_type == 'paragraph' and '<br>' in b.value.source:
+                    l_changed = True
+                    b.value.source = b.value.source.replace('<br>', '<br/>')
+                    if b.value.source[0] == '-':
+                        b.value.source = '\u2014' + b.value.source[1:]
+                    elif b.value.source[0:2] == '﻿-':
+                        b.value.source = '﻿\u2014' + b.value.source[2:]
+                    elif b.value.source[0:5] == '<p>﻿-':
+                        b.value.source = '<p>﻿\u2014' + b.value.source[5:]
+                    set_block(i, b, l.body)
             if l_changed:
                 print(l.lesson_number)
                 l.save(update_fields=['body'])
@@ -35,6 +45,15 @@ class Command(BaseCommand):
                             r_body_block['value'] = '\u2014' + r_body_block['value'][1:]
                         elif r_body_block['value'][0:2] == '﻿-':
                             r_body_block['value'] = '﻿\u2014' + r_body_block['value'][2:]
+                        changed = True
+                    elif r_body_block['type'] == 'paragraph' and '<br>' in r_body_block['value']:
+                        r_body_block['value'] = r_body_block['value'].replace('<br>', '<br/>')
+                        if r_body_block['value'][0] == '-':
+                            r_body_block['value'] = '\u2014' + r_body_block['value'][1:]
+                        elif r_body_block['value'][0:2] == '﻿-':
+                            r_body_block['value'] = '﻿\u2014' + r_body_block['value'][2:]
+                        elif r_body_block['value'][0:5] == '<p>﻿-':
+                            r_body_block['value'] = '<p>﻿\u2014' + r_body_block['value'][5:]
                         changed = True
                     new_r_body.append(r_body_block)
                 r_content_decoded["body"] = json.dumps(new_r_body)
