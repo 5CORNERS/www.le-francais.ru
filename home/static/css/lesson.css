@@ -340,3 +340,7 @@ a.page-review:hover {
   --mdb-table-accent-bg: transparent;
   background-color: var(--mdb-table-hover-bg);
 }
+
+div#body p {
+    margin-bottom: 0.5rem;
+}
