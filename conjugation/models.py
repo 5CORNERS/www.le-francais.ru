@@ -125,13 +125,13 @@ class Verb(models.Model):
 	aspirate_h = models.BooleanField(default=False)
 	maison = models.BooleanField(default=False)
 
-	homonym = models.IntegerField(null=True, default=None)
+	homonym = models.IntegerField(null=True, default=None, blank=True)
 
 	reflexive_only = models.BooleanField(default=False)
 	can_be_pronoun = models.BooleanField(default=False)
 
 	is_defective = models.BooleanField(default=False)
-	deffective = models.ForeignKey('DeffectivePattern', null=True, on_delete=models.SET_NULL)
+	deffective = models.ForeignKey('DeffectivePattern', null=True, on_delete=models.SET_NULL, blank=True)
 
 	pp_invariable = models.BooleanField(default=False)
 
@@ -167,7 +167,7 @@ class Verb(models.Model):
 
 	regle = models.ForeignKey(Regle, on_delete=models.SET_NULL, blank=True, null=True)
 
-	audio_url = models.URLField(default=None, null=True)
+	audio_url = models.URLField(default=None, null=True, blank=True)
 
 	main_part = models.CharField(max_length=64)
 	main_part_no_accents = models.CharField(max_length=64)
