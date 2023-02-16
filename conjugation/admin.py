@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Except, Verb
+from .models import Except, Verb, Regle
 
 
 # Register your models here.
@@ -51,3 +51,8 @@ class VerbAdmin(admin.ModelAdmin):
         'is_slang',
         'is_etre_verb',
     ]
+
+
+@admin.register(Regle)
+class RegleAdmin(admin.ModelAdmin):
+    search_fields = ['verb__infinitive', 'verb__infinitive_no_accents']

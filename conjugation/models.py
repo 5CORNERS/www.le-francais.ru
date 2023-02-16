@@ -86,7 +86,7 @@ class RuTag(Tag):
 
 class Regle(models.Model):
 	text_rus = models.CharField(max_length=100000, default='')
-	text_fr = models.CharField(max_length=100000, default='')
+	text_fr = models.CharField(max_length=100000, default='', blank=True)
 
 	def __str__(self):
 		verb = self.verb_set.order_by('-count').first()
