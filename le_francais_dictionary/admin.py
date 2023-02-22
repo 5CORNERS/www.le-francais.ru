@@ -382,4 +382,4 @@ class UserDayRepetitionAdmin(admin.ModelAdmin):
 
 @admin.register(UnifiedWord)
 class UnifiedWordAdmin(admin.ModelAdmin):
-	search_fields = ['word', 'translation', 'group_id']
+	search_fields = ['word', 'translation', 'group__pk']
