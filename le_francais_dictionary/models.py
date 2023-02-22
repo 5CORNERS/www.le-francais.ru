@@ -195,7 +195,7 @@ class Word(models.Model):
 	group = models.ForeignKey('WordGroup', on_delete=models.SET_NULL, null=True, blank=True)
 	definition_num = models.IntegerField(null=True, blank=True, default=None)
 
-	order = models.IntegerField(null=True, default=None)
+	order = models.IntegerField(null=True, default=None, blank=True)
 
 	class Meta:
 		ordering = ['order']
@@ -560,8 +560,8 @@ class Word(models.Model):
 						self.save()
 					return self
 		shtooka_url = None
-		if not ('<speak>' in self.word_ssml
-		        and 'gender=' in self.word_ssml):
+		if not ('<speak>' in self.get_ssml()
+		        and 'gender=' in self.get_ssml()):
 			shtooka_url = shtooka_by_title_in_path(
 				title=remove_parenthesis(self.word),
 				ftp_path=FTP_FR_WORDS_PATH,
@@ -595,7 +595,7 @@ class WordTranslation(models.Model):
 	translations_ssml = models.CharField(max_length=1000, null=True, default=None, blank=True)
 	polly = models.ForeignKey(PollyTask, null=True, blank=True, on_delete=models.PROTECT)
 	_polly_url = models.URLField(null=True, default=None, blank=True)
-	packet = models.ForeignKey('Packet', on_delete=models.CASCADE, null=True)
+	packet = models.ForeignKey('Packet', on_delete=models.CASCADE, null=True, blank=True)
 
 	@property
 	def filename(self):
@@ -757,6 +757,9 @@ class UnifiedWord(models.Model):
 		self._original_translations = None
 		self._original_word = None
 		self._original_words = None
+
+	def __str__(self):
+		return f'{self.word}'
 
 	@property
 	def ru_filename(self):

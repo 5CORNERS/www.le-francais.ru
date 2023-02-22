@@ -12,6 +12,7 @@ from django.core.checks import messages
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 
+from conjugation.models import Regle
 from home.models import LessonPage
 from .forms import DictionaryCsvImportForm, DictionaryWordFormset
 from .models import Word, WordTranslation, Packet, WordGroup, \
@@ -358,9 +359,27 @@ class VerbFormAdmin(admin.ModelAdmin):
 @admin.register(DictionaryError)
 class DictionaryErrorAdmin(admin.ModelAdmin):
 	ordering = ['-datetime_creation']
-	search_fields = ['user', 'message']
+	search_fields = ['user__username']
 	readonly_fields = ['user', 'message', 'datetime_creation']
 	list_filter = (
 		('datetime_creation', DateFieldListFilter),
 	)
 	list_display = ['__str__', 'user', 'datetime_creation']
+
+@admin.register(UserWordData)
+class UserWordDataAdmin(admin.ModelAdmin):
+	search_fields = ['user', 'word']
+	ordering = ['-datetime']
+	list_display = ['__str__']
+
+@admin.register(UserWordRepetition)
+class UserWordRepetitionAdmin(admin.ModelAdmin):
+	pass
+
+@admin.register(UserDayRepetition)
+class UserDayRepetitionAdmin(admin.ModelAdmin):
+	search_fields = ['user__username']
+
+@admin.register(UnifiedWord)
+class UnifiedWordAdmin(admin.ModelAdmin):
+	search_fields = ['word', 'translation', 'group_id']
