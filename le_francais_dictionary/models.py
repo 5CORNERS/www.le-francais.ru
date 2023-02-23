@@ -135,7 +135,7 @@ class UserPacket(models.Model):
 
 class WordGroup(models.Model):
 	def __str__(self):
-		return f'{[w.word for w in self.word_set.all().order_by("order")]}'
+		return f'{self.pk}:{[w.word for w in self.word_set.all().order_by("order")]}'
 
 
 class EmptyUni:
