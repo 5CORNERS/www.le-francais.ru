@@ -4,7 +4,8 @@ import csv
 
 from home.models import LessonPage
 from le_francais_dictionary.models import Verb, VerbForm, VerbPacket, VerbPacketRelation
-from le_francais_dictionary.consts import TENSE_CHOICES
+from le_francais_dictionary.consts import TENSE_CHOICES, \
+	TYPE_AFFIRMATIVE, TYPE_NEGATIVE
 
 
 def get_tense_id(name):
@@ -15,6 +16,10 @@ def get_tense_id(name):
 
 
 class Command(BaseCommand):
+	def add_arguments(self, parser):
+		parser.add_argument('--revoice', action='store_true', dest='is_revoice')
+		parser.add_argument('--id', dest='ids', action='append', type=int)
+
 	def handle(self, *args, **options):
 		verb_translations_path = 'le_francais_dictionary/local/Verbs for cards - SMALL TABLE.csv'
 		verb_forms_path = 'le_francais_dictionary/local/Verbs for cards - GRAND TABLE.csv'
@@ -29,8 +34,8 @@ class Command(BaseCommand):
 
 		infinitive_translation_map = {}
 		for row in verb_infinitives_reader:
-			infinitive = row['INFINITIVE']
-			translation = row['TRANSLATION']
+			infinitive = row['INFINITIVE'].strip()
+			translation = row['TRANSLATION'].strip()
 			translation_text = row['RU_SYNT']
 			infinitive_translation_map[infinitive] = (translation, translation_text)
 
@@ -39,6 +44,8 @@ class Command(BaseCommand):
 
 		forms_to_save = []
 		verb_packet_relations_to_save = []
+		verbs_to_revoice = []
+		forms_to_revoice = []
 
 		verb_order = 0
 		form_order = 0
@@ -47,9 +54,11 @@ class Command(BaseCommand):
 		last_lesson_number = None
 		lessons = {lesson.lesson_number: lesson for lesson in LessonPage.objects.all()}
 		for row in verb_forms_reader:
-			if not row['TRANSLATION'] or not row['LESSON_NO']:
+			if not row['TRANSLATION'] or not row['LESSON_NO'] or not row['ID']:
 				continue
 			lesson_number = int(row['LESSON_NO'])
+			if lesson_number > 1000:
+				lesson_number = lesson_number - 1000 # WHY??
 			if lesson_number in existed_packets.keys():
 				packet = existed_packets[lesson_number]
 			else:
@@ -61,13 +70,22 @@ class Command(BaseCommand):
 				existed_packets[lesson_number] = packet
 
 			infinitive = row['VERBE']
+			infinitive_type = TYPE_AFFIRMATIVE if row['TYPE'] == 'affirmative' else TYPE_NEGATIVE
+			infinitive_is_regular = True if row['CLASS'] == 'regular' else False
 			if infinitive in existed_verbs.keys():
-				verb = existed_verbs[infinitive]
+				verb: Verb = existed_verbs[infinitive]
+				if (verb.type, verb.regular) != (infinitive_type, infinitive_is_regular):
+					verb.type, verb.regular = infinitive_type, infinitive_is_regular
+					verb.save(update_fields=['type', 'regular'])
+				if (verb.translation, verb.translation_text) != infinitive_translation_map[infinitive]:
+					verb.translation, verb.translation_text = infinitive_translation_map[infinitive]
+					verb.save(update_fields=['translation', 'translation_text'])
+					verbs_to_revoice.append(verb)
 			elif infinitive in infinitive_translation_map.keys():
 				verb = Verb(
 					verb=row['VERBE'],
-					type=Verb.TYPE_AFFIRMATIVE if row['TYPE'] == 'affirmative' else Verb.TYPE_NEGATIVE,
-					regular=True if row['CLASS'] == 'regular' else False,
+					type=infinitive_type,
+					regular=infinitive_is_regular,
 				)
 				verb.translation, verb.translation_text = infinitive_translation_map[infinitive]
 				print(f'Saving Verb: {verb.verb}')
@@ -101,15 +119,21 @@ class Command(BaseCommand):
 
 			if (form_form, verb.pk) in existed_forms.keys():
 				form = existed_forms[(form_form, verb.pk)]
+				if form.form != form_form or form.translation != row['TRANSLATION']:
+					forms_to_revoice.append(form)
 			else:
 				form = VerbForm(form=form_form)
 				existed_forms[(form_form, verb.pk)] = form
+				forms_to_revoice.append(form)
 
 			form_to_show: str = row['CONJUGAISON']
 			if form_to_show.find('ils') == 0:
 				form_to_show = 'ils (elles)' + form_to_show[3:]
 			elif form_to_show.find('il') == 0:
 				form_to_show = 'il (elle, on)' + form_to_show[2:]
+
+			# if int(row['ID']) in options['ids']:
+			# 	to_revoice.append((form.form, verb.pk))
 
 			form.verb = verb
 			form.tense = get_tense_id(tense)
@@ -137,3 +161,13 @@ class Command(BaseCommand):
 		print(f'Saving verb Forms...')
 		VerbForm.objects.bulk_create([form for form in forms_to_save if form._state.adding])
 		bulk_update([form for form in forms_to_save if not form._state.adding], batch_size=200)
+
+		if options['is_revoice']:
+
+			for v in verbs_to_revoice:
+				print(v)
+				v.to_voice()
+
+			for f in forms_to_revoice:
+				print(f)
+				f.to_voice()
