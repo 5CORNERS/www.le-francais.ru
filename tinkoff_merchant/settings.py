@@ -11,6 +11,8 @@ DEFAULT_CONFIG = {
     'ITEM_TAX': 'none',
     'TERMINAL_KEY': '',
     'SECRET_KEY': '',
+    'TTL_DAYS': 1,
+    'TTL_MINUTES': 0,
 }
 
 

@@ -1,8 +1,10 @@
+import datetime
 from typing import List
 from decimal import *
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.utils import timezone
 
 from .consts import TAXES, TAXATIONS, CATEGORIES, LESSON_TICKETS, \
 	COFFEE_CUPS, CATEGORIES_E_NAME, \
@@ -61,6 +63,7 @@ class Payment(models.Model):
 	class Meta:
 		verbose_name = 'Заказ'
 		verbose_name_plural = 'Заказы'
+		ordering = ['creation_date']
 
 	def __str__(self):
 		return 'Заказ #{self.id}:{self.order_id}:{self.payment_id}'.format(self=self)
@@ -117,10 +120,17 @@ class Payment(models.Model):
 		return self
 
 	def to_json(self, data=None) -> dict:
+		link_ttl_days = get_config()['TTL_DAYS']
+		link_ttl_minutes = get_config()['TTL_MINUTES']
+		redirect_due_date = (timezone.now() + datetime.timedelta(days=link_ttl_days, minutes=link_ttl_minutes))
+		redirect_due_date_str = redirect_due_date.strftime(
+				'%Y-%m-%dT%H:%M:%S'
+			) + redirect_due_date.strftime('%z')[:3] + ':' + redirect_due_date.strftime('%z')[3:]
 		json = {
 			'Amount': self.amount,
 			'OrderId': self.order_id,
 			'Description': self.description,
+			'RedirectDueDate': redirect_due_date_str
 		}
 		if self.customer_key:
 			json['CustomerKey'] = self.customer_key

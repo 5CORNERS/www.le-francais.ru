@@ -553,6 +553,7 @@ TINKOFF_PAYMENTS_CONFIG = {
     'ITEM_TAX': 'none',
     'TERMINAL_KEY': os.environ.get('TINKOFF_TERMINAL_ID'),
     'SECRET_KEY': os.environ.get('TINKOFF_TERMINAL_PASSWORD'),
+    'TTL_DAYS': 7,
 }
 
 # Pay34 settings
