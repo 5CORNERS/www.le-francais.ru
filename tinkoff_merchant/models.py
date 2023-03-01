@@ -1,10 +1,8 @@
-import datetime
 from typing import List
 from decimal import *
 
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.utils import timezone
 
 from .consts import TAXES, TAXATIONS, CATEGORIES, LESSON_TICKETS, \
 	COFFEE_CUPS, CATEGORIES_E_NAME, \
@@ -49,6 +47,9 @@ class Payment(models.Model):
 
 	creation_date = models.DateTimeField(verbose_name='Дата создания заказа', auto_now_add=True, null=True)
 	update_date = models.DateTimeField(verbose_name='Дата последнего обновления', auto_now=True, null=True)
+	redirect_due_date = models.DateTimeField(
+		verbose_name='Срок жизни ссылки', blank=True, null=True, default=None
+	)
 	status_history = JSONField(default=list, encoder=Encoder)
 	response_history = JSONField(default=list, encoder=Encoder)
 	request_history = JSONField(default=list, encoder=Encoder)
@@ -63,7 +64,7 @@ class Payment(models.Model):
 	class Meta:
 		verbose_name = 'Заказ'
 		verbose_name_plural = 'Заказы'
-		ordering = ['creation_date']
+		ordering = ['-creation_date']
 
 	def __str__(self):
 		return 'Заказ #{self.id}:{self.order_id}:{self.payment_id}'.format(self=self)
@@ -120,12 +121,9 @@ class Payment(models.Model):
 		return self
 
 	def to_json(self, data=None) -> dict:
-		link_ttl_days = get_config()['TTL_DAYS']
-		link_ttl_minutes = get_config()['TTL_MINUTES']
-		redirect_due_date = (timezone.now() + datetime.timedelta(days=link_ttl_days, minutes=link_ttl_minutes))
-		redirect_due_date_str = redirect_due_date.strftime(
+		redirect_due_date_str = self.redirect_due_date.strftime(
 				'%Y-%m-%dT%H:%M:%S'
-			) + redirect_due_date.strftime('%z')[:3] + ':' + redirect_due_date.strftime('%z')[3:]
+			) + self.redirect_due_date.strftime('%z')[:3] + ':' + self.redirect_due_date.strftime('%z')[3:]
 		json = {
 			'Amount': self.amount,
 			'OrderId': self.order_id,

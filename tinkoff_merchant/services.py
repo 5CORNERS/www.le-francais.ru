@@ -3,12 +3,13 @@ import json
 import types
 
 import requests
+from django.utils import timezone
 
 from .consts import PAYMENT_STATUS_CONFIRMED
 from .utils import Encoder
 from .models import Payment
 from .settings import get_config
-from datetime import datetime
+from datetime import datetime, timedelta
 from .signals import payment_refund
 
 
@@ -91,6 +92,11 @@ class MerchantAPI:
         return token == self._token(data)
 
     def init(self, p: Payment, data=None) -> Payment:
+        if p.redirect_due_date is None:
+            link_ttl_days = get_config()['TTL_DAYS']
+            link_ttl_minutes = get_config()['TTL_MINUTES']
+            p.redirect_due_date = (
+                        timezone.now() + timedelta(days=link_ttl_days,  minutes=link_ttl_minutes))
         response = self._request('INIT', requests.post, p.to_json(data), p).json()
         return self.update_payment_from_response(p, response)
 
