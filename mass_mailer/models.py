@@ -1,5 +1,5 @@
 import smtplib
-from datetime import datetime
+from datetime import datetime, timedelta
 from email.utils import formataddr
 from ssl import socket_error
 
@@ -15,7 +15,7 @@ import uuid
 from annoying.fields import AutoOneToOneField, JSONField
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, DateRangeField
 from django.core.mail import EmailMessage, send_mass_mail, \
 	EmailMultiAlternatives, get_connection
 from django.core.mail.backends.smtp import EmailBackend
@@ -27,6 +27,10 @@ from django.shortcuts import reverse
 from postman.api import pm_broadcast
 from user_sessions.models import Session
 from validate_email import validate_email
+
+from tinkoff_merchant.consts import PAYMENT_STATUS_CHOICES, \
+	CATEGORIES as PAYMENT_ITEM_CATEGORY, CATEGORIES
+from tinkoff_merchant.models import Payment
 
 User = get_user_model()
 
@@ -166,7 +170,7 @@ class UsersFilter(models.Model):
 	joined_before = models.DateField(null=True, blank=True)
 	joined_after = models.DateField(null=True, blank=True)
 
-	last_activity_before = models.DateField(null=True, blank=True)
+	last_activity_before = models.DateField(null=True, blank=True, help_text="Sessions Only")
 	last_activity_after = models.DateField(null=True, blank=True)
 
 	min_lesson_number = models.IntegerField(null=True, blank=True)
@@ -179,6 +183,7 @@ class UsersFilter(models.Model):
 	manual_blacklist = models.TextField(blank=True, null=True, default=None)
 	ignore_subscriptions = models.BooleanField(default=False)
 	send_once = models.BooleanField(default=True)
+	send_once_in_days = models.IntegerField(blank=True, null=True)
 	send_to_not_validated = models.BooleanField(default=True)
 
 	send_only_first = models.IntegerField(null=True, blank=True, default=None)
@@ -193,11 +198,106 @@ class UsersFilter(models.Model):
 
 	cups_amount_gte = models.IntegerField(null=True, blank=True, default=None)
 
+	payments_statuses = ChoiceArrayField(models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES), blank=True, null=True)
+	payments_range = DateRangeField(null=True, blank=True, help_text='Bounds works as [,)')
+	payments_range_days = IntegerField(null=True, blank=True)
+	payments_exclude = models.BooleanField(default=False)
+	payments_category = ChoiceArrayField(models.CharField(max_length=20, choices=CATEGORIES), blank=True, null=True)
+
+	payments_statuses_b = ChoiceArrayField(models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES), blank=True, null=True)
+	payments_range_b = DateRangeField(null=True, blank=True, help_text='Bounds works as [,)')
+	payments_range_days_b = IntegerField(null=True, blank=True)
+	payments_exclude_b = models.BooleanField(default=False)
+	payments_category_b = ChoiceArrayField(models.CharField(max_length=20, choices=CATEGORIES), blank=True, null=True)
+
+	payments_statuses_c = ChoiceArrayField(models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES), blank=True, null=True)
+	payments_range_c = DateRangeField(null=True, blank=True, help_text='Bounds works as [,)')
+	payments_range_days_c = IntegerField(null=True, blank=True)
+	payments_exclude_c = models.BooleanField(default=False)
+	payments_category_c = ChoiceArrayField(models.CharField(max_length=20, choices=CATEGORIES), blank=True, null=True)
+
+	recipient_country = ChoiceArrayField(models.CharField(max_length=2,choices=[
+		('RU', 'Russia'),
+		('FR', 'France'),
+		('UA', 'Ukraine'),
+		('BY', 'Belarus'),
+		('KZ', 'Kazakhstan'),
+		('DE', 'Germany'),
+		('BE', 'Belgium'),
+		('CH', 'Switzerland'),
+		('CA', 'Canada'),
+		('NL', 'Netherlands'),
+		('PL', 'Poland'),
+		('US', 'United States'),
+		('GB', 'United Kingdom'),
+		('ES', 'Spain'),
+		('IT', 'Italy'),
+		('UZ', 'Uzbekistan'),
+		('CZ', 'Czechia'),
+		('LV', 'Latvia'),
+		('AM', 'Armenia'),
+		('TR', 'Turkey'),
+		('MD', 'Moldova'),
+		('EE', 'Estonia'),
+		('IL', 'Israel'),
+		('LU', 'Luxembourg'),
+		('GE', 'Georgia'),
+		('LT', 'Lithuania'),
+		('KG', 'Kyrgyzstan'),
+		('AE', 'United Arab Emirates'),
+		('AZ', 'Azerbaijan'),
+		('FI', 'Finland'),
+		('BG', 'Bulgaria'),
+		('ME', 'Montenegro'),
+		('SE', 'Sweden'),
+		('IE', 'Ireland'),
+		('RS', 'Serbia'),
+		('RO', 'Romania'),
+		('TH', 'Thailand'),
+		('KR', 'South Korea'),
+		('AT', 'Austria'),
+		('IN', 'India'),
+		('TJ', 'Tajikistan'),
+		('BR', 'Brazil'),
+		('CY', 'Cyprus'),
+		('NO', 'Norway'),
+		('VN', 'Vietnam'),
+		('GN', 'Guinea'),
+		('DK', 'Denmark'),
+		('SK', 'Slovakia'),
+		('MA', 'Morocco'),
+		('CI', 'Ivory Coast'),
+		('NC', 'New Caledonia'),
+		('BJ', 'Benin'),
+		('TN', 'Tunisia'),
+		('CL', 'Chile'),
+		('AG', 'Antigua and Barbuda'),
+		('ID', 'Indonesia'),
+		('DZ', 'Algeria'),
+		('SG', 'Singapore'),
+		('LK', 'Sri Lanka'),
+		('ZA', 'South Africa'),
+		('PT', 'Portugal'),
+		('SC', 'Seychelles'),
+		('MC', 'Monaco'),
+		('HK', 'Hong Kong'),
+		('LA', 'Laos'),
+		('BH', 'Bahrain'),
+		('CD', 'DR Congo'),
+		('GR', 'Greece'),
+		('NG', 'Nigeria'),
+		('MN', 'Mongolia'),
+		('MY', 'Malaysia'),
+		('MX', 'Mexico'),
+		('MV', 'Maldives'),
+		('MU', 'Mauritius'),
+		('AU', 'Australia'),
+		('LB', 'Lebanon')]), blank=True, null=True)
+
 	def __str__(self):
 		return self.name
 
 	def get_recipients(self):
-		from tinkoff_merchant.models import Payment
 		recipients = User.objects.filter(is_active=True)
 		if self:
 			if self.manual_email_list:
@@ -349,13 +449,17 @@ class UsersFilter(models.Model):
 						default=0, output_field=models.IntegerField()
 					))).filter(max_lesson_logged__gte=self.min_lesson_number)
 			if self.last_activity_before:
-				...
-				# sessions = Session.objects.select_related('user').filter(
-				# 	last_activity__gt=self.last_activity_before,
-				# 	user__isnull=False
-				# ).distinct('user').values('user')
+				user_pks = Session.objects.filter(
+					last_activity__lte=self.last_activity_before,
+					user__isnull=False
+				).values_list('user_id', flat=True).distinct()
+				recipients.filter(pk__in=user_pks)
 			if self.last_activity_after:
-				...
+				user_pks = Session.objects.filter(
+					last_activity__gte=self.last_activity_after,
+					user__isnull=False
+				).values_list('user_id', flat=True).distinct()
+				recipients.filter(pk__in=user_pks)
 			if self.manual_blacklist:
 				blacklist = self.manual_blacklist.split(",")
 				recipients = recipients.exclude(email__in=blacklist)
@@ -386,7 +490,57 @@ class UsersFilter(models.Model):
 				recipients = recipients.annotate(
 					last_login_date=Cast('last_login', models.DateField())
 				).exclude(Q(date_joined__date=F('last_login_date'))|Q(last_login__isnull=True))
+			recipients = self.filter_by_payments(recipients)
+			if self.recipient_country:
+				recipients = recipients.filter(country_code__in=self.recipient_country)
 		return recipients
+
+	def iter_payments_filters(self):
+		return iter([
+			(self.payments_statuses, self.payments_range, self.payments_range_days, self.payments_exclude, self.payments_category),
+			(self.payments_statuses_b, self.payments_range_b, self.payments_range_days_b, self.payments_exclude_b, self.payments_category_b),
+			(self.payments_statuses_c, self.payments_range_c, self.payments_range_days_c, self.payments_exclude_c, self.payments_category_c)
+		])
+
+	def filter_user_payments(self, user:User):
+		user_payments = Payment.objects.filter(customer_key=str(user.pk))
+		for p_statuses, p_range, p_range_days, p_exclude, p_categories in self.iter_payments_filters():
+			iteration = Payment.objects.filter(customer_key=str(user.pk))
+			if p_statuses or p_range is not None or p_range_days is not None or p_categories:
+				if p_statuses:
+					iteration = iteration.filter(status__in=p_statuses)
+				if p_range is not None:
+					iteration = iteration.filter(creation_date__date__range=p_range)
+				if p_range_days is not None:
+					iteration = iteration.filter(creation_date__gte=timezone.now().date() - timedelta(days=p_range_days))
+				if p_categories:
+					iteration = iteration.filter(receipt__receiptitem__category__in=p_categories)
+				if iteration.count():
+					pks = iteration.values_list('pk', flat=True)
+					if p_exclude:
+						user_payments.exclude(pk__in=pks)
+					else:
+						user_payments.filter(pk__in=pks)
+		return user_payments
+	def filter_by_payments(self, query):
+		for p_statuses, p_range, p_range_days, p_exclude, p_categories in self.iter_payments_filters():
+			payments = Payment.objects.all()
+			if p_statuses or p_range is not None or p_range_days is not None or p_categories:
+				if p_statuses:
+					payments = payments.filter(status__in=p_statuses)
+				if p_range is not None:
+					payments = payments.filter(creation_date__date__range=p_range)
+				if p_range_days is not None:
+					payments = payments.filter(creation_date__gte=timezone.now().date() - timedelta(days=p_range_days))
+				if p_categories:
+					payments = payments.filter(receipt__receiptitem__category__in=p_categories)
+				if payments.count():
+					user_pks = payments.filter(customer_key__isnull=False).annotate(customer_id=Cast('customer_key', models.IntegerField())).values_list('customer_id', flat=True).distinct()
+					if p_exclude:
+						query = query.exclude(pk__in=user_pks)
+					else:
+						query = query.filter(pk__in=user_pks)
+		return query
 
 	@staticmethod
 	def first_last_payments_filter(first_payment_date, last_payment_date,
@@ -414,6 +568,14 @@ class UsersFilter(models.Model):
 		if self.send_once:
 			recipients = recipients.exclude(
 				pk__in=[log.recipient_id for log in MessageLog.objects.filter(result__in=MessageLog.RESULTS_SUCCESS, message=message)])
+		if self.send_once_in_days:
+			recipients = recipients.exclude(
+				pk__in=MessageLog.objects.filter(
+					result__in=MessageLog.RESULTS_SUCCESS,
+					message=message,
+					sent_datetime__date__gte=(timezone.now() - timedelta(days=self.send_once_in_days)).date()
+				).values_list('recipient_id', flat=True)
+			)
 		if not self.send_to_not_validated:
 			recipients = recipients.exclude(
 				pk__in=MessageLog.objects.filter(result__in=MessageLog.RESULTS_FAILURE,
@@ -461,6 +623,7 @@ class Message(models.Model):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._recipients = None
+		self._contexts = {}
 
 	def __str__(self):
 		return f'{self.name} — {self.template_subject}'
@@ -724,9 +887,17 @@ class Message(models.Model):
 		)
 
 	def get_context(self, recipient, additional_context=None, include_subject=True):
+		if recipient.pk in self._contexts.keys():
+			return self._contexts[recipient.pk]
 		from tinkoff_merchant.models import Payment
 		from tinkoff_merchant.consts import COFFEE_CUPS
-		last_cup_payment = Payment.objects.filter(customer_key=str(recipient.user.pk), status__in=['CONFIRMED', 'AUTHORIZED'], receipt__receiptitem__category=COFFEE_CUPS).order_by('update_date').last()
+		last_cup_payment = Payment.objects.filter(
+			customer_key=str(recipient.user.pk),
+			status__in=['CONFIRMED', 'AUTHORIZED'],
+			receipt__receiptitem__category=COFFEE_CUPS
+		).order_by('update_date').last()
+
+		filtered_payments = self.recipients_filter.filter_user_payments(recipient.user)
 
 		next_after_payment_activation = None
 		if last_cup_payment:
@@ -746,8 +917,9 @@ class Message(models.Model):
 			last_payment={
 				'date': last_cup_payment.update_date if last_cup_payment else None,
 				'cups_count': sum(
-					item.site_quantity for item in last_cup_payment.items()) if last_cup_payment else 0
+					item.site_quantity for item in last_cup_payment.items()) if last_cup_payment else 0,
 			},
+			filtered_payments=filtered_payments,
 			unsubscribe_url=recipient.get_unsubscribe_url(),
 			first_name=recipient.user.first_name,
 			name=name,
@@ -759,6 +931,7 @@ class Message(models.Model):
 		if additional_context:
 			for k, v in additional_context.items():
 				context[k]=v
+		self._contexts[recipient.pk] = context
 		return context
 
 
