@@ -4,6 +4,7 @@ from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseRedire
 	HttpResponsePermanentRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.utils import timezone
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -27,9 +28,9 @@ def get_polly_audio_link(request):
 	task_completed = False
 	polly_audio, created = PollyAudio.objects.select_related('polly').get_or_create(key=key)
 	text = Tense(key=key).get_polly_ssml()
-	if polly_audio.polly and polly_audio.polly.text != text:
-		polly_audio.delete()
-		polly_audio, created = PollyAudio.objects.select_related('polly').get_or_create(key=key)
+	# if polly_audio.polly and polly_audio.polly.text != text:
+	# 	polly_audio.delete()
+	# 	polly_audio, created = PollyAudio.objects.select_related('polly').get_or_create(key=key)
 	if created or polly_audio.polly is None or polly_audio.polly.url is None:
 		polly_task = PollyTask(
 			text=text,
@@ -38,13 +39,14 @@ def get_polly_audio_link(request):
 			sample_rate=SAMPLE_RATE_22050,
 			voice_id=VOICE_ID_LEA,
 			output_format=OUTPUT_FORMAT_MP3,
+			datetime_creation=timezone.now()
 		)
 		polly_task.create_task('polly-conjugations/', wait=False, save=True)
 		polly_audio.polly = polly_task
 		polly_audio.save()
 	elif polly_audio.polly.task_status != 'completed':
 		polly_audio.polly.update_task()
-		if polly_audio.polly.task_status == 'complete':
+		if polly_audio.polly.task_status == 'completed':
 			task_completed = True
 	else:
 		task_completed = True
