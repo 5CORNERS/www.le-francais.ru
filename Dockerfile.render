@@ -19,6 +19,7 @@ FROM ghcr.io/renderinc/heroku-app-builder:${HEROKU_STACK} AS builder
 # ARG MY_BUILD_TIME_ENV_VAR
 # ARG DATABASE_URL
 ARG MAXMIND_LICENSE_KEY
+ARG EMAIL_URL
 
 # The FROM statement above refers to an image with the base buildpacks already
 # in place. We then run the apply-buildpacks.py script here because, unlike our
