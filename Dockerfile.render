@@ -18,10 +18,12 @@ FROM ghcr.io/renderinc/heroku-app-builder:${HEROKU_STACK} AS builder
 
 # ARG MY_BUILD_TIME_ENV_VAR
 # ARG DATABASE_URL
+ARG MAXMIND_LICENSE_KEY
 
 # The FROM statement above refers to an image with the base buildpacks already
 # in place. We then run the apply-buildpacks.py script here because, unlike our
 # `v2` image, this allows us to expose build-time env vars to your app.
+RUN apk add libressl-dev
 RUN /render/build-scripts/apply-buildpacks.py heroku-20
 
 # We strongly recommend that you package a Procfile with your application, but
