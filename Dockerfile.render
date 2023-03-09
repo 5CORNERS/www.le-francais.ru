@@ -23,8 +23,6 @@ ARG MAXMIND_LICENSE_KEY
 # The FROM statement above refers to an image with the base buildpacks already
 # in place. We then run the apply-buildpacks.py script here because, unlike our
 # `v2` image, this allows us to expose build-time env vars to your app.
-USER root
-RUN apt-get --assume-yes install libressl-dev
 RUN /render/build-scripts/apply-buildpacks.py heroku-20
 
 # We strongly recommend that you package a Procfile with your application, but
