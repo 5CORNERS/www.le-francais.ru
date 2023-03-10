@@ -196,7 +196,7 @@ TEMPLATE_LOADERS = TEMPLATES[0]['OPTIONS']['loaders']
 
 WSGI_APPLICATION = 'le_francais.wsgi.application'
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY', default=get_random_secret_key())
 
 SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT") == "True"
 
