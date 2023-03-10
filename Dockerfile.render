@@ -17,7 +17,7 @@ FROM ghcr.io/renderinc/heroku-app-builder:${HEROKU_STACK} AS builder
 # use case.
 
 # ARG MY_BUILD_TIME_ENV_VAR
-# ARG DATABASE_URL
+ARG DATABASE_URL
 ARG MAXMIND_LICENSE_KEY
 ARG EMAIL_URL
 
