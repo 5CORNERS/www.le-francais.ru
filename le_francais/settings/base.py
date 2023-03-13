@@ -423,15 +423,13 @@ WAGTAIL_SITE_NAME = "le_francais"
 BASE_URL = 'www.le-francais.ru'
 
 ALLOWED_HOSTS = [
-    'hidden-refuge-27954-bs-4.herokuapp.com',
-    'testserver',
     'www.le-francais.ru',
-    'le-francais.ru',
-    'localhost',
-    '127.0.0.1',
-    '192.168.0.27',
     os.environ.get('HEROKU_APP_NAME', 'none')+'.herokuapp.com'
 ]
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME', None)
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS', 'SAMEORIGIN')
 
