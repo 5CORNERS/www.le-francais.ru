@@ -18,11 +18,7 @@ FROM ghcr.io/renderinc/heroku-app-builder:${HEROKU_STACK} AS builder
 
 # ARG MY_BUILD_TIME_ENV_VAR
 ARG DATABASE_URL
-ARG MAXMIND_LICENSE_KEY
 ARG EMAIL_URL
-ARG 1
-ARG 2
-ARG 3
 
 # The FROM statement above refers to an image with the base buildpacks already
 # in place. We then run the apply-buildpacks.py script here because, unlike our
@@ -35,6 +31,18 @@ RUN /render/build-scripts/apply-buildpacks.py ${HEROKU_STACK}
 RUN if [[ -f /app/Procfile ]]; then \
   /render/build-scripts/create-process-types "/app/Procfile"; \
 fi;
+
+# Maxmind Database Update
+
+RUN apt-get update && \
+    apt-get install -y libmaxminddb0 libmaxminddb-dev geoipupdate && \
+    mkdir -p /app/geoip
+
+ENV MAXMIND_ACCOUNT_ID ${GEOIPUPDATE_ACCOUNT_ID}
+ENV MAXMIND_LICENSE_KEY ${GEOIPUPDATE_LICENSE_KEY}
+
+RUN echo "AccountID ${MAXMIND_ACCOUNT_ID}\nLicenseKey ${MAXMIND_LICENSE_KEY}\nEditionIDs GeoLite2-City GeoLite2-Country" > /etc/GeoIP.conf && \
+    geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
 
 # For running the app, we use a clean base image and also one without Ubuntu development packages
 # https://devcenter.heroku.com/articles/heroku-20-stack#heroku-20-docker-image

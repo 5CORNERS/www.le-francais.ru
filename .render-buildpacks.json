@@ -1,6 +1,5 @@
 {
   "buildpacks": [
-    "https://github.com/danstiner/heroku-buildpack-geoip-geolite2.git",
     "heroku/python"
   ]
 }
