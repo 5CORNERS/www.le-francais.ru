@@ -9,6 +9,20 @@ ARG IMPORT_VERSION=v4
 ARG HEROKU_STACK=${IMPORT_VERSION}-heroku-20
 FROM ghcr.io/renderinc/heroku-app-builder:${HEROKU_STACK} AS builder
 
+# Maxmind Database Update
+
+USER root
+
+RUN sudo apt-get update && \
+    sudo apt-get install -y libmaxminddb0 libmaxminddb-dev geoipupdate && \
+    mkdir -p /app/geoip
+
+ENV MAXMIND_ACCOUNT_ID ${GEOIPUPDATE_ACCOUNT_ID}
+ENV MAXMIND_LICENSE_KEY ${GEOIPUPDATE_LICENSE_KEY}
+
+RUN echo "AccountID ${MAXMIND_ACCOUNT_ID}\nLicenseKey ${MAXMIND_LICENSE_KEY}\nEditionIDs GeoLite2-City GeoLite2-Country" > /etc/GeoIP.conf && \
+    geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
+
 
 # Below, please specify any build-time environment variables that you need to
 # reference in your build (as called by your buildpacks). If you don't specify
@@ -31,18 +45,6 @@ RUN /render/build-scripts/apply-buildpacks.py ${HEROKU_STACK}
 RUN if [[ -f /app/Procfile ]]; then \
   /render/build-scripts/create-process-types "/app/Procfile"; \
 fi;
-
-# Maxmind Database Update
-
-RUN apt-get update && \
-    apt-get install -y libmaxminddb0 libmaxminddb-dev geoipupdate && \
-    mkdir -p /app/geoip
-
-ENV MAXMIND_ACCOUNT_ID ${GEOIPUPDATE_ACCOUNT_ID}
-ENV MAXMIND_LICENSE_KEY ${GEOIPUPDATE_LICENSE_KEY}
-
-RUN echo "AccountID ${MAXMIND_ACCOUNT_ID}\nLicenseKey ${MAXMIND_LICENSE_KEY}\nEditionIDs GeoLite2-City GeoLite2-Country" > /etc/GeoIP.conf && \
-    geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
 
 # For running the app, we use a clean base image and also one without Ubuntu development packages
 # https://devcenter.heroku.com/articles/heroku-20-stack#heroku-20-docker-image
