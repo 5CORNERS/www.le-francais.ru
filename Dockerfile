@@ -23,8 +23,7 @@ RUN apt-get update && \
 ENV MAXMIND_ACCOUNT_ID ${GEOIPUPDATE_ACCOUNT_ID}
 ENV MAXMIND_LICENSE_KEY ${GEOIPUPDATE_LICENSE_KEY}
 
-RUN echo "AccountID ${MAXMIND_ACCOUNT_ID}\nLicenseKey ${MAXMIND_LICENSE_KEY}\nEditionIDs GeoLite2-City GeoLite2-Country" > /etc/GeoIP.conf && \
-    geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
+RUN geoipupdate -v -f /etc/secrets/GeoIP.conf -d /app/geoip
 
 
 # Below, please specify any build-time environment variables that you need to
