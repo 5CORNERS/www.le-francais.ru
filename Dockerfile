@@ -13,8 +13,8 @@ FROM ghcr.io/renderinc/heroku-app-builder:${HEROKU_STACK} AS builder
 
 USER root
 
-RUN sudo apt-get update && \
-    sudo apt-get install -y libmaxminddb0 libmaxminddb-dev geoipupdate && \
+RUN apt-get update && \
+    apt-get install -y libmaxminddb0 libmaxminddb-dev geoipupdate && \
     mkdir -p /app/geoip
 
 ENV MAXMIND_ACCOUNT_ID ${GEOIPUPDATE_ACCOUNT_ID}
