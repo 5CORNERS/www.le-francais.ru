@@ -338,6 +338,7 @@ class PacketAdmin(admin.ModelAdmin):
 @admin.register(WordGroup)
 class GroupAdmin(admin.ModelAdmin):
 	inlines = [WordInline]
+	search_fields = ['pk']
 
 
 class VerbFormInline(admin.TabularInline):
@@ -368,18 +369,23 @@ class DictionaryErrorAdmin(admin.ModelAdmin):
 
 @admin.register(UserWordData)
 class UserWordDataAdmin(admin.ModelAdmin):
-	search_fields = ['user', 'word']
+	search_fields = ['user__username', 'user__email', 'word__word']
 	ordering = ['-datetime']
 	list_display = ['__str__']
 
 @admin.register(UserWordRepetition)
 class UserWordRepetitionAdmin(admin.ModelAdmin):
-	pass
+	search_fields = ['user__username', 'user__email', 'word__word']
+	ordering = ['-repetition_datetime']
+	list_display = ['repetition_datetime', 'time', 'user', 'word']
 
 @admin.register(UserDayRepetition)
 class UserDayRepetitionAdmin(admin.ModelAdmin):
-	search_fields = ['user__username']
+	search_fields = ['user__username', 'user__email']
+	ordering = ['-datetime']
+	list_display = ['datetime', 'user', 'success']
 
 @admin.register(UnifiedWord)
 class UnifiedWordAdmin(admin.ModelAdmin):
-	search_fields = ['word', 'translation', 'group__pk']
+	search_fields = ['word__word', 'translation__translation', 'group__pk']
+	# raw_id_fields = ['group']
