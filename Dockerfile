@@ -23,7 +23,8 @@ RUN apt-get update && \
 ENV MAXMIND_ACCOUNT_ID ${GEOIPUPDATE_ACCOUNT_ID}
 ENV MAXMIND_LICENSE_KEY ${GEOIPUPDATE_LICENSE_KEY}
 
-RUN geoipupdate -v -f /etc/secrets/GeoIP.conf -d /app/geoip
+COPY GeoIP.conf /etc/GeoIP.conf
+RUN geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
 
 
 # Below, please specify any build-time environment variables that you need to
