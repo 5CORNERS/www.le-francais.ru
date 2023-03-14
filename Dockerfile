@@ -19,7 +19,7 @@ RUN apt-get update && \
     echo "deb https://packages.maxmind.com/any/$(lsb_release -sc) main" > /etc/apt/sources.list.d/maxmind.list && \
     apt-get update && \
     apt-get install -y libmaxminddb0 libmaxminddb-dev geoipupdate && \
-    mkdir -p /app/geoip && \
+    mkdir -p /app/geoip
 
 ENV MAXMIND_ACCOUNT_ID ${GEOIPUPDATE_ACCOUNT_ID}
 ENV MAXMIND_LICENSE_KEY ${GEOIPUPDATE_LICENSE_KEY}
