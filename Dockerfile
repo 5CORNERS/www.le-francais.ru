@@ -29,8 +29,7 @@ RUN geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
 # Installing Cron Jobs
 
 RUN apt-get -y install cron
-COPY le-francais.cron /etc/cron.d/
-RUN chmod 0644 1000:1000 /etc/cron.d/le-francais.cron
+COPY --chown 1000:1000 le-francais.cron /etc/cron.d/
 CMD cron && tail -f /var/log/cron.log
 
 # Below, please specify any build-time environment variables that you need to
