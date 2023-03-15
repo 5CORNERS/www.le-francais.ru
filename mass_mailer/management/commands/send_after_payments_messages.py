@@ -19,11 +19,20 @@ User = get_user_model()
 
 class Command(BaseCommand):
 	def add_arguments(self, parser):
-		parser.add_argument(
+		group = parser.add_mutually_exclusive_group(required=True)
+		group.add_argument(
 			'-sn', '--settings-name',
-			required=True,
-			help='You need to specify an email settings name..',
-			dest='settings_name'
+			required=False,
+			help='You need to specify an email settings name',
+			dest='settings_name',
+			type=str,
+		)
+		group.add_argument(
+			'-si', '--settings-id',
+			required=False,
+			help='You need to specify an email settings id',
+			dest = 'settings_id',
+			type=int
 		)
 		parser.add_argument(
 			'-sb', '--subject',
@@ -52,7 +61,13 @@ class Command(BaseCommand):
 		)
 
 	def handle(self, *args, **options):
-		settings = get_email_setting(options['settings_name'])
+		if options['settings_name']:
+			settings = get_email_setting_by_name(options['settings_name'])
+		elif options['settings_id']:
+			settings = get_email_setting_by_id(options['settings_id'])
+		else:
+			print("Email settings name or id must be specified")
+			raise
 		message = create_message(
 			settings=settings,
 			subject=options['subject'],
@@ -117,13 +132,21 @@ def split_username_email(addr):
 	return username, email
 
 
-def get_email_setting(name:str):
+def get_email_setting_by_name(name:str):
 	try:
 		username, host_port = name.split("@", 1)
 		host, port = host_port.split(":", 1)
 		setting = EmailSettings.objects.get(username=username, host=host, port=port)
 	except EmailSettings.DoesNotExist:
 		print(f'Setting with name "{name}" does not exist!')
+		raise
+	return setting
+
+def get_email_setting_by_id(id):
+	try:
+		setting = EmailSettings.objects.get(pk=id)
+	except EmailSettings.DoesNotExist:
+		print(f'Setting with id "{id}" does not exist!')
 		raise
 	return setting
 

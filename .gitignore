@@ -29,3 +29,5 @@ home/data/devoirs.csv
 !/html_files/resume_populaire/get_markers.py
 !/html_files/resume_populaire/update_markers.py
 /geoip/
+GeoIP.conf
+/..bfg-report/
