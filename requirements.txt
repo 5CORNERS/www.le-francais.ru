@@ -23,6 +23,7 @@ tabulate~=0.8.10
 
 django-allauth==0.37.0 # 0.40.0 -- last django 1; 0.42.0 -- added yandex provider
 
+python-jose>=3.0.0
 social-auth-core
 social-auth-app-django==4.0.0
 mutagen~=1.45.1
