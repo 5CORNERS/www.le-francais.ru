@@ -30,7 +30,6 @@ RUN geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
 
 RUN apt-get -y install cron
 COPY --chown=1000:1000 le-francais.cron /etc/cron.d/
-CMD cron && tail -f /var/log/cron.log
 
 # Below, please specify any build-time environment variables that you need to
 # reference in your build (as called by your buildpacks). If you don't specify
