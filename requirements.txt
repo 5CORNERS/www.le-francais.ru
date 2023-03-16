@@ -43,11 +43,6 @@ django-user-agents
 django-annoying
 django-js-reverse
 django-cors-headers
-
-libsass
-django-compressor
-django-sass-processor
-
 django-storages
 boto3~=1.16.49
 google-cloud-texttospeech

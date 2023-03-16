@@ -72,8 +72,6 @@ INSTALLED_APPS = [
     'user_sessions',
     'corsheaders',
 
-    'sass_processor',
-
     'storages',
 
     'social_django',
@@ -288,10 +286,7 @@ LOCALE_PATHS = [
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'sass_processor.finders.CssFinder',
 ]
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static_compiled'),
@@ -299,29 +294,6 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
-
-WHITENOISE_MAX_AGE = 31557600
-
-WHITENOISE_KEEP_ONLY_HASHED_FILES = False
-
-def add_header_service_worker_allowed(headers, path, url):
-    if path.endswith('.js'):
-        headers['Service-Worker-Allowed'] = '/'
-
-WHITENOISE_ADD_HEADERS_FUNCTION = add_header_service_worker_allowed
-
-# Sass Processor settings
-
-SASS_PROCESSOR_AUTO_INCLUDE = False
-
-SASS_PROCESSOR_INCLUDE_DIRS = [
-    os.path.join(BASE_DIR, 'home/static/scss'),
-    # os.path.join(BASE_DIR, 'home/static/components'),
-]
-
-SASS_PRECISION = 8
-
-SASS_OUTPUT_STYLE = 'compact'
 
 # Amazon AWS S3 settings
 
