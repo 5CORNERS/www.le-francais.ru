@@ -1,8 +1,5 @@
 cd "$1" || exit 1
 echo "-----> Installing Not deps packages"
 pip install django-session-header --no-dependencies
-echo "-----> Deleting static src folders"
+echo "-----> Deleting static src folder"
 rm -rf ./static_src
-rm -rf ./home/static
-rm -rf ./le_francais_dictionary/static
-rm -rf ./conjugation/static
