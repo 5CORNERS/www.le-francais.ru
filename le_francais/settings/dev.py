@@ -13,10 +13,7 @@ except ImportError:
 	pass
 
 ALLOWED_HOSTS = ALLOWED_HOSTS + [
-	'le-francais.ru',
 	'localhost',
-	'127.0.0.1',
-	'192.168.0.27',
 ]
 
 # STATICFILES_STORAGE = 'django.core.files.storage.FileSystemStorage'

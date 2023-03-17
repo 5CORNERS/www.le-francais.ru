@@ -114,7 +114,8 @@ INSTALLED_APPS = [
     'django_js_reverse',
     'mass_mailer',
 
-    'log_errors'
+    'log_errors',
+    'whitenoise.runserver_nostatic'
 ]
 
 MIDDLEWARE = [
