@@ -28,8 +28,7 @@ RUN geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
 
 # Installing Cron Jobs
 
-RUN apt-get -y install cron
-COPY --chown=1000:1000 le-francais.cron /etc/cron.d/
+COPY le-francais.cron /app/le-francais.cron
 
 # Below, please specify any build-time environment variables that you need to
 # reference in your build (as called by your buildpacks). If you don't specify
@@ -77,4 +76,4 @@ ENTRYPOINT [ "/render/setup-env" ]
 # You may override the process type that is run by replacing 'web' with another
 # process type name in the CMD line below. That process type must have been
 # defined in the app's Procfile during build.
-CMD [ "/render/process/web" ]
+CMD [ "sh", "-c", "crontab /app/le-francais.cron && cron && /render/process/web" ]
