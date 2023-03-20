@@ -26,10 +26,6 @@ ENV MAXMIND_LICENSE_KEY ${GEOIPUPDATE_LICENSE_KEY}
 COPY GeoIP.conf /etc/GeoIP.conf
 RUN geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
 
-# Installing Cron Jobs
-
-COPY le-francais.cron /app/le-francais.cron
-
 # Below, please specify any build-time environment variables that you need to
 # reference in your build (as called by your buildpacks). If you don't specify
 # the arg below, you won't be able to access it in your build. You can also
@@ -76,4 +72,4 @@ ENTRYPOINT [ "/render/setup-env" ]
 # You may override the process type that is run by replacing 'web' with another
 # process type name in the CMD line below. That process type must have been
 # defined in the app's Procfile during build.
-CMD [ "sh", "-c", "crontab /app/le-francais.cron && cron && /render/process/web" ]
+CMD [ "/render/process/web" ]
