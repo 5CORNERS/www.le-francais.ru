@@ -283,10 +283,15 @@ def create_moderator_notification(sender, instance):
 		Q(is_superuser=True) | Q(groups__permissions=perm) | Q(user_permissions=perm)
 	).distinct()
 	for user in users_to_notify:
-		notification_user, created = NotificationUser.objects.get_or_create(
-			notification=notification,
-			user=user
-		)
+		try:
+			notification_user, created = NotificationUser.objects.get_or_create(
+				notification=notification,
+				user=user
+			)
+		except NotificationUser.MultipleObjectsReturned:
+			NotificationUser.objects.filter(
+				notification=notification, user=user
+			)[1:].delete()
 
 def create_pybb_post_notification(sender, instance: Post, **kwargs):
 	if not instance.on_moderation and instance.updated is None:
@@ -311,10 +316,15 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 			id__in=instance.topic.subscribers.all()).exclude(
 			id=instance.user.id)
 		for user in users_to_notify:
-			notification_user, created = NotificationUser.objects.get_or_create(
-				notification=notification,
-				user=user
-			)
+			try:
+				notification_user, created = NotificationUser.objects.get_or_create(
+					notification=notification,
+					user=user
+				)
+			except NotificationUser.MultipleObjectsReturned:
+				NotificationUser.objects.filter(
+					notification=notification, user=user
+				)[1:].delete()
 
 	elif instance.on_moderation:
 		if instance.updated is not None:
@@ -473,7 +483,13 @@ def create_dictionary_notification(sender, instance: UserDayRepetition, **kwargs
 	)
 	if created:
 		print(f'Created Notification {notification.datetime_creation} -- {len(instance.repetitions)}')
-	NotificationUser.objects.get_or_create(
-		notification=notification,
-		user=instance.user
-	)
+	try:
+		NotificationUser.objects.get_or_create(
+			notification=notification,
+			user=instance.user
+		)
+	except NotificationUser.MultipleObjectsReturned:
+		NotificationUser.objects.filter(
+			notification=notification,
+			user=instance.user
+		)[1:].delete()

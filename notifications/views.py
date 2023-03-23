@@ -119,10 +119,15 @@ def check_notifications(request):
 	notifications = Notification.objects.prefetch_related(
 		'notificationuser_set').filter(pk__in=pks)
 	for notification in notifications:
-		notification_user, created = NotificationUser.objects.get_or_create(
-			user=request.user,
-			notification=notification
-		)
+		try:
+			notification_user, created = NotificationUser.objects.get_or_create(
+				notification=notification,
+				user=request.user
+			)
+		except NotificationUser.MultipleObjectsReturned:
+			NotificationUser.objects.filter(
+				notification=notification, user=request.user
+			)[1:].delete()
 	NotificationUser.objects.filter(
 		notification_id__in=notifications,
 		user=request.user,
