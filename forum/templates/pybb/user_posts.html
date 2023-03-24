@@ -13,6 +13,12 @@
 {% block content %}
     <div class="posts">
         {% for post in object_list %}
+            {% ifchanged post.topic.forum %}
+                <h1>{{ post.topic.forum.name }}</h1>
+            {% endifchanged %}
+            {% ifchanged post.topic %}
+                <h2>{{ post.topic.name }}</h2>
+            {% endifchanged %}
             {% include "pybb/post_template.html" %}
         {% endfor %}
     </div>
