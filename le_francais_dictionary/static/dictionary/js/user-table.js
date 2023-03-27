@@ -136,53 +136,78 @@ let loadFilterButton = {
                     tableFiltersLoaded = false;
             return;
         }
-        $.ajax(Urls['dictionary:get_filters'](), {
-            method: 'POST',
-            dataType: 'json',
-            async: false,
-            statusCode: {
-                200: function (r) {
-                    tableFilters = r;
-                    tableFiltersLoaded = true;
+        if (!isVerbs()) {
+            $.ajax(Urls['dictionary:get_filters'](), {
+                method: 'POST',
+                dataType: 'json',
+                async: false,
+                statusCode: {
+                    200: function (r) {
+                        tableFilters = r;
+                        tableFiltersLoaded = true;
+                    },
+                    404: function () {
+                        tableFilters = tableFiltersInit.valueOf();
+                        tableFiltersLoaded = false;
+                    },
+                    500: function () {
+                        tableFilters = tableFiltersInit.valueOf();
+                        tableFiltersLoaded = false;
+                    }
                 },
-                404: function () {
-                    tableFilters = tableFiltersInit.valueOf();
-                    tableFiltersLoaded = false;
-                },
-                500: function () {
-                    tableFilters = tableFiltersInit.valueOf();
-                    tableFiltersLoaded = false;
+                complete: function () {
+                    after_complete(...args)
                 }
-            },
-            complete: function () {
-                after_complete(...args)
-            }
-        })
+            })
+        } else {
+            this.getVerbFilters(after_complete, args)
+        }
+    },
+    getVerbFilters: function (after_complete, args=[]){
+        const json = localStorage.getItem('verbsTableFilters');
+        if (json !== null) {
+            tableFilters = JSON.parse(json)
+            tableFiltersLoaded = true;
+        } else {
+            tableFilters = tableFiltersInit.valueOf();
+            tableFiltersLoaded = false;
+        }
+        after_complete(...args);
     },
     saveFilters: function(){
         if (FILTER_SAVING_ON === false){
             loadFilterButton.afterSavingError();
             return;
         }
-        $.ajax(Urls['dictionary:save_filters'](), {
-            method: 'POST',
-            data: JSON.stringify({
-                filters: tableFilters
-            }),
-            contentType: "application/json",
-            dataType: "json",
-            beforeSend: function () {
-                loadFilterButton.setStateSaving();
-            },
-            statusCode:{
-                200: function () {
-                    loadFilterButton.afterSavingFilters()
+        if (!isVerbs()) {
+            $.ajax(Urls['dictionary:save_filters'](), {
+                method: 'POST',
+                data: JSON.stringify({
+                    filters: tableFilters
+                }),
+                contentType: "application/json",
+                dataType: "json",
+                beforeSend: function () {
+                    loadFilterButton.setStateSaving();
                 },
-                500: function () {
-                    loadFilterButton.afterSavingError();
-                },
-            },
-        })
+                statusCode: {
+                    200: function () {
+                        loadFilterButton.afterSavingFilters()
+                    },
+                    500: function () {
+                        loadFilterButton.afterSavingError();
+                    }
+                }
+            })
+        } else {
+            this.saveVerbFilters();
+        }
+    },
+    saveVerbFilters: function () {
+        loadFilterButton.setStateSaving();
+        const json = JSON.stringify(tableFilters);
+        localStorage.setItem('verbsTableFilters', json);
+        loadFilterButton.afterSavingFilters();
     },
     filter: function () {
         savingFiltersEnabled = false;
@@ -251,7 +276,7 @@ function select(elm, value){
 }
 
 function saveFilters(process, filterIds, filterAttrs, value=undefined, checked=undefined){
-    if (!savingFiltersEnabled || isVerbs()){
+    if (!savingFiltersEnabled){
         return
     }
     $.each(filterIds, function (i, filterId) {
@@ -426,16 +451,19 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                         })
                         switchColorCoding(colorCodingEnabled)
                     }else{
+                        saveFilters('beforeLoad', ['id_packets'], []);
                         let $hideRegularCheckbox = $('#hideRegular')
                         hideRegular($hideRegularCheckbox[0].checked)
                         $hideRegularCheckbox.on('change', function (e) {
                             e.preventDefault();
+                            saveFilters('afterLoad', [this.id], ['checked'])
                             hideRegular(this.checked)
                         });
                         let $hideNegativeCheckbox = $('#hideNegative');
                         hideNegative($hideNegativeCheckbox[0].checked);
                         $hideNegativeCheckbox.on('change', function (e){
                             e.preventDefault();
+                            saveFilters('afterLoad', [this.id], ['checked'])
                             hideNegative(this.checked)
                         })
                     }

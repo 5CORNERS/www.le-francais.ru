@@ -11,7 +11,7 @@
         let csrf = "{{ csrf_token }}";
         const tableType = "verbs"
         let init_packets = null;
-        const FILTER_SAVING_ON = false;
+        const FILTER_SAVING_ON = true;
     </script>
 {% endblock %}
 {% block extra_head %}
@@ -65,6 +65,7 @@
                             class="text-medium"> глаголы</span><span
                             class="text-large"> список глаголов</span>
                     </button>
+                    <button class="btn btn-info mb-2 ml-lg-auto text-truncate" id="getAndApplyFilters">Повторить последнюю выборку</button>
                 </form>
             </div>
             <div class="col-12 words-footable">
