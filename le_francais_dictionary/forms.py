@@ -90,11 +90,7 @@ class WordsManagementFilterForm(forms.Form):
 				words = repetition_words + packet_words
 				words = list(dict.fromkeys(words))
 			else:
-				query = Word.objects.prefetch_related(
-					'userwordrepetition_set', 'userdata',
-					'userwordignore_set',
-					'wordtranslation_set', 'group'
-				).filter(packet_id__in=data['packets'])
+				query = Word.objects.filter(packet_id__in=data['packets'])
 				words = list(query.distinct().order_by('order'))
 			# time = datetime.now()
 			words = prefetch_words_data(words, self.user)
