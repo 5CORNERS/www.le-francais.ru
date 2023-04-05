@@ -219,33 +219,8 @@ DATABASES = {
     }
 }
 
-TESTING = 'test' in sys.argv[1:]
-if TESTING:
-    print('=========================')
-    print('In TEST Mode')
-    # print('Disabling Migrations')
-    # class DisableMigrations(object):
-    #
-    #     def __contains__(self, item):
-    #         return True
-    #
-    #     def __getitem__(self, item):
-    #         return None
-    #
-    # MIGRATION_MODULES = DisableMigrations()
-    print('Using Local Test Database')
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'localhost',
-        'PORT': '5433',
-    }
-    print('=========================\n')
-else:
-    db_from_env = dj_database_url.config(conn_max_age=500)
-    DATABASES['default'].update(db_from_env)
+db_from_env = dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(db_from_env)
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 20971520
 FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520
@@ -361,11 +336,14 @@ POSTMAN_AUTO_MODERATE_AS = True
 POSTMAN_NAME_USER_AS = 'username'
 POSTMAN_SHOW_USER_AS = 'username'
 POSTMAN_DISALLOW_ANONYMOUS = True
+POSTMAN_MAILER_APP = 'mailer'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 MASS_EMAIL_BACKEND = EMAIL_BACKEND
+MASS_MAILER_DEFAULT_CHUNK_SIZE = 10
+MASS_MAILER_DEFAULT_DELAY = 60
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Le-francais.ru <no-reply@mail.le-francais.ru>')
-DEFAULT_REPLY_TO_EMAIL = os.getenv('DEFAULT_REPLY_TO_EMAIL', 'support@le-francais.ru')
+DEFAULT_REPLY_TO_EMAIL = os.getenv('DEFAULT_REPLY_TO_EMAIL', DEFAULT_FROM_EMAIL)
 
 email_config = dj_email_url.config()
 

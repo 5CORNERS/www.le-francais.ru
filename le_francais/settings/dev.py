@@ -7,13 +7,8 @@ DEBUG = True
 COMPRESS_ENABLED = True
 REQUEST_ID_HEADER = None
 
-try:
-	from .local import *
-except ImportError:
-	pass
-
 ALLOWED_HOSTS = ALLOWED_HOSTS + [
-	'localhost',
+	'localhost','le-francais.ru'
 ]
 
 # STATICFILES_STORAGE = 'django.core.files.storage.FileSystemStorage'
@@ -30,3 +25,8 @@ def add_header_service_worker_allowed(headers, path, url):
         headers['Service-Worker-Allowed'] = '/'
 
 WHITENOISE_ADD_HEADERS_FUNCTION = add_header_service_worker_allowed
+
+try:
+	from .local import *
+except ImportError:
+	pass

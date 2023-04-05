@@ -503,7 +503,7 @@ class UsersFilter(models.Model):
 		])
 
 	def filter_user_payments(self, user:User):
-		user_payments = Payment.objects.filter(customer_key=str(user.pk))
+		user_payments = Payment.objects.filter(customer_key=str(user.pk)).order_by('creation_date')
 		for p_statuses, p_range, p_range_days, p_exclude, p_categories in self.iter_payments_filters():
 			iteration = Payment.objects.filter(customer_key=str(user.pk))
 			if p_statuses or p_range is not None or p_range_days is not None or p_categories:
@@ -531,7 +531,7 @@ class UsersFilter(models.Model):
 				if p_range is not None:
 					payments = payments.filter(creation_date__date__range=p_range)
 				if p_range_days is not None:
-					payments = payments.filter(creation_date__gte=timezone.now().date() - timedelta(days=p_range_days))
+					payments = payments.filter(creation_date__gt=timezone.now() - timedelta(days=p_range_days))
 				if p_categories:
 					payments = payments.filter(receipt__receiptitem__category__in=p_categories)
 				if payments.count():
@@ -540,6 +540,11 @@ class UsersFilter(models.Model):
 						query = query.exclude(pk__in=user_pks)
 					else:
 						query = query.filter(pk__in=user_pks)
+				else:
+					if p_exclude:
+						pass
+					else:
+						return query.none()
 		return query
 
 	@staticmethod
@@ -568,7 +573,7 @@ class UsersFilter(models.Model):
 		if self.send_once:
 			recipients = recipients.exclude(
 				pk__in=[log.recipient_id for log in MessageLog.objects.filter(result__in=MessageLog.RESULTS_SUCCESS, message=message)])
-		if self.send_once_in_days:
+		elif self.send_once_in_days:
 			recipients = recipients.exclude(
 				pk__in=MessageLog.objects.filter(
 					result__in=MessageLog.RESULTS_SUCCESS,
@@ -610,8 +615,8 @@ class Message(models.Model):
 		related_query_name='received_mass_mailer_messages'
 	)
 
-	created_datetime = models.DateTimeField(auto_now_add=True)
-	send_datetime = models.DateTimeField(null=True)
+	created_datetime = models.DateTimeField(auto_now_add=True, blank=True)
+	send_datetime = models.DateTimeField(null=True, blank=True)
 
 	list_unsubscribe_header = models.BooleanField(default=False)
 
@@ -619,6 +624,8 @@ class Message(models.Model):
 	postman_subject = models.CharField(max_length=120, blank=True)
 	postman_body = models.TextField(blank=True)
 	postman_sender = models.ForeignKey(User, related_name="postmaster_broadcast_messages", null=True, blank=True)
+
+	validate_emails = models.BooleanField(default=True)
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -638,15 +645,18 @@ class Message(models.Model):
 			return self.email_settings.get_backend()
 		else:
 			klass = import_string(settings.MASS_EMAIL_BACKEND)
-			host     = settings.MASS_EMAIL_HOST
-			port     = settings.MASS_EMAIL_PORT
-			user     = settings.MASS_EMAIL_HOST_USER
-			password = settings.MASS_EMAIL_HOST_PASSWORD
-			use_tls  = settings.MASS_EMAIL_USE_TLS
-			use_ssl  = settings.MASS_EMAIL_USE_SSL
-			return klass(host=host, port=port, username=user, password=password,
-	                 use_tls=use_tls, fail_silently=False, use_ssl=use_ssl, timeout=None,
-	                 ssl_keyfile=None, ssl_certfile=None)
+			if settings.MASS_EMAIL_BACKEND.endswith('smtp.EmailBackend'):
+				host     = settings.MASS_EMAIL_HOST
+				port     = settings.MASS_EMAIL_PORT
+				user     = settings.MASS_EMAIL_HOST_USER
+				password = settings.MASS_EMAIL_HOST_PASSWORD
+				use_tls  = settings.MASS_EMAIL_USE_TLS
+				use_ssl  = settings.MASS_EMAIL_USE_SSL
+				return klass(host=host, port=port, username=user, password=password,
+		                 use_tls=use_tls, fail_silently=False, use_ssl=use_ssl, timeout=None,
+		                 ssl_keyfile=None, ssl_certfile=None)
+			else:
+				return klass()
 
 	def set_recipients(self):
 		self._recipients = self.recipients_filter.get_recipients_for_message(message=self)
@@ -781,25 +791,34 @@ class Message(models.Model):
 			return sent_count, errors_count
 		if self.recipients_filter and self.recipients_filter.send_only_first:
 			subscribed_recipients = subscribed_recipients[:self.recipients_filter.send_only_first]
-		chunks = [subscribed_recipients[x:x+self.email_settings.messages_per_connection] for x in range(0, len(subscribed_recipients), self.email_settings.messages_per_connection)]
-		for chunk in chunks:
+		if self.email_settings:
+			chunk_size = self.email_settings.messages_per_connection
+			delay = self.email_settings.delay_between_connections
+			sender_header = self.email_settings.get_sender_header()
+		else:
+			chunk_size = settings.MASS_MAILER_DEFAULT_CHUNK_SIZE
+			delay = settings.MASS_MAILER_DEFAULT_DELAY
+			sender_header = settings.DEFAULT_FROM_EMAIL
+		chunks = [subscribed_recipients[x:x+chunk_size] for x in range(0, len(subscribed_recipients), chunk_size)]
+		for i, chunk in enumerate(chunks):
 			messages_with_recipients = []
 			for recipient in chunk:
-				is_validated = validate_email(
-					email_address=recipient.email,
-					check_regex=True,
-					check_mx=True,
-					smtp_timeout=10,
-					dns_timeout=10,
-					use_blacklist=True)
-				if not is_validated and is_validated is not None:
-					MessageLog.objects.log(self, recipient, MessageLog.RESULT_FAILURE,
-										   log_message=str(f"Can't Validate EMail"))
-					errors_count += 1
-					postman_recipients.append(recipient)
-					continue
+				if self.validate_emails:
+					is_validated = validate_email(
+						email_address=recipient.email,
+						check_regex=True,
+						check_mx=True,
+						smtp_timeout=10,
+						dns_timeout=10,
+						use_blacklist=True)
+					if not is_validated and is_validated is not None:
+						MessageLog.objects.log(self, recipient, MessageLog.RESULT_FAILURE,
+											   log_message=str(f"Can't Validate EMail"))
+						errors_count += 1
+						postman_recipients.append(recipient)
+						continue
 				header = {
-					'Sender': f'{self.email_settings.get_sender_header()}',
+					'Sender': sender_header,
 				}
 				if self.list_unsubscribe_header:
 					header['List-Unsubscribe'] = f'<{recipient.mailer_profile.get_unsubscribe_url()}>'
@@ -836,7 +855,6 @@ class Message(models.Model):
 					backend.send_messages([message])
 					sent_count += 1
 					MessageLog.objects.log(self, recipient, MessageLog.RESULT_SUCCESS, f'Message was sent to {recipient.email}')
-					time.sleep(1)
 				except (socket_error, smtplib.SMTPSenderRefused,
 				        smtplib.SMTPRecipientsRefused,
 				        smtplib.SMTPDataError,
@@ -846,7 +864,8 @@ class Message(models.Model):
 					errors_count += 1
 					print(f"SMTP Error: {str(error)}")
 			backend.close()
-			time.sleep(self.email_settings.delay_between_connections)
+			if i != len(chunks) -1:
+				time.sleep(delay)
 
 		if postman_recipients and self.postman_broadcast:
 			self.sent_postman(postman_recipients)
