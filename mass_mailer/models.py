@@ -627,6 +627,8 @@ class Message(models.Model):
 
 	validate_emails = models.BooleanField(default=True)
 
+	bcc = ArrayField(models.EmailField(), default=list, blank=True)
+
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._recipients = None
@@ -731,7 +733,8 @@ class Message(models.Model):
 					to=[to],
 					headers=header,
 					reply_to=self.get_reply_to_header(),
-					body=Template(self.template_txt).render(Context(data['context']))
+					body=Template(self.template_txt).render(Context(data['context'])),
+					bcc=list(self.bcc) if self.bcc else None
 				)
 				if self.template_html:
 					email_message.attach_alternative(Template(self.template_html).render(Context(data["context"])), 'text/html')
