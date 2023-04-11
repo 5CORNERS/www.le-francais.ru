@@ -1,8 +1,11 @@
+import uuid
 from typing import List
 from decimal import *
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.urls import reverse
+from django.utils import timezone
 
 from .consts import TAXES, TAXATIONS, CATEGORIES, LESSON_TICKETS, \
 	COFFEE_CUPS, CATEGORIES_E_NAME, \
@@ -99,7 +102,20 @@ class Payment(models.Model):
 		return self.get_user()
 
 	def can_redirect(self) -> bool:
-		return self.status == PAYMENT_STATUS_NEW and self.payment_url
+		if self.redirect_due_date and self.redirect_due_date > timezone.now():
+			return self.status == PAYMENT_STATUS_NEW and self.payment_url
+
+	def get_or_create_redirect(self):
+		try:
+			return self.redirect_to_payment_url, False
+		except RedirectToPaymentUrl.DoesNotExist:
+			return RedirectToPaymentUrl.objects.get_or_create(
+				payment=self
+			)
+
+	def get_redirect_url(self) -> str:
+		redirect2payment, created = self.get_or_create_redirect()
+		return redirect2payment.get_url()
 
 	def is_paid(self) -> bool:
 		return self.status in PAYMENT_PAYED_STATUSES
@@ -158,6 +174,10 @@ class Payment(models.Model):
 	def children(self):
 		if self.recurrent:
 			return list(Payment.objects.filter(parent=self))
+
+	@property
+	def visited_through_redirect(self) -> bool:
+		return self.redirect_to_payment_url.visited is not None
 
 
 class Receipt(models.Model):
@@ -251,3 +271,12 @@ class ReceiptItem(models.Model):
 
 	def e_name(self):
 		return '{0}{1}'.format(CATEGORIES_E_NAME[self.category],f' {self.site_quantity}' if self.site_quantity else '')
+
+class RedirectToPaymentUrl(models.Model):
+	payment = models.OneToOneField(Payment, related_name='redirect_to_payment_url',
+	                               unique=True, on_delete=models.CASCADE)
+	uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	visited = models.DateTimeField(null=True, blank=True)
+
+	def get_url(self):
+		return reverse('tinkoff_payment:redirect_to_payment', kwargs={'uuid': self.uuid})

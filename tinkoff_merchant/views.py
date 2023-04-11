@@ -4,9 +4,9 @@ from calendar import monthrange
 import tabulate
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, HttpResponseGone
 from django.shortcuts import get_object_or_404, render
-from django.template import defaultfilters
+from django.template import defaultfilters, TemplateDoesNotExist
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 
 from .consts import PAYMENT_STATUS_CONFIRMED, PAYMENT_STATUS_REFUNDED
-from .models import Payment
+from .models import Payment, RedirectToPaymentUrl
 from .services import MerchantAPI
 from .signals import payment_update, payment_confirm, payment_refund
 
@@ -104,3 +104,16 @@ def get_log(request:HttpRequest, year, month):
         'average_daily': average_daily_income,
         'year': year, 'month': month
     })
+
+
+def redirect_to_payment(request, uuid):
+    redirect2payment = RedirectToPaymentUrl.objects.get(uuid=uuid)
+    if redirect2payment.payment.can_redirect():
+        redirect2payment.visited = timezone.now()
+        redirect2payment.save()
+        return HttpResponseRedirect(redirect2payment.payment.payment_url)
+    else:
+        try:
+            return render(request, '410.html', status=410)
+        except TemplateDoesNotExist:
+            return HttpResponseGone()

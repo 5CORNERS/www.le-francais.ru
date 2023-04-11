@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Ошибка 404{% endblock %}
+{% block title %}Ошибка 410{% endblock %}
 
 {% block content %}
     <div class="container-fluid">
@@ -14,11 +14,11 @@
                     <div class="media mt-4">
                         <img src="{% static 'images/hat-logo.png' %}" class="mr-3" alt="Le-francais.ru Logo"/>
                         <div class="media-body">
-                            <h1 class="mt-0">Ошибка 404.</h1>
+                            <h1 class="mt-0">Ошибка 410.</h1>
                             <h4>
-                                Упс! А такой странички нет :(
+                                Упс! А такой странички больше нет :(
                             </h4>
-                            <p>Вы полагаете, должна была быть? Возможно, это косяк. <a href="/forum/forum/30/">Сообщите нам</a>, пожалуйста, об этой проблеме.</p>
+                            <p>Истёк срок действия ссылки или запрашиваемая страница была удалена.</p>
                         </div>
                     </div>
                 </div>
