@@ -15,6 +15,7 @@ def clear_sent(modeladmin, request, qs):
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
 	readonly_fields = ['sent']
+	raw_id_fields = ['postman_sender']
 	actions = [send, clear_sent]
 
 @admin.register(EmailSettings)
