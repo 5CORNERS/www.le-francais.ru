@@ -1,12 +1,15 @@
 import datetime
+import time
 
 import geoip2.errors
 from django.conf import settings
 from django.contrib.gis.geoip2 import GeoIP2
 from django.middleware import csrf
 from django.utils import timezone
+from django.utils.http import cookie_date
 from django_session_header.middleware import SessionHeaderMixin
 from user_sessions.middleware import SessionMiddleware
+from ads.utils import clear_session_data as ads_clear_session_data
 
 from home.consts import IP_HEADERS_LIST
 
@@ -40,8 +43,7 @@ class SessionHeaderMiddleware(SessionMiddleware):
             request.session.csrf_exempt = True
 
     def process_response(self, request, response):
-        supr = super()
-        response = supr.process_response(request, response)
+        response = super().process_response(request, response)
         if request.session.session_key:
             response['X-SessionID'] = request.session.session_key
         return response
@@ -92,7 +94,7 @@ class CustomSessionMiddleware(SessionHeaderMiddleware):
 
 class GeoIpSessionMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        # This product includes GeoLite2 data created by MaxMind, available from
+        # This method uses GeoLite2 data created by MaxMind, available from
         # https://www.maxmind.com
         now = timezone.now()
         ip = request.session.ip
@@ -101,16 +103,25 @@ class GeoIpSessionMiddleware(MiddlewareMixin):
                 geoip_dict = request.session['geoip']
                 last_check = datetime.datetime.fromisoformat(
                     geoip_dict['last_check'])
-                if (now - last_check).days > 1:
+                last_check_ip = geoip_dict.get('last_check_ip', '')
+                if (now - last_check).days > 1 or last_check_ip != ip:
                     g = GeoIP2()
                     geoip_dict['last_check'] = now.isoformat()
                     for k, v in g.city(ip).items():
                         geoip_dict[k] = v
-                    request.session['geoip'] = geoip_dict
+                    request.session['geoip'] = {
+                        'country_code': geoip_dict.get('country_code', ''),
+                        'country_name': geoip_dict.get('country_name', ''),
+                        'region': geoip_dict.get('region', ''),
+                        'city': geoip_dict.get('city'),
+                        'last_check': geoip_dict.get('last_check', ''),
+                        'last_check_ip': ip
+                    }
             else:
                 g = GeoIP2()
                 geoip_dict = {
-                    'last_check': now.isoformat()
+                    'last_check': now.isoformat(),
+                    'last_check_ip': ip,
                 }
                 for k, v in g.city(ip).items():
                     geoip_dict[k] = v
@@ -128,6 +139,7 @@ class GeoIpSessionMiddleware(MiddlewareMixin):
                 user.save(update_fields=['country_code','city','country_name','region'])
         except geoip2.errors.AddressNotFoundError:
             geoip_dict = {
-                'last_check': now.isoformat()
+                'last_check': now.isoformat(),
+                'last_check_ip': ip,
             }
             request.session['geoip'] = geoip_dict
