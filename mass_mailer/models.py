@@ -1,7 +1,6 @@
 import smtplib
 from datetime import datetime, timedelta
 from email.utils import formataddr
-from ssl import socket_error
 
 from django.db.models import Q, Count, Sum, Case, When, F, \
 	DecimalField, IntegerField, Max
@@ -623,7 +622,9 @@ class Message(models.Model):
 	postman_broadcast = models.BooleanField(default=False, help_text="Private messages for users, who, for some reason, can't or won't receive emails")
 	postman_subject = models.CharField(max_length=120, blank=True)
 	postman_body = models.TextField(blank=True)
-	postman_sender = models.ForeignKey(User, related_name="postmaster_broadcast_messages", null=True, blank=True)
+	postman_sender = models.ForeignKey(
+		User, related_name="postmaster_broadcast_messages",
+		null=True, blank=True, )
 
 	validate_emails = models.BooleanField(default=True)
 
@@ -751,7 +752,7 @@ class Message(models.Model):
 						log_message=f'Message to {message.to} was sent'
 					)
 					time.sleep(1)
-				except (socket_error, smtplib.SMTPSenderRefused,
+				except (smtplib.SMTPSenderRefused,
 				        smtplib.SMTPRecipientsRefused,
 				        smtplib.SMTPDataError,
 				        smtplib.SMTPAuthenticationError) as error:
@@ -858,7 +859,7 @@ class Message(models.Model):
 					backend.send_messages([message])
 					sent_count += 1
 					MessageLog.objects.log(self, recipient, MessageLog.RESULT_SUCCESS, f'Message was sent to {recipient.email}')
-				except (socket_error, smtplib.SMTPSenderRefused,
+				except (smtplib.SMTPSenderRefused,
 				        smtplib.SMTPRecipientsRefused,
 				        smtplib.SMTPDataError,
 				        smtplib.SMTPAuthenticationError) as error:
@@ -920,6 +921,7 @@ class Message(models.Model):
 		).order_by('update_date').last()
 
 		filtered_payments = self.recipients_filter.filter_user_payments(recipient.user)
+		last_filtered_payment = filtered_payments.last()
 
 		next_after_payment_activation = None
 		if last_cup_payment:
@@ -942,11 +944,16 @@ class Message(models.Model):
 					item.site_quantity for item in last_cup_payment.items()) if last_cup_payment else 0,
 			},
 			filtered_payments=filtered_payments,
+			last_filtered_payment=last_filtered_payment,
+			last_filtered_payment_category=last_filtered_payment.item_category,
 			unsubscribe_url=recipient.get_unsubscribe_url(),
 			first_name=recipient.user.first_name,
 			name=name,
 			cups_quantity=recipient.user.cups_amount,
-			next_after_payment_activation=next_after_payment_activation
+			next_after_payment_activation=next_after_payment_activation,
+			COFFEE_CUPS='coffee_cups',
+			LESSON_TICKETS = 'tickets',
+			DONATIONS = 'donations',
 		)
 		if include_subject:
 			context['subject'] = self.get_subject_for(recipient, additional_context)
