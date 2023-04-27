@@ -11,6 +11,7 @@ Disallow: /payments/
 Disallow: /conjugaison/polly/
 Disallow: /conjugaison/verbs_autocomplete/
 Disallow: /home/lesson-transcript-prototype/
+Disallow: /static/components/
 
 Host: https://www.le-francais.ru
 
