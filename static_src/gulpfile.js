@@ -42,9 +42,14 @@ gulp.task('js', () => {
         'node_modules/vue/dist/vue.js',
         'node_modules/vue-multiselect/dist/vue-multiselect.min.js',
         'node_modules/howler/dist/howler.js',
-        'js/**/*.js'
     ])
         .pipe(uglify())
+        .pipe(gulp.dest(dist + '/js/'))
+});
+
+gulp.task('datatables.js', () => {
+    return gulp.src('js/datatables.js')
+        .pipe(webpack({output:{filename:'datatables.js'}}))
         .pipe(gulp.dest(dist + '/js/'))
 });
 
@@ -59,4 +64,4 @@ gulp.task('clean', () => {
     ], {force: true});
 });
 
-gulp.task('default', gulp.series(['clean', 'sass', 'css', 'js', 'fa-fonts']));
+gulp.task('default', gulp.series(['clean', 'sass', 'css', 'js', 'fa-fonts', 'datatables.js']));
