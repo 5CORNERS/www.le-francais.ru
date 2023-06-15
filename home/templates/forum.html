@@ -26,9 +26,15 @@
 		f.parentNode.insertBefore(j, f);
 	})(window, document, 'script', 'dataLayer', 'GTM-WC2Q4XT');</script>
 	<!-- End Google Tag Manager -->
-	<!-- Google Publisher Tag -->
-	<script async="async" id="googleTagServicesScript"
-	        src="https://www.googletagservices.com/tag/js/gpt.js"></script>
+    {% if not is_gpt_disabled %}
+        <!-- Google Publisher Tag -->
+        <script id="googleTagServicesScript" async="async"
+                src="https://www.googletagservices.com/tag/js/gpt.js"></script>
+        <!-- Google AdSense Script -->
+        <script async
+                src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8102560651335796"
+                crossorigin="anonymous"></script>
+    {% endif %}
 
 	<meta charset="utf-8"/>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
