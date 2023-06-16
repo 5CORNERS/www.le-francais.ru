@@ -5,6 +5,8 @@ const uglify = require('gulp-uglify');
 const cleanCSS = require('gulp-clean-css');
 const del = require('del');
 const dist = '../static_compiled/components';
+const sourcemaps = require('gulp-sourcemaps');
+const rename = require('gulp-rename')
 
 gulp.task('sass', () => {
     return gulp.src(
@@ -36,15 +38,24 @@ gulp.task('js', () => {
         'node_modules/bootstrap-select/dist/js/bootstrap-select.js',
         'node_modules/bootstrap-select/dist/js/i18n/defaults-ru_RU.js',
         'node_modules/jquery.simple-checkbox-table/dist/jquery.simple-checkbox-table.js',
-        'node_modules/jquery-datatables-checkboxes/js/dataTables.checkboxes.min.js',
+        'node_modules/jquery-datatables-checkboxes/js/dataTables.checkboxes.js',
         'node_modules/moment/moment.js',
         'node_modules/js-cookie/src/js.cookie.js',
         'node_modules/vue/dist/vue.js',
         'node_modules/vue-multiselect/dist/vue-multiselect.min.js',
         'node_modules/howler/dist/howler.js',
     ])
-        .pipe(uglify())
-        .pipe(gulp.dest(dist + '/js/'))
+        .pipe(sourcemaps.init())
+        .pipe(gulp.dest(dist + '/js/')) // save .js
+        .pipe(uglify({
+            mangle: true,
+            output: {
+                beautify: true,
+                comments: /^!/
+            } }))
+        .pipe(rename({ extname: '.min.js' }))
+        .pipe(sourcemaps.write('maps'))
+        .pipe(gulp.dest(dist + '/js/')) // save .min.js
 });
 
 gulp.task('datatables.js', () => {
@@ -64,4 +75,4 @@ gulp.task('clean', () => {
     ], {force: true});
 });
 
-gulp.task('default', gulp.series(['clean', 'sass', 'css', 'js', 'fa-fonts', 'datatables.js']));
+gulp.task('default', gulp.series(['clean', 'sass', 'css', 'js', 'fa-fonts', /*'datatables.js'*/]));

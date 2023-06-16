@@ -4,7 +4,7 @@
 {% block title_suffix %} — мои глаголы{% endblock %}
 {% block extra_js %}
     <script type="text/javascript"
-        src="{% static 'components/js/jquery.simple-checkbox-table.js' %}"></script>
+        src="{% static 'components/js/jquery.simple-checkbox-table.min.js' %}"></script>
     <script type="text/javascript"
             src="{% static 'dictionary/js/user-table.min.js' %}"></script>
     <script>
@@ -17,7 +17,7 @@
 {% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{% static 'components/css/datatables.css' %}"/>
 
-    <script type="text/javascript" src="{% static 'components/js/datatables.js' %}"></script>
+    <script type="text/javascript" src="{% static 'components/js/datatables.min.js' %}"></script>
 
 
     <link rel="stylesheet" href="{% static 'components/css/dataTables.checkboxes.css' %}">
@@ -27,8 +27,8 @@
 
     <link rel="stylesheet"
           href="{% static 'components/css/bootstrap-select.css' %}">
-    <script src="{% static 'components/js/bootstrap-select.js' %}"></script>
-    <script src="{% static 'components/js/defaults-ru_RU.js' %}"></script>
+    <script src="{% static 'components/js/bootstrap-select.min.js' %}"></script>
+    <script src="{% static 'components/js/defaults-ru_RU.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'dictionary/scss/user-table.css' %}">
 {% endblock %}
 

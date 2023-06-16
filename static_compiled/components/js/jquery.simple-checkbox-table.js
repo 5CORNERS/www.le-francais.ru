@@ -1,1 +1,45 @@
-!function(e,d){"use strict";d.fn.simpleCheckboxTable=function(t){var c=d.extend({},e,t);return this.each(function(t,e){var n=d(e);n.find("thead th:nth-child(1) input[type='checkbox']").on("change",function(){(d(this).is(":checked")?n.find("tbody td:nth-child(1) input[type='checkbox']:not(:disabled):not(:checked)").prop("checked",!0):n.find("tbody td:nth-child(1) input[type='checkbox']:not(:disabled):checked").prop("checked",!1)).trigger("change")}).end().find("tbody tr").on("click",function(){var t=d(this).find("td:nth-child(1) input[type='checkbox']:not(:disabled)");t.prop("checked",!t.is(":checked")).trigger("change")}).end().find("tbody td:nth-child(1) input[type='checkbox']").on("change",function(){var t=0===d(this).closest("tbody").find("td:nth-child(1) input[type='checkbox']:not(:disabled):not(:checked)").length;n.find("thead th:nth-child(1) input[type='checkbox']").prop("checked",t),c.onCheckedStateChanged.call(n,d(this))}).trigger("change").end().find("tbody td a,input[type='checkbox']").on("click",function(t){t.stopPropagation()}).end()})}}({onCheckedStateChanged:function(){}},jQuery);
+(function(defaults, $) {
+  "use strict";
+  
+  $.fn.simpleCheckboxTable = function(options) {
+    var settings = $.extend({}, defaults, options);
+
+    return this.each(function(i, elem) {
+      var $table = $(elem);
+      $table
+        .find("thead th:nth-child(1) input[type='checkbox']")
+          .on("change", function() {
+            if ($(this).is(":checked")) {
+              $table.find("tbody td:nth-child(1) input[type='checkbox']:not(:disabled):not(:checked)").prop("checked", true).trigger("change");
+            } else {
+              $table.find("tbody td:nth-child(1) input[type='checkbox']:not(:disabled):checked").prop("checked", false).trigger("change");
+            }
+          })
+          .end()
+        .find("tbody tr")
+          .on("click", function() {
+            var $checkbox = $(this).find("td:nth-child(1) input[type='checkbox']:not(:disabled)");
+            $checkbox.prop("checked", !$checkbox.is(":checked")).trigger("change");
+          })
+          .end()
+        .find("tbody td:nth-child(1) input[type='checkbox']")
+          .on("change", function() {
+            var $uncheckedCheckboxes = $(this).closest("tbody").find("td:nth-child(1) input[type='checkbox']:not(:disabled):not(:checked)"),
+                isCheckedAll = $uncheckedCheckboxes.length === 0;
+
+            $table.find("thead th:nth-child(1) input[type='checkbox']").prop("checked", isCheckedAll);
+
+            settings.onCheckedStateChanged.call($table, $(this));
+          })
+          .trigger("change")
+          .end()
+        .find("tbody td a,input[type='checkbox']")
+          .on("click", function(e) {
+            e.stopPropagation();
+          })
+          .end();
+    });
+  };
+})({
+  onCheckedStateChanged: function() {},
+}, jQuery);
