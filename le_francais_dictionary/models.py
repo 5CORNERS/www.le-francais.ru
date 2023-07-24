@@ -1081,6 +1081,9 @@ class Verb(models.Model):
 			self._forms = list(self.verbform_set.all().order_by('order'))
 		return self._forms
 
+	def get_audio_url(self):
+		return self.audio_url if self.audio_url else self.polly.url if self.polly else None
+
 	def to_dict(self):
 		polly_url = self.audio_url if self.audio_url else self.polly.url if self.polly else None
 		if self.translation_audio_url:
@@ -1102,7 +1105,7 @@ class Verb(models.Model):
 			"type": self.type,
 		}
 
-	def to_voice(self, save=True, translation_language=LANGUAGE_CODE_RU, translation_genre=GENRE_MASCULINE):
+	def to_voice(self, save=True, translation_language=LANGUAGE_CODE_RU, translation_genre=GENRE_MASCULINE, overwrite=False):
 		voice_string = self.verb.lower()
 		voice_string = re.sub(r'\(.*\)', '', voice_string)
 		voice_string = voice_string.strip()
@@ -1121,12 +1124,12 @@ class Verb(models.Model):
 				file_title=self.verb,
 				ftp_path=FTP_FR_VERBS_PATH,
 				speaking_rate=1,
-				verbs=True
+				verbs=True, overwrite=overwrite
 			)
 
 		translation_shtooka_url = shtooka_by_title_in_path(
 			title=self.translation_text or self.translation,
-			ftp_path=FTP_RU_VERBS_PATH,
+			ftp_path=FTP_RU_VERBS_PATH if translation_language == LANGUAGE_CODE_RU else FTP_FR_VERBS_PATH,
 			language_code=translation_language,
 			verbs=True
 		)
@@ -1134,14 +1137,14 @@ class Verb(models.Model):
 		if not translation_shtooka_url:
 			self.translation_audio_url = google_cloud_tts(
 				self.translation_text or self.translation,
-				filename=self.translation.replace(' ', '_'),
+				filename=self.translation.replace(' ', '_').replace('\'', '_').replace('\\', '_').replace('/', '_'),
 				language=translation_language,
 				genre=translation_genre,
 				file_id=str(self.pk),
 				file_title=self.translation,
 				ftp_path=FTP_RU_VERBS_PATH if translation_language == LANGUAGE_CODE_RU else FTP_FR_VERBS_PATH,
 				speaking_rate=1,
-				verbs=True,
+				verbs=True, overwrite=overwrite
 			)
 		else:
 			self.translation_audio_url = translation_shtooka_url
@@ -1180,7 +1183,7 @@ class VerbForm(models.Model):
 	translation_audio_url = models.URLField(null=True)
 
 	def __str__(self):
-		return self.verb
+		return f"{self.form} - {self.translation}"
 
 	def to_dict(self):
 		polly_url = self.audio_url if self.audio_url else self.polly.url if self.polly else None
@@ -1201,7 +1204,7 @@ class VerbForm(models.Model):
 			"tense": self.tense,
 		}
 
-	def to_voice(self, save=True, translation_language=LANGUAGE_CODE_RU, translation_genre=GENRE_MASCULINE):
+	def to_voice(self, save=True, translation_language=LANGUAGE_CODE_RU, translation_genre=GENRE_MASCULINE, overwrite=False):
 		voice_string = self.form.lower()
 		voice_string = re.sub(r'\(.*\)', '', voice_string)
 		voice_string = voice_string.strip()
@@ -1221,19 +1224,20 @@ class VerbForm(models.Model):
 				voice_string,
 				filename=self.form.replace(' ', '_').replace('\'', '_').replace('\\', '_'),
 				language=LANGUAGE_CODE_FR,
-				genre=GENRE_MASCULINE,
+				genre=GENRE_FEMININE,
 				file_id=str(self.pk),
 				file_title=self.form,
 				ftp_path=FTP_FR_VERBS_PATH,
 				speaking_rate=1,
-				verbs=True
+				verbs=True,
+				overwrite=overwrite
 			)
 		else:
 			self.audio_url = shtooka_url
 
 		translation_shtooka_url = shtooka_by_title_in_path(
 			title=self.translation_text or self.translation,
-			ftp_path=FTP_RU_VERBS_PATH,
+			ftp_path=FTP_RU_VERBS_PATH if translation_language == LANGUAGE_CODE_RU else FTP_FR_VERBS_PATH,
 			language_code=translation_language,
 			verbs=True
 		)
@@ -1248,7 +1252,8 @@ class VerbForm(models.Model):
 				file_title=self.translation,
 				ftp_path=FTP_RU_VERBS_PATH if translation_language == LANGUAGE_CODE_RU else FTP_FR_VERBS_PATH,
 				speaking_rate=1,
-				verbs=True
+				verbs=True,
+				overwrite=overwrite
 			)
 		else:
 			self.translation_audio_url=translation_shtooka_url
