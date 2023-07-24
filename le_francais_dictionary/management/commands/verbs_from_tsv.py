@@ -60,7 +60,9 @@ class Command(BaseCommand):
 			lesson_number = int(row['LESSON_NO'])
 			if lesson_number > 1000:
 				lesson_number = lesson_number - 1000 # WHY??
-			if lesson_number in existed_packets.keys():
+			if lesson_number == 0:
+				continue
+			elif lesson_number in existed_packets.keys():
 				packet = existed_packets[lesson_number]
 			else:
 				print(f'Saving Packet:Глаголы урока {lesson_number}')
