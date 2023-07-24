@@ -27,6 +27,7 @@ class Command(BaseCommand):
 		existed_packets = {packet.lesson.lesson_number:packet for packet in list(VerbPacket.objects.select_related('lesson').all())}
 		existed_verbs = {verb.verb:verb for verb in list(Verb.objects.all())}
 		existed_forms = {(verb_form.form, verb_form.verb_id):verb_form for verb_form in list(VerbForm.objects.all())}
+		print('Deleting Relations...')
 		VerbPacketRelation.objects.all().delete()
 
 		verb_infinitives_file = open(verb_translations_path, 'r', encoding='utf-8')
@@ -77,9 +78,10 @@ class Command(BaseCommand):
 				if (verb.type, verb.regular) != (infinitive_type, infinitive_is_regular):
 					verb.type, verb.regular = infinitive_type, infinitive_is_regular
 					verb.save(update_fields=['type', 'regular'])
-				if (verb.translation, verb.translation_text) != infinitive_translation_map[infinitive]:
+				if infinitive in infinitive_translation_map.keys() and (verb.translation, verb.translation_text) != infinitive_translation_map[infinitive]:
 					verb.translation, verb.translation_text = infinitive_translation_map[infinitive]
 					verb.save(update_fields=['translation', 'translation_text'])
+					print(f'verb to revoice -- {verb.pk}')
 					verbs_to_revoice.append(verb)
 			elif infinitive in infinitive_translation_map.keys():
 				verb = Verb(
@@ -90,6 +92,8 @@ class Command(BaseCommand):
 				verb.translation, verb.translation_text = infinitive_translation_map[infinitive]
 				print(f'Saving Verb: {verb.verb}')
 				verb.save()
+				print(f'verb to revoice -- {verb.pk}')
+				verbs_to_revoice.append(verb)
 				existed_verbs[infinitive] = verb
 			else:
 				continue
@@ -119,11 +123,13 @@ class Command(BaseCommand):
 
 			if (form_form, verb.pk) in existed_forms.keys():
 				form = existed_forms[(form_form, verb.pk)]
-				if form.form != form_form or form.translation != row['TRANSLATION']:
+				if form.form != form_form or form.translation != row['TRANSLATION'] or form.translation_text != row['RU SYNTH']:
+					print(f'form to revoice -- {form.pk}')
 					forms_to_revoice.append(form)
 			else:
 				form = VerbForm(form=form_form)
 				existed_forms[(form_form, verb.pk)] = form
+				print(f'form to revoice -- {form.pk}')
 				forms_to_revoice.append(form)
 
 			form_to_show: str = row['CONJUGAISON']
@@ -132,8 +138,9 @@ class Command(BaseCommand):
 			elif form_to_show.find('il') == 0:
 				form_to_show = 'il (elle, on)' + form_to_show[2:]
 
-			# if int(row['ID']) in options['ids']:
-			# 	to_revoice.append((form.form, verb.pk))
+			if options['ids'] is not None and int(row['ID']) in options['ids']:
+				print(f'form to revoice -- {form.pk}')
+				forms_to_revoice.append(form)
 
 			form.verb = verb
 			form.tense = get_tense_id(tense)
@@ -163,11 +170,12 @@ class Command(BaseCommand):
 		bulk_update([form for form in forms_to_save if not form._state.adding], batch_size=200)
 
 		if options['is_revoice']:
-
+			print([v.pk for v in verbs_to_revoice])
+			print([f.pk for f in forms_to_revoice])
 			for v in verbs_to_revoice:
 				print(v)
-				v.to_voice()
+				v.to_voice(overwrite=True)
 
 			for f in forms_to_revoice:
 				print(f)
-				f.to_voice()
+				f.to_voice(overwrite=True)
