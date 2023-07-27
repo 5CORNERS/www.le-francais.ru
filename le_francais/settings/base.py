@@ -510,7 +510,7 @@ TINKOFF_PAYMENTS_CONFIG = {
 
 PAY54_CLIENT_ID = os.environ.get('PAY54_CLIENT_ID')
 PAY54_CLIENT_SECRET = os.environ.get('PAY54_CLIENT_SECRET')
-PAY54_TEST_ENABLE = False
+PAY54_TEST_ENABLE = os.environ.get('PAY54_TEST_ENABLE','False') == 'True'
 
 # Js Reverse settings
 
