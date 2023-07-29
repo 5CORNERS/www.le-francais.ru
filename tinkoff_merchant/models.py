@@ -227,7 +227,7 @@ class ReceiptItem(models.Model):
 	quantity = models.DecimalField(verbose_name='Количество/вес', max_digits=20, decimal_places=3)
 	amount = models.IntegerField(verbose_name='Сумма в копейках')
 	tax = models.CharField(verbose_name='Ставка налога', max_length=10, choices=TAXES)
-	ean13 = models.CharField(verbose_name='Штрих-код', max_length=20, blank=True, default=None)
+	ean13 = models.CharField(verbose_name='Штрих-код', max_length=20, blank=True, default='')
 	shop_code = models.CharField(verbose_name='Код магазина', max_length=64, blank=True, default='')
 
 	category = models.CharField(verbose_name='Категория товара', choices=CATEGORIES, default='', max_length=20)
@@ -254,12 +254,12 @@ class ReceiptItem(models.Model):
 			'Quantity': self.quantity,
 			'Amount': self.amount,
 			'Tax': self.tax,
-			'ShopCode': self.shop_code,
 		}
 		if self.ean13:
 			result['Ean13'] = self.ean13
-		else:
-			return result
+		if self.shop_code:
+			result['ShopCode'] = self.shop_code
+		return result
 
 	def to_json_pay54(self, tax: int) -> dict:
 		return {
