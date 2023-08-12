@@ -377,7 +377,7 @@ from .consts import ITEMS, CUPS_IDS, IP_HEADERS_LIST
 def get_currency(request):
     if request.user.country_code == 'CA':
         return 'cad'
-    elif request.user.countru_code in ['CH', 'LI']:
+    elif request.user.country_code in ['CH', 'LI']:
         return 'chf'
     elif request.user.country_code in ['US']:
         return 'usd'
