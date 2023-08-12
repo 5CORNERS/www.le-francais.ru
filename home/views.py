@@ -381,17 +381,20 @@ def get_currency(request):
         return 'chf'
     elif request.user.country_code in EU_COUNTRIES:
         return 'eur'
-    else:
+    elif request.user.country_code in ['US']:
         return 'usd'
+    else:
+        return 'rub'
 
 
 class TinkoffPayments(View):
     @method_decorator(login_required)
     def get(self, request):
-        if request.user.country_code not in os.environ.get('BLOCKED_COUNTRY_CODES').split(','):
+        currency = get_currency(request)
+        if currency != 'rub' and request.GET.get('no-redirect', True):
             link = (f"https://{os.environ.get('EU_SITE_DOMAIN')}/payments/"
                     f"?email={request.user.email}"
-                    f"&currency={get_currency(request)}")
+                    f"&currency={currency}")
             return HttpResponseRedirect(link)
         if request.user.saw_message and request.user.must_pay and request.GET.get(
                 's_t', '') == '1':
