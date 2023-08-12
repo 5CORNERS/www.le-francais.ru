@@ -388,7 +388,7 @@ def get_currency(request):
 class TinkoffPayments(View):
     @method_decorator(login_required)
     def get(self, request):
-        if request.user.country_code in os.environ.get('BLOCKED_COUNTRY_CODES').split(','):
+        if request.user.country_code not in os.environ.get('BLOCKED_COUNTRY_CODES').split(','):
             link = (f"https://{os.environ.get('EU_SITE_DOMAIN')}/payments/"
                     f"?email={request.user.email}"
                     f"&currency={get_currency(request)}")
@@ -797,9 +797,9 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
     result = []
     for type, attr, href, title, transition in LESSON_PAGE_FIELDS:
         if tab_id is None or tab_id == href:
-            if type is 'html':
+            if type == 'html':
                 value = render_wagtail_blocks(getattr(page, attr))
-            elif type is 'pdf':
+            elif type == 'pdf':
                 url = getattr(page, attr)
                 if render_pdf:
                     value = render_to_string('blocks/document_viewer.html',
