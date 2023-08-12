@@ -371,18 +371,18 @@ def coffee_amount_check(request):
                     's_t', '0'))
 
 
-from .consts import ITEMS, CUPS_IDS, IP_HEADERS_LIST
+from .consts import ITEMS, CUPS_IDS, IP_HEADERS_LIST, EU_COUNTRIES
 
 
 def get_currency(request):
-    if request.user.country_code == 'CA':
+    if request.user.country_code in ['CA']:
         return 'cad'
     elif request.user.country_code in ['CH', 'LI']:
         return 'chf'
-    elif request.user.country_code in ['US']:
-        return 'usd'
-    else:
+    elif request.user.country_code in EU_COUNTRIES:
         return 'eur'
+    else:
+        return 'usd'
 
 
 class TinkoffPayments(View):
