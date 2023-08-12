@@ -1,4 +1,5 @@
 import json
+import os
 import threading
 from datetime import datetime, timedelta, timezone
 
@@ -373,9 +374,25 @@ def coffee_amount_check(request):
 from .consts import ITEMS, CUPS_IDS, IP_HEADERS_LIST
 
 
+def get_currency(request):
+    if request.user.country_code == 'CA':
+        return 'cad'
+    elif request.user.countru_code in ['CH', 'LI']:
+        return 'chf'
+    elif request.user.country_code in ['US']:
+        return 'usd'
+    else:
+        return 'eur'
+
+
 class TinkoffPayments(View):
     @method_decorator(login_required)
     def get(self, request):
+        if request.user.country_code in os.environ.get('BLOCKED_COUNTRY_CODES').split(','):
+            link = (f"https://{os.environ.get('EU_SITE_DOMAIN')}/payments/"
+                    f"?email={request.user.email}"
+                    f"&currency={get_currency(request)}")
+            return HttpResponseRedirect(link)
         if request.user.saw_message and request.user.must_pay and request.GET.get(
                 's_t', '') == '1':
             if not request.user.low_price:
