@@ -1146,7 +1146,7 @@ class WagtailPageNavTree(models.Model):
     tree = JSONField(default={}, blank=True, null=True)
 
 
-@receiver(payment_confirm)
+# @receiver(payment_confirm)
 def send_receipt(sender, **kwargs):
     if settings.DEBUG:
         return
@@ -1154,7 +1154,7 @@ def send_receipt(sender, **kwargs):
     pay34_api.send_receipt_request(kwargs['payment'])
 
 
-@receiver(payment_refund)
+# @receiver(payment_refund)
 def send_refund(sender, **kwargs):
     if settings.DEBUG:
         return
