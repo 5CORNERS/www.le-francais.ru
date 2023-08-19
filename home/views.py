@@ -395,7 +395,7 @@ class TinkoffPayments(View):
         currency = get_currency(request)
         if currency != 'rub' and request.GET.get('no-redirect', True):
             link = (f"https://{os.environ.get('EU_SITE_DOMAIN')}/payments/"
-                    f"?email={request.user.email}"
+                    f"?username={request.user.username}"
                     f"&currency={currency}")
             return HttpResponseRedirect(link)
         if request.user.saw_message and request.user.must_pay and request.GET.get(
