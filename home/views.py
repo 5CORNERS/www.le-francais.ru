@@ -393,7 +393,7 @@ class TinkoffPayments(View):
     @method_decorator(login_required)
     def get(self, request):
         currency = get_currency(request)
-        if currency != 'rub' and request.GET.get('no-redirect', '1') != '1':
+        if currency != 'rub' and request.GET.get('no-redirect', '0') != '1':
             link = (f"https://{os.environ.get('EU_SITE_DOMAIN')}/payments/"
                     f"?username={request.user.username}"
                     f"&currency={currency}")
