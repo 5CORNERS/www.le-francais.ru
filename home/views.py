@@ -386,7 +386,7 @@ def get_currency(request):
     elif request.user.country_code in ['RU', 'BY']:
         return 'rub'
     else:
-        return 'usd'
+        return 'eur'
 
 
 class TinkoffPayments(View):
