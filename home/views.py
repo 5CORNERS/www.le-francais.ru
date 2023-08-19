@@ -1,4 +1,5 @@
 import json
+import os
 import threading
 from datetime import datetime, timedelta, timezone
 
@@ -370,12 +371,33 @@ def coffee_amount_check(request):
                     's_t', '0'))
 
 
-from .consts import ITEMS, CUPS_IDS, IP_HEADERS_LIST
+from .consts import ITEMS, CUPS_IDS, IP_HEADERS_LIST, EU_COUNTRIES
+
+
+def get_currency(request):
+    if request.user.country_code in ['CA']:
+        return 'cad'
+    elif request.user.country_code in ['CH', 'LI']:
+        return 'chf'
+    elif request.user.country_code in EU_COUNTRIES:
+        return 'eur'
+    elif request.user.country_code in ['US']:
+        return 'usd'
+    elif request.user.country_code in ['RU', 'BY']:
+        return 'rub'
+    else:
+        return 'eur'
 
 
 class TinkoffPayments(View):
     @method_decorator(login_required)
     def get(self, request):
+        currency = get_currency(request)
+        if currency != 'rub' and request.GET.get('no-redirect', '0') != '1':
+            link = (f"https://{os.environ.get('EU_SITE_DOMAIN')}/payments/"
+                    f"?username={request.user.username}"
+                    f"&currency={currency}")
+            return HttpResponseRedirect(link)
         if request.user.saw_message and request.user.must_pay and request.GET.get(
                 's_t', '') == '1':
             if not request.user.low_price:
@@ -780,9 +802,9 @@ def json_default_tabs(page: LessonPage, user, request, render_pdf, tab_id=None):
     result = []
     for type, attr, href, title, transition in LESSON_PAGE_FIELDS:
         if tab_id is None or tab_id == href:
-            if type is 'html':
+            if type == 'html':
                 value = render_wagtail_blocks(getattr(page, attr))
-            elif type is 'pdf':
+            elif type == 'pdf':
                 url = getattr(page, attr)
                 if render_pdf:
                     value = render_to_string('blocks/document_viewer.html',
