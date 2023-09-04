@@ -179,6 +179,13 @@ class Payment(models.Model):
 	def visited_through_redirect(self) -> bool:
 		return self.redirect_to_payment_url.visited is not None
 
+	@property
+	def item_category(self):
+		try:
+			return self.receipt.receiptitem_set.first().category
+		except (Receipt.DoesNotExist, ReceiptItem.DoesNotExist) as e:
+			return None
+
 
 class Receipt(models.Model):
 	payment = models.OneToOneField(to=Payment, on_delete=models.CASCADE, verbose_name='Заказ')

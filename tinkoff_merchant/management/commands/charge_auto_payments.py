@@ -47,6 +47,7 @@ class Command(BaseCommand):
         api = MerchantAPI()
 
         charged_user_ids = set()
+        charged_emails = set()
         for pp in parent_payments:
             # TODO: make this into payment object method
             # if we already have more recent parent payment
@@ -54,6 +55,11 @@ class Command(BaseCommand):
                 continue
             else:
                 charged_user_ids.add(pp.customer_key)
+
+            if pp.email is not None and pp.email in charged_emails:
+                continue
+            else:
+                charged_emails.add(pp.email)
 
             # if parent or children payment less than 30 days ago
             if ((NOW - pp.creation_date) < DELTA or
