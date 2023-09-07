@@ -18,7 +18,8 @@ def to_ftp(filename, file, path):
         host=os.environ.get('SFTP_FILES_LE_FRANCAIS_HOSTNAME'),
         username=os.environ.get('SFTP_FILES_LE_FRANCAIS_USERNAME'),
         password=os.environ.get('SFTP_FILES_LE_FRANCAIS_PASSWORD'),
-        cnopts=cnopts
+        cnopts=cnopts,
+        log='logfile.log'
     )
     with srv.cd(path):
         if srv.exists(filename):
@@ -40,17 +41,24 @@ def to_ftp(filename, file, path):
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        path = Path('home/data/à partir de 86')
+        path = Path('home/data/resumes')
         for pdf_path in path.glob('*.pdf'):
             random_key = ''.join(random.SystemRandom().choice(
                 string.ascii_uppercase + string.digits) for _ in
                                  range(10))
             pdf_name = os.path.splitext(os.path.basename(pdf_path.absolute()))[0]
-            new_pdf_name = pdf_name + '_' + random_key + '.pdf'
+
+            try:
+                lesson_number = int(pdf_name.split('_')[0])
+            except:
+                lesson_number = int(pdf_name.split('-')[0])
+            if lesson_number < 86:
+                new_pdf_name = f'resume-ext-{lesson_number:03d}-{random_key}.pdf'
+            else:
+                new_pdf_name = pdf_name + '_' + random_key + '.pdf'
             to_ftp(new_pdf_name, pdf_path.open('rb'), FTP_RESUMES_PATH)
             url = URL_RESUMES_PATH + new_pdf_name
-            lesson_number = int(pdf_name.split('_')[0])
-            print(lesson_number)
+            print(lesson_number, new_pdf_name, sep='\t')
             lesson = LessonPage.objects.get(lesson_number=lesson_number)
             lesson.repetition_material = url
             lesson.save_revision()
