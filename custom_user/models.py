@@ -360,7 +360,7 @@ def activate_tinkoff_payment(sender, **kwargs):
 @receiver(payment_refund)
 def deactivate_tinkoff_payment(sender, **kwargs):
 	payment = kwargs['payment']
-	if payment.customer.key:
+	if payment.customer_key:
 		user = User.objects.get(id=int(payment.customer_key))
 		quantity = 0
 		items = list(payment.receipt.receiptitem_set.all())
