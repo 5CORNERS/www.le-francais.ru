@@ -104,6 +104,7 @@
                 isSupport = false,
                 setTime = $this.get(0).getAttribute('set-time'),
                 isStrict = $this.data('strict') === true,
+                isLesson = $this.data('lesson-audio') === true,
                 forbidBackground = $this.data('forbid-background') === true;
 
             isAutoPlay = ((isAutoPlay === '') || (isAutoPlay === 'autoplay'))
@@ -150,9 +151,13 @@
                 if (downloadable === true) {
                     var source = $(theAudio).find('source').attr('src');
                     if (!isStrict) {
-                        thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="' + source + '&download=true' + '" class="' + cssClass.downloadButton + ' fa fa-download"></a></div><div class="audioplayer-space"></div>');
+                        if (isLesson) {
+                            thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="' + source + '&download=true' + '" class="' + cssClass.downloadButton + ' fa fa-download"></a></div><div class="audioplayer-space"></div>');
+                        }else{
+                            thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="' + source + '" class="' + cssClass.downloadButton + ' fa fa-download"></a></div><div class="audioplayer-space"></div>')
+                        }
                     } else {
-                        thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="#" class="' + cssClass.downloadButton + ' fa fa-download"></a></div>');
+                        thePlayer.append('<div class="' + cssClass.download + '"><a download="true" href="#null" class="' + cssClass.downloadButton + ' fa fa-download"></a></div>');
                     }
                     $(theAudio).attr('id', 'lesson-audio');
                     $(theAudio).attr('number', lesson_number);

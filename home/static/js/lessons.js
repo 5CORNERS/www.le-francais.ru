@@ -209,7 +209,7 @@ $(document).ready(function () {
 
         if (!userlesson && must_pay || NEED_PAYMENT && !IS_AUTHENTICATED) {
             window.addEventListener('lessonPlayerReady', function () {
-                let downloadButton = $('.audioplayer-download-button')[0];
+                let downloadButton = $('#lessonAudioBlock').find('.audioplayer-download-button')[0]
                 downloadButton.addEventListener('click', function () {
                     activateLesson('download');
                 });
@@ -255,7 +255,7 @@ $(document).ready(function () {
     } else {
         if (!IS_AUTHENTICATED && LESSON_NUMBER > 5) {
             $(window).one('lessonPlayerReady', function () {
-                $('.audioplayer-download-button').on('click', function (e) {
+                $('#lessonAudioBlock').find('.audioplayer-download-button').on('click', function (e) {
                     e.preventDefault();
                     $.ajax({
                         url: Urls['modal:download_login_required'](),
