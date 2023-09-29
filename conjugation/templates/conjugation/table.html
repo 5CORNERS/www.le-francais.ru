@@ -161,6 +161,20 @@
             </div>
 
             <div class="switches">
+                {% if forms_count > 1 %}
+                    <div class="col-12 mb-2">
+                        <ul class="nav nav-pills">
+                            {% for i in forms_range %}
+                                <li style="cursor: pointer"
+                                    class="nav-item verb-form-pill">
+                                    <a href="" class="nav-link{% if forloop.first %} active{% endif %} form-pills"
+                                       id="formPill{{ forloop.counter0 }}" data-toggle="pill"
+                                       data-t=".form{{ forloop.counter0 }}">Вариант {{ i }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
                 <div id="switchesRow" class="row mb-0 mt-2">
                     <div class="col-12" id="switchesCol">
                         {% include 'conjugation/switches.html' with switches_form=switches_form v=v badges=badges %}
