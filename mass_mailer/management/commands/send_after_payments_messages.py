@@ -97,7 +97,7 @@ def filter_users_with_payments_with_activations(message, timedelta):
     receipt_items = ReceiptItem.objects.select_related('receipt', 'receipt__payment').filter(
         category__in=[COFFEE_CUPS, LESSON_TICKETS]
     ).filter(
-        receipt__payment__status__in=["AUTHORISED", "CONFIRMED"]
+        receipt__payment__status__in=["AUTHORIZED", "CONFIRMED"]
     ).filter(
         receipt__payment__update_date__gte=timezone.now() - timedelta
     ).order_by('receipt__payment__customer_key')
@@ -125,7 +125,7 @@ def filter_users_with_payments_with_activations(message, timedelta):
         if user is None:
             continue
         # Exclude users which has more than one payment
-        if Payment.objects.filter(status__in=["AUTHORISED", "CONFIRMED"], customer_key=str(user.pk)).count() > 1:
+        if Payment.objects.filter(status__in=["AUTHORIZED", "CONFIRMED"], customer_key=str(user.pk)).count() > 1:
             continue
         activation = next((ul for ul in user_lessons if ul.date > update_datetime and ul.user_id == user.pk), None)
         payment = item.receipt.payment

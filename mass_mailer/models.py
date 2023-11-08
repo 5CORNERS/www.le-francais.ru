@@ -479,8 +479,7 @@ class UsersFilter(models.Model):
 			if True:
 				recipients = recipients.annotate(
 					payments_amount_sum=Sum(Case(When(
-						tinkoff_payment__status__in=['CONFIRMED',
-						                             'AUTHORISED'],
+						tinkoff_payment__status__in=['CONFIRMED', 'AUTHORIZED'],
 						then=F('tinkoff_payment__amount')),
 						output_field=IntegerField(),
 						default=0))
