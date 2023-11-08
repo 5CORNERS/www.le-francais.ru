@@ -922,6 +922,8 @@ class Message(models.Model):
 
 		filtered_payments = self.recipients_filter.filter_user_payments(recipient.user)
 		last_filtered_payment = filtered_payments.last()
+		last_filtered_payment_category = last_filtered_payment.item_category
+
 
 		next_after_payment_activation = None
 		if last_cup_payment:
@@ -945,15 +947,15 @@ class Message(models.Model):
 			},
 			filtered_payments=filtered_payments,
 			last_filtered_payment=last_filtered_payment,
-			last_filtered_payment_category=last_filtered_payment.item_category,
+			last_filtered_payment_category=last_filtered_payment_category,
 			unsubscribe_url=recipient.get_unsubscribe_url(),
 			first_name=recipient.user.first_name,
 			name=name,
 			cups_quantity=recipient.user.cups_amount,
 			next_after_payment_activation=next_after_payment_activation,
 			COFFEE_CUPS='coffee_cups',
-			LESSON_TICKETS = 'tickets',
-			DONATIONS = 'donations',
+			LESSON_TICKETS='tickets',
+			DONATIONS='donations',
 		)
 		if include_subject:
 			context['subject'] = self.get_subject_for(recipient, additional_context)

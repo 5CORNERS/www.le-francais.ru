@@ -183,7 +183,7 @@ class Payment(models.Model):
 	def item_category(self):
 		try:
 			return self.receipt.receiptitem_set.first().category
-		except (Receipt.DoesNotExist, ReceiptItem.DoesNotExist) as e:
+		except (Receipt.DoesNotExist, ReceiptItem.DoesNotExist, AttributeError) as e:
 			return None
 
 
