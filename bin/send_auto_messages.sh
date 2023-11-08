@@ -1,0 +1,1 @@
+/app/.heroku/python/bin/python3 /app/manage.py send_after_payments_messages --settings-id=4 --subject="Спасибо за вашу поддержку" --timedelta=14:0:0:0 --from="ILYA DUMOV<ilia.dumov@mail.le-francais.ru>" --reply-to="ILYA DUMOV<ilia.dumov@mail.le-francais.ru>"
