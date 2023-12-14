@@ -1,8 +1,20 @@
 # First stage: Download GeoIP databases using maxmindinc/geoipupdate
-FROM maxmindinc/geoipupdate as geoipupdate-stage
+FROM ghcr.io/maxmind/geoipupdate:latest as geoipupdate-stage
 
-COPY ./GeoIP.conf /usr/local/etc/GeoIP.conf
-RUN geoipupdate --verbose
+# Build arguments for geoipupdate configuration
+ARG GEOIPUPDATE_ACCOUNT_ID
+ARG GEOIPUPDATE_LICENSE_KEY
+ARG GEOIPUPDATE_EDITION_IDS
+ARG GEOIPUPDATE_FREQUENCY=0
+
+# Set environment variables from build arguments
+ENV GEOIPUPDATE_ACCOUNT_ID=${GEOIPUPDATE_ACCOUNT_ID}
+ENV GEOIPUPDATE_LICENSE_KEY=${GEOIPUPDATE_LICENSE_KEY}
+ENV GEOIPUPDATE_EDITION_IDS=${GEOIPUPDATE_EDITION_IDS}
+ENV GEOIPUPDATE_FREQUENCY=${GEOIPUPDATE_FREQUENCY}
+
+# Run the entry script to update the database
+RUN /usr/bin/entry.sh
 
 # Second stage: Runtime application
 FROM python:3.7
