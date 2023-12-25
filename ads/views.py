@@ -1,4 +1,6 @@
 import random
+from functools import reduce
+from operator import concat
 from typing import Dict, List
 
 from dateutil.parser import isoparse
@@ -130,9 +132,14 @@ def get_creative_dict(request) -> Dict:
         #     Q(placements__code__in=[placements], placements_inverted=False) | Q(placements__isnull=True, placements_inverted=False)
         # )
         line_items = line_items.exclude(placements__code__in=placements, placements_inverted=True)
-        line_items = line_items.filter(Q(placements_inverted=True) | Q(placements__code__in=placements, placements_inverted=False) | Q(placements__isnull=True))
+        line_items = line_items.filter(
+            Q(placements_inverted=True) | Q(placements__code__in=placements, placements_inverted=False) | Q(placements__isnull=True)
+        )
 
-        line_items = line_items.annotate(placements_and_arr=ArrayAgg('placements_and')).annotate(placements_and_len=Func(F('placements_and_arr'), function='CARDINALITY')).exclude(placements_and_arr__contains=placements, placements_and_len=len(placements))
+        line_items = line_items.annotate(placements_and_arr=ArrayAgg('placements_and')).annotate(
+            placements_and_len=Func(F('placements_and_arr'), function='CARDINALITY')
+        ).exclude(placements_and_arr__contains=placements, placements_and_len=len(placements))
+
         line_items = line_items.filter(Q(placements_and_inverted=True) | Q(
             placements_and_arr__contains=placements, placements_and_inverted=False, placements_and_len=len(placements)
         ) | Q(placements_and__isnull=True))
@@ -268,7 +275,9 @@ def get_creative_dict(request) -> Dict:
         chosen_line_items = list(set(c.line_item for c in creatives_list))
         chosen_line_items.sort(key=lambda l: l.priority, reverse=True)
         if len(chosen_line_items) > 1:
-            chosen_line_item = chosen_line_items[0]
+            chosen_line_item = random.choice(reduce(
+                concat, [[l]*l.priority for l in chosen_line_items]
+            ))
             creatives_list = [c for c in creatives_list if c.line_item_id == chosen_line_item.pk]
 
         if sizes:
