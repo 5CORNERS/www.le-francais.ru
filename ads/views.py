@@ -236,9 +236,9 @@ def get_creative_dict(request) -> Dict:
     if sizes:
         heights = [s['height'] for s in sizes]
         heights.sort()
-        max_height = heights[0]
+        max_height = heights[-1]
         creatives_list = list(filter(
-            lambda c: (((c.width, c.height) in [(s['width'], s['height']) for s in sizes]) or (c.fluid and [s['fluid'] for s in sizes] and (c.height < max_height or max_height == 0))) and (c.width < max_width),
+            lambda c: (((c.width, c.height) in [(s['width'], s['height']) for s in sizes]) or (c.fluid and [s['fluid'] for s in sizes] and (c.height <= max_height or max_height == 0))) and (c.width < max_width),
             creatives
         ))
     else:
