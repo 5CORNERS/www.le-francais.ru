@@ -123,7 +123,8 @@ function vueIsLoaded() {
                 verbListHTML: '',
                 loadingProgress: 0,
                 loadingProgressMax: 0,
-                safeMode: false
+                safeMode: false,
+                currentPlay: 0
             },
 
             async mounted() {
@@ -563,7 +564,6 @@ function vueIsLoaded() {
                 },
 
                 toggleType: function () {
-
                     if (this.type === LISTENING) {
                         this.type = CHECKING
                     } else {
@@ -589,21 +589,41 @@ function vueIsLoaded() {
                     array.sort(() => Math.random() - 0.5);
                 },
 
+                checkLength: function () {
+                    if (this.currentCard === (this.cards.length)) {
+                        this.currentCard = 0
+                        this.progress = 0
+                        this.flipAllCards()
+                        if (this.type === CHECKING) {
+                            this.shuffle(this.cardsRepeat)
+                        }
+                    }
+                },
+
                 playNextCard: function () {
                     if (!this.pause && !this.playing) {
                         this.currentCard++;
-                        if (this.currentCard === (this.cards.length)) {
-                            this.currentCard = 0
-                            this.progress = 0
-                            this.flipAllCards()
-                            if (this.type === CHECKING) {
-                                this.shuffle(this.cardsRepeat)
-                            }
-                        }
+                        this.checkLength();
                         if (!this.pause) {
                             console.log(`Playing next card: ${this.currentCard}`)
                             this.playCards('playNextCard');
                         }
+                    }
+                },
+
+                skipCard: function () {
+                    if (this.pause === false) {
+                        this.playingSound.stop();
+                        this.playing = false;
+                        this.playingSound = undefined;
+                        this.currentCard++;
+                        this.checkLength();
+                        this.showCurrentCard();
+                        this.playCards('skipCard');
+                    } else {
+                        this.currentCard++;
+                        this.checkLength();
+                        this.showCurrentCard();
                     }
                 },
 
@@ -645,6 +665,8 @@ function vueIsLoaded() {
                 },
 
                 playCards: function (source = 'none') {
+                    this.currentPlay++
+                    let currentPlay = this.currentPlay
                     if (this.playing) {
                         return
                     }
@@ -654,18 +676,26 @@ function vueIsLoaded() {
 
                     if (!this.showNegative && this.getCurrentCard().type === CARD_TYPE_NEGATIVE) {
                         console.log('Playing next card')
+                        if (currentPlay < this.currentPlay) {
+                            return
+                        }
                         return this.playNextCard()
                     }
                     if (!this.showParticipe && this.getCurrentCard().tense === TENSE_PARTICIPE_PASSE) {
                         console.log('Playing next card')
+                        if (currentPlay < this.currentPlay) {
+                            return
+                        }
                         return this.playNextCard()
                     } else if (this.showParticipe && this.getCurrentCard().tense !== TENSE_PARTICIPE_PASSE) {
                         console.log('Playing next card')
+                        if (currentPlay < this.currentPlay) {
+                            return
+                        }
                         return this.playNextCard()
                     }
                     if (!this.pause) {
-                        playingInstance = playingInstance + 1
-                        console.log(`playing instance: ${playingInstance}, source: ${source}`)
+                        console.log(`playing instance: ${currentPlay}, source: ${source}`)
                         this.getCurrentCard().flipped = false;
                         this.showCurrentCard()
                         if (this.card.isShownOnDrill || this.type === CHECKING) {
@@ -690,6 +720,9 @@ function vueIsLoaded() {
                                 tenseSound = this.getTenseSound()
                                 afterTenseTimeout = this.timeoutTense * 1000
                             }
+                            if (currentPlay < this.currentPlay) {
+                                return
+                            }
                             this.play(tenseSound).then(function (tenseDuration) {
                                 if (_this.pause) {
                                     _this.playing = false;
@@ -698,6 +731,9 @@ function vueIsLoaded() {
                                 tenseDuration = 0
                                 console.log('tense timeout: ' + (tenseDuration + afterTenseTimeout))
                                 setTimeout(function () {
+                                    if (currentPlay < _this.currentPlay) {
+                                        return
+                                    }
                                     _this.play(_this.card.formSound).then(function (verbDuration) {
                                         if (_this.pause) {
                                             _this.playing = false;
@@ -707,17 +743,25 @@ function vueIsLoaded() {
                                         setTimeout(function () {
                                             let translationUrl = undefined;
                                             let translationSound = undefined;
+
                                             if (_this.card.tense === TENSE_PARTICIPE_PASSE
                                                 || (_this.type === LISTENING && _this.card.isTranslation)
                                                 || _this.type === CHECKING
                                                 || (_this.translateInfinitives && _this.isCurrentCardInfinitive() && _this.type === LISTENING)
                                             ) {
                                                 translationSound = _this.card.translationSound
-                                                _this.card.flipped = true;
+                                                if (currentPlay < _this.currentPlay) {
+                                                    return
+                                                } else {
+                                                    _this.card.flipped = true;
+                                                }
                                             }
                                             if (_this.pause) {
                                                 _this.playing = false;
                                                 _this.card.flipped = false
+                                                return
+                                            }
+                                            if (currentPlay < _this.currentPlay) {
                                                 return
                                             }
                                             _this.play(translationSound).then(function (translationDuration) {
@@ -735,6 +779,9 @@ function vueIsLoaded() {
                                                     setTimeout(function () {
                                                         _this.playing = false;
                                                         if (!_this.pause) {
+                                                            if (currentPlay < _this.currentPlay) {
+                                                                return
+                                                            }
                                                             console.log('Playing next card')
                                                             return _this.playNextCard()
                                                         }
@@ -746,6 +793,9 @@ function vueIsLoaded() {
                                 }, tenseDuration + afterTenseTimeout)
                             }.bind(_this))
                         } else {
+                            if (currentPlay < this.currentPlay) {
+                                return
+                            }
                             console.log('Playing next card')
                             return this.playNextCard()
                         }

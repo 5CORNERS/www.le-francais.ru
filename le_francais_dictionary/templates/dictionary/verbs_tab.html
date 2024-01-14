@@ -119,6 +119,22 @@
 										</div>
 									</div>
 								</div>
+                                <div class="row d-flex align-items-center mb-4">
+                                    <div class="col d-flex justify-content-between">
+                                        <button style="visibility: hidden"
+                                                {% comment %}v-on:click="playPreviousCard"{% endcomment %}
+                                                class="btn btn-info btn-nav"
+                                                type="button">
+                                          <img src="{% static 'dictionary/img/previous.svg' %}" />
+                                        </button>
+                                        <button
+                                                v-on:click="skipCard"
+                                                class="btn btn-info btn-nav"
+                                                type="button">
+                                          <img src="{% static 'dictionary/img/next.svg' %}" />
+                                        </button>
+                                    </div>
+                                </div>
 								<div class="row">
                                     <div class="col">
                                         <div class="input-group mt-2" v-if="!showParticipe">
