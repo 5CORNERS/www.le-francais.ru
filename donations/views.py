@@ -6,7 +6,7 @@ from django import urls
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMultiAlternatives
-from django.http import HttpResponseBadRequest, HttpResponseNotFound
+from django.http import HttpResponseBadRequest, HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
@@ -18,6 +18,7 @@ from django.views.generic import TemplateView
 from donations.forms import SupportForm, CrowdFundingForm
 from donations.models import Donation
 from home.models import BackUrls
+from home.utils import get_currency
 from tinkoff_merchant.consts import DONATIONS
 from tinkoff_merchant.models import Payment as TinkoffPayment
 from tinkoff_merchant.services import MerchantAPI
@@ -93,6 +94,13 @@ class SubmitDonation(View):
 
 class DonationPage(View):
 	def get(self, request, template_name='base.html'):
+		currency = get_currency(request)
+		if currency != 'rub' and request.GET.get('no-redirect', '0') != '1':
+			link = (f"https://{os.environ.get('EU_SITE_DOMAIN')}/payments/"
+					f"?username={request.user.email}"
+					f"&currency={currency}")
+			return HttpResponseRedirect(link)
+
 		form = SupportForm({})
 		return render(request, f'donations/{template_name}', {'form': form})
 
