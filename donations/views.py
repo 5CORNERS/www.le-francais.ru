@@ -103,7 +103,7 @@ class DonationPage(View):
             else:
                 username_part = ''
             link = (
-                    f"https://{os.environ.get('EU_SITE_DOMAIN')}/payments/?currency={currency}" + username_part
+                    f"https://{os.environ.get('EU_SITE_DOMAIN')}/payments/support/?currency={currency}" + username_part
             )
             return HttpResponseRedirect(link)
 
