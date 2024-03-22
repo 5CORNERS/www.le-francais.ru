@@ -667,17 +667,21 @@ def map_to_eaf(map:List[Dict], eaf_file:BytesIO):
 
 
 def get_currency(request):
-    if request.user.country_code in ['CA']:
+    if request.user.is_authenticated:
+        country_code = request.user.country_code
+    else:
+        country_code = request.session['geoip']['country_code']
+    if country_code in ['CA']:
         return 'cad'
-    elif request.user.country_code in ['CH', 'LI']:
+    elif country_code in ['CH', 'LI']:
         return 'chf'
-    elif request.user.countycode in ['UK']:
+    elif country_code in ['UK']:
         return 'gbp'
-    elif request.user.country_code in EU_COUNTRIES:
+    elif country_code in EU_COUNTRIES:
         return 'eur'
-    elif request.user.country_code in ['US']:
+    elif country_code in ['US']:
         return 'usd'
-    elif request.user.country_code in ['RU', 'BY']:
+    elif country_code in ['RU', 'BY']:
         return 'rub'
     else:
         return 'eur'
