@@ -47,7 +47,7 @@ from .forms import ChangeUsername
 from django.contrib.admin.views.decorators import staff_member_required
 from home.models import UserLesson
 from .models import Payment
-from .utils import message_left, get_nav_tree, files_le_francais_url
+from .utils import message_left, get_nav_tree, files_le_francais_url, get_currency
 
 if "mailer" in settings.INSTALLED_APPS:
     from mailer import send_mail
@@ -371,22 +371,7 @@ def coffee_amount_check(request):
                     's_t', '0'))
 
 
-from .consts import ITEMS, CUPS_IDS, IP_HEADERS_LIST, EU_COUNTRIES
-
-
-def get_currency(request):
-    if request.user.country_code in ['CA']:
-        return 'cad'
-    elif request.user.country_code in ['CH', 'LI']:
-        return 'chf'
-    elif request.user.country_code in EU_COUNTRIES:
-        return 'eur'
-    elif request.user.country_code in ['US']:
-        return 'usd'
-    elif request.user.country_code in ['RU', 'BY']:
-        return 'rub'
-    else:
-        return 'eur'
+from .consts import ITEMS, CUPS_IDS
 
 
 class TinkoffPayments(View):

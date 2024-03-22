@@ -18,7 +18,7 @@ from lxml.etree import tostring
 from markdown import Markdown
 from html import escape as html_escape
 
-from home.consts import COLUMN_TEXT, COLUMN_START, COLUMN_END, COLUMN_SPEAKER
+from home.consts import COLUMN_TEXT, COLUMN_START, COLUMN_END, COLUMN_SPEAKER, EU_COUNTRIES
 from le_francais.settings.base import FILES_LE_FRANCAIS_HTTPS, \
     FILES_LE_FRANCAIS_SITENAME
 
@@ -664,3 +664,24 @@ def map_to_eaf(map:List[Dict], eaf_file:BytesIO):
     ...
     # saving all changes to eaf file
     ...
+
+
+def get_currency(request):
+    if request.user.is_authenticated:
+        country_code = request.user.country_code
+    else:
+        country_code = request.session['geoip']['country_code']
+    if country_code in ['CA']:
+        return 'cad'
+    elif country_code in ['CH', 'LI']:
+        return 'chf'
+    elif country_code in ['UK']:
+        return 'gbp'
+    elif country_code in EU_COUNTRIES:
+        return 'eur'
+    elif country_code in ['US']:
+        return 'usd'
+    elif country_code in ['RU', 'BY']:
+        return 'rub'
+    else:
+        return 'eur'
