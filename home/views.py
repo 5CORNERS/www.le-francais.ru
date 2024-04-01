@@ -23,7 +23,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from oauth2client.client import OAuth2WebServerFlow
 from social_core.utils import setting_name
-from user_sessions.backends.db import SessionStore
 from user_sessions.models import Session
 from wagtail.contrib.sitemaps.sitemap_generator import \
     Sitemap as WagtailSitemap
@@ -387,21 +386,21 @@ class TinkoffPayments(View):
                 's_t', '') == '1':
             if not request.user.low_price:
                 data = dict(tickets=True, cards=[
-                    dict(title="1 билет", image="images/ticket-1-78.png",
+                    dict(title="1 билет", image="images/tickets/ticket-1-120.png",
                          description=None,
                          price1="<s>По цене стаканчика кофе в <b>McDonalds</b></s>",
-                         price2=78, item_id=6),
-                    dict(title="5 билетов", image="images/tickets-5-69.png",
-                         description=None, price1="по 69 ₽", price2=345,
+                         price2=120, item_id=6),
+                    dict(title="5 билетов", image="images/tickets/ticket-5-490.png",
+                         description=None, price1="по 98 ₽", price2=490,
                          item_id=7),
-                    dict(title="10 билетов", image="images/tickets-10-59.png",
-                         description=None, price1="по 59 ₽", price2=590,
+                    dict(title="10 билетов", image="images/tickets/ticket-10-890.png",
+                         description=None, price1="по 89 ₽", price2=890,
                          item_id=8),
-                    dict(title="20 билетов", image="images/tickets-20-49.png",
-                         description=None, price1="по 49 ₽", price2=980,
+                    dict(title="20 билетов", image="images/tickets/ticket-20-1560.png",
+                         description=None, price1="по 78 ₽", price2=1560,
                          item_id=9),
-                    dict(title="50 билетов", image="images/tickets-50-39.png",
-                         description=None, price1="по 39 ₽", price2=1950,
+                    dict(title="50 билетов", image="images/tickets/ticket-50-2950.png",
+                         description=None, price1="по 59 ₽", price2=2950,
                          item_id=10),
                 ])
                 return render(request,
@@ -411,16 +410,16 @@ class TinkoffPayments(View):
                     dict(title="1 билет", image="images/ticket_1-39.png",
                          description=None, price1="по 39 ₽", price2=39,
                          item_id=11),
-                    dict(title="5 билет", image="images/ticket_5-39.png",
+                    dict(title="5 билетов", image="images/ticket_5-39.png",
                          description=None, price1="по 39 ₽", price2=295,
                          item_id=12),
-                    dict(title="10 билет", image="images/ticket_10-39.png",
+                    dict(title="10 билетов", image="images/ticket_10-39.png",
                          description=None, price1="по 39 ₽", price2=490,
                          item_id=13),
-                    dict(title="20 билет", image="images/ticket_20.png",
+                    dict(title="20 билетов", image="images/ticket_20.png",
                          description=None, price1="по 39 ₽", price2=780,
                          item_id=9),
-                    dict(title="50 билет", image="images/ticket_50.png",
+                    dict(title="50 билетов", image="images/ticket_50.png",
                          description=None, price1="по 34 ₽", price2=1690,
                          item_id=10),
                 ])
@@ -431,20 +430,20 @@ class TinkoffPayments(View):
                 dict(title="1 чашечка", image="images/coffee_1.png",
                      description=None,
                      price1="<s>По цене стаканчика кофе в <b>McDonalds</b></s>",
-                     price2=78,
+                     price2=120,
                      item_id=1),
                 dict(title="5 чашечек", image="images/coffee_5.png",
                      description=None,
-                     price1="по 69 ₽", price2=345, item_id=2),
+                     price1=f"по {490/5} ₽", price2=490, item_id=2),
                 dict(title="10 чашечек", image="images/coffee_10.png",
-                     description=None, price1="по 59 ₽", price2=590,
+                     description=None, price1=f"по {890/10} ₽", price2=890,
                      item_id=3),
                 dict(title="20 чашечек", image="images/coffee_20.png",
-                     description=None, price1="по 49 ₽", price2=980,
+                     description=None, price1=f"по {1560/20} ₽", price2=1560,
                      item_id=4),
                 dict(title="50 чашечек", image="images/coffee_50.png",
                      description='''Хватит, чтобы угощать целый год.''',
-                     price1="по 39 ₽", price2=1950, item_id=5),
+                     price1=f"по {2950/50} ₽", price2=2950, item_id=5),
             ])
             return render(request, 'payments/tinkoff_payments.html', data)
 
