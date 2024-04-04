@@ -5,6 +5,18 @@ from home.models import PageLayoutAdvertisementSnippet
 
 register = template.Library()
 
+
+@register.simple_tag()
+def colored(html, tag_i, color_i, tag_b, color_b):
+    return html.replace(
+        '<i>', f'<{tag_i} style="color:{color_i};">'
+    ).replace(
+        '</i>', f'</{tag_i}>'
+    ).replace(
+        '<b>', f'<{tag_b} style="color:{color_b};">'
+    ).replace('</b>', f'</{tag_b}>')
+
+
 @register.assignment_tag(takes_context=True)
 def option_url(context, option):
     feminin = context.dicts[3]['feminin']

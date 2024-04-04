@@ -1,0 +1,47 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Verb Table</title>
+    <link rel="stylesheet" href="{% static 'components/css/bootstrap.css' %}">
+</head>
+<body>
+
+{% for mood in table.moods %}
+    <h2>{{ mood.name | safe }}</h2>
+    {% for tense in mood.tenses %}
+        <h3>{{ tense.name | safe }}</h3>
+         <div class="table-responsive">
+         <table class="table table-bordered table-hover table-sm" style="width: 100%; max-width: 330px; min-width: 254px">
+             <thead>
+             <tr>
+                 <th style="border: none; padding-top: 0" colspan="2">{{ verb.infinitive | capfirst }}</th>
+             </tr>
+             </thead>
+             <tbody>
+             <tr>
+                 <td>{% include 'conjugation/courses_table_person.html' with person=tense.persons.0 %}</td>
+                 <td>{% include 'conjugation/courses_table_person.html' with person=tense.persons.3 %}</td>
+             </tr>
+             <tr>
+                 <td>{% include 'conjugation/courses_table_person.html' with person=tense.persons.1 %}</td>
+                 <td>{% include 'conjugation/courses_table_person.html' with person=tense.persons.4 %}</td>
+             </tr>
+             <tr>
+                 <td>{% include 'conjugation/courses_table_person.html' with person=tense.persons.2 %}</td>
+                 <td>{% include 'conjugation/courses_table_person.html' with person=tense.persons.5 %}</td>
+             </tr>
+             </tbody>
+         </table>
+         </div>
+    {% endfor %}
+{% endfor %}
+
+<script src="{% static 'components/js/jquery.js' %}"></script>
+<script src="{% static 'components/js/bootstrap.js' %}" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -282,6 +282,11 @@ def verb_page(request, feminin, question, negative, passive, reflexive, pronoun,
 		was_on_conjugations = session.get('was_on_conjugations', False)
 		if not was_on_conjugations:
 			session['was_on_conjugations'] = True
+		if request.GET.get('get-table', False):
+			return render(request, 'conjugation/courses_table.html', {
+				'table': table,
+				'verb': verb
+			})
 		return render(request, 'conjugation/table.html', {
 			'v': verb,
 			'reflexive': bool(reflexive),
