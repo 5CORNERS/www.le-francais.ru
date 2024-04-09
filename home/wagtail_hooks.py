@@ -7,7 +7,7 @@ from wagtail.core import hooks
 def register_bluehighlight_feature(features):
     feature_name = 'cm_blue'
     type_ = 'BLUE_HIGHLIGHT'
-    tag = f'span{feature_name}'
+    tag = f'span'
 
     control = {
         'type': type_,
@@ -41,7 +41,7 @@ def register_bluehighlight_feature(features):
 def register_redhighlight_feature(features):
     feature_name = 'cm_red'
     type_ = 'RED_HIGHLIGHT'
-    tag = f'span{feature_name}'
+    tag = f'span'
 
     control = {
         'type': type_,
@@ -75,8 +75,7 @@ def register_redhighlight_feature(features):
 def register_orangehighlight_feature(features):
     feature_name = 'cm_orange'
     type_ = 'ORANGE_HIGHLIGHT'
-    tag = 'span'
-    tag = f'span{feature_name}'
+    tag = f'span'
 
     control = {
         'type': type_,
@@ -96,7 +95,7 @@ def register_orangehighlight_feature(features):
                 type_: {
                     'element': tag,
                     'props': {
-                        'class': 'text-danger'
+                        'class': 'text-warning'
                     }
                 }
             }
@@ -110,7 +109,7 @@ def register_orangehighlight_feature(features):
 def register_greenhighlight_feature(features):
     feature_name = 'cm_green'
     type_ = 'GREEN_HIGHLIGHT'
-    tag = f'span{feature_name}'
+    tag = f'span'
 
     control = {
         'type': type_,
