@@ -21,7 +21,7 @@ from pybb.models import Topic, Forum, Category
 from wagtail.admin.edit_handlers import StreamFieldPanel, FieldPanel, \
     MultiFieldPanel, PageChooserPanel, \
     InlinePanel
-from wagtail.core.blocks import RichTextBlock, RawHTMLBlock, ListBlock, \
+from wagtail.core.blocks import RichTextBlock as WagtailRichTextBlock, RawHTMLBlock, ListBlock, \
     StructBlock
 from wagtail.core.fields import StreamField
 from wagtail.core.models import Page, Orderable
@@ -49,6 +49,17 @@ from .blocks.PlayerPlusBlock import PlayerPlusBlock
 from .pay54 import Pay34API
 from .utils import message, parse_tab_delimited_srt_file, sub_html, create_document_from_transcript_srt, \
     get_html_and_map_from_docx
+
+class RichTextBlock(WagtailRichTextBlock):
+    def __init__(self, *args, **kwargs):
+        kwargs['features'] = [
+            'h1', 'h2', 'h3', 'h4', 'bold', 'italic','ol','ul','hr','link','document-link','image','embed'
+            'cm_blue', 'cm_orange', 'cm_red', 'cm_green',
+            'h1','h5','h6','code','superscript','subscript','strikethrough','blockquote'
+        ]
+        super(RichTextBlock, self).__init__(*args, **kwargs)
+
+        
 
 PAGE_CHOICES = (
     ('lesson_a1', 'Lesson A1'),
@@ -352,8 +363,8 @@ class DefaultPage(Page):
         ('video', VideoPlayerBlock()),
         ('tabs', TabsBlock()),
         ('translations', ListBlock(StructBlock([
-            ('word', RichTextBlock(required=True)),
-            ('translation', RichTextBlock(required=True))
+            ('word', RichTextBlock(required=True, )),
+            ('translation', RichTextBlock(required=True, ))
         ]), template="blocks/transcriptions.html")
          ),
         ('post', PostBlock()),
@@ -404,8 +415,8 @@ class PageWithSidebar(Page):
         ('video', VideoPlayerBlock()),
         ('tabs', TabsBlock()),
         ('translations', ListBlock(StructBlock([
-            ('word', RichTextBlock(required=True)),
-            ('translation', RichTextBlock(required=True))
+            ('word', RichTextBlock(required=True, )),
+            ('translation', RichTextBlock(required=True, ))
         ]), template="blocks/transcriptions.html")
          ),
         ('post', PostBlock()),
@@ -559,8 +570,8 @@ class LessonPage(Page):
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('translations', ListBlock(StructBlock([
-            ('word', RichTextBlock(required=True)),
-            ('translation', RichTextBlock(required=True))
+            ('word', RichTextBlock(required=True, )),
+            ('translation', RichTextBlock(required=True, ))
         ]), template="blocks/transcriptions.html")),
         ('post', PostBlock()),
         ('floating_image', FloatingImageBlock()),
@@ -579,8 +590,8 @@ class LessonPage(Page):
         ('audio', AudioBlock()),
         ('video', VideoPlayerBlock()),
         ('translations', ListBlock(StructBlock([
-            ('word', RichTextBlock(required=True)),
-            ('translation', RichTextBlock(required=True))
+            ('word', RichTextBlock(required=True, )),
+            ('translation', RichTextBlock(required=True, ))
         ]), template="blocks/transcriptions.html")),
         ('post', PostBlock()),
         ('floating_image', FloatingImageBlock()),
@@ -899,8 +910,8 @@ class ArticlePage(Page):
         ('video', VideoPlayerBlock()),
         ('tabs', TabsBlock()),
         ('translations', ListBlock(StructBlock([
-            ('word', RichTextBlock(required=True)),
-            ('translation', RichTextBlock(required=True))
+            ('word', RichTextBlock(required=True, )),
+            ('translation', RichTextBlock(required=True, ))
         ]), template="blocks/transcriptions.html")
          ),
         ('post', PostBlock()),
@@ -964,8 +975,8 @@ class PodcastPage(Page):
         ('video', VideoPlayerBlock()),
         ('tabs', TabsBlock()),
         ('translations', ListBlock(StructBlock([
-            ('word', RichTextBlock(required=True)),
-            ('translation', RichTextBlock(required=True))
+            ('word', RichTextBlock(required=True, )),
+            ('translation', RichTextBlock(required=True, ))
         ]), template="blocks/transcriptions.html")
          ),
         ('post', PostBlock()),
