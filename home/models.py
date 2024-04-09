@@ -53,9 +53,8 @@ from .utils import message, parse_tab_delimited_srt_file, sub_html, create_docum
 class RichTextBlock(WagtailRichTextBlock):
     def __init__(self, *args, **kwargs):
         kwargs['features'] = [
-            'h1', 'h2', 'h3', 'h4', 'bold', 'italic','ol','ul','hr','link','document-link','image','embed'
+            'h1', 'h2', 'h3', 'h4', 'bold', 'italic','ol','ul','hr','link','document-link','image','embed',
             'cm_blue', 'cm_orange', 'cm_red', 'cm_green',
-            'h1','h5','h6','code','superscript','subscript','strikethrough','blockquote'
         ]
         super(RichTextBlock, self).__init__(*args, **kwargs)
 
