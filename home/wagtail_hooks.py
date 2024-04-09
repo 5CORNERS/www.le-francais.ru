@@ -95,7 +95,7 @@ def register_orangehighlight_feature(features):
                 type_: {
                     'element': tag,
                     'props': {
-                        'class': 'text-warning'
+                        'class': 'text-orange'
                     }
                 }
             }
