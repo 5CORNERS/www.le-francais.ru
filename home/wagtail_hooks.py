@@ -11,7 +11,7 @@ def register_bluehighlight_feature(features):
 
     control = {
         'type': type_,
-        'label': 'Blue HL',
+        'label': '🟦',
         'description': 'Blue gradient highlight',
         'style': {'color': '#337ab7'},
     }
@@ -45,7 +45,7 @@ def register_redhighlight_feature(features):
 
     control = {
         'type': type_,
-        'label': 'Red HL',
+        'label': '🟥',
         'description': 'Red gradient highlight',
         'style': {'color': '#ed1c24'},
     }
@@ -79,7 +79,7 @@ def register_orangehighlight_feature(features):
 
     control = {
         'type': type_,
-        'label': 'Orange HL',
+        'label': '🟧',
         'description': 'Orange gradient highlight',
         'style': {'color': '#f28b1a'},
     }
@@ -113,7 +113,7 @@ def register_greenhighlight_feature(features):
 
     control = {
         'type': type_,
-        'label': 'Green HL',
+        'label': '🟩',
         'description': 'Green gradient highlight',
         'style': {'color': '#28a745'},
     }

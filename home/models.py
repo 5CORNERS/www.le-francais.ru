@@ -4,24 +4,22 @@ import datetime
 import json
 import re
 from io import StringIO, BytesIO
-from typing import Optional, Any
+from typing import Optional
 
 from annoying.fields import AutoOneToOneField
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField, ArrayField
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import Count, Sum
-from django.dispatch import receiver
 from django.forms import CheckboxInput, TextInput
 from django.http import HttpRequest
-from django.template.response import TemplateResponse
 from django.utils import timezone
 from modelcluster.fields import ParentalKey
 from pybb.models import Topic, Forum, Category
 from wagtail.admin.edit_handlers import StreamFieldPanel, FieldPanel, \
     MultiFieldPanel, PageChooserPanel, \
     InlinePanel
-from wagtail.core.blocks import RichTextBlock as WagtailRichTextBlock, RawHTMLBlock, ListBlock, \
+from wagtail.core.blocks import RawHTMLBlock, ListBlock, \
     StructBlock
 from wagtail.core.fields import StreamField
 from wagtail.core.models import Page, Orderable
@@ -38,27 +36,17 @@ from home.blocks.Reviews import ChoosenReviews
 from home.blocks.TabsBlock import TabsBlock, TabBlock
 from home.blocks.VideoPlayer import VideoPlayerBlock
 from home.blocks.AlsoReadBlock import AlsoReadBlock
-from tinkoff_merchant.signals import payment_confirm, payment_refund
 from .blocks.BootstrapCalloutBlock import BootstrapCalloutBlock
 from .blocks.CollapseBlock import CollapseBlock
 from .blocks.FloatingImageBlock import FloatingImageBlock
 from .blocks.InvisibleRawHTMLBlock import InvisibleRawHTMLBlock, VisibleRawHTMLBlock
 from .blocks.LeFrancaisAdUnit import LeFrancaisAdUnitBlock, \
-    AdUnitSizeBlock, AdUnitSizeBlockAdvanced
+    AdUnitSizeBlockAdvanced
 from .blocks.PlayerPlusBlock import PlayerPlusBlock
+from .blocks.RichTextBlockWithFeatures import RichTextBlock
 from .pay54 import Pay34API
 from .utils import message, parse_tab_delimited_srt_file, sub_html, create_document_from_transcript_srt, \
     get_html_and_map_from_docx
-
-class RichTextBlock(WagtailRichTextBlock):
-    def __init__(self, *args, **kwargs):
-        kwargs['features'] = [
-            'h1', 'h2', 'h3', 'h4', 'bold', 'italic','ol','ul','hr','link','document-link','image','embed',
-            'cm_blue', 'cm_orange', 'cm_red', 'cm_green',
-        ]
-        super(RichTextBlock, self).__init__(*args, **kwargs)
-
-        
 
 PAGE_CHOICES = (
     ('lesson_a1', 'Lesson A1'),

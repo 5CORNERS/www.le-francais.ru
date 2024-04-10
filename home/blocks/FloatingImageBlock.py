@@ -1,5 +1,6 @@
-from wagtail.core.blocks import StreamBlock, StructBlock, RichTextBlock, \
+from wagtail.core.blocks import StreamBlock, StructBlock, \
 	RawHTMLBlock, TextBlock, ChoiceBlock, IntegerBlock, CharBlock, BooleanBlock
+from .RichTextBlockWithFeatures import RichTextBlock
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.templatetags.wagtailimages_tags import ImageNode
 
