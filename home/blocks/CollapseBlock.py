@@ -1,5 +1,6 @@
 from django.utils.crypto import get_random_string
-from wagtail.core.blocks import StreamBlock, StructBlock, TextBlock, RawHTMLBlock, RichTextBlock
+from wagtail.core.blocks import StreamBlock, StructBlock, TextBlock, RawHTMLBlock
+from RichTextBlockWithFeatures import RichTextBlock
 from wagtail.images.blocks import ImageChooserBlock
 
 from home.blocks.FloatingImageBlock import FloatingImageBlock
