@@ -21,7 +21,7 @@ def register_bluehighlight_feature(features):
     )
 
     db_conversion = {
-        'from_database_format': {tag: InlineStyleElementHandler(type_)},
+        'from_database_format': {'span[class="text-primary"]': InlineStyleElementHandler(type_)},
         'to_database_format': {
             'style_map': {
                 type_: {
@@ -55,7 +55,7 @@ def register_redhighlight_feature(features):
     )
 
     db_conversion = {
-        'from_database_format': {tag: InlineStyleElementHandler(type_)},
+        'from_database_format': {'span[class="text-danger"]': InlineStyleElementHandler(type_)},
         'to_database_format': {
             'style_map': {
                 type_: {
@@ -89,7 +89,7 @@ def register_orangehighlight_feature(features):
     )
 
     db_conversion = {
-        'from_database_format': {tag: InlineStyleElementHandler(type_)},
+        'from_database_format': {'span[class="text-orange"]': InlineStyleElementHandler(type_)},
         'to_database_format': {
             'style_map': {
                 type_: {
@@ -123,7 +123,7 @@ def register_greenhighlight_feature(features):
     )
 
     db_conversion = {
-        'from_database_format': {tag: InlineStyleElementHandler(type_)},
+        'from_database_format': {'span[class="text-success"]': InlineStyleElementHandler(type_)},
         'to_database_format': {
             'style_map': {
                 type_: {
