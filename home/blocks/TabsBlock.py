@@ -1,6 +1,6 @@
 from wagtail.core import blocks
 from wagtail.core.blocks.field_block import RawHTMLBlock, CharBlock, BooleanBlock
-from RichTextBlockWithFeatures import RichTextBlock
+from .RichTextBlockWithFeatures import RichTextBlock
 from wagtail.core.blocks.stream_block import StreamBlock
 from wagtail.images.blocks import ImageChooserBlock
 
