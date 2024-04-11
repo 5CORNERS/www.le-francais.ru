@@ -1359,3 +1359,7 @@ span.underline.play *{
 .text-orange {
     color: #f28b1a;
 }
+
+h1, h2, h3, h4 {
+    margin-top: 1.2rem;
+}
