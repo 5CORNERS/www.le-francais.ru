@@ -1,1 +1,1 @@
-Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% elif pronoun %}s'en {{ v.infinitive }}{% else %}{{ v.infinitive }}{% endif %} во французском языке.
+{% if v.seo_title and not reflexive %}{{ v.seo_title }}{% else %}Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% elif pronoun %}s'en {{ v.infinitive }}{% else %}{{ v.infinitive }}{% endif %} во французском языке.{% endif %}
