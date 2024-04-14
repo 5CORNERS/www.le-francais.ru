@@ -61,3 +61,4 @@ class RegleAdmin(admin.ModelAdmin):
 @admin.register(VerbSEO)
 class VerbSEOAdmin(admin.ModelAdmin):
     list_display = ['verb', 'title', 'description']
+    raw_id_fields = ['verb']
