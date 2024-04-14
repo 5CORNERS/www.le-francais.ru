@@ -1,1 +1,1 @@
-Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} — в самой крутой спрягалке из всех здесь представленных: с озвучанием, комментариями и особенностями спряжения. Вам понравится! :)
+{% if v.seo_description and not reflexive %}{{ v.seo_description }}{% else %}Спряжение глагола {% if reflexive %}{{ v.reflexiveverb.infinitive }}{% else %}{{ v.infinitive }}{% endif %} — в самой крутой спрягалке из всех здесь представленных: с озвучанием, комментариями и особенностями спряжения. Вам понравится! :){% endif %}

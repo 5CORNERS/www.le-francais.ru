@@ -117,6 +117,7 @@ class Verb(models.Model):
 		self._exceptions = None
 		self._conjugations = None
 		self._conjugations_no_html = None
+		self._seo = None
 
 	count = models.IntegerField(default=0)
 	infinitive = models.CharField(max_length=100)
@@ -444,6 +445,26 @@ class Verb(models.Model):
 					gender=gender
 				))
 		return urls
+
+	@property
+	def seo_title(self):
+		if self._seo is None:
+			self._seo = self.verbseo or False
+		if self._seo:
+			return self._seo.title
+
+	@property
+	def seo_description(self):
+		if self._seo is None:
+			self._seo = self.verbseo or False
+		if self._seo:
+			return self._seo.description
+
+
+class VerbSEO(models.Model):
+	verb = models.OneToOneField('Verb', on_delete=models.CASCADE)
+	title = models.CharField(max_length=258)
+	description = models.CharField(max_length=1024)
 
 
 class Except(models.Model):
