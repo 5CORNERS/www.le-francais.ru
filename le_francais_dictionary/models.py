@@ -82,6 +82,8 @@ class Packet(models.Model):
 		return self.word_set.all().count()
 
 	def is_activated(self, user) -> bool:
+		if user.is_authenticated and not user.must_pay:
+			return True
 		if self.lesson and self.lesson.payed(user):
 			return True
 		else:
