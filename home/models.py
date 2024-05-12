@@ -650,7 +650,7 @@ class LessonPage(Page):
         return get_nav_root(self)
 
     def __str__(self):
-        return "LessonPage " + str(self.lesson_number)
+        return "LessonPage " + str(self.lesson_number) + ": " + self.title
 
     def add_lesson_to_user(self, user):
         if user.cup_amount >= 1:
