@@ -238,7 +238,11 @@ def get_nav_tree(root, current_page):
     if root.show_in_menus:
         nav_items = [get_navigation_object_from_page(root, current_page)]
     else:
-        nav_items = get_navigation_object_from_page(root, current_page)["nodes"]
+        navigation_object = get_navigation_object_from_page(root, current_page)["nodes"]
+        if 'nodes' in navigation_object:
+            nav_items = navigation_object["nodes"]
+        else:
+            nav_items = []
     return nav_items
 
 def parse_tab_delimited_srt_file(file):
