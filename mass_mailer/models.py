@@ -921,7 +921,10 @@ class Message(models.Model):
 
 		filtered_payments = self.recipients_filter.filter_user_payments(recipient.user)
 		last_filtered_payment = filtered_payments.last()
-		last_filtered_payment_category = last_filtered_payment.item_category
+		if last_filtered_payment:
+			last_filtered_payment_category = last_filtered_payment.item_category
+		else:
+			last_filtered_payment_category = None
 
 
 		next_after_payment_activation = None
