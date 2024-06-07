@@ -286,7 +286,7 @@ class Word(models.Model):
 		if not self._polly_url:
 			return self.polly.url if self.polly else None
 		else:
-			return urlquote(self._polly_url, safe='/:')
+			return urlquote(self._polly_url, safe='/:%')
 
 	@property
 	def first_translation(self):
@@ -611,7 +611,7 @@ class WordTranslation(models.Model):
 		if not self._polly_url:
 			return self.polly.url if self.polly else None
 		else:
-			return urlquote(self._polly_url, safe='/:')
+			return urlquote(self._polly_url, safe='/:%')
 
 	@property
 	def genre(self):
