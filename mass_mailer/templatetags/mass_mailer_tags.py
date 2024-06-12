@@ -1,4 +1,5 @@
 from django.template.defaulttags import register
+from ..models import Profile
 
 
 @register.simple_tag(takes_context=False)
@@ -19,3 +20,7 @@ def n_to_word(s:str):
 	elif "1 " in s:
 		s = s.replace("1 ", "")
 	return s
+
+@register.assignment_tag(takes_context=False)
+def get_mass_mailer_profile_by_user(user):
+	return Profile.objects.get(user=user)
