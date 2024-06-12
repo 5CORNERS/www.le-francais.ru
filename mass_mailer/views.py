@@ -13,7 +13,7 @@ def unsubscribe(request, key):
 		profile = Profile.objects.get(key=key)
 		profile.subscribed = False
 		profile.save()
-		return HttpResponse(f'Ваш адрес {profile.user.email} был отписан от всех рассылок, чтобы подписаться обратно, перейдите по адресу {request.build_absolute_uri(reverse("mass_mailer:subscribe", kwargs={"key":key}))}.', status=200, content_type='text/plain; charset=UTF-8')
+		return HttpResponse(f'Ваш адрес {profile.user.email} был отписан от всех рассылок. Чтобы подписаться обратно, перейдите по адресу {request.build_absolute_uri(reverse("mass_mailer:subscribe", kwargs={"key":key}))}', status=200, content_type='text/plain; charset=UTF-8')
 	except Profile.DoesNotExist:
 		return HttpResponseNotFound()
 
