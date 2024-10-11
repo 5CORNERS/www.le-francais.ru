@@ -345,14 +345,21 @@ MASS_MAILER_DEFAULT_DELAY = 60
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Le-francais.ru <no-reply@mail.le-francais.ru>')
 DEFAULT_REPLY_TO_EMAIL = os.getenv('DEFAULT_REPLY_TO_EMAIL', DEFAULT_FROM_EMAIL)
 
-email_config = dj_email_url.config()
-
-EMAIL_HOST = email_config['EMAIL_HOST']
-EMAIL_PORT = email_config['EMAIL_PORT']
-EMAIL_HOST_USER = email_config['EMAIL_HOST_USER']
-EMAIL_HOST_PASSWORD = email_config['EMAIL_HOST_PASSWORD']
-EMAIL_USE_TLS = email_config['EMAIL_USE_TLS']
-EMAIL_USE_SSL = email_config['EMAIL_USE_SSL']
+if os.getenv('EMAIL_HOST', False):
+    EMAIL_HOST = os.getenv('EMAIL_HOST')
+    EMAIL_PORT = os.getenv('EMAIL_PORT')
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
+    EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL') == 'True'
+else:
+    email_config = dj_email_url.config()
+    EMAIL_HOST = email_config['EMAIL_HOST']
+    EMAIL_PORT = email_config['EMAIL_PORT']
+    EMAIL_HOST_USER = email_config['EMAIL_HOST_USER']
+    EMAIL_HOST_PASSWORD = email_config['EMAIL_HOST_PASSWORD']
+    EMAIL_USE_TLS = email_config['EMAIL_USE_TLS']
+    EMAIL_USE_SSL = email_config['EMAIL_USE_SSL']
 
 # Django Mailer Settings
 
