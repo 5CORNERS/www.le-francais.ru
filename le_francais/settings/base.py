@@ -338,28 +338,36 @@ POSTMAN_SHOW_USER_AS = 'username'
 POSTMAN_DISALLOW_ANONYMOUS = True
 POSTMAN_MAILER_APP = 'mailer'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django_ses.SESBackend'
+
+AWS_SES_REGION_NAME = 'eu-west-1'
+AWS_SES_REGION_ENDPOINT = 'email.eu-west-1.amazonaws.com'
+
+# AWS_SES_ACCESS_KEY_ID = os.getenv('AWS_SES_ACCESS_KEY_ID')
+# AWS_SES_SECRET_ACCESS_KEY = os.getenv('AWS_SES_SECRET_ACCESS_KEY')
+
+
 MASS_EMAIL_BACKEND = EMAIL_BACKEND
 MASS_MAILER_DEFAULT_CHUNK_SIZE = 10
 MASS_MAILER_DEFAULT_DELAY = 60
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Le-francais.ru <no-reply@mail.le-francais.ru>')
 DEFAULT_REPLY_TO_EMAIL = os.getenv('DEFAULT_REPLY_TO_EMAIL', DEFAULT_FROM_EMAIL)
 
-if os.getenv('EMAIL_HOST', False):
-    EMAIL_HOST = os.getenv('EMAIL_HOST')
-    EMAIL_PORT = os.getenv('EMAIL_PORT')
-    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
-    EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL') == 'True'
-else:
-    email_config = dj_email_url.config()
-    EMAIL_HOST = email_config['EMAIL_HOST']
-    EMAIL_PORT = email_config['EMAIL_PORT']
-    EMAIL_HOST_USER = email_config['EMAIL_HOST_USER']
-    EMAIL_HOST_PASSWORD = email_config['EMAIL_HOST_PASSWORD']
-    EMAIL_USE_TLS = email_config['EMAIL_USE_TLS']
-    EMAIL_USE_SSL = email_config['EMAIL_USE_SSL']
+# if os.getenv('EMAIL_HOST', False):
+#     EMAIL_HOST = os.getenv('EMAIL_HOST')
+#     EMAIL_PORT = os.getenv('EMAIL_PORT')
+#     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+#     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+#     EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
+#     EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL') == 'True'
+# else:
+#     email_config = dj_email_url.config()
+#     EMAIL_HOST = email_config['EMAIL_HOST']
+#     EMAIL_PORT = email_config['EMAIL_PORT']
+#     EMAIL_HOST_USER = email_config['EMAIL_HOST_USER']
+#     EMAIL_HOST_PASSWORD = email_config['EMAIL_HOST_PASSWORD']
+#     EMAIL_USE_TLS = email_config['EMAIL_USE_TLS']
+#     EMAIL_USE_SSL = email_config['EMAIL_USE_SSL']
 
 # Django Mailer Settings
 
