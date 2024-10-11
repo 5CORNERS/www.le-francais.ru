@@ -146,7 +146,7 @@ MIDDLEWARE = [
     # 'django_mobile.middleware.SetFlavourMiddleware',
 
     'le_francais.middleware.GeoIpSessionMiddleware',
-    'custom_user.middleware.GetPush4SiteId',
+    # 'custom_user.middleware.GetPush4SiteId',
     'log_errors.middleware.Log500ErrorsMiddleware',
 ]
 
