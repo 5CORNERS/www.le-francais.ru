@@ -1,75 +1,43 @@
-# "v4-" stacks use our new, more rigorous buildpacks management system. They
-# allow you to use multiple buildpacks in a single application, as well as to
-# use custom buildpacks.
-#
-# - `v2-` images work with heroku-import v3.x.
-# - `v4-` images work with heroku-import v4.x. (We synced the tags.)
+# First stage: Download GeoIP databases using maxmindinc/geoipupdate
+FROM ghcr.io/maxmind/geoipupdate:latest as geoipupdate-stage
 
-ARG IMPORT_VERSION=v4
-ARG HEROKU_STACK=${IMPORT_VERSION}-heroku-20
-FROM ghcr.io/renderinc/heroku-app-builder:${HEROKU_STACK} AS builder
+# Build arguments for geoipupdate configuration
+ARG GEOIPUPDATE_ACCOUNT_ID
+ARG GEOIPUPDATE_LICENSE_KEY
+ARG GEOIPUPDATE_EDITION_IDS
+ARG GEOIPUPDATE_FREQUENCY=0
 
-# Maxmind Database Update
+# Set environment variables from build arguments
+ENV GEOIPUPDATE_ACCOUNT_ID=${GEOIPUPDATE_ACCOUNT_ID}
+ENV GEOIPUPDATE_LICENSE_KEY=${GEOIPUPDATE_LICENSE_KEY}
+ENV GEOIPUPDATE_EDITION_IDS=${GEOIPUPDATE_EDITION_IDS}
+ENV GEOIPUPDATE_FREQUENCY=${GEOIPUPDATE_FREQUENCY}
 
-USER root
+# Run the entry script to update the database
+RUN /usr/bin/entry.sh
 
-RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository ppa:maxmind/ppa && \
-    apt-get update && \
-    apt-get install -y libmaxminddb0 libmaxminddb-dev mmdb-bin geoipupdate && \
-    mkdir -p /app/geoip
+# Second stage: Runtime application
+FROM python:3.7
 
-ENV MAXMIND_ACCOUNT_ID ${GEOIPUPDATE_ACCOUNT_ID}
-ENV MAXMIND_LICENSE_KEY ${GEOIPUPDATE_LICENSE_KEY}
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-COPY GeoIP.conf /etc/GeoIP.conf
-RUN geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
+# Set work directory
+WORKDIR /usr/src/app
 
-# Below, please specify any build-time environment variables that you need to
-# reference in your build (as called by your buildpacks). If you don't specify
-# the arg below, you won't be able to access it in your build. You can also
-# specify a default value, as with any Docker `ARG`, if appropriate for your
-# use case.
+COPY --from=geoipupdate-stage /usr/share/GeoIP /usr/src/app/geoip
 
-# ARG MY_BUILD_TIME_ENV_VAR
-ARG DATABASE_URL
-ARG EMAIL_URL
+# Install dependencies
+COPY requirements.txt /usr/src/app/
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install django-session-header --no-dependencies --no-cache-dir
 
-# The FROM statement above refers to an image with the base buildpacks already
-# in place. We then run the apply-buildpacks.py script here because, unlike our
-# `v2` image, this allows us to expose build-time env vars to your app.
-RUN /render/build-scripts/apply-buildpacks.py ${HEROKU_STACK}
+# Copy app to workdir
+COPY . /usr/src/app
 
-# We strongly recommend that you package a Procfile with your application, but
-# if you don't, we'll try to guess one for you. If this is incorrect, please
-# add a Procfile that tells us what you need us to run.
-RUN if [[ -f /app/Procfile ]]; then \
-  /render/build-scripts/create-process-types "/app/Procfile"; \
-fi;
+# Collect static files
+RUN python manage.py collectstatic --noinput
 
-# For running the app, we use a clean base image and also one without Ubuntu development packages
-# https://devcenter.heroku.com/articles/heroku-20-stack#heroku-20-docker-image
-FROM ghcr.io/renderinc/heroku-app-runner:${HEROKU_STACK} AS runner
-
-# Here we copy your build artifacts from the build image to the runner so that
-# the image that we deploy to Render is smaller and, therefore, can start up
-# faster.
-COPY --from=builder --chown=1000:1000 /render /render/
-COPY --from=builder --chown=1000:1000 /app /app/
-
-# Here we're switching to a non-root user in the container to remove some categories
-# of container-escape attack.
-USER 1000:1000
-WORKDIR /app
-
-# This sources all /app/.profile.d/*.sh files before process start.
-# These are created by buildpacks, and you probably don't have to worry about this.
-# https://devcenter.heroku.com/articles/buildpack-api#profile-d-scripts
-ENTRYPOINT [ "/render/setup-env" ]
-
-# 3. By default, we run the 'web' process type defined in the app's Procfile
-# You may override the process type that is run by replacing 'web' with another
-# process type name in the CMD line below. That process type must have been
-# defined in the app's Procfile during build.
-CMD [ "/render/process/web" ]
+# Gunicorn
+CMD ["gunicorn", "le_francais.wsgi", "--bind", "0.0.0.0:8000"]
