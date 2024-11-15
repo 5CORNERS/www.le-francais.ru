@@ -1,6 +1,14 @@
 {% load static le_francais_dictionary wagtailcore_tags site_tags %}
 <h4>Флэш-карты со словами к уроку</h4>
 <div class="row">
+    <div class="col-12">
+        <div id="flash-cards-opera-warning" class="alert alert-danger d-none" role="alert">
+            В последних версиях <b>браузера Opera</b> наши карточки могут не работать. Мы знаем об этой проблеме и работаем над
+            ее устранением. В браузерах Chrome, Edge, Firefox, Vivaldi и прочих всё работает корректно. Если Вы
+            столкнулись с такой проблемой, пожалуйста, перейдите временно в другой браузер. Как только мы устраним эту
+            проблему, мы уведомим об этом на форуме. Извините за неудобство!
+        </div>
+    </div>
     {% if not hide_info %}
         <div class="col-12">
             <div id="flash-cards-info"
@@ -196,6 +204,10 @@
     </div>
 </div>
 <script>
+    debugger;
+    if (window.navigator.userAgent.search('OPR') !== -1) {
+        $('#flash-cards-opera-warning').removeClass('d-none');
+    }
     function loadFlashCards(packet_id) {
         $.ajax(Urls['dictionary:get_app'](packet_id), {
             success: function (data) {
