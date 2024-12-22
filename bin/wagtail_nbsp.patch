@@ -1,0 +1,28 @@
+Subject: [PATCH] Normalize whitespace handling in HTML to ContentState conversion
+---
+Index: wagtail/admin/rich_text/converters/html_to_contentstate.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/wagtail/admin/rich_text/converters/html_to_contentstate.py b/wagtail/admin/rich_text/converters/html_to_contentstate.py
+--- admin/rich_text/converters/html_to_contentstate.py	(revision e5d86af0cdeb2c5c96d060e3b01e97b49768b13b)
++++ admin/rich_text/converters/html_to_contentstate.py	(revision e50515e61c0127ae582e7e92f70041a338f1f9cd)
+@@ -12,7 +12,8 @@
+ KEEP_WHITESPACE = 1
+ FORCE_WHITESPACE = 2
+
+-WHITESPACE_RE = re.compile(r'\s+')
++# match one or more consecutive normal spaces, new-lines, tabs and form-feeds
++WHITESPACE_RE = re.compile(r'[ \t\n\f\r]+')
+
+
+ class HandlerState:
+@@ -306,6 +307,7 @@
+
+     def handle_data(self, content):
+         # normalise whitespace sequences to a single space
++        # This is in line with https://www.w3.org/TR/html4/struct/text.html#h-9.1
+         content = re.sub(WHITESPACE_RE, ' ', content)
+
+         if self.state.current_block is None:
