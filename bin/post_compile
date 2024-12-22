@@ -4,4 +4,4 @@ pip install django-session-header --no-dependencies
 echo "-----> Deleting static src folder"
 rm -rf ./static_src
 echo "-----> Patching Wagtail"
-pypatch apply wagtail ./bin/wagtail_nbsp.patch
+python -m pypatch.command apply ./bin/wagtail_nbsp.patch wagtail
