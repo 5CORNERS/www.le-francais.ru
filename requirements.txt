@@ -53,7 +53,7 @@ django-bootstrap-form
 django-postman==3.5.1
 django-crispy-forms
 django-registration
-django-htmlmin
+django-htmlmin==0.11.0
 pydub
 brotlipy
 django-inline-svg
