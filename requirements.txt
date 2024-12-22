@@ -2,9 +2,8 @@ django >= 1.11.29, < 2.0.0
 gunicorn==22.0.0
 psycopg2==2.8.6
 
-wagtail==2.1
+Pillow==5.4.1
 geoip2~=3.0.0
-Pillow~=5.4
 shortuuid~=1.0.1
 anytree~=2.8.0
 pytz~=2020.5
@@ -62,6 +61,7 @@ django-npm
 
 -e git+https://github.com/5CORNERS/pybbm.git#egg=pybbm
 -e git+https://github.com/AntonDumov/django-recaptcha3.git#egg=django-recaptcha3
+-e git+https://github.com/AntonDumov/wagtail-2.1-fix-nbsp.git@stable/2.1.x#egg=wagtail
 
 git+https://github.com/hovel/django-pure-pagination.git@4e5febe5f6df7fda8488b77fd827b8547d436f26
 git+https://github.com/AntonDumov/py3-validate-email.git
