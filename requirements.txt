@@ -86,7 +86,7 @@ setuptools~=51.0.0
 dnspython~=1.16.0
 idna~=2.9
 filelock~=3.0.12
-beautifulsoup4~=4.6.1
+beautifulsoup4
 requests~=2.23.0
 django-contrib-comments~=1.9.2
 lxml~=4.5.2
