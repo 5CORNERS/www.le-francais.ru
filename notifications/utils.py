@@ -39,10 +39,6 @@ def query_notifications(request):
 		).exclude(datetime_creation__lt=user.date_joined).exclude(
 			excpt=user).distinct().order_by(
 			'-datetime_creation'))  # TODO: фильтровать по разрешениям
-	if not notifications:
-		has_notifications = False
-	else:
-		has_notifications = True
 	notification_user_set = NotificationUser.objects.filter(
 		user=user
 	)
@@ -64,15 +60,18 @@ def query_notifications(request):
 			notification._is_viewed[user.pk] = False
 			notification._is_visited[user.pk] = False
 	time_threshold = timezone.now() - timezone.timedelta(days=14)
+	old_notifications = [
+			n.to_dict(user) for n in notifications if
+			(n.datetime_creation > time_threshold and n.is_viewed(user))
+		]
+	new_notifications = [
+		n.to_dict(user) for n in notifications if not n.is_viewed(user)
+	]
+	has_notifications = bool(len(old_notifications) + len(new_notifications))
 	return dict(
 		has_notifications=has_notifications,
 		authenticated=True,
-		old_notifications=[
-			n.to_dict(user) for n in notifications if
-			(n.datetime_creation > time_threshold and n.is_viewed(user))
-		],
-		new_notifications=[
-			n.to_dict(user) for n in notifications if not n.is_viewed(user)
-		],
+		old_notifications=old_notifications,
+		new_notifications=new_notifications,
 		login_url=login_url,
 	)
