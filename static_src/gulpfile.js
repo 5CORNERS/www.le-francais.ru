@@ -60,13 +60,32 @@ gulp.task('js', () => {
 
 gulp.task('datatables.js', () => {
     return gulp.src('js/datatables.js')
-        .pipe(webpack({output:{filename:'datatables.js'}}))
+        .pipe(webpack({output:{filename:'datatables.js'}, devtool: 'source-map'}))
         .pipe(gulp.dest(dist + '/js/'))
 });
+
+gulp.task('videojs', () => {
+    return gulp.src(['js/videojs.js'])
+        .pipe(webpack({output:{filename:'videojs.js'}, devtool: 'source-map'}))
+        .pipe(gulp.dest(dist + '/js/'))
+})
+
+gulp.task('videojs-styles', () => {
+    return gulp.src('node_modules/video.js/dist/video-js.css')
+        .pipe(sourcemaps.init())
+        .pipe(cleanCSS({compatibility: 'ie8'}))
+        .pipe(gulp.dest(dist + '/css/'))
+})
 
 gulp.task('fa-fonts', function () {
     return gulp.src('node_modules/@fortawesome/fontawesome-free/webfonts/*')
         .pipe(gulp.dest(dist + '/webfonts/'));
+});
+
+gulp.task('bootstrap5', () => {
+    return gulp.src('node_modules/bootstrap5/dist/js/bootstrap.bundle.js')
+        .pipe(webpack({output:{filename:'bootstrap5.js'}, devtool: 'source-map'}))
+        .pipe(gulp.dest(dist + '/js/'))
 });
 
 gulp.task('clean', () => {
@@ -75,4 +94,4 @@ gulp.task('clean', () => {
     ], {force: true});
 });
 
-gulp.task('default', gulp.series(['clean', 'sass', 'css', 'js', 'fa-fonts', /*'datatables.js'*/]));
+gulp.task('default', gulp.series(['clean', 'sass', 'css', 'js', 'fa-fonts', 'videojs', 'videojs-styles','datatables.js', 'bootstrap5']));
