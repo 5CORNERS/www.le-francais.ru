@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% load i18n %}
+{% load i18n static %}
 
 {% block head_title %}{% trans "Sign Out" %}{% endblock %}
 
 {% block content %}
     <div class="container">
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-12 logout-form" style="display: none">
                 <h1>{% trans "Sign Out" %}</h1>
 
                 <p>{% trans 'Are you sure you want to sign out?' %}</p>
@@ -20,8 +20,34 @@
                     <button type="submit">{% trans 'Sign Out' %}</button>
                 </form>
             </div>
+            <div class="col-lg-12 center spinner">
+                <img alt="{% trans 'Logging out' %}" src="{% static 'images/loading_icon.gif' %}">
+            </div>
         </div>
     </div>
 
 
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        $(() => {
+            fetch('{% url "account_logout" %}', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '{{ redirect_field_value }}' || '/';
+                    }
+                })
+                .catch(error => {
+                    $('.spinner').hide();
+                    $('.logout-form').show();
+                })
+        });
+    </script>
 {% endblock %}
