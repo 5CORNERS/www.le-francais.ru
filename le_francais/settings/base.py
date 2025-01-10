@@ -153,6 +153,7 @@ MIDDLEWARE = [
 SESSION_ENGINE = 'user_sessions.backends.db'
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_AGE = 2678400
+SESSION_COOKIE_DOMAIN = '.le-francais.ru'
 
 
 ROOT_URLCONF = 'le_francais.urls'
