@@ -407,6 +407,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_SIGNUP_FORM_CLASS = 'custom_user.forms.CaptchaAllauthSignupForm'
+ACCOUNT_ADAPTER = 'le_francais.adapter.AccountAdapter'
 
 SOCIALACCOUNT_EMAIL_VERIFICATION = False
 LOGIN_ERROR_URL = '/accounts/login/'
