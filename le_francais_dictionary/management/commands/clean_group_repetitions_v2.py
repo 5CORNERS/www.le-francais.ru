@@ -14,7 +14,8 @@ def check_user(user:User):
 		if word.group is not None:
 			word_to_stay = UserWordRepetition.objects.filter(user=user, word__group=word.group).order_by('repetition_datetime').values_list('word_id', flat=True).last()
 			to_del += UserWordRepetition.objects.filter(user=user, word__group=word.group).exclude(word_id=word_to_stay).values_list('id', flat=True)
-
+	if to_del:
+		print(f'User {user} has following repetitions to delete: {to_del}')
 	return to_del
 
 class Command(BaseCommand):
@@ -22,5 +23,10 @@ class Command(BaseCommand):
 		repetitions_pks_to_delete = []
 		for user in User.objects.filter(flash_cards_data__isnull=False).distinct():
 			repetitions_pks_to_delete += check_user(user)
-		r = UserWordRepetition.objects.filter(pk__in=repetitions_pks_to_delete).delete()
-		print(r)
+		
+		confirm = input("Do you want to delete the selected repetitions? Type 'yes' to confirm: ").strip().lower()
+		if confirm == 'yes':
+			r = UserWordRepetition.objects.filter(pk__in=repetitions_pks_to_delete).delete()
+			print(r)
+		else:
+			print("Deletion aborted by user.")
