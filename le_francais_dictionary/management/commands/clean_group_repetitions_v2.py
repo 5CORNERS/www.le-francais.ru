@@ -15,9 +15,11 @@ def check_user(user:User):
 			word_to_stay = UserWordRepetition.objects.filter(user=user, word__group=word.group).order_by('repetition_datetime').values_list('word_id', flat=True).last()
 			to_del += UserWordRepetition.objects.filter(user=user, word__group=word.group).exclude(word_id=word_to_stay).values_list('id', flat=True)
 
-	print(to_del)
+	return to_del
 
 class Command(BaseCommand):
 	def handle(self, *args, **options):
+		repetitions_pks_to_delete = []
 		for user in User.objects.filter(flash_cards_data__isnull=False).distinct():
-			check_user(user)
+			repetitions_pks_to_delete += check_user(user)
+		UserWordRepetition.objects.filter(pk__in=repetitions_pks_to_delete).delete()
