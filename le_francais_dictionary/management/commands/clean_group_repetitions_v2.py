@@ -22,4 +22,5 @@ class Command(BaseCommand):
 		repetitions_pks_to_delete = []
 		for user in User.objects.filter(flash_cards_data__isnull=False).distinct():
 			repetitions_pks_to_delete += check_user(user)
-		UserWordRepetition.objects.filter(pk__in=repetitions_pks_to_delete).delete()
+		r = UserWordRepetition.objects.filter(pk__in=repetitions_pks_to_delete).delete()
+		print(r)
