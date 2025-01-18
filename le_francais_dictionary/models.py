@@ -322,7 +322,7 @@ class Word(models.Model):
 
 	@property
 	def table_html(self):
-		if self.part_of_speech == PARTOFSPEECH_ADJECTIVE and self.genre == GENRE_BOTH:
+		if (self.part_of_speech in [PARTOFSPEECH_NOUN, PARTOFSPEECH_ADJECTIVE]) and self.genre == GENRE_BOTH:
 			return re.sub(
 				ADJECTIVE_GENRE_PARENTHESIS_PATTERN,
 				r'<span class="genre-cc-enabled genre-feminine pos-cc-enabled pos-adj">\1</span>',
@@ -633,7 +633,7 @@ class WordTranslation(models.Model):
 
 	@property
 	def table_html(self):
-		if self.word.part_of_speech == PARTOFSPEECH_ADJECTIVE and (self.word.genre == GENRE_BOTH or self.word.genre == GENRE_EPICENE):
+		if self.word.part_of_speech in [PARTOFSPEECH_ADJECTIVE, PARTOFSPEECH_NOUN] and (self.word.genre == GENRE_BOTH or self.word.genre == GENRE_EPICENE):
 			return re.sub(
 				ADJECTIVE_GENRE_PARENTHESIS_PATTERN,
 				r'<span class="genre-cc-enabled genre-feminine pos-cc-enabled pos-adj">\1</span>',
