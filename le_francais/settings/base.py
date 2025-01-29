@@ -400,6 +400,10 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS', 'SAMEORIGIN')
 
+# Yandex CLoud Settings
+YANDEX_CLOUD_ID = os.getenv('YANDEX_CLOUD_ID', None)
+YANDEX_CLOUD_KEY = os.getenv('YANDEX_CLOUD_KEY', None)
+
 # Allauth settings
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
