@@ -1,3 +1,17 @@
+ENGINE_STANDARD = 'standard'
+ENGINE_NEURAL = 'neural'
+ENGINE_LONG_FORM = 'long-form'
+ENGINE_GENERATIVE = 'generative'
+
+DEFAULT_ENGINE = ENGINE_NEURAL
+
+ENGINE_CHOICES = [
+	(ENGINE_STANDARD, 'Standard'),
+	(ENGINE_NEURAL, 'Neural'),
+	(ENGINE_LONG_FORM, 'Long form'),
+	(ENGINE_GENERATIVE, 'Generative'),
+]
+
 OUTPUT_FORMAT_JSON = 'json'
 OUTPUT_FORMAT_MP3 = 'mp3'
 OUTPUT_FORMAT_OGG = 'ogg_vorbis'
@@ -95,6 +109,7 @@ PARAMS = {
 	'speech_mark_types': 'SpeechMarkTypes',
 	'text_type': 'TextType',
 	'language_code': 'LanguageCode',
+	'engine': 'Engine'
 }
 
 RESPONSE_PARAMS = {

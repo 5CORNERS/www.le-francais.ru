@@ -19,6 +19,7 @@ class PollyTask(models.Model):
 	request_characters = models.IntegerField(null=True, default=None)
 	url = models.URLField(null=True, verbose_name='Ссылка на файл', default=None)
 	error = models.BooleanField(default=False)
+	engine = models.CharField(choices=ENGINE_CHOICES, default=DEFAULT_ENGINE, max_length=16)
 
 	def to_dict(self) -> dict:
 		opts = self._meta
