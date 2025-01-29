@@ -29,7 +29,8 @@ RUN geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
 # Download ffmpeg
 
 RUN mkdir -p /tmp/ffmpeg && mkdir -p /app/ffmpeg && \
-    curl -L 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz' | tar -xzvf -C /tmp/ffmpeg && \
+    curl -L 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz' -o /tmp/ffmpeg.tar.xz && \
+    tar -xf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg --strip-components=1 && \
     chmod +x /tmp/ffmpeg/bin/ffmpeg
 
 # Below, please specify any build-time environment variables that you need to
