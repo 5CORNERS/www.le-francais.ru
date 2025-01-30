@@ -1,3 +1,4 @@
+import json
 from io import BytesIO
 
 from django.conf import settings
@@ -26,6 +27,7 @@ class YandexAPI:
             for chunk in response.iter_content(chunk_size=None):
                 stream.write(chunk)
             stream.seek(0)
-            return stream, False, 'TTS_DONE'
+            return stream, False, 'TTS_DONE', None
         else:
-            return None, True, 'TTS_ERROR'
+            data = json.loads(response.text)
+            return None, True, 'TTS_ERROR', data['error_message']

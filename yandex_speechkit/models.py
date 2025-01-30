@@ -30,6 +30,7 @@ class YandexSpeechKitTask(models.Model):
     error = models.BooleanField(default=False, blank=True)
     stream = models.BinaryField(null=True, default=None, blank=True)
     url = models.URLField(null=True, default=None, blank=True)
+    error_message = models.TextField(null=True, default=None, blank=True)
 
     def get_filename(self):
         if self.text:
@@ -56,8 +57,11 @@ class YandexSpeechKitTask(models.Model):
         if self.pk is None:
             self.save()
         api = YandexAPI()
-        stream, self.error, self.task_status = api.get_audio_stream(speechkit_task=self)
-        self.stream = stream.read()
+        stream, self.error, self.task_status, self.error_message = api.get_audio_stream(speechkit_task=self)
+        if not self.error:
+            self.stream = stream.read()
+        else:
+            self.stream = None
         self.save(update_fields=['stream', 'error', 'task_status'])
 
     def save_to_file(self):

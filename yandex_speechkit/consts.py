@@ -1,12 +1,12 @@
 PARAMS = {
     'text': 'text',
     'ssml': 'ssml',
-    'lang': 'language',
+    'lang': 'lang',
     'voice': 'voice',
     'speed': 'speed',
     'emotion': 'emotion',
     'format': 'format',
-    'sampleRateHertz': 'sample_rate',
+    'sample_rate': 'sampleRateHertz',
 }
 
 LANGUAGE_RU = 'ru-RU'
