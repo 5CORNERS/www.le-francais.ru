@@ -7,12 +7,9 @@ DEBUG = True
 COMPRESS_ENABLED = True
 REQUEST_ID_HEADER = None
 
-ALLOWED_HOSTS = ALLOWED_HOSTS + [
-	'localhost','le-francais.ru'
-]
-
 # STATICFILES_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
+ALLOWED_HOSTS = ['*']
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -25,6 +22,7 @@ def add_header_service_worker_allowed(headers, path, url):
         headers['Service-Worker-Allowed'] = '/'
 
 WHITENOISE_ADD_HEADERS_FUNCTION = add_header_service_worker_allowed
+SESSION_COOKIE_DOMAIN = None
 
 try:
 	from .local import *

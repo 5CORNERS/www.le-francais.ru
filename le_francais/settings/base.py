@@ -115,7 +115,8 @@ INSTALLED_APPS = [
     'mass_mailer',
 
     'log_errors',
-    'whitenoise.runserver_nostatic'
+    'whitenoise.runserver_nostatic',
+    'yandex_speechkit'
 ]
 
 MIDDLEWARE = [
@@ -388,15 +389,6 @@ WAGTAIL_SITE_NAME = "le_francais"
 # Base URL to use when referring to full URLs within the Wagtail admin backend-
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
 BASE_URL = 'www.le-francais.ru'
-
-ALLOWED_HOSTS = [
-    'www.le-francais.ru',
-    os.environ.get('HEROKU_APP_NAME', 'none')+'.herokuapp.com'
-]
-
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME', None)
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS', 'SAMEORIGIN')
 
