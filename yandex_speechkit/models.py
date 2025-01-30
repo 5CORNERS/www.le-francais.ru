@@ -3,8 +3,12 @@ import re
 from io import BytesIO
 
 import pysftp
+from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
+
+from os import environ, pathsep, path
+environ["PATH"] += pathsep + path.abspath(os.path.join(settings.BASE_DIR, "ffmpeg"))
 from pydub import AudioSegment
 
 from yandex_speechkit.consts import LANGUAGE_CHOICES, VOICES_CHOICES, EMOTION_CHOICES, FORMAT_CHOICES, \
