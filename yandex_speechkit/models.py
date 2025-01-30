@@ -3,7 +3,6 @@ import re
 from io import BytesIO
 
 import pysftp
-from anyascii import anyascii
 from django.db import models
 from django.utils.text import slugify
 from pydub import AudioSegment
