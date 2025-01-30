@@ -19,17 +19,17 @@ from yandex_speechkit.api import YandexAPI
 # Create your models here.
 
 class YandexSpeechKitTask(models.Model):
-    text = models.CharField(max_length=5000, null=True, default=None)
-    ssml = models.CharField(max_length=5000, null=True, default=None)
+    text = models.CharField(max_length=5000, null=True, default=None, blank=True)
+    ssml = models.CharField(max_length=5000, null=True, default=None, blank=True)
     lang = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, null=True, default=None)
     voice = models.CharField(max_length=10, choices=VOICES_CHOICES, null=True, default=None)
     emotion = models.CharField(max_length=10, choices=EMOTION_CHOICES, null=True, default=None)
     format = models.CharField(max_length=10, choices=FORMAT_CHOICES, null=False, default=FORMAT_MP3)
-    sample_rate = models.CharField(max_length=10, choices=SAMPLE_RATE_CHOICES, null=True, default=None)
+    sample_rate = models.CharField(max_length=10, choices=SAMPLE_RATE_CHOICES, null=True, default=None, blank=True)
     task_status = models.CharField(max_length=10, null=True, default='CREATED')
-    error = models.BooleanField(default=False)
-    stream = models.BinaryField(null=True, default=None)
-    url = models.URLField(null=True, default=None)
+    error = models.BooleanField(default=False, blank=True)
+    stream = models.BinaryField(null=True, default=None, blank=True)
+    url = models.URLField(null=True, default=None, blank=True)
 
     def get_filename(self):
         if self.text:
