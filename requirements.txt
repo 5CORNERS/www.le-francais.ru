@@ -56,7 +56,7 @@ django-postman==3.5.1
 django-crispy-forms
 django-registration
 django-htmlmin==0.11.0
-pydub
+pydub~=0.25.1
 brotlipy
 django-inline-svg
 django-npm
