@@ -16,7 +16,7 @@ from docx.text.run import Run
 from lxml import etree
 from lxml.etree import tostring
 from markdown import Markdown
-from html import escape as html_escape
+from html import escape as html_escape, unescape
 
 from home.consts import COLUMN_TEXT, COLUMN_START, COLUMN_END, COLUMN_SPEAKER, EU_COUNTRIES
 from le_francais.settings.base import FILES_LE_FRANCAIS_HTTPS, \
@@ -313,7 +313,10 @@ def docx_parse_document(document):
         html, lines_map, opened_tags, is_list = docx_parse_through_paragraph(document, p, html, lines_map, opened_tags, toc_nodes, is_list)
     html = re.sub('!\[(.+?)]\((.+?)\s"(.+?)"\)',
                   '<img title="\g<1>" src="\g<2>" alt="\g<3>">', html)
-    html = re.sub('<p>\[HTML](.*?)\[/HTML]</p>', '\g<1>', html)
+    for match in re.finditer('<p>\[HTML](.*?)\[/HTML]</p>', html):
+        html_block = unescape(match.group(1))
+        html = html.replace(match.group(0), html_block)
+    # html = re.sub('<p>\[HTML](.*?)\[/HTML]</p>', '\g<1>', html)
     return html, lines_map
 
 def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map, opened_tags, toc_nodes, is_list=False):
@@ -557,12 +560,13 @@ def parse_docx(docx_file:BytesIO):
 
 def text_preprocessor(text:str):
     new_text = text.replace('--', '—')\
-        .replace(' ?', ' ?')\
-        .replace(' !', ' !')\
+        .replace(' ?', ' ?')\
+        .replace(' !', ' !')\
         .replace('- ', '— ')\
-        .replace('...', '…').replace('..', '…')\
+        .replace('...', '…')\
         .replace('[ ', '[').replace(' ]', ']')\
         .replace(' .', '.').replace(' ,', ',')
+    #.replace('..', '…')\
     # new_text = re.sub('—(\w)', '— \g<1>', new_text)
     # new_text = re.sub('(\w)—', '\g<1> —', new_text)
     new_text = re.sub('"([\w\d\-])', '«\g<1>', new_text)
