@@ -7,7 +7,7 @@ class CaptchaAllauthSignupForm(forms.Form):
 	captcha = ReCaptchaField(widget=ReCaptchaHiddenInput, score_threshold=0.1)
 
 	def signup(self, request, user):
-		user.recaptcha3_score = self.cleaned_data['captcha'][1]
+		user.recaptcha3_score = self.cleaned_data['captcha'].get('score', None)
 		user.save()
 
 
