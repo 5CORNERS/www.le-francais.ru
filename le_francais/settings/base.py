@@ -328,8 +328,8 @@ PYBB_PERMISSION_HANDLER = 'forum.permissions.CustomPermissionHandler'
 PYBB_FROM_EMAIL = os.getenv('PYBB_FROM_EMAIL', 'Le-francais.ru » Форум <no-reply@mail.le-francais.ru>')
 # PYBB_PROFILE_RELATED_NAME = 'profile'
 
-from profiles.utils import check_user
-PYBB_PREMODERATION = check_user
+from profiles.utils import is_posting_permitted
+PYBB_PREMODERATION = is_posting_permitted
 
 # Postman settings
 
