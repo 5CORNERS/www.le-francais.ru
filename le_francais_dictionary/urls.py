@@ -24,5 +24,8 @@ urlpatterns = [
     url('^app/verbs/$', views.start_app_verbs, name='app_verbs'),
     url('^verbs/(?P<packet_id>\d+)/$', views.get_verbs, name='get_verbs'),
     url('^verbs/(?P<packet_id>\d+)/(?P<more_lessons>\d+)/$', views.get_verbs, name='get_verbs_more_lessons'),
+    url('^api/create-cross-site-words/$', views.create_cross_site_words, name='create_cross_site_words'),
+    url('^api/voiceover-cross-site-word/$', views.voiceover_cross_site_word, name='voiceover_cross_site_word'),
+    url('^api/cross_site_packet/$', views.cross_site_packet, name='cross_site_packet'),
 ]
 

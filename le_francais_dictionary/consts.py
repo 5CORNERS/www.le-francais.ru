@@ -119,3 +119,9 @@ STAR_CHOICES = [
     ('5@0',
      '<i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i><i class="fas fa-star" aria-hidden="true" style="color: #ffc107;"></i>'),
 ]
+
+CARD_QUESTION_EMPTY_CODE = 1
+CARD_ANSWER_EMPTY_CODE = 2
+CARD_WORD_VALIDATION_ERROR_CODE = 3
+CARD_TRANSLATION_VALIDATION_ERROR_CODE = 4
+CARD_WORD_COULD_NOT_BE_DELETED_CODE = 5

@@ -1,11 +1,15 @@
 import json
+import os
 import traceback
+from json import JSONDecodeError
 from typing import List
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Count, Subquery, OuterRef, \
-    IntegerField, Q
+    IntegerField, Q, ProtectedError
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -25,7 +29,7 @@ from .models import Word, Packet, UserPacket, \
     UserStandalonePacket, \
     prefetch_words_data, VerbPacket, UserDayRepetition, \
     get_repetition_words_query, VerbPacketRelation, \
-    DictionaryError, verb_to_packet_relations_to_dict
+    DictionaryError, verb_to_packet_relations_to_dict, WordTranslation, Partner
 from . import consts
 from home.models import UserLesson
 
@@ -717,3 +721,214 @@ def start_app_verbs(request):
     }
     data = attach_info(request, data)
     return render(request, 'dictionary/verbs_app_standalone.html', {'data': json.dumps(data)})
+
+
+@csrf_exempt
+def cross_site_packet(request):
+    try:
+        data = json.loads(request.body)
+        if data['key'] not in settings.DICTIONARY_CROSS_SITE_KEYS.keys():
+            return JsonResponse({'success': False, 'message':'Wrong key'}, status=403)
+
+        site_name = settings.DICTIONARY_CROSS_SITE_KEYS[data['key']]
+        partner, created = Partner.objects.get_or_create(
+            name=data['partner']['name']
+        )
+
+        if request.method == 'GET':
+            packet = Packet.objects.get(
+                cross_site_id=data['id']
+            )
+        elif request.method == 'POST':
+            packet, created = Packet.objects.get_or_create(
+                cross_site_id=data['id']
+            )
+            packet.name = data['name']
+            packet.partner = partner
+            packet.cross_site_available=True
+            packet.cross_site_id=data['id']
+            packet.cross_site_site_name=site_name
+            packet.save()
+        elif request.method == 'DELETE':
+            packet = Packet.objects.get(
+                cross_site_id=data['id'], partner=partner
+            )
+            packet.delete()
+        else:
+            return HttpResponse('Method not allowed', status=405)
+        return JsonResponse(packet.to_dict())
+
+    except JSONDecodeError:
+        return JsonResponse({'success':False, 'message':'JSONDecodeError'}, status=400)
+    except Packet.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Packet not found'}, status=404)
+
+
+def cross_site_words(request):
+    try:
+        data = json.loads(request.body)
+        if data['key'] not in settings.DICTIONARY_CROSS_SITE_KEYS.keys():
+            return JsonResponse({'success': False, 'message': 'Wrong key'}, status=403)
+        site_name = settings.DICTIONARY_CROSS_SITE_KEYS[data['key']]
+        partner = Partner.objects.get(name=data['partner']['name'])
+
+        if request.method == 'GET':
+            ...
+    finally:
+        pass
+
+
+def get_partner_data(reqeust):
+    data = json.loads(reqeust.body)
+    try:
+        partner = Partner.objects.get(name=data['name'])
+    except Partner.DoesNotExist:
+        return HttpResponseNotFound()
+    return JsonResponse(partner.to_dict())
+
+
+@csrf_exempt
+def create_cross_site_words(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except JSONDecodeError:
+            return HttpResponse('JSONDecodeError', status=400)
+        if data['key'] not in settings.DICTIONARY_CROSS_SITE_KEYS.keys():
+            return HttpResponse('Wrong key', status=403)
+        else:
+            site_name = settings.DICTIONARY_CROSS_SITE_KEYS[data['key']]
+
+        partner_name = data['partner']['name']
+        partner = Partner.objects.get(name=partner_name)
+
+        packet, created = Packet.objects.get_or_create(
+            cross_site_id=data['table']['id'],
+            partner=partner,
+        )
+        packet.name = data['table']['name']
+        packet.cross_site_available=True
+        packet.save()
+
+        packet_words_ids = list(packet.word_set.all().values_list('cd_id', flat=True))
+        saved_words_ids = []
+
+        result = dict(
+            success=False,
+            packet=dict(
+                id=packet.id,
+                name=packet.name
+            ),
+            words=[],
+            translations=[],
+            errors=[], deleted=[], notDeleted=[]
+        )
+
+        for counter, card_data in enumerate(data['cards']):
+            try:
+                word = Word.objects.get(
+                    cross_site_available=True,
+                    cross_site_id=card_data['id'],
+                    cross_site_site_name=site_name
+                )
+            except Word.DoesNotExist:
+                word = Word(
+                    cross_site_available=True,
+                    cross_site_id=card_data['id'],
+                    cross_site_site_name=site_name
+                )
+            word.word = card_data['question']
+            word.word_string = card_data['question_pronunciation']
+            word.packet = packet
+            word.order = counter
+
+            if card_data['additional_info'] is not None:
+                for key, value in card_data['additional_info'].items():
+                    if hasattr(word, key):
+                        setattr(word, key, value)
+
+            try:
+                word.full_clean()
+                word.save()
+                result['words'].append(word.to_dict())
+            except ValidationError as e:
+                result['errors'].append(dict(
+                    id=card_data['id'],
+                    field_errors=e.message_dict,  # Include field-specific errors
+                    message="Error validating word",
+                    code=consts.CARD_WORD_VALIDATION_ERROR_CODE
+                ))
+                continue
+
+            try:
+                translation = WordTranslation.objects.get(
+                    word=word
+                )
+            except WordTranslation.DoesNotExist:
+                translation = WordTranslation(
+                    word=word
+                )
+            translation.translation = card_data['answer']
+            translation.translation_string = card_data['answer_pronunciation']
+
+            try:
+                translation.full_clean()
+                translation.save()
+                result['translations'].append(translation.to_dict())
+            except ValidationError as e:
+                result['errors'].append(dict(
+                    id=card_data['id'],
+                    field_errors=e.message_dict,  # Include field-specific errors
+                    message="Error validating translation",
+                    code=consts.CARD_TRANSLATION_VALIDATION_ERROR_CODE
+                ))
+                continue
+
+            saved_words_ids.append(word.cd_id)
+        words_for_deletion_ids = list(filter(lambda pk: pk not in saved_words_ids, packet_words_ids))
+        for word_for_deletion_id in words_for_deletion_ids:
+            try:
+                word_for_deletion = Word.objects.get(cd_id=word_for_deletion_id)
+                deletion_result = word_for_deletion.delete()
+                result['deleted'].append(dict(
+                    id=word_for_deletion.cross_site_id,
+                    word=word_for_deletion.to_dict()
+                ))
+            except ProtectedError as e:
+                result['notDeleted'].append(dict(
+                    id=word_for_deletion.cross_site_id,
+                    word=word_for_deletion.to_dict(),
+                    reason=str(e),
+                    reasonValue=len(e.protected_objects)
+                ))
+            except Word.DoesNotExist as e:
+                continue
+
+        result['success'] = True
+        return JsonResponse(result, status=200)
+    else:
+        return HttpResponse('Only POST method allowed', status=405)
+
+
+@csrf_exempt
+def voiceover_cross_site_word(request):
+    try:
+        data = json.loads(request.body)
+        word = Word.objects.get(pk=data['word_id'])
+        translation = word.first_translation
+        if translation is None:
+            return JsonResponse({'success': False, 'message': 'No translation found'}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'JSONDecodeError'}, status=400)
+    except Word.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Word not found'}, status=404)
+    if request.method == 'POST':
+        word.create_polly_task_v2()
+        translation.create_yandex_task()
+        return JsonResponse(word.to_dict())
+    elif request.method == 'GET':
+        return JsonResponse({'success': True, "data": {
+            "voiceovers": [word.polly_url, translation.polly_url],
+        }}, encoder=DjangoJSONEncoder)
+    else:
+        return HttpResponse('Only POST and GET methods allowed', status=405)
