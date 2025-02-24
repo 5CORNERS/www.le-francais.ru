@@ -1,5 +1,5 @@
 def is_posting_permitted(user, post):
-    if user.recaptcha_score < 0.3:
+    if user.recaptcha3_score < 0.3:
         return False
     return (
             user.days_since_joined() > 1
