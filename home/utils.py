@@ -311,7 +311,7 @@ def docx_parse_document(document):
     is_list = False
     for p in document.paragraphs:
         html, lines_map, opened_tags, is_list = docx_parse_through_paragraph(document, p, html, lines_map, opened_tags, toc_nodes, is_list)
-    html = re.sub('!\[(.+?)]\((.+?)\s"(.+?)"\)',
+    html = re.sub('!\[(.+?)]\((.+?)\s&quot;(.+?)&quot;\)',
                   '<img title="\g<1>" src="\g<2>" alt="\g<3>">', html)
     for match in re.finditer('<p>\[HTML](.*?)\[/HTML]</p>', html):
         html_block = unescape(match.group(1))
