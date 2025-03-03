@@ -573,6 +573,7 @@ def text_preprocessor(text:str):
     new_text = re.sub('"([\w\d\-])', '«\g<1>', new_text)
     new_text = re.sub('([\w\d\-]|…|\.|!|\?)"', '\g<1>»', new_text)
     new_text = re.sub('«\s', '« ', new_text)
+    new_text = re.sub('\s»', ' »', new_text)
     new_text = re.sub('(\S)\(', '\g<1> (', new_text)
     return new_text.lstrip(' ')
 
