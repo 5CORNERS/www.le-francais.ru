@@ -103,7 +103,7 @@ class YandexSpeechKitTask(models.Model):
             filename = self.get_filename(extension='mp3')
             file = self.get_mp3(tags)
             srv.putfo(file, filename)
-            self.url = url,
+            self.url = url
             self.stream = None
             self.task_status = result_task_status
             self.save(update_fields=['url', 'stream', 'task_status'])
