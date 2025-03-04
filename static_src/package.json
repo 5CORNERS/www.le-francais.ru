@@ -16,7 +16,6 @@
     "bootstrap-select": "^1.13.12",
     "bootstrap-treeview": "github:AntonDumov/bootstrap-treeview#1.2.1",
     "bootstrap5": "npm:bootstrap@^5.3.3",
-    "bops": "^1.0.1",
     "bower": "^1.8.14",
     "dashjs": "^4.7.4",
     "datatables.net-bs4": "^1.13.4",
@@ -42,6 +41,8 @@
     "simpleotp": "^1.0.0",
     "video.js": "^8.21.0",
     "videojs-contrib-eme": "^5.5.1",
+    "videojs-contrib-quality-levels": "^4.1.0",
+    "videojs-contrib-quality-menu": "^1.0.3",
     "vue": "2.6.14",
     "vue-multiselect": "^2.1.6",
     "webpack-stream": "^5.2.1"

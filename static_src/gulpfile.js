@@ -70,12 +70,12 @@ gulp.task('videojs', () => {
         .pipe(gulp.dest(dist + '/js/'))
 })
 
-gulp.task('videojs-styles', () => {
-    return gulp.src('node_modules/video.js/dist/video-js.css')
-        .pipe(sourcemaps.init())
-        .pipe(cleanCSS({compatibility: 'ie8'}))
-        .pipe(gulp.dest(dist + '/css/'))
-})
+// gulp.task('videojs-styles', () => {
+//     return gulp.src('node_modules/video.js/dist/video-js.css')
+//         .pipe(sourcemaps.init())
+//         .pipe(cleanCSS({compatibility: 'ie8'}))
+//         .pipe(gulp.dest(dist + '/css/'))
+// })
 
 gulp.task('fa-fonts', function () {
     return gulp.src('node_modules/@fortawesome/fontawesome-free/webfonts/*')
@@ -94,4 +94,4 @@ gulp.task('clean', () => {
     ], {force: true});
 });
 
-gulp.task('default', gulp.series(['clean', 'sass', 'css', 'js', 'fa-fonts', 'videojs', 'videojs-styles','datatables.js', 'bootstrap5']));
+gulp.task('default', gulp.series(['clean', 'sass', 'css', 'js', 'fa-fonts', 'videojs','datatables.js', 'bootstrap5']));
