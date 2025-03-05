@@ -303,6 +303,15 @@ def create_document_from_transcript_srt(table_csv) -> BytesIO:
     document.save(file)
     return file
 
+
+def text_postprocessor(html):
+    return html \
+            .replace(' »', '&nbsp;»')\
+            .replace('« ', '«&nbsp;')\
+            .replace(' ?', '&nbsp;?')\
+            .replace(' !', '&nbsp;!')
+
+
 def docx_parse_document(document):
     html = ""
     lines_map = []
@@ -316,6 +325,7 @@ def docx_parse_document(document):
     for match in re.finditer('<p>\[HTML](.*?)\[/HTML]</p>', html):
         html_block = unescape(match.group(1))
         html = html.replace(match.group(0), html_block)
+    html = text_postprocessor(html)
     # html = re.sub('<p>\[HTML](.*?)\[/HTML]</p>', '\g<1>', html)
     return html, lines_map
 
