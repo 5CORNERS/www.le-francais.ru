@@ -9,7 +9,7 @@ from .tts import google_cloud_tts, shtooka_by_title_in_path, \
     FTP_FR_WORDS_PATH, FTP_RU_WORDS_PATH, pytts_voice_string
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, JSONField
-from django.db import models
+from django.db import models, connections, DatabaseError
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.http import urlquote
@@ -80,7 +80,7 @@ class Packet(models.Model):
         data = dict()
         data['pk'] = self.pk
         data['name'] = self.name
-        data['lessonNumber'] = self.lesson.lesson_number
+        data['lessonNumber'] = self.lesson.lesson_number if self.lesson else None
         data['demo'] = self.demo
         if user and user.is_authenticated:
             if self.lesson.payed(user):
@@ -107,6 +107,24 @@ class Packet(models.Model):
         return self.word_set.all().count()
 
     def is_activated(self, user) -> bool:
+        if self.cross_site_id:
+            try:
+                with connections['courses'].cursor() as cursor:
+                    cursor.execute("""
+                        SELECT flash_cards_table.remote_id
+                        FROM flash_cards_table 
+                        JOIN courses_lecturepage ON courses_lecturepage.flashcards_id = flash_cards_table.id
+                        JOIN courses_boughtlecture ON courses_boughtlecture.lecture_id = courses_lecturepage.page_ptr_id
+                        JOIN courses_userprofile ON courses_boughtlecture.user_profile_id = courses_userprofile.user_id
+                        JOIN courses_user_user ON courses_userprofile.user_id = courses_user_user.id
+                        WHERE courses_lecturepage.for_free OR (courses_user_user.le_francais_id = %s AND flash_cards_table.remote_id = %s)
+                        LIMIT 1;
+                    """, [user.pk, self.cross_site_id])
+                    result = cursor.fetchone()
+                    if result:
+                        return True
+            except DatabaseError as e:
+                return False
         if user.is_authenticated and not user.must_pay:
             return True
         if self.lesson and self.lesson.payed(user):
@@ -232,6 +250,7 @@ class Word(models.Model):
     word_string = models.TextField(blank=True, null=True, default=None)
 
     voiceover_data_changed = models.BooleanField(default=False, blank=True)
+    is_archived = models.BooleanField(default=False, blank=True)
 
     class Meta:
         ordering = ['order']

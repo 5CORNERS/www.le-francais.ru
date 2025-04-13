@@ -15,6 +15,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse, \
@@ -23,7 +24,7 @@ from django.http import JsonResponse, HttpResponse, \
 # Create your views here.
 from le_francais_dictionary.forms import WordsManagementFilterForm, \
     VerbsManagementFilterForm
-from .consts import TENSE_PARTICIPE_PASSE, STAR_CHOICES
+from .consts import TENSE_PARTICIPE_PASSE, STAR_CHOICES, WORD_JSON_FIELDS_TO_PYTHON, TRANSLATION_JSON_FIELDS_TO_PYTHON
 from .models import Word, Packet, UserPacket, \
     UserWordData, UserWordRepetition, UserWordIgnore, \
     UserStandalonePacket, \
@@ -589,16 +590,16 @@ def start_app(request):
         return JsonResponse({'message': 'OK'}, status=200)
     else:
         return render(request, 'dictionary/dictionary_app_standalone.html', {
-	        'packet_id': 99999999,
-	        'mode': 'learn'
+            'packet_id': 99999999,
+            'mode': 'learn'
         })
 
 
 def start_app_repeat(request):
-	return render(request, 'dictionary/dictionary_app_standalone.html', {
-		'packet_id': 99999999,
-		'mode': 'repeat'
-	})
+    return render(request, 'dictionary/dictionary_app_standalone.html', {
+        'packet_id': 99999999,
+        'mode': 'repeat'
+    })
 
 
 def get_verbs(request, packet_id:int, more_lessons:int=None):
@@ -753,7 +754,10 @@ def cross_site_packet(request):
             packet = Packet.objects.get(
                 cross_site_id=data['id'], partner=partner
             )
-            packet.delete()
+            try:
+                packet.delete()
+            except ProtectedError as e:
+                return JsonResponse({'success': False, 'message': f'Cannot delete packet. {e}'}, status=403)
         else:
             return HttpResponse('Method not allowed', status=405)
         return JsonResponse(packet.to_dict())
@@ -911,24 +915,146 @@ def create_cross_site_words(request):
 
 
 @csrf_exempt
-def voiceover_cross_site_word(request):
+def create_and_voice_word(request):
     try:
         data = json.loads(request.body)
-        word = Word.objects.get(pk=data['word_id'])
-        translation = word.first_translation
-        if translation is None:
-            return JsonResponse({'success': False, 'message': 'No translation found'}, status=404)
+
+        if data['key'] not in settings.DICTIONARY_CROSS_SITE_KEYS.keys():
+            return JsonResponse({ 'success':False, 'message':'Wrong key'}, status=403)
+        else:
+            site_name = settings.DICTIONARY_CROSS_SITE_KEYS[data['key']]
+
+        card_data = data['card']
+
+        partner, partner_created = Partner.objects.get_or_create(
+            name=data['partner']['name'],
+        )
+
+        packet, packet_created = Packet.objects.get_or_create(
+            cross_site_id=data['table']['id'],
+            partner=partner,
+        )
+        if packet_created and packet.name != data['table']['name']:
+            packet.name = data['table']['name']
+            packet.save()
+
+        try:
+            word = Word.objects.get(pk=data['word_id'])
+        except (KeyError, Word.DoesNotExist):
+            word = Word(
+                packet=packet,
+                cross_site_available=True,
+                cross_site_id=card_data['id'],
+                cross_site_site_name=site_name
+            )
+
+        try:
+            for json_name,field_name in WORD_JSON_FIELDS_TO_PYTHON.items():
+                setattr(word, field_name, card_data.get(json_name, None))
+        except KeyError as e:
+            return JsonResponse({ 'success':False, 'message':f"Key Error in the card data: {str(e)}"}, status=400)
+
+        validation_errors = []
+        voiceover_errors = []
+        try:
+            word.full_clean()
+            word.save()
+
+            if data['voiceover'] and word.voiceover_data_changed:
+                try:
+                    word.create_polly_task_v2()
+                except:
+                    voiceover_errors.append({'word_string': [gettext_lazy('Error creating voiceover')], 'word': [gettext_lazy('Error creating voiceover')]})
+
+        except ValidationError as e:
+            validation_errors.append(e.message_dict)
+
+        if word.first_translation is not None:
+            translation = word.first_translation
+        else:
+            translation = WordTranslation(
+                word=word
+            )
+
+        for json_name, field_name in TRANSLATION_JSON_FIELDS_TO_PYTHON.items():
+            setattr(translation, field_name, card_data.get(json_name, None))
+        try:
+            translation.full_clean()
+            translation.save()
+
+            if data['voiceover'] and translation.voiceover_data_changed:
+                try:
+                    translation.create_yandex_task()
+                except:
+                    voiceover_errors.append({'translation_string': [gettext_lazy('Error creating voiceover')], 'translation': [gettext_lazy('Error creating voiceover')]})
+
+
+        except ValidationError as e:
+            validation_errors.append(e.message_dict)
+
+        return JsonResponse({
+            'success':True,
+            'word':word.to_dict(),
+            'packet': packet.to_dict(),
+            'saveErrors': validation_errors,
+            'voiceoverErrors': voiceover_errors,
+        })
+
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'message': 'JSONDecodeError'}, status=400)
     except Word.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Word not found'}, status=404)
-    if request.method == 'POST':
-        word.create_polly_task_v2()
-        translation.create_yandex_task()
-        return JsonResponse(word.to_dict())
-    elif request.method == 'GET':
-        return JsonResponse({'success': True, "data": {
-            "voiceovers": [word.polly_url, translation.polly_url],
-        }}, encoder=DjangoJSONEncoder)
-    else:
-        return HttpResponse('Only POST and GET methods allowed', status=405)
+
+
+@csrf_exempt
+def delete_cross_site_words(request, packet_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message':'Only POST method allowed'}, status=405)
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        return JsonResponse({'success': False, 'message':'JSONDecodeError'}, status=400)
+    if data['key'] not in settings.DICTIONARY_CROSS_SITE_KEYS.keys():
+        return JsonResponse({'success': False, 'message':'Wrong key'}, status=403)
+    result = {
+        'deleted':[],
+        'notDeleted': [],
+        'notFound': data['cardsIDs']
+    }
+    packet = Packet.objects.get(id=packet_id)
+    words_to_delete = Word.objects.filter(packet=packet).exclude(cross_site_id__in=data['cardsIDsToStay'])
+    for word in words_to_delete:
+        try:
+            deletion_result = word.delete()
+            result['deleted'].append(dict(
+                id=word.cross_site_id,
+                word=word.to_dict(),
+                deletionResult=deletion_result
+            ))
+            try:
+                result['notFound'].remove(word.cross_site_id)
+            except ValueError:
+                pass
+        except ProtectedError as e:
+            if data['confirmed']:
+                ...
+            result['notDeleted'].append(dict(
+                id=word.cross_site_id,
+                word=word.to_dict(),
+                reason=str(e),
+                reasonValue=len(e.protected_objects)
+            ))
+            word.is_archived = True
+            word.save(update_fields=['is_archived'])
+    return JsonResponse(dict(success=True, **result))
+
+
+def dictionary_app_embedded(request, packet_id):
+    try:
+        packet = Packet.objects.get(pk=packet_id)
+    except Packet.DoesNotExist:
+        return HttpResponse(b'Packet not found', status=404)
+    return render(request, 'dictionary/dictionary_app_embedded.html', {
+        'packet': packet.to_dict(),
+        'mode': 'learn'
+    })

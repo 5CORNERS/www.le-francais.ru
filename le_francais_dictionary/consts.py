@@ -125,3 +125,16 @@ CARD_ANSWER_EMPTY_CODE = 2
 CARD_WORD_VALIDATION_ERROR_CODE = 3
 CARD_TRANSLATION_VALIDATION_ERROR_CODE = 4
 CARD_WORD_COULD_NOT_BE_DELETED_CODE = 5
+
+WORD_JSON_FIELDS_TO_PYTHON = {
+    'id': 'cross_site_id',
+    'question': 'word',
+    'questionPronunciation': 'word_string',
+    'order': 'order',
+    'genre':'genre'
+}
+
+TRANSLATION_JSON_FIELDS_TO_PYTHON = {
+    'answer': 'translation',
+    'answerPronunciation': 'translation_string'
+}
