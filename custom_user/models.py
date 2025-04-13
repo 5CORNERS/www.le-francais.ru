@@ -217,8 +217,9 @@ class User(AbstractUser):
 		self.save()
 
 	objects = CustomUserManager()
-	USERNAME_FIELD = 'email'
-	REQUIRED_FIELDS = ['username']
+	USERNAME_FIELD = 'username'
+	EMAIL_FIELD = 'email'
+	REQUIRED_FIELDS = ['email']
 
 	def has_coffee(self):
 		if self.cups_amount > 0 or self.cup_credit > 0:
