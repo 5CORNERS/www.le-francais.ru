@@ -81,6 +81,10 @@ video{
     margin-bottom: 0;
 }
 
+.footer a {
+    text-decoration: none;
+}
+
 img {
     max-width: 100%;
     height: auto;
@@ -213,11 +217,11 @@ body {
     margin-bottom: 0;
 }
 
-.list-group-item:first-child {
-    border-top: 0;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-}
+/*.list-group-item:first-child {*/
+/*    border-top: 0;*/
+/*    border-top-left-radius: 0;*/
+/*    border-top-right-radius: 0;*/
+/*}*/
 
 .sidebar {
     position: fixed;
