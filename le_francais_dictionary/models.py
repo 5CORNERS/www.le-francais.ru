@@ -83,9 +83,11 @@ class Packet(models.Model):
         data['lessonNumber'] = self.lesson.lesson_number if self.lesson else None
         data['demo'] = self.demo
         if user and user.is_authenticated:
-            if self.lesson.payed(user):
+            if self.lesson and self.lesson.payed(user):
                 data['activated'] = True
                 data['added'] = True
+            elif self.cross_site_available:
+                data['activated'] = data['added'] = self.is_activated(user)
             else:
                 data['activated'] = False
                 data['added'] = False
@@ -114,9 +116,9 @@ class Packet(models.Model):
                         SELECT flash_cards_table.remote_id
                         FROM flash_cards_table 
                         JOIN courses_lecturepage ON courses_lecturepage.flashcards_id = flash_cards_table.id
-                        JOIN courses_boughtlecture ON courses_boughtlecture.lecture_id = courses_lecturepage.page_ptr_id
-                        JOIN courses_userprofile ON courses_boughtlecture.user_profile_id = courses_userprofile.user_id
-                        JOIN courses_user_user ON courses_userprofile.user_id = courses_user_user.id
+                        LEFT JOIN courses_boughtlecture ON courses_boughtlecture.lecture_id = courses_lecturepage.page_ptr_id
+                        LEFT JOIN courses_userprofile ON courses_boughtlecture.user_profile_id = courses_userprofile.user_id
+                        LEFT JOIN courses_user_user ON courses_userprofile.user_id = courses_user_user.id
                         WHERE courses_lecturepage.for_free OR (courses_user_user.le_francais_id = %s AND flash_cards_table.remote_id = %s)
                         LIMIT 1;
                     """, [user.pk, self.cross_site_id])

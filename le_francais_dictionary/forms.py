@@ -49,6 +49,7 @@ class WordsManagementFilterForm(forms.Form):
 					lesson__payment__user=user)).distinct()
 		else:
 			self.packets = Packet.objects.filter(demo=True).distinct()
+		self.packets = self.packets.exclude(cross_site_available=True)
 		choices = [(o.id, str(o.name)) for o in self.packets]
 		# TODO: has_repetition_words method
 		if self.user.is_authenticated and get_repetition_words_query(self.user, filter_excluded=False).count() > 0:

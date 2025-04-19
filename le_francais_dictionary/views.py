@@ -754,7 +754,9 @@ def cross_site_packet(request):
             packet = Packet.objects.get(
                 cross_site_id=data['id'], partner=partner
             )
+            words = packet.word_set.all()
             try:
+                words.delete()
                 packet.delete()
             except ProtectedError as e:
                 return JsonResponse({'success': False, 'message': f'Cannot delete packet. {e}'}, status=403)
@@ -932,6 +934,8 @@ def create_and_voice_word(request):
 
         packet, packet_created = Packet.objects.get_or_create(
             cross_site_id=data['table']['id'],
+            cross_site_available=True,
+            cross_site_site_name=site_name,
             partner=partner,
         )
         if packet_created and packet.name != data['table']['name']:
