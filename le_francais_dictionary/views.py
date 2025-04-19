@@ -1051,14 +1051,3 @@ def delete_cross_site_words(request, packet_id):
             word.is_archived = True
             word.save(update_fields=['is_archived'])
     return JsonResponse(dict(success=True, **result))
-
-
-def dictionary_app_embedded(request, packet_id):
-    try:
-        packet = Packet.objects.get(pk=packet_id)
-    except Packet.DoesNotExist:
-        return HttpResponse(b'Packet not found', status=404)
-    return render(request, 'dictionary/dictionary_app_embedded.html', {
-        'packet': packet.to_dict(),
-        'mode': 'learn'
-    })

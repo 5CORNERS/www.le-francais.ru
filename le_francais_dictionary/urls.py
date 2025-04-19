@@ -22,7 +22,6 @@ urlpatterns = [
     url('^app/$', views.start_app, name='app'),
     url('^app/reviews/$', views.start_app_repeat, name='app_repeat'),
     url('^app/verbs/$', views.start_app_verbs, name='app_verbs'),
-    url('^app/embedded/(?P<packet_id>\d+)/$', views.dictionary_app_embedded, name='embedded_app'),
     url('^verbs/(?P<packet_id>\d+)/$', views.get_verbs, name='get_verbs'),
     url('^verbs/(?P<packet_id>\d+)/(?P<more_lessons>\d+)/$', views.get_verbs, name='get_verbs_more_lessons'),
     url('^api/create-cross-site-words/$', views.create_cross_site_words, name='create_cross_site_words'),
