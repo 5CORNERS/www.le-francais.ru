@@ -333,8 +333,8 @@ PYBB_PERMISSION_HANDLER = 'forum.permissions.CustomPermissionHandler'
 PYBB_FROM_EMAIL = os.getenv('PYBB_FROM_EMAIL', 'Le-francais.ru » Форум <no-reply@mail.le-francais.ru>')
 # PYBB_PROFILE_RELATED_NAME = 'profile'
 
-from profiles.utils import check_user
-PYBB_PREMODERATION = check_user
+from profiles.utils import is_posting_permitted
+PYBB_PREMODERATION = is_posting_permitted
 
 # Postman settings
 
@@ -377,6 +377,7 @@ DEFAULT_REPLY_TO_EMAIL = os.getenv('DEFAULT_REPLY_TO_EMAIL', DEFAULT_FROM_EMAIL)
 
 # Django Mailer Settings
 
+MAILER_EMAIL_BACKEND = EMAIL_BACKEND
 MAILER_EMAIL_MAX_BATCH = 20
 MAILER_EMAIL_MAX_DEFERRED = 1
 MAILER_EMAIL_THROTTLE = 20

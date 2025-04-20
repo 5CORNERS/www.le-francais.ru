@@ -39,7 +39,7 @@ class Command(BaseCommand):
 		post_save.connect(post_saved, sender=Post)
 
 		for post in Post.objects.all():
-			if post.created < timezone.now()-timezone.timedelta(weeks=24):
+			if post.created < timezone.now()-timezone.timedelta(weeks=20):
 				continue
 			for link in re.findall('\((((http://)|(https://))(\S+?\.(png|jpeg|gif|jpg)))', post.body, re.I):
 				file_name = link[0].split('//')[1]
@@ -59,10 +59,10 @@ class Command(BaseCommand):
 						print(' Success!')
 					else:
 						print(' File already exist')
-						s += str(post.id) + ',' + link[
-							0] + ',' + file_name[:] + '\n'
+					s += str(post.id) + ',' + link[
+						0] + ',' + file_name[:] + '\n'
 				except:
-					print(' Error')
+					print(f' Error, filename will be {file_name[:]}')
 
 		open('forum/dat/images/list.csv', 'w').write(s)
 
