@@ -943,8 +943,8 @@ def create_and_voice_word(request):
             packet.save()
 
         try:
-            word = Word.objects.get(pk=data['word_id'])
-        except (KeyError, Word.DoesNotExist):
+            word = Word.objects.get(pk=data['card']['remoteId'])
+        except Word.DoesNotExist:
             word = Word(
                 packet=packet,
                 cross_site_available=True,
@@ -967,8 +967,9 @@ def create_and_voice_word(request):
             if data['voiceover'] and word.voiceover_data_changed:
                 try:
                     word.create_polly_task_v2()
-                except:
-                    voiceover_errors.append({'word_string': [gettext_lazy('Error creating voiceover')], 'word': [gettext_lazy('Error creating voiceover')]})
+                except BaseException as e:
+                    message = str(e)
+                    voiceover_errors.append({'word_string': [gettext_lazy('Error creating voiceover') + f': {message}'], 'word': [gettext_lazy('Error creating voiceover') + f': {message}']})
 
         except ValidationError as e:
             validation_errors.append(e.message_dict)
