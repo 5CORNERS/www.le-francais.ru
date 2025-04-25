@@ -32,7 +32,7 @@ RUN mkdir -p /tmp/ffmpeg && mkdir -p /app/ffmpeg && \
     curl -L 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz' -o /tmp/ffmpeg.tar.xz && \
     tar -xf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg --strip-components=1 && \
     mv /tmp/ffmpeg/bin/ffmpeg /usr/local/bin && \
-    chmod +x /usr/local/bin/ffmpeg && \
+    chmod +x /usr/local/bin/ffmpeg
 
 RUN ffmpeg -version
 
