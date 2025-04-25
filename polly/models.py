@@ -71,6 +71,7 @@ class PollyTask(models.Model):
                     channels=1,
                     sample_width=2,
                 )
+        return None
 
     def save_to_file(self, save_path=None, tags=None, result_task_status='saved'):
         if save_path is None:
