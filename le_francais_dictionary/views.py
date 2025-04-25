@@ -964,7 +964,7 @@ def create_and_voice_word(request):
             word.full_clean()
             word.save()
 
-            if data['voiceover'] and word.voiceover_data_changed:
+            if word.voiceover_data_changed:
                 try:
                     word.create_polly_task_v2()
                 except BaseException as e:
@@ -987,7 +987,7 @@ def create_and_voice_word(request):
             translation.full_clean()
             translation.save()
 
-            if data['voiceover'] and translation.voiceover_data_changed:
+            if translation.voiceover_data_changed:
                 try:
                     translation.create_yandex_task()
                 except:
