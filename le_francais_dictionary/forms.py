@@ -49,6 +49,7 @@ class WordsManagementFilterForm(forms.Form):
 					lesson__payment__user=user)).distinct()
 		else:
 			self.packets = Packet.objects.filter(demo=True).distinct()
+		self.packets = self.packets.exclude(cross_site_available=True)
 		choices = [(o.id, str(o.name)) for o in self.packets]
 		# TODO: has_repetition_words method
 		if self.user.is_authenticated and get_repetition_words_query(self.user, filter_excluded=False).count() > 0:
@@ -68,13 +69,6 @@ class WordsManagementFilterForm(forms.Form):
 			('stars', 'Оценка <button class="btn funnel-filter-button" id="starsFilterContainer"></button>', 'cell-stars', True, True, True,  methodcaller('mean_quality_filter_value', self.user), methodcaller('mean_quality_filter_value', self.user), methodcaller('mean_quality', self.user)),
 		]
 
-	def set_words_cash(
-			self,
-			words:List[Word],
-			user_data:List[UserWordData],
-
-	):
-		return
 
 	def table_dict(self):
 		if self.is_valid():

@@ -32,3 +32,4 @@ home/data/devoirs.csv
 GeoIP.conf
 /..bfg-report/
 /static_src/package-lock.json
+/ffmpeg/

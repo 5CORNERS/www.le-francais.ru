@@ -16,6 +16,16 @@ def add_header_service_worker_allowed(headers, path, url):
 
 WHITENOISE_ADD_HEADERS_FUNCTION = add_header_service_worker_allowed
 
+ALLOWED_HOSTS = [
+    'www.le-francais.ru',
+    # os.environ.get('HEROKU_APP_NAME', 'none')+'.herokuapp.com'
+]
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME', None)
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+SESSION_COOKIE_DOMAIN = '.le-francais.ru'
 
 try:
 	from .local import *

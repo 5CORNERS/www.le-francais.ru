@@ -115,7 +115,8 @@ INSTALLED_APPS = [
     'mass_mailer',
 
     'log_errors',
-    'whitenoise.runserver_nostatic'
+    'whitenoise.runserver_nostatic',
+    'yandex_speechkit'
 ]
 
 MIDDLEWARE = [
@@ -222,6 +223,10 @@ DATABASES = {
 
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
+
+courses_db_from_env = dj_database_url.config(env='COURSES_DATABASE_URL', conn_max_age=500)
+DATABASES['courses'] = courses_db_from_env
+
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 20971520
 FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520
@@ -390,16 +395,11 @@ WAGTAIL_SITE_NAME = "le_francais"
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
 BASE_URL = 'www.le-francais.ru'
 
-ALLOWED_HOSTS = [
-    'www.le-francais.ru',
-    os.environ.get('HEROKU_APP_NAME', 'none')+'.herokuapp.com'
-]
-
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME', None)
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
 X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS', 'SAMEORIGIN')
+
+# Yandex CLoud Settings
+YANDEX_CLOUD_ID = os.getenv('YANDEX_CLOUD_ID', None)
+YANDEX_CLOUD_KEY = os.getenv('YANDEX_CLOUD_KEY', None)
 
 # Allauth settings
 
@@ -587,7 +587,9 @@ RECAPTCHA_SCORE_THRESHOLD = 0.5
 
 # Corse Headers settings
 
-CORS_ORIGIN_ALLOW_ALL = os.getenv('CORS_ORIGIN_ALLOW_ALL', 'False') == 'True'
+# CORS_ORIGIN_ALLOW_ALL = os.getenv('CORS_ORIGIN_ALLOW_ALL', 'False') == 'True'
+CORS_ORIGIN_REGEX_WHITELIST = [r'^(https?:\/\/)?((([a-zA-Z0-9-]+\.)?le-francais\.ru)|(localhost))(:\d{1,5})?$']
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'X-SessionID',
@@ -603,3 +605,7 @@ FILES_LE_FRANCAIS_SITENAME = os.getenv('FILES_LE_FRANCAIS_SITENAME', 'files.le-f
 GEOIP_PATH=os.path.join(BASE_DIR, os.getenv('GEOIP_GEOLITE2_PATH', ''))
 GEOIP_CITY=os.getenv('GEOIP_GEOLITE2_CITY_FILENAME')
 GEOIP_COUNTRY=os.getenv('GEOIP_GEOLITE2_COUNTRY_FILENAME')
+
+DICTIONARY_CROSS_SITE_KEYS = {
+    os.getenv('COURSES_FLASHCARDS_KEY'): 'courses'
+}

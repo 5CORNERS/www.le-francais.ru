@@ -26,6 +26,13 @@ ENV MAXMIND_LICENSE_KEY ${GEOIPUPDATE_LICENSE_KEY}
 COPY GeoIP.conf /etc/GeoIP.conf
 RUN geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
 
+# Download ffmpeg
+
+RUN mkdir -p /tmp/ffmpeg && mkdir -p /app/ffmpeg && \
+    curl -L 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz' -o /tmp/ffmpeg.tar.xz && \
+    tar -xf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg --strip-components=1 && \
+    chmod +x /tmp/ffmpeg/bin/ffmpeg
+
 # Below, please specify any build-time environment variables that you need to
 # reference in your build (as called by your buildpacks). If you don't specify
 # the arg below, you won't be able to access it in your build. You can also
@@ -57,6 +64,7 @@ FROM ghcr.io/renderinc/heroku-app-runner:${HEROKU_STACK} AS runner
 # faster.
 COPY --from=builder --chown=1000:1000 /render /render/
 COPY --from=builder --chown=1000:1000 /app /app/
+COPY --from=builder --chown=1000:1000 /tmp/ffmpeg/bin /app/ffmpeg/
 
 # Here we're switching to a non-root user in the container to remove some categories
 # of container-escape attack.

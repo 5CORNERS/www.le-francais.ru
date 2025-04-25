@@ -1,6 +1,7 @@
 cd "$1" || exit 1
 echo "-----> Installing Not deps packages"
 pip install django-session-header --no-dependencies
+pip install Pillow~=6.2.2
 echo "-----> Deleting static src folder"
 rm -rf ./static_src
 echo "-----> Patching Wagtail"

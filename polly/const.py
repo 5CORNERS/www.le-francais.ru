@@ -24,6 +24,12 @@ OUTPUT_FORMATS = (
 	(OUTPUT_FORMAT_PCM, 'pcm'),
 )
 
+FILE_EXTENSION = {
+	OUTPUT_FORMAT_MP3: 'mp3',
+	OUTPUT_FORMAT_OGG: 'ogg',
+	OUTPUT_FORMAT_PCM: 'wav',
+}
+
 SAMPLE_RATE_8000 = '8000'
 SAMPLE_RATE_16000 = '16000'
 SAMPLE_RATE_22050 = '22050'
@@ -58,6 +64,7 @@ TEXT_TYPES = (
 VOICE_ID_LEA = 'Lea'
 VOICE_ID_CELINE = 'Celine'
 VOICE_ID_MATHIEU = 'Mathieu'
+VOICE_ID_REMI = 'Remi'
 
 # Russian voices
 VOICE_ID_MAXIM = 'Maxim'
@@ -65,6 +72,7 @@ VOICE_ID_TATYANA = 'Tatyana'
 
 VOICE_IDS = (
 	(VOICE_ID_LEA, 'lea'),
+	(VOICE_ID_REMI, 'remi'),
 	(VOICE_ID_CELINE, 'celine'),
 	(VOICE_ID_MATHIEU, 'matthieu'),
 	(VOICE_ID_MAXIM, 'maxim'),
