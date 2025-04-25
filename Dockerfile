@@ -31,10 +31,7 @@ RUN geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
 RUN mkdir -p /tmp/ffmpeg && mkdir -p /app/ffmpeg && \
     curl -L 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz' -o /tmp/ffmpeg.tar.xz && \
     tar -xf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg --strip-components=1 && \
-    mv /tmp/ffmpeg/bin/ffmpeg /usr/local/bin && \
-    chmod +x /usr/local/bin/ffmpeg
-
-RUN ffmpeg -version
+    chmod +x /tmp/ffmpeg/bin/ffmpeg
 
 # Below, please specify any build-time environment variables that you need to
 # reference in your build (as called by your buildpacks). If you don't specify
@@ -68,6 +65,7 @@ FROM ghcr.io/renderinc/heroku-app-runner:${HEROKU_STACK} AS runner
 COPY --from=builder --chown=1000:1000 /render /render/
 COPY --from=builder --chown=1000:1000 /app /app/
 COPY --from=builder --chown=1000:1000 /tmp/ffmpeg/bin /app/ffmpeg/
+ENV PATH="$PATH:/app/ffmpeg"
 
 # Here we're switching to a non-root user in the container to remove some categories
 # of container-escape attack.
