@@ -33,7 +33,6 @@ RUN mkdir -p /tmp/ffmpeg && mkdir -p /app/ffmpeg && \
     tar -xf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg --strip-components=1 && \
     mv /tmp/ffmpeg/bin/ffmpeg /usr/local/bin && \
     chmod +x /usr/local/bin/ffmpeg && \
-    rm -rf /tmp/ffmpeg /tmp/ffmpeg.tar.xz
 
 RUN ffmpeg -version
 
