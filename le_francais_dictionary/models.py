@@ -19,7 +19,7 @@ from le_francais_dictionary.consts import GENRE_CHOICES, \
     PARTOFSPEECH_CHOICES, \
     PARTOFSPEECH_NOUN, GENRE_MASCULINE, GENRE_FEMININE, \
     GRAMMATICAL_NUMBER_CHOICES, PARTOFSPEECH_ADJECTIVE, TENSE_CHOICES, \
-    TYPE_CHOICES, GENRE_EPICENE, GENRE_BOTH
+    TYPE_CHOICES, GENRE_EPICENE, GENRE_BOTH, PARTOFSPEECH_LOCUTION, PARTOFSPEECH_PHRASE, PARTOFSPEECH_VERB
 from le_francais_dictionary.utils import format_text2speech, \
     create_or_update_repetition, \
     remove_parenthesis, clean_filename, escape_non_url_characters
@@ -536,10 +536,15 @@ class Word(models.Model):
         else:
             text = remove_parenthesis(self.word)
 
-        if self.genre in [GENRE_MASCULINE, GENRE_BOTH]:
-            start_voice = VOICE_ID_REMI
-        else:
+        if self.part_of_speech in [PARTOFSPEECH_NOUN, PARTOFSPEECH_ADJECTIVE, PARTOFSPEECH_LOCUTION, PARTOFSPEECH_PHRASE]:
+            if self.genre in [GENRE_FEMININE]:
+                start_voice = VOICE_ID_LEA
+            else:
+                start_voice = VOICE_ID_REMI
+        elif self.part_of_speech in [PARTOFSPEECH_VERB]:
             start_voice = VOICE_ID_LEA
+        else:
+            start_voice = VOICE_ID_REMI
 
         tags = {
             'tracknumber': self.cd_id,
@@ -800,31 +805,82 @@ class WordTranslation(models.Model):
 
     def create_yandex_task(self):
         from yandex_speechkit.models import YandexSpeechKitTask, create_joined_task_v2
-        from yandex_speechkit.consts import (DEFAULT_VOICE_FEMALE, DEFAULT_EMOTION_FEMALE,
-                                             DEFAULT_VOICE_MALE, DEFAULT_EMOTION_MALE, DEFAULT_FORMAT, LANGUAGE_RU)
+        from yandex_speechkit.consts import (
+            DEFAULT_VOICE_FEMALE, DEFAULT_EMOTION_FEMALE,
+            DEFAULT_VOICE_MALE, DEFAULT_EMOTION_MALE, DEFAULT_FORMAT, LANGUAGE_RU,
+            DEFAULT_VOICE_MALE2, DEFAULT_EMOTION_MALE2, DEFAULT_VOICE_FEMALE2,
+            DEFAULT_EMOTION_FEMALE2, DEFAULT_VOICE_PITCH_MALE, DEFAULT_VOICE_PITCH_MALE2,
+            DEFAULT_VOICE_FEMALE3, DEFAULT_VOICE_FEMALE4,
+            DEFAULT_VOICE_PITCH_FEMALE, DEFAULT_VOICE_PITCH_FEMALE2, DEFAULT_VOICE_PITCH_FEMALE3,
+            DEFAULT_VOICE_PITCH_FEMALE4, DEFAULT_EMOTION_FEMALE3, DEFAULT_EMOTION_FEMALE4
+        )
 
         if self.translation_string:
             text = self.translation_string
         else:
             text = remove_parenthesis(self.translation)
 
-        if self.genre in [GENRE_MASCULINE, GENRE_BOTH]:
-            start_voice = DEFAULT_VOICE_MALE
-            start_emotion = DEFAULT_EMOTION_MALE
+        if self.word.part_of_speech in [PARTOFSPEECH_NOUN, PARTOFSPEECH_ADJECTIVE]:
+            if self.genre in [GENRE_FEMININE]:
+                first_voice = DEFAULT_VOICE_FEMALE
+                first_pitch = DEFAULT_VOICE_PITCH_FEMALE
+                first_emotion = DEFAULT_EMOTION_FEMALE
+                second_voice = DEFAULT_VOICE_MALE
+                second_pitch = DEFAULT_VOICE_PITCH_MALE
+                second_emotion = DEFAULT_EMOTION_MALE
+            else:
+                first_voice = DEFAULT_VOICE_MALE
+                first_pitch = DEFAULT_VOICE_PITCH_MALE
+                first_emotion = DEFAULT_EMOTION_MALE
+                second_voice = DEFAULT_VOICE_FEMALE
+                second_pitch = DEFAULT_VOICE_PITCH_FEMALE
+                second_emotion = DEFAULT_EMOTION_FEMALE
+        elif self.word.part_of_speech in [PARTOFSPEECH_LOCUTION, PARTOFSPEECH_PHRASE]:
+            if self.genre in [GENRE_FEMININE]:
+                first_voice = DEFAULT_VOICE_FEMALE2
+                first_pitch = DEFAULT_VOICE_PITCH_FEMALE2
+                first_emotion = DEFAULT_EMOTION_FEMALE2
+                second_voice = DEFAULT_VOICE_MALE2
+                second_pitch = DEFAULT_VOICE_PITCH_MALE2
+                second_emotion = DEFAULT_EMOTION_MALE2
+            else:
+                first_voice = DEFAULT_VOICE_MALE2
+                first_pitch = DEFAULT_VOICE_PITCH_MALE2
+                first_emotion = DEFAULT_EMOTION_MALE2
+                second_voice = DEFAULT_VOICE_FEMALE2
+                second_pitch = DEFAULT_VOICE_PITCH_FEMALE2
+                second_emotion = DEFAULT_EMOTION_FEMALE2
+        elif self.word.part_of_speech in [PARTOFSPEECH_VERB]:
+            first_voice = second_voice = DEFAULT_VOICE_FEMALE4
+            first_pitch = second_pitch = DEFAULT_VOICE_PITCH_FEMALE4
+            first_emotion = second_emotion = DEFAULT_EMOTION_FEMALE4
         else:
-            start_voice = DEFAULT_VOICE_FEMALE
-            start_emotion = DEFAULT_EMOTION_FEMALE
+            if self.genre in [GENRE_FEMININE]:
+                first_voice = DEFAULT_VOICE_FEMALE3
+                first_pitch = DEFAULT_VOICE_PITCH_FEMALE3
+                first_emotion = DEFAULT_EMOTION_FEMALE3
+                second_voice = DEFAULT_VOICE_MALE2
+                second_pitch = DEFAULT_VOICE_PITCH_MALE2
+                second_emotion = DEFAULT_EMOTION_MALE2
+            else:
+                first_voice = DEFAULT_VOICE_MALE2
+                first_pitch = DEFAULT_VOICE_PITCH_MALE2
+                first_emotion = DEFAULT_EMOTION_MALE2
+                second_voice = DEFAULT_VOICE_FEMALE3
+                second_pitch = DEFAULT_VOICE_PITCH_FEMALE3
+                second_emotion = DEFAULT_EMOTION_FEMALE3
 
         tags = {
             'tracknumber': self.cd_id,
             'title': self.translation,
-            'artist': f"{start_voice} -- {start_emotion}",
+            'artist': f"{first_voice} -- {first_emotion}",
             'album': 'Yandex SpeechKit',
             'copyright': 'www.le-francais.ru'
         }
 
-        voice = start_voice
-        emotion = start_emotion
+        voice = first_voice
+        pitch = first_pitch
+        emotion = first_emotion
         tasks = []
         for voice_text in text.split('|'):
             new_task = YandexSpeechKitTask.objects.create(
@@ -836,12 +892,14 @@ class WordTranslation(models.Model):
             )
             new_task = new_task.synthesize()
             tasks.append(new_task)
-            if voice == DEFAULT_VOICE_MALE:
-                voice = DEFAULT_VOICE_FEMALE
-                emotion = DEFAULT_EMOTION_FEMALE
+            if voice == first_voice:
+                voice = second_voice
+                emotion = second_emotion
+                pitch = second_pitch
             else:
-                voice = DEFAULT_VOICE_MALE
-                emotion = DEFAULT_EMOTION_MALE
+                voice = first_voice
+                emotion = first_emotion
+                pitch = first_pitch
 
         if len(tasks) > 1:
             result_task = create_joined_task_v2(
