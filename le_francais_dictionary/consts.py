@@ -131,7 +131,8 @@ WORD_JSON_FIELDS_TO_PYTHON = {
     'question': 'word',
     'questionPronunciation': 'word_string',
     'order': 'order',
-    'genre':'genre'
+    'genre':'genre',
+    'partOfSpeech': 'part_of_speech'
 }
 
 TRANSLATION_JSON_FIELDS_TO_PYTHON = {
