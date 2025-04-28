@@ -891,8 +891,7 @@ class WordTranslation(models.Model):
             )
 
         self.yandex_task = result_task
-        self.voiceover_data_changed = False
-        self.save(update_fields=['yandex_task', 'voiceover_data_changed'])
+        self.save(update_fields=['yandex_task'])
 
     def create_polly_task(self):
         text = format_text2speech(self.translation)
