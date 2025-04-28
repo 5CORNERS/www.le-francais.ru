@@ -952,8 +952,11 @@ def create_and_voice_word(request):
                 cross_site_site_name=site_name
             )
 
+        word_voiceover_data_changed = False
         try:
             for json_name,field_name in WORD_JSON_FIELDS_TO_PYTHON.items():
+                if getattr(word, field_name) != card_data.get(json_name, None):
+                    word_voiceover_data_changed = True
                 setattr(word, field_name, card_data.get(json_name, None))
         except KeyError as e:
             return JsonResponse({ 'success':False, 'message':f"Key Error in the card data: {str(e)}"}, status=400)
@@ -964,7 +967,7 @@ def create_and_voice_word(request):
             word.full_clean()
             word.save()
 
-            if word.voiceover_data_changed:
+            if word_voiceover_data_changed:
                 try:
                     word.create_polly_task_v2()
                 except BaseException as e:
@@ -981,13 +984,16 @@ def create_and_voice_word(request):
                 word=word
             )
 
+        translation_voiceover_data_changed = False
         for json_name, field_name in TRANSLATION_JSON_FIELDS_TO_PYTHON.items():
+            if getattr(translation, field_name) != card_data.get(json_name, None):
+                translation_voiceover_data_changed = True
             setattr(translation, field_name, card_data.get(json_name, None))
         try:
             translation.full_clean()
             translation.save()
 
-            if translation.voiceover_data_changed:
+            if translation_voiceover_data_changed:
                 try:
                     translation.create_yandex_task()
                 except:

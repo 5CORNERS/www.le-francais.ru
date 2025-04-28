@@ -251,7 +251,6 @@ class Word(models.Model):
     cross_site_site_name = models.CharField(max_length=10, null=True, blank=True)
     word_string = models.TextField(blank=True, null=True, default=None)
 
-    voiceover_data_changed = models.BooleanField(default=False, blank=True)
     is_archived = models.BooleanField(default=False, blank=True)
 
     class Meta:
@@ -267,19 +266,6 @@ class Word(models.Model):
         self._repetitions = {}
         self._uni = None
 
-        self.original_voiceover_data = {
-            "word": self.word,
-            "word_string": self.word_string,
-            "genre": self.genre,
-            "part_of_speech": self.part_of_speech,
-            "word_ssml": self.word_ssml,
-        }
-
-    def save(self, *args, **kwargs):
-        for attr, value in self.original_voiceover_data.items():
-            if value != getattr(self, attr):
-                self.voiceover_data_changed = True
-        super().save(*args, **kwargs)
 
     def mistake_ratio(self, mistakes):
         word = self.word
@@ -588,8 +574,7 @@ class Word(models.Model):
             )
         self.polly = result_task
         self._polly_url = None
-        self.voiceover_data_changed = False
-        self.save(update_fields=['polly', '_polly_url', 'voiceover_data_changed'])
+        self.save(update_fields=['polly', '_polly_url'])
 
     def create_polly_task(self, local=None):
         if self.word_ssml:
@@ -735,21 +720,8 @@ class WordTranslation(models.Model):
     yandex_task = models.ForeignKey('yandex_speechkit.YandexSpeechKitTask', related_name='translations', null=True,
                                     blank=True, on_delete=models.SET_NULL)
 
-    voiceover_data_changed = models.BooleanField(default=False, blank=True)
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.original_voiceover_data = {
-            "translation": self.translation,
-            "translations_ssml": self.translations_ssml,
-            "translation_string": self.translation_string,
-        }
-
-    def save(self, *args, **kwargs):
-        for attr, value in self.original_voiceover_data.items():
-            if value != getattr(self, attr):
-                self.voiceover_data_changed = True
-        super().save(*args, **kwargs)
 
     @property
     def filename(self):
@@ -765,6 +737,8 @@ class WordTranslation(models.Model):
                 return self.polly.url
             elif self.yandex_task is not None:
                 return self.yandex_task.url
+            else:
+                return None
         else:
             return urlquote(self._polly_url, safe='/:%')
 
