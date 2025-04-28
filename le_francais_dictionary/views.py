@@ -999,7 +999,6 @@ def create_and_voice_word(request):
                 except:
                     voiceover_errors.append({'translation_string': [gettext_lazy('Error creating voiceover')], 'translation': [gettext_lazy('Error creating voiceover')]})
 
-
         except ValidationError as e:
             validation_errors.append(e.message_dict)
 
