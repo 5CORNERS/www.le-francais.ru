@@ -1,0 +1,15 @@
+{% extends 'dictionary/verbs_app_standalone.html' %}
+{% block menu %}{% endblock %}
+{% block payment_modals %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block js %}{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+            {% include 'dictionary/verbs_tab.html' with hide_load_more=True default_show_negative=True default_translate_infinitives=True %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

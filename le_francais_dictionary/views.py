@@ -3,6 +3,7 @@ import os
 import traceback
 from json import JSONDecodeError
 from typing import List
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -10,7 +11,7 @@ from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Count, Subquery, OuterRef, \
     IntegerField, Q, ProtectedError
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
@@ -712,6 +713,17 @@ def manage_words_standalone(request, lesson_number):
                    'init_packets': init_packets})
 
 
+def open_verbs_iframe(request, packet_id):
+    relations = VerbPacketRelation.objects.filter(packet__pk=packet_id).values_list('pk', flat=True)
+    query_params = {
+        'iframe': 'True'
+    }
+    if relations:
+        query_params['v'] = relations
+    url = f"{reverse('dictionary:app_verbs')}?{urlencode(query_params, doseq=True)}"
+    return redirect(url)
+
+
 def start_app_verbs(request):
     query = VerbPacketRelation.objects.filter(
         pk__in=map(int, request.GET.getlist('v')))
@@ -721,7 +733,11 @@ def start_app_verbs(request):
         "errors": [],
     }
     data = attach_info(request, data)
-    return render(request, 'dictionary/verbs_app_standalone.html', {'data': json.dumps(data)})
+    if request.GET.get('iframe', 'False') == 'True':
+        template_name = 'dictionary/verbs_app_iframe.html'
+    else:
+        template_name = 'dictionary/verbs_app_standalone.html'
+    return render(request, template_name, {'data': json.dumps(data)})
 
 
 @csrf_exempt
