@@ -127,6 +127,7 @@ MIDDLEWARE = [
     # 'django.contrib.sessions.middleware.SessionMiddleware',
     # 'le_francais.middleware.SessionHeaderMiddleware',
     'le_francais.middleware.CustomSessionMiddleware',
+    'le_francais.middleware.FrameMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -593,6 +594,10 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'X-SessionID',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://courses.le-francais.ru",
 ]
 
 NOTIFICATIONS_AUTO_CHECK_NEW = os.getenv('NOTIFICATIONS_AUTO_CHECK_NEW', '1') == '1'

@@ -143,3 +143,13 @@ class GeoIpSessionMiddleware(MiddlewareMixin):
                 'last_check_ip': ip,
             }
             request.session['geoip'] = geoip_dict
+
+
+class FrameMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        response['Content-Security-Policy'] = "frame-ancestors 'self' https://courses.le-francais.ru"
+        return response
