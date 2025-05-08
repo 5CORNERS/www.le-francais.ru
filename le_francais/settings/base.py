@@ -356,6 +356,10 @@ AWS_SES_REGION_ENDPOINT = 'email.eu-west-1.amazonaws.com'
 
 
 MASS_EMAIL_BACKEND = EMAIL_BACKEND
+MASS_EMAIL_BACKENDS = {
+    ('django.core.mail.backends.smtp.EmailBackend', 'SMTPEmailBackend'),
+    ('django_ses.SESBackend', 'SESEmailBackend'),
+}
 MASS_MAILER_DEFAULT_CHUNK_SIZE = 10
 MASS_MAILER_DEFAULT_DELAY = 60
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Le-francais.ru <no-reply@mail.le-francais.ru>')

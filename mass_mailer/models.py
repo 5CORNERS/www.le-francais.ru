@@ -109,17 +109,19 @@ class EmailSettings(models.Model):
 	messages_per_connection = models.IntegerField(default=35)
 	delay_between_connections = models.IntegerField(default=10, help_text='In seconds')
 
+	backend = models.CharField(max_length=256, choices=settings.MASS_EMAIL_BACKENDS, default=settings.MASS_EMAIL_BACKEND)
+
 	def __str__(self):
-		return f'{self.username}@{self.host}:{self.port}'
+		return f'{self.username}@{self.host}:{self.port}' if self.backend == settings.MASS_EMAIL_BACKEND else self.backend
 
 	def get_backend(self):
-		klass = import_string(settings.MASS_EMAIL_BACKEND)
+		klass = import_string(self.backend)
 		return klass(host=self.host, port=self.port, username=self.username,
 		             password=self.password,
 		             use_tls=self.use_tls, fail_silently=False,
 		             use_ssl=self.use_ssl,
 		             timeout=None,
-		             ssl_keyfile=None, ssl_certfile=None)
+		             ssl_keyfile=None, ssl_certfile=None) if self.backend == settings.MASS_EMAIL_BACKEND else klass()
 
 	def get_sender_header(self):
 		return f'{self.sender_username} <{self.sender_email}>'
