@@ -56,11 +56,11 @@ urlpatterns = [
 
     url(r'^dictionary/', include(dictionary_urls, namespace='dictionary')),
 
+    url(r'^django-admin/django-ses/', include('django_ses.urls')),
     url(r'^django-admin/', include(admin.site.urls)),
 
     url(r'^activation-log/$', activation_log, name='activation_log'),
 
-    url(r'^admin/django-ses/', include('django_ses.urls')),
     url(r'^admin/', include(wagtailadmin_urls)),
     url(r'^documents/', include(wagtaildocs_urls)),
 

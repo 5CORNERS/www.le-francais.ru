@@ -700,20 +700,21 @@ class Message(models.Model):
 			for data in chunk:
 				to = data['email']
 				context = data['context']
-				is_validated = validate_email(
-					email_address=to,
-					check_regex=True,
-					check_mx=True,
-					smtp_timeout=10,
-					dns_timeout=10,
-					use_blacklist=True)
-				if not is_validated and is_validated is not None:
-					MessageLog.objects.create(
-						message=self,
-						result=MessageLog.RESULT_FAILURE,
-						log_message=str(f"Can't Validate EMail: {to}")
-					)
-					continue
+				if self.email_settings.backend == 'django.core.mail.backends.smtp.EmailBackend':
+					is_validated = validate_email(
+						email_address=to,
+						check_regex=True,
+						check_mx=True,
+						smtp_timeout=10,
+						dns_timeout=10,
+						use_blacklist=True)
+					if not is_validated and is_validated is not None:
+						MessageLog.objects.create(
+							message=self,
+							result=MessageLog.RESULT_FAILURE,
+							log_message=str(f"Can't Validate EMail: {to}")
+						)
+						continue
 
 				header = {
 					'Sender': f'{self.email_settings.get_sender_header()}',
