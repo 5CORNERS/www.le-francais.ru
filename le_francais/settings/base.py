@@ -356,7 +356,7 @@ AWS_SES_REGION_ENDPOINT = 'email.eu-west-1.amazonaws.com'
 # AWS_SES_SECRET_ACCESS_KEY = os.getenv('AWS_SES_SECRET_ACCESS_KEY')
 
 
-MASS_EMAIL_BACKEND = EMAIL_BACKEND
+MASS_EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 MASS_EMAIL_BACKENDS = {
     ('django.core.mail.backends.smtp.EmailBackend', 'SMTPEmailBackend'),
     ('django_ses.SESBackend', 'SESEmailBackend'),
