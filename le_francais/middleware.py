@@ -151,5 +151,8 @@ class FrameMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        response['Content-Security-Policy'] = "frame-ancestors 'self' https://courses.le-francais.ru"
+        if settings.DEBUG:
+            response['Content-Security-Policy'] = "frame-ancestors 'self' http://localhost:8081"
+        else:
+            response['Content-Security-Policy'] = "frame-ancestors 'self' https://courses.le-francais.ru"
         return response
