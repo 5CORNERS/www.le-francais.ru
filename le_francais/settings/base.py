@@ -113,6 +113,7 @@ INSTALLED_APPS = [
     'tinkoff_merchant',
     'django_js_reverse',
     'mass_mailer',
+    'django_ses',
 
     'log_errors',
     'whitenoise.runserver_nostatic',

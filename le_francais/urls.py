@@ -102,6 +102,8 @@ urlpatterns = [
 
     url(r'^messages/', include('forum_messages.urls')),
 
+    url(r'^admin/django-ses/', include('django_ses.urls')),
+
     url(r'^conjugaison/', include('conjugation.urls', namespace='conjugation')),
 
     url(r'^support', include('donations.urls', namespace='donations')),
