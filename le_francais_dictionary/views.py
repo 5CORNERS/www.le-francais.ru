@@ -624,6 +624,7 @@ def get_verbs(request, packet_id:int, more_lessons:int=None):
     if more_lessons:
         current_lesson = packet.lesson.lesson_number
         more_packets = list(VerbPacket.objects.filter(
+            lesson__isnull=False,
             lesson__lesson_number__gte=current_lesson - more_lessons,
             lesson__lesson_number__lt=current_lesson
         ).order_by('-lesson__lesson_number'))
@@ -652,7 +653,7 @@ def attach_info(request, result):
                                               tense=TENSE_PARTICIPE_PASSE)
                 .values('packet').annotate(count=Count('pk')).values(
                 'count'), output_field=IntegerField())
-    ).prefetch_related('lesson').all().order_by(
+    ).prefetch_related('lesson').filter(lesson__isnull=False).order_by(
         'lesson__lesson_number')
     result['packets'] = [{
         'id': p.id,
