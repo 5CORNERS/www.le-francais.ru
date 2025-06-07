@@ -514,13 +514,20 @@ class Word(models.Model):
 
     def create_polly_task_v2(self):
         from polly.models import PollyTask, join_polly_tasks
-        from polly.const import (ENGINE_GENERATIVE, VOICE_ID_LEA,
+        from polly.const import (ENGINE_GENERATIVE, ENGINE_NEURAL, VOICE_ID_LEA,
                                  VOICE_ID_REMI, OUTPUT_FORMAT_PCM,
-                                 LANGUAGE_CODE_FR, TEXT_TYPE_TEXT, SAMPLE_RATE_16000)
+                                 LANGUAGE_CODE_FR, TEXT_TYPE_TEXT, SAMPLE_RATE_16000,
+                                 )
         if self.word_string:
             text = self.word_string
+            if text.startswith('*'):
+                text = text[1:]
+                engine = ENGINE_NEURAL
+            else:
+                engine = ENGINE_GENERATIVE
         else:
             text = remove_parenthesis(self.word)
+            engine = ENGINE_GENERATIVE
 
         if self.part_of_speech in [PARTOFSPEECH_NOUN, PARTOFSPEECH_ADJECTIVE, PARTOFSPEECH_LOCUTION, PARTOFSPEECH_PHRASE]:
             if self.genre in [GENRE_FEMININE]:
@@ -549,7 +556,7 @@ class Word(models.Model):
                 language_code=LANGUAGE_CODE_FR,
                 output_format=OUTPUT_FORMAT_PCM,
                 voice_id=voice,
-                engine=ENGINE_GENERATIVE,
+                engine=engine,
                 sample_rate=SAMPLE_RATE_16000
             )
             tasks.append(new_task.get_audio_stream_and_save())
