@@ -5,7 +5,7 @@
          class="alert alert-success alert-dismissible fade show"
          role="alert">
         <span style="color:red">ВАЖНО!</span> Как учить спряжения глаголов, чтобы это работало -- узнайте <a
-            href="{% slugurl 'comment-apprendre-la-conjugaison-française' %}">из
+            href="{% slugurl 'comment-apprendre-la-conjugaison-française' %}"{% if target_blank %} target="_blank"{% endif %}>из
         маленькой статьи</a> о том, какие механизмы запоминания мы используем.
         <button type="button" data-toggle="tooltip"
                 title="Больше не показывать"
@@ -192,7 +192,7 @@
                 <p><b>Фаза 2.</b>Вам дается интервал в пять секунд, чтобы выудить из памяти форму спряжения глагола в
                     произвольном лице и числе. Это сложнее, чем читать спряжение подряд, но это помогает по-настоящему
                     закрепить и пользоваться тем, что вы выучили.</p>
-                <p>Как это работает на уровне памяти, читайте в статье <a href="{% slugurl 'comment-apprendre-la-conjugaison-française' %}">«Как быстро запомнить спряжение глаголов»</a>.</p>
+                <p>Как это работает на уровне памяти, читайте в статье <a href="{% slugurl 'comment-apprendre-la-conjugaison-française' %}"{% if target_blank %} target="_blank"{% endif %}>«Как быстро запомнить спряжение глаголов»</a>.</p>
                 <p class="mb-0">Que La Force soit avec vous ! :)</p>
             </div>
         </div>
