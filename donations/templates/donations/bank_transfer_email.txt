@@ -1,0 +1,11 @@
+Добрый день!
+
+Спасибо Вам еще раз за готовность нас поддержать! Ниже — реквизиты счета для банковского перевода в {currency}. По любым вопросам не стесняйтесь мне писать на почту, в Телеграм, в личку или на форум.
+
+IBAN: {{ iban }}
+BIC / SWIFT code: {{ bic }}
+Beneficiary: {{ beneficiary }}
+Receiving bank: {{ bank }}, {{ bank_address }}
+Correspondent BIC: {{ correspondent_bic }}
+Для перевода внутри Revolut используйте ник @{{ nickname }}.
+Вы также можете оплатить картой онлайн по ссылке https://revolut.me/{{ nickname }}

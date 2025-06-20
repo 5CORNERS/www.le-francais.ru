@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponseBadRequest, HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.template.loader import render_to_string
 from django.urls import reverse
 
 # Create your views here.
@@ -125,7 +126,7 @@ def crowdfunding_submit(request):
 
 
 def get_bank_transfer_currencies() -> dict:
-    return json.loads(os.environ.get('BANK_TRANSFER_DATA',
+    return json.loads(os.environ.get('BANK_TRANSFER_DATA_V2',
                                      '{"USD":{"html": "<b>blablabla</b>", "text": "blablabla"}, "EUR":{"html": "<b>blablabla</b>", "text": "blablabla"}}'))
 
 
@@ -134,49 +135,53 @@ class BankTransfer(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(BankTransfer, self).get_context_data(**kwargs)
-        context['currencies'] = get_bank_transfer_currencies().keys()
+        currencies = list(get_bank_transfer_currencies().keys())
+        currencies.remove('default')
+        context['currencies'] = currencies
         return context
 
 
 @login_required
 def bank_transfer_get_email(request):
     if request.method == 'POST' and request.user.is_authenticated:
-        currency = request.POST.get('currency', None)
-        if currency is None:
+        current_currency = request.POST.get('currency', None)
+        if current_currency is None:
             return redirect(urls.reverse('donations:bank_transfer') + "?error&bad_request")
         data = get_bank_transfer_currencies()
-        messages = (data.get(currency, None))
-        if messages is None:
+        default_kwargs:dict = data.get('default')
+        currency_kwargs:dict = data.get(current_currency)
+        if default_kwargs is None or currency_kwargs is None:
             return redirect(urls.reverse('donations:bank_transfer') + "?error&not_found")
         user = request.user
         if user.get_full_name():
-            name = user.get_full_name()
+            username = user.get_full_name()
         else:
-            name = user.get_username()
-        if name.isascii():
-            to = formataddr((name, user.email))
+            username = user.get_username()
+        if username.isascii():
+            to = formataddr((username, user.email))
         else:
             to = user.email
-        subject = f'Details for bank transfer in {currency}'
+        subject = f'Details for bank transfer in {current_currency}'
+
+        message_data = {
+            'username': username,
+            'subject': subject,
+            'currency': current_currency,
+        }
+        message_data.update(default_kwargs)
+        message_data.update(currency_kwargs)
+
+        message_text = render_to_string('donations/bank_transfer_email.txt', message_data, request)
+        message_html = render_to_string('donations/bank_transfer_email.html', message_data, request)
+
         message = EmailMultiAlternatives(
             subject=subject,
-            body=f"Добрый день!\n\nСпасибо Вам еще раз за готовность нас поддержать! Ниже — реквизиты счета для банковского перевода в {currency}. По любым вопросам не стесняйтесь мне писать на почту, в Телеграм, в личку или на форум.\n\n{messages.get('text')}",
+            body=message_text,
             from_email=settings.DEFAULT_FROM_EMAIL,
             reply_to=[settings.DEFAULT_REPLY_TO_EMAIL],
             to=[to],
         )
-        message.attach_alternative(f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<p>Добрый день!</p>
-<p>Спасибо Вам еще раз за готовность нас поддержать! Ниже — реквизиты счета для банковского перевода в {currency}. По любым вопросам не стесняйтесь мне писать на почту, в Телеграм, в личку или на форум.</p>
-{messages.get('html')}
-</body>
-</html>""", 'text/html')
+        message.attach_alternative(message_html, 'text/html')
         message.send()
         return redirect(urls.reverse('donations:bank_transfer') + "?success")
     else:

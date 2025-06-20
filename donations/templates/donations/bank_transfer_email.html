@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ subject }}</title>
+</head>
+<body>
+<p>Добрый день!</p>
+<p>Спасибо Вам еще раз за готовность нас поддержать! Ниже — реквизиты счета для банковского перевода в {currency}. По любым вопросам не стесняйтесь мне писать на почту, в Телеграм, в личку или на форум.</p>
+<p><b>IBAN</b>: {{ iban }}<br> <b>BIC / SWIFT code</b>: {{ bic }}<br>
+    <b>Beneficiary</b>: {{ beneficiary }}
+<br><b>Receiving bank:</b> {{ bank }}, {{ bank_address }}
+<br><b>Correspondent BIC</b>: {{ correspondent_bic }}
+</p>
+<p>
+    Для перевода внутри Revolut используйте ник @{{ nickname }}.
+</p>
+<p>
+    Вы также можете оплатить картой онлайн <a href="https://revolut.me/{{ nickname }}">по этой ссылке</a>.
+</p>
+</body>
+</html>
