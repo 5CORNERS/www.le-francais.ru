@@ -580,6 +580,9 @@ def text_preprocessor(text:str):
     #.replace('..', '…')\
     # new_text = re.sub('—(\w)', '— \g<1>', new_text)
     # new_text = re.sub('(\w)—', '\g<1> —', new_text)
+    new_text = re.sub("([A-zÀ-ÿ])'([A-zÀ-ÿ])", "\g<1>+++\g<1>", new_text)
+    new_text = re.sub("\'", "\"", new_text)
+    new_text = re.sub("\+\+\+", "\'", new_text)
     new_text = re.sub('"([\w\d\-])', '«\g<1>', new_text)
     new_text = re.sub('([\w\d\-]|…|\.|!|\?)"', '\g<1>»', new_text)
     new_text = re.sub('«\s', '« ', new_text)
@@ -703,7 +706,7 @@ def get_currency(request):
     elif country_code in ['US']:
         return 'usd'
     elif country_code in ['IL']:
-        return 'ils'
+        return 'ins'
     elif country_code in ['RU', 'BY']:
         return 'rub'
     else:
