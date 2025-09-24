@@ -706,7 +706,7 @@ def get_currency(request):
     elif country_code in ['US']:
         return 'usd'
     elif country_code in ['IL']:
-        return 'ins'
+        return 'ils'
     elif country_code in ['RU', 'BY']:
         return 'rub'
     else:
