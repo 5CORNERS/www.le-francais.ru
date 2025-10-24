@@ -119,7 +119,7 @@ $(document).ready(function () {
 			function logEcommerceTransaction() {
 				window.dataLayer = window.dataLayer || [];
 				dataLayer.push({
-					'event': 'paymentSuccess',
+					'event': 'purchase',
 					'ecommerce': {
 						'transaction_id': '{{ payment.order_id }}',
 						'value': {{ payment.amount|div:100 }},
