@@ -26,6 +26,14 @@
 {% block body_class %}template-homepage{% endblock %}
 
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
+{% block adfinity %}
+{% check_user_lesson request.user self as userlesson %}
+{% if userlesson %}
+<!-- Adfinity block disabled -->
+{% else %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
 
 {% block extra_js %}
 	<script>
