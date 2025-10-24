@@ -35,6 +35,15 @@
 {% endif %}
 {% endblock %}
 
+{% block adsense %}
+{% check_user_lesson request.user self as userlsesson %}
+{% if userlsesson %}
+<!-- Adsense block disabled -->
+{% else %}
+{{ block.super }}
+{% endif %}
+{% endblock %}
+
 {% block extra_js %}
 	<script>
     const CSRF_TOKEN = '{{ csrf_token }}';
