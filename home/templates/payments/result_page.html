@@ -116,23 +116,28 @@ $(document).ready(function () {
 })</script>
 	{% if success %}
 		<script>
-			function eccomercePushSuccess() {
+			function logEcommerceTransaction() {
 				window.dataLayer = window.dataLayer || [];
 				dataLayer.push({
 					'event': 'paymentSuccess',
-					'transactionId': '{{ payment.order_id }}',
-					'transactionTotal': {{ payment.amount|div:100 }},
-					'transactionProducts': [{% for item in payment.items %}{
-							'sku': '{{ item.e_sku }}',
-							'name': '{{ item.e_name }}',
-							'category': '{{ item.category }}',
-							'price': {{ item.price|div:100 }},
-							'quantity': {{ item.quantity|floatformat }}
-							},
-						{% endfor %}]
+					'ecommerce': {
+						'transaction_id': '{{ payment.order_id }}',
+						'value': {{ payment.amount|div:100 }},
+						'currency': 'RUB',
+						'items': [
+							{% for item in payment.items %}{
+								'item_id': '{{ item.e_sku }}',
+								'item_name': '{{ item.e_name }}',
+								'item_category': '{{ item.category }}',
+								'price': {{ item.price|div:100 }},
+								'quantity': {{ item.quantity|floatformat }}
+							}{% if not forloop.last %},{% endif %}
+							{% endfor %}
+						]
+					}
 				});
 			}
-			window.onload = eccomercePushSuccess;
+			window.onload = logEcommerceTransaction;
 		</script>
 	{% endif %}
 </body>
