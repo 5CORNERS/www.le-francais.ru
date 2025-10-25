@@ -22,13 +22,20 @@ from home.consts import COLUMN_TEXT, COLUMN_START, COLUMN_END, COLUMN_SPEAKER, E
 from le_francais.settings.base import FILES_LE_FRANCAIS_HTTPS, \
     FILES_LE_FRANCAIS_SITENAME
 
+
 def is_gpt_disabled(request):
     if request is None:
         return True
     session = request.session
     geoip_dict = session.get('geoip', None)
+    test_gpt_disabled = request.GET.get('test_gpt_disabled', None)
+    if test_gpt_disabled is not None:
+        if test_gpt_disabled == '1':
+            return True
+        else:
+            return False
     if ((geoip_dict and (geoip_dict.get('country_code') in os.environ.get('BLOCKED_COUNTRY_CODES').split(',')
-    or geoip_dict.get('country_code') is None)) or request.GET.get('test_gpt_disabled', None) == '1'):
+                         or geoip_dict.get('country_code') is None))):
         return True
     return False
 
