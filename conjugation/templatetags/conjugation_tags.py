@@ -42,7 +42,7 @@ def option_url(context, option):
 
 
 @register.inclusion_tag('tags/conjugation_advert_body.html', takes_context=True)
-def conjugation_advertisement_body(context, code):
+def conjugation_advertisement_body(context, code, gpt_disabled=None):
     try:
         request = context.get('request')
         user = request.user
@@ -50,8 +50,10 @@ def conjugation_advertisement_body(context, code):
             return dict(body=None)
         snippet:PageLayoutAdvertisementSnippet = PageLayoutAdvertisementSnippet.objects.filter(code=code).exclude(live=False).first()
         placements = [p.code for p in snippet.placements.all()]
+        if gpt_disabled is None:
+            gpt_disabled = context.get('is_gpt_disabled')
         return dict(body=snippet.body, snippet=snippet,
-                    gpt_disabled=context.get('is_gpt_disabled'),
+                    gpt_disabled=gpt_disabled,
                     request=context.get('request'),
                     utm_source=f"{snippet.code}",
                     placements=placements
