@@ -36,8 +36,8 @@
 {% endblock %}
 
 {% block adsense %}
-{% check_user_lesson request.user self as userlsesson %}
-{% if userlsesson %}
+{% check_user_lesson request.user self as userlesson %}
+{% if userlesson %}
 <!-- Adsense block disabled -->
 {% else %}
 {{ block.super }}
