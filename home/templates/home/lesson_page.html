@@ -28,7 +28,7 @@
 {% block description %}{% if self.search_description %}{{ self.search_description }}{% endif %}{% endblock %}
 {% block adfinity %}
 {% check_user_lesson request.user self as userlesson %}
-{% if userlesson %}
+{% if userlesson or request.user.is_authenticated and not request.user.must_pay %}
 <!-- Adfinity block disabled -->
 {% else %}
 {{ block.super }}
@@ -37,7 +37,7 @@
 
 {% block adsense %}
 {% check_user_lesson request.user self as userlesson %}
-{% if userlesson %}
+{% if userlesson or request.user.is_authenticated and not request.user.must_pay %}
 <!-- Adsense block disabled -->
 {% else %}
 {{ block.super }}
