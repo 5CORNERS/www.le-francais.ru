@@ -254,7 +254,7 @@ class Word(models.Model):
     is_archived = models.BooleanField(default=False, blank=True)
 
     class Meta:
-        ordering = ['order']
+        ordering = ['lesson__lesson_number', 'packet__id', 'order']
 
     def __init__(self, *args, **kwargs):
         super(Word, self).__init__(*args, **kwargs)
@@ -1418,6 +1418,9 @@ class VerbPacketRelation(models.Model):
     packet = models.ForeignKey(VerbPacket, on_delete=models.CASCADE)
     order = models.PositiveIntegerField(default=1)
     tense = models.IntegerField(choices=TENSE_CHOICES, default=0)
+
+    def __str__(self):
+        return f'{self.verb} -- {self.packet} -- {self.tense}'
 
 
 class VerbForm(models.Model):
