@@ -254,7 +254,7 @@ class Word(models.Model):
     is_archived = models.BooleanField(default=False, blank=True)
 
     class Meta:
-        ordering = ['lesson__lesson_number', 'packet__id', 'order']
+        ordering = ['packet__lesson__lesson_number', 'packet__id', 'order']
 
     def __init__(self, *args, **kwargs):
         super(Word, self).__init__(*args, **kwargs)
