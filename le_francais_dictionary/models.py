@@ -56,6 +56,7 @@ class Packet(models.Model):
     demo = models.BooleanField(default=False)
     lesson = models.ForeignKey('home.LessonPage',
                                related_name='dictionary_packets', null=True, on_delete=models.SET_NULL)
+    order = models.IntegerField(default=0, null=True, blank=True)
 
     cross_site_available = models.BooleanField(default=False, blank=True)
     cross_site_id = models.PositiveIntegerField(null=True, blank=True, unique=True)
