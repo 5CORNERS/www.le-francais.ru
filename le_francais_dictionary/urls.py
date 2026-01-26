@@ -16,7 +16,7 @@ urlpatterns = [
     url('^get-app/([0-9]*)/$', views.get_app, name='get_app'),
     url('^my-words/$', views.ManageWords.as_view(), name='my_words'),
     url('^my-verbs/$', views.ManageVerbs.as_view(), name='my_verbs'),
-    url('^my-words-standalone/(?P<lesson_number>[0-9]*)/$', views.manage_words_standalone, name='my_words_standalone'),
+    url('^my-words-standalone/(?P<lesson_number>-?[0-9]*)/$', views.manage_words_standalone, name='my_words_standalone'),
     url('^my-words-get-filters/$', views.get_filters, name='get_filters'),
     url('^my-words-save-filters/$', views.save_filters, name='save_filters'),
     url('^app/$', views.start_app, name='app'),
@@ -29,5 +29,6 @@ urlpatterns = [
     url('^api/create-and-voice-cross-site-word/$', views.create_and_voice_word, name='create_and_voice_cross_site_word'),
     url('^api/cross_site_packet/$', views.cross_site_packet, name='cross_site_packet'),
     url('^api/delete-cross-site-words/(?P<packet_id>\d+)/', views.delete_cross_site_words, name='delete_cross_site_words'),
+    url('^api/get_user_cross_site_data/$', views.GetUserCrossSiteData.as_view(), name='get_user_cross_site_data')
 ]
 
