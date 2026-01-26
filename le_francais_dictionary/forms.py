@@ -85,7 +85,7 @@ class WordsManagementFilterForm(forms.Form):
 				words = list(dict.fromkeys(words))
 			else:
 				query = Word.objects.filter(packet_id__in=data['packets'])
-				words = list(query.distinct().order_by('order'))
+				words = list(query.distinct())
 			# time = datetime.now()
 			words = prefetch_words_data(words, self.user)
 			result = dict(
