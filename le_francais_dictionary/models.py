@@ -166,7 +166,7 @@ class Packet(models.Model):
         return self._user_words_checked[user.pk]
 
     class Meta:
-        ordering = ['lesson__lesson_number']
+        ordering = ['order', 'lesson__lesson_number']
 
 
 class UserPacket(models.Model):
@@ -255,7 +255,7 @@ class Word(models.Model):
     is_archived = models.BooleanField(default=False, blank=True)
 
     class Meta:
-        ordering = ['packet__lesson__lesson_number', 'packet__id', 'order']
+        ordering = ['packet__order', 'packet__lesson__lesson_number', 'order']
 
     def __init__(self, *args, **kwargs):
         super(Word, self).__init__(*args, **kwargs)
