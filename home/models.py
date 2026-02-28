@@ -592,7 +592,8 @@ class LessonPage(Page):
         ('html', RawHTMLBlock()),
         ('visible_html', VisibleRawHTMLBlock()),
         ('invisible_html', InvisibleRawHTMLBlock()),
-        ('learning_apps', LearningAppsBlock())
+        ('learning_apps', LearningAppsBlock()),
+        ('audio', AudioBlock()),
     ], verbose_name='Домашка', null=True, blank=True)
 
     additional_exercise = StreamField([
