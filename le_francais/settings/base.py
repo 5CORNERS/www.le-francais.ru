@@ -124,6 +124,7 @@ MIDDLEWARE = [
     'django.middleware.gzip.GZipMiddleware',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'le_francais.middleware.EnforceCustomDomainMiddleware'
     'whitenoise.middleware.WhiteNoiseMiddleware',
     # 'django.contrib.sessions.middleware.SessionMiddleware',
     # 'le_francais.middleware.SessionHeaderMiddleware',

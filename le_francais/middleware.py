@@ -4,6 +4,7 @@ import time
 import geoip2.errors
 from django.conf import settings
 from django.contrib.gis.geoip2 import GeoIP2
+from django.http import HttpResponsePermanentRedirect
 from django.middleware import csrf
 from django.utils import timezone
 from django.utils.http import cookie_date
@@ -156,3 +157,13 @@ class FrameMiddleware:
         else:
             response['Content-Security-Policy'] = "frame-ancestors 'self' https://courses.le-francais.ru"
         return response
+
+class EnforceCustomDomainMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if 'onrender.com' in request.get_host():
+            new_url = f"https://www.le-francais.ru{request.get_full_path()}"
+            return HttpResponsePermanentRedirect(new_url)
+        return self.get_response(request)
