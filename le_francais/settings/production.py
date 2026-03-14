@@ -17,7 +17,7 @@ def add_header_service_worker_allowed(headers, path, url):
 WHITENOISE_ADD_HEADERS_FUNCTION = add_header_service_worker_allowed
 
 ALLOWED_HOSTS = [
-    'hidden-refuge-27954.onrender.com'
+    'hidden-refuge-27954.onrender.com',
     'www.le-francais.ru',
     # os.environ.get('HEROKU_APP_NAME', 'none')+'.herokuapp.com'
 ]
