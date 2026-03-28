@@ -10,9 +10,11 @@
             src="{% static 'dictionary/js/user-table-standalone.min.js' %}"></script>
     <script>
     const USER_IS_AUTHENTICATED = {{ request.user.is_authenticated|yesno:"true;,false;" }}
+    const COURSES_BASE_URL = "{{ COURSES_BASE_URL }}"
     {% if cross_site_key %}
-        const COURSES_BASE_URL = "{{ COURSES_BASE_URL }}"
         const CROSS_SITE_KEY = "{{ cross_site_key }}"
+    {% else %}
+        const CROSS_SITE_KEY = null;
     {% endif %}
     </script>
     <script src="{% static 'iframe_scripts/size_sender.js' %}"></script>
