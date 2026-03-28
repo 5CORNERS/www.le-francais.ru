@@ -67,6 +67,10 @@ COPY --from=builder --chown=1000:1000 /app /app/
 COPY --from=builder --chown=1000:1000 /tmp/ffmpeg/bin /app/ffmpeg/
 ENV PATH="$PATH:/app/ffmpeg"
 
+# Link Render runtime secret to the expected app location
+RUN ln -s /etc/secrets/le_francais.pem /app/le_francais.pem
+
+
 # Here we're switching to a non-root user in the container to remove some categories
 # of container-escape attack.
 USER 1000:1000
