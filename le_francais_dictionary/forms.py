@@ -49,7 +49,7 @@ class WordsManagementFilterForm(forms.Form):
 			widget=forms.HiddenInput
 		)
 
-		if cross_site is None and self.data['crossSiteKey'] is not None:
+		if cross_site is None and self.data.get('crossSiteKey', None) is not None:
 			cross_site = self.data['crossSiteKey']
 
 		# Selects user-specific packets based on authentication, payment status, and lesson access
