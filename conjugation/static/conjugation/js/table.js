@@ -4,7 +4,9 @@ let audio = undefined;
 let ua = window.navigator.userAgent;
 let iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
 let is_webkit = !!ua.match(/WebKit/i);
-let iOSSafari = iOS && is_webkit && !ua.match(/CriOS/i);
+let is_safari = ua.indexOf('Safari') !== -1 && ua.indexOf('Chrome') === -1;
+let is_ipad_os = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+let iOSSafari = iOS || is_ipad_os || is_safari;
 
 const NORMAL_CLASS = 'fa-volume-down';
 const LOADING_CLASS = 'fa-spinner fa-pulse';
@@ -43,7 +45,7 @@ function pollyListen(icon, key) {
 			}
 		)
 	} else {
-		audio = new Audio([polly[key]]);
+		audio = new Audio(polly[key]);
 		audio.attributes['data-key'] = key;
 		audio.addEventListener('play', function () {
 			changeClassTo(icon, SPEAKING_CLASS);
