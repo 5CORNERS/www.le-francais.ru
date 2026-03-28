@@ -1,4 +1,5 @@
 let deferredPrompt;
+let installPromptShown = false;
 let $searchVerb;
 
 if ('serviceWorker' in navigator) {
@@ -15,18 +16,23 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-var isTooSoon = true;
-window.addEventListener("beforeinstallprompt", function(e) {
+window.addEventListener('beforeinstallprompt', function (e) {
+  e.preventDefault();
   deferredPrompt = e;
-  if (isTooSoon) {
-    deferredPrompt.preventDefault(); // Prevents prompt display
-    // Prompt later instead:
-    setTimeout(function() {
-      isTooSoon = false;
-      deferredPrompt.prompt(); // Throws if called more than once or default not prevented
-    }, 10000);
-  }
 });
+
+function tryShowInstallPrompt() {
+  if (installPromptShown || !deferredPrompt) return;
+
+  installPromptShown = true;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.finally(() => {
+    deferredPrompt = null;
+  });
+}
+
+window.addEventListener('pointerdown', tryShowInstallPrompt, { once: true });
+window.addEventListener('keydown', tryShowInstallPrompt, { once: true });
 
 window.addEventListener('appinstalled', (evt) => {
   console.log('a2hs installed');
