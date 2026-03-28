@@ -2,6 +2,16 @@ let deferredPrompt;
 let installPromptShown = false;
 let $searchVerb;
 
+const INSTALL_PROMPT_STORAGE_KEY = 'conjugation_install_prompt_shown';
+
+function hasSeenInstallPrompt() {
+  return localStorage.getItem(INSTALL_PROMPT_STORAGE_KEY) === '1';
+}
+
+function markInstallPromptSeen() {
+  localStorage.setItem(INSTALL_PROMPT_STORAGE_KEY, '1');
+}
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('/static/conjugation/js/conjugation-sw.js', {
@@ -22,9 +32,11 @@ window.addEventListener('beforeinstallprompt', function (e) {
 });
 
 function tryShowInstallPrompt() {
-  if (installPromptShown || !deferredPrompt) return;
+  if (installPromptShown || !deferredPrompt || hasSeenInstallPrompt()) return;
 
   installPromptShown = true;
+  markInstallPromptSeen();
+
   deferredPrompt.prompt();
   deferredPrompt.userChoice.finally(() => {
     deferredPrompt = null;
