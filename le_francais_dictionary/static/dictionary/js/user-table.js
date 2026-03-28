@@ -9,8 +9,9 @@ let colorCodingEnabled = true;
 const isVerbs = function () {
     return tableType === "verbs"
 }
+
 const getCrossSiteKey = function () {
-    return CROSS_SITE_KEY || null
+    return typeof CROSS_SITE_KEY !== 'undefined' ? CROSS_SITE_KEY : null
 }
 
 function showDeleted(checked) {
