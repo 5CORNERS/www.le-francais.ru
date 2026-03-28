@@ -1,4 +1,4 @@
-const CACHE_NAME = 'le_francais-conjugation-cache-v31';
+const CACHE_NAME = 'le_francais-conjugation-cache-v32';
 const urlsMatchToCache = [
     '/static/conjugation/css/conjugation.min.css',
     '/static/conjugation/js/conjugation.min.js',
@@ -40,8 +40,10 @@ self.addEventListener('activate', event => {
 });
 
 const putInCache = async (request, response) => {
-  const cache = await caches.open(CACHE_NAME);
-  await cache.put(request, response);
+    if (request.method === 'GET') {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, response);
+    }
 };
 
 const fetchRequest = async ({ request }) => {
