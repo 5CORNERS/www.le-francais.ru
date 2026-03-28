@@ -1,0 +1,482 @@
+Country,City,Count
+Algeria,,1
+Argentina,Buenos Aires,1
+Armenia,Hrazdan,1
+Armenia,Yerevan,3
+Australia,Sydney,1
+Austria,Vienna,1
+Austria,,1
+Azerbaijan,Baku,1
+Azerbaijan,,1
+Bahrain,Manama,1
+Belarus,Borovlyany,1
+Belarus,Brest,4
+Belarus,Gomel,4
+Belarus,Homyel,4
+Belarus,Hrodna,1
+Belarus,Ivanovo,1
+Belarus,Minsk,22
+Belarus,Navapolatsk,1
+Belarus,,1
+Belgium,Andenne,1
+Belgium,Anderlecht,1
+Belgium,Antwerp,1
+Belgium,Brussels,7
+Belgium,Ixelles-Elsene,1
+Belgium,Juprelle,1
+Belgium,Liège,5
+Belgium,Mechelen,1
+Belgium,Mons,1
+Belgium,Ranst,1
+Belgium,Tervuren,1
+Belgium,Wetteren,1
+Bulgaria,Nikopol,1
+Bulgaria,Sofia,2
+Bulgaria,Varna,2
+Canada,Aurora,1
+Canada,Brampton,1
+Canada,Burnaby,1
+Canada,Calgary,1
+Canada,Chicoutimi,1
+Canada,Greater Sudbury,1
+Canada,Montreal,11
+Canada,North York,1
+Canada,Québec,1
+Canada,Rimouski,1
+Canada,Saint-Bruno-de-Montarville,1
+Canada,Saint-Georges-de-Windsor,1
+Canada,Saint-Laurent,1
+Canada,Sherbrooke,1
+Canada,Thornhill,1
+Canada,Toronto,4
+Canada,Whitehorse,1
+Cuba,Havana,1
+Cyprus,Paralimni,1
+Czechia,Prague,6
+Czechia,Rybare,1
+Czechia,,1
+Denmark,Copenhagen,3
+DR Congo,Kinshasa,1
+Estonia,Tallinn,3
+Estonia,,1
+Finland,Helsinki,12
+Finland,,2
+France,Aix-en-Provence,1
+France,Ajaccio,1
+France,Alençon,1
+France,Ancenis,1
+France,Andrezel,1
+France,Andrezieux-Boutheon,1
+France,Angresse,1
+France,Annecy,1
+France,Ardin,1
+France,Balma,1
+France,Besançon,1
+France,Béziers,1
+France,Bischheim,1
+France,Boissy-Saint-Léger,1
+France,Bonchamp-lès-Laval,1
+France,Bordeaux,1
+France,Bourges,1
+France,Bourgoin-Jallieu,1
+France,Bram,1
+France,Cachan,1
+France,Caen,1
+France,Cagnes-sur-Mer,1
+France,Cagny,1
+France,Cannes,2
+France,Cergy,1
+France,Chambéry,2
+France,Clamart,1
+France,Cluses,1
+France,Cogolin,1
+France,Colmar,1
+France,Colombes,2
+France,Creil,1
+France,Darnétal,1
+France,Dijon,1
+France,Épinay-sur-Seine,1
+France,Étampes,1
+France,Fontainebleau,2
+France,Garches,1
+France,Genilac,1
+France,Grambois,1
+France,Grasse,1
+France,Grenoble,1
+France,Hayange,1
+France,Hegenheim,1
+France,Hyères,1
+France,Illkirch-Graffenstaden,1
+France,Ingre,1
+France,Jouars-Pontchartrain,1
+France,Le Perreux-sur-Marne,1
+France,Lille,3
+France,Limoges,2
+France,L'Isle-d'Abeau,1
+France,Lyon,7
+France,Maisons-Alfort,1
+France,Mangiennes,1
+France,Marseille,7
+France,Massy,1
+France,Meyzieu,1
+France,Mirande,1
+France,Nancy,1
+France,Nantes,3
+France,Nice,4
+France,Nîmes,3
+France,Opio,1
+France,Orléans,1
+France,Orly,2
+France,Paris,24
+France,Pars-les-Romilly,1
+France,Pars-lès-Romilly,1
+France,Pessac,1
+France,Pessac-sur-Dordogne,1
+France,Pineuilh,1
+France,Ploërmel,1
+France,Plouzané,1
+France,Pouzauges,1
+France,Reims,2
+France,Rennes,1
+France,Rivesaltes,1
+France,Rohrbach-les-Bitche,1
+France,Roquefort-les-Pins,1
+France,Saint-Astier,1
+France,Sainte-Foy-les-Lyon,1
+France,Saint-Etienne-de-Valoux,1
+France,Saint-Genis-Pouilly,1
+France,Saint-Germain-en-Laye,1
+France,Saint-Julien-en-Genevois,1
+France,Saint-Martin-d'Hères,1
+France,Saint-Maur-des-Fossés,1
+France,Saint-Raphaël,1
+France,Saint-Sébastien-de-Morsent,1
+France,Sannois,1
+France,Sarcelles,1
+France,Semeac,1
+France,Sérent,1
+France,Sevrier,1
+France,Strasbourg,2
+France,Sucy-en-Brie,1
+France,Toulon,1
+France,Toulouse,4
+France,Valenciennes,1
+France,Verdun,1
+France,Verson,1
+France,Vif,1
+France,Villeneuve-Loubet,1
+France,Villeurbanne,1
+France,,42
+Georgia,Gverdisubani,1
+Georgia,K'alak'i T'bilisi,2
+Georgia,Tbilisi,5
+Germany,Berlin,4
+Germany,Braunschweig,1
+Germany,Cologne,1
+Germany,Dortmund,1
+Germany,Frankfurt am Main,7
+Germany,Güglingen,1
+Germany,Heidelberg,2
+Germany,Homburg,1
+Germany,Karlsruhe,2
+Germany,Kassel,1
+Germany,Lübeck,1
+Germany,Mannheim,1
+Germany,Munich,3
+Germany,Salzgitter,1
+Germany,Schramberg,1
+Germany,Soltau,1
+Germany,Stralsund,1
+Germany,Stuttgart,1
+Germany,,7
+Gibraltar,,1
+Guinea,,1
+India,Bengaluru,1
+India,Roorkee,1
+Indonesia,Denpasar,1
+Israel,Giv‘atayim,1
+Israel,Jerusalem,1
+Israel,Nesher,1
+Israel,Petah Tikva,1
+Israel,Tel Aviv,3
+Israel,,2
+Italy,Andria,1
+Italy,Bassano del Grappa,1
+Italy,Milan,2
+Italy,Novara,1
+Italy,Padova,1
+Italy,Padua,1
+Italy,Todi,1
+Italy,,3
+Japan,Tokyo,2
+Japan,,2
+Jordan,Amman,1
+Kazakhstan,Aktau,1
+Kazakhstan,Almaty,12
+Kazakhstan,Astana,3
+Kazakhstan,Atyrau,2
+Kazakhstan,Kokshetau,1
+Kazakhstan,Kostanay,1
+Kazakhstan,Kyzylorda,1
+Kazakhstan,Pavlodar,1
+Kuwait,Kuwait City,1
+Kyrgyzstan,Bishkek,2
+Kyrgyzstan,,1
+Latvia,Riga,4
+Libya,,1
+Lithuania,Birštonas,1
+Lithuania,Palanga,1
+Lithuania,Traksėdžiai,1
+Lithuania,Vilnius,4
+Lithuania,,4
+Luxembourg,Luxembourg,2
+Luxembourg,,5
+Malaysia,Kajang,1
+Malaysia,Kuala Lumpur,1
+Moldova,Bălţi,1
+Moldova,Chisinau,7
+Moldova,Orhei,1
+Moldova,,1
+Montenegro,Podgorica,2
+Morocco,Casablanca,1
+Morocco,Fes,1
+Morocco,Tétouan,1
+Morocco,,1
+Netherlands,Almere Stad,2
+Netherlands,Amsterdam,6
+Netherlands,,1
+Norway,Oslo,1
+Norway,Sandefjord,2
+Poland,Katowice,1
+Poland,Labiszyn,1
+Poland,Poznan,1
+Poland,Warsaw,4
+Portugal,Lisbon,1
+Réunion,,1
+Romania,Galati,1
+Romania,Iasi,1
+Romania,,1
+Russia,Aleksandrov,1
+Russia,Angarsk,1
+Russia,Arzamas,1
+Russia,Asbest,1
+Russia,Astrakhan,2
+Russia,Azov,1
+Russia,Balashikha,2
+Russia,Barnaul,2
+Russia,Belebey,1
+Russia,Belgorod,3
+Russia,Belorechensk,1
+Russia,Bogatyye Saby,1
+Russia,Bronnitsy,1
+Russia,Bryansk,4
+Russia,Bugry,1
+Russia,Cheboksary,1
+Russia,Chelyabinsk,17
+Russia,Cherepovets,1
+Russia,Chusovoy,1
+Russia,Dolgoprudny,1
+Russia,Domodedovo,2
+Russia,Dzerzhinsk,2
+Russia,Fokino,1
+Russia,Fryanovo,2
+Russia,Gatchina,3
+Russia,Gelendzhik,1
+Russia,Irkutsk,2
+Russia,Ivanovo,6
+Russia,Izhevsk,2
+Russia,Kaliningrad,6
+Russia,Kaluga,2
+Russia,Kazan',8
+Russia,Kazan’,4
+Russia,Kemerovo,3
+Russia,Khabarovsk,6
+Russia,Kingisepp,1
+Russia,Kirov,1
+Russia,Kirzhach,1
+Russia,Kiselëvsk,1
+Russia,Klimovsk,1
+Russia,Knyazhaya Baygora,1
+Russia,Kogalym,1
+Russia,Kondratovo,1
+Russia,Korenovsk,1
+Russia,Korolyov,1
+Russia,Kostroma,1
+Russia,Krasnodar,20
+Russia,Krasnoyarsk,9
+Russia,Kronstadt,1
+Russia,Kstovo,1
+Russia,Kudrovo,1
+Russia,Kursk,2
+Russia,Kyzyl,1
+Russia,Leninogorsk,1
+Russia,Lesnoy,1
+Russia,Lipetsk,2
+Russia,Lyubertsy,1
+Russia,Magadan,1
+Russia,Magnitogorsk,1
+Russia,Makhachkala,3
+Russia,Moscow,280
+Russia,Moscow Oblast,3
+Russia,Mozhaysk,1
+Russia,Murino,1
+Russia,Mytishchi,2
+Russia,Naberezhnyye Chelny,1
+Russia,Nal'chik,1
+Russia,Nikolayevka,1
+Russia,Nizhnekamsk,1
+Russia,Nizhniy Novgorod,17
+Russia,Nizhnyaya Tura,1
+Russia,Nizhny Tagil,2
+Russia,Noginsk,2
+Russia,Novocherkassk,1
+Russia,Novomoskovsk,1
+Russia,Novosibirsk,16
+Russia,Novy Urengoy,1
+Russia,Obninsk,1
+Russia,Odintsovo,1
+Russia,Omsk,3
+Russia,Orenburg,2
+Russia,Penza,1
+Russia,Pereslavl'-Zalesskiy,1
+Russia,Perm,5
+Russia,Petrozavodsk,3
+Russia,Podolsk,1
+Russia,Pokachi,1
+Russia,Pskov,3
+Russia,Pushchino,1
+Russia,Ramenskoye,3
+Russia,Rezh,1
+Russia,Rostov-on-Don,9
+Russia,Ryazan,2
+Russia,Samara,9
+Russia,Saprykino,1
+Russia,Saratov,6
+Russia,Serpukhov,3
+Russia,Smolensk,6
+Russia,Solnechnogorsk,1
+Russia,Stavropol,7
+Russia,St Petersburg,130
+Russia,Stroitel',1
+Russia,Surgut,2
+Russia,Svetogorsk,1
+Russia,Taganrog,1
+Russia,Tambov,1
+Russia,Tolyatti,2
+Russia,Tomsk,3
+Russia,Tsarskoye Selo,1
+Russia,Tula,7
+Russia,Tver,4
+Russia,Tyumen,4
+Russia,Udomlya,1
+Russia,Ufa,5
+Russia,Uglich,1
+Russia,Ulan-Ude,1
+Russia,Ulyanovsk,1
+Russia,Veliky Novgorod,1
+Russia,Verkhnyaya Pyshma,1
+Russia,Vidnoye,1
+Russia,Vladikavkaz,2
+Russia,Vladimir,2
+Russia,Vladivostok,6
+Russia,Vlasikha,1
+Russia,Volgograd,3
+Russia,Vologda,1
+Russia,Volzhsky,1
+Russia,Voronezh,6
+Russia,Vyborg,2
+Russia,Vytegra,1
+Russia,Yakutsk,1
+Russia,Yaroslavl,2
+Russia,Yegor'yevsk,1
+Russia,Yekaterinburg,13
+Russia,Yelabuga,2
+Russia,Yoshkar-Ola,1
+Russia,Yuzhno-Sakhalinsk,2
+Russia,Zavolzh'ye,1
+Russia,Zheleznogorsk,1
+Russia,,151
+Saudi Arabia,Dammam,1
+Serbia,Belgrade,4
+Seychelles,,1
+South Korea,Gunpo,1
+South Korea,Jongno-gu,1
+South Korea,Seoul,1
+South Korea,,1
+Spain,Badalona,1
+Spain,Barcelona,1
+Spain,Madrid,3
+Spain,Port de Sagunt,1
+Spain,Saron,1
+Spain,,2
+Sweden,Stockholm,1
+Switzerland,Basel,1
+Switzerland,Châtel-Saint-Denis,1
+Switzerland,Chenens,1
+Switzerland,Clarens,1
+Switzerland,Geneva,1
+Switzerland,Lausanne,3
+Switzerland,Le Vaud,1
+Switzerland,Montreux,1
+Switzerland,Onex,1
+Switzerland,Schlieren,3
+Switzerland,Vernier,1
+Switzerland,Zollikerberg,1
+Switzerland,Zurich,3
+Switzerland,,1
+Tajikistan,Dushanbe,1
+Thailand,Bangkok,2
+The Netherlands,Amsterdam,8
+The Netherlands,Dronten,2
+The Netherlands,Eindhoven,1
+The Netherlands,Naaldwijk,1
+The Netherlands,The Hague,1
+The Netherlands,,4
+Türkiye,Adana,1
+Türkiye,Antalya,1
+Ukraine,Desna,1
+Ukraine,Dnipro,1
+Ukraine,Fastiv,1
+Ukraine,Ivano-Frankivsk,2
+Ukraine,Kharkiv,2
+Ukraine,Kyiv,9
+Ukraine,Liuboml,1
+Ukraine,Lutsk,2
+Ukraine,Lviv,1
+Ukraine,Makiivka,1
+Ukraine,Melitopol,1
+Ukraine,Mykolayiv,1
+Ukraine,Odesa,5
+Ukraine,Poltava,1
+Ukraine,Rava-Ruska,1
+Ukraine,Sevastopol,5
+Ukraine,Svaliavka,2
+Ukraine,Vinnytsia,1
+Ukraine,Yalta,1
+Ukraine,Zaporizhzhia,1
+Ukraine,,5
+United Arab Emirates,Abu Dhabi,1
+United Arab Emirates,Dubai,4
+United Kingdom,Bolton,1
+United Kingdom,Bristol,1
+United Kingdom,Bromsgrove,1
+United Kingdom,Lewisham,1
+United Kingdom,London,3
+United Kingdom,Plymouth,1
+United Kingdom,Slough,1
+United Kingdom,,1
+United States,Amherst,1
+United States,Atlanta,1
+United States,Austin,1
+United States,Brooklyn,2
+United States,Honolulu,1
+United States,Hyattsville,1
+United States,Las Vegas,1
+United States,McKinney,1
+United States,New York,3
+United States,Santa Clara,1
+United States,Secaucus,1
+United States,Staten Island,1
+United States,,3
+Uzbekistan,Tashkent,1
+,,1304

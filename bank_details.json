@@ -1,0 +1,22 @@
+{
+  "default": {
+    "beneficiary": "Viktoriia Dumova",
+    "iban": "NL68 REVO 9440 6992 56",
+    "bic": "REVONL22",
+    "bank": "Revolut Bank UAB",
+    "bank_address": "Barbara Strozzilaan 201, 1083 HN, Amsterdam, Netherlands",
+    "nickname": "vikadumova"
+  },
+  "EUR": {
+    "correspondent_bic": "CHASDEFX"
+  },
+  "CAD": {
+    "correspondent_bic": "BARCGB22"
+  },
+  "CHF": {
+    "correspondent_bic": "CHASGB2L"
+  },
+  "USD": {
+    "correspondent_bic": "CHASGB2L"
+  }
+}

@@ -1,0 +1,25 @@
+{% block all %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+{% block head %}
+    <meta charset="UTF-8">
+    <title>{% block titile %}{{ subject }}{% endblock %}</title>
+    <link rel="apple-touch-icon" sizes="180x180"
+          href="//{{ domain }}{% url 'favicon:apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32"
+          href="//{{ domain }}{% url 'favicon:favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="194x194"
+          href="//{{ domain }}{% url 'favicon:favicon-194x194.png' %}">
+    <link rel="icon" type="image/png" sizes="192x192"
+          href="//{{ domain }}{% url 'favicon:android-chrome-192x192.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16"
+          href="//{{ domain }}{% url 'favicon:favicon-16x16.png' %}">
+{% endblock %}
+</head>
+<body>
+{% block body %}
+{% endblock %}
+</body>
+</html>
+{% endblock %}
