@@ -33,3 +33,4 @@ GeoIP.conf
 /..bfg-report/
 /static_src/package-lock.json
 /ffmpeg/
+/le_francais.pem

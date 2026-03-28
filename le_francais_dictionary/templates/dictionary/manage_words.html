@@ -64,6 +64,11 @@
                             <option value="{{ choice.0 }}" data-content="{{ choice.1 }}"></option>
                         {% endfor %}
                     </select>
+                    <select name="{{ form.crossSiteKey.html_name }}" id="{{ form.crossSiteKey.auto_id }}" type="hidden" style="display: none">
+                        {% for choice in form.fields.crossSiteKey.choices %}
+                            <option value="{{ choice.0 }}"{% if choice.0 == init_cross_site %} selected{% endif %}>{{ choice.1 }}</option>
+                        {% endfor %}
+                    </select>
                     {% csrf_token %}
                     <button type="submit" class="btn btn-primary mb-2 mr-sm-2 get-list-button">Получить<span class="text-medium"> слова</span><span class="text-large"> список слов</span></button>
                 <button class="btn btn-info mb-2 ml-lg-auto text-truncate" id="getAndApplyFilters">Повторить последнюю выборку</button>

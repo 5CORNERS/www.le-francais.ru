@@ -1,0 +1,9 @@
+{% extends 'dictionary/manage_words_standalone.html' %}
+{% load static %}
+{% block extra_js %}
+    {{ block.super }}
+    <script>
+    const COURSES_BASE_URL = "{{ COURSES_BASE_URL }}"
+    </script>
+
+{% endblock %}

@@ -25,6 +25,6 @@ WHITENOISE_ADD_HEADERS_FUNCTION = add_header_service_worker_allowed
 SESSION_COOKIE_DOMAIN = None
 
 try:
-	from .local import *
+    from .local import *
 except ImportError:
-	pass
+    pass

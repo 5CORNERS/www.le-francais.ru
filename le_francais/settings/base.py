@@ -627,3 +627,9 @@ GEOIP_COUNTRY=os.getenv('GEOIP_GEOLITE2_COUNTRY_FILENAME')
 DICTIONARY_CROSS_SITE_KEYS = {
     os.getenv('COURSES_FLASHCARDS_KEY'): 'courses'
 }
+CROSS_SITE_KEYS_DOMAINS = {
+    'courses': 'courses.le-francais.ru'
+}
+
+COURSES_BASE_URL = 'https://courses.le-francais.ru'
+COURSES_FETCH_PACKETS_PATH = '/flashcards/api/{0}/packets/'

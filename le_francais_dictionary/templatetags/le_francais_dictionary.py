@@ -84,6 +84,7 @@ def type_name(t):
 
 @register.simple_tag
 def iframe_height(c):
+    """Computes iframe height from capped content dimension"""
     if isinstance(c, int):
         if c > 50:
             c = 50

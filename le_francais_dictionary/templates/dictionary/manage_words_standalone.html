@@ -10,7 +10,13 @@
             src="{% static 'dictionary/js/user-table-standalone.min.js' %}"></script>
     <script>
     const USER_IS_AUTHENTICATED = {{ request.user.is_authenticated|yesno:"true;,false;" }}
+    {% if cross_site_key %}
+        const COURSES_BASE_URL = "{{ COURSES_BASE_URL }}"
+        const CROSS_SITE_KEY = "{{ cross_site_key }}"
+    {% endif %}
     </script>
+    <script src="{% static 'iframe_scripts/size_sender.js' %}"></script>
+    <script src="{% static 'iframe_scripts/theme_listener.js' %}"></script>
 {% endblock %}
 {% block extra_css %}
     {{ block.super }}

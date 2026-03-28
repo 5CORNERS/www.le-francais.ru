@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django import forms
+from django.conf import settings
 from django.db.models import Q, F, Case, When
 from typing import List
 
@@ -9,6 +10,7 @@ from le_francais_dictionary.models import Packet, UserWordRepetition, \
 	UserWordData, UserWordIgnore, WordTranslation, WordGroup, \
 	prefetch_words_data, get_repetition_words_query, VerbPacket, Verb, \
 	VerbPacketRelation
+from .courses_client import get_courses_packets
 
 from .sm2 import sm2_ef_q_mq
 
@@ -36,20 +38,36 @@ def row(name, o, p_value, p_sort_value=None, p_filter_value=None):
 
 class WordsManagementFilterForm(forms.Form):
 
-	def __init__(self, user, *args, **kwargs):
+	def __init__(self, user, cross_site=None, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.user=user
-		if self.user.is_authenticated and not self.user.must_pay:
-			self.packets = Packet.objects.all()
-		elif self.user.is_authenticated and self.user.has_lessons:
-			self.packets = Packet.objects.filter(Q(demo=True) | Q(
-				lesson__payment__user=user)).distinct()
-		elif self.user.is_authenticated:
-			self.packets = Packet.objects.filter(Q(demo=True) | Q(
-					lesson__payment__user=user)).distinct()
+		self.cross_site=cross_site
+
+		self.fields['crossSiteKey'] = forms.ChoiceField(
+			required=False,
+			choices=[(key, domain) for key, domain in settings.CROSS_SITE_KEYS_DOMAINS.items()],
+			widget=forms.HiddenInput
+		)
+
+		if cross_site is None and self.data['crossSiteKey'] is not None:
+			cross_site = self.data['crossSiteKey']
+
+		# Selects user-specific packets based on authentication, payment status, and lesson access
+		if cross_site is not None:
+			# check with courses what packets available to the user
+			self.packets = Packet.objects.filter(pk__in=get_courses_packets(user.pk, settings.CROSS_SITE_KEYS_DOMAINS[cross_site]))
 		else:
-			self.packets = Packet.objects.filter(demo=True).distinct()
-		self.packets = self.packets.exclude(cross_site_available=True)
+			if self.user.is_authenticated and not self.user.must_pay:
+				self.packets = Packet.objects.all()
+			elif self.user.is_authenticated and self.user.has_lessons:
+				self.packets = Packet.objects.filter(Q(demo=True) | Q(
+					lesson__payment__user=user)).distinct()
+			elif self.user.is_authenticated:
+				self.packets = Packet.objects.filter(Q(demo=True) | Q(
+						lesson__payment__user=user)).distinct()
+			else:
+				self.packets = Packet.objects.filter(demo=True).distinct()
+			self.packets = self.packets.exclude(cross_site_available=True)
 		choices = [(o.id, str(o.name)) for o in self.packets]
 		# TODO: has_repetition_words method
 		if self.user.is_authenticated and get_repetition_words_query(self.user, filter_excluded=False).count() > 0:
@@ -84,8 +102,13 @@ class WordsManagementFilterForm(forms.Form):
 				words = repetition_words + packet_words
 				words = list(dict.fromkeys(words))
 			else:
-				query = Word.objects.filter(packet_id__in=data['packets'])
-				words = list(query.distinct())
+				if self.cross_site is None:
+					query = Word.objects.filter(packet_id__in=data['packets'])
+					words = list(query.distinct())
+				else:
+					...
+					# check with courses what packets available to the user
+
 			# time = datetime.now()
 			words = prefetch_words_data(words, self.user)
 			result = dict(

@@ -6,6 +6,7 @@ from typing import List
 from urllib.parse import urlencode
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
@@ -34,6 +35,8 @@ from .models import Word, Packet, UserPacket, \
     DictionaryError, verb_to_packet_relations_to_dict, WordTranslation, Partner
 from . import consts
 from home.models import UserLesson
+
+User = get_user_model()
 
 
 # TODO: write get_calendar function
@@ -513,7 +516,7 @@ def get_app(request, packet_id):
 
 class ManageWords(View):
     def post(self, request):
-        form = WordsManagementFilterForm(request.user, request.POST)
+        form = WordsManagementFilterForm(request.user, None, request.POST)
         table = form.table_dict()
         table_html = render_to_string('dictionary/words_table.html',
                                       {'table': table}, request)
@@ -527,7 +530,7 @@ class ManageWords(View):
     @method_decorator(login_required)
     def get(self, request):
         # TODO: podcasts support
-        form = WordsManagementFilterForm(request.user)
+        form = WordsManagementFilterForm(request.user, cross_site=request.POST.get('ck', None))
         init_packets = None
         init_lesson = request.GET.get('lesson', None)
         init_packet = request.GET.get('lesson_pk', None)
@@ -558,7 +561,9 @@ class ManageWords(View):
         return render(request, 'dictionary/manage_words.html',
                       {'form': form, 'table': table,
                        'star_choices': STAR_CHOICES,
-                       'init_packets': init_packets})
+                       'init_packets': init_packets,
+                       'init_cross_site': request.POST.get('ck', None)
+                       })
 
 
 class ManageVerbs(View):
@@ -672,7 +677,11 @@ def get_repetition_words_count(request):
             'count': 0
         }
     else:
-        words = get_repetition_words_query(request.user)
+        words = Word.objects.filter(
+            userwordrepetition__repetition_datetime__lte=timezone.now(),
+            userwordrepetition__user=request.user,
+            userwordrepetition__time__lt=5
+        ).exclude(userwordignore__user=request.user).values('cd_id').distinct()
         result = {
             'count': words.count()
         }
@@ -703,15 +712,27 @@ def save_filters(request):
 
 def manage_words_standalone(request, lesson_number):
     star_choices = STAR_CHOICES
-    form = WordsManagementFilterForm(request.user)
     init_lesson = int(lesson_number)
-    init_packets = Packet.objects.filter(
-        lesson__lesson_number=init_lesson).values_list(
-        'pk', flat=True)
+    if init_lesson != 0:
+        init_packets = Packet.objects.filter(
+            lesson__lesson_number=init_lesson).values_list(
+            'pk', flat=True)
+        cross_site_key = None
+    else:
+        packets_ids = map(lambda x: int(x), request.GET.getlist('p'))
+        cross_site_key = request.GET.get('ck', None)
+        init_packets = Packet.objects.filter(pk__in=packets_ids).values_list(
+            'pk', flat=True)
+        if not init_packets:
+            init_packets = None
+    form = WordsManagementFilterForm(request.user, cross_site=cross_site_key)
     return render(request, 'dictionary/manage_words_standalone.html',
                   {'form': form, 'table': form.table_dict(),
                    'star_choices': star_choices,
-                   'init_packets': init_packets})
+                   'init_packets': init_packets,
+                   'cross_site_key': cross_site_key,
+                   'init_cross_site': cross_site_key,
+                   })
 
 
 def open_verbs_iframe(request, packet_id):
@@ -1074,3 +1095,76 @@ def delete_cross_site_words(request, packet_id):
             word.is_archived = True
             word.save(update_fields=['is_archived'])
     return JsonResponse(dict(success=True, **result))
+
+
+class GetUserCrossSiteData(View):
+    def get(self, request):
+        data = request.json_data
+
+        obj_type = data.get('type', None)
+        if obj_type is None:
+            return JsonResponse({'success': False, 'message': f'Missing parameter \'type\''})
+        obj_ids = data.get('ids', [])
+
+        if obj_type == 'packet':
+            if data['ids']:
+                packets = Packet.objects.filter(pk__in=obj_ids, cross_site_name=request.cross_site_name)
+            else:
+                packets = Packet.objects.filter(cross_site_name=request.cross_site_name)
+            result = [packet.to_dict(request.user) for packet in packets]
+        elif obj_type == 'words':
+            words = Word.objects.filter(pk__in=obj_ids)
+            result = [word.to_dict(user=request.user) for word in words]
+        else:
+            return JsonResponse({
+                'success': False, 'message': f"No such data type: {obj_type}"
+            }, status=400)
+
+        return JsonResponse({
+            'success': True, 'data': result
+        }, status=200)
+
+    def post(self, request):
+        data = request.json_data
+        action = data.get('action', None)
+        if action is None:
+            return JsonResponse({'success': False, 'message': f'Missing parameter: \'action\''})
+
+        if action == 'store_user_packet':
+            word_ids = data['ids']
+            words_ids = Word.objects.filter(pk__in=word_ids, packet__cross_site_name=request.cross_site_name).values_list('cd_id', flat=True)
+            UserStandalonePacket.objects.update(filters=None, words=words_ids)
+            return JsonResponse({'success': True, 'data': words_ids})
+        else:
+            return JsonResponse({
+                'success': False, 'message': f'No sauch action type: \'{action}\''
+            }, status=400)
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            request.json_data = json.loads(request.body)
+        except (JSONDecodeError, ValueError):
+            return JsonResponse(
+                {'success': False, 'message': 'Invalid JSON'},
+                status=400
+            )
+        except AttributeError:
+            return JsonResponse(
+                {'success': False, 'message': 'No JSON data provided'},
+                status=400
+            )
+
+        key = request.json_data.get('key')
+        if not key or key not in settings.DICTIONARY_CROSS_SITE_KEYS.keys():
+            return JsonResponse({'success': False, 'message': 'Wrong key'}, status=403)
+        request.cross_site_name = settings.DICTIONARY_CROSS_SITE_KEYS.get(key)
+        user_id = request.json_data.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': 'Missing user_id'}, status=400)
+        try:
+            request.user = User.objects.get(pk=request.json_data['user_id'])
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'message': f'User with id {request.json_data["user_id"]} does not exist'}, status=404)
+
+        return super().dispatch(request, *args, **kwargs)

@@ -29,6 +29,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 SESSION_COOKIE_DOMAIN = '.le-francais.ru'
 
 try:
-	from .local import *
+    from .local import *
 except ImportError:
-	pass
+    pass
+

@@ -9,6 +9,9 @@ let colorCodingEnabled = true;
 const isVerbs = function () {
     return tableType === "verbs"
 }
+const getCrossSiteKey = function () {
+    return CROSS_SITE_KEY || null
+}
 
 function showDeleted(checked) {
     if (checked) {
@@ -328,11 +331,14 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
     let form = $('#filterWordsForm');
     let url;
     url = isVerbs() ? Urls['dictionary:my_verbs']() : Urls['dictionary:my_words']();
+    let data = form.serializeArray();
+    let key = getCrossSiteKey();
+    data.push({ name: 'crossSiteKey', value: key ? getCrossSiteKey() : "" });
 
     $.ajax(url, {
         type: 'POST',
         dataType: 'json',
-        data: form.serialize(),
+        data: $.param(data),
         success: function (r) {
             $table.html(r.table);
             if (dt !== undefined) {
