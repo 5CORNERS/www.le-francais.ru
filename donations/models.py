@@ -61,6 +61,12 @@ class Donation(models.Model):
                 amount += child.amount / 100
         return amount
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.user is not None:
+            self.user.has_donated = True
+            self.user.save(update_fields=['has_donated'])
+
     def send_email_notification(self):
         if self.user is not None:
             user = self.user

@@ -112,6 +112,18 @@ class User(AbstractUser):
 		default=False, editable=True,
 		verbose_name='Статус пенсионера/студента')
 
+	has_donated = models.BooleanField(
+		default=False, editable=True, verbose_name='has donated'
+	)
+
+	def check_has_donated(self):
+		if self.donation_set.exists():
+			self.has_donated = True
+			self.save(update_fields=['has_donated'])
+			return True
+		else:
+			return False
+
 	country_name = models.CharField(max_length=2000, default=None, null=True, blank=True)
 	country_code = models.CharField(max_length=2000, default=None, null=True, blank=True)
 	city = models.CharField(max_length=2000, default=None, null=True, blank=True)

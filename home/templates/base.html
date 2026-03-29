@@ -27,7 +27,7 @@
     })(window, document, 'script', 'dataLayer', 'GTM-WC2Q4XT');</script>
     <!-- End Google Tag Manager -->
 
-{% if request.user.is_superuser or not request.user.is_authenticated or not request.user.donation_set.exists %}
+{% if request.user.is_superuser or not request.user.is_authenticated or not request.user.has_donated %}
     {% if not is_gpt_disabled %}
         <!-- Google Publisher Tag -->
         <script id="googleTagServicesScript" async="async" src="https://www.googletagservices.com/tag/js/gpt.js"></script>
