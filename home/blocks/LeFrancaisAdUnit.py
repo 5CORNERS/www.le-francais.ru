@@ -5,7 +5,7 @@ from ads.utils import parsed_media_query_to_str
 
 def get_placements():
     from ads.models import Placement
-    return [(placement.code, placement.name) for placement in Placement.objects.all()]
+    return list(Placement.objects.values_list('code', 'name'))
 
 class AdUnitSizeBlock(blocks.StructBlock):
     type = blocks.ChoiceBlock(choices=[
@@ -34,7 +34,7 @@ class AdUnitSizeBlockAdvanced(blocks.StructBlock):
 
 class LeFrancaisAdUnitBlock(blocks.StructBlock):
     ad_unit_name = blocks.CharBlock()
-    placements = blocks.ListBlock(blocks.ChoiceBlock(choices=get_placements()), required=False, default=[])
+    placements = blocks.ListBlock(blocks.ChoiceBlock(choices=get_placements), required=False, default=[])
     utm_source = blocks.CharBlock()
     floating_image = blocks.ChoiceBlock(choices=[
         ('left', 'Left'), ('center', 'Center'), ('right', 'Right')
