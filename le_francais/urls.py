@@ -68,6 +68,7 @@ urlpatterns = [
 
     url(r'^import/', include(site_import_urls)),
     url(r'^api/', include(api_urls, namespace='api')),
+    url(r'^api/auth/', include('custom_user.api_urls')),
     url(r'^api/', include(service_urls)),
     url(r'^api/', include(notifications_api_urls, namespace='notifications')),
     url(r'^modal/', include(modal_urls, namespace='modal')),
