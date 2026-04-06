@@ -34,3 +34,4 @@ GeoIP.conf
 /static_src/package-lock.json
 /ffmpeg/
 le_francais.pem
+courses_public.pem
