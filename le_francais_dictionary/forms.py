@@ -1,18 +1,12 @@
-from datetime import datetime
-
 from django import forms
 from django.conf import settings
-from django.db.models import Q, F, Case, When
+from django.db.models import Q
 from typing import List
 
-from le_francais_dictionary.models import Packet, UserWordRepetition, \
-	Word, \
-	UserWordData, UserWordIgnore, WordTranslation, WordGroup, \
+from le_francais_dictionary.models import Packet, Word, \
 	prefetch_words_data, get_repetition_words_query, VerbPacket, Verb, \
 	VerbPacketRelation
-from .courses_client import get_courses_packets
-
-from .sm2 import sm2_ef_q_mq
+from le_francais.courses_client import get_courses_packets
 
 
 class DictionaryCsvImportForm(forms.Form):
