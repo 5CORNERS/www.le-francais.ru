@@ -19,8 +19,8 @@ from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls, \
     activate_urls, meta_urls, service_urls, urlpatterns as home_urls, \
     favicon_urls
 from home.urls import modal_urls
-from home.views import MovePostView, AorAddPostView, AorEditPostView, \
-    AorTopicView, move_post_processing, favicon, activation_log
+from custom_user.views import MovePostView, AorAddPostView, AorEditPostView, \
+    AorTopicView, move_post_processing, favicon, activation_log, logout_view
 from home.views import change_username, \
     LeFrancaisWagtailSitemap as WagtailSitemap
 from notifications import urls as notifications_api_urls
@@ -80,6 +80,7 @@ urlpatterns = [
     url(r'^coffee/', include(coffee_urls, namespace='coffee')),
     url(r'^activate/', include(activate_urls, namespace='activate')),
 
+    url(r'^accounts/logout/$', logout_view, name='account_logout'),
     url(r'^accounts/', include('custom_user.urls', namespace='custom_user')),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^accounts/username/change/$', change_username, name='account_change_username'),

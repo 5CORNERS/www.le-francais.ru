@@ -113,6 +113,27 @@ class ForceLogin(View):
             return render(request, 'custom_user/admin/force_login.html', {'form': form})
 
 
+from allauth.account.views import LogoutView
+from django.contrib.auth import logout as auth_logout
+
+
+class CustomLogoutView(LogoutView):
+    def get(self, *args, **kwargs):
+        if self.request.GET.get('silent') == '1':
+            auth_logout(self.request)
+            return render(self.request, 'account/silent_logout.html')
+        return super(CustomLogoutView, self).get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        if self.request.GET.get('silent') == '1':
+            auth_logout(self.request)
+            return render(self.request, 'account/silent_logout.html')
+        return super(CustomLogoutView, self).post(*args, **kwargs)
+
+
+logout_view = CustomLogoutView.as_view()
+
+
 def update_timezone(request):
     if request.user.is_authenticated:
 	    request.user.timezone = request.body.decode()

@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <script>
+        // Notify the parent window (courses site) that logout is complete
+        window.parent.postMessage('logged_out', 'https://courses.le-francais.ru');
+    </script>
+</body>
+</html>
