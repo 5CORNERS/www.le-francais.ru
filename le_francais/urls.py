@@ -12,6 +12,7 @@ from wagtail.core import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
 from conjugation.sitemap import ConjugationSwitchesSitemap
+from custom_user.views import logout_view
 from forum.sitemap_generator import ForumSitemap, TopicSitemap
 # from custom_user.forms import MyCustomUserForm
 from home.forms import AORProfileForm
@@ -19,8 +20,8 @@ from home.urls import site_import_urls, api_urls, payment_urls, coffee_urls, \
     activate_urls, meta_urls, service_urls, urlpatterns as home_urls, \
     favicon_urls
 from home.urls import modal_urls
-from custom_user.views import MovePostView, AorAddPostView, AorEditPostView, \
-    AorTopicView, move_post_processing, favicon, activation_log, logout_view
+from home.views import MovePostView, AorAddPostView, AorEditPostView, \
+    AorTopicView, move_post_processing, favicon, activation_log
 from home.views import change_username, \
     LeFrancaisWagtailSitemap as WagtailSitemap
 from notifications import urls as notifications_api_urls
