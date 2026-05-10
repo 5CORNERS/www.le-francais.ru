@@ -87,7 +87,10 @@ class Payment(models.Model):
 		if self._user:
 			return self._user
 		elif self.customer_key:
-			return get_user_model().objects.get(pk=int(self.customer_key))
+			try:
+				return get_user_model().objects.get(pk=int(self.customer_key))
+			except get_user_model().DoesNotExist:
+				return None
 		return None
 
 	@property
