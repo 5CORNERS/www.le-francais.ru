@@ -497,6 +497,13 @@ function updateTable(afterInit=undefined, initialPageLength=50) {
                             });
                             saveFilters('selectAfterFilter', filterIds, ['checked'], 'on', true)
                         }
+                        if (getCrossSiteKey()) {
+                            let ids = get_selected_filtered(dt);
+                            window.parent.postMessage({
+                                type: 'words_selected',
+                                ids: ids
+                            }, typeof COURSES_BASE_URL !== 'undefined' && COURSES_BASE_URL ? COURSES_BASE_URL : '*');
+                        }
                     });
                     if (afterInit !== undefined) {
                         afterInit()
