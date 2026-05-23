@@ -693,4 +693,14 @@ $(document).ready(function () {
     if(getParams.has('last') && getParams.get('last') === 'true'){
         loadFilterButton.loadAndFilter()
     }
+
+    window.addEventListener('message', function (event) {
+        if (getCrossSiteKey()) {
+            if (event.data.action === 'addIgnored') {
+                $('#markWords').click();
+            } else if (event.data.action === 'removeIgnored') {
+                $('#unmarkWords').click();
+            }
+        }
+    });
 });
