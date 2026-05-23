@@ -695,17 +695,16 @@ $(document).ready(function () {
     }
 
     window.addEventListener('message', function (event) {
-        // Verify origin
-        const trustedOrigin = typeof COURSES_BASE_URL !== 'undefined' && COURSES_BASE_URL ? COURSES_BASE_URL : null;
-        if (trustedOrigin) {
-            try {
-                if (event.origin !== new URL(trustedOrigin).origin) {
-                    return;
-                }
-            } catch (e) {
-                console.error('Invalid COURSES_BASE_URL:', trustedOrigin);
+        const trustedOriginUrl = typeof COURSES_BASE_URL !== 'undefined' && COURSES_BASE_URL ? COURSES_BASE_URL : null;
+        if (!trustedOriginUrl) { // Fail closed if no trusted origin is configured
+            return;
+        }
+        try {
+            if (event.origin !== new URL(trustedOriginUrl).origin) {
                 return;
             }
+        } catch (e) {
+            return; // Fail closed on invalid URL
         }
 
         if (event.data && typeof event.data === 'object' && getCrossSiteKey()) {
