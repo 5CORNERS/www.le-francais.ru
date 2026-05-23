@@ -695,7 +695,7 @@ $(document).ready(function () {
     }
 
     window.addEventListener('message', function (event) {
-        if (getCrossSiteKey()) {
+        if (event.data && getCrossSiteKey()) {
             if (event.data.action === 'addIgnored') {
                 $('#markWords').click();
             } else if (event.data.action === 'removeIgnored') {
