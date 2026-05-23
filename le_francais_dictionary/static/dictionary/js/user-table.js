@@ -695,7 +695,20 @@ $(document).ready(function () {
     }
 
     window.addEventListener('message', function (event) {
-        if (event.data && getCrossSiteKey()) {
+        // Verify origin
+        const trustedOrigin = typeof COURSES_BASE_URL !== 'undefined' && COURSES_BASE_URL ? COURSES_BASE_URL : null;
+        if (trustedOrigin) {
+            try {
+                if (event.origin !== new URL(trustedOrigin).origin) {
+                    return;
+                }
+            } catch (e) {
+                console.error('Invalid COURSES_BASE_URL:', trustedOrigin);
+                return;
+            }
+        }
+
+        if (event.data && typeof event.data === 'object' && getCrossSiteKey()) {
             if (event.data.action === 'addIgnored') {
                 $('#markWords').click();
             } else if (event.data.action === 'removeIgnored') {
