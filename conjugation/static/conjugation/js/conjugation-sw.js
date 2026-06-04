@@ -1,4 +1,4 @@
-const CACHE_NAME = 'le_francais-conjugation-cache-v32';
+const CACHE_NAME = 'le_francais-conjugation-cache-v33';
 const urlsMatchToCache = [
     '/static/conjugation/css/conjugation.min.css',
     '/static/conjugation/js/conjugation.min.js',
