@@ -455,7 +455,7 @@ input#search-verb::placeholder {
 }
 
 
-.regle_mobile {
+.regle_mobile, .translation_mobile {
     display: none;
 }
 
@@ -481,7 +481,7 @@ input#search-verb::placeholder {
         display: none;
     }
 
-    .regle_mobile {
+    .regle_mobile, .translation_mobile {
         display: block;
     }
 

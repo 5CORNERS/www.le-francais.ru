@@ -1,0 +1,411 @@
+/* ==========================================================================
+   Dictionary Component Stylesheet (django/standalone compatible)
+   ========================================================================== */
+
+.dictionnaire {
+    background: #fff;
+    padding: 0;
+    margin-top: 20px;
+    color: #333;
+    font-family: inherit;
+}
+.dictionnaire h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    margin-top: 0;
+    color: #333;
+    font-weight: bold;
+}
+.dictionnaire h3 {
+    font-size: 1.5rem;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+.group {
+    margin-bottom: 20px;
+}
+.group-header {
+    background: #f8f9fa;
+    padding: 8px 10px;
+    border-left: 2px solid #337ab7;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+.roman-numeral {
+    color: #337ab7;
+    margin-right: 10px;
+}
+.meanings-list {
+    padding-left: 20px;
+}
+.meanings-list.flat, .group.no-header .meanings-list {
+    padding-left: 0;
+}
+.meaning {
+    margin-bottom: 12px;
+}
+.meaning-index {
+    color: #d9534f;
+    font-weight: bold;
+    margin-right: 6px;
+}
+.meaning-description {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+.examples-list {
+    padding-left: 20px;
+}
+.example {
+    margin: 6px 0;
+    display: block;
+    text-align: left;
+}
+.example-fr {
+    font-style: italic;
+    color: #333;
+    display: inline;
+}
+.example-fr::after {
+    content: " — ";
+    font-style: normal;
+}
+.example-ru {
+    color: #666;
+    display: inline;
+}
+.example-ru.wrapped {
+    display: block;
+    text-align: right;
+    margin-top: 2px;
+}
+
+/* Right-align translation only on small screens when it wraps to save space and match user request */
+@media (max-width: 480px) {
+    .example-ru {
+        display: block;
+        text-align: right;
+        margin-top: 2px;
+    }
+}
+
+mark {
+    background: transparent;
+    padding: 0;
+    font-weight: bold;
+    color: #666;
+}
+
+.phrase {
+    margin-top: 8px;
+    padding: 4px 0;
+    border: none;
+}
+.phrase-header {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+.phrase-fr {
+    color: #337ab7;
+    margin-right: 8px;
+}
+.phrase-translation {
+    color: #333;
+}
+.senses-list {
+    padding-left: 20px;
+}
+.sense {
+    margin-top: 4px;
+}
+.sense-description {
+    font-size: 1em;
+    color: #333;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+.comment {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 0 !important;
+    margin-bottom: 8px;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* Expandable containers spacing & logic */
+.phrases-container, .idioms-container, .meanings-container {
+    position: relative;
+    overflow: hidden;
+}
+.phrases-container.collapsed, .idioms-container.collapsed, .meanings-container.collapsed {
+    padding-bottom: 24px; /* Small padding so the gradient fades out the last visible item */
+}
+.hidden-item {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                margin 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                padding 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.4s ease-in-out;
+    opacity: 1;
+}
+.hidden-item > div {
+    overflow: hidden;
+}
+
+/* Higher specificity to override base margins without !important if possible, 
+   but since base styles are on .meaning/.phrase, we use the container.collapsed prefix */
+.phrases-container.collapsed .hidden-item, 
+.idioms-container.collapsed .hidden-item, 
+.meanings-container.collapsed .hidden-item {
+    grid-template-rows: 0fr;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: grid-template-rows 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                margin 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                padding 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s ease-in-out;
+}
+.phrases-container.collapsed::after, .idioms-container.collapsed::after, .meanings-container.collapsed::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.7) 40%, rgba(255,255,255,1) 90%);
+    pointer-events: none;
+    z-index: 1;
+}
+.show-more-btn {
+    display: inline-block;
+    width: auto;
+    min-width: 200px;
+    text-align: center;
+    margin: 0 auto -10px auto;
+    padding: 2px 25px;
+    color: #337ab7;
+    background-color: #fff;
+    border: 1px solid #337ab7;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9em;
+    position: relative;
+    top: -36px; /* Pull the button up onto the fading area */
+    z-index: 10; /* Ensure it is above the gradient fade */
+    transition: all 0.2s;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.show-more-btn.expanded {
+    top: 10px; /* Reset position when list is expanded */
+    margin-bottom: 25px;
+}
+.show-more-btn:hover {
+    color: #fff;
+    background-color: #337ab7;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.show-more-btn::before, .show-more-btn::after {
+    content: "↓";
+    display: inline-block;
+    font-weight: bold;
+    transition: transform 0.3s;
+}
+.show-more-btn::before {
+    margin-right: 12px;
+}
+.show-more-btn::after {
+    margin-left: 12px;
+}
+.show-more-btn.expanded::before, .show-more-btn.expanded::after {
+    content: "↑";
+}
+
+.verb-article-comment {
+    margin: 24px 0;
+    padding: 16px 20px;
+    background-color: #fafbfc;
+    border-left: 4px solid #337ab7;
+    border-radius: 4px;
+    color: #555;
+    font-size: 0.95em;
+    line-height: 1.6;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.verb-article-comment mark {
+    background-color: #f7e1b5;
+    padding: 2px 4px;
+    border-radius: 2px;
+    color: #333;
+}
+
+/* Styles for expandable sections inside comments (sent via API as <details class="verb-comment-details">) */
+details.verb-comment-details {
+    display: inline;
+}
+details.verb-comment-details summary {
+    display: inline-flex !important;
+    align-items: center !important;
+    flex-direction: row !important; /* Override inline row-reverse from API */
+    color: #007bff !important;
+    background-color: #fff !important;
+    border: 1px solid #007bff !important;
+    border-radius: 10rem !important; /* pill badge */
+    padding: 0.15em 0.8em !important;
+    margin-left: 6px !important;
+    cursor: pointer !important;
+    font-weight: 500 !important;
+    font-size: 0.85em !important;
+    line-height: 1.5 !important;
+    vertical-align: baseline !important;
+    outline: none !important;
+    user-select: none !important;
+    text-decoration: none !important;
+    list-style: none !important; 
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out !important;
+}
+details.verb-comment-details summary:hover {
+    color: #fff !important;
+    background-color: #007bff !important;
+}
+/* Скрываем стандартные и глобальные маркеры */
+details.verb-comment-details summary::-webkit-details-marker {
+    display: none !important;
+}
+details.verb-comment-details summary::marker {
+    display: none !important;
+}
+details.verb-comment-details summary::before {
+    display: none !important;
+    content: none !important;
+}
+/* Добавляем символ стрелочки напрямую */
+details.verb-comment-details summary::after {
+    content: "↓" !important;
+    display: inline-block !important;
+    margin-left: 6px !important;
+    transition: transform 0.2s ease !important;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+details.verb-comment-details[open] summary::after {
+    content: "↑" !important;
+}
+
+details.verb-comment-details div {
+    display: block;
+    margin-top: 12px;
+    padding: 12px 16px;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    font-size: 0.95em;
+    color: #444;
+    overflow: hidden;
+}
+/* Анимируем само раскрытие спойлера, изменяя max-height */
+details.verb-comment-details[open] summary ~ * {
+    animation: details-sweep 0.4s ease-out forwards;
+}
+@keyframes details-sweep {
+    0% {
+        opacity: 0;
+        max-height: 0;
+        margin-top: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        border-width: 0;
+    }
+    100% {
+        opacity: 1;
+        max-height: 400px;
+        margin-top: 12px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        border-width: 2px;
+    }
+}
+
+/* Hide the article comment on mobile resolution screen widths */
+@media (max-width: 768px) {
+    .verb-article-comment {
+        display: none !important;
+    }
+}
+@media (pointer: coarse) {
+    .verb-article-comment {
+        display: none !important;
+    }
+}
+
+.translation_mobile {
+    position: relative;
+    overflow: visible !important;
+}
+
+#translationMobileShowButton {
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 50px; /* Offset to stay below the sticky navbar */
+    display: block;
+    width: 100%;
+    background-color: white !important;
+    z-index: 1000;
+    margin-bottom: 0;
+    border-radius: 18px 18px 0 0;
+    transition: padding 0.1s ease-out, box-shadow 0.1s ease-out;
+}
+#translationMobileShowButton.is-sticky {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+#translationMobileShowButton:focus, #translationMobileShowButton:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Loading spacer */
+.dictionnaire .loading {
+    padding: 30px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    font-size: 1.1em;
+}
+
+/* Bootstrap alert placeholders in case the app is standalone and doesn't load bootstrap */
+.dictionnaire .alert {
+    position: relative;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+}
+.dictionnaire .alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+.dictionnaire .alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+.dictionnaire .alert-light {
+    color: #818182;
+    background-color: #fefefe;
+    border-color: #fdfdfe;
+}

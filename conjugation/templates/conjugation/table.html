@@ -42,6 +42,7 @@
 	        type="text/javascript"
 	        src="{% static 'js/le_francais.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'conjugation/js/table.min.js' %}"></script>
+    <script>{% include 'conjugation/init.js' %}</script>
 
 {% endblock %}
 
@@ -145,6 +146,10 @@
                  style="width: 100%; border-radius:20px; border-color: #337ab74d!important;">
                 {% include 'conjugation/regle.html' with text=v.regle.text_rus infinitive=v.infinitive employs=v.employs mobile=True %}
             </div>
+            <div class="translation_mobile border pt-2 pl-2 pr-2 pb-2 mb-3"
+                 style="width: 100%; border-radius:20px; border-color: #337ab74d!important;">
+                {% include 'conjugation/translation_mobile.html' %}
+            </div>
             <div class="tabs">
                 <ul class="nav nav-tabs conjugation-tabs mb-0">
                     <li class="nav-item active" id="less_tab">
@@ -203,6 +208,7 @@
             <div class="regle">
                 {% include 'conjugation/regle.html' with text=v.regle.text_rus infinitive=v.infinitive employs=v.employs mobile=False %}
             </div>
+            {% include "conjugation/translation.html" %}
             <div class="novichkam">
                 {% include 'conjugation/novichkam.html' %}
             </div>
