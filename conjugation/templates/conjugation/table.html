@@ -186,7 +186,11 @@
                     </div>
                 </div>
             </div>
-            <div class="table">
+            <div class="alert alert-warning mt-2 mb-2" style="margin-left: -10px;margin-right: -10px">
+                Мы делаем бесплатный сервис, им пользуются десятки тысяч. Но для нас он не
+                бесплатный. Пожалуйста, <b><a href="{% url 'donations:donation_page' %}">помогите нам оплачивать сервера</a></b>; Поддержите нас!
+            </div>
+            <div class="table mt-2">
                 {% for mood in table.moods %}
                     {% include 'conjugation/mood.html' with mood=mood with_name=True %}
                 {% endfor %}

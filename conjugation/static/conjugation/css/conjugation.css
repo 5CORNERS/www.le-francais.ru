@@ -20,6 +20,10 @@
     }
 }
 
+.mood-name-title {
+    margin-top: 0
+}
+
 h4 {
     line-height: 1.42857143;
 }

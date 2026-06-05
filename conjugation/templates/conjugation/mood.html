@@ -1,6 +1,6 @@
 {% if with_name %}<div class="row mood_name" id="{{ mood.html_id }}" data-max-length="{{ mood.max_form_length }}">
     <div class="col-12">
-        <div><h2>{% if mood.name == 'Subjonctif' %}
+        <div><h2 class="mood-name-title">{% if mood.name == 'Subjonctif' %}
             <a title="Что такое Subjonctif — самое доступное объяснение в Рунете"
                href="/oh-la-la/subjonctif/?utm_campaign=conjugeur&utm_medium=button&utm_source=subjonctif">{{ mood.name | safe }}</a>{% else %}
             {{ mood.name | safe }}{% endif %}<a class="anchorjs-link " aria-label="Anchor" data-anchorjs-icon="#" href="#{{ mood.html_id }}" style="padding-left: 0.375em;"></a> </h2></div>
