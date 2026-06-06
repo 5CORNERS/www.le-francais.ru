@@ -186,9 +186,15 @@
                     </div>
                 </div>
             </div>
-            <div class="alert alert-warning mt-2 mb-2" style="margin-left: -10px;margin-right: -10px;padding-left: 0.75rem">
-                Этот бесплатный сервис для всех — не бесплатен для нас. Пожалуйста, <a href="{% url 'donations:donation_page' %}"><b>помогите нам оплачивать
+            <div class="alert alert-warning mt-2 mb-2"
+                 style="margin-left: -10px;margin-right: -10px;padding-left: 0.75rem">
+                Мы несем расхода по поддержанию работы этого сервиса. Пожалуйста, <a href="{% url 'donations:donation_page' %}"><b>помогите нам
+                оплачивать
                 сервера</b></a>, поддержите нас!
+                <details class="verb-comment-details">
+                    <summary>В ответ мы…</summary>
+                    <div>В ответ мы отключим вам рекламу на всем сайте.</div>
+                </details>
             </div>
             <div class="table mt-2">
                 {% for mood in table.moods %}
