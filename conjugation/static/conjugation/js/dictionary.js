@@ -319,7 +319,7 @@
     // 1.5 Moderation Status Plates (Show community notice only if unverified)
     if (isMobile) {
       if (data.moderationStatus === 'draft') {
-        const alertDraft = ce('div', 'alert alert-warning', 'Этот перевод еще не проверялся опытными участниками');
+        const alertDraft = ce('div', 'alert alert-info', 'Этот перевод еще не проверялся опытными участниками');
         alertDraft.style.fontSize = '14px';
         alertDraft.style.padding = '8px 12px';
         alertDraft.style.marginBottom = '15px';
