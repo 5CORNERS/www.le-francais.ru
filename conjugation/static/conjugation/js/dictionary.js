@@ -306,10 +306,6 @@
     const hasTranslations = (data.groups && data.groups.length > 0) || 
                             (data.phrases && data.phrases.length > 0) || 
                             (data.idioms && data.idioms.length > 0);
-                            
-    if (isMobile && !hasTranslations) {
-        return; // Empty mobile block if there are no translations
-    }
     
     // 1. Verb Header
     const verbUpper = data.verb.toUpperCase();
@@ -317,21 +313,7 @@
     container.appendChild(ce('h2', '', titleText));
 
     // 1.5 Moderation Status Plates (Show community notice only if unverified)
-    if (isMobile) {
-      if (data.moderationStatus === 'draft') {
-        const alertDraft = ce('div', 'alert alert-info', 'Этот перевод еще не проверялся опытными участниками');
-        alertDraft.style.fontSize = '14px';
-        alertDraft.style.padding = '8px 12px';
-        alertDraft.style.marginBottom = '15px';
-        container.appendChild(alertDraft);
-      } else if (data.moderationStatus === 'pending') {
-        const alertPending = ce('div', 'alert alert-info', 'Этот перевод проходит проверку, но еще не одобрен');
-        alertPending.style.fontSize = '14px';
-        alertPending.style.padding = '8px 12px';
-        alertPending.style.marginBottom = '15px';
-        container.appendChild(alertPending);
-      }
-    } else {
+
       if (data.moderationStatus === 'draft' || data.moderationStatus === 'pending') {
         const noticeAlert = ce('div', 'alert alert-light', '');
         noticeAlert.style.fontSize = '14px';
@@ -350,7 +332,7 @@
         noticeAlert.appendChild(noticeLink);
         container.appendChild(noticeAlert);
       }
-    }
+
 
     // 2. Groups or Flat Meanings
     let totalMeanings = 0;

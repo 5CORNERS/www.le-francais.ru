@@ -338,18 +338,6 @@ details.verb-comment-details[open] summary ~ * {
     }
 }
 
-/* Hide the article comment on mobile resolution screen widths */
-@media (max-width: 768px) {
-    .verb-article-comment {
-        display: none !important;
-    }
-}
-@media (pointer: coarse) {
-    .verb-article-comment {
-        display: none !important;
-    }
-}
-
 .translation_mobile {
     position: relative;
     overflow: visible !important;
