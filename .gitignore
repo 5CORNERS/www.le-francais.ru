@@ -35,3 +35,6 @@ GeoIP.conf
 /ffmpeg/
 le_francais.pem
 courses_public.pem
+
+GEMINI.md
+/docs/superpowers/
