@@ -8,37 +8,30 @@
 
 {% block content %}
   <div class="container-fluid">
-  <div class="row">
-    <div class="col-md-2 col-xl-3 d-none d-md-flex"></div>
-    <div class="col-md-8 col-xl-5">
-      <div style="padding-top:30px; padding-bottom:30px">
-        <h3>Регистрация нового пользователя</h3>
-      </div>
-      <div class="col-xl-12">
-        {% include 'account/oauth-buttons.html' with next=request.GET.next %}
+    <div class="row">
+      <div class="col-md-2 col-xl-3 d-none d-md-flex"></div>
+      <div class="col-md-8 col-xl-5">
+        <div style="padding-top:30px; padding-bottom:15px">
+          <h3>Регистрация нового пользователя</h3>
+        </div>
         <div class="col-xl-12">
-          <div style="margin-bottom:10px">
-            Если у вас нет аккаунтов в социальных сетях, зарегистрируйтесь с помощью этой формы:
-          </div>
-
           <form class="login" method="POST" action="{% url 'account_signup' %}">
             {% csrf_token %}
             {% if form.errors %}
               <ul>
                 {% for field in form %}
                   {% for error in field.errors %}
-                    <li class="">
-	                    <div class="alert alert-danger" role="alert"><strong>{{ error|escape }}</strong></div>
+                    <li style="list-style: none;">
+                      <div class="alert alert-danger" role="alert"><strong>{{ error|escape }}</strong></div>
                     </li>
                   {% endfor %}
                 {% endfor %}
                 {% for error in form.non_field_errors %}
-                  <li class="">
+                  <li style="list-style: none;">
                     <div class="alert alert-warning" role="alert"><strong>{{ error|escape }}</strong></div>
                   </li>
                 {% endfor %}
               </ul>
-
             {% endif %}
             <div class="form-group">
               <input type="email" name="email" id="id_email" class="form-control form-control-lg"
@@ -67,9 +60,16 @@
             {% endif %}
           </form>
         </div>
+
+        <div class="col-xl-12" style="margin-top: 20px;">
+          <div style="margin-bottom:15px; text-align: center;">
+            <b>Или зарегистрироваться через социальные сети:</b>
+          </div>
+          {% include 'account/oauth-buttons.html' with next=request.GET.next %}
+          <hr class="d-lg-none">
+        </div>
       </div>
-      <div class="col-md-2 col-xl-3 d-none d-md-flex "></div>
+      <div class="col-md-2 col-xl-3 d-none d-md-flex"></div>
     </div>
-  </div>
   </div>
 {% endblock %}
