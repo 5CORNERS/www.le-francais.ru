@@ -1,28 +1,12 @@
 {% load static %}
 {% if request.GET.next %}{% endif %}
 <div class="row text-xs-center oauth-buttons-row">
-    {% if request.session.geoip.country_code != 'RU' or force_render %}
-    <div class="col-xl-4 col-md-6 google-oauth-btn">
-        <a class="btn btn-google btn-block" href="{% url "social:begin" "google-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}"
-           style="margin-bottom:10px">
-            Google
-        </a>
-    </div>
-    {% endif %}
     <div class="col-xl-4 col-md-6">
         <a class="btn btn-vk btn-block" style="margin-bottom:10px"
            href="{% url "social:begin" "vk-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}">
             ВКонтакте
         </a>
     </div>
-    {% if request.session.geoip.country_code != 'RU' or force_render %}
-    <div class="col-xl-4 col-md-6 facebook-oauth-btn">
-        <a class="btn btn-facebook btn-block" style="margin-bottom:10px"
-           href="{% url "social:begin" "facebook" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}">
-            Facebook
-        </a>
-    </div>
-    {% endif %}
     <div class="col-xl-4 col-md-6">
         <a class="btn btn-mailru btn-block" style="margin-bottom:10px"
            href="{% url "social:begin" "mailru-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}">
@@ -41,6 +25,22 @@
             Яндекс
         </a>
     </div>
+    {% if request.session.geoip.country_code != 'RU' or force_render %}
+    <div class="col-xl-4 col-md-6 google-oauth-btn">
+        <a class="btn btn-google btn-block" href="{% url "social:begin" "google-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}"
+           style="margin-bottom:10px">
+            Google
+        </a>
+    </div>
+    {% endif %}
+    {% if request.session.geoip.country_code != 'RU' or force_render %}
+    <div class="col-xl-4 col-md-6 facebook-oauth-btn">
+        <a class="btn btn-facebook btn-block" style="margin-bottom:10px"
+           href="{% url "social:begin" "facebook" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}">
+            Facebook
+        </a>
+    </div>
+    {% endif %}
 </div>
 
 {% if request.session.geoip.country_code == 'RU' and not force_render %}
