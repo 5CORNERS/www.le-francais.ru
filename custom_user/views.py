@@ -165,3 +165,15 @@ def add_log_message(request):
         session_key=request.session.session_key
     )
     return JsonResponse({'success': True})
+
+
+def login_options(request):
+    """
+    Renders the social login buttons dynamically via AJAX on demand.
+    Sets force_render=True to override Russian GeoIP checks.
+    """
+    next_url = request.GET.get('next')
+    return render(request, 'account/oauth-buttons.html', {
+        'next': next_url,
+        'force_render': True
+    })

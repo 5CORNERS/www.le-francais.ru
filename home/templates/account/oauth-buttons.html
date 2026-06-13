@@ -1,7 +1,7 @@
 {% load static %}
 {% if request.GET.next %}{% endif %}
 <div class="row text-xs-center oauth-buttons-row">
-    {% if request.session.geoip.country_code != 'RU' %}
+    {% if request.session.geoip.country_code != 'RU' or force_render %}
     <div class="col-xl-4 col-md-6 google-oauth-btn">
         <a class="btn btn-google btn-block" href="{% url "social:begin" "google-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}"
            style="margin-bottom:10px">
@@ -15,7 +15,7 @@
             ВКонтакте
         </a>
     </div>
-    {% if request.session.geoip.country_code != 'RU' %}
+    {% if request.session.geoip.country_code != 'RU' or force_render %}
     <div class="col-xl-4 col-md-6 facebook-oauth-btn">
         <a class="btn btn-facebook btn-block" style="margin-bottom:10px"
            href="{% url "social:begin" "facebook" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}">
@@ -43,54 +43,46 @@
     </div>
 </div>
 
-{% if request.session.geoip.country_code == 'RU' %}
+{% if request.session.geoip.country_code == 'RU' and not force_render %}
 <script>
   (function() {
-    var injected = false;
-    function injectForeignOAuth() {
-      if (injected) return;
-      injected = true;
+    var loaded = false;
+    function loadAuthOptions() {
+      if (loaded) return;
+      loaded = true;
       
-      // Remove listeners
-      window.removeEventListener('mousemove', injectForeignOAuth);
-      window.removeEventListener('scroll', injectForeignOAuth);
-      window.removeEventListener('keydown', injectForeignOAuth);
-      window.removeEventListener('touchstart', injectForeignOAuth);
+      window.removeEventListener('mousemove', loadAuthOptions);
+      window.removeEventListener('scroll', loadAuthOptions);
+      window.removeEventListener('keydown', loadAuthOptions);
+      window.removeEventListener('touchstart', loadAuthOptions);
       
-      // Select all elements matching '.oauth-buttons-row'
-      var rows = document.querySelectorAll('.oauth-buttons-row');
-      rows.forEach(function(row) {
-        // Build Google Button column
-        var googleCol = document.createElement('div');
-        googleCol.className = 'col-xl-4 col-md-6 google-oauth-btn';
-        googleCol.innerHTML = '<a class="btn btn-google btn-block" href="{% url "social:begin" "google-oauth2" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}" style="margin-bottom:10px">Google</a>';
-        
-        // Build Facebook Button column
-        var fbCol = document.createElement('div');
-        fbCol.className = 'col-xl-4 col-md-6 facebook-oauth-btn';
-        fbCol.innerHTML = '<a class="btn btn-facebook btn-block" style="margin-bottom:10px" href="{% url "social:begin" "facebook" %}{% if request.GET.next %}?next={{ request.GET.next }}{% elif next %}?next={{ next }}{% endif %}">Facebook</a>';
-        
-        // Insert them back into their original layout positions
-        if (row.firstChild) {
-          row.insertBefore(googleCol, row.firstChild);
-          var vkCol = googleCol.nextSibling;
-          if (vkCol) {
-            row.insertBefore(fbCol, vkCol.nextSibling);
-          } else {
-            row.appendChild(fbCol);
+      var nextParam = "{% if request.GET.next %}{{ request.GET.next }}{% elif next %}{{ next }}{% endif %}";
+      // Request alternate options using generic query path
+      var url = "/accounts/login/options/";
+      if (nextParam) {
+        url += "?next=" + encodeURIComponent(nextParam);
+      }
+      
+      fetch(url)
+        .then(function(response) { return response.text(); })
+        .then(function(html) {
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(html, 'text/html');
+          var newRow = doc.querySelector('.oauth-buttons-row');
+          if (newRow) {
+            var rows = document.querySelectorAll('.oauth-buttons-row');
+            rows.forEach(function(row) {
+              row.innerHTML = newRow.innerHTML;
+            });
           }
-        } else {
-          row.appendChild(googleCol);
-          row.appendChild(fbCol);
-        }
-      });
+        })
+        .catch(function(err) { console.error('Load failed:', err); });
     }
     
-    // Add event listeners on user interaction
-    window.addEventListener('mousemove', injectForeignOAuth, { passive: true });
-    window.addEventListener('scroll', injectForeignOAuth, { passive: true });
-    window.addEventListener('keydown', injectForeignOAuth, { passive: true });
-    window.addEventListener('touchstart', injectForeignOAuth, { passive: true });
+    window.addEventListener('mousemove', loadAuthOptions, { passive: true });
+    window.addEventListener('scroll', loadAuthOptions, { passive: true });
+    window.addEventListener('keydown', loadAuthOptions, { passive: true });
+    window.addEventListener('touchstart', loadAuthOptions, { passive: true });
   })();
 </script>
 {% endif %}
