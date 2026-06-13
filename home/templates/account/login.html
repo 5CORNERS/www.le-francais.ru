@@ -110,4 +110,40 @@
       <div class="col-md-2 col-xl-3 d-none d-md-flex"></div>
     </div>
   </div>
+
+<!-- Restriction Modal -->
+<div class="modal fade" id="foreignAuthModal" tabindex="-1" role="dialog" aria-labelledby="foreignAuthModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="foreignAuthModalLabel">Ограничение авторизации</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Согласно законодательству РФ, авторизация через иностранные системы (Google, Facebook и др.) ограничена.</p>
+        <p>Пожалуйста, войдите используя <strong>E-mail и пароль</strong>. Если вы ранее регистрировались через социальную сеть и не знаете свой пароль, вы можете <a href="{% url 'account_reset_password' %}">восстановить его по этой ссылке</a> (используйте email, привязанный к вашей соцсети).</p>
+        <p>Также вы можете использовать отечественные сервисы: ВКонтакте, Яндекс или Mail.ru.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Понятно</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if request.session.geoip.country_code == 'RU' %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var foreignButtons = document.querySelectorAll('.btn-google, .btn-facebook');
+    foreignButtons.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        $('#foreignAuthModal').modal('show');
+      });
+    });
+  });
+</script>
+{% endif %}
 {% endblock %}
