@@ -463,6 +463,9 @@ SOCIAL_AUTH_PIPELINE = (
     # Create the record that associates the social account with the user.
     'social_core.pipeline.social_auth.associate_user',
 
+    # Create the verified allauth EmailAddress for the user.
+    'custom_user.pipeline.create_allauth_email',
+
     # Populate the extra_data field in the social record with the values
     # specified by settings (and the default ones like access_token, etc).
     'social_core.pipeline.social_auth.load_extra_data',
