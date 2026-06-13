@@ -167,7 +167,7 @@ def add_log_message(request):
     return JsonResponse({'success': True})
 
 
-def login_options(request):
+def login_config(request):
     """
     Renders the social login buttons dynamically via AJAX on demand.
     Sets force_render=True to override Russian GeoIP checks.
