@@ -316,13 +316,12 @@
 
       if (data.moderationStatus === 'draft' || data.moderationStatus === 'pending') {
         const noticeAlert = ce('div', 'alert alert-light', '');
-        noticeAlert.style.fontSize = '14px';
         noticeAlert.style.padding = '8px 12px';
         noticeAlert.style.marginBottom = '15px';
         noticeAlert.style.border = '1px solid #ddd';
         noticeAlert.style.backgroundColor = '#f8f9fa';
         
-        const noticeText = document.createTextNode('Этот раздел нам помогают создавать участниками сообщества, он может содержать неточности. Заметили ошибку? ');
+        const noticeText = document.createTextNode('Этот раздел нам помогают создавать участники сообщества, он может содержать неточности. Заметили ошибку? ');
         const noticeLink = ce('a', '', 'Помогите ее исправить!');
         const encodedVerbIdForLink = base64urlEncode(verbId);
         noticeLink.href = 'https://coverbe.web.app/' + encodedVerbIdForLink;
