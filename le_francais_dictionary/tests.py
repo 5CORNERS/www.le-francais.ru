@@ -1,6 +1,7 @@
 import datetime
 import json
 import random
+import jwt
 import string
 
 from django.core.management import call_command
@@ -367,3 +368,68 @@ class FlashCardsEarlyUpdateTestCase(TestCase):
 
     def test_poor_answer_near_end(self):
         ...
+
+
+class SSOStandaloneLoginTestCase(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.user = User.objects.create_user(
+            username='le_francais_test',
+            email='le_francais_test@test.com',
+            password='password123'
+        )
+
+    def test_sso_auto_login_success(self):
+        from cryptography.hazmat.primitives.asymmetric import rsa
+        from cryptography.hazmat.primitives import serialization
+        
+        # Generate 2048-bit private key
+        private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048
+        )
+        pem_private_key = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+        pem_public_key = private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        ).decode('utf-8')
+
+        payload = {
+            'iss': 'courses.le-francais.ru',
+            'aud': 'www.le-francais.ru',
+            'user_id': self.user.pk,
+            'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=15)
+        }
+        token = jwt.encode(payload, pem_private_key, algorithm='RS256')
+
+        # Request standalone word manager with token
+        url = reverse('dictionary:my_words_standalone', args=[0]) + f"?ck=courses&token={token}"
+        request = self.factory.get(url)
+        
+        # Verify request.user starts out Anonymous
+        from django.contrib.auth.models import AnonymousUser
+        request.user = AnonymousUser()
+        
+        # Add session support for login()
+        from django.contrib.sessions.middleware import SessionMiddleware
+        middleware = SessionMiddleware()
+        middleware.process_request(request)
+        request.session.save()
+
+        # Mock the loaded public key and render function
+        from unittest.mock import patch
+        from django.http import HttpResponse
+        with patch('le_francais_dictionary.views.load_courses_public_key', return_value=pem_public_key), \
+             patch('le_francais_dictionary.forms.get_courses_packets', return_value=[]), \
+             patch('le_francais_dictionary.views.render', return_value=HttpResponse('OK')):
+            from le_francais_dictionary.views import manage_words_standalone
+            response = manage_words_standalone(request, 0)
+        
+        self.assertEqual(response.status_code, 200)
+        # Assert that the request user is now the logged-in user
+        self.assertTrue(request.user.is_authenticated)
+        self.assertEqual(request.user.pk, self.user.pk)

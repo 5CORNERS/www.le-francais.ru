@@ -708,17 +708,48 @@ def save_filters(request):
     userpacket.filters = filters
     userpacket.save()
     return HttpResponse(status=200)
+_courses_public_key = None
+
+
+def load_courses_public_key():
+    global _courses_public_key
+    if _courses_public_key is None:
+        with open('courses_public.pem', 'r') as key_file:
+            _courses_public_key = key_file.read()
+    return _courses_public_key
 
 
 def manage_words_standalone(request, lesson_number):
+    token = request.GET.get('token')
+    if token:
+        import jwt
+        from django.contrib.auth import login
+        try:
+            public_key = load_courses_public_key()
+            payload = jwt.decode(
+                token,
+                public_key,
+                algorithms=['RS256'],
+                issuer='courses.le-francais.ru',
+                audience='www.le-francais.ru'
+            )
+            user_id = payload.get('user_id')
+            if user_id:
+                user = User.objects.get(pk=user_id)
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        except Exception:
+            pass
+
     star_choices = STAR_CHOICES
     init_lesson = int(lesson_number)
     if init_lesson != 0:
+        template_name = 'dictionary/manage_words_standalone.html'
         init_packets = Packet.objects.filter(
             lesson__lesson_number=init_lesson).values_list(
             'pk', flat=True)
         cross_site_key = None
     else:
+        template_name = 'dictionary/manage_words_iframe.html'
         packets_ids = map(lambda x: int(x), request.GET.getlist('p'))
         cross_site_key = request.GET.get('ck', None)
         init_packets = Packet.objects.filter(pk__in=packets_ids).values_list(
@@ -726,7 +757,7 @@ def manage_words_standalone(request, lesson_number):
         if not init_packets:
             init_packets = None
     form = WordsManagementFilterForm(request.user, cross_site=cross_site_key)
-    return render(request, 'dictionary/manage_words_standalone.html',
+    return render(request, template_name,
                   {'form': form, 'table': form.table_dict(),
                    'star_choices': star_choices,
                    'init_packets': init_packets,
