@@ -17,7 +17,7 @@ def get_signed_token(aud:str):
 def get_courses_packets(user_id, cross_site_name):
     token = get_signed_token(cross_site_name)
     headers = {'Authorization': f'Bearer {token}'}
-    response = requests.get(f'{settings.COURSES_BASE_URL}/{settings.COURSES_FETCH_PACKETS_PATH.format(user_id)}',
+    response = requests.get(f'{settings.COURSES_BASE_URL}{settings.COURSES_FETCH_PACKETS_PATH.format(user_id)}',
                             headers=headers)
     data = response.json()
     if data.get('success', False):
