@@ -18,7 +18,7 @@
     {% endif %}
     </script>
     <script src="{% static 'iframe_scripts/size_sender.js' %}"></script>
-    <script src="{% static 'iframe_scripts/theme_listener.js' %}"></script>
+    <script>{% include 'dictionary/theme_listener.js' with COURSES_BASE_URL=COURSES_BASE_URL %}</script>
 {% endblock %}
 {% block extra_css %}
     {{ block.super }}

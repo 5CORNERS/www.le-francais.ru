@@ -1,0 +1,125 @@
+body.theme-dark {
+    background-color: #16191d;
+    color: #ced4da;
+}
+
+/* Cards dark theme */
+body.theme-dark .card {
+    background-color: #2d2d2d;
+    border-color: #444;
+}
+
+body.theme-dark .card-header {
+    background-color: #1e1e1e;
+    border-color: #444;
+}
+
+/* Tables dark theme */
+body.theme-dark .table {
+    color: #e0e0e0;
+    background-color: #2d2d2d;
+}
+
+body.theme-dark .table th,
+body.theme-dark .table td {
+    border-color: #444;
+}
+
+body.theme-dark .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Forms dark theme */
+body.theme-dark .form-control {
+    background-color: #2d2d2d;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+body.theme-dark .input-group-text {
+    background-color: #1e1e1e;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+/* Dropdown menus */
+body.theme-dark .dropdown-menu {
+    background-color: #2d2d2d;
+    border-color: #444;
+}
+
+body.theme-dark .dropdown-item {
+    color: #e0e0e0;
+}
+
+body.theme-dark .dropdown-item:hover,
+body.theme-dark .dropdown-item:focus {
+    background-color: #3d3d3d;
+}
+
+/* Buttons */
+body.theme-dark .btn-light {
+    background-color: #444;
+    border-color: #555;
+    color: #e0e0e0;
+}
+
+body.theme-dark .btn-outline-secondary {
+    border-color: #666;
+    color: #e0e0e0;
+}
+
+/* Modal dialogs */
+body.theme-dark .modal-content {
+    background-color: #2d2d2d;
+    border-color: #444;
+}
+
+body.theme-dark .modal-header,
+body.theme-dark .modal-footer {
+    border-color: #444;
+}
+
+/* Links */
+body.theme-dark a:not(.btn) {
+    color: #8ab4f8;
+}
+
+body.theme-dark a:hover:not(.btn) {
+    color: #aecbfa;
+}
+
+/* List groups */
+body.theme-dark .list-group-item {
+    background-color: #2d2d2d;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+/* Pagination */
+body.theme-dark .page-link {
+    background-color: #2d2d2d;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+body.theme-dark .page-item.disabled .page-link {
+    background-color: #222;
+    border-color: #444;
+}
+
+.uppertable {
+    display: initial !important;
+}
+
+.filter1 {
+    display: none;
+}
+
+.dataTables_length {
+    display: initial !important;
+}
+
+.dataTables_info {
+    display: initial !important;
+}
