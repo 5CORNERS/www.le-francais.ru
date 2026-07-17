@@ -186,13 +186,20 @@ def create_message(settings, subject, template_html, template_txt,
     return message
 
 
-def send_message(message: Message, users_payments_activations: List[Tuple[User, Payment, UserLesson, int]]) -> (
-int, int):
+def send_message(message: Message, users_payments_activations: List[Tuple[User, Payment, UserLesson, int]]) -> Tuple[int, int]:
     contexts = {}
+    recipient_ids = []
+
     for user, payment, activation, quantity in users_payments_activations:
         contexts[user.pk] = get_context(user, message, payment, activation, quantity)
-    sent_count, errors_count = message.send(to=[user for user, *o in users_payments_activations],
-                                            users_context=contexts)
+        recipient_ids.append(user.pk)
+
+    recipients = User.objects.filter(pk__in=recipient_ids)
+
+    sent_count, errors_count = message.send(
+        to=recipients,
+        users_context=contexts
+    )
     return sent_count, errors_count
 
 
