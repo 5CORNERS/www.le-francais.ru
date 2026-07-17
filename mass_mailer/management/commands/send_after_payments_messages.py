@@ -194,6 +194,9 @@ def send_message(message: Message, users_payments_activations: List[Tuple[User, 
         contexts[user.pk] = get_context(user, message, payment, activation, quantity)
         recipient_ids.append(user.pk)
 
+    if not recipient_ids:
+        return 0, 0
+
     recipients = User.objects.filter(pk__in=recipient_ids)
 
     sent_count, errors_count = message.send(
