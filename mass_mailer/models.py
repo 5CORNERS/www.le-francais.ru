@@ -922,7 +922,13 @@ class Message(models.Model):
 			receipt__receiptitem__category=COFFEE_CUPS
 		).order_by('update_date').last()
 
-		filtered_payments = self.recipients_filter.filter_user_payments(recipient.user)
+		if additional_context and 'filtered_payments' in additional_context:
+			filtered_payments = additional_context['filtered_payments']
+		elif self.recipients_filter:
+			filtered_payments = self.recipients_filter.filter_user_payments(recipient.user)
+		else:
+			filtered_payments = Payment.objects.filter(customer_key=str(recipient.user.pk)).order_by('creation_date')
+
 		last_filtered_payment = filtered_payments.last()
 		if last_filtered_payment:
 			last_filtered_payment_category = last_filtered_payment.item_category

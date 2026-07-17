@@ -206,6 +206,7 @@ def send_message(message: Message, users_payments_activations: List[Tuple[User, 
 def get_context(user, message, payment, next_after_payment_activation=None, quantity=1) -> dict:
     context = {
         "payment": payment,
+        "filtered_payments": Payment.objects.filter(customer_key=str(user.pk)).order_by('creation_date'),
         "next_after_payment_activation": next_after_payment_activation,
         "cups_quantity": quantity
     }
