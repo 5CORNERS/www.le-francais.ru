@@ -712,6 +712,14 @@ $(document).ready(function () {
                 $('#markWords').click();
             } else if (event.data.action === 'removeIgnored') {
                 $('#unmarkWords').click();
+            } else if (event.data.action === 'start' ) {
+                window.parent.postMessage(
+                    {
+                        type: 'start',
+                        value: get_selected_filtered(dt)
+                    }, COURSES_BASE_URL || "*"
+                )
+                console.log("Sent selected")
             }
         }
     });
