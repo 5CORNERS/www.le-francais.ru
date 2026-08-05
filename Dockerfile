@@ -49,31 +49,31 @@ ARG EMAIL_URL
 RUN /render/build-scripts/apply-buildpacks.py ${HEROKU_STACK}
 
 # Generate the combined CA bundle at build time using only verified PEM-formatted Russian root/sub certificates
-RUN python -c "import os, sys, traceback; \
-try: \
-    try: \
-        import certifi; \
-        ca_path = certifi.where(); \
-    except ImportError: \
-        ca_path = '/etc/ssl/certs/ca-certificates.crt'; \
-    d = '/app/tinkoff_merchant/certs'; \
-    if not os.path.exists(d): \
-        d = os.path.abspath('tinkoff_merchant/certs'); \
-    f_out = os.path.join(d, 'combined_ca.pem'); \
-    default_certs = open(ca_path, 'r', encoding='utf-8').read(); \
-    custom_certs = []; \
-    if os.path.exists(d): \
-        for f in os.listdir(d): \
-            if (f.endswith('.pem') or f.endswith('.crt')) and f != 'combined_ca.pem': \
-                with open(os.path.join(d, f), 'r', encoding='utf-8', errors='ignore') as file: \
-                    content = file.read(); \
-                    if '-----BEGIN CERTIFICATE-----' in content: \
-                        custom_certs.append(content.strip()); \
-    open(f_out, 'w', encoding='utf-8').write(default_certs + '\n\n' + '\n\n'.join(custom_certs)); \
-    print('Generated Docker CA bundle successfully at:', f_out); \
-except Exception as e: \
-    traceback.print_exc(); \
-    sys.exit(1);"
+RUN python -c "exec('''import os, sys, traceback\n\
+try:\n\
+    try:\n\
+        import certifi\n\
+        ca_path = certifi.where()\n\
+    except ImportError:\n\
+        ca_path = '/etc/ssl/certs/ca-certificates.crt'\n\
+    d = '/app/tinkoff_merchant/certs'\n\
+    if not os.path.exists(d):\n\
+        d = os.path.abspath('tinkoff_merchant/certs')\n\
+    f_out = os.path.join(d, 'combined_ca.pem')\n\
+    default_certs = open(ca_path, 'r', encoding='utf-8').read()\n\
+    custom_certs = []\n\
+    if os.path.exists(d):\n\
+        for f in os.listdir(d):\n\
+            if (f.endswith('.pem') or f.endswith('.crt')) and f != 'combined_ca.pem':\n\
+                with open(os.path.join(d, f), 'r', encoding='utf-8', errors='ignore') as file:\n\
+                    content = file.read()\n\
+                    if '-----BEGIN CERTIFICATE-----' in content:\n\
+                        custom_certs.append(content.strip())\n\
+    open(f_out, 'w', encoding='utf-8').write(default_certs + '\\n\\n' + '\\n\\n'.join(custom_certs))\n\
+    print('Generated Docker CA bundle successfully at:', f_out)\n\
+except Exception as e:\n\
+    traceback.print_exc()\n\
+    sys.exit(1)''')"
 
 # We strongly recommend that you package a Procfile with your application, but
 # if you don't, we'll try to guess one for you. If this is incorrect, please
