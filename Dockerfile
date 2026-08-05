@@ -69,7 +69,7 @@ try:\n\
                     content = file.read()\n\
                     if '-----BEGIN CERTIFICATE-----' in content:\n\
                         custom_certs.append(content.strip())\n\
-    open(f_out, 'w', encoding='utf-8').write(default_certs + '\\n\\n' + '\\n\\n'.join(custom_certs))\n\
+    open(f_out, 'w', encoding='utf-8').write(default_certs + (chr(10)*2) + (chr(10)*2).join(custom_certs))\n\
     print('Generated Docker CA bundle successfully at:', f_out)\n\
 except Exception as e:\n\
     traceback.print_exc()\n\
