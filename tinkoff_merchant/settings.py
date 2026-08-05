@@ -13,6 +13,7 @@ DEFAULT_CONFIG = {
     'SECRET_KEY': '',
     'TTL_DAYS': 1,
     'TTL_MINUTES': 0,
+    'VERIFY': True,
 }
 
 

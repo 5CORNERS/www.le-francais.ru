@@ -1,6 +1,8 @@
 import hashlib
 import json
 import types
+import os
+import certifi
 
 import requests
 from django.utils import timezone
@@ -11,6 +13,56 @@ from .models import Payment
 from .settings import get_config
 from datetime import datetime, timedelta
 from .signals import payment_refund
+
+
+def get_ca_bundle_path():
+    certs_dir = os.path.join(os.path.dirname(__file__), 'certs')
+    combined_ca_path = os.path.join(certs_dir, 'combined_ca.pem')
+    
+    try:
+        need_generate = not os.path.exists(combined_ca_path)
+        
+        # Discover all available certificate files (.pem and .crt) except the target output file itself
+        cert_files = []
+        if os.path.exists(certs_dir):
+            for filename in os.listdir(certs_dir):
+                if (filename.endswith('.pem') or filename.endswith('.crt')) and filename != 'combined_ca.pem':
+                    cert_files.append(os.path.join(certs_dir, filename))
+        
+        # Check if any certificate file is newer than the generated combined_ca.pem
+        if not need_generate and cert_files:
+            combined_mtime = os.path.getmtime(combined_ca_path)
+            for cert_path in cert_files:
+                if os.path.getmtime(cert_path) > combined_mtime:
+                    need_generate = True
+                    break
+        
+        if need_generate:
+            with open(certifi.where(), 'r', encoding='utf-8') as f:
+                default_certs = f.read()
+            
+            custom_certs_list = []
+            for cert_path in cert_files:
+                try:
+                    with open(cert_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        content = f.read()
+                        if '-----BEGIN CERTIFICATE-----' in content:
+                            # Normalize newline endings and append
+                            custom_certs_list.append(content.strip())
+                except Exception:
+                    pass
+            
+            combined_certs = default_certs + '\n\n' + '\n\n'.join(custom_certs_list)
+            with open(combined_ca_path, 'w', encoding='utf-8') as f:
+                f.write(combined_certs)
+    except Exception:
+        custom_ca_path = os.path.join(certs_dir, 'russiantrustedca.pem')
+        if os.path.exists(custom_ca_path):
+            return custom_ca_path
+        return certifi.where()
+    
+    return combined_ca_path
+
 
 
 class PaymentHTTPException(Exception):
@@ -45,7 +97,13 @@ class MerchantAPI:
             'Token': self._token(data),
         })
 
-        r = method(url, data=json.dumps(data, cls=Encoder), headers={'Content-Type': 'application/json'})
+        verify_config = get_config().get('VERIFY', True)
+        if verify_config is True:
+            verify = get_ca_bundle_path()
+        else:
+            verify = verify_config
+
+        r = method(url, data=json.dumps(data, cls=Encoder), headers={'Content-Type': 'application/json'}, verify=verify)
 
         if r.status_code != 200:
             raise PaymentHTTPException('bad status code')

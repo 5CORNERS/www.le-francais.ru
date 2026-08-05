@@ -48,6 +48,25 @@ ARG EMAIL_URL
 # `v2` image, this allows us to expose build-time env vars to your app.
 RUN /render/build-scripts/apply-buildpacks.py ${HEROKU_STACK}
 
+# Generate the combined CA bundle at build time using only verified PEM-formatted Russian root/sub certificates
+RUN python -c "import os, certifi; \
+d = '/app/tinkoff_merchant/certs'; \
+f_out = os.path.join(d, 'combined_ca.pem'); \
+default_certs = open(certifi.where(), 'r', encoding='utf-8').read(); \
+custom_certs = []; \
+if os.path.exists(d): \
+    for f in os.listdir(d): \
+        if (f.endswith('.pem') or f.endswith('.crt')) and f != 'combined_ca.pem': \
+            try: \
+                with open(os.path.join(d, f), 'r', encoding='utf-8', errors='ignore') as file: \
+                    content = file.read(); \
+                    if '-----BEGIN CERTIFICATE-----' in content: \
+                        custom_certs.append(content.strip()); \
+            except Exception: \
+                pass; \
+open(f_out, 'w', encoding='utf-8').write(default_certs + '\n\n' + '\n\n'.join(custom_certs)); \
+print('Generated Docker CA bundle successfully!');"
+
 # We strongly recommend that you package a Procfile with your application, but
 # if you don't, we'll try to guess one for you. If this is incorrect, please
 # add a Procfile that tells us what you need us to run.
