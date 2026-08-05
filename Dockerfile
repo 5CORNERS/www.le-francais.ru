@@ -56,7 +56,9 @@ try: \
         ca_path = certifi.where(); \
     except ImportError: \
         ca_path = '/etc/ssl/certs/ca-certificates.crt'; \
-    d = os.path.abspath('tinkoff_merchant/certs'); \
+    d = '/app/tinkoff_merchant/certs'; \
+    if not os.path.exists(d): \
+        d = os.path.abspath('tinkoff_merchant/certs'); \
     f_out = os.path.join(d, 'combined_ca.pem'); \
     default_certs = open(ca_path, 'r', encoding='utf-8').read(); \
     custom_certs = []; \
@@ -68,7 +70,7 @@ try: \
                     if '-----BEGIN CERTIFICATE-----' in content: \
                         custom_certs.append(content.strip()); \
     open(f_out, 'w', encoding='utf-8').write(default_certs + '\n\n' + '\n\n'.join(custom_certs)); \
-    print('Generated Docker CA bundle successfully!'); \
+    print('Generated Docker CA bundle successfully at:', f_out); \
 except Exception as e: \
     traceback.print_exc(); \
     sys.exit(1);"
