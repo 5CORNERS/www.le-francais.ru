@@ -6,3 +6,4 @@ echo "-----> Deleting static src folder"
 rm -rf ./static_src
 echo "-----> Patching Wagtail"
 python -m pypatch.command apply ./bin/wagtail_nbsp.patch wagtail
+python manage.py migrate
