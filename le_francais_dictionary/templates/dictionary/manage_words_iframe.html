@@ -4,3 +4,9 @@
 {{ block.super }}
     <link rel="stylesheet" href="{% static 'dictionary/css/user-table-iframe.min.css' %}">
 {% endblock %}
+{% block filter_saving %}
+    <script>
+        const FILTER_SAVING_ON = true;
+        window.FILTER_SAVING_KEY = "{{ cross_site_key }}";
+    </script>
+{% endblock %}

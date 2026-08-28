@@ -5,6 +5,13 @@ let $table = $('#wordsTable');
 let style = getComputedStyle(document.body);
 let checked_ids = [];
 let colorCodingEnabled = true;
+const filterSavingKey = function () {
+    if (window.FILTER_SAVING_KEY === undefined){
+        return 'main'
+    } else {
+        return window.FILTER_SAVING_KEY
+    }
+}
 
 const isVerbs = function () {
     return tableType === "verbs"
@@ -145,6 +152,9 @@ let loadFilterButton = {
                 method: 'POST',
                 dataType: 'json',
                 async: false,
+                data: JSON.stringify({
+                    filterKey: filterSavingKey()
+                }),
                 statusCode: {
                     200: function (r) {
                         tableFilters = r;
@@ -187,7 +197,8 @@ let loadFilterButton = {
             $.ajax(Urls['dictionary:save_filters'](), {
                 method: 'POST',
                 data: JSON.stringify({
-                    filters: tableFilters
+                    filters: tableFilters,
+                    filterKey: filterSavingKey()
                 }),
                 contentType: "application/json",
                 dataType: "json",
@@ -712,6 +723,8 @@ $(document).ready(function () {
                 $('#markWords').click();
             } else if (event.data.action === 'removeIgnored') {
                 $('#unmarkWords').click();
+            } else if (event.data.action === 'loadFilters') {
+                loadFilterButton.loadAndFilter();
             } else if (event.data.action === 'start' ) {
                 window.parent.postMessage(
                     {

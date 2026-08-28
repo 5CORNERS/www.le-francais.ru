@@ -1251,6 +1251,7 @@ class UserStandalonePacket(models.Model):
         models.IntegerField(),
         blank=True, null=True
     )
+    filters_v2 = JSONField(default={})
 
     def to_dict(self, user=None) -> dict:
         """

@@ -1,5 +1,4 @@
 import json
-import os
 import traceback
 from json import JSONDecodeError
 from typing import List
@@ -687,27 +686,44 @@ def get_repetition_words_count(request):
         }
     return JsonResponse(result, status=200)
 
+
 @csrf_exempt
 def get_filters(request):
     user = request.user
+    data = json.loads(request.body)
+    filter_key = data.get('filterKey', "main")
     try:
-        userpacket= UserStandalonePacket.objects.get(user=user)
+        userpacket = UserStandalonePacket.objects.get(user=user)
     except UserStandalonePacket.DoesNotExist:
         return HttpResponseNotFound()
-    if userpacket.filters is None:
+
+    filters = userpacket.filters_v2.get(filter_key, userpacket.filters_v2.get("main"))
+
+    if filters is None:
         return HttpResponseNotFound()
+
     return JsonResponse(
-        userpacket.filters, status=200
+        filters, status=200
     )
+
 
 @csrf_exempt
 def save_filters(request):
     data = json.loads(request.body)
+    filter_key = data.get('filterKey', "main")
     filters = data['filters']
+
     userpacket, created = UserStandalonePacket.objects.get_or_create(user=request.user)
-    userpacket.filters = filters
-    userpacket.save()
+
+    if not isinstance(userpacket.filters_v2, dict):
+        userpacket.filters_v2 = {}
+
+    userpacket.filters_v2[filter_key] = filters
+    userpacket.save(update_fields=['filters_v2'])
+
     return HttpResponse(status=200)
+
+
 _courses_public_key = None
 
 
@@ -1199,3 +1215,39 @@ class GetUserCrossSiteData(View):
             return JsonResponse({'success': False, 'message': f'User with id {request.json_data["user_id"]} does not exist'}, status=404)
 
         return super().dispatch(request, *args, **kwargs)
+
+
+from rest_framework.views import APIView
+from le_francais.permsissions import IsValidCourses
+
+class UpdateUserStandalonePacketView(APIView):
+    permission_classes = [IsValidCourses]
+
+    def post(self, request):
+        payload = getattr(request, 'service_payload', None)
+        if not payload:
+            return JsonResponse({'success': False, 'message': 'Invalid token payload'}, status=401)
+
+        user_id = payload.get('user_id')
+        User = get_user_model()
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'User not found'}, status=404)
+
+        try:
+            data = request.data
+            words_ids = data.get('words', [])
+            if not isinstance(words_ids, list):
+                return JsonResponse({'success': False, 'message': 'words must be a list'}, status=400)
+
+            packet, created = UserStandalonePacket.objects.get_or_create(user=user)
+            packet.words = [int(w) for w in words_ids]
+            packet.save(update_fields=['words'])
+
+            return JsonResponse({'success': True})
+
+        except (ValueError, TypeError):
+            return JsonResponse({'success': False, 'message': 'Invalid data'}, status=400)
+
+
