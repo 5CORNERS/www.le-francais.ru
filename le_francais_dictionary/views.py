@@ -771,6 +771,13 @@ def manage_words_standalone(request, lesson_number):
         init_packets = list(Packet.objects.filter(pk__in=packets_ids).values_list('pk', flat=True))
         if 88888888 in packets_ids:
             init_packets = [88888888] + init_packets
+        if 99999999 in packets_ids:
+            query_params = request.GET.copy()
+            query_params['last'] = 'true'
+            del query_params['p']
+            return HttpResponseRedirect(
+                f"{request.path}?{query_params.urlencode()}",
+            )
         if not init_packets:
             init_packets = None
     form = WordsManagementFilterForm(request.user, cross_site=cross_site_key)
