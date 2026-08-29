@@ -123,6 +123,10 @@ body.theme-dark div.bg-light {
     background-color: #2d2d2d !important;
 }
 
+body.theme-dark .selected {
+    color: #ced4da !important;
+}
+
 .uppertable {
     display: initial !important;
 }
