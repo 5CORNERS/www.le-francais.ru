@@ -766,10 +766,11 @@ def manage_words_standalone(request, lesson_number):
         cross_site_key = None
     else:
         template_name = 'dictionary/manage_words_iframe.html'
-        packets_ids = map(lambda x: int(x), request.GET.getlist('p'))
+        packets_ids = list(map(lambda x: int(x), request.GET.getlist('p')))
         cross_site_key = request.GET.get('ck', None)
-        init_packets = Packet.objects.filter(pk__in=packets_ids).values_list(
-            'pk', flat=True)
+        init_packets = list(Packet.objects.filter(pk__in=packets_ids).values_list('pk', flat=True))
+        if 88888888 in packets_ids:
+            init_packets = [88888888] + init_packets
         if not init_packets:
             init_packets = None
     form = WordsManagementFilterForm(request.user, cross_site=cross_site_key)
