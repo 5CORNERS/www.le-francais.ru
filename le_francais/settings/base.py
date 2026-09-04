@@ -225,10 +225,10 @@ DATABASES = {
     }
 }
 
-db_from_env = dj_database_url.config(conn_max_age=500)
+db_from_env = dj_database_url.config(conn_max_age=0)
 DATABASES['default'].update(db_from_env)
 
-courses_db_from_env = dj_database_url.config(env='COURSES_DATABASE_URL', conn_max_age=500)
+courses_db_from_env = dj_database_url.config(env='COURSES_DATABASE_URL', conn_max_age=0)
 DATABASES['courses'] = courses_db_from_env
 
 
