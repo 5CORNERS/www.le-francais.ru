@@ -173,10 +173,6 @@ def get_ads(context, ad_unit_name, ad_unit_placement_code, sizes_str,
     else:
         sizes_list = None
 
-    if not context['request'].user.is_staff:
-        line_item.views = F('views') + 1
-        line_item.save()
-
     return {'empty': False, 'adsense': adsense,
             'creatives': creatives_list, 'line_item': line_item,
             'sizes_str': sizes_str,

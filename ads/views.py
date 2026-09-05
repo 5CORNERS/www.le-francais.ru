@@ -39,14 +39,6 @@ class AdCounterRedirectView(RedirectView):
         # if creative.utm_source is not None:
         #     utm_source = f"utm_source={creative.utm_source}"
 
-        if not user.is_staff:
-
-            creative.clicks = F('clicks') + 1
-            creative.save(update_fields=['clicks'])
-
-            line_item.clicks = F('clicks') + 1
-            line_item.save(update_fields=['clicks'])
-
         log_id = kwargs.get('log_id', None)
         if log_id is not None:
             try:
@@ -320,12 +312,6 @@ def get_creative_dict(request) -> Dict:
         clear_session_data(session)
         request.session = session
 
-        # count statistics
-        if not request.user.is_staff:
-            chosen_creative.views += 1
-            chosen_creative.save(update_fields=['views'])
-            chosen_creative.line_item.views += 1
-            chosen_creative.line_item.save(update_fields=['views'])
         geoip_dict = request.session.get('geoip', None)
         if geoip_dict:
             country = geoip_dict.get('country_name')
