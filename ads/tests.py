@@ -112,6 +112,45 @@ class CullLogsCommandTestCase(TestCase):
         # Only 1 log (the newer one) should remain in the database
         self.assertEqual(Log.objects.count(), 1)
 
+    def test_cull_logs_command_with_line_item_filter(self):
+        # Create an unrelated line item with some logs older than 10 days
+        unrelated_line_item = LineItem.objects.create(name='Unrelated Line Item', priority=1, views=20, clicks=2)
+        unrelated_creative = Creative.objects.create(
+            name='Unrelated Creative',
+            line_item=unrelated_line_item,
+            views=20,
+            clicks=2,
+            _width=300,
+            _height=250
+        )
+        
+        now = timezone.now()
+        log_unrelated = Log.objects.create(
+            line_item=unrelated_line_item,
+            creative=unrelated_creative,
+            ip='127.0.0.1',
+            clicked=False
+        )
+        Log.objects.filter(pk=log_unrelated.pk).update(datetime=now - timedelta(days=15))
+
+        # Run command with --line-item filter for self.line_item only
+        call_command('cull_logs', 10, line_item='Cull Test Line Item')
+
+        # Reload models
+        self.line_item.refresh_from_db()
+        self.creative.refresh_from_db()
+        unrelated_line_item.refresh_from_db()
+        unrelated_creative.refresh_from_db()
+
+        # self.line_item's old logs should be culled (adds 2 views and 1 click)
+        self.assertEqual(self.line_item.views, 12)  # 10 + 2
+        
+        # unrelated_line_item's logs should NOT be culled (and its views/clicks should remain unchanged)
+        self.assertEqual(unrelated_line_item.views, 20)
+        
+        # Log counts: only the unrelated log (older) and the newer log should remain (total 2)
+        self.assertEqual(Log.objects.count(), 2)
+
 
 from ads.admin import LineItemAdmin, CreativeAdmin
 from django.contrib.admin.sites import AdminSite

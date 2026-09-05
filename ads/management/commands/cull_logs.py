@@ -10,11 +10,23 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('days', type=int, help='Cull logs older than this number of days.')
+        parser.add_argument('--line-item', type=str, help='Filter logs by LineItem ID or Name.')
 
     def handle(self, *args, **options):
         days = options['days']
         cutoff_datetime = timezone.now() - timedelta(days=days)
         old_logs = Log.objects.filter(datetime__lt=cutoff_datetime)
+
+        line_item_arg = options.get('line_item')
+        if line_item_arg:
+            if line_item_arg.isdigit():
+                li = LineItem.objects.filter(models.Q(id=int(line_item_arg)) | models.Q(name=line_item_arg)).first()
+            else:
+                li = LineItem.objects.filter(name=line_item_arg).first()
+            if not li:
+                self.stdout.write(self.style.ERROR(f"LineItem '{line_item_arg}' not found."))
+                return
+            old_logs = old_logs.filter(line_item=li)
 
         total_to_cull = old_logs.count()
         if total_to_cull == 0:
