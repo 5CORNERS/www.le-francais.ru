@@ -1,7 +1,7 @@
 import csv
 
 from django.contrib import admin
-from django.db.models import Q
+from django.db.models import Q, Subquery, OuterRef, Count, IntegerField
 from django.http import HttpResponse
 
 # Register your models here.
@@ -15,21 +15,34 @@ class CreativeInline(admin.TabularInline):
     extra = 0
     readonly_fields = ['combined_views', 'combined_clicks', 'views', 'clicks']
 
+    def get_queryset(self, request):
+        qs = super(CreativeInline, self).get_queryset(request)
+        active_views_subquery = Log.objects.filter(creative=OuterRef('pk')).values('creative').annotate(c=Count('id')).values('c')
+        active_clicks_subquery = Log.objects.filter(creative=OuterRef('pk'), clicked=True).values('creative').annotate(c=Count('id')).values('c')
+        return qs.annotate(
+            active_views=Subquery(active_views_subquery, output_field=IntegerField()),
+            active_clicks=Subquery(active_clicks_subquery, output_field=IntegerField())
+        )
+
     def combined_views(self, obj):
-        current_logs = Log.objects.filter(creative=obj).count()
-        return obj.views + current_logs
+        active_views = getattr(obj, 'active_views', None)
+        if active_views is None:
+            active_views = Log.objects.filter(creative=obj).count()
+        return obj.views + (active_views or 0)
     combined_views.short_description = 'Combined Views'
 
     def combined_clicks(self, obj):
-        current_clicks = Log.objects.filter(creative=obj, clicked=True).count()
-        return obj.clicks + current_clicks
+        active_clicks = getattr(obj, 'active_clicks', None)
+        if active_clicks is None:
+            active_clicks = Log.objects.filter(creative=obj, clicked=True).count()
+        return obj.clicks + (active_clicks or 0)
     combined_clicks.short_description = 'Combined Clicks'
 
 
 @admin.register(LineItem)
 class LineItemAdmin(admin.ModelAdmin):
     form = GeoAdder
-    readonly_fields = ['combined_views', 'combined_clicks']
+    readonly_fields = ['combined_views', 'combined_clicks', 'views', 'clicks']
     inlines = [CreativeInline]
     fields = [
         'name', 'priority', 'placements', 'placements_inverted',
@@ -41,6 +54,8 @@ class LineItemAdmin(admin.ModelAdmin):
         'do_not_show_if_was_on_conjugations',
         'combined_views',
         'combined_clicks',
+        'views',
+        'clicks',
         'capping_day',
         'capping_week',
         'capping_month',
@@ -57,14 +72,27 @@ class LineItemAdmin(admin.ModelAdmin):
         'targeting_invert',
     ]
 
+    def get_queryset(self, request):
+        qs = super(LineItemAdmin, self).get_queryset(request)
+        active_views_subquery = Log.objects.filter(line_item=OuterRef('pk')).values('line_item').annotate(c=Count('id')).values('c')
+        active_clicks_subquery = Log.objects.filter(line_item=OuterRef('pk'), clicked=True).values('line_item').annotate(c=Count('id')).values('c')
+        return qs.annotate(
+            active_views=Subquery(active_views_subquery, output_field=IntegerField()),
+            active_clicks=Subquery(active_clicks_subquery, output_field=IntegerField())
+        )
+
     def combined_views(self, obj):
-        current_logs = Log.objects.filter(line_item=obj).count()
-        return obj.views + current_logs
+        active_views = getattr(obj, 'active_views', None)
+        if active_views is None:
+            active_views = Log.objects.filter(line_item=obj).count()
+        return obj.views + (active_views or 0)
     combined_views.short_description = 'Combined Views'
 
     def combined_clicks(self, obj):
-        current_clicks = Log.objects.filter(line_item=obj, clicked=True).count()
-        return obj.clicks + current_clicks
+        active_clicks = getattr(obj, 'active_clicks', None)
+        if active_clicks is None:
+            active_clicks = Log.objects.filter(line_item=obj, clicked=True).count()
+        return obj.clicks + (active_clicks or 0)
     combined_clicks.short_description = 'Combined Clicks'
 
 
@@ -75,23 +103,36 @@ class PlacementAdmin(admin.ModelAdmin):
 
 @admin.register(Creative)
 class CreativeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'line_item', 'combined_views', 'combined_clicks', ]
+    list_display = ['name', 'line_item', 'combined_views', 'combined_clicks', 'views', 'clicks']
     readonly_fields = ['combined_views', 'combined_clicks', 'views', 'clicks']
     fields = [
         'name', 'utm_campaign', 'utm_medium', 'utm_source',
         'image_click_through_url', 'image', 'image_url', 'html', 'iframe',
-        'line_item', 'disable', 'combined_views', 'combined_clicks',
+        'line_item', 'disable', 'combined_views', 'combined_clicks', 'views', 'clicks',
         'labels', 'fluid', 'priority'
     ]
 
+    def get_queryset(self, request):
+        qs = super(CreativeAdmin, self).get_queryset(request)
+        active_views_subquery = Log.objects.filter(creative=OuterRef('pk')).values('creative').annotate(c=Count('id')).values('c')
+        active_clicks_subquery = Log.objects.filter(creative=OuterRef('pk'), clicked=True).values('creative').annotate(c=Count('id')).values('c')
+        return qs.annotate(
+            active_views=Subquery(active_views_subquery, output_field=IntegerField()),
+            active_clicks=Subquery(active_clicks_subquery, output_field=IntegerField())
+        )
+
     def combined_views(self, obj):
-        current_logs = Log.objects.filter(creative=obj).count()
-        return obj.views + current_logs
+        active_views = getattr(obj, 'active_views', None)
+        if active_views is None:
+            active_views = Log.objects.filter(creative=obj).count()
+        return obj.views + (active_views or 0)
     combined_views.short_description = 'Combined Views'
 
     def combined_clicks(self, obj):
-        current_clicks = Log.objects.filter(creative=obj, clicked=True).count()
-        return obj.clicks + current_clicks
+        active_clicks = getattr(obj, 'active_clicks', None)
+        if active_clicks is None:
+            active_clicks = Log.objects.filter(creative=obj, clicked=True).count()
+        return obj.clicks + (active_clicks or 0)
     combined_clicks.short_description = 'Combined Clicks'
 
 def export_csv(modeladmin, request, queryset):
