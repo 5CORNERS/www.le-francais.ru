@@ -15,7 +15,7 @@ USER root
 
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
-    add-apt-repository ppa:maxmind/ppa && \
+    (for i in 1 2 3; do add-apt-repository -y ppa:maxmind/ppa && break || sleep 15; done) && \
     apt-get update && \
     apt-get install -y libmaxminddb0 libmaxminddb-dev mmdb-bin geoipupdate && \
     mkdir -p /app/geoip
