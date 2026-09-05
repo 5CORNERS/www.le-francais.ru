@@ -48,3 +48,67 @@ class LiveIncrementDecoupleTestCase(TestCase):
         # Verify that model views fields DID NOT change
         self.assertEqual(self.line_item.views, initial_li_views)
         self.assertEqual(self.creative.views, initial_cr_views)
+
+
+from datetime import timedelta
+from django.core.management import call_command
+
+class CullLogsCommandTestCase(TestCase):
+    def setUp(self):
+        self.line_item = LineItem.objects.create(name='Cull Test Line Item', priority=1, views=10, clicks=5)
+        self.creative = Creative.objects.create(
+            name='Cull Test Creative',
+            line_item=self.line_item,
+            views=8,
+            clicks=4,
+            _width=300,
+            _height=250
+        )
+        
+        # Create logs using manual datetime manipulation (bypass auto_now_add via update where necessary, or just creating them normally)
+        now = timezone.now()
+        
+        # Log 1: older than 10 days, clicked = True
+        log1 = Log.objects.create(
+            line_item=self.line_item,
+            creative=self.creative,
+            ip='127.0.0.1',
+            clicked=True
+        )
+        Log.objects.filter(pk=log1.pk).update(datetime=now - timedelta(days=15))
+
+        # Log 2: older than 10 days, clicked = False
+        log2 = Log.objects.create(
+            line_item=self.line_item,
+            creative=self.creative,
+            ip='127.0.0.1',
+            clicked=False
+        )
+        Log.objects.filter(pk=log2.pk).update(datetime=now - timedelta(days=12))
+
+        # Log 3: newer than 10 days (should NOT be culled), clicked = False
+        log3 = Log.objects.create(
+            line_item=self.line_item,
+            creative=self.creative,
+            ip='127.0.0.1',
+            clicked=False
+        )
+        Log.objects.filter(pk=log3.pk).update(datetime=now - timedelta(days=5))
+
+    def test_cull_logs_command(self):
+        # Cull logs older than 10 days
+        call_command('cull_logs', 10)
+
+        # Reload models
+        self.line_item.refresh_from_db()
+        self.creative.refresh_from_db()
+
+        # Expecting 2 culled logs: 2 views, 1 click added to model fields
+        self.assertEqual(self.line_item.views, 12)  # 10 + 2
+        self.assertEqual(self.line_item.clicks, 6)  # 5 + 1
+        self.assertEqual(self.creative.views, 10)  # 8 + 2
+        self.assertEqual(self.creative.clicks, 5)  # 4 + 1
+
+        # Only 1 log (the newer one) should remain in the database
+        self.assertEqual(Log.objects.count(), 1)
+
