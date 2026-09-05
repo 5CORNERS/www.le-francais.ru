@@ -29,7 +29,7 @@ class CreativeInline(admin.TabularInline):
 @admin.register(LineItem)
 class LineItemAdmin(admin.ModelAdmin):
     form = GeoAdder
-    readonly_fields = ['combined_views', 'combined_clicks', 'views', 'clicks']
+    readonly_fields = ['combined_views', 'combined_clicks']
     inlines = [CreativeInline]
     fields = [
         'name', 'priority', 'placements', 'placements_inverted',
@@ -41,8 +41,6 @@ class LineItemAdmin(admin.ModelAdmin):
         'do_not_show_if_was_on_conjugations',
         'combined_views',
         'combined_clicks',
-        'views',
-        'clicks',
         'capping_day',
         'capping_week',
         'capping_month',
@@ -77,12 +75,12 @@ class PlacementAdmin(admin.ModelAdmin):
 
 @admin.register(Creative)
 class CreativeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'line_item', 'combined_views', 'combined_clicks', 'views', 'clicks']
+    list_display = ['name', 'line_item', 'combined_views', 'combined_clicks', ]
     readonly_fields = ['combined_views', 'combined_clicks', 'views', 'clicks']
     fields = [
         'name', 'utm_campaign', 'utm_medium', 'utm_source',
         'image_click_through_url', 'image', 'image_url', 'html', 'iframe',
-        'line_item', 'disable', 'combined_views', 'combined_clicks', 'views', 'clicks',
+        'line_item', 'disable', 'combined_views', 'combined_clicks',
         'labels', 'fluid', 'priority'
     ]
 
