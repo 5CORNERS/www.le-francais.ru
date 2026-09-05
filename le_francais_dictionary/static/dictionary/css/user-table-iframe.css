@@ -128,7 +128,7 @@ body.theme-dark .selected {
 }
 
 .uppertable {
-    display: initial !important;
+    display: flex !important;
 }
 
 .filter1 {
