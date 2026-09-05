@@ -238,6 +238,12 @@ let loadFilterButton = {
     loadAndFilter: function () {
         loadFilterButton.setStateLoading();
         loadFilterButton.getFilters(loadFilterButton.filter);
+        window.parent.postMessage(
+            {
+                type: 'loadFiltersFinished',
+                value: tableFilters,
+            }, COURSES_BASE_URL || "*"
+        )
     },
     disable: function () {
         this.$button.attr('disabled', '').addClass('disabled')
