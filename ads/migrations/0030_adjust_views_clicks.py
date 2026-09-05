@@ -3,44 +3,54 @@ from __future__ import unicode_literals
 from django.db import migrations
 
 def adjust_views_clicks(apps, schema_editor):
-    LineItem = apps.get_model('ads', 'LineItem')
-    Creative = apps.get_model('ads', 'Creative')
-    Log = apps.get_model('ads', 'Log')
+    cursor = schema_editor.connection.cursor()
 
-    # For LineItems
-    for item in LineItem.objects.all():
-        active_views = Log.objects.filter(line_item=item).count()
-        active_clicks = Log.objects.filter(line_item=item, clicked=True).count()
-        item.views = max(0, item.views - active_views)
-        item.clicks = max(0, item.clicks - active_clicks)
-        item.save()
+    # Update LineItems in bulk
+    cursor.execute("""
+        UPDATE ads_lineitem
+        SET 
+          views = CASE 
+            WHEN views - COALESCE((SELECT COUNT(*) FROM ads_log WHERE ads_log.line_item_id = ads_lineitem.id), 0) < 0 THEN 0
+            ELSE views - COALESCE((SELECT COUNT(*) FROM ads_log WHERE ads_log.line_item_id = ads_lineitem.id), 0)
+          END,
+          clicks = CASE 
+            WHEN clicks - COALESCE((SELECT COUNT(*) FROM ads_log WHERE ads_log.line_item_id = ads_lineitem.id AND ads_log.clicked), 0) < 0 THEN 0
+            ELSE clicks - COALESCE((SELECT COUNT(*) FROM ads_log WHERE ads_log.line_item_id = ads_lineitem.id AND ads_log.clicked), 0)
+          END
+    """)
 
-    # For Creatives
-    for creative in Creative.objects.all():
-        active_views = Log.objects.filter(creative=creative).count()
-        active_clicks = Log.objects.filter(creative=creative, clicked=True).count()
-        creative.views = max(0, creative.views - active_views)
-        creative.clicks = max(0, creative.clicks - active_clicks)
-        creative.save()
+    # Update Creatives in bulk
+    cursor.execute("""
+        UPDATE ads_creative
+        SET 
+          views = CASE 
+            WHEN views - COALESCE((SELECT COUNT(*) FROM ads_log WHERE ads_log.creative_id = ads_creative.id), 0) < 0 THEN 0
+            ELSE views - COALESCE((SELECT COUNT(*) FROM ads_log WHERE ads_log.creative_id = ads_creative.id), 0)
+          END,
+          clicks = CASE 
+            WHEN clicks - COALESCE((SELECT COUNT(*) FROM ads_log WHERE ads_log.creative_id = ads_creative.id AND ads_log.clicked), 0) < 0 THEN 0
+            ELSE clicks - COALESCE((SELECT COUNT(*) FROM ads_log WHERE ads_log.creative_id = ads_creative.id AND ads_log.clicked), 0)
+          END
+    """)
 
 def reverse_adjust(apps, schema_editor):
-    LineItem = apps.get_model('ads', 'LineItem')
-    Creative = apps.get_model('ads', 'Creative')
-    Log = apps.get_model('ads', 'Log')
+    cursor = schema_editor.connection.cursor()
 
-    for item in LineItem.objects.all():
-        active_views = Log.objects.filter(line_item=item).count()
-        active_clicks = Log.objects.filter(line_item=item, clicked=True).count()
-        item.views = item.views + active_views
-        item.clicks = item.clicks + active_clicks
-        item.save()
+    # Restore LineItems in bulk
+    cursor.execute("""
+        UPDATE ads_lineitem
+        SET 
+          views = views + COALESCE((SELECT COUNT(*) FROM ads_log WHERE ads_log.line_item_id = ads_lineitem.id), 0),
+          clicks = clicks + COALESCE((SELECT COUNT(*) FROM ads_log WHERE ads_log.line_item_id = ads_lineitem.id AND ads_log.clicked), 0)
+    """)
 
-    for creative in Creative.objects.all():
-        active_views = Log.objects.filter(creative=creative).count()
-        active_clicks = Log.objects.filter(creative=creative, clicked=True).count()
-        creative.views = creative.views + active_views
-        creative.clicks = creative.clicks + active_clicks
-        creative.save()
+    # Restore Creatives in bulk
+    cursor.execute("""
+        UPDATE ads_creative
+        SET 
+          views = views + COALESCE((SELECT COUNT(*) FROM ads_log WHERE ads_log.creative_id = ads_creative.id), 0),
+          clicks = clicks + COALESCE((SELECT COUNT(*) FROM ads_log WHERE ads_log.creative_id = ads_creative.id AND ads_log.clicked), 0)
+    """)
 
 class Migration(migrations.Migration):
     dependencies = [
