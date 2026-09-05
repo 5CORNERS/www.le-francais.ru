@@ -13,13 +13,23 @@ class CreativeInline(admin.TabularInline):
     model = Creative
     fk_name = 'line_item'
     extra = 0
-    readonly_fields = ['views', 'clicks']
+    readonly_fields = ['combined_views', 'combined_clicks', 'views', 'clicks']
+
+    def combined_views(self, obj):
+        current_logs = Log.objects.filter(creative=obj).count()
+        return obj.views + current_logs
+    combined_views.short_description = 'Combined Views'
+
+    def combined_clicks(self, obj):
+        current_clicks = Log.objects.filter(creative=obj, clicked=True).count()
+        return obj.clicks + current_clicks
+    combined_clicks.short_description = 'Combined Clicks'
 
 
 @admin.register(LineItem)
 class LineItemAdmin(admin.ModelAdmin):
     form = GeoAdder
-    readonly_fields = ['views', 'clicks']
+    readonly_fields = ['combined_views', 'combined_clicks', 'views', 'clicks']
     inlines = [CreativeInline]
     fields = [
         'name', 'priority', 'placements', 'placements_inverted',
@@ -29,6 +39,8 @@ class LineItemAdmin(admin.ModelAdmin):
         'less_than_n_days_ago',
         'less_than_n_days_ago_value',
         'do_not_show_if_was_on_conjugations',
+        'combined_views',
+        'combined_clicks',
         'views',
         'clicks',
         'capping_day',
@@ -47,13 +59,42 @@ class LineItemAdmin(admin.ModelAdmin):
         'targeting_invert',
     ]
 
+    def combined_views(self, obj):
+        current_logs = Log.objects.filter(line_item=obj).count()
+        return obj.views + current_logs
+    combined_views.short_description = 'Combined Views'
+
+    def combined_clicks(self, obj):
+        current_clicks = Log.objects.filter(line_item=obj, clicked=True).count()
+        return obj.clicks + current_clicks
+    combined_clicks.short_description = 'Combined Clicks'
+
+
 @admin.register(Placement)
 class PlacementAdmin(admin.ModelAdmin):
     pass
 
+
 @admin.register(Creative)
 class CreativeAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['name', 'line_item', 'combined_views', 'combined_clicks', 'views', 'clicks']
+    readonly_fields = ['combined_views', 'combined_clicks', 'views', 'clicks']
+    fields = [
+        'name', 'utm_campaign', 'utm_medium', 'utm_source',
+        'image_click_through_url', 'image', 'image_url', 'html', 'iframe',
+        'line_item', 'disable', 'combined_views', 'combined_clicks', 'views', 'clicks',
+        'labels', 'fluid', 'priority'
+    ]
+
+    def combined_views(self, obj):
+        current_logs = Log.objects.filter(creative=obj).count()
+        return obj.views + current_logs
+    combined_views.short_description = 'Combined Views'
+
+    def combined_clicks(self, obj):
+        current_clicks = Log.objects.filter(creative=obj, clicked=True).count()
+        return obj.clicks + current_clicks
+    combined_clicks.short_description = 'Combined Clicks'
 
 def export_csv(modeladmin, request, queryset):
     response = HttpResponse(

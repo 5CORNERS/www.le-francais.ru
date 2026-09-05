@@ -112,3 +112,41 @@ class CullLogsCommandTestCase(TestCase):
         # Only 1 log (the newer one) should remain in the database
         self.assertEqual(Log.objects.count(), 1)
 
+
+from ads.admin import LineItemAdmin, CreativeAdmin
+from django.contrib.admin.sites import AdminSite
+
+class AdminCombinedFieldsTestCase(TestCase):
+    def setUp(self):
+        self.site = AdminSite()
+        self.line_item = LineItem.objects.create(name='Admin Test Line Item', views=100, clicks=10)
+        self.creative = Creative.objects.create(
+            name='Admin Test Creative',
+            line_item=self.line_item,
+            views=50,
+            clicks=5,
+            _width=300,
+            _height=250
+        )
+        
+        # Create active logs
+        Log.objects.create(line_item=self.line_item, creative=self.creative, ip='127.0.0.1', clicked=True)
+        Log.objects.create(line_item=self.line_item, creative=self.creative, ip='127.0.0.1', clicked=False)
+
+    def test_admin_combined_fields(self):
+        li_admin = LineItemAdmin(LineItem, self.site)
+        cr_admin = CreativeAdmin(Creative, self.site)
+
+        # LineItem combined counts:
+        # Stored: views=100, clicks=10
+        # Active logs: 2 views, 1 click
+        self.assertEqual(li_admin.combined_views(self.line_item), 102)
+        self.assertEqual(li_admin.combined_clicks(self.line_item), 11)
+
+        # Creative combined counts:
+        # Stored: views=50, clicks=5
+        # Active logs: 2 views, 1 click
+        self.assertEqual(cr_admin.combined_views(self.creative), 52)
+        self.assertEqual(cr_admin.combined_clicks(self.creative), 6)
+
+
