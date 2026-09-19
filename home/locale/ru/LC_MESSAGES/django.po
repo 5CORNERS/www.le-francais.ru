@@ -708,3 +708,7 @@ msgstr ""
 "\n"
 "    Вход завершён.<br />\n"
 "    Вы можете закрыть это окно\n"
+
+#: account/forms.py:101
+msgid "The e-mail address and/or password you specified are not correct."
+msgstr "E-mail адрес и/или пароль неверны."
