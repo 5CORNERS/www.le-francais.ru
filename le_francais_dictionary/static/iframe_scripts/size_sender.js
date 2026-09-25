@@ -25,7 +25,6 @@ $(
                     height: height
                 }, COURSES_BASE_URL || "*");
 
-                console.log('Sent height: ' + height); // For debugging
             }
 
         }
@@ -75,5 +74,8 @@ $(
             attributeFilter: ['class', 'id', 'src'], // Ignore style changes
             characterData: true
         });
+
+        // Periodically check and send height as a fallback
+        setInterval(sendHeight, 500);
     }
 );
