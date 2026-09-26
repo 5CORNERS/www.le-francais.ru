@@ -51,3 +51,29 @@ class SessionRetrievalView(APIView):
             return Response(UserSerializer(session.user).data, status=status.HTTP_200_OK)
 
         return Response({"detail": "No user associated with this session"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class CheckAvailabilityView(APIView):
+    permission_classes = [IsValidCourses]
+
+    def post(self, request):
+        return self.check(request.data)
+
+    def get(self, request):
+        return self.check(request.query_params)
+
+    def check(self, data):
+        username = data.get('username')
+        email = data.get('email')
+
+        response_data = {}
+
+        if username is not None:
+            username_taken = User.objects.filter(username__iexact=username).exists()
+            response_data['username_available'] = not username_taken
+
+        if email is not None:
+            email_taken = User.objects.filter(email__iexact=email).exists()
+            response_data['email_available'] = not email_taken
+
+        return Response(response_data, status=status.HTTP_200_OK)
