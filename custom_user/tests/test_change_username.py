@@ -9,5 +9,5 @@ class ChangeUsernameTestCase(TestCase):
     def test_change_username(self):
         c = Client()
         c.login(username='username1', password='password1')
-        c.post('/accaunts/username/change', {'username':'username3'})
+        c.post('/accounts/username/change/', {'username':'username3'})
         self.assertEqual(User.objects.get(email='username1@example.com').username, 'username3')

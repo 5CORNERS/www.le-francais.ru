@@ -1,6 +1,6 @@
 import io
 from django.test import TestCase
-from django.core.management import call_command
+from django.core.management import call_command, CommandError
 from django.contrib.auth import get_user_model
 from allauth.account.models import EmailAddress
 
@@ -39,5 +39,5 @@ class ChangeUserEmailCommandTestCase(TestCase):
 
     def test_change_email_already_taken(self):
         out = io.StringIO()
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(CommandError):
             call_command('change_user_email', 'cmdtestuser1', 'cmduser2@example.com', '--no-input', stdout=out)
