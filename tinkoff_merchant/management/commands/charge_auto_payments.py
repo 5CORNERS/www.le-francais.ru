@@ -8,7 +8,7 @@ from tinkoff_merchant.consts import PAYMENT_PAYED_STATUSES, CATEGORIES
 from tinkoff_merchant.models import Payment
 from tinkoff_merchant.services import MerchantAPI
 
-DELTA = timedelta(days=25)
+DELTA = timedelta(days=15)
 NOW = timezone.now()
 
 class Command(BaseCommand):
@@ -61,12 +61,20 @@ class Command(BaseCommand):
             else:
                 charged_emails.add(pp.email)
 
+            if pp.user is None:
+                continue
+
+            if not pp.rebill_id:
+                print(f"В заказе {pp} пользователя {pp.user} параметр rebill_id = {pp.rebill_id}")
+                continue
+
             # if parent or children payment less than 30 days ago
             if ((NOW - pp.creation_date) < DELTA or
                     pp.children.filter(
                         creation_date__gt=NOW - DELTA,
                         status__in=PAYMENT_PAYED_STATUSES
                     ).exists()):
+                print(f"Последний  заказ пользователя {pp.user} был создан меньше, чем {DELTA.days} дней назад")
                 continue
 
             print(f'\nCreating new children payment for {pp} -- {pp.amount/100}₽ -- {pp.creation_date.strftime("%Y-%m-%d")} -- {pp.user.username if pp.user else "anonymous"}')
