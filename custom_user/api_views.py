@@ -77,3 +77,23 @@ class CheckAvailabilityView(APIView):
             response_data['email_available'] = not email_taken
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+class SetPasswordView(APIView):
+    permission_classes = [IsValidCourses]
+
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if not email or not password:
+            return Response({"detail": "Email and password are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        user.set_password(password)
+        user.save()
+
+        return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
