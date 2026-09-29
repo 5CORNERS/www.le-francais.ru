@@ -41,3 +41,16 @@ GEMINI.md
 /tinkoff_merchant/certs/combined_ca.pem
 /.superpowers/
 /.agents/
+/tools/bin/
+/tools/pgsql/
+/tools/backups/
+/tools/data/
+/tools/mamba_root/
+/tools/env/
+/tools/temp_*/
+/tools/*.zip
+/tools/*.tar.bz2
+/tools/*.tar.gz
+/tools/postgres.log
+/backups/
+test_sandbox.wsb
