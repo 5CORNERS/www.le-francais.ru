@@ -1,6 +1,8 @@
 .idea
 db.sqlite3
 .env
+*.enc
+.env.dev.enc
 Procfile.local
 venv
 *.pyc
