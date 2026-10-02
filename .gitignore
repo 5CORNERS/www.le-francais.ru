@@ -56,3 +56,4 @@ GEMINI.md
 /tools/postgres.log
 /backups/
 test_sandbox.wsb
+/.gemini/
