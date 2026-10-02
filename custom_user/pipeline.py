@@ -8,11 +8,14 @@ def create_allauth_email(backend, user, response, *args, **kwargs):
     if not user or not user.email:
         return
 
-    # Check if EmailAddress already exists
-    if not EmailAddress.objects.filter(user=user, email=user.email).exists():
-        EmailAddress.objects.create(
-            user=user,
-            email=user.email,
-            verified=True,
-            primary=True
-        )
+    email_address, created = EmailAddress.objects.get_or_create(
+        user=user,
+        email=user.email,
+        defaults={
+            'verified': True,
+            'primary': True
+        }
+    )
+    if not created and not email_address.verified:
+        email_address.verified = True
+        email_address.save(update_fields=['verified'])

@@ -1,4 +1,7 @@
 from django.db.models import Q
+from allauth.account.models import EmailAddress
+from allauth.account.utils import setup_user_email, send_email_confirmation
+from allauth.account.signals import user_signed_up
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -31,6 +34,13 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            if not EmailAddress.objects.filter(user=user).exists():
+                setup_user_email(request, user, [])
+            try:
+                send_email_confirmation(request, user, signup=True)
+            except Exception:
+                pass
+            user_signed_up.send(sender=user.__class__, request=request, user=user)
             return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

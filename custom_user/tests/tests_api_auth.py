@@ -1,4 +1,6 @@
 import jwt
+from allauth.account.models import EmailAddress
+from django.core import mail
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -42,6 +44,13 @@ class AuthAPITests(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['username'], 'newuser')
+
+        email_address = EmailAddress.objects.filter(user__username='newuser', email='new@example.com').first()
+        self.assertIsNotNone(email_address)
+        self.assertTrue(email_address.primary)
+        self.assertFalse(email_address.verified)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ['new@example.com'])
 
     def test_register_duplicate_email(self):
         url = reverse('api-register')
