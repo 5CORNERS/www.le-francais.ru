@@ -348,7 +348,7 @@ POSTMAN_SHOW_USER_AS = 'username'
 POSTMAN_DISALLOW_ANONYMOUS = True
 POSTMAN_MAILER_APP = 'mailer'
 
-EMAIL_BACKEND = 'django_ses.SESBackend'
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django_ses.SESBackend')
 
 AWS_SES_REGION_NAME = 'eu-west-1'
 AWS_SES_REGION_ENDPOINT = 'email.eu-west-1.amazonaws.com'

@@ -3,6 +3,7 @@ from allauth.account.models import EmailAddress
 from allauth.account.utils import setup_user_email, send_email_confirmation
 from allauth.account.signals import user_signed_up
 from django.utils import timezone
+from django.contrib.auth import SESSION_KEY, BACKEND_SESSION_KEY, HASH_SESSION_KEY
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +11,25 @@ from custom_user.models import User
 from custom_user.api_serializers import UserSerializer, RegisterSerializer
 from le_francais.permsissions import IsValidCourses
 from user_sessions.models import Session
+from user_sessions.backends.db import SessionStore
+
+
+def _create_user_session(user, request):
+    ip = '127.0.0.1'
+    for header in ['HTTP_X_REAL_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR']:
+        val = request.META.get(header)
+        if val:
+            ip = val.split(',')[0].strip()
+            break
+    session = SessionStore(
+        ip=ip,
+        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+    )
+    session[SESSION_KEY] = str(user.pk)
+    session[BACKEND_SESSION_KEY] = 'allauth.account.auth_backends.AuthenticationBackend'
+    session[HASH_SESSION_KEY] = user.get_session_auth_hash()
+    session.save()
+    return session.session_key
 
 
 class LoginView(APIView):
@@ -23,7 +43,10 @@ class LoginView(APIView):
 
         user = User.objects.filter(Q(email__iexact=identifier) | Q(username__iexact=identifier)).first()
         if user and user.check_password(password):
-            return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+            session_key = _create_user_session(user, request)
+            data = UserSerializer(user).data
+            data['session_key'] = session_key
+            return Response(data, status=status.HTTP_200_OK)
         return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -43,7 +66,10 @@ class RegisterView(APIView):
                 email_address.verified = True
                 email_address.save(update_fields=['verified'])
             user_signed_up.send(sender=user.__class__, request=request, user=user)
-            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+            session_key = _create_user_session(user, request)
+            data = UserSerializer(user).data
+            data['session_key'] = session_key
+            return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

@@ -24,6 +24,8 @@ def add_header_service_worker_allowed(headers, path, url):
 WHITENOISE_ADD_HEADERS_FUNCTION = add_header_service_worker_allowed
 SESSION_COOKIE_DOMAIN = None
 
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+
 try:
     from .local import *
 except ImportError:
