@@ -98,6 +98,10 @@ CUSTOM_CONFIG_VALUE="french language portal"
     Assert-Condition (Test-Path $TestDecFile) "Decrypted file created" "File not found: $TestDecFile"
 
     if (Test-Path $TestDecFile) {
+        $decBytes = [System.IO.File]::ReadAllBytes($TestDecFile)
+        $hasBom = ($decBytes.Length -ge 3 -and $decBytes[0] -eq 0xEF -and $decBytes[1] -eq 0xBB -and $decBytes[2] -eq 0xBF)
+        Assert-Condition (-not $hasBom) "Decrypted file does not contain UTF-8 BOM" "Decrypted file contains UTF-8 BOM"
+
         $decContent = [System.IO.File]::ReadAllText($TestDecFile, [System.Text.Encoding]::UTF8)
 
         Assert-Condition ($decContent.Contains("SECRET_KEY=unit-test-secret-key-xyz-123")) "Decrypted content preserves SECRET_KEY"

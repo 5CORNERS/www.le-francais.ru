@@ -70,7 +70,7 @@ try {
 
     $decryptor = $aes.CreateDecryptor()
     $plainBytes = $decryptor.TransformFinalBlock($cipherBytes, 0, $cipherBytes.Length)
-    $plainText = [System.Text.Encoding]::UTF8.GetString($plainBytes)
+    $plainText = [System.Text.Encoding]::UTF8.GetString($plainBytes).TrimStart([char]0xFEFF)
 
     # Enforce local portable PostgreSQL port 5433
     $targetDbUrl = "DATABASE_URL=postgres://postgres@127.0.0.1:5433/le_francais"
@@ -85,7 +85,8 @@ try {
         New-Item -ItemType Directory -Force -Path $outDir | Out-Null
     }
 
-    [System.IO.File]::WriteAllText($OutputFile, $plainText, [System.Text.Encoding]::UTF8)
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($OutputFile, $plainText, $utf8NoBom)
 
     Write-Host "Successfully decrypted $InputFile -> $OutputFile (DATABASE_URL mapped to port 5433)" -ForegroundColor Green
     exit 0
