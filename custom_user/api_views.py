@@ -34,12 +34,14 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            if not EmailAddress.objects.filter(user=user).exists():
-                setup_user_email(request, user, [])
-            try:
-                send_email_confirmation(request, user, signup=True)
-            except Exception:
-                pass
+            email_address, created = EmailAddress.objects.get_or_create(
+                user=user,
+                email=user.email,
+                defaults={'verified': True, 'primary': True}
+            )
+            if not email_address.verified:
+                email_address.verified = True
+                email_address.save(update_fields=['verified'])
             user_signed_up.send(sender=user.__class__, request=request, user=user)
             return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
