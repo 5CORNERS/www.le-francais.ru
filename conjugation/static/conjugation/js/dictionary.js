@@ -33,6 +33,30 @@
   }
 
   /**
+   * Formats a comment text. If the comment was wrapped in outer markdown asterisks (*...*),
+   * strips the outer pair so that only inner highlighted terms become <mark>.
+   */
+  function formatComment(text) {
+    if (!text) return '';
+    let str = text.trim();
+    if (str.startsWith('*') && str.endsWith('*') && str.length > 2) {
+      str = str.slice(1, -1).trim();
+    }
+    return formatText(str);
+  }
+
+  /**
+   * Wraps an element into a smooth collapsible container for compact-view transitions.
+   */
+  function wrapCollapsible(childEl) {
+    const wrapper = ce('div', 'dict-collapsible');
+    const inner = ce('div', 'dict-collapsible-inner');
+    inner.appendChild(childEl);
+    wrapper.appendChild(inner);
+    return wrapper;
+  }
+
+  /**
    * Helper to create an element with a class and optional content.
    */
   function ce(tag, className, html) {
@@ -43,26 +67,9 @@
   }
 
   /**
-   * Adjust example text wrapping layout on resize
+   * Adjust example text wrapping layout on resize (legacy no-op)
    */
-  window.updateExamplesWraps = function() {
-    document.querySelectorAll('.example').forEach(function(ex) {
-      const fr = ex.querySelector('.example-fr');
-      const ru = ex.querySelector('.example-ru');
-      if (!fr || !ru || ex.offsetParent === null) return;
-      
-      // Remove wrapped class initially to accurately measure natural flow
-      ru.classList.remove('wrapped');
-      
-      // Wait for layout to update
-      const frRect = fr.getBoundingClientRect();
-      const ruRect = ru.getBoundingClientRect();
-      if (ruRect.bottom > frRect.bottom + 5) {
-        ru.classList.add('wrapped');
-      }
-    });
-  };
-  window.addEventListener('resize', window.updateExamplesWraps);
+  window.updateExamplesWraps = function() {};
 
   /**
    * Renders a list of examples.
@@ -70,17 +77,26 @@
   function renderExamples(examples) {
     const container = ce('div', 'examples-list');
     examples.forEach(function(ex) {
+      if (!ex.fr && !ex.ru) return;
       const exampleEl = ce('div', 'example');
-      const frSpan = ce('span', 'example-fr', formatText(ex.fr));
-      const ruSpan = ce('span', 'example-ru', formatText(ex.ru));
-      exampleEl.appendChild(frSpan);
-      exampleEl.appendChild(ruSpan);
+      const bulletSpan = ce('span', 'example-bullet', '“');
+      bulletSpan.setAttribute('aria-hidden', 'true');
+      const bodyEl = ce('div', 'example-body');
+
+      if (ex.fr) {
+        bodyEl.appendChild(ce('div', 'example-fr', formatText(ex.fr)));
+      }
+      if (ex.ru) {
+        bodyEl.appendChild(ce('div', 'example-ru', formatText(ex.ru)));
+      }
+
+      exampleEl.appendChild(bulletSpan);
+      exampleEl.appendChild(bodyEl);
       container.appendChild(exampleEl);
-      
-      setTimeout(window.updateExamplesWraps, 0);
     });
     return container;
   }
+
 
   /**
    * Renders a meaning object.
@@ -97,10 +113,10 @@
     descEl.appendChild(textSpan);
     inner.appendChild(descEl);
     if (meaning.comment) {
-      inner.appendChild(ce('div', 'comment', formatText(meaning.comment)));
+      inner.appendChild(wrapCollapsible(ce('div', 'comment', formatComment(meaning.comment))));
     }
     if (meaning.examples && meaning.examples.length > 0) {
-      inner.appendChild(renderExamples(meaning.examples));
+      inner.appendChild(wrapCollapsible(renderExamples(meaning.examples)));
     }
     el.appendChild(inner);
     return el;
@@ -116,10 +132,10 @@
       el.appendChild(ce('div', 'sense-description', formatText(sense.description)));
     }
     if (sense.comment) {
-      el.appendChild(ce('div', 'comment', formatText(sense.comment)));
+      el.appendChild(wrapCollapsible(ce('div', 'comment', formatComment(sense.comment))));
     }
     if (sense.examples && sense.examples.length > 0) {
-      el.appendChild(renderExamples(sense.examples));
+      el.appendChild(wrapCollapsible(renderExamples(sense.examples)));
     }
     if (!hasDistinctDesc) {
       el.classList.add('sense-examples-only');
@@ -138,7 +154,7 @@
     header.appendChild(ce('span', 'phrase-translation', '— ' + formatText(item.translation)));
     inner.appendChild(header);
     if (item.comment) {
-      inner.appendChild(ce('div', 'comment', formatText(item.comment)));
+      inner.appendChild(wrapCollapsible(ce('div', 'comment', formatComment(item.comment))));
     }
     if (item.senses && item.senses.length > 0) {
       const sensesList = ce('div', 'senses-list');
@@ -261,8 +277,8 @@
     
     container.appendChild(ce('h3', '', title));
     
-    const listLimit = isCompact ? 8 : 4;
-    const listThreshold = isCompact ? 9 : 6;
+    const listLimit = 6;
+    const listThreshold = 7;
     const isCollapsedInit = items.length > listThreshold;
     const listContainer = ce('div', containerClass + (isCollapsedInit ? ' collapsed' : ''));
     let renderedCount = 0;
@@ -325,11 +341,21 @@
   }
 
   function toggleCompactMode() {
-    const nextMode = !getCompactMode();
-    setCompactMode(nextMode);
+    const isNowCompact = !getCompactMode();
+    setCompactMode(isNowCompact);
     document.querySelectorAll('.dictionnaire').forEach(function(c) {
-      if (c._dictData) {
-        renderDictionary(c, c._dictData, c._dictVerbId);
+      if (isNowCompact) {
+        c.classList.add('compact-view');
+      } else {
+        c.classList.remove('compact-view');
+      }
+      const toggleBtn = c.querySelector('.dict-toggle-btn');
+      if (toggleBtn) {
+        toggleBtn.className = 'dict-toggle-btn ' + (isNowCompact ? 'compact' : 'expanded');
+        const iconSpan = toggleBtn.querySelector('.dict-toggle-icon');
+        if (iconSpan) iconSpan.textContent = isNowCompact ? '💡' : '✕';
+        const textSpan = toggleBtn.querySelector('.dict-toggle-text');
+        if (textSpan) textSpan.textContent = isNowCompact ? 'Показать примеры и пояснения' : 'Скрыть примеры и пояснения';
       }
     });
   }
@@ -451,8 +477,8 @@
       totalMeanings = data.meanings.length;
     }
 
-    const meaningsLimit = isCompact ? 8 : 4;
-    const meaningsThreshold = isCompact ? 9 : 5;
+    const meaningsLimit = 6;
+    const meaningsThreshold = 7;
 
     let meaningsParent = container;
     let isMeaningsCollapsed = false;
@@ -565,8 +591,8 @@
 
     // 5. Postscript Comment (Desktop only, shown at the very end of section)
     if (data.comment) {
-      const commentEl = ce('div', 'verb-article-comment', formatText(data.comment));
-      container.appendChild(commentEl);
+      const commentEl = ce('div', 'verb-article-comment', formatComment(data.comment));
+      container.appendChild(wrapCollapsible(commentEl));
     }
   }
 
