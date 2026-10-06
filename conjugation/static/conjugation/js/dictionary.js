@@ -93,7 +93,7 @@
       const idxSpan = ce('span', 'meaning-index', index + '.');
       descEl.appendChild(idxSpan);
     }
-    const textSpan = ce('span', '', formatText(meaning.description || ''));
+    const textSpan = ce('span', 'meaning-text', formatText(meaning.description || ''));
     descEl.appendChild(textSpan);
     inner.appendChild(descEl);
     if (meaning.comment) {
@@ -111,7 +111,8 @@
    */
   function renderSense(sense, parentTranslation) {
     const el = ce('div', 'sense');
-    if (sense.description && sense.description.trim() !== parentTranslation.trim()) {
+    const hasDistinctDesc = Boolean(sense.description && sense.description.trim() !== parentTranslation.trim());
+    if (hasDistinctDesc) {
       el.appendChild(ce('div', 'sense-description', formatText(sense.description)));
     }
     if (sense.comment) {
@@ -119,6 +120,9 @@
     }
     if (sense.examples && sense.examples.length > 0) {
       el.appendChild(renderExamples(sense.examples));
+    }
+    if (!hasDistinctDesc) {
+      el.classList.add('sense-examples-only');
     }
     return el;
   }
@@ -252,17 +256,19 @@
   /**
    * Renders a list with "show more" functionality.
    */
-  function renderExpandableList(container, items, title, containerClass) {
+  function renderExpandableList(container, items, title, containerClass, isCompact) {
     if (!items || items.length === 0) return;
     
     container.appendChild(ce('h3', '', title));
     
-    const isCollapsedInit = items.length > 6;
+    const listLimit = isCompact ? 8 : 4;
+    const listThreshold = isCompact ? 9 : 6;
+    const isCollapsedInit = items.length > listThreshold;
     const listContainer = ce('div', containerClass + (isCollapsedInit ? ' collapsed' : ''));
     let renderedCount = 0;
     items.forEach(function(item) {
       const itemEl = renderPhrase(item);
-      if (isCollapsedInit && renderedCount >= 4) {
+      if (isCollapsedInit && renderedCount >= listLimit) {
           itemEl.classList.add('hidden-item');
       }
       renderedCount++;
@@ -272,7 +278,7 @@
     container.appendChild(listContainer);
     
     if (isCollapsedInit) {
-      const remainingCount = items.length - 4;
+      const remainingCount = items.length - listLimit;
       const btn = ce('div', 'show-more-btn', 'Показать еще ' + remainingCount);
       btn.onclick = function() {
         const isExpanding = listContainer.classList.contains('collapsed');
@@ -296,6 +302,85 @@
     }
   }
 
+  const STORAGE_KEY = 'dict_compact_view';
+
+  function getCompactMode() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved === null) {
+        return true; // Default: compact view (examples hidden)
+      }
+      return saved === 'true';
+    } catch (e) {
+      return true;
+    }
+  }
+
+  function setCompactMode(val) {
+    try {
+      localStorage.setItem(STORAGE_KEY, val ? 'true' : 'false');
+    } catch (e) {
+      // Ignore if localStorage unavailable
+    }
+  }
+
+  function toggleCompactMode() {
+    const nextMode = !getCompactMode();
+    setCompactMode(nextMode);
+    document.querySelectorAll('.dictionnaire').forEach(function(c) {
+      if (c._dictData) {
+        renderDictionary(c, c._dictData, c._dictVerbId);
+      }
+    });
+  }
+
+  function hasExamplesOrComments(data) {
+    if (!data) return false;
+    if (data.comment) return true;
+    if (data.groups) {
+      for (let i = 0; i < data.groups.length; i++) {
+        const g = data.groups[i];
+        if (g.meanings) {
+          for (let j = 0; j < g.meanings.length; j++) {
+            const m = g.meanings[j];
+            if (m.comment || (m.examples && m.examples.length > 0)) return true;
+          }
+        }
+      }
+    }
+    if (data.meanings) {
+      for (let j = 0; j < data.meanings.length; j++) {
+        const m = data.meanings[j];
+        if (m.comment || (m.examples && m.examples.length > 0)) return true;
+      }
+    }
+    if (data.phrases) {
+      for (let i = 0; i < data.phrases.length; i++) {
+        const p = data.phrases[i];
+        if (p.comment) return true;
+        if (p.senses) {
+          for (let j = 0; j < p.senses.length; j++) {
+            const s = p.senses[j];
+            if (s.comment || (s.examples && s.examples.length > 0)) return true;
+          }
+        }
+      }
+    }
+    if (data.idioms) {
+      for (let i = 0; i < data.idioms.length; i++) {
+        const p = data.idioms[i];
+        if (p.comment) return true;
+        if (p.senses) {
+          for (let j = 0; j < p.senses.length; j++) {
+            const s = p.senses[j];
+            if (s.comment || (s.examples && s.examples.length > 0)) return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   /**
    * Renders the dictionary data into the container.
    */
@@ -311,6 +396,29 @@
     const verbUpper = data.verb.toUpperCase();
     const titleText = data.verb.length <= 15 ? "Перевод глагола " + verbUpper : "Перевод " + verbUpper;
     container.appendChild(ce('h2', '', titleText));
+
+    const hasDetails = hasExamplesOrComments(data);
+    const isCompact = hasDetails && getCompactMode();
+
+    if (isCompact) {
+      container.classList.add('compact-view');
+    } else {
+      container.classList.remove('compact-view');
+    }
+
+    // 1.2 Toggle Button (placed directly under H2, above notice plate)
+    if (hasDetails) {
+      const toggleBtn = ce('button', 'dict-toggle-btn ' + (isCompact ? 'compact' : 'expanded'));
+      toggleBtn.type = 'button';
+      const iconSpan = ce('span', 'dict-toggle-icon', isCompact ? '💡' : '✕');
+      const textSpan = ce('span', 'dict-toggle-text', isCompact ? 'Показать примеры и пояснения' : 'Скрыть примеры и пояснения');
+      toggleBtn.appendChild(iconSpan);
+      toggleBtn.appendChild(textSpan);
+      toggleBtn.onclick = function() {
+        toggleCompactMode();
+      };
+      container.appendChild(toggleBtn);
+    }
 
     // 1.5 Moderation Status Plates (Show community notice only if unverified)
 
@@ -343,19 +451,25 @@
       totalMeanings = data.meanings.length;
     }
 
+    const meaningsLimit = isCompact ? 8 : 4;
+    const meaningsThreshold = isCompact ? 9 : 5;
+
     let meaningsParent = container;
     let isMeaningsCollapsed = false;
     let remainingMeanings = 0;
     
-    if (totalMeanings > 5) {
+    if (totalMeanings > meaningsThreshold) {
         isMeaningsCollapsed = true;
-        remainingMeanings = totalMeanings - 4;
+        remainingMeanings = totalMeanings - meaningsLimit;
         meaningsParent = ce('div', 'meanings-container collapsed');
     }
 
     let renderedCount = 0;
 
     if (data.groups && data.groups.length > 0) {
+      const hasAnyGroupWithMultiple = Boolean(data.groups.some(function(g) {
+        return g.meanings && g.meanings.length > 1;
+      }));
       data.groups.forEach(function(group) {
         const groupEl = ce('div', 'group');
         const groupInner = ce('div', 'group-inner');
@@ -383,10 +497,10 @@
 
         if (group.meanings && group.meanings.length > 0) {
           const meaningsList = ce('div', 'meanings-list');
-          const hasMultiple = group.meanings.length > 1;
+          const shouldNumber = hasAnyGroupWithMultiple || group.meanings.length > 1;
           group.meanings.forEach(function(m, idx) {
-            const mEl = renderMeaning(m, hasMultiple ? idx + 1 : null);
-            if (isMeaningsCollapsed && renderedCount >= 4) {
+            const mEl = renderMeaning(m, shouldNumber ? idx + 1 : null);
+            if (isMeaningsCollapsed && renderedCount >= meaningsLimit) {
                 mEl.classList.add('hidden-item');
             } else {
                 groupFullyHidden = false;
@@ -410,7 +524,7 @@
       const hasMultiple = data.meanings.length > 1;
       data.meanings.forEach(function(m, idx) {
         const mEl = renderMeaning(m, hasMultiple ? idx + 1 : null);
-        if (isMeaningsCollapsed && renderedCount >= 4) {
+        if (isMeaningsCollapsed && renderedCount >= meaningsLimit) {
             mEl.classList.add('hidden-item');
         }
         flatList.appendChild(mEl);
@@ -444,10 +558,10 @@
     }
 
     // 3. Phrases
-    renderExpandableList(container, data.phrases, 'Фразеология', 'phrases-container');
+    renderExpandableList(container, data.phrases, 'Фразеология', 'phrases-container', isCompact);
 
     // 4. Idioms
-    renderExpandableList(container, data.idioms, 'Идиоматические выражения', 'idioms-container');
+    renderExpandableList(container, data.idioms, 'Идиоматические выражения', 'idioms-container', isCompact);
 
     // 5. Postscript Comment (Desktop only, shown at the very end of section)
     if (data.comment) {
@@ -525,6 +639,8 @@
 
         if (response.status === 200) {
           const data = await response.json();
+          container._dictData = data;
+          container._dictVerbId = verbId;
           renderDictionary(container, data, verbId);
         } else {
           hideUI();
