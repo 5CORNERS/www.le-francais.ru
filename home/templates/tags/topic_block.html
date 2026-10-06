@@ -11,7 +11,7 @@
     <div class="posts">
         {% if first_post %}{% ifnotequal first_post post_list.0 %}
             {% with first_post as post %}
-                <li class="first_post">{% include "pybb/post_template.html" %}</li>
+                <div class="first_post">{% include "pybb/post_template.html" %}</div>
             {% endwith %}
         {% endifnotequal %}{% endif %}
         {% for post in post_list %}
