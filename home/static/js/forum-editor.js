@@ -174,6 +174,15 @@
             .replace(/"/g, '&quot;');
     }
 
+    function sanitizeUrl(url) {
+        if (!url) return '#';
+        url = url.trim();
+        if (/^(https?:|\/|mailto:)/i.test(url)) {
+            return escapeHtml(url);
+        }
+        return '#';
+    }
+
     /**
      * Converts Markdown string to Visual HTML for contenteditable
      */
@@ -236,10 +245,14 @@
         text = text.replace(/^---$/gim, '<hr>');
 
         // Images: ![alt](url)
-        text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="forum-embedded-img">');
+        text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function(match, alt, url) {
+            return '<img src="' + sanitizeUrl(url) + '" alt="' + escapeHtml(alt) + '" class="forum-embedded-img">';
+        });
 
         // Links: [text](url)
-        text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+        text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(match, label, url) {
+            return '<a href="' + sanitizeUrl(url) + '" target="_blank" rel="noopener">' + label + '</a>';
+        });
 
         // Emojis: :heart: -> ❤️
         text = text.replace(/:([a-zA-Z0-9_+-]+):/g, function(match) {
@@ -267,18 +280,24 @@
         // Subscript: ~text~
         text = text.replace(/~([^\s~]+)~/g, '<sub>$1</sub>');
 
+        // Ordered lists
+        text = text.replace(/^\d+\.\s+(.*)$/gim, '<oli>$1</oli>');
+        text = text.replace(/((?:<oli>.*<\/oli>\s*)+)/g, function(match) {
+            return '<ol>' + match.replace(/<\/?oli>/g, function(m) { return m === '<oli>' ? '<li>' : '</li>'; }) + '</ol>';
+        });
+
+        // Unordered lists
+        text = text.replace(/^[-*]\s+(.*)$/gim, '<li>$1</li>');
+        text = text.replace(/((?:<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>');
+
         // Bold italic: ***text***
         text = text.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
 
         // Bold: **text**
         text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 
-        // Italic: *text*
-        text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-
-        // Lists
-        text = text.replace(/^[-*]\s+(.*)$/gim, '<li>$1</li>');
-        text = text.replace(/((?:<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>');
+        // Italic: *text* (emulate negative lookbehind with capture group for cross-browser support)
+        text = text.replace(/(^|[^*])\*([^\s*][^*\n]*?[^\s*]|\S)\*(?!\*)/g, '$1<em>$2</em>');
 
         // Restore inline codes
         for (var j = 0; j < inlineCodes.length; j++) {
@@ -296,7 +315,7 @@
         var res = blocks.map(function(b) {
             b = b.trim();
             if (!b) return '';
-            if (b.startsWith('<blockquote') || b.startsWith('<details') || b.startsWith('<h1') || b.startsWith('<h2') || b.startsWith('<h3') || b.startsWith('<ul') || b.startsWith('<pre') || b.startsWith('<hr')) {
+            if (b.startsWith('<blockquote') || b.startsWith('<details') || b.startsWith('<h1') || b.startsWith('<h2') || b.startsWith('<h3') || b.startsWith('<ul') || b.startsWith('<ol') || b.startsWith('<pre') || b.startsWith('<hr')) {
                 return b;
             }
             return '<p>' + b.replace(/\n/g, '<br>') + '</p>';

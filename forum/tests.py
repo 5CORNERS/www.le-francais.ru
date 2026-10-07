@@ -180,3 +180,15 @@ class ForumUtilTestCase(TestCase):
         self.assertIn('Jean_Valjean', mentioned)
 
 
+class ForumFormattingTestCase(TestCase):
+    def setUp(self):
+        self.parser = CustomMarkdownParser()
+
+    def test_ordered_list_and_bullet_list_formatting(self):
+        html1 = self.parser.format("1. First item\n2. Second item")
+        html2 = self.parser.format("* Bullet item 1\n* Bullet item 2")
+        self.assertIn('<ol>', html1)
+        self.assertIn('<ul>', html2)
+        self.assertNotIn('<em> Bullet item 1</em>', html2)
+
+
