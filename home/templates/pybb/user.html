@@ -1,5 +1,5 @@
 {% extends 'pybb/base.html' %}
-{% load pybb_tags i18n %}
+{% load pybb_tags i18n static %}
 
 {% block title %}{{ target_user.username }}{% endblock %}
 
@@ -11,82 +11,170 @@
 	{% endwith %}
 {% endblock %}
 
+{% block extra_css %}
+	<style>
+		.user-profile-header-card {
+			border: 1px solid #e9ecef;
+			border-radius: 8px;
+			background: #ffffff;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+			margin-bottom: 1.5rem;
+			padding: 2rem;
+		}
+		.user-profile-avatar-wrapper .avatar {
+			width: 90px;
+			height: 90px;
+			border-radius: 50%;
+			object-fit: cover;
+		}
+		.user-stat-card {
+			border: 1px solid #e9ecef;
+			border-radius: 8px;
+			background: #f8f9fa;
+			padding: 1rem 1.25rem;
+			text-align: center;
+			transition: background-color 0.15s ease-in-out;
+		}
+		.user-stat-card:hover {
+			background-color: #eef2f7;
+			text-decoration: none;
+		}
+		.user-stat-value {
+			font-size: 1.75rem;
+			font-weight: 700;
+			color: #2b3a4a;
+			line-height: 1.2;
+		}
+		.user-stat-label {
+			font-size: 0.85rem;
+			color: #6c757d;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-top: 0.25rem;
+		}
+	</style>
+{% endblock %}
+
 {% block content %}
 	{% pybb_get_profile user=target_user as profile %}
-	<h1>{{ target_user.username }}</h1>
-	<div class="userinfo">
-		{% include "pybb/avatar.html" with user=target_user %}
-		<div class="info">
-			{% if profile.icq or profile.skype or profile.jabber or profile.site or profile.interests %}
-				<div class="badge badge-info">{% trans "Information" %}</div>
-			{% endif %}
-			{% if profile.icq %}
-				<div>ICQ: {{ profile.icq }}</div>
-			{% endif %}
-			{% if profile.skype %}
-				<div>Skype: {{ profile.skype }}</div>
-			{% endif %}
-			{% if profile.jabber %}
-				<div>Jabber: {{ profile.jabber }}</div>
-			{% endif %}
-			{% if profile.site %}
-				<div>{% trans 'Personal site' %}: <a href="{{ profile.site }}">{{ profile.site }}</a></div>
-			{% endif %}
-			{% if profile.interests %}
-				<div>{% trans 'Interests' %}: {{ profile.interests }}</div>
-			{% endif %}
 
-			<div class="badge badge-info">{% trans "Statistics" %}</div>
-			<div>
-				<a href="{% url 'user_topics' target_user.username %}">
-					Количество тем{# TODO l18n #}:
-					{{ topic_count }}
-				</a>
-			</div>
-			<div>
-				<a href="{% url 'user_posts' target_user.username %}">
-					Количество постов{# TODO l18n #}:
-					{{ profile.post_count }}
-				</a>
-			</div>
-			<div>
-				Дата регистрации{# TODO l18n #}:
-				{% pybb_time target_user.date_joined %}
+	<div class="user-profile-wrapper my-4">
+		<div class="user-profile-header-card">
+			<div class="d-flex flex-column flex-md-row align-items-center align-items-md-start text-center text-md-left">
+				<div class="user-profile-avatar-wrapper mb-3 mb-md-0 mr-md-4">
+					{% include "pybb/avatar.html" with user=target_user %}
+				</div>
+				<div class="flex-grow-1">
+					<div class="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-start">
+						<div>
+							<h2 class="font-weight-bold mb-1">{{ target_user.username }}</h2>
+							<div class="text-muted small mb-2">
+								<i class="far fa-calendar-alt mr-1"></i> На сайте с {{ target_user.date_joined|date:'d E Y' }}
+								{% if not target_user.is_active %}
+									<span class="badge badge-danger ml-2">Заблокирован</span>
+								{% endif %}
+								{% if target_user.is_staff %}
+									<span class="badge badge-info ml-1">Администратор</span>
+								{% endif %}
+							</div>
+						</div>
+
+						<!-- Action buttons -->
+						<div class="user-controls mt-2 mt-md-0">
+							{% if target_user == user %}
+								<a class="btn btn-outline-primary btn-sm mr-1" href="{% url 'pybb:edit_profile' %}">
+									<i class="fa fa-cog mr-1"></i> Настройки профиля
+								</a>
+								<a class="btn btn-outline-secondary btn-sm" href="{% url 'postman:inbox' %}">
+									<i class="fa fa-envelope mr-1"></i> Сообщения
+									{% if postman_unread_count %}
+										<span class="badge badge-primary">{{ postman_unread_count }}</span>
+									{% endif %}
+								</a>
+							{% elif user.is_authenticated %}
+								<a class="btn btn-primary btn-sm" href="{% url 'postman:write' target_user.username %}">
+									<i class="fa fa-envelope mr-1"></i> Написать сообщение
+								</a>
+							{% endif %}
+						</div>
+					</div>
+
+					{% if profile.signature %}
+						<div class="user-profile-signature mt-3 pt-3 border-top small text-muted">
+							{{ profile.signature_html|safe }}
+						</div>
+					{% endif %}
+				</div>
 			</div>
 		</div>
-		<div class="clear"></div>
-	</div><br>
-	<div class='controls'>
-		{% if request.user|pybb_may_manage_moderators %}
-			<a href="{% url 'pybb:edit_privileges' target_user.username %}"
-			   class="btn btn-default">{% trans 'Moderator' %}</a>
-		{% endif %}
-		{% if perms.pybb.block_users and target_user != user %}
-			{% if target_user.is_active %}
-				<form method="post" action="{% url 'pybb:block_user' target_user.username %}"
-				      style="display: inline-block;">{% csrf_token %}
-					<button class="btn btn-danger">{% trans 'Block' %}</button>
-				</form>
-			{% else %}
-				<form method="post" action="{% url 'pybb:unblock_user' target_user.username %}"
-				      style="display: inline-block;">{% csrf_token %}
-					<button class="btn btn-success">{% trans 'Unblock' %}</button>
-				</form>
-			{% endif %}
-		{% endif %}
-		{% if perms.pybb.can_edit %}
-			<a href="{% url 'admin:pybb_profile_change' profile.id %}"
-			   class="btn btn-default">{% trans 'Admin' %}</a>
-		{% endif %}
-		{% if target_user == user %}
-			<a class="btn btn-default" href="{% url 'pybb:edit_profile' %}">Настройки учетной записи{# TODO l18n #}</a>
-			<a class="btn btn-default" href="{% url 'postman:inbox' %}">
-				Личные сообщения{# TODO l18n #} {% if postman_unread_count %}({{ postman_unread_count }}){% endif %}
-			</a>
-		{% endif %}
-		{% if target_user != user and user.is_authenticated %}
-			<a class="btn btn-default"
-			           href="{% url 'postman:write' target_user.username %}">Написать личное сообщение{# TODO l18n #}</a>
+
+		<!-- Stats Row -->
+		<div class="row mb-4">
+			<div class="col-6 col-md-6 mb-3">
+				<a href="{% url 'user_topics' target_user.username %}" class="user-stat-card d-block text-decoration-none">
+					<div class="user-stat-value">{{ topic_count }}</div>
+					<div class="user-stat-label">Темы на форуме</div>
+				</a>
+			</div>
+			<div class="col-6 col-md-6 mb-3">
+				<a href="{% url 'user_posts' target_user.username %}" class="user-stat-card d-block text-decoration-none">
+					<div class="user-stat-value">{{ profile.post_count }}</div>
+					<div class="user-stat-label">Сообщения</div>
+				</a>
+			</div>
+		</div>
+
+		<!-- Details / About & Moderator controls -->
+		{% if profile.site or profile.interests or request.user|pybb_may_manage_moderators or perms.pybb.block_users and target_user != user or perms.pybb.can_edit %}
+			<div class="card shadow-sm border-0 mb-4">
+				<div class="card-body">
+					{% if profile.site or profile.interests %}
+						<h6 class="font-weight-bold mb-3"><i class="fa fa-info-circle text-primary mr-1"></i> Информация</h6>
+						{% if profile.site %}
+							<div class="mb-2">
+								<span class="text-muted mr-2">Сайт:</span>
+								<a href="{{ profile.site }}" target="_blank" rel="nofollow noopener">{{ profile.site }}</a>
+							</div>
+						{% endif %}
+						{% if profile.interests %}
+							<div class="mb-2">
+								<span class="text-muted mr-2">Интересы:</span>
+								<span>{{ profile.interests }}</span>
+							</div>
+						{% endif %}
+					{% endif %}
+
+					<!-- Staff / Mod actions -->
+					{% if request.user|pybb_may_manage_moderators or perms.pybb.block_users and target_user != user or perms.pybb.can_edit %}
+						<div class="border-top pt-3 mt-3">
+							<span class="text-muted small mr-2">Модерация:</span>
+							{% if request.user|pybb_may_manage_moderators %}
+								<a href="{% url 'pybb:edit_privileges' target_user.username %}" class="btn btn-sm btn-outline-secondary mr-1">
+									Права модератора
+								</a>
+							{% endif %}
+							{% if perms.pybb.can_edit %}
+								<a href="{% url 'admin:pybb_profile_change' profile.id %}" class="btn btn-sm btn-outline-secondary mr-1">
+									Редактировать в админке
+								</a>
+							{% endif %}
+							{% if perms.pybb.block_users and target_user != user %}
+								{% if target_user.is_active %}
+									<form method="post" action="{% url 'pybb:block_user' target_user.username %}" class="d-inline">
+										{% csrf_token %}
+										<button class="btn btn-sm btn-outline-danger">Заблокировать</button>
+									</form>
+								{% else %}
+									<form method="post" action="{% url 'pybb:unblock_user' target_user.username %}" class="d-inline">
+										{% csrf_token %}
+										<button class="btn btn-sm btn-outline-success">Разблокировать</button>
+									</form>
+								{% endif %}
+							{% endif %}
+						</div>
+					{% endif %}
+				</div>
+			</div>
 		{% endif %}
 	</div>
 {% endblock %}

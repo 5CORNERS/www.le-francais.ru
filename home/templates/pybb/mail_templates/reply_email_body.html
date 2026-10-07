@@ -1,0 +1,11 @@
+{% extends PYBB_TEMPLATE_MAIL_TXT|default:"pybb/mail_templates/base.html" %}
+{% load i18n pybb_tags %}
+{% block content %}{% pybb_get_profile user=post.user as profile %}{% autoescape off %}Пользователь {{ profile.get_display_name }} ответил(а) на ваше сообщение в теме «{{ post.topic.name }}».
+
+Ссылка на ответ: {{ post_url }}
+Ссылка на тему: {{ topic_url }}
+
+-----
+Настроить получение email-уведомлений можно в профиле: {{ profile_settings_url }}
+{% endautoescape %}
+{% endblock %}

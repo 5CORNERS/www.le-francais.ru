@@ -8,7 +8,21 @@
     {% endif %}
 {% endblock %}
 {% block text %}
-    <b>{{ username }}</b> ответил(а)
-    <a href='{{ self.get_click_url }}'>"{{ post_name }}"</a> в теме
-    <b>"{{ topic_name }}"</b>, на которую вы подписаны.
+    {% if is_reply_to_you %}
+        <b>{{ username }}</b> ответил(а) на ваше сообщение
+        <a href='{{ self.get_click_url }}'>"{{ post_name }}"</a> в теме
+        <b>"{{ topic_name }}"</b>.
+    {% elif is_quote %}
+        <b>{{ username }}</b> процитировал(а) вас
+        <a href='{{ self.get_click_url }}'>"{{ post_name }}"</a> в теме
+        <b>"{{ topic_name }}"</b>.
+    {% elif is_mention %}
+        <b>{{ username }}</b> упомянул(а) вас
+        <a href='{{ self.get_click_url }}'>"{{ post_name }}"</a> в теме
+        <b>"{{ topic_name }}"</b>.
+    {% else %}
+        <b>{{ username }}</b> ответил(а)
+        <a href='{{ self.get_click_url }}'>"{{ post_name }}"</a> в теме
+        <b>"{{ topic_name }}"</b>, на которую вы подписаны.
+    {% endif %}
 {% endblock %}

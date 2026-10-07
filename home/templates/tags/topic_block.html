@@ -1,5 +1,4 @@
-{% load pybb_tags i18n staticfiles %}
-{% load site_tags %}
+{% load pybb_tags i18n staticfiles site_tags forum_tags %}
 
 <div class="topic">
     <h1>{{ topic.name }}</h1>
@@ -11,9 +10,10 @@
     <div class="posts">
         {% if first_post %}{% ifnotequal first_post post_list.0 %}
             {% with first_post as post %}
-                <li class="first_post">{% include "pybb/post_template.html" %}</li>
+                <div class="first_post">{% include "pybb/post_template.html" %}</div>
             {% endwith %}
         {% endifnotequal %}{% endif %}
+        {% prefetch_posts_reactions_tag post_list %}
         {% for post in post_list %}
             {% cycle 'odd' 'even' as rowcolors silent %}
             {% include "pybb/post_template.html" %}
@@ -51,9 +51,9 @@
             {% endif %}
 
             {% if user.is_subscribed %}
-                <a class="btn btn-secondary" href="{% url 'pybb:delete_subscription' topic.id %}?from_topic">{% trans 'Unsubscribe' %}</a>
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'pybb:delete_subscription' topic.id %}?from_topic"><i class="fa fa-bell-slash mr-1"></i> {% trans 'Unsubscribe' %}</a>
             {% elif user|pybb_may_subscribe_topic:topic %}
-                <a class="btn btn-secondary" href="{% url 'pybb:add_subscription' topic.id %}">{% trans 'Subscribe' %}</a>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'pybb:add_subscription' topic.id %}"><i class="fa fa-bell mr-1"></i> {% trans 'Subscribe' %}</a>
             {% endif %}
         </div>
     {% endif %}

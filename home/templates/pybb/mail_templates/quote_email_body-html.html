@@ -1,0 +1,25 @@
+{% extends PYBB_TEMPLATE_MAIL_HTML|default:"pybb/mail_templates/base-html.html" %}
+{% load i18n pybb_tags %}
+{% block content %}
+    {% pybb_get_profile user=post.user as profile %}
+    <p>
+        Здравствуйте, <b>{{ user.username }}</b>!
+    </p>
+    <p>
+        Пользователь <b>{{ profile.get_display_name }}</b> процитировал(а) вас в теме 
+        <a href="{{ topic_url }}"><b>«{{ post.topic.name }}»</b></a> на форуме le-francais.ru:
+    </p>
+
+    <div style="margin: 15px 0; padding: 12px 16px; background-color: #f8f9fa; border-left: 3px solid #337ab7; font-size: 14px; line-height: 1.5;">
+        {{ post.body_html|safe }}
+    </div>
+
+    <p style="margin: 20px 0;">
+        <a href="{{ post_url }}" style="display: inline-block; padding: 8px 16px; background-color: #337ab7; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: bold;">Перейти к сообщению</a>
+    </p>
+
+    <hr style="border: none; border-top: 1px solid #eeeeee; margin: 20px 0;" />
+    <p style="font-size: 12px; color: #777777;">
+        Вы получили это письмо, так как вас процитировали на форуме. Вы можете настроить уведомления в <a href="{{ profile_settings_url }}">настройках вашего профиля</a>.
+    </p>
+{% endblock %}

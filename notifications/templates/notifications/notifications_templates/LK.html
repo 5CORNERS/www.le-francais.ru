@@ -1,5 +1,5 @@
 {% extends './base.html' %}
-{% load forum_tags %}
+{% load forum_tags static %}
 {% block img %}
     {% if self.image.url != '/static/pybb/img/default_avatar.jpg' %}
         <img src="{{ self.image.url }}" height="10px" alt="">
@@ -8,7 +8,15 @@
     {% endif %}
 {% endblock %}
 {% block text %}
-    <b>{{ username }}</b> оценил(а) Ваш пост
+    <b>{{ username }}</b>
+    {% if reaction_emoji %}
+        отреагировал(а) <span style="font-size: 1.15em; vertical-align: -1px;">{{ reaction_emoji }}</span> на Ваш пост
+    {% elif reaction_image %}
+        отреагировал(а) <img src="{% static reaction_image %}" style="width: 18px; height: 18px; vertical-align: -3px; object-fit: contain;" alt="{{ reaction_label }}"> на Ваш пост
+    {% else %}
+        оценил(а) Ваш пост
+    {% endif %}
     <a href='{{ self.get_click_url }}'>"{{ post_name }}"</a> в теме
     <b>"{{ topic_name }}"</b>.
 {% endblock %}
+

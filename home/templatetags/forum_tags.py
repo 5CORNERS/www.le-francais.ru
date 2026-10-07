@@ -33,8 +33,12 @@ def top_topics(count=50, *args, **kwargs):
 
 
 @register.inclusion_tag('pybb/_avinit.html')
-def avinit_initials(username, size):
-	return {'svg':get_svg_avatar(username, width=str(size), height=str(size), radius=str(size/2), **{'font-size':str(size/2)})}
+def avinit_initials(username, size=48):
+	try:
+		size = int(size)
+	except (ValueError, TypeError):
+		size = 48
+	return {'svg': get_svg_avatar(username, width=str(size), height=str(size), radius=str(size/2), **{'font-size': str(size/2)})}
 
 @register.simple_tag
 def pybb_breadcrumb_link(object, anchor=''):
@@ -42,3 +46,33 @@ def pybb_breadcrumb_link(object, anchor=''):
 	# noinspection PyRedeclaration
 	anchor = anchor or smart_text(object)
 	return mark_safe('<a itemprop="item" href="%s"><span itemprop="name">%s</span></a>' % (url, escape(anchor)))
+
+
+from forum.reactions import (
+	get_post_reactions_summary,
+	prefetch_posts_reactions,
+	render_reaction_icon_html,
+	get_all_reactions,
+)
+
+
+@register.simple_tag
+def prefetch_posts_reactions_tag(post_list):
+	prefetch_posts_reactions(post_list)
+	return ''
+
+
+@register.simple_tag
+def get_post_reactions(post, current_user=None):
+	return get_post_reactions_summary(post, current_user)
+
+
+@register.simple_tag
+def render_reaction_icon(code, css_class=''):
+	return render_reaction_icon_html(code, css_class)
+
+
+@register.simple_tag
+def get_available_reactions():
+	return get_all_reactions()
+

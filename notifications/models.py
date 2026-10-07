@@ -22,7 +22,9 @@ from postman.models import Message
 
 from custom_user.models import User
 from pybb.models import Post, Like, Topic, Profile
-from pybb.models import Post, Like
+from django.contrib.sites.models import Site
+from pybb import util as pybb_util
+from pybb.permissions import perms as pybb_perms
 
 from le_francais_dictionary.models import UserDayRepetition, \
 	UserWordRepetition, get_repetition_words_query
@@ -43,13 +45,14 @@ class NotificationImage(models.Model):
 class Notification(models.Model):
 	MODERATION = 'MD'
 	LIKES = 'LK'
-	REPLYES = 'RP'
+	REPLIES = 'RP'
+	REPLYES = REPLIES
 	MESSAGES = 'MG'
 	TOPICS = 'TP'
 	INTERVAL_REPETITIONS = 'IR'
 	CATEGORIES_CHOICES = [
 		(LIKES, 'Likes'),
-		(REPLYES, 'Replies'),
+		(REPLIES, 'Replies'),
 		(MESSAGES, 'Messages'),
 		(TOPICS, 'Topics'),
 		(INTERVAL_REPETITIONS, 'Interval Repetitions')
@@ -253,6 +256,11 @@ def clean_post(post: str) -> str:
 	for line in post.splitlines():
 		if not line.startswith('>') and not line == '':
 			result += line + ' '
+	if not result.strip():
+		for line in post.splitlines():
+			cleaned = line.lstrip('> ').strip()
+			if cleaned:
+				result += cleaned + ' '
 	limit = 50
 	tail = len(result) > limit and '...' or ''
 	return result[:50] + tail
@@ -293,38 +301,146 @@ def create_moderator_notification(sender, instance):
 				notification=notification, user=user
 			)[1:].delete()
 
+
 def create_pybb_post_notification(sender, instance: Post, **kwargs):
 	if not instance.on_moderation and instance.updated is None:
-		notification = Notification(
-			title='Новый ответ в теме',
-			category=Notification.REPLYES,
-			data=dict(
-				username=str(instance.user),
-				post_name=clean_post(instance.body),
-				post_url=instance.get_absolute_url(),
-				topic_name=str(instance.topic),
-				topic_url=instance.topic.get_absolute_url()
-			),
-			click_url=instance.get_absolute_url(),
-			image=NotificationImage.objects.get_or_create(
-				url=instance.user.pybb_profile.avatar_url
-			)[0],
-			content_object=instance,
-		)
-		notification.save()
-		users_to_notify = User.objects.filter(
-			id__in=instance.topic.subscribers.all()).exclude(
-			id=instance.user.id)
-		for user in users_to_notify:
+		from forum.models import PostReply
+		from forum.utils import get_quoted_and_mentioned_users, send_forum_mail
+
+		# 1. Process reply_to if passed
+		reply_to_id = getattr(instance, '_reply_to_id', None)
+		if reply_to_id:
 			try:
-				notification_user, created = NotificationUser.objects.get_or_create(
-					notification=notification,
-					user=user
-				)
-			except NotificationUser.MultipleObjectsReturned:
-				NotificationUser.objects.filter(
-					notification=notification, user=user
-				)[1:].delete()
+				PostReply.objects.get_or_create(post=instance, defaults={'reply_to_id': reply_to_id})
+			except Exception:
+				pass
+
+		direct_reply_user = None
+		if hasattr(instance, 'reply_info') and instance.reply_info.reply_to:
+			target_post = instance.reply_info.reply_to
+			if target_post.user and target_post.user.pk != instance.user.pk:
+				direct_reply_user = target_post.user
+
+		# 2. Extract quoted and mentioned users from body
+		excluded_ids = [instance.user.pk]
+		if direct_reply_user:
+			excluded_ids.append(direct_reply_user.pk)
+		quoted_users, mentioned_users = get_quoted_and_mentioned_users(instance.body, exclude_user_ids=excluded_ids)
+		for u in quoted_users:
+			excluded_ids.append(u.pk)
+		for u in mentioned_users:
+			excluded_ids.append(u.pk)
+
+		# 3. Topic subscribers
+		subscribers = list(instance.topic.subscribers.exclude(id__in=excluded_ids))
+
+		# 4. In-app bell notifications
+		avatar_image = NotificationImage.objects.get_or_create(
+			url=instance.user.pybb_profile.avatar_url
+		)[0]
+
+		# 4a. Notification for direct reply
+		if direct_reply_user:
+			notif_reply = Notification.objects.create(
+				title='Ответ на ваше сообщение',
+				category=Notification.REPLIES,
+				data=dict(
+					username=str(instance.user),
+					post_name=clean_post(instance.body),
+					post_url=instance.get_absolute_url(),
+					topic_name=str(instance.topic),
+					topic_url=instance.topic.get_absolute_url(),
+					is_reply_to_you=True,
+				),
+				click_url=instance.get_absolute_url(),
+				image=avatar_image,
+				content_object=instance,
+			)
+			NotificationUser.objects.create(notification=notif_reply, user=direct_reply_user)
+
+		# 4b. Notification for quoted users
+		if quoted_users:
+			notif_quote = Notification.objects.create(
+				title='Вас процитировали в теме',
+				category=Notification.REPLIES,
+				data=dict(
+					username=str(instance.user),
+					post_name=clean_post(instance.body),
+					post_url=instance.get_absolute_url(),
+					topic_name=str(instance.topic),
+					topic_url=instance.topic.get_absolute_url(),
+					is_quote=True,
+				),
+				click_url=instance.get_absolute_url(),
+				image=avatar_image,
+				content_object=instance,
+			)
+			for u in quoted_users:
+				NotificationUser.objects.create(notification=notif_quote, user=u)
+
+		# 4c. Notification for mentioned users
+		if mentioned_users:
+			notif_mention = Notification.objects.create(
+				title='Вас упомянули в теме',
+				category=Notification.REPLIES,
+				data=dict(
+					username=str(instance.user),
+					post_name=clean_post(instance.body),
+					post_url=instance.get_absolute_url(),
+					topic_name=str(instance.topic),
+					topic_url=instance.topic.get_absolute_url(),
+					is_mention=True,
+				),
+				click_url=instance.get_absolute_url(),
+				image=avatar_image,
+				content_object=instance,
+			)
+			for u in mentioned_users:
+				NotificationUser.objects.create(notification=notif_mention, user=u)
+
+		# 4d. Notification for thread subscribers
+		if subscribers:
+			notif_sub = Notification.objects.create(
+				title='Новый ответ в теме',
+				category=Notification.REPLIES,
+				data=dict(
+					username=str(instance.user),
+					post_name=clean_post(instance.body),
+					post_url=instance.get_absolute_url(),
+					topic_name=str(instance.topic),
+					topic_url=instance.topic.get_absolute_url(),
+				),
+				click_url=instance.get_absolute_url(),
+				image=avatar_image,
+				content_object=instance,
+			)
+			for u in subscribers:
+				NotificationUser.objects.create(notification=notif_sub, user=u)
+
+		# 5. Send emails
+		current_site = Site.objects.get_current()
+		delete_url = reverse('pybb:delete_subscription', args=[instance.topic.id])
+		email_context = {
+			'post': instance,
+			'post_url': 'http://%s%s' % (current_site, instance.get_absolute_url()),
+			'topic_url': 'http://%s%s' % (current_site, instance.topic.get_absolute_url()),
+			'delete_url_full': 'http://%s%s' % (current_site, delete_url),
+			'site': current_site,
+		}
+
+		if direct_reply_user:
+			send_forum_mail([direct_reply_user], 'reply_email', email_context, preference_type='reply')
+		if quoted_users:
+			send_forum_mail(quoted_users, 'quote_email', email_context, preference_type='reply')
+		if mentioned_users:
+			send_forum_mail(mentioned_users, 'quote_email', email_context, preference_type='reply')
+		if subscribers:
+			send_forum_mail(subscribers, 'subscription_email', email_context, preference_type='subscription')
+
+		# 6. Auto-subscribe post author if requested
+		if pybb_util.get_pybb_profile(instance.user).autosubscribe and \
+				pybb_perms.may_subscribe_topic(instance.user, instance.topic):
+			instance.topic.subscribers.add(instance.user)
 
 	elif instance.on_moderation:
 		if instance.updated is not None:
@@ -344,6 +460,9 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 
 def create_pybb_like_notification(sender, instance: Like, **kwargs):
 	if instance.post.user == instance.profile.user:
+		return
+	from forum.models import PostReaction
+	if PostReaction.objects.filter(post_id=instance.post_id, user_id=instance.profile.user_id).exists():
 		return
 	try:
 		notification, created = Notification.objects.get_or_create(
@@ -386,6 +505,66 @@ def delete_pybb_like_notification(sender, instance: Like, **kwargs):
 		.filter(content_type=ContentType.objects.get_for_model(Like),
 	            object_id=instance.id) \
 		.update(active=False)
+
+
+def create_post_reaction_notification(sender, instance, **kwargs):
+	if instance.post.user == instance.user:
+		return
+	from forum.reactions import get_reaction
+	reaction_info = get_reaction(instance.reaction_type)
+	reaction_label = reaction_info['label'] if reaction_info else 'Реакция'
+	reaction_emoji = reaction_info['emoji'] if reaction_info else None
+	reaction_image = reaction_info['image'] if reaction_info else None
+
+	try:
+		notification, created = Notification.objects.get_or_create(
+			content_type=ContentType.objects.get_for_model(instance.__class__),
+			object_id=instance.id,
+			image=NotificationImage.objects.get_or_create(
+				url=instance.user.pybb_profile.avatar_url
+			)[0],
+		)
+	except Notification.MultipleObjectsReturned:
+		for notification in Notification.objects.filter(
+				content_type=ContentType.objects.get_for_model(instance.__class__),
+				object_id=instance.id,
+		)[1:]:
+			notification.delete()
+		return create_post_reaction_notification(sender, instance, **kwargs)
+
+	notification.title = 'Новая реакция на ваш пост: {}'.format(reaction_label)
+	notification.category = notification.LIKES
+	notification.data = dict(
+		username=instance.user.pybb_profile.get_display_name(),
+		post_url=instance.post.get_absolute_url(),
+		post_name=clean_post(instance.post.body),
+		topic_url=instance.post.topic.get_absolute_url(),
+		topic_name=str(instance.post.topic),
+		reaction_type=instance.reaction_type,
+		reaction_label=reaction_label,
+		reaction_emoji=reaction_emoji,
+		reaction_image=reaction_image,
+	)
+	notification.click_url = instance.post.get_absolute_url()
+	notification.image = NotificationImage.objects.get_or_create(
+		url=instance.user.pybb_profile.avatar_url
+	)[0]
+	notification.active = instance.active
+	notification.save()
+
+	if created:
+		NotificationUser.objects.create(
+			notification=notification,
+			user=instance.post.user,
+		)
+
+
+def delete_post_reaction_notification(sender, instance, **kwargs):
+	Notification.objects.prefetch_related('notificationuser_set') \
+		.filter(content_type=ContentType.objects.get_for_model(instance.__class__),
+	            object_id=instance.id) \
+		.update(active=False)
+
 
 
 def create_postman_notification(sender, instance: Message, **kwargs):
@@ -446,6 +625,10 @@ post_save.connect(create_pybb_post_notification, Post)
 post_delete.connect(delete_pybb_notification, Post)
 post_save.connect(create_pybb_like_notification, Like)
 post_delete.connect(delete_pybb_like_notification, Like)
+from forum.models import PostReaction
+post_save.connect(create_post_reaction_notification, PostReaction)
+post_delete.connect(delete_post_reaction_notification, PostReaction)
+
 post_save.connect(create_postman_notification, Message)
 post_save.connect(create_pybb_topic_notification, Topic)
 post_delete.connect(delete_pybb_notification, Topic)

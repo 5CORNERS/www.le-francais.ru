@@ -3,7 +3,7 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils.translation import ugettext as _
 from django_comments_xtd.forms import XtdCommentForm
-from pybb.forms import EditProfileForm
+from pybb.forms import EditProfileForm, PostForm
 
 from custom_user.models import User
 from profiles.models import Profile
@@ -88,15 +88,94 @@ class AuthenticationFormCaptcha(AuthenticationForm):
     captcha = CaptchaField(label=_('Captcha'))
 
 
+class AorPostForm(PostForm):
+    reply_to_post = forms.IntegerField(required=False, widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super(AorPostForm, self).__init__(*args, **kwargs)
+        self.use_required_attribute = False
+        if 'reply_to_post' in self.initial:
+            self.fields['reply_to_post'].initial = self.initial['reply_to_post']
+        if 'body' in self.fields:
+            self.fields['body'].widget = forms.Textarea(attrs={
+                'class': 'form-control forum-markdown-textarea',
+                'rows': '10',
+            })
+            self.fields['body'].widget.attrs.pop('required', None)
+
+
+    def save(self, commit=True):
+        post, topic = super(AorPostForm, self).save(commit=commit)
+        reply_to_id = self.cleaned_data.get('reply_to_post')
+        if reply_to_id:
+            post._reply_to_id = reply_to_id
+            if commit and post.pk:
+                from forum.models import PostReply
+                try:
+                    PostReply.objects.get_or_create(post=post, defaults={'reply_to_id': reply_to_id})
+                except Exception:
+                    pass
+        if commit and post and post.pk:
+            from forum.attachment_utils import link_attachments_to_post
+            try:
+                link_attachments_to_post(post, post.body)
+            except Exception:
+                pass
+        return post, topic
+
+
+
 class AORProfileForm(EditProfileForm):
+    email_on_reply = forms.BooleanField(
+        required=False,
+        label=_('Присылать email при ответе на мое сообщение или цитировании'),
+        help_text=_('Уведомлять по электронной почте, когда кто-то отвечает на ваше сообщение или цитирует его.')
+    )
+
+    signature = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        label=_('Подпись'),
+        required=False
+    )
+
     class Meta:
         model = Profile
-        fields = ('avatar', 'autosubscribe', 'signature', 'show_signatures', 'time_zone',
-                  'language',)
+        fields = (
+            'avatar',
+            'autosubscribe',
+            'receive_emails',
+            'email_on_reply',
+            'signature',
+            'show_signatures',
+            'time_zone',
+            'language',
+        )
 
-    signature = forms.CharField(widget=forms.Textarea, label=_('Signature'),
-                                required=False)
-# time_zone = forms.ChoiceField()
+    def __init__(self, *args, **kwargs):
+        super(AORProfileForm, self).__init__(*args, **kwargs)
+        if 'autosubscribe' in self.fields:
+            self.fields['autosubscribe'].label = _('Автоматически подписываться на темы, где я пишу')
+        if 'receive_emails' in self.fields:
+            self.fields['receive_emails'].label = _('Присылать email о новых ответах во всех отслеживаемых темах')
+            self.fields['receive_emails'].help_text = _('Отключите, если не хотите получать письма о каждом новом сообщении в подписанных темах.')
+        if 'show_signatures' in self.fields:
+            self.fields['show_signatures'].label = _('Показывать подписи других пользователей')
+
+        if self.instance and hasattr(self.instance, 'user') and self.instance.user:
+            prefs = getattr(self.instance.user, 'forum_preferences', None)
+            if prefs is not None:
+                self.fields['email_on_reply'].initial = prefs.email_on_reply
+            else:
+                self.fields['email_on_reply'].initial = True
+
+    def save(self, commit=True):
+        profile = super(AORProfileForm, self).save(commit=commit)
+        if hasattr(profile, 'user') and profile.user:
+            from forum.models import ForumUserPreference
+            pref, _ = ForumUserPreference.objects.get_or_create(user=profile.user)
+            pref.email_on_reply = self.cleaned_data.get('email_on_reply', True)
+            pref.save()
+        return profile
 
 
 class SearchForm(forms.Form):
