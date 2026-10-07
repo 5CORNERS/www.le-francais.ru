@@ -75,19 +75,45 @@
     transform: translateY(0);
 }
 
-/* Compact view rules: hide examples, comments, and empty sense elements */
-.dictionnaire.compact-view .comment,
-.dictionnaire.compact-view .examples-list,
-.dictionnaire.compact-view .sense-examples-only,
-.dictionnaire.compact-view .verb-article-comment {
-    display: none !important;
+/* Smooth collapse / expand for examples and comments */
+.dict-collapsible {
+    display: grid;
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease-in-out;
+}
+.dict-collapsible > .dict-collapsible-inner {
+    overflow: hidden;
+    min-height: 0;
+}
+.dictionnaire.compact-view .dict-collapsible {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    pointer-events: none;
+}
+.dictionnaire.compact-view .sense-examples-only {
+    display: none;
+}
+.meaning {
+    margin-bottom: 12px;
+    transition: margin-bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .dictionnaire.compact-view .meaning {
     margin-bottom: 6px;
 }
+.phrase {
+    margin-top: 8px;
+    padding: 4px 0;
+    border: none;
+    transition: margin-top 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
 .dictionnaire.compact-view .phrase {
     margin-top: 4px;
     padding: 2px 0;
+}
+.group {
+    margin-bottom: 20px;
+    transition: margin-bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .dictionnaire.compact-view .group {
     margin-bottom: 14px;
@@ -141,38 +167,76 @@
     min-width: 0;
 }
 .examples-list {
-    padding-left: 20px;
+    padding-left: 18px;
+    margin-top: 4px;
+    margin-bottom: 6px;
 }
 .example {
-    margin: 6px 0;
-    display: block;
+    display: flex;
+    align-items: flex-start;
+    margin: 5px 0 7px 0;
     text-align: left;
 }
-.example-fr {
-    font-style: italic;
-    color: #333;
-    display: inline;
+.example-bullet {
+    flex-shrink: 0;
+    width: 14px;
+    margin-right: 7px;
+    margin-top: -1px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: normal;
+    font-size: 1.35em;
+    line-height: 1.15;
+    color: #70757a;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
 }
-.example-fr::after {
-    content: " — ";
+.example-body {
+    flex: 1;
+    min-width: 0;
+}
+.example-fr {
+    color: #202124;
+    font-size: 14px;
+    line-height: 1.45;
+    display: block;
     font-style: normal;
 }
-.example-ru {
-    color: #666;
-    display: inline;
+.example-fr mark {
+    background: transparent;
+    padding: 0;
+    font-weight: 600;
+    color: #202124;
 }
-.example-ru.wrapped {
+.example-ru {
+    color: #70757a;
+    font-size: 13px;
+    line-height: 1.4;
     display: block;
-    text-align: right;
-    margin-top: 2px;
+    margin-top: 1px;
+    font-style: normal;
+}
+.example-ru mark {
+    background: transparent;
+    padding: 0;
+    font-weight: 600;
+    color: #3c4043;
 }
 
-/* Right-align translation only on small screens when it wraps to save space and match user request */
 @media (max-width: 480px) {
+    .examples-list {
+        padding-left: 12px;
+    }
+    .example-bullet {
+        width: 12px;
+        margin-right: 5px;
+        font-size: 1.25em;
+    }
+    .example-fr {
+        font-size: 13.5px;
+    }
     .example-ru {
-        display: block;
-        text-align: right;
-        margin-top: 2px;
+        font-size: 12.5px;
     }
 }
 
@@ -180,8 +244,9 @@ mark {
     background: transparent;
     padding: 0;
     font-weight: bold;
-    color: #666;
+    color: inherit;
 }
+
 
 .phrase {
     margin-top: 8px;
@@ -213,11 +278,19 @@ mark {
 }
 .comment {
     font-size: 0.9em;
-    color: #666;
+    color: #555555;
     margin-top: 0 !important;
     margin-bottom: 8px;
     font-style: italic;
-    line-height: 1.4;
+    font-weight: 400;
+    line-height: 1.45;
+}
+.comment mark {
+    background: transparent;
+    padding: 0;
+    font-weight: 600;
+    font-style: italic;
+    color: #202124;
 }
 
 /* Expandable containers spacing & logic */
