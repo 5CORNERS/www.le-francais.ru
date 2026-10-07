@@ -93,13 +93,15 @@ class AorPostForm(PostForm):
 
     def __init__(self, *args, **kwargs):
         super(AorPostForm, self).__init__(*args, **kwargs)
+        self.use_required_attribute = False
         if 'reply_to_post' in self.initial:
             self.fields['reply_to_post'].initial = self.initial['reply_to_post']
         if 'body' in self.fields:
-            existing_class = self.fields['body'].widget.attrs.get('class', '')
-            classes = set(existing_class.split())
-            classes.update(['form-control', 'no-markitup', 'forum-markdown-textarea'])
-            self.fields['body'].widget.attrs['class'] = ' '.join(sorted(classes)).strip()
+            self.fields['body'].widget = forms.Textarea(attrs={
+                'class': 'form-control forum-markdown-textarea',
+                'rows': '10',
+            })
+            self.fields['body'].widget.attrs.pop('required', None)
 
 
     def save(self, commit=True):

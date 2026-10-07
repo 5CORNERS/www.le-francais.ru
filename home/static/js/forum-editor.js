@@ -6,23 +6,165 @@
 (function(window, document, $) {
     'use strict';
 
-    // Popular emojis list for picker
+    // Popular emojis list for picker with shortcodes
     var EMOJIS = [
-        '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇',
-        '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😋', '😛', '😜',
-        '🤪', '😝', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑',
-        '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤',
-        '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥵', '🥶', '🥴',
-        '😵', '🤯', '🤠', '🥳', '😎', '🤓', '🧐', '😕', '😟', '🙁',
-        '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😥',
-        '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩', '😫', '🥱',
-        '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '💩', '🤡', '👻',
-        '👏', '👍', '👎', '👊', '✊', '🤛', '🤜', '🤞', '✌️', '🤟',
-        '👌', '👈', '👉', '👆', '👇', '☝️', '✋', '👋', '💪', '🙏',
-        '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '💔', '❣️',
-        '💕', '💞', '💓', '💗', '💖', '💘', '💝', '☕', '🥖', '🥐',
-        '🍷', '🧀', '🇫🇷', '🇷🇺', '🇬🇧', '🎉', '💡', '✍️', '📚', '❓', '❗'
+        { char: '😀', code: ':grinning:' },
+        { char: '😃', code: ':smiley:' },
+        { char: '😄', code: ':smile:' },
+        { char: '😁', code: ':grin:' },
+        { char: '😆', code: ':laughing:' },
+        { char: '😅', code: ':sweat_smile:' },
+        { char: '😂', code: ':joy:' },
+        { char: '🤣', code: ':rofl:' },
+        { char: '😊', code: ':blush:' },
+        { char: '😇', code: ':innocent:' },
+        { char: '🙂', code: ':slight_smile:' },
+        { char: '🙃', code: ':upside_down:' },
+        { char: '😉', code: ':wink:' },
+        { char: '😌', code: ':relieved:' },
+        { char: '😍', code: ':heart_eyes:' },
+        { char: '🥰', code: ':smiling_face_with_3_hearts:' },
+        { char: '😘', code: ':kissing_heart:' },
+        { char: '😋', code: ':yum:' },
+        { char: '😛', code: ':stuck_out_tongue:' },
+        { char: '😜', code: ':stuck_out_tongue_winking_eye:' },
+        { char: '🤪', code: ':zany_face:' },
+        { char: '😝', code: ':stuck_out_tongue_closed_eyes:' },
+        { char: '🤗', code: ':hugs:' },
+        { char: '🤭', code: ':hand_over_mouth:' },
+        { char: '🤫', code: ':shushing_face:' },
+        { char: '🤔', code: ':thinking:' },
+        { char: '🤐', code: ':zipper_mouth:' },
+        { char: '🤨', code: ':raised_eyebrow:' },
+        { char: '😐', code: ':neutral_face:' },
+        { char: '😑', code: ':expressionless:' },
+        { char: '😶', code: ':no_mouth:' },
+        { char: '😏', code: ':smirk:' },
+        { char: '😒', code: ':unamused:' },
+        { char: '🙄', code: ':roll_eyes:' },
+        { char: '😬', code: ':grimacing:' },
+        { char: '🤥', code: ':lying_face:' },
+        { char: '😔', code: ':pensive:' },
+        { char: '😪', code: ':sleepy:' },
+        { char: '🤤', code: ':drooling_face:' },
+        { char: '😴', code: ':sleeping:' },
+        { char: '😷', code: ':mask:' },
+        { char: '🤒', code: ':thermometer_face:' },
+        { char: '🤕', code: ':head_bandage:' },
+        { char: '🤢', code: ':nauseated_face:' },
+        { char: '🤮', code: ':vomiting_face:' },
+        { char: '🤧', code: ':sneezing_face:' },
+        { char: '🥵', code: ':hot_face:' },
+        { char: '🥶', code: ':cold_face:' },
+        { char: '🥴', code: ':woozy_face:' },
+        { char: '😵', code: ':dizzy_face:' },
+        { char: '🤯', code: ':exploding_head:' },
+        { char: '🤠', code: ':cowboy:' },
+        { char: '🥳', code: ':partying_face:' },
+        { char: '😎', code: ':sunglasses:' },
+        { char: '🤓', code: ':nerd:' },
+        { char: '🧐', code: ':monocle:' },
+        { char: '😕', code: ':confused:' },
+        { char: '😟', code: ':worried:' },
+        { char: '🙁', code: ':slightly_frowning_face:' },
+        { char: '😮', code: ':open_mouth:' },
+        { char: '😯', code: ':hushed:' },
+        { char: '😲', code: ':astonished:' },
+        { char: '😳', code: ':flushed:' },
+        { char: '🥺', code: ':pleading_face:' },
+        { char: '😦', code: ':frowning:' },
+        { char: '😧', code: ':anguished:' },
+        { char: '😨', code: ':fearful:' },
+        { char: '😰', code: ':cold_sweat:' },
+        { char: '😥', code: ':disappointed_relieved:' },
+        { char: '😢', code: ':cry:' },
+        { char: '😭', code: ':sob:' },
+        { char: '😱', code: ':scream:' },
+        { char: '😖', code: ':confounded:' },
+        { char: '😣', code: ':persevere:' },
+        { char: '😞', code: ':disappointed:' },
+        { char: '😓', code: ':sweat:' },
+        { char: '😩', code: ':weary:' },
+        { char: '😫', code: ':tired_face:' },
+        { char: '🥱', code: ':yawning_face:' },
+        { char: '😤', code: ':triumph:' },
+        { char: '😡', code: ':rage:' },
+        { char: '😠', code: ':angry:' },
+        { char: '🤬', code: ':cursing_face:' },
+        { char: '😈', code: ':smiling_imp:' },
+        { char: '👿', code: ':imp:' },
+        { char: '💀', code: ':skull:' },
+        { char: '💩', code: ':poop:' },
+        { char: '🤡', code: ':clown:' },
+        { char: '👻', code: ':ghost:' },
+        { char: '👏', code: ':clap:' },
+        { char: '👍', code: ':+1:' },
+        { char: '👎', code: ':-1:' },
+        { char: '👊', code: ':punch:' },
+        { char: '✊', code: ':fist:' },
+        { char: '🤛', code: ':left_facing_fist:' },
+        { char: '🤜', code: ':right_facing_fist:' },
+        { char: '🤞', code: ':crossed_fingers:' },
+        { char: '✌️', code: ':v:' },
+        { char: '🤟', code: ':love_you_gesture:' },
+        { char: '👌', code: ':ok_hand:' },
+        { char: '👈', code: ':point_left:' },
+        { char: '👉', code: ':point_right:' },
+        { char: '👆', code: ':point_up_2:' },
+        { char: '👇', code: ':point_down:' },
+        { char: '☝️', code: ':point_up:' },
+        { char: '✋', code: ':hand:' },
+        { char: '👋', code: ':wave:' },
+        { char: '💪', code: ':muscle:' },
+        { char: '🙏', code: ':pray:' },
+        { char: '❤️', code: ':heart:' },
+        { char: '🧡', code: ':orange_heart:' },
+        { char: '💛', code: ':yellow_heart:' },
+        { char: '💚', code: ':green_heart:' },
+        { char: '💙', code: ':blue_heart:' },
+        { char: '💜', code: ':purple_heart:' },
+        { char: '🖤', code: ':black_heart:' },
+        { char: '🤍', code: ':white_heart:' },
+        { char: '💔', code: ':broken_heart:' },
+        { char: '❣️', code: ':heavy_heart_exclamation:' },
+        { char: '💕', code: ':two_hearts:' },
+        { char: '💞', code: ':revolving_hearts:' },
+        { char: '💓', code: ':heartbeat:' },
+        { char: '💗', code: ':heartpulse:' },
+        { char: '💖', code: ':sparkling_heart:' },
+        { char: '💘', code: ':cupid:' },
+        { char: '💝', code: ':gift_heart:' },
+        { char: '☕', code: ':coffee:' },
+        { char: '🥖', code: ':baguette_bread:' },
+        { char: '🥐', code: ':croissant:' },
+        { char: '🍷', code: ':wine_glass:' },
+        { char: '🧀', code: ':cheese:' },
+        { char: '🇫🇷', code: ':flag_fr:' },
+        { char: '🇷🇺', code: ':flag_ru:' },
+        { char: '🇬🇧', code: ':flag_gb:' },
+        { char: '🎉', code: ':tada:' },
+        { char: '💡', code: ':bulb:' },
+        { char: '✍️', code: ':writing_hand:' },
+        { char: '📚', code: ':books:' },
+        { char: '❓', code: ':question:' },
+        { char: '❗', code: ':exclamation:' }
     ];
+
+    var SHORTCODE_TO_CHAR = {
+        ':thumbsup:': '👍',
+        ':thumbsdown:': '👎',
+        ':fire:': '🔥',
+        ':star:': '⭐',
+        ':100:': '💯',
+        ':check:': '✔️',
+        ':x:': '❌',
+        ':beer:': '🍺',
+        ':cake:': '🎂',
+        ':book:': '📖'
+    };
+    for (var i = 0; i < EMOJIS.length; i++) {
+        SHORTCODE_TO_CHAR[EMOJIS[i].code] = EMOJIS[i].char;
+    }
 
     function escapeHtml(str) {
         return (str || '')
@@ -99,18 +241,25 @@
         // Links: [text](url)
         text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
 
+        // Emojis: :heart: -> ❤️
+        text = text.replace(/:([a-zA-Z0-9_+-]+):/g, function(match) {
+            return SHORTCODE_TO_CHAR[match] || match;
+        });
+
         // Custom formatting
-        // Keystrokes: ++ctrl+c++
-        text = text.replace(/\+\+([^+]+)\+\+/g, '<kbd class="editor-key">$1</kbd>');
+        // Keystrokes: ++ctrl+c++, ++asdf++, ++"hello world"++
+        text = text.replace(/\+\+(?:(?:"([^"]+)")|(.+?))\+\+/g, function(match, quoted, unquoted) {
+            return '<kbd class="editor-key">' + escapeHtml(quoted || unquoted) + '</kbd>';
+        });
 
         // Highlight: ==text==
-        text = text.replace(/==([^=]+)==/g, '<mark class="editor-mark">$1</mark>');
+        text = text.replace(/==(.+?)==/g, '<mark class="editor-mark">$1</mark>');
 
         // Underline: ^^text^^
-        text = text.replace(/\^\^([^^]+)\^\^/g, '<u class="editor-underline">$1</u>');
+        text = text.replace(/\^\^(.+?)\^\^/g, '<u class="editor-underline">$1</u>');
 
         // Strikethrough: ~~text~~
-        text = text.replace(/~~([^~]+)~~/g, '<del class="editor-del">$1</del>');
+        text = text.replace(/~~(.+?)~~/g, '<del class="editor-del">$1</del>');
 
         // Superscript: ^text^
         text = text.replace(/\^([^\s^]+)\^/g, '<sup>$1</sup>');
@@ -198,10 +347,13 @@
                 case 'sub':
                     return childrenText.trim() ? '~' + childrenText.trim() + '~' : '';
                 case 'kbd':
+                    if (node.parentNode && node.parentNode.classList && node.parentNode.classList.contains('keys')) {
+                        return childrenText.trim();
+                    }
                     return childrenText.trim() ? '++' + childrenText.trim() + '++' : '';
                 case 'span':
                     if (node.classList && node.classList.contains('keys')) {
-                        return '++' + node.textContent.trim() + '++';
+                        return childrenText.trim() ? '++' + childrenText.trim() + '++' : '';
                     }
                     return childrenText;
                 case 'code':
@@ -378,6 +530,10 @@
         // Prevent legacy markItUp from initializing
         this.$textarea.addClass('no-markitup forum-markdown-textarea');
 
+        // Prevent HTML5 constraint validation on hidden textarea from blocking form submit
+        this.$textarea.removeAttr('required');
+        this.$textarea.closest('form').attr('novalidate', 'novalidate');
+
         // Build Editor UI Wrapper
         this.buildUI();
 
@@ -404,57 +560,66 @@
     };
 
     ForumEditor.prototype.buildUI = function() {
-        var emojiItemsHtml = EMOJIS.map(function(emoji) {
-            return '<span class="forum-emoji-item" data-emoji="' + emoji + '" title="' + emoji + '">' + emoji + '</span>';
+        var emojiItemsHtml = EMOJIS.map(function(item) {
+            return '<span class="forum-emoji-item" data-emoji="' + item.char + '" data-code="' + item.code + '" title="' + item.code + '">' + item.char + '</span>';
         }).join('');
 
         var toolbarHtml = [
             '<div class="forum-editor-wrapper">',
                 '<div class="forum-editor-toolbar">',
-                    // Formatting
-                    '<div class="btn-group btn-group-sm mr-1 mb-1" role="group">',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="bold" title="Жирный (**текст**)"><i class="fa fa-bold"></i></button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="italic" title="Курсив (*текст*)"><i class="fa fa-italic"></i></button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="underline" title="Подчеркнутый (^^текст^^)"><i class="fa fa-underline"></i></button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="strikethrough" title="Зачеркнутый (~~текст~~)"><i class="fa fa-strikethrough"></i></button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="mark" title="Выделение маркером (==текст==)"><i class="fa fa-pencil" style="background:#fff3cd;padding:1px 3px;border-radius:2px;"></i></button>',
+                    // Left Mode Switcher Block
+                    '<div class="forum-editor-mode-block">',
+                        '<div class="forum-mode-switch" title="Переключить режим: Визуальный / Markdown">',
+                            '<span class="forum-mode-switch-btn visual active" data-mode="visual" title="Визуальный редактор (WYSIWYG)"><i class="fa fa-eye"></i></span>',
+                            '<label class="forum-toggle-track" title="Переключить режим">',
+                                '<input type="checkbox" class="forum-mode-checkbox" aria-label="Переключить Markdown / Визуальный">',
+                                '<span class="forum-toggle-thumb"></span>',
+                            '</label>',
+                            '<span class="forum-mode-switch-btn markdown" data-mode="markdown" title="Исходный Markdown"><i class="fa fa-code"></i></span>',
+                        '</div>',
                     '</div>',
-                    // Script / Keys
-                    '<div class="btn-group btn-group-sm mr-1 mb-1" role="group">',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="superscript" title="Верхний индекс (^текст^)"><i class="fa fa-superscript"></i></button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="subscript" title="Нижний индекс (~текст~)"><i class="fa fa-subscript"></i></button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="kbd" title="Клавиша (++клавиша++)"><i class="fa fa-keyboard-o"></i></button>',
-                    '</div>',
-                    // Structure
-                    '<div class="btn-group btn-group-sm mr-1 mb-1" role="group">',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="h2" title="Подзаголовок (## Заголовок)"><strong>H2</strong></button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="h3" title="Подзаголовок (### Заголовок)"><strong>H3</strong></button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="quote" title="Цитата (> текст)"><i class="fa fa-quote-left"></i></button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="ul" title="Список (- пункт)"><i class="fa fa-list-ul"></i></button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="ol" title="Нумерованный список (1. пункт)"><i class="fa fa-list-ol"></i></button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="spoiler" title="Спойлер (???- Заголовок)"><i class="fa fa-caret-square-o-down"></i> Спойлер</button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="code" title="Код (`код`)"><i class="fa fa-code"></i></button>',
-                    '</div>',
-                    // Insert
-                    '<div class="btn-group btn-group-sm mr-1 mb-1" role="group">',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="link" title="Вставить ссылку"><i class="fa fa-link"></i></button>',
-                        '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="image" title="Вставить или загрузить изображение"><i class="fa fa-picture-o"></i> Картинка</button>',
-                        '<div class="btn-group btn-group-sm forum-emoji-group position-relative" role="group">',
-                            '<button type="button" class="btn btn-light forum-editor-btn forum-emoji-btn" title="Вставить эмодзи"><i class="fa fa-smile-o"></i></button>',
-                            '<div class="forum-emoji-dropdown d-none">',
-                                '<div class="forum-emoji-header">',
-                                    '<span class="small font-weight-bold text-muted">Эмодзи</span>',
-                                    '<button type="button" class="btn btn-sm btn-link text-muted p-0 forum-emoji-close" style="font-size:16px;line-height:1;text-decoration:none;">&times;</button>',
+                    '<div class="forum-toolbar-divider"></div>',
+                    // Formatting & Insert Tools Block
+                    '<div class="forum-editor-tools-block">',
+                        // Formatting
+                        '<div class="btn-group btn-group-sm" role="group">',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="bold" title="Жирный (**текст**)"><i class="fa fa-bold"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="italic" title="Курсив (*текст*)"><i class="fa fa-italic"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="underline" title="Подчеркнутый (^^текст^^)"><i class="fa fa-underline"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="strikethrough" title="Зачеркнутый (~~текст~~)"><i class="fa fa-strikethrough"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="mark" title="Выделение маркером (==текст==)"><i class="fa fa-pencil" style="background:#fff3cd;padding:1px 3px;border-radius:2px;"></i></button>',
+                        '</div>',
+                        // Script / Keys
+                        '<div class="btn-group btn-group-sm" role="group">',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="superscript" title="Верхний индекс (^текст^)"><i class="fa fa-superscript"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="subscript" title="Нижний индекс (~текст~)"><i class="fa fa-subscript"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="kbd" title="Клавиша (++клавиша++)"><i class="fa fa-keyboard-o"></i></button>',
+                        '</div>',
+                        // Structure
+                        '<div class="btn-group btn-group-sm" role="group">',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="h2" title="Подзаголовок (## Заголовок)"><strong>H2</strong></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="h3" title="Подзаголовок (### Заголовок)"><strong>H3</strong></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="quote" title="Цитата (> текст)"><i class="fa fa-quote-left"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="ul" title="Список (- пункт)"><i class="fa fa-list-ul"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="ol" title="Нумерованный список (1. пункт)"><i class="fa fa-list-ol"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="spoiler" title="Спойлер (???- Заголовок)"><i class="fa fa-caret-square-o-down"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="code" title="Код (`код`)"><i class="fa fa-code"></i></button>',
+                        '</div>',
+                        // Insert
+                        '<div class="btn-group btn-group-sm" role="group">',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="link" title="Вставить ссылку"><i class="fa fa-link"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="image" title="Вставить или загрузить изображение"><i class="fa fa-picture-o"></i></button>',
+                            '<div class="btn-group btn-group-sm forum-emoji-group position-relative" role="group">',
+                                '<button type="button" class="btn btn-light forum-editor-btn forum-emoji-btn" title="Вставить эмодзи"><i class="fa fa-smile-o"></i></button>',
+                                '<div class="forum-emoji-dropdown d-none">',
+                                    '<div class="forum-emoji-header">',
+                                        '<span class="small font-weight-bold text-muted">Эмодзи</span>',
+                                        '<button type="button" class="btn btn-sm btn-link text-muted p-0 forum-emoji-close" style="font-size:16px;line-height:1;text-decoration:none;">&times;</button>',
+                                    '</div>',
+                                    '<div class="forum-emoji-grid">' + emojiItemsHtml + '</div>',
                                 '</div>',
-                                '<div class="forum-emoji-grid">' + emojiItemsHtml + '</div>',
                             '</div>',
                         '</div>',
-
-                    '</div>',
-                    // Mode Switcher
-                    '<div class="btn-group btn-group-sm mb-1 forum-mode-switcher" role="group">',
-                        '<button type="button" class="btn btn-primary active forum-mode-btn" data-mode="visual" title="Визуальный WYSIWYG редактор"><i class="fa fa-eye mr-1"></i>Визуальный</button>',
-                        '<button type="button" class="btn btn-light forum-mode-btn" data-mode="markdown" title="Исходный Markdown код"><i class="fa fa-code mr-1"></i>Markdown</button>',
                     '</div>',
                 '</div>',
                 // Hidden file input
@@ -500,12 +665,9 @@
 
     ForumEditor.prototype.updateModeButtons = function() {
         var isVisual = this.currentMode === 'visual';
-        this.$wrapper.find('.forum-mode-btn[data-mode="visual"]')
-            .toggleClass('btn-primary active', isVisual)
-            .toggleClass('btn-light', !isVisual);
-        this.$wrapper.find('.forum-mode-btn[data-mode="markdown"]')
-            .toggleClass('btn-primary active', !isVisual)
-            .toggleClass('btn-light', isVisual);
+        this.$wrapper.find('.forum-mode-checkbox').prop('checked', !isVisual);
+        this.$wrapper.find('.forum-mode-switch-btn.visual').toggleClass('active', isVisual);
+        this.$wrapper.find('.forum-mode-switch-btn.markdown').toggleClass('active', !isVisual);
     };
 
     ForumEditor.prototype.setMode = function(newMode) {
@@ -579,9 +741,16 @@
             self.saveSelection();
         });
 
-        // Mode switch buttons
-        this.$wrapper.on('click', '.forum-mode-btn', function(e) {
+        // Mode switch checkbox change
+        this.$wrapper.on('change', '.forum-mode-checkbox', function() {
+            var mode = this.checked ? 'markdown' : 'visual';
+            self.setMode(mode);
+        });
+
+        // Mode switch icon buttons click
+        this.$wrapper.on('click', '.forum-mode-switch-btn', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             var mode = $(this).data('mode');
             self.setMode(mode);
         });
@@ -620,28 +789,46 @@
             e.preventDefault();
             e.stopPropagation();
             var emoji = $(this).data('emoji');
-            self.insertEmoji(emoji);
+            var code = $(this).data('code') || emoji;
+            self.insertEmoji(emoji, code);
             self.$wrapper.find('.forum-emoji-dropdown').addClass('d-none');
         });
 
-
-        // Live sync on input
-        this.$visualEditor.on('input', function() {
-            self.updateCharCounter();
-        });
-        this.$textarea.on('input', function() {
-            self.updateCharCounter();
-        });
-
-        // Sync before form submit
-        this.$textarea.closest('form').on('submit', function() {
+        // Live continuous sync on input / changes in visual editor
+        this.$visualEditor.on('input keyup paste change', function() {
             self.syncMarkdownFromVisual();
+            self.updateCharCounter();
+        });
+        this.$textarea.on('input keyup paste change', function() {
+            self.updateCharCounter();
+        });
+
+        // Sync before submit button click and form submit
+        var $form = this.$textarea.closest('form');
+        $form.on('click', 'button[type="submit"], input[type="submit"]', function() {
+            self.syncMarkdownFromVisual();
+        });
+        $form.on('submit', function(e) {
+            self.syncMarkdownFromVisual();
+            var val = $.trim(self.$textarea.val());
+            if (!val) {
+                e.preventDefault();
+                e.stopPropagation();
+                alert('Пожалуйста, введите текст сообщения.');
+                if (self.currentMode === 'visual') {
+                    self.$visualEditor.focus();
+                } else {
+                    self.$textarea.focus();
+                }
+                return false;
+            }
         });
     };
 
     ForumEditor.prototype.executeCommand = function(cmd) {
         if (this.currentMode === 'visual') {
             this.executeVisualCommand(cmd);
+            this.syncMarkdownFromVisual();
         } else {
             this.executeMarkdownCommand(cmd);
         }
@@ -786,7 +973,7 @@
         }
     };
 
-    ForumEditor.prototype.insertEmoji = function(emoji) {
+    ForumEditor.prototype.insertEmoji = function(emoji, code) {
         if (this.currentMode === 'visual') {
             this.$visualEditor.focus();
             if (this.savedRange) {
@@ -813,8 +1000,9 @@
                 }
             }
             this.saveSelection();
+            this.syncMarkdownFromVisual();
         } else {
-            wrapTextareaSelection(this.$textarea, '', emoji, '');
+            wrapTextareaSelection(this.$textarea, '', code || emoji, '');
         }
         this.updateCharCounter();
     };
@@ -949,6 +1137,7 @@
                         } else {
                             document.execCommand('insertHTML', false, imgHtml);
                         }
+                        self.syncMarkdownFromVisual();
                     } else {
                         var currentVal = self.$textarea.val();
                         var finalMd = '![' + altText + '](' + imgUrl + ')';
@@ -978,6 +1167,7 @@
     ForumEditor.prototype.handleUploadError = function(uploadId, placeholderMd, errorMessage) {
         if (this.currentMode === 'visual') {
             $('#' + uploadId).remove();
+            this.syncMarkdownFromVisual();
         } else {
             var currentVal = this.$textarea.val();
             this.$textarea.val(currentVal.replace(placeholderMd, ''));

@@ -24,10 +24,35 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 4px;
+    justify-content: flex-start;
+    gap: 6px;
 }
 
-.forum-editor-toolbar .btn-group {
+.forum-editor-mode-block {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.forum-toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background-color: #dee2e6;
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+.forum-editor-tools-block {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 4px;
+    flex: 0 1 auto;
+}
+
+.forum-editor-tools-block .btn-group {
     margin-right: 4px;
     margin-bottom: 2px;
 }
@@ -61,14 +86,100 @@
     pointer-events: none;
 }
 
-.forum-mode-switcher {
-    margin-left: auto;
+/* Switcher: Visual (Eye) <-> Markdown (Code) */
+.forum-mode-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid #ced4da;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+    height: 31px;
+    box-sizing: border-box;
 }
 
-.forum-mode-btn {
-    font-size: 12px;
-    padding: 4px 10px;
-    font-weight: 500;
+.forum-mode-switch:hover {
+    border-color: #adb5bd;
+    background-color: #f8f9fa;
+}
+
+.forum-mode-switch-btn {
+    font-size: 14px;
+    line-height: 1;
+    color: #6c757d;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 4px;
+    transition: all 0.2s ease;
+}
+
+.forum-mode-switch-btn:hover {
+    color: #212529;
+}
+
+.forum-mode-switch-btn.active {
+    color: #007bff;
+    font-weight: bold;
+    transform: scale(1.15);
+}
+
+.forum-toggle-track {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    margin: 0 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.forum-toggle-track input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+    margin: 0;
+}
+
+.forum-toggle-thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 20px;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.forum-toggle-thumb:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: #007bff;
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.forum-toggle-track input:checked + .forum-toggle-thumb:before {
+    transform: translateX(16px);
+    background-color: #007bff;
+}
+
+.forum-toggle-track input:focus + .forum-toggle-thumb {
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .forum-editor-container {
@@ -109,13 +220,14 @@
     padding: 12px 14px;
     border: none;
     border-radius: 0;
-    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    font-size: 14px;
-    line-height: 1.5;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.6;
     color: #212529;
     resize: vertical;
     outline: none;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .forum-markdown-textarea:focus {
@@ -153,17 +265,35 @@
     border-radius: 3px;
 }
 
-.forum-visual-editor .editor-key,
-.forum-visual-editor kbd {
-    background-color: #f8f9fa;
-    color: #212529;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15), inset 0 1px 0 #fff;
-    font-size: 12px;
-    padding: 2px 6px;
-    font-family: inherit;
+.keys,
+.post-content .keys,
+.post-body .keys,
+.post-card .keys {
     display: inline-block;
+    vertical-align: baseline;
+    margin: 0 2px;
+}
+
+.keys kbd,
+.post-content kbd,
+.post-body kbd,
+.post-card kbd,
+.forum-visual-editor kbd,
+.forum-visual-editor .editor-key {
+    display: inline-block;
+    padding: 2px 7px;
+    font-size: 0.88em;
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #2b3035;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-bottom: 2px solid #adb5bd;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12), inset 0 1px 0 #fff;
+    white-space: nowrap;
+    margin: 0 1px;
 }
 
 .forum-visual-editor code {
@@ -339,19 +469,19 @@
 @media (max-width: 576px) {
     .forum-editor-toolbar {
         padding: 4px 6px;
+        justify-content: space-between;
     }
     .forum-editor-btn {
         padding: 3px 6px;
         font-size: 12px;
     }
-    .forum-mode-switcher {
-        width: 100%;
-        margin-top: 4px;
-        display: flex;
+    .forum-editor-mode-block {
+        margin-right: 0;
+        margin-bottom: 4px;
     }
-    .forum-mode-btn {
-        flex: 1;
-        text-align: center;
+    .forum-editor-tools-block {
+        justify-content: flex-start;
+        width: 100%;
     }
 }
 
