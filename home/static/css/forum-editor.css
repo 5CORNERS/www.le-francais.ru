@@ -270,31 +270,61 @@
 }
 
 /* Emoji Dropdown */
+.forum-emoji-group {
+    position: relative;
+}
+
 .forum-emoji-dropdown {
-    width: 290px;
-    max-height: 240px;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 1050;
+    width: 310px;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    padding: 8px 10px;
+    margin: 0;
+}
+
+.forum-emoji-dropdown.d-none {
+    display: none !important;
+}
+
+.forum-emoji-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+}
+
+.forum-emoji-grid {
+    max-height: 200px;
     overflow-y: auto;
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    padding: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .forum-emoji-item {
-    font-size: 20px;
+    font-size: 22px;
     line-height: 1;
-    padding: 4px 5px;
+    padding: 4px 6px;
     cursor: pointer;
     border-radius: 4px;
     transition: transform 0.1s ease, background-color 0.1s ease;
     user-select: none;
+    display: inline-block;
 }
 
 .forum-emoji-item:hover {
     background-color: #e9ecef;
-    transform: scale(1.2);
+    transform: scale(1.25);
 }
+
 
 /* Footer / status bar */
 .forum-editor-footer {

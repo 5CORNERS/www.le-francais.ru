@@ -345,8 +345,32 @@
         if (!this.$textarea.length) return;
 
         this.currentMode = this.options.initialMode; // 'visual' or 'markdown'
+        this.savedRange = null;
         this.init();
     }
+
+    ForumEditor.prototype.saveSelection = function() {
+        if (this.currentMode === 'visual') {
+            var sel = window.getSelection();
+            if (sel && sel.rangeCount > 0) {
+                var range = sel.getRangeAt(0);
+                if (this.$visualEditor && this.$visualEditor.length && this.$visualEditor[0].contains(range.commonAncestorContainer)) {
+                    this.savedRange = range.cloneRange();
+                }
+            }
+        }
+    };
+
+    ForumEditor.prototype.restoreSelection = function() {
+        if (this.currentMode === 'visual' && this.savedRange) {
+            var sel = window.getSelection();
+            if (sel) {
+                sel.removeAllRanges();
+                sel.addRange(this.savedRange);
+            }
+        }
+    };
+
 
     ForumEditor.prototype.init = function() {
         var self = this;
@@ -415,10 +439,17 @@
                     '<div class="btn-group btn-group-sm mr-1 mb-1" role="group">',
                         '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="link" title="Вставить ссылку"><i class="fa fa-link"></i></button>',
                         '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="image" title="Вставить или загрузить изображение"><i class="fa fa-picture-o"></i> Картинка</button>',
-                        '<div class="btn-group btn-group-sm" role="group">',
-                            '<button type="button" class="btn btn-light forum-editor-btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Вставить эмодзи"><i class="fa fa-smile-o"></i></button>',
-                            '<div class="dropdown-menu forum-emoji-dropdown">' + emojiItemsHtml + '</div>',
+                        '<div class="btn-group btn-group-sm forum-emoji-group position-relative" role="group">',
+                            '<button type="button" class="btn btn-light forum-editor-btn forum-emoji-btn" title="Вставить эмодзи"><i class="fa fa-smile-o"></i></button>',
+                            '<div class="forum-emoji-dropdown d-none">',
+                                '<div class="forum-emoji-header">',
+                                    '<span class="small font-weight-bold text-muted">Эмодзи</span>',
+                                    '<button type="button" class="btn btn-sm btn-link text-muted p-0 forum-emoji-close" style="font-size:16px;line-height:1;text-decoration:none;">&times;</button>',
+                                '</div>',
+                                '<div class="forum-emoji-grid">' + emojiItemsHtml + '</div>',
+                            '</div>',
                         '</div>',
+
                     '</div>',
                     // Mode Switcher
                     '<div class="btn-group btn-group-sm mb-1 forum-mode-switcher" role="group">',
@@ -538,6 +569,16 @@
     ForumEditor.prototype.bindEvents = function() {
         var self = this;
 
+        // Prevent toolbar buttons and emoji items from stealing focus from visual editor
+        this.$wrapper.on('mousedown', '.forum-editor-btn, .forum-emoji-item, .forum-emoji-close', function(e) {
+            e.preventDefault();
+        });
+
+        // Save selection on cursor movement / click in visual editor
+        this.$visualEditor.on('mouseup keyup focus blur', function() {
+            self.saveSelection();
+        });
+
         // Mode switch buttons
         this.$wrapper.on('click', '.forum-mode-btn', function(e) {
             e.preventDefault();
@@ -552,12 +593,37 @@
             self.executeCommand(cmd);
         });
 
+        // Emoji popup toggle
+        this.$wrapper.on('click', '.forum-emoji-btn', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var $dropdown = self.$wrapper.find('.forum-emoji-dropdown');
+            $dropdown.toggleClass('d-none');
+        });
+
+        // Emoji popup close button
+        this.$wrapper.on('click', '.forum-emoji-close', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            self.$wrapper.find('.forum-emoji-dropdown').addClass('d-none');
+        });
+
+        // Close emoji popup on click outside
+        $(document).on('click.forumEmoji', function(e) {
+            if (!$(e.target).closest('.forum-emoji-group').length) {
+                self.$wrapper.find('.forum-emoji-dropdown').addClass('d-none');
+            }
+        });
+
         // Emoji buttons
         this.$wrapper.on('click', '.forum-emoji-item', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             var emoji = $(this).data('emoji');
             self.insertEmoji(emoji);
+            self.$wrapper.find('.forum-emoji-dropdown').addClass('d-none');
         });
+
 
         // Live sync on input
         this.$visualEditor.on('input', function() {
@@ -584,6 +650,9 @@
 
     ForumEditor.prototype.executeVisualCommand = function(cmd) {
         this.$visualEditor.focus();
+        if (this.savedRange) {
+            this.restoreSelection();
+        }
         switch (cmd) {
             case 'bold':
                 document.execCommand('bold', false, null);
@@ -651,7 +720,9 @@
                 this.$fileInput.click();
                 break;
         }
+        this.saveSelection();
     };
+
 
     ForumEditor.prototype.executeMarkdownCommand = function(cmd) {
         switch (cmd) {
@@ -718,12 +789,36 @@
     ForumEditor.prototype.insertEmoji = function(emoji) {
         if (this.currentMode === 'visual') {
             this.$visualEditor.focus();
-            document.execCommand('insertText', false, emoji);
+            if (this.savedRange) {
+                this.restoreSelection();
+            }
+            var inserted = false;
+            try {
+                inserted = document.execCommand('insertText', false, emoji);
+            } catch (err) {}
+
+            if (!inserted) {
+                var sel = window.getSelection();
+                if (sel && sel.rangeCount > 0) {
+                    var range = sel.getRangeAt(0);
+                    range.deleteContents();
+                    var textNode = document.createTextNode(emoji);
+                    range.insertNode(textNode);
+                    range.setStartAfter(textNode);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                } else {
+                    this.$visualEditor.append(document.createTextNode(emoji));
+                }
+            }
+            this.saveSelection();
         } else {
             wrapTextareaSelection(this.$textarea, '', emoji, '');
         }
         this.updateCharCounter();
     };
+
 
     ForumEditor.prototype.bindUploadHandlers = function() {
         var self = this;
