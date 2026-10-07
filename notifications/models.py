@@ -303,7 +303,7 @@ def create_moderator_notification(sender, instance):
 def create_pybb_post_notification(sender, instance: Post, **kwargs):
 	if not instance.on_moderation and instance.updated is None:
 		from forum.models import PostReply
-		from forum.utils import get_mentioned_and_quoted_users, send_forum_mail
+		from forum.utils import get_quoted_and_mentioned_users, send_forum_mail
 
 		# 1. Process reply_to if passed
 		reply_to_id = getattr(instance, '_reply_to_id', None)
@@ -323,8 +323,10 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 		excluded_ids = [instance.user.pk]
 		if direct_reply_user:
 			excluded_ids.append(direct_reply_user.pk)
-		quoted_users = get_mentioned_and_quoted_users(instance.body, exclude_user_ids=excluded_ids)
+		quoted_users, mentioned_users = get_quoted_and_mentioned_users(instance.body, exclude_user_ids=excluded_ids)
 		for u in quoted_users:
+			excluded_ids.append(u.pk)
+		for u in mentioned_users:
 			excluded_ids.append(u.pk)
 
 		# 3. Topic subscribers
@@ -354,10 +356,10 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 			)
 			NotificationUser.objects.create(notification=notif_reply, user=direct_reply_user)
 
-		# 4b. Notification for quoted/mentioned users
+		# 4b. Notification for quoted users
 		if quoted_users:
 			notif_quote = Notification.objects.create(
-				title='Вас упомянули в теме',
+				title='Вас процитировали в теме',
 				category=Notification.REPLYES,
 				data=dict(
 					username=str(instance.user),
@@ -374,7 +376,27 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 			for u in quoted_users:
 				NotificationUser.objects.create(notification=notif_quote, user=u)
 
-		# 4c. Notification for thread subscribers
+		# 4c. Notification for mentioned users
+		if mentioned_users:
+			notif_mention = Notification.objects.create(
+				title='Вас упомянули в теме',
+				category=Notification.REPLYES,
+				data=dict(
+					username=str(instance.user),
+					post_name=clean_post(instance.body),
+					post_url=instance.get_absolute_url(),
+					topic_name=str(instance.topic),
+					topic_url=instance.topic.get_absolute_url(),
+					is_mention=True,
+				),
+				click_url=instance.get_absolute_url(),
+				image=avatar_image,
+				content_object=instance,
+			)
+			for u in mentioned_users:
+				NotificationUser.objects.create(notification=notif_mention, user=u)
+
+		# 4d. Notification for thread subscribers
 		if subscribers:
 			notif_sub = Notification.objects.create(
 				title='Новый ответ в теме',
@@ -408,6 +430,8 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 			send_forum_mail([direct_reply_user], 'reply_email', email_context, preference_type='reply')
 		if quoted_users:
 			send_forum_mail(quoted_users, 'quote_email', email_context, preference_type='reply')
+		if mentioned_users:
+			send_forum_mail(mentioned_users, 'quote_email', email_context, preference_type='reply')
 		if subscribers:
 			send_forum_mail(subscribers, 'subscription_email', email_context, preference_type='subscription')
 

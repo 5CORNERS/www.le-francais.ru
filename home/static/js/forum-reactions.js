@@ -306,14 +306,14 @@
     });
 
     // Scrolling chevrons inside Anton's who-liked tooltip
-    $(document).on('click', '.tooltip-who-liked-container .fa-chevron-right', function (e) {
+    $(document).on('click', '.tooltip-who-liked-container .fa-chevron-right, .tooltip-who-liked-container [class*="fa-chevron-right"]', function (e) {
         e.stopPropagation();
         e.preventDefault();
         var $container = $(this).closest('.tooltip-who-liked-container');
         $container.animate({ scrollLeft: $container.scrollLeft() + 100 }, 150);
     });
 
-    $(document).on('click', '.tooltip-who-liked-container .fa-chevron-left', function (e) {
+    $(document).on('click', '.tooltip-who-liked-container .fa-chevron-left, .tooltip-who-liked-container [class*="fa-chevron-left"]', function (e) {
         e.stopPropagation();
         e.preventDefault();
         var $container = $(this).closest('.tooltip-who-liked-container');
@@ -326,22 +326,47 @@
 
     // Hover timers for reaction badges to show Anton's who-liked tooltip
     var badgeShowTimer = null;
-    var badgeHideTimer = null;
+
+    function hideAllBadgeTooltips() {
+        clearTimeout(badgeShowTimer);
+        $('.reaction-badge.show-tooltip').removeClass('show-tooltip');
+    }
 
     $(document).on('mouseenter', '.reaction-badge', function () {
         var $badge = $(this);
-        clearTimeout(badgeHideTimer);
+        // Immediately close any other badge's tooltip when moving to a neighbor badge
+        $('.reaction-badge').not($badge).removeClass('show-tooltip');
+        clearTimeout(badgeShowTimer);
+
+        var $tooltip = $badge.find('.tooltip-who-liked');
+        if (!$tooltip.length || !$tooltip.find('.tooltip-like-entry').length) {
+            return;
+        }
+
         badgeShowTimer = setTimeout(function () {
+            // Ensure no other badges are shown
+            $('.reaction-badge').not($badge).removeClass('show-tooltip');
             $badge.addClass('show-tooltip');
-        }, 180);
+        }, 150);
     });
 
     $(document).on('mouseleave', '.reaction-badge', function () {
         var $badge = $(this);
         clearTimeout(badgeShowTimer);
-        badgeHideTimer = setTimeout(function () {
-            $badge.removeClass('show-tooltip');
-        }, 220);
+        $badge.removeClass('show-tooltip');
+    });
+
+    // Close tooltips on click outside or Esc
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('.reaction-badge').length) {
+            hideAllBadgeTooltips();
+        }
+    });
+
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape' || e.keyCode === 27) {
+            hideAllBadgeTooltips();
+        }
     });
 
 })(jQuery);

@@ -7734,7 +7734,7 @@ kbd {
 }
 
 .block-forum .reaction-badge .tooltip-who-liked.show-chevrones {
-    padding: 4px 14px;
+    padding: 4px 18px;
 }
 
 .block-forum .reaction-badge .tooltip-who-liked:after {
@@ -7748,7 +7748,6 @@ kbd {
     border-color: #679efe transparent transparent transparent;
 }
 
-.block-forum .reaction-badge:hover .tooltip-who-liked,
 .block-forum .reaction-badge.show-tooltip .tooltip-who-liked {
     visibility: visible;
     opacity: 1;

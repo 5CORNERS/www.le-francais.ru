@@ -18,36 +18,45 @@ except ImportError:
     from django.core.urlresolvers import reverse
 
 
-def extract_usernames_from_text(text):
+def extract_quoted_and_mentioned_names(text):
     if not text:
-        return set()
+        return set(), set()
     # 1. Quoted authors: > **Username**:
-    quoted = re.findall(r'>\s*\*\*([^\*\n\r]+?)\*\*:', text)
+    quoted_raw = re.findall(r'>\s*\*\*([^\*\n\r]+?)\*\*:', text)
+    quoted = set(name.strip() for name in quoted_raw if name.strip())
+
     # 2. Addressed authors at line start: **Username**,
     addressed = re.findall(r'(?:^|\n)\s*\*\*([^\*\n\r]+?)\*\*,', text)
     # 3. Direct @mentions: @Username
     mentions = re.findall(r'(?<![\w@])@([a-zA-Z0-9_.@+-]+)', text)
 
-    all_names = set()
-    for name in quoted + addressed + mentions:
-        cleaned = name.strip()
-        if cleaned:
-            all_names.add(cleaned)
-    return all_names
+    mentioned = set(name.strip() for name in (addressed + mentions) if name.strip())
+    # Users who were quoted do not need a duplicate mention notification
+    mentioned = mentioned - quoted
+    return quoted, mentioned
+
+
+def extract_usernames_from_text(text):
+    quoted, mentioned = extract_quoted_and_mentioned_names(text)
+    return quoted | mentioned
+
+
+def get_quoted_and_mentioned_users(text, exclude_user_ids=None):
+    if not text:
+        return [], []
+    quoted_names, mentioned_names = extract_quoted_and_mentioned_names(text)
+    User = get_user_model()
+    quoted_users = list(User.objects.filter(username__in=quoted_names)) if quoted_names else []
+    mentioned_users = list(User.objects.filter(username__in=mentioned_names)) if mentioned_names else []
+    if exclude_user_ids:
+        quoted_users = [u for u in quoted_users if u.id not in exclude_user_ids]
+        mentioned_users = [u for u in mentioned_users if u.id not in exclude_user_ids]
+    return quoted_users, mentioned_users
 
 
 def get_mentioned_and_quoted_users(text, exclude_user_ids=None):
-    if not text:
-        return []
-    names = extract_usernames_from_text(text)
-    if not names:
-        return []
-
-    User = get_user_model()
-    qs = User.objects.filter(username__in=names)
-    if exclude_user_ids:
-        qs = qs.exclude(id__in=exclude_user_ids)
-    return list(qs)
+    quoted, mentioned = get_quoted_and_mentioned_users(text, exclude_user_ids=exclude_user_ids)
+    return quoted + mentioned
 
 
 def send_forum_mail(users, template, context=None, preference_type='reply'):
