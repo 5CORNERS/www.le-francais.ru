@@ -90,7 +90,49 @@
     * **Выравнивание тулбара:** устранён пустой блок слева, переключатель режимов и кнопки форматирования выстроены в единую компактную строку слева направо с вертикальным разделителем.
     * **Комфортный свитч режимов:** увеличены размеры и отступы переключателя (высота 31px, трек 36×20px, бегунок 14px, отступы и зазоры 8px), иконки больше не прилипают к краям.
     * **Полное отключение `markItUp`:** виджет поля `body` переведён на стандартный `Textarea`, исключив загрузку и конфликты старых скриптов/стилей markItUp.
-    * **Автоматические тесты (30 тест-кейсов):** в `forum/tests.py` добавлен расширенный тестовый набор, покрывающий парсинг клавиш и расширений Markdown, форму `AorPostForm`, сохранение связей ответов `PostReply`, привязку вложений `ForumAttachment`, настройки уведомлений `AORProfileForm`, API реакций и колокольчик уведомлений.
+    * **Автоматические тесты (32 тест-кейса в `forum/tests.py`):**
+      1. **Парсер разметки и клавиш (`CustomMarkdownParserTests`):**
+         * `test_formatting_features` — базовая поддержка `^^подчеркивание^^` (`<ins>`), `~~зачеркивание~~` (`<del>`), `==маркер==` (`<mark>`), `3^ème^` (`<sup>`), `C~2~H~5~OH` (`<sub>`).
+         * `test_keystroke_variations` — расширенный синтаксис клавиш `++...++`:
+           * произвольные несловарные слова без кавычек (`++asdf++` $\rightarrow$ `<kbd>asdf</kbd>`),
+           * кириллические названия (`++пробел++` $\rightarrow$ `<kbd>пробел</kbd>`),
+           * клавиши с пробелами (`++тестовая клавиша++`),
+           * комбинации и модификаторы (`++ctrl+c++` $\rightarrow$ `<kbd>Ctrl</kbd>+<kbd>C</kbd>`),
+           * клавиши в кавычках (`++"Enter / Return"++`).
+         * `test_spoiler_formatting` — спойлеры `???- "Заголовок"\n    Текст` ($\rightarrow$ `<details><summary>`).
+         * `test_emoji_formatting` — рендеринг шорткодов эмодзи (`:heart:`).
+         * `test_quote_formatting` — форматирование цитат с указанием автора (`> **Иван**:\n> ...`) и без него.
+      2. **Форма сообщения и привязка ответов (`AorPostFormTests`):**
+         * `test_form_initialization_widget_and_attributes` — проверка отсутствия HTML5 атрибута `required`, перевод поля `body` на чистый `Textarea` с классом `forum-markdown-textarea` без зависимостей старого `markItUp`.
+         * `test_form_reply_to_post_initial` — проброс `reply_to_post` в `initial`.
+         * `test_form_save_creates_post_reply` — сохранение ответа создает связь `PostReply` между сообщением-ответом и исходным постом.
+         * `test_form_save_links_forum_attachments` — сохранение сообщения с markdown-картинкой автоматически привязывает объект `ForumAttachment` к `Post`.
+      3. **Форма профиля и настройки уведомлений (`AorProfileFormTests`):**
+         * `test_profile_form_initial_and_save_preferences` — чтение и сохранение флага `email_on_reply` в модель `ForumUserPreference`.
+      4. **Система реакций (`PostReactionTests`):**
+         * `test_reaction_registry_and_rendering` — проверка реестра реакций, рендеринг эмодзи и кастомного SVG берета `beret`.
+         * `test_post_react_ajax_unauthenticated` — отклонение неавторизованных запросов с HTTP 401.
+         * `test_post_react_ajax_invalid_post` & `invalid_reaction` — валидация существования поста и кода реакции.
+         * `test_post_react_ajax_add_and_toggle` — добавление реакции (счетчик 1, `status: ok`), повторный клик отменяет реакцию (счетчик 0, `user_reaction: null`).
+         * `test_post_react_ajax_switch_reaction` — переключение одной реакции на другую (например, с `heart` на `like`).
+         * `test_post_reaction_users_ajax` — эндпоинт списка пользователей для тултипа.
+         * `test_prefetch_posts_reactions` — оптимизированная пакетная выборка реакций для списка постов.
+      5. **Уведомления и сниппеты (`ForumNotificationTests`):**
+         * `test_clean_post_normal` — удаление цитат из сниппета уведомления.
+         * `test_clean_post_quote_only` — гарантия того, что пост, состоящий только из цитаты, не возвращает пустую строку в уведомление.
+         * `test_clean_post_truncation` — обрезка длинного текста до 50 символов с `...`.
+         * `test_extract_quoted_and_mentioned_names` — извлечение авторов цитат, обращений и `@упоминаний`.
+         * `test_extract_cyrillic_quoted_and_mentioned_names` — распознавание кириллических имен пользователей в цитатах и упоминаниях.
+         * `test_extract_quoted_and_mentioned_deduplication` — исключение дубликатов упоминаний для пользователей, которые уже были процитированы.
+         * `test_get_quoted_and_mentioned_users` — извлечение объектов пользователей с фильтрацией `exclude_user_ids`.
+         * `test_direct_reply_and_quote_notifications` — генерация колокольчика с `is_reply_to_you=True` при прямом ответе и `is_quote=True` при цитировании.
+         * `test_post_reaction_notification_creation` — отправка уведомления автору поста при постановке реакции с названием реакции.
+      6. **Вложения и загрузка изображений (`ForumAttachmentTests`):**
+         * `test_process_uploaded_image_resizing_and_compression` — сжатие тяжелых изображений до 1400px и < 1 МБ.
+         * `test_process_uploaded_image_invalid_format` — отклонение некорректных форматов.
+         * `test_upload_image_ajax_view` — эндпоинт AJAX-загрузки (авторизация, успешная загрузка, ограничение 10 МБ).
+         * `test_link_attachments_to_post` — ручная привязка вложений к посту.
+         * `test_post_save_signal_links_attachment_automatically` — автоматическое связывание вложений по сигналу `post_save`.
 * **Миграции:**
   * `forum/migrations/0002_forumuserpreference_postreply.py`
   * `forum/migrations/0003_auto_20261007_0529.py`
@@ -114,7 +156,7 @@
    ```bash
    python manage.py test forum
    ```
-   (Все 30 тестов проходят со статусом OK).
+   (Все 32 теста проходят со статусом OK).
 4. **Сборка статики (при необходимости):**
    Все новые файлы (`home/static/css/forum-editor.css`, `home/static/js/forum-editor.js`) подключены и готовы к работе.
 
