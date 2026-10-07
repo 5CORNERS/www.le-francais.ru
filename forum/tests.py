@@ -4,13 +4,14 @@ from __future__ import unicode_literals
 from io import BytesIO
 from PIL import Image
 
-from django.test import TestCase, Client
+from django.core import mail
+from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 
-from forum.models import ForumAttachment
+from forum.models import ForumAttachment, ForumUserPreference
 from forum.attachment_utils import process_uploaded_image, link_attachments_to_post
 from forum.markup_engines import CustomMarkdownParser
 from pybb.models import Forum, Category, Topic, Post
@@ -190,5 +191,107 @@ class ForumFormattingTestCase(TestCase):
         self.assertIn('<ol>', html1)
         self.assertIn('<ul>', html2)
         self.assertNotIn('<em> Bullet item 1</em>', html2)
+
+
+@override_settings(
+    MAILER_EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+    EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+    MAILER_EMAIL_THROTTLE=0,
+    PYBB_USE_DJANGO_MAILER=True
+)
+class ForumEmailNotificationTestCase(TestCase):
+    def setUp(self):
+        from mailer.models import Message
+        Message.objects.all().delete()
+        self.user1 = User.objects.create_user(username='alice', email='alice@test.com', password='pw')
+        self.user2 = User.objects.create_user(username='bob', email='bob@test.com', password='pw')
+        self.user3 = User.objects.create_user(username='charlie', email='charlie@test.com', password='pw')
+
+        self.category = Category.objects.create(name='Discussion Cat')
+        self.forum = Forum.objects.create(category=self.category, name='Discussion', slug='discussion')
+        self.topic = Topic.objects.create(forum=self.forum, name='General Topic', user=self.user1)
+        self.first_post = Post.objects.create(topic=self.topic, user=self.user1, body='Initial post')
+
+    def test_direct_reply_sends_email_to_recipient(self):
+        from mailer.engine import send_all
+        reply_post = Post(
+            topic=self.topic,
+            user=self.user2,
+            body='**alice**, thank you!'
+        )
+        reply_post._reply_to_id = self.first_post.pk
+        reply_post.save()
+        send_all()
+
+        # Check mail was sent to dummy outbox
+        self.assertTrue(len(mail.outbox) >= 1)
+        recipient_emails = [m.to[0] for m in mail.outbox]
+        self.assertIn('alice@test.com', recipient_emails)
+        self.assertNotIn('bob@test.com', recipient_emails)
+
+    def test_opt_out_preference_prevents_email(self):
+        from mailer.engine import send_all
+        pref, _ = ForumUserPreference.objects.get_or_create(user=self.user1)
+        pref.email_on_reply = False
+        pref.save()
+
+        reply_post = Post(
+            topic=self.topic,
+            user=self.user2,
+            body='**alice**, ping!'
+        )
+        reply_post._reply_to_id = self.first_post.pk
+        reply_post.save()
+        send_all()
+
+        # Alice should NOT receive email
+        recipient_emails = [m.to[0] for m in mail.outbox]
+        self.assertNotIn('alice@test.com', recipient_emails)
+
+    def test_quote_email_notification(self):
+        from mailer.engine import send_all
+        quote_post = Post(
+            topic=self.topic,
+            user=self.user2,
+            body='> **alice**:\n> Initial post\n\nI agree completely.'
+        )
+        quote_post.save()
+        send_all()
+
+        self.assertTrue(len(mail.outbox) >= 1)
+        recipient_emails = [m.to[0] for m in mail.outbox]
+        self.assertIn('alice@test.com', recipient_emails)
+
+    def test_mention_email_notification_with_cyrillic(self):
+        from mailer.engine import send_all
+        cyrillic_user = User.objects.create_user(username='Дмитрий', email='dmitry@test.com', password='pw')
+        post = Post(
+            topic=self.topic,
+            user=self.user1,
+            body='Привет, @Дмитрий, как дела?'
+        )
+        post.save()
+        send_all()
+
+        self.assertTrue(len(mail.outbox) >= 1)
+        recipient_emails = [m.to[0] for m in mail.outbox]
+        self.assertIn('dmitry@test.com', recipient_emails)
+
+    def test_subscriber_email_notification(self):
+        from mailer.engine import send_all
+        self.topic.subscribers.add(self.user3)
+
+        post = Post(
+            topic=self.topic,
+            user=self.user2,
+            body='Just a regular comment'
+        )
+        post.save()
+        send_all()
+
+        recipient_emails = [m.to[0] for m in mail.outbox]
+        self.assertIn('charlie@test.com', recipient_emails)
+        self.assertNotIn('bob@test.com', recipient_emails)
+
 
 
