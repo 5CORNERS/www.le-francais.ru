@@ -7252,7 +7252,7 @@ kbd {
 .block-forum .post-card .post-header {
     background-color: #f8f9fa;
     border-bottom: 1px solid #e9ecef;
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 1rem;
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
 }
@@ -7418,7 +7418,7 @@ kbd {
 
 /* Post Body */
 .block-forum .post-card .post-body {
-    padding: 1.25rem;
+    padding: 1.15rem 1.25rem 0.75rem;
     font-size: 15px;
     line-height: 1.6;
     color: #212529;
@@ -7436,6 +7436,10 @@ kbd {
     word-wrap: break-word;
 }
 
+.block-forum .post-card .post-content article > :last-child {
+    margin-bottom: 0;
+}
+
 .block-forum .post-card .post-content article img {
     max-width: 100%;
     height: auto;
@@ -7450,13 +7454,18 @@ kbd {
 }
 
 .block-forum .post-card .post-signature {
-    margin-top: 1rem;
+    margin-top: 0.75rem;
     padding-top: 0.5rem;
     border-top: 1px dashed #dee2e6;
     color: #868e96;
     font-size: 0.85rem;
     max-height: 60px;
     overflow: auto;
+}
+
+.block-forum .post-card .post-signature p,
+.block-forum .post-card .post-signature p:last-child {
+    margin-bottom: 0;
 }
 
 /* Post Footer */
@@ -7509,10 +7518,10 @@ kbd {
 /* Mobile & Responsive Rules */
 @media (max-width: 576px) {
     .block-forum .post-card .post-header {
-        padding: 0.6rem 0.75rem;
+        padding: 0.5rem 0.75rem;
     }
     .block-forum .post-card .post-body {
-        padding: 0.85rem 0.75rem;
+        padding: 0.85rem 0.75rem 0.6rem;
     }
     .block-forum .post-card .post-footer {
         padding: 0.45rem 0.75rem;
