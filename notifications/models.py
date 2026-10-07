@@ -255,6 +255,11 @@ def clean_post(post: str) -> str:
 	for line in post.splitlines():
 		if not line.startswith('>') and not line == '':
 			result += line + ' '
+	if not result.strip():
+		for line in post.splitlines():
+			cleaned = line.lstrip('> ').strip()
+			if cleaned:
+				result += cleaned + ' '
 	limit = 50
 	tail = len(result) > limit and '...' or ''
 	return result[:50] + tail
