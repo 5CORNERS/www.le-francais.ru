@@ -7737,6 +7737,15 @@ kbd {
     padding: 4px 18px;
 }
 
+.block-forum .reaction-badge .tooltip-who-liked:before {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 12px;
+}
+
 .block-forum .reaction-badge .tooltip-who-liked:after {
     content: " ";
     position: absolute;

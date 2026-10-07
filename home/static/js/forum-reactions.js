@@ -326,17 +326,21 @@
 
     // Hover timers for reaction badges to show Anton's who-liked tooltip
     var badgeShowTimer = null;
+    var badgeHideTimer = null;
 
     function hideAllBadgeTooltips() {
         clearTimeout(badgeShowTimer);
+        clearTimeout(badgeHideTimer);
         $('.reaction-badge.show-tooltip').removeClass('show-tooltip');
     }
 
     $(document).on('mouseenter', '.reaction-badge', function () {
         var $badge = $(this);
-        // Immediately close any other badge's tooltip when moving to a neighbor badge
-        $('.reaction-badge').not($badge).removeClass('show-tooltip');
         clearTimeout(badgeShowTimer);
+        clearTimeout(badgeHideTimer);
+
+        // Immediately annihilate any neighbor's tooltip when moving onto a new badge
+        $('.reaction-badge').not($badge).removeClass('show-tooltip');
 
         var $tooltip = $badge.find('.tooltip-who-liked');
         if (!$tooltip.length || !$tooltip.find('.tooltip-like-entry').length) {
@@ -344,16 +348,20 @@
         }
 
         badgeShowTimer = setTimeout(function () {
-            // Ensure no other badges are shown
             $('.reaction-badge').not($badge).removeClass('show-tooltip');
             $badge.addClass('show-tooltip');
-        }, 150);
+        }, 120);
     });
 
     $(document).on('mouseleave', '.reaction-badge', function () {
         var $badge = $(this);
         clearTimeout(badgeShowTimer);
-        $badge.removeClass('show-tooltip');
+        clearTimeout(badgeHideTimer);
+
+        // Generous buffer when moving cursor away, giving time to comfortably move without hurry
+        badgeHideTimer = setTimeout(function () {
+            $badge.removeClass('show-tooltip');
+        }, 300);
     });
 
     // Close tooltips on click outside or Esc
