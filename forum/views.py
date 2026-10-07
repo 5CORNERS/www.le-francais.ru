@@ -93,35 +93,32 @@ def post_react_ajax(request, pk):
     if not reaction_info:
         return JsonResponse({'status': 'error', 'error': 'Invalid reaction'}, status=400)
 
-    existing_reaction = PostReaction.objects.filter(post=post, user=request.user).first()
     pybb_profile = getattr(request.user, 'pybb_profile', None)
+    from django.db import transaction
 
-    if existing_reaction and existing_reaction.active:
-        if existing_reaction.reaction_type == reaction_code:
-            existing_reaction.active = False
+    with transaction.atomic():
+        existing_reaction, created = PostReaction.objects.select_for_update().get_or_create(
+            post=post,
+            user=request.user,
+            defaults={
+                'reaction_type': reaction_code,
+                'active': True,
+            }
+        )
+        if not created:
+            if existing_reaction.active and existing_reaction.reaction_type == reaction_code:
+                existing_reaction.active = False
+            else:
+                existing_reaction.reaction_type = reaction_code
+                existing_reaction.active = True
             existing_reaction.save()
-            if pybb_profile:
-                Like.objects.filter(post=post, profile=pybb_profile).update(active=False)
-        else:
-            existing_reaction.reaction_type = reaction_code
-            existing_reaction.active = True
-            existing_reaction.save()
-            if pybb_profile:
-                Like.objects.update_or_create(post=post, profile=pybb_profile, defaults={'active': True})
-    else:
-        if existing_reaction:
-            existing_reaction.reaction_type = reaction_code
-            existing_reaction.active = True
-            existing_reaction.save()
-        else:
-            existing_reaction = PostReaction.objects.create(
-                post=post,
-                user=request.user,
-                reaction_type=reaction_code,
-                active=True
-            )
+
         if pybb_profile:
-            Like.objects.update_or_create(post=post, profile=pybb_profile, defaults={'active': True})
+            Like.objects.update_or_create(
+                post=post,
+                profile=pybb_profile,
+                defaults={'active': existing_reaction.active}
+            )
 
     data = get_post_reactions_summary(post, current_user=request.user)
     data['status'] = 'ok'

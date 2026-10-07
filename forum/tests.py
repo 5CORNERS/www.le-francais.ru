@@ -139,3 +139,28 @@ class CustomMarkdownParserTests(TestCase):
         self.assertIn('<details', html)
         self.assertIn('<summary>Мой секрет</summary>', html)
         self.assertIn('Скрытый текст', html)
+
+
+class PostReactionViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='reaction_user', email='react@example.com', password='password')
+        category = Category.objects.create(name='Test Category')
+        forum = Forum.objects.create(name='React Forum', category=category)
+        topic = Topic.objects.create(forum=forum, name='React Topic', user=self.user)
+        self.post = Post.objects.create(topic=topic, user=self.user, body='React to this')
+
+    def test_toggle_reaction_ajax(self):
+        self.client.login(username='reaction_user', password='password')
+        url = reverse('forum:react_post', kwargs={'pk': self.post.pk})
+        
+        # Add reaction
+        resp1 = self.client.post(url, {'reaction': 'fire'})
+        self.assertEqual(resp1.status_code, 200)
+        self.assertEqual(resp1.json()['user_reaction'], 'fire')
+
+        # Toggle reaction off
+        resp2 = self.client.post(url, {'reaction': 'fire'})
+        self.assertEqual(resp2.status_code, 200)
+        self.assertIsNone(resp2.json()['user_reaction'])
+
