@@ -1,8 +1,10 @@
-{% load i18n pybb_tags staticfiles %}
+{% load i18n pybb_tags staticfiles forum_tags %}
 
 {% pybb_get_profile post.user as post_user_profile %}
 {% pybb_get_profile request.user as request_user_profile %}
 {% liked post request.user as liked %}
+{% get_post_reactions post request.user as reactions_data %}
+
 
 <div class="card post post-card post-row mb-4 {% if post.on_moderation %}on-moderation{% endif %}"
      id="post-{{ post.id }}"
@@ -172,26 +174,119 @@
 		{% endif %}
 	</div>
 
-	<div class="card-footer post-footer d-flex justify-content-between align-items-center">
-		<div class="post-footer-left">
-			<ul class="list-inline action-menu m-0">
-				<li class="{% if liked %}selected{% endif %} like-container" itemprop="interactionStatistic" itemscope itemtype="http://schema.org/InteractionCounter">
-					<a {% if user.is_authenticated %}href="{% url 'pybb:like_post' post.pk %}"
-					   data-count="{{ post.likes|pybb_likes_count }}"
-					   class="like"
-					   {% else %}href="{% url 'account_login' %}?next={{ post.get_absolute_url }}"
-					   data-count="{{ post.likes|pybb_likes_count }}"
-					   class="like-disabled"{% endif %}
-					><span class="{% if liked %}fas{% else %}far{% endif %} fa-heart"></span>
-						<span class="counter"
-						      id="{{ post.pk }}-likecount">{% if post.likes|pybb_likes_count > 0 %}{{ post.likes|pybb_likes_count }}{% endif %}</span>
-					</a>
-					{% if post.likes|pybb_likes_count > 0 %}<div class='tooltip-who-liked{% if post.likes|pybb_likes_count > 5 %} show-chevrones{% endif %}'>{% who_liked post 5 %}</div>{% endif %}
-					<meta itemprop="interactionType" content="http://schema.org/LikeAction" />
-					<meta itemprop="userInteractionCount" content="{{ post.likes|pybb_likes_count }}" />
-				</li>
-			</ul>
+	<div class="card-footer post-footer d-flex justify-content-between align-items-center flex-wrap">
+		<div class="post-footer-left d-flex align-items-center flex-wrap" itemprop="interactionStatistic" itemscope itemtype="http://schema.org/InteractionCounter">
+			<meta itemprop="interactionType" content="http://schema.org/LikeAction" />
+			<meta itemprop="userInteractionCount" content="{{ reactions_data.total_count }}" />
+
+			<!-- Reaction Button & Popover Picker -->
+			<div class="reactions-wrapper" data-post-id="{{ post.id }}">
+				<div class="reaction-picker-popover" id="reaction-picker-{{ post.id }}">
+					<div class="reaction-picker-inner">
+						{% for r in reactions_data.all_reactions %}
+							<button type="button"
+							        class="reaction-picker-btn {% if reactions_data.user_reaction == r.code %}is-selected{% endif %}"
+							        data-reaction="{{ r.code }}"
+							        aria-label="{{ r.label }}">
+								{% if r.emoji %}
+									<span class="reaction-emoji">{{ r.emoji }}</span>
+								{% else %}
+									{% render_reaction_icon r.code %}
+								{% endif %}
+								<span class="reaction-tooltip">{{ r.label }}</span>
+							</button>
+						{% endfor %}
+					</div>
+				</div>
+
+				<button type="button"
+				        class="post-react-btn {% if reactions_data.user_reaction %}active user-reacted-{{ reactions_data.user_reaction }}{% endif %}"
+				        data-post-id="{{ post.id }}"
+				        data-current-reaction="{{ reactions_data.user_reaction|default:'' }}"
+				        data-react-url="{% url 'forum:react_post' post.id %}"
+				        {% if not user.is_authenticated %}data-login-url="{% url 'account_login' %}?next={{ post.get_absolute_url }}"{% endif %}
+				        aria-label="{% if reactions_data.user_reaction %}{{ reactions_data.user_reaction }}{% else %}{% trans 'Мне нравится' %}{% endif %}">
+					<span class="post-react-icon">
+						{% if reactions_data.user_reaction == 'heart' %}
+							<i class="fas fa-heart text-danger"></i>
+						{% elif reactions_data.user_reaction == 'like' %}
+							👍
+						{% elif reactions_data.user_reaction == 'pray' %}
+							🙏
+						{% elif reactions_data.user_reaction == 'idea' %}
+							💡
+						{% elif reactions_data.user_reaction == 'pencil' %}
+							✏️
+						{% elif reactions_data.user_reaction == 'wow' %}
+							😮
+						{% elif reactions_data.user_reaction == 'fire' %}
+							🔥
+						{% elif reactions_data.user_reaction == 'beret' %}
+							{% render_reaction_icon 'beret' %}
+						{% else %}
+							<i class="far fa-heart"></i>
+						{% endif %}
+					</span>
+					<span class="post-react-label">
+						{% if reactions_data.user_reaction == 'heart' %}
+							{% trans 'Сердечко' %}
+						{% elif reactions_data.user_reaction == 'like' %}
+							{% trans 'Нравится' %}
+						{% elif reactions_data.user_reaction == 'pray' %}
+							{% trans 'Спасибо' %}
+						{% elif reactions_data.user_reaction == 'idea' %}
+							{% trans 'Идея' %}
+						{% elif reactions_data.user_reaction == 'pencil' %}
+							{% trans 'Взял на карандаш' %}
+						{% elif reactions_data.user_reaction == 'wow' %}
+							{% trans 'Вау!' %}
+						{% elif reactions_data.user_reaction == 'fire' %}
+							{% trans 'Огонь' %}
+						{% elif reactions_data.user_reaction == 'beret' %}
+							Vive le-francais.ru !
+						{% else %}
+							{% trans 'Мне нравится' %}
+						{% endif %}
+					</span>
+				</button>
+			</div>
+
+			<!-- Reaction Badges with Anton's Signature Tooltip -->
+			<div class="reactions-badges" id="reactions-badges-{{ post.id }}">
+				{% for r in reactions_data.summary %}
+					<div class="reaction-badge {% if r.is_user %}is-user-reacted{% endif %}"
+					     role="button"
+					     tabindex="0"
+					     data-post-id="{{ post.id }}"
+					     data-reaction="{{ r.code }}"
+					     data-react-url="{% url 'forum:react_post' post.id %}"
+					     aria-label="{{ r.label }}">
+						{% if r.emoji %}
+							<span class="reaction-badge-emoji">{{ r.emoji }}</span>
+						{% else %}
+							{% render_reaction_icon r.code %}
+						{% endif %}
+						<span class="reaction-badge-count">{{ r.count }}</span>
+
+						<!-- Anton's Handcrafted Who Liked Tooltip -->
+						<div class="tooltip-who-liked {% if r.users|length > 5 %}show-chevrones{% endif %}">
+							<div class="tooltip-who-liked-container {% if r.users|length > 5 %}show-chevrones{% endif %}">
+								<span class="fas fa-chevron-left"></span>
+								{% for u in r.users %}
+									<a href="{{ u.url }}" class="tooltip-like-entry" title="{{ u.username }}" data-toggle="tooltip">
+										<div class="avatar">
+											<img src="{{ u.avatar_url }}" alt="{{ u.username }}">
+										</div>
+									</a>
+								{% endfor %}
+								<span class="fas fa-chevron-right"></span>
+							</div>
+						</div>
+					</div>
+				{% endfor %}
+			</div>
 		</div>
+
 		<div class="post-footer-right">
 			{% if user.is_authenticated and not is_move %}
 				<a href="#create_post"

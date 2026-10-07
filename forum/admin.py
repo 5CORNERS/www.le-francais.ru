@@ -19,7 +19,7 @@ class CustomPostAdmin(PostAdmin):
 admin.site.register(Post, CustomPostAdmin)
 
 
-from .models import ForumUserPreference, PostReply
+from .models import ForumUserPreference, PostReply, PostReaction
 
 @admin.register(ForumUserPreference)
 class ForumUserPreferenceAdmin(admin.ModelAdmin):
@@ -31,3 +31,12 @@ class ForumUserPreferenceAdmin(admin.ModelAdmin):
 class PostReplyAdmin(admin.ModelAdmin):
     list_display = ('post', 'reply_to')
     raw_id_fields = ('post', 'reply_to')
+
+
+@admin.register(PostReaction)
+class PostReactionAdmin(admin.ModelAdmin):
+    list_display = ('post', 'user', 'reaction_type', 'active', 'created')
+    list_filter = ('reaction_type', 'active')
+    search_fields = ('user__username', 'post__id')
+    raw_id_fields = ('post', 'user')
+

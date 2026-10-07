@@ -1,4 +1,5 @@
-{% load pybb_tags i18n staticfiles site_tags %}
+{% load pybb_tags i18n staticfiles site_tags forum_tags %}
+
 {% block extra_head %}
     <script async='async' src='https://www.googletagservices.com/tag/js/gpt.js'></script>
     <script>
@@ -37,6 +38,7 @@
         {% include 'pybb/poll.html' %}
     {% endif %}
 
+    {% prefetch_posts_reactions_tag post_list %}
     <div class="posts">
         {% if first_post %}{% ifnotequal first_post post_list.0 %}
             {% with first_post as post %}

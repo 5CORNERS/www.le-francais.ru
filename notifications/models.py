@@ -430,6 +430,9 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 def create_pybb_like_notification(sender, instance: Like, **kwargs):
 	if instance.post.user == instance.profile.user:
 		return
+	from forum.models import PostReaction
+	if PostReaction.objects.filter(post_id=instance.post_id, user_id=instance.profile.user_id).exists():
+		return
 	try:
 		notification, created = Notification.objects.get_or_create(
 			content_type=ContentType.objects.get_for_model(Like),
@@ -471,6 +474,66 @@ def delete_pybb_like_notification(sender, instance: Like, **kwargs):
 		.filter(content_type=ContentType.objects.get_for_model(Like),
 	            object_id=instance.id) \
 		.update(active=False)
+
+
+def create_post_reaction_notification(sender, instance, **kwargs):
+	if instance.post.user == instance.user:
+		return
+	from forum.reactions import get_reaction
+	reaction_info = get_reaction(instance.reaction_type)
+	reaction_label = reaction_info['label'] if reaction_info else 'Реакция'
+	reaction_emoji = reaction_info['emoji'] if reaction_info else None
+	reaction_image = reaction_info['image'] if reaction_info else None
+
+	try:
+		notification, created = Notification.objects.get_or_create(
+			content_type=ContentType.objects.get_for_model(instance.__class__),
+			object_id=instance.id,
+			image=NotificationImage.objects.get_or_create(
+				url=instance.user.pybb_profile.avatar_url
+			)[0],
+		)
+	except Notification.MultipleObjectsReturned:
+		for notification in Notification.objects.filter(
+				content_type=ContentType.objects.get_for_model(instance.__class__),
+				object_id=instance.id,
+		)[1:]:
+			notification.delete()
+		return create_post_reaction_notification(sender, instance, **kwargs)
+
+	notification.title = 'Новая реакция на ваш пост: {}'.format(reaction_label)
+	notification.category = notification.LIKES
+	notification.data = dict(
+		username=instance.user.pybb_profile.get_display_name(),
+		post_url=instance.post.get_absolute_url(),
+		post_name=clean_post(instance.post.body),
+		topic_url=instance.post.topic.get_absolute_url(),
+		topic_name=str(instance.post.topic),
+		reaction_type=instance.reaction_type,
+		reaction_label=reaction_label,
+		reaction_emoji=reaction_emoji,
+		reaction_image=reaction_image,
+	)
+	notification.click_url = instance.post.get_absolute_url()
+	notification.image = NotificationImage.objects.get_or_create(
+		url=instance.user.pybb_profile.avatar_url
+	)[0]
+	notification.active = instance.active
+	notification.save()
+
+	if created:
+		NotificationUser.objects.create(
+			notification=notification,
+			user=instance.post.user,
+		)
+
+
+def delete_post_reaction_notification(sender, instance, **kwargs):
+	Notification.objects.prefetch_related('notificationuser_set') \
+		.filter(content_type=ContentType.objects.get_for_model(instance.__class__),
+	            object_id=instance.id) \
+		.update(active=False)
+
 
 
 def create_postman_notification(sender, instance: Message, **kwargs):
@@ -531,6 +594,10 @@ post_save.connect(create_pybb_post_notification, Post)
 post_delete.connect(delete_pybb_notification, Post)
 post_save.connect(create_pybb_like_notification, Like)
 post_delete.connect(delete_pybb_like_notification, Like)
+from forum.models import PostReaction
+post_save.connect(create_post_reaction_notification, PostReaction)
+post_delete.connect(delete_post_reaction_notification, PostReaction)
+
 post_save.connect(create_postman_notification, Message)
 post_save.connect(create_pybb_topic_notification, Topic)
 post_delete.connect(delete_pybb_notification, Topic)

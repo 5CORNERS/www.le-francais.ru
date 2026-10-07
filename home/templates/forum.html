@@ -240,6 +240,10 @@
 	<script defer
 	        type="text/javascript"
 	        src="{% static 'js/le_francais.min.js' %}"></script>
+	<script defer
+	        type="text/javascript"
+	        src="{% static 'js/forum-reactions.js' %}"></script>
+
 	{% get_full_path as full_path %}
 	{% if 'payment_success' in request.GET and request.GET.modal_open == 'success-payment-modal' %}
 		<script>

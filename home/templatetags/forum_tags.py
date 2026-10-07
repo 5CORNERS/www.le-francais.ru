@@ -46,3 +46,33 @@ def pybb_breadcrumb_link(object, anchor=''):
 	# noinspection PyRedeclaration
 	anchor = anchor or smart_text(object)
 	return mark_safe('<a itemprop="item" href="%s"><span itemprop="name">%s</span></a>' % (url, escape(anchor)))
+
+
+from forum.reactions import (
+	get_post_reactions_summary,
+	prefetch_posts_reactions,
+	render_reaction_icon_html,
+	get_all_reactions,
+)
+
+
+@register.simple_tag
+def prefetch_posts_reactions_tag(post_list):
+	prefetch_posts_reactions(post_list)
+	return ''
+
+
+@register.simple_tag
+def get_post_reactions(post, current_user=None):
+	return get_post_reactions_summary(post, current_user)
+
+
+@register.simple_tag
+def render_reaction_icon(code, css_class=''):
+	return render_reaction_icon_html(code, css_class)
+
+
+@register.simple_tag
+def get_available_reactions():
+	return get_all_reactions()
+

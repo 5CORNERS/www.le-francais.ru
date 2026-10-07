@@ -34,4 +34,22 @@ class ForumUserPreference(models.Model):
         verbose_name_plural = 'Настройки уведомлений форума'
 
     def __str__(self):
-        return 'Preferences for {}'.format(self.user.username)
+        return 'Preferences for {}'.format(self.user.username)
+
+
+class PostReaction(models.Model):
+    post = models.ForeignKey('pybb.Post', on_delete=models.CASCADE, related_name='reactions')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='forum_reactions')
+    reaction_type = models.CharField(max_length=20, default='heart')
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('post', 'user')
+        verbose_name = 'Реакция на сообщение'
+        verbose_name_plural = 'Реакции на сообщения'
+
+    def __str__(self):
+        return '{} by {} on Post #{}'.format(self.reaction_type, self.user.username, self.post_id)
+
