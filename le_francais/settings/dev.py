@@ -26,6 +26,10 @@ SESSION_COOKIE_DOMAIN = None
 
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 
+if 'courses' in DATABASES and not DATABASES['courses'].get('PORT'):
+    DATABASES['courses']['PORT'] = DATABASES['default'].get('PORT', 5433)
+
+
 try:
     from .local import *
 except ImportError:

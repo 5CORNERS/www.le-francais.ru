@@ -19,7 +19,7 @@ class CustomPostAdmin(PostAdmin):
 admin.site.register(Post, CustomPostAdmin)
 
 
-from .models import ForumUserPreference, PostReply, PostReaction
+from .models import ForumUserPreference, PostReply, PostReaction, ForumAttachment
 
 @admin.register(ForumUserPreference)
 class ForumUserPreferenceAdmin(admin.ModelAdmin):
@@ -39,4 +39,14 @@ class PostReactionAdmin(admin.ModelAdmin):
     list_filter = ('reaction_type', 'active')
     search_fields = ('user__username', 'post__id')
     raw_id_fields = ('post', 'user')
+
+
+@admin.register(ForumAttachment)
+class ForumAttachmentAdmin(admin.ModelAdmin):
+    list_display = ('filename', 'user', 'post', 'file_size', 'width', 'height', 'created')
+    list_filter = ('created',)
+    search_fields = ('filename', 'user__username')
+    raw_id_fields = ('user', 'post')
+    readonly_fields = ('file_size', 'width', 'height', 'created')
+
 

@@ -52,4 +52,24 @@ class PostReaction(models.Model):
 
     def __str__(self):
         return '{} by {} on Post #{}'.format(self.reaction_type, self.user.username, self.post_id)
+
+
+class ForumAttachment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='forum_attachments', verbose_name='Пользователь')
+    post = models.ForeignKey('pybb.Post', on_delete=models.SET_NULL, null=True, blank=True, related_name='forum_attachments', verbose_name='Сообщение')
+    file = models.ImageField(upload_to='forum/images/%Y/%m/', verbose_name='Файл')
+    filename = models.CharField(max_length=255, verbose_name='Исходное имя файла')
+    file_size = models.PositiveIntegerField(verbose_name='Размер файла (байт)')
+    width = models.PositiveIntegerField(null=True, blank=True, verbose_name='Ширина')
+    height = models.PositiveIntegerField(null=True, blank=True, verbose_name='Высота')
+    created = models.DateTimeField(auto_now_add=True, verbose_name='Дата загрузки')
+
+    class Meta:
+        verbose_name = 'Вложение форума'
+        verbose_name_plural = 'Вложения форума'
+        ordering = ['-created']
+
+    def __str__(self):
+        return '{} ({})'.format(self.filename, self.user.username if self.user else 'anonymous')
+
 

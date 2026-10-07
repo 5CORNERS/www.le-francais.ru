@@ -1,4 +1,5 @@
 {% load i18n pybb_tags staticfiles %}
+<link rel="stylesheet" href="{% static 'css/forum-editor.css' %}">
 <form class="post-form" action="
     {% if forum %}
         {% url 'pybb:add_topic' forum.pk %}
@@ -52,10 +53,15 @@
 				<div class="card-collapse collapse out"><div class="card-body">{% include "pybb/poll_edit_form.html" %}</div></div>
 			</div>
 		{% endif %}
-		{% include "pybb/attachments_formset.html" %}
+		<div class="d-none">
+			{% include "pybb/attachments_formset.html" %}
+		</div>
 		<p class="submit">{% include "pybb/_button_submit.html" %}</p>
 	</fieldset>
 </form>
+
+<script src="{% static 'js/forum-editor.js' %}"></script>
+
 
 <script>
 (function() {
@@ -69,18 +75,23 @@
     }
 
     function scrollToTextarea($textarea, $createPost) {
-        if ($createPost && $createPost.length) {
-            $('html, body').animate({
-                scrollTop: $createPost.offset().top - 80
-            }, 300, function() {
+        var focusEditor = function() {
+            if (window.forumEditor && window.forumEditor.currentMode === 'visual') {
+                window.forumEditor.$visualEditor.focus();
+            } else {
                 $textarea.focus();
                 var len = $textarea.val().length;
                 if ($textarea[0].setSelectionRange) {
                     $textarea[0].setSelectionRange(len, len);
                 }
-            });
+            }
+        };
+        if ($createPost && $createPost.length) {
+            $('html, body').animate({
+                scrollTop: $createPost.offset().top - 80
+            }, 300, focusEditor);
         } else {
-            $textarea.focus();
+            focusEditor();
         }
     }
 
@@ -121,6 +132,10 @@
                         $textarea.val(greeting);
                     } else if (currentVal.indexOf(greeting) === -1) {
                         $textarea.val(greeting + '\n' + currentVal);
+                    }
+
+                    if (window.forumEditor && window.forumEditor.syncVisualFromMarkdown) {
+                        window.forumEditor.syncVisualFromMarkdown();
                     }
 
                     scrollToTextarea($textarea, $createPost);
@@ -174,6 +189,10 @@
                     $textarea.val(quoteBlock);
                 }
 
+                if (window.forumEditor && window.forumEditor.syncVisualFromMarkdown) {
+                    window.forumEditor.syncVisualFromMarkdown();
+                }
+
                 scrollToTextarea($textarea, $createPost);
             });
 
@@ -186,7 +205,7 @@
                 var postLen = parseInt($btn.data('post-length'), 10) || 0;
                 var username = $btn.data('post-username') || '';
                 if (!username && $btn.closest('.post-card').length) {
-                    username = $.trim($btn.closest('.post-card').find('.post-username').text());
+                    username = $.trim($(this).closest('.post-card').find('.post-username').text());
                 }
 
                 function executeFullQuote() {
@@ -207,6 +226,10 @@
                                 $textarea.val(currentVal + '\n' + data);
                             } else {
                                 $textarea.val(data);
+                            }
+
+                            if (window.forumEditor && window.forumEditor.syncVisualFromMarkdown) {
+                                window.forumEditor.syncVisualFromMarkdown();
                             }
 
                             scrollToTextarea($textarea, $createPost);
@@ -237,5 +260,6 @@
     }
     initForumFormHandlers();
 })();
+
 </script>
 

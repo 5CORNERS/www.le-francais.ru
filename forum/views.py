@@ -137,4 +137,41 @@ def post_reaction_users_ajax(request, pk):
     return JsonResponse(data)
 
 
+@require_POST
+def upload_image_ajax(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Для загрузки изображений требуется войти на сайт.'}, status=401)
+
+    file_obj = request.FILES.get('file') or request.FILES.get('image')
+    if not file_obj:
+        return JsonResponse({'success': False, 'error': 'Файл изображения не был передан.'}, status=400)
+
+    # 10 MB raw upload ceiling
+    if file_obj.size > 10 * 1024 * 1024:
+        return JsonResponse({
+            'success': False,
+            'error': 'Размер исходного файла превышает 10 МБ. Пожалуйста, сожмите файл или используйте сторонний хостинг.'
+        }, status=400)
+
+    from forum.attachment_utils import process_uploaded_image
+
+    try:
+        attachment = process_uploaded_image(file_obj, request.user)
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'Ошибка при сохранении изображения: {}'.format(e)}, status=500)
+
+    return JsonResponse({
+        'success': True,
+        'url': attachment.file.url,
+        'filename': attachment.filename,
+        'size': attachment.file_size,
+        'width': attachment.width,
+        'height': attachment.height,
+        'id': attachment.pk,
+    })
+
+
+
 

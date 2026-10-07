@@ -97,8 +97,10 @@ class AorPostForm(PostForm):
             self.fields['reply_to_post'].initial = self.initial['reply_to_post']
         if 'body' in self.fields:
             existing_class = self.fields['body'].widget.attrs.get('class', '')
-            if 'form-control' not in existing_class:
-                self.fields['body'].widget.attrs['class'] = (existing_class + ' form-control').strip()
+            classes = set(existing_class.split())
+            classes.update(['form-control', 'no-markitup', 'forum-markdown-textarea'])
+            self.fields['body'].widget.attrs['class'] = ' '.join(sorted(classes)).strip()
+
 
     def save(self, commit=True):
         post, topic = super(AorPostForm, self).save(commit=commit)
@@ -111,7 +113,14 @@ class AorPostForm(PostForm):
                     PostReply.objects.get_or_create(post=post, defaults={'reply_to_id': reply_to_id})
                 except Exception:
                     pass
+        if commit and post and post.pk:
+            from forum.attachment_utils import link_attachments_to_post
+            try:
+                link_attachments_to_post(post, post.body)
+            except Exception:
+                pass
         return post, topic
+
 
 
 class AORProfileForm(EditProfileForm):
