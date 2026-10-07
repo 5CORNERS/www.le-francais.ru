@@ -6527,8 +6527,10 @@
 }
 
 .block-forum blockquote {
-    border-left: 3px solid #dbd8ba;
-    background: #f5f2d0
+    border-left: 3px solid #adb5bd;
+    background: #f8f9fa;
+    color: #495057;
+    border-radius: 0 4px 4px 0;
 }
 
 .block-forum .category h1 {
@@ -7042,6 +7044,18 @@ kbd {
     border: 5px solid #F5F5F5 !important;
 }
 
+.block-forum .markItUpEditor,
+.block-forum textarea#id_body,
+.block-forum .post-form textarea {
+    font-family: inherit !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+}
+
+.block-forum .markItUpContainer {
+    font-family: inherit !important;
+}
+
 .list-inline.action-menu {
     margin: 0 0 5px 0;
     position: absolute;
@@ -7328,11 +7342,19 @@ kbd {
     text-decoration: none;
 }
 
+.block-forum .post-card .post-author-heading {
+    white-space: nowrap;
+}
+
 .block-forum .post-card .post-date {
     font-size: 0.8rem;
     color: #868e96;
-    margin-top: 2px;
     line-height: 1.2;
+    white-space: nowrap;
+}
+
+.block-forum .post-card .post-date .post-edited {
+    white-space: nowrap;
 }
 
 .block-forum .post-card .post-date .permalink {
@@ -7466,20 +7488,21 @@ kbd {
 }
 
 .block-forum .post-card .post-reply-btn {
-    font-size: 0.82rem;
-    padding: 0.25rem 0.65rem;
+    font-size: 13px;
+    padding: 4px 8px;
     border-radius: 4px;
-    color: #0077bb;
-    border-color: #0077bb;
+    color: #6c757d;
     background-color: transparent;
+    border: none;
     transition: all 0.15s ease-in-out;
-    text-decoration: none;
+    text-decoration: none !important;
+    display: inline-flex;
+    align-items: center;
 }
 
 .block-forum .post-card .post-reply-btn:hover {
-    color: #fff;
-    background-color: #0077bb;
-    border-color: #0077bb;
+    color: #0077bb;
+    background-color: #e9ecef;
     text-decoration: none;
 }
 
@@ -7497,6 +7520,16 @@ kbd {
     .block-forum .post-card .post-header-main {
         flex-wrap: wrap;
         gap: 0.5rem;
+    }
+    .block-forum .post-card .post-meta-text {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    .block-forum .post-card .post-date-bullet {
+        display: none;
+    }
+    .block-forum .post-card .post-date {
+        margin-top: 2px;
     }
     .block-forum .post-card .post-control-wrap {
         width: 100%;
@@ -7521,4 +7554,24 @@ kbd {
         margin-right: 0 !important;
     }
 }
+
+/* Modal fix for Bootstrap 4 */
+#quote-warning-modal {
+    z-index: 1060 !important;
+}
+
+#quote-warning-modal .modal-dialog {
+    z-index: 1061 !important;
+}
+
+.block-forum .modal.show {
+    display: block !important;
+}
+
+.block-forum .modal.show .modal-dialog {
+    -webkit-transform: none !important;
+    -ms-transform: none !important;
+    transform: none !important;
+}
+
 

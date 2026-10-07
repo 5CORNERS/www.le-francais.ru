@@ -17,3 +17,17 @@ class CustomPostAdmin(PostAdmin):
     link.short_description = format_html('<i class="fa fa-external-link" aria-hidden="true"></i>')
 
 admin.site.register(Post, CustomPostAdmin)
+
+
+from .models import ForumUserPreference, PostReply
+
+@admin.register(ForumUserPreference)
+class ForumUserPreferenceAdmin(admin.ModelAdmin):
+    list_display = ('user', 'email_on_reply')
+    search_fields = ('user__username', 'user__email')
+
+
+@admin.register(PostReply)
+class PostReplyAdmin(admin.ModelAdmin):
+    list_display = ('post', 'reply_to')
+    raw_id_fields = ('post', 'reply_to')

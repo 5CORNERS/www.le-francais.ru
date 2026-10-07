@@ -1,98 +1,323 @@
 {% extends 'pybb/base.html' %}
 {% load i18n pybb_tags static site_tags %}
 
-{% block title %}{% trans "Profile editing" %}{% endblock title %}
+{% block title %}Настройки профиля{% endblock title %}
+
 {% block extra_css %}
 	<style>
+		.profile-card {
+			border: 1px solid #e9ecef;
+			border-radius: 8px;
+			background: #ffffff;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+			margin-bottom: 1.5rem;
+			overflow: hidden;
+		}
+		.profile-card-header {
+			background-color: #f8f9fa;
+			border-bottom: 1px solid #e9ecef;
+			padding: 0.85rem 1.25rem;
+			font-weight: 600;
+			color: #333333;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+		.profile-card-body {
+			padding: 1.25rem;
+		}
+		.profile-card label {
+			display: block;
+			font-weight: 600;
+			margin-bottom: 0.4rem;
+			color: #333333;
+			float: none !important;
+			width: auto !important;
+			text-align: left !important;
+		}
+		.profile-card textarea,
+		.profile-card select {
+			display: block;
+			width: 100% !important;
+			max-width: 100%;
+			box-sizing: border-box;
+		}
+		.profile-checkbox-row {
+			display: flex;
+			align-items: flex-start;
+			margin-bottom: 0.25rem;
+		}
+		.profile-checkbox-row input[type="checkbox"] {
+			width: 18px !important;
+			height: 18px !important;
+			margin: 2px 10px 0 0 !important;
+			cursor: pointer;
+			flex-shrink: 0;
+			float: none !important;
+			display: inline-block !important;
+		}
+		.profile-checkbox-row label {
+			cursor: pointer;
+			margin: 0 !important;
+			font-weight: 600 !important;
+			color: #212529 !important;
+			line-height: 1.4 !important;
+			float: none !important;
+			display: inline !important;
+		}
+		.profile-checkbox-help {
+			margin-left: 28px;
+			color: #6c757d;
+			font-size: 0.875rem;
+			line-height: 1.4;
+		}
+		.profile-sidebar-avatar {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding-bottom: 1rem;
+		}
+		.profile-sidebar-avatar .avatar {
+			width: 100px;
+			height: 100px;
+			border-radius: 50%;
+			margin-bottom: 0.75rem;
+			object-fit: cover;
+		}
 		.coffee-button {
-
 			display: flex !important;
 			align-items: center !important;
-			margin-bottom: 1rem !important;
+			margin-bottom: 0.5rem !important;
 			margin-top: 0.5rem !important;
 		}
-
 		.coffee-button-image {
-			margin-right: 5px !important;
+			margin-right: 8px !important;
 			display: block !important;
-			height: 2.5em !important
+			height: 2.2em !important;
 		}
-
 		.coffee-button-text {
-			border-left: 1px solid #ccc !important;
-			padding-left: 5px !important;
+			border-left: 1px solid #ddd !important;
+			padding-left: 8px !important;
+			font-weight: 600;
 		}
 	</style>
 {% endblock %}
-{% block extra_js %}{% endblock %}
+
 {% block content %}
 	<script type="text/javascript" src="{% static 'js/jquery.are-you-sure.min.js' %}"></script>
 	<script>
-		$('form').areYouSure({'message': 'Изменения будут потеряны!'});
+		$(function() {
+			$('form.profile-edit').areYouSure({'message': 'Изменения будут потеряны!'});
+		});
 	</script>
-	<div class="row">
-		<div class="col-lg-4">
-			{% include "pybb/avatar.html" %}
-			<p>
-				<a href="{% url 'account_change_password' %}">Изменить пароль{# TODO l18n #}</a>
-			</p>
-			<p>
-				<a href="{% url 'account_change_username' %}">Изменить ник на форуме</a>
-			</p>
-			<p>
-				{% if user.saw_message %}
-					{% message user.cup_amount 'активация' 'активации' 'активаций' as message %}
-					{% if user.has_coffee %}У вас ещё {{ message }} в загашнике.{% elif user.cups_amount < 0 and user.cup_credit == 0 %}У вас ещё {{ message }} в загашнике. Вы исчерпали кредит в 3 урока.{% else %}У вас пусто в закромах. Пора пополнить запасы.{% endif %}
-					<button class="coffee-button btn btn-default btn-xs" id="coffee-button"
-					        onclick="location.href='{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal'">
-						Пополнить
-					</button>
-				{% else %}
-					{% message user.cup_amount 'чашечка' 'чашечки' 'чашечек' as message %}
-					{% if user.has_coffee %}У вас ещё {{ message }} в загашнике.{% else %}У вас совсем нет чашечек кофе в запасе. Как же вы будете угощать?!</p>{% endif %}
-					<button class="coffee-button btn btn-default btn-xs" id="coffee-button"
-					        onclick="location.href='{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal'">
-						<img id="coffee-button-image" class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}">
-						<div id="coffee-button-text" class="coffee-button-text">Пополнить запасы</div>
-					</button>
-				{% endif %}
-		</div>
-		<div class="col-lg-8">
-			<form action="" method="post" enctype="multipart/form-data"
-			      class="profile-edit">
-				{% include "pybb/form.html" %}
-{#				<div>Выбрать варианты подписок на push-уведомления о выходе новых статей, обзоров, уроков или просто#}
-{#					новостей (в любых сочетаниях)#}
-{#				</div>#}
-{#				<div>Il faut bien que je supporte deux ou trois chenilles si je veux connaître les papillons (Antoine de#}
-{#					Saint-Exupéry, Le Petit Prince)#}
-{#				</div>#}
-{#				<div>Управляйте своими подписками!</div>#}
-{#				<div class="p4s-button"></div>#}
-				<div class="form-actions">
-					<button type="submit" class="btn btn-primary">
-						{% trans "Save" %}
-					</button>
-				</div>
-			</form>
-		</div>
-	</div>
-	{% if user.subscriptions.all %}
+
+	<div class="profile-page-wrapper my-4">
 		<div class="row">
-			<div class="col-lg-12">
-				<h1>Мои подписки{# TODO l18n #}{#{% trans "Subscriptions on topics" %}#}</h1>
-				<ul>
-					{% for sub in user.subscriptions.all %}
-						<li>
-							{% pybb_link sub %}
-							&mdash;
-							<strong>
-								<a href="{% url 'pybb:delete_subscription' sub.id %}">{% trans "delete" %}</a>
-							</strong>
-						</li>
-					{% endfor %}
-				</ul>
+			<!-- Left column: User info & Quick links -->
+			<div class="col-lg-4 mb-4">
+				<div class="profile-card">
+					<div class="profile-card-body text-center">
+						<div class="profile-sidebar-avatar">
+							{% include "pybb/avatar.html" %}
+							<h4 class="font-weight-bold mt-2 mb-0">{{ user.username }}</h4>
+							{% if user.email %}
+								<span class="text-muted small">{{ user.email }}</span>
+							{% endif %}
+						</div>
+
+						<div class="list-group list-group-flush text-left mt-2 border-top pt-2">
+							<a href="{% url 'pybb:user' user.username %}" class="list-group-item list-group-item-action d-flex align-items-center px-2 py-2">
+								<i class="fa fa-user text-muted mr-2" style="width: 20px; text-align: center;"></i> Публичный профиль
+							</a>
+							<a href="{% url 'account_change_username' %}" class="list-group-item list-group-item-action d-flex align-items-center px-2 py-2">
+								<i class="fa fa-id-badge text-muted mr-2" style="width: 20px; text-align: center;"></i> Изменить ник на форуме
+							</a>
+							<a href="{% url 'account_change_password' %}" class="list-group-item list-group-item-action d-flex align-items-center px-2 py-2">
+								<i class="fa fa-key text-muted mr-2" style="width: 20px; text-align: center;"></i> Сменить пароль
+							</a>
+						</div>
+					</div>
+				</div>
+
+				<!-- Lessons / Coffee balance card -->
+				<div class="profile-card">
+					<div class="profile-card-header">
+						<span><i class="fa fa-coffee text-primary mr-1"></i> Баланс уроков</span>
+					</div>
+					<div class="profile-card-body">
+						{% if user.saw_message %}
+							{% message user.cup_amount 'активация' 'активации' 'активаций' as message %}
+							<p class="mb-2">
+								{% if user.has_coffee %}
+									У вас ещё {{ message }} в загашнике.
+								{% elif user.cups_amount < 0 and user.cup_credit == 0 %}
+									У вас ещё {{ message }} в загашнике. Вы исчерпали кредит в 3 урока.
+								{% else %}
+									У вас пусто в закромах. Пора пополнить запасы.
+								{% endif %}
+							</p>
+							<button class="btn btn-outline-primary btn-sm btn-block"
+							        onclick="location.href='{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal'">
+								Пополнить
+							</button>
+						{% else %}
+							{% message user.cup_amount 'чашечка' 'чашечки' 'чашечек' as message %}
+							<p class="mb-2">
+								{% if user.has_coffee %}
+									У вас ещё {{ message }} в загашнике.
+								{% else %}
+									У вас совсем нет чашечек кофе в запасе. Как же вы будете угощать?!
+								{% endif %}
+							</p>
+							<button class="coffee-button btn btn-outline-secondary btn-sm btn-block"
+							        onclick="location.href='{% url 'payments:payments' %}?next={{ request.path }}&success_modal=success-payment-modal&fail_modal=fail-payment-modal'">
+								<img class="coffee-button-image" src="{% static 'images/coffee-icons/buy_me_a_coffee-05.svg' %}" alt="coffee">
+								<span class="coffee-button-text">Пополнить запасы</span>
+							</button>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+
+			<!-- Right column: Settings form -->
+			<div class="col-lg-8">
+				<form action="" method="post" enctype="multipart/form-data" class="profile-edit">
+					{% csrf_token %}
+					{% include "pybb/form_errors.html" %}
+
+					<!-- Card 1: Avatar -->
+					<div class="profile-card">
+						<div class="profile-card-header">
+							<span><i class="fa fa-image text-primary mr-2"></i> Фото / Аватар</span>
+						</div>
+						<div class="profile-card-body">
+							{% if form.avatar %}
+								{% include "pybb/form_field.html" with field=form.avatar %}
+							{% endif %}
+						</div>
+					</div>
+
+					<!-- Card 2: Notifications & Emails -->
+					<div class="profile-card">
+						<div class="profile-card-header">
+							<span><i class="fa fa-envelope text-primary mr-2"></i> Уведомления и email-сообщения</span>
+						</div>
+						<div class="profile-card-body">
+							<!-- email_on_reply -->
+							<div class="form-group mb-3 pb-3 border-bottom">
+								<div class="profile-checkbox-row">
+									{{ form.email_on_reply }}
+									<label for="{{ form.email_on_reply.id_for_label }}">
+										Присылать email при ответе на мое сообщение или цитировании
+									</label>
+								</div>
+								<div class="profile-checkbox-help">
+									Уведомлять по электронной почте, когда кто-то отвечает персонально на ваше сообщение или цитирует его.
+								</div>
+							</div>
+
+							<!-- receive_emails -->
+							<div class="form-group mb-3 pb-3 border-bottom">
+								<div class="profile-checkbox-row">
+									{{ form.receive_emails }}
+									<label for="{{ form.receive_emails.id_for_label }}">
+										Присылать email о новых ответах во всех отслеживаемых темах
+									</label>
+								</div>
+								<div class="profile-checkbox-help">
+									Отключите этот параметр, если не хотите получать письмо о каждом новом посте в темах из списка ваших подписок.
+								</div>
+							</div>
+
+							<!-- autosubscribe -->
+							<div class="form-group mb-0">
+								<div class="profile-checkbox-row">
+									{{ form.autosubscribe }}
+									<label for="{{ form.autosubscribe.id_for_label }}">
+										Автоматически подписываться на тему при написании ответа
+									</label>
+								</div>
+								<div class="profile-checkbox-help">
+									Тема будет автоматически добавляться в список подписок, когда вы отправляете в неё сообщение.
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Card 3: Signature & Settings -->
+					<div class="profile-card">
+						<div class="profile-card-header">
+							<span><i class="fa fa-pencil-alt text-primary mr-2"></i> Оформление и подпись</span>
+						</div>
+						<div class="profile-card-body">
+							{% if form.signature %}
+								<div class="form-group mb-3">
+									<label for="{{ form.signature.id_for_label }}">Подпись на форуме</label>
+									{{ form.signature }}
+									<small class="form-text text-muted">Текст отображается внизу ваших сообщений на форуме.</small>
+								</div>
+							{% endif %}
+
+							{% if form.show_signatures %}
+								<div class="form-group mb-3">
+									<div class="profile-checkbox-row">
+										{{ form.show_signatures }}
+										<label for="{{ form.show_signatures.id_for_label }}">
+											Показывать подписи других пользователей
+										</label>
+									</div>
+								</div>
+							{% endif %}
+
+							{% if form.time_zone %}
+								<div class="form-group mb-3">
+									<label for="{{ form.time_zone.id_for_label }}">Часовой пояс</label>
+									{{ form.time_zone }}
+								</div>
+							{% endif %}
+
+							{% if form.language %}
+								<div class="form-group mb-0">
+									<label for="{{ form.language.id_for_label }}">Язык интерфейса</label>
+									{{ form.language }}
+								</div>
+							{% endif %}
+						</div>
+					</div>
+
+					<div class="form-actions text-right mb-4">
+						<button type="submit" class="btn btn-primary btn-lg px-4 font-weight-bold shadow-sm">
+							<i class="fa fa-check mr-1"></i> Сохранить настройки
+						</button>
+					</div>
+				</form>
+
+				<!-- Card 4: Subscriptions -->
+				<div class="profile-card">
+					<div class="profile-card-header">
+						<span><i class="fa fa-rss text-primary mr-2"></i> Мои подписки на темы</span>
+						<span class="badge badge-secondary badge-pill">{{ user.subscriptions.count }}</span>
+					</div>
+					<div class="profile-card-body p-0">
+						{% if user.subscriptions.all %}
+							<ul class="list-group list-group-flush">
+								{% for sub in user.subscriptions.all %}
+									<li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+										<span>{% pybb_link sub %}</span>
+										<a href="{% url 'pybb:delete_subscription' sub.id %}" class="btn btn-sm btn-outline-danger" title="Отписаться">
+											<i class="fa fa-times mr-1"></i> Отписаться
+										</a>
+									</li>
+								{% endfor %}
+							</ul>
+						{% else %}
+							<div class="p-3 text-muted">
+								У вас нет активных подписок на темы.
+							</div>
+						{% endif %}
+					</div>
+				</div>
 			</div>
 		</div>
-	{% endif %}
+	</div>
 {% endblock content %}

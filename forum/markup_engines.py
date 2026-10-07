@@ -28,3 +28,10 @@ class CustomMarkdownParser(MarkdownParser):
 			],
 			safe_mode='escape',
 		)
+
+	def quote(self, text, username=''):
+		cleaned = text.replace('\r\n', '\n').replace('\r', '\n')
+		quoted_lines = '\n> '.join(cleaned.split('\n'))
+		if username:
+			return '> **' + username + '**:\n> ' + quoted_lines + '\n\n'
+		return '> ' + quoted_lines + '\n\n'

@@ -13,17 +13,16 @@
 		<div class="post-header-main d-flex justify-content-between align-items-center">
 			<div class="post-author-wrap d-flex align-items-center">
 				<a href="{% url 'pybb:user' post.user.username %}" class="post-avatar-link mr-2" title="{{ post.user.username }}">
-					{% include "pybb/avatar.html" with profile=post.user.pybb_profile PYBB_AVATAR_WIDTH=42 PYBB_AVATAR_HEIGHT=42 %}
+					{% include "pybb/avatar.html" with profile=post.user.pybb_profile PYBB_AVATAR_WIDTH=36 PYBB_AVATAR_HEIGHT=36 %}
 				</a>
-				<div class="post-meta-text">
-					<div class="post-author-line d-flex align-items-center" itemprop="author" itemscope itemtype="http://schema.org/Person">
-						<a itemprop="url" href="{% url 'pybb:user' post.user.username %}" class="post-username-link">
-							<span itemprop="name" class="post-username">{{ post.user.username }}</span>
-						</a>
-						{% if not post.user.is_active %}
-							<span class="badge badge-warning ml-2">{% trans 'blocked' %}</span>
-						{% endif %}
-						<button class="btn btn-sm btn-link text-muted p-0 ml-2 author-info-toggle"
+				<div class="post-meta-text d-flex align-items-center flex-wrap">
+					<div class="post-author-heading d-inline-flex align-items-center mr-2 text-nowrap">
+						<span itemprop="author" itemscope itemtype="http://schema.org/Person" class="d-inline-flex align-items-center">
+							<a itemprop="url" href="{% url 'pybb:user' post.user.username %}" class="post-username-link">
+								<strong itemprop="name" class="post-username text-dark">{{ post.user.username }}</strong>
+							</a>
+						</span>
+						<button class="btn btn-sm btn-link text-muted p-0 ml-1 author-info-toggle"
 						        type="button"
 						        data-toggle="collapse"
 						        data-target="#author-details-{{ post.id }}"
@@ -32,25 +31,29 @@
 						        title="{% trans 'Author info' %}">
 							<i class="fa fa-info-circle"></i>
 						</button>
+						{% if not post.user.is_active %}
+							<span class="badge badge-warning ml-1">{% trans 'blocked' %}</span>
+						{% endif %}
 					</div>
-					<div class="post-date text-muted small">
-						<a class="permalink text-muted mr-1" href="{{ post.get_absolute_url }}" title="Permalink">#</a>
+					<div class="post-date text-muted small d-inline-flex align-items-center text-nowrap">
+						<span class="post-date-bullet mr-1">&bull;</span>
 						<meta itemprop="datePublished" content="{{ post.created|date:"c" }}" />
 						{% if post.updated %}<meta itemprop="dateModified" content="{{ post.updated|date:"c" }}" />{% endif %}
-						<span>{% if request_user_profile.date_show_type == 1 %}{{ post.created }}{% else %}{{ post.created|timesince }} {% trans "ago" %}{% endif %}</span>
+						<span>{% if request_user_profile.date_show_type == 1 %}{{ post.created }}{% else %}{{ post.created|timesince }}&nbsp;{% trans "ago" %}{% endif %}</span>
 						{% if post.updated %}
-							<span class="post-edited ml-1">
-								({% trans "edited" %}
-								{% if request_user_profile.date_show_type == 1 %}
-									{{ post.updated }})
-								{% else %}
-									{{ post.updated|timesince }} {% trans "ago" %})
+							{% if request_user_profile.date_show_type == 1 %}
+								{% if post.created != post.updated %}
+									<span class="post-edited ml-1">({% trans "edited" %}&nbsp;{{ post.updated }})</span>
 								{% endif %}
-							</span>
+							{% else %}
+								{% with c_since=post.created|timesince u_since=post.updated|timesince %}
+									{% if c_since != u_since %}
+										<span class="post-edited ml-1">({% trans "edited" %}&nbsp;{{ u_since }}&nbsp;{% trans "ago" %})</span>
+									{% endif %}
+								{% endwith %}
+							{% endif %}
 						{% endif %}
-						{% if user.is_superuser %}
-							<span class="post-ip ml-1">{% trans "from" %} {{ post.user_ip }}</span>
-						{% endif %}
+						<a class="permalink text-muted ml-1" href="{{ post.get_absolute_url }}" title="Permalink">#</a>
 					</div>
 				</div>
 			</div>
@@ -101,20 +104,18 @@
 									<i class="fa fa-pencil-alt"></i></a>
 							{% endif %}
 
-							<a href="{% url 'pybb:add_post' post.topic.id %}?quote_id={{ post.id }}"
-							   title="{% trans "quote entire message (not recommended)" %}"
-							   class="quote-link">
-								<i class="fa fa-quote-right"></i></a>
 							<a href="#"
-							   title="{% trans 'quote selected' %}"
-							   class="quote-selected-link">
+							   title="{% trans 'Цитировать выделенный текст' %}"
+							   class="quote-selected-btn"
+							   data-post-username="{{ post_user_profile.get_display_name }}">
 								<i class="fa fa-quote-left"></i></a>
-
-							{% if user.id != post.user.id %}
-								<a href="{% url 'postman:write' post.user.username %}"
-								   title="{% trans "Write personal message" %}">
-									<i class="fa fa-envelope"></i></a>
-							{% endif %}
+							<a href="{% url 'pybb:add_post' post.topic.id %}?quote_id={{ post.id }}"
+							   title="{% trans 'Цитировать всё сообщение (не рекомендуется)' %}"
+							   class="quote-all-btn"
+							   data-post-id="{{ post.id }}"
+							   data-post-username="{{ post_user_profile.get_display_name }}"
+							   data-post-length="{{ post.body|length }}">
+								<i class="fa fa-copy"></i></a>
 						{% endif %}
 					{% endif %}
 				</div>
@@ -193,8 +194,11 @@
 		</div>
 		<div class="post-footer-right">
 			{% if user.is_authenticated and not is_move %}
-				<a href="{% url 'pybb:add_post' post.topic.id %}?quote_id={{ post.id }}"
-				   class="btn btn-sm btn-outline-secondary post-reply-btn quote-link"
+				<a href="#create_post"
+				   class="post-reply-btn"
+				   data-post-id="{{ post.id }}"
+				   data-post-username="{{ post_user_profile.get_display_name }}"
+				   data-add-post-url="{% url 'pybb:add_post' post.topic.id %}?reply_to={{ post.id }}"
 				   title="{% trans 'Reply' %}">
 					<i class="fa fa-reply mr-1"></i> {% trans "Reply" %}
 				</a>

@@ -33,8 +33,12 @@ def top_topics(count=50, *args, **kwargs):
 
 
 @register.inclusion_tag('pybb/_avinit.html')
-def avinit_initials(username, size):
-	return {'svg':get_svg_avatar(username, width=str(size), height=str(size), radius=str(size/2), **{'font-size':str(size/2)})}
+def avinit_initials(username, size=48):
+	try:
+		size = int(size)
+	except (ValueError, TypeError):
+		size = 48
+	return {'svg': get_svg_avatar(username, width=str(size), height=str(size), radius=str(size/2), **{'font-size': str(size/2)})}
 
 @register.simple_tag
 def pybb_breadcrumb_link(object, anchor=''):

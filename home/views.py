@@ -42,7 +42,7 @@ from pybb.permissions import perms
 from pybb.views import AddPostView, EditPostView, TopicView
 from tinkoff_merchant.models import Payment as TinkoffPayment
 from tinkoff_merchant.services import MerchantAPI
-from .forms import ChangeUsername
+from .forms import ChangeUsername, AorPostForm
 from django.contrib.admin.views.decorators import staff_member_required
 from home.models import UserLesson
 from .models import Payment
@@ -694,17 +694,48 @@ def modal_simple_login(request):
 
 
 class AorAddPostView(AddPostView):
+    post_form_class = AorPostForm
+    admin_post_form_class = AorPostForm
+
     def get_form_class(self):
-        return PostForm
+        return AorPostForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if 'reply_to' in request.GET and 'topic_id' in kwargs:
+            try:
+                self.reply_to_id = int(request.GET.get('reply_to'))
+            except (ValueError, TypeError):
+                self.reply_to_id = None
+        else:
+            self.reply_to_id = None
+        return super(AorAddPostView, self).dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super(AorAddPostView, self).get_form_kwargs()
+        if getattr(self, 'reply_to_id', None):
+            kwargs.setdefault('initial', {})
+            kwargs['initial']['reply_to_post'] = self.reply_to_id
+            try:
+                target_post = Post.objects.select_related('user').get(pk=self.reply_to_id)
+                author_name = target_post.user.username
+                if not kwargs['initial'].get('body'):
+                    kwargs['initial']['body'] = '**' + author_name + '**, '
+            except Post.DoesNotExist:
+                pass
+        return kwargs
 
 
 class AorEditPostView(EditPostView):
+    post_form_class = AorPostForm
+    admin_post_form_class = AorPostForm
+
     def get_form_class(self):
-        return PostForm
+        return AorPostForm
 
 
 class AorTopicView(TopicView):
-    admin_post_form_class = PostForm
+    post_form_class = AorPostForm
+    admin_post_form_class = AorPostForm
 
 
 def move_post_processing(request):

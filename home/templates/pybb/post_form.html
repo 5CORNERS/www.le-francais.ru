@@ -15,7 +15,32 @@
 		{% if form.name %} {% include "pybb/form_field.html" with field=form.name %} {% endif %}
 		{% if form.slug %} {% include "pybb/form_field.html" with field=form.slug %} {% endif %}
 		{% if form.login %} {% include "pybb/form_field.html" with field=form.login %}  {% endif %}
-		{% if form.body %} {% include "pybb/form_field.html" with field=form.body %}  {% endif %}
+		<div id="reply-to-indicator" class="alert alert-secondary py-2 px-3 mb-2 {% if not form.reply_to_post.value %}d-none{% endif %}" style="display: {% if form.reply_to_post.value %}flex{% else %}none{% endif %}; align-items: center; justify-content: space-between; border-left: 4px solid #007bff; border-radius: 4px;">
+			<span>
+				<i class="fa fa-reply text-primary mr-1"></i>
+				<span class="text-muted">{% trans "Ответ на сообщение" %}:</span>
+				<strong id="reply-to-username"></strong>
+			</span>
+			<button type="button" class="btn btn-sm btn-link text-danger p-0 ml-3 text-decoration-none" id="cancel-reply-btn" title="{% trans 'Отменить' %}">
+				<i class="fa fa-times mr-1"></i>{% trans "Отменить" %}
+			</button>
+		</div>
+		{% if form.reply_to_post %}
+			{{ form.reply_to_post }}
+		{% else %}
+			<input type="hidden" name="reply_to_post" id="id_reply_to_post" value="">
+		{% endif %}
+		{% if form.body %}
+			<div class="form-group mb-3">
+				{% if form.body.errors %}
+					<div class="text-danger small mb-1">{{ form.body.errors }}</div>
+				{% endif %}
+				{{ form.body }}
+				{% if form.body.help_text %}
+					<small class="form-text text-muted">{{ form.body.help_text }}</small>
+				{% endif %}
+			</div>
+		{% endif %}
 		{{ form.media }}
 		{% if request.user|pybb_may_create_poll and form.poll_type %}
 			<div class="card card-default">
@@ -31,5 +56,186 @@
 		<p class="submit">{% include "pybb/_button_submit.html" %}</p>
 	</fieldset>
 </form>
-{#<script async src="//extraimage.net/sdk/pup.js" data-url="https://extraimage.net/upload" data-auto-insert="markdown-embed"></script>#}
+
+<script>
+(function() {
+    function getSelectedText() {
+        if (window.getSelection) {
+            return window.getSelection().toString();
+        } else if (document.selection && document.selection.createRange) {
+            return document.selection.createRange().text;
+        }
+        return '';
+    }
+
+    function scrollToTextarea($textarea, $createPost) {
+        if ($createPost && $createPost.length) {
+            $('html, body').animate({
+                scrollTop: $createPost.offset().top - 80
+            }, 300, function() {
+                $textarea.focus();
+                var len = $textarea.val().length;
+                if ($textarea[0].setSelectionRange) {
+                    $textarea[0].setSelectionRange(len, len);
+                }
+            });
+        } else {
+            $textarea.focus();
+        }
+    }
+
+    function initForumFormHandlers() {
+        if (typeof jQuery === 'undefined') {
+            setTimeout(initForumFormHandlers, 50);
+            return;
+        }
+        jQuery(function($) {
+            // Unbind PyBB default handlers if pybbjs was loaded
+            $('.quote-link, .quote-selected-link').off('click');
+
+            // 1. Reply to user handler
+            $(document).off('click.postReply').on('click.postReply', '.post-reply-btn', function(e) {
+                var postId = $(this).data('post-id');
+                var username = $(this).data('post-username') || '';
+                var addPostUrl = $(this).data('add-post-url');
+                var $textarea = $('#id_body');
+                var $createPost = $('#create_post');
+
+                if ($textarea.length > 0 && $createPost.length > 0) {
+                    e.preventDefault();
+
+                    var $hiddenInput = $('input[name="reply_to_post"]');
+                    if ($hiddenInput.length) {
+                        $hiddenInput.val(postId);
+                    }
+
+                    var $indicator = $('#reply-to-indicator');
+                    if ($indicator.length) {
+                        $('#reply-to-username').text(username);
+                        $indicator.removeClass('d-none').css('display', 'flex');
+                    }
+
+                    var currentVal = $textarea.val();
+                    var greeting = '**' + username + '**, ';
+                    if (!currentVal.trim()) {
+                        $textarea.val(greeting);
+                    } else if (currentVal.indexOf(greeting) === -1) {
+                        $textarea.val(greeting + '\n' + currentVal);
+                    }
+
+                    scrollToTextarea($textarea, $createPost);
+                } else if (addPostUrl) {
+                    window.location.href = addPostUrl;
+                }
+            });
+
+            // 2. Cancel reply
+            $(document).off('click.cancelReply').on('click.cancelReply', '#cancel-reply-btn', function(e) {
+                e.preventDefault();
+                $('input[name="reply_to_post"]').val('');
+                $('#reply-to-indicator').addClass('d-none').hide();
+                $('#reply-to-username').text('');
+            });
+
+            // 3. Quote selected text
+            $(document).off('click.quoteSelected').on('click.quoteSelected', '.quote-selected-btn, .quote-selected-link', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                var selectedText = getSelectedText().trim();
+                if (!selectedText) {
+                    alert('{% trans "Выделите нужный фрагмент сообщения, а затем нажмите «Цитировать выделенное»." %}');
+                    return;
+                }
+                var $textarea = $('#id_body');
+                var $createPost = $('#create_post');
+                if ($textarea.length === 0) {
+                    return;
+                }
+                var username = $(this).data('post-username') || '';
+                if (!username && $(this).closest('.post-card').length) {
+                    username = $.trim($(this).closest('.post-card').find('.post-username').text());
+                }
+
+                var lines = selectedText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+                var quotedLines = lines.map(function(l) { return '> ' + l; }).join('\n');
+                var quoteBlock = '';
+                if (username) {
+                    quoteBlock = '> **' + username + '**:\n' + quotedLines + '\n\n';
+                } else {
+                    quoteBlock = quotedLines + '\n\n';
+                }
+
+                var currentVal = $textarea.val();
+                if (currentVal && !currentVal.endsWith('\n')) {
+                    $textarea.val(currentVal + '\n\n' + quoteBlock);
+                } else if (currentVal) {
+                    $textarea.val(currentVal + '\n' + quoteBlock);
+                } else {
+                    $textarea.val(quoteBlock);
+                }
+
+                scrollToTextarea($textarea, $createPost);
+            });
+
+            // 4. Quote whole post (with warning modal for > 400 chars)
+            $(document).off('click.quoteAll').on('click.quoteAll', '.quote-all-btn, .quote-link', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                var $btn = $(this);
+                var url = $btn.attr('href');
+                var postLen = parseInt($btn.data('post-length'), 10) || 0;
+                var username = $btn.data('post-username') || '';
+                if (!username && $btn.closest('.post-card').length) {
+                    username = $.trim($btn.closest('.post-card').find('.post-username').text());
+                }
+
+                function executeFullQuote() {
+                    var $textarea = $('#id_body');
+                    var $createPost = $('#create_post');
+                    if ($textarea.length > 0) {
+                        $.get(url, function(data) {
+                            if (username) {
+                                var expectedHeader = '> **' + username + '**';
+                                if (data.indexOf(expectedHeader) === -1) {
+                                    data = '> **' + username + '**:\n' + data;
+                                }
+                            }
+                            var currentVal = $textarea.val();
+                            if (currentVal && !currentVal.endsWith('\n')) {
+                                $textarea.val(currentVal + '\n\n' + data);
+                            } else if (currentVal) {
+                                $textarea.val(currentVal + '\n' + data);
+                            } else {
+                                $textarea.val(data);
+                            }
+
+                            scrollToTextarea($textarea, $createPost);
+                        });
+                    } else {
+                        window.location.href = url;
+                    }
+                }
+
+                if (postLen > 400) {
+                    var $modal = $('#quote-warning-modal');
+                    if ($modal.length) {
+                        if (!$modal.parent().is('body')) {
+                            $modal.appendTo('body');
+                        }
+                        $('#confirm-quote-all-btn').off('click.confirmQuote').one('click.confirmQuote', function() {
+                            $modal.modal('hide');
+                            executeFullQuote();
+                        });
+                        $modal.modal('show');
+                        return;
+                    }
+                }
+
+                executeFullQuote();
+            });
+        });
+    }
+    initForumFormHandlers();
+})();
+</script>
 
