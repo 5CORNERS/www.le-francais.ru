@@ -28,9 +28,9 @@ def extract_quoted_and_mentioned_names(text):
     # 2. Addressed authors at line start: **Username**,
     addressed = re.findall(r'(?:^|\n)\s*\*\*([^\*\n\r]+?)\*\*,', text)
     # 3. Direct @mentions: @Username
-    mentions = re.findall(r'(?<![\w@])@([a-zA-Z0-9_.@+-]+)', text)
+    mentions = re.findall(r'(?<![\w@])@([a-zA-Z0-9_.\u0400-\u04FF@+-]+)', text)
 
-    mentioned = set(name.strip() for name in (addressed + mentions) if name.strip())
+    mentioned = set(name.strip().rstrip('.,:;!?') for name in (addressed + mentions) if name.strip().rstrip('.,:;!?'))
     # Users who were quoted do not need a duplicate mention notification
     mentioned = mentioned - quoted
     return quoted, mentioned
@@ -77,7 +77,6 @@ def send_forum_mail(users, template, context=None, preference_type='reply'):
             current_site, reverse('pybb:edit_profile')
         )
 
-    old_lang = translation.get_language()
     from_email = getattr(settings, 'PYBB_FROM_EMAIL', getattr(settings, 'DEFAULT_FROM_EMAIL', None))
 
     mails = []
@@ -105,26 +104,22 @@ def send_forum_mail(users, template, context=None, preference_type='reply'):
 
         profile = util.get_pybb_profile(user)
         lang = getattr(profile, 'language', None) or settings.LANGUAGE_CODE
-        translation.activate(lang)
+        with translation.override(lang):
+            subject = render_to_string('pybb/mail_templates/%s_subject.html' % template, user_context)
+            user_context['subject'] = subject
 
-        subject = render_to_string('pybb/mail_templates/%s_subject.html' % template, user_context)
-        subject = ''.join(subject.splitlines())
-        user_context['subject'] = subject
+            txt_message = render_to_string('pybb/mail_templates/%s_body.html' % template, user_context)
 
-        txt_message = render_to_string('pybb/mail_templates/%s_body.html' % template, user_context)
+            headers = {}
+            if 'delete_url_full' in user_context:
+                headers['List-Unsubscribe'] = '<%s>' % user_context['delete_url_full']
 
-        headers = {}
-        if 'delete_url_full' in user_context:
-            headers['List-Unsubscribe'] = '<%s>' % user_context['delete_url_full']
-
-        try:
-            html_message = render_to_string('pybb/mail_templates/%s_body-html.html' % template, user_context)
-        except TemplateDoesNotExist:
-            mails.append((subject, txt_message, from_email, [user.email], None, headers))
-        else:
-            mails.append((subject, txt_message, from_email, [user.email], html_message, headers))
+            try:
+                html_message = render_to_string('pybb/mail_templates/%s_body-html.html' % template, user_context)
+            except TemplateDoesNotExist:
+                mails.append((subject, txt_message, from_email, [user.email], None, headers))
+            else:
+                mails.append((subject, txt_message, from_email, [user.email], html_message, headers))
 
     if mails:
         send_mass_html_mail(mails, fail_silently=True)
-
-    translation.activate(old_lang)

@@ -164,3 +164,19 @@ class PostReactionViewTestCase(TestCase):
         self.assertEqual(resp2.status_code, 200)
         self.assertIsNone(resp2.json()['user_reaction'])
 
+
+class ForumUtilTestCase(TestCase):
+    def test_extract_cyrillic_quoted_and_mentioned_names(self):
+        from forum.utils import extract_quoted_and_mentioned_names
+        text = (
+            "> **Алексей Линецкий**:\n> Привет!\n\n"
+            "**Fatma Ametova**, посмотри на это:\n"
+            "А также спросим @Иван и @Jean_Valjean."
+        )
+        quoted, mentioned = extract_quoted_and_mentioned_names(text)
+        self.assertIn('Алексей Линецкий', quoted)
+        self.assertIn('Fatma Ametova', mentioned)
+        self.assertIn('Иван', mentioned)
+        self.assertIn('Jean_Valjean', mentioned)
+
+
