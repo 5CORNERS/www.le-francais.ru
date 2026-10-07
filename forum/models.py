@@ -72,4 +72,15 @@ class ForumAttachment(models.Model):
     def __str__(self):
         return '{} ({})'.format(self.filename, self.user.username if self.user else 'anonymous')
 
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from pybb.models import Post
+from forum.attachment_utils import link_attachments_to_post
+
+
+@receiver(post_save, sender=Post)
+def post_saved_link_attachments(sender, instance, **kwargs):
+    link_attachments_to_post(instance, instance.body)
+
 

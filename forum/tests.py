@@ -7,6 +7,7 @@ from PIL import Image
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 
 from forum.models import ForumAttachment
@@ -92,6 +93,28 @@ class ForumAttachmentTests(TestCase):
             body='See attachment: ![{}]({})'.format(attachment.filename, attachment.file.url)
         )
         link_attachments_to_post(post, post.body)
+        attachment.refresh_from_db()
+        self.assertEqual(attachment.post, post)
+
+    def test_post_save_signal_links_attachment_automatically(self):
+        category = Category.objects.create(name='Signal Test Category')
+        forum = Forum.objects.create(category=category, name='Signal Test Forum')
+        topic = Topic.objects.create(forum=forum, name='Signal Test Topic', user=self.user)
+
+        raw_data = self.create_test_image(width=300, height=200)
+        attachment = ForumAttachment(
+            user=self.user,
+            filename='auto_linked.jpg',
+            file_size=len(raw_data),
+        )
+        attachment.file.save('auto_linked.jpg', ContentFile(raw_data), save=True)
+        self.assertIsNone(attachment.post)
+
+        post = Post.objects.create(
+            topic=topic,
+            user=self.user,
+            body='Look at this: ![{}]({})'.format(attachment.filename, attachment.file.url)
+        )
         attachment.refresh_from_db()
         self.assertEqual(attachment.post, post)
 
