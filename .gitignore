@@ -57,3 +57,4 @@ GEMINI.md
 /backups/
 test_sandbox.wsb
 /.gemini/
+/le_francais/settings/local.py
