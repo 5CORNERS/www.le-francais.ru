@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import ast
 import json
 import uuid
@@ -45,13 +45,14 @@ class NotificationImage(models.Model):
 class Notification(models.Model):
 	MODERATION = 'MD'
 	LIKES = 'LK'
-	REPLYES = 'RP'
+	REPLIES = 'RP'
+	REPLYES = REPLIES
 	MESSAGES = 'MG'
 	TOPICS = 'TP'
 	INTERVAL_REPETITIONS = 'IR'
 	CATEGORIES_CHOICES = [
 		(LIKES, 'Likes'),
-		(REPLYES, 'Replies'),
+		(REPLIES, 'Replies'),
 		(MESSAGES, 'Messages'),
 		(TOPICS, 'Topics'),
 		(INTERVAL_REPETITIONS, 'Interval Repetitions')
@@ -300,6 +301,7 @@ def create_moderator_notification(sender, instance):
 				notification=notification, user=user
 			)[1:].delete()
 
+
 def create_pybb_post_notification(sender, instance: Post, **kwargs):
 	if not instance.on_moderation and instance.updated is None:
 		from forum.models import PostReply
@@ -341,7 +343,7 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 		if direct_reply_user:
 			notif_reply = Notification.objects.create(
 				title='Ответ на ваше сообщение',
-				category=Notification.REPLYES,
+				category=Notification.REPLIES,
 				data=dict(
 					username=str(instance.user),
 					post_name=clean_post(instance.body),
@@ -360,7 +362,7 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 		if quoted_users:
 			notif_quote = Notification.objects.create(
 				title='Вас процитировали в теме',
-				category=Notification.REPLYES,
+				category=Notification.REPLIES,
 				data=dict(
 					username=str(instance.user),
 					post_name=clean_post(instance.body),
@@ -380,7 +382,7 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 		if mentioned_users:
 			notif_mention = Notification.objects.create(
 				title='Вас упомянули в теме',
-				category=Notification.REPLYES,
+				category=Notification.REPLIES,
 				data=dict(
 					username=str(instance.user),
 					post_name=clean_post(instance.body),
@@ -400,7 +402,7 @@ def create_pybb_post_notification(sender, instance: Post, **kwargs):
 		if subscribers:
 			notif_sub = Notification.objects.create(
 				title='Новый ответ в теме',
-				category=Notification.REPLYES,
+				category=Notification.REPLIES,
 				data=dict(
 					username=str(instance.user),
 					post_name=clean_post(instance.body),
