@@ -106,6 +106,7 @@ def send_forum_mail(users, template, context=None, preference_type='reply'):
         lang = getattr(profile, 'language', None) or settings.LANGUAGE_CODE
         with translation.override(lang):
             subject = render_to_string('pybb/mail_templates/%s_subject.html' % template, user_context)
+            subject = ''.join(subject.splitlines())
             user_context['subject'] = subject
 
             txt_message = render_to_string('pybb/mail_templates/%s_body.html' % template, user_context)
