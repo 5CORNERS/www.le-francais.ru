@@ -574,6 +574,9 @@
         // Bind upload handlers (Drag&Drop, Paste, Button)
         this.bindUploadHandlers();
 
+        // Bind resizer
+        this.initResizer();
+
         // Expose public instance
         window.forumEditor = this;
     };
@@ -645,7 +648,7 @@
                 '<input type="file" class="forum-image-file-input d-none" accept="image/jpeg,image/png,image/gif,image/webp">',
                 // Editor body container
                 '<div class="forum-editor-container position-relative">',
-                    '<div class="forum-visual-editor form-control" contenteditable="true" spellcheck="true" placeholder="Напишите ответ или перетащите изображение сюда..."></div>',
+                    '<div class="forum-visual-editor" contenteditable="true" spellcheck="true" placeholder="Напишите ответ или перетащите изображение сюда..."></div>',
                     // Drop overlay
                     '<div class="forum-drop-overlay d-none">',
                         '<div class="forum-drop-message">',
@@ -663,7 +666,14 @@
                 // Footer
                 '<div class="forum-editor-footer d-flex justify-content-between align-items-center">',
                     '<small class="text-muted"><i class="fa fa-info-circle mr-1"></i>Поддерживаются: Drag & Drop и Ctrl+V для картинок, <code>^^подчеркивание^^</code>, <code>==маркер==</code>, <code>~~зачеркивание~~</code>, <code>++клавиши++</code>, спойлеры.</small>',
-                    '<small class="text-muted font-italic forum-char-counter"></small>',
+                    '<div class="d-flex align-items-center flex-shrink-0 ml-2">',
+                        '<small class="text-muted font-italic forum-char-counter mr-2"></small>',
+                        '<div class="forum-editor-resizer" title="Изменить высоту поля ввода">',
+                            '<svg viewBox="0 0 10 10" width="10" height="10">',
+                                '<path d="M9 1L1 9M9 5L5 9M9 9L9 9" stroke="#adb5bd" stroke-width="1.5" stroke-linecap="round"/>',
+                            '</svg>',
+                        '</div>',
+                    '</div>',
                 '</div>',
             '</div>'
         ].join('');
@@ -693,6 +703,11 @@
         if (newMode === this.currentMode) return;
 
         if (newMode === 'markdown') {
+            // Keep resized height in sync
+            var visualH = this.$visualEditor.outerHeight();
+            if (visualH && visualH > 0) {
+                this.$textarea.css({'height': visualH + 'px', 'max-height': 'none'});
+            }
             // Convert Visual HTML -> Markdown
             var md = htmlToMarkdown(this.$visualEditor[0]);
             this.$textarea.val(md);
@@ -700,6 +715,11 @@
             this.$textarea.show().focus();
             this.currentMode = 'markdown';
         } else {
+            // Keep resized height in sync
+            var textH = this.$textarea.outerHeight();
+            if (textH && textH > 0) {
+                this.$visualEditor.css({'height': textH + 'px', 'max-height': 'none'});
+            }
             // Convert Markdown -> Visual HTML
             var html = markdownToHtml(this.$textarea.val());
             this.$visualEditor.html(html);
@@ -1193,6 +1213,56 @@
         }
         alert(errorMessage);
         this.updateCharCounter();
+    };
+
+    ForumEditor.prototype.initResizer = function() {
+        var self = this;
+        var $resizer = this.$wrapper.find('.forum-editor-resizer');
+        if (!$resizer.length) return;
+
+        function startResize(startY) {
+            var startHeight = self.currentMode === 'markdown' ? self.$textarea.outerHeight() : self.$visualEditor.outerHeight();
+            $('body').css('user-select', 'none');
+            $(document).css('cursor', 'se-resize');
+
+            function onMove(clientY) {
+                var delta = clientY - startY;
+                var newHeight = Math.max(140, startHeight + delta);
+                self.$visualEditor.css({'height': newHeight + 'px', 'max-height': 'none'});
+                self.$textarea.css({'height': newHeight + 'px', 'max-height': 'none'});
+            }
+
+            function onMouseMove(e) {
+                onMove(e.clientY);
+            }
+
+            function onTouchMove(e) {
+                if (e.originalEvent && e.originalEvent.touches && e.originalEvent.touches.length) {
+                    onMove(e.originalEvent.touches[0].clientY);
+                }
+            }
+
+            function onEnd() {
+                $(document).off('mousemove', onMouseMove).off('mouseup', onEnd);
+                $(document).off('touchmove', onTouchMove).off('touchend', onEnd);
+                $('body').css('user-select', '');
+                $(document).css('cursor', '');
+            }
+
+            $(document).on('mousemove', onMouseMove).on('mouseup', onEnd);
+            $(document).on('touchmove', onTouchMove).on('touchend', onEnd);
+        }
+
+        $resizer.on('mousedown', function(e) {
+            e.preventDefault();
+            startResize(e.clientY);
+        });
+
+        $resizer.on('touchstart', function(e) {
+            if (e.originalEvent && e.originalEvent.touches && e.originalEvent.touches.length) {
+                startResize(e.originalEvent.touches[0].clientY);
+            }
+        });
     };
 
     // Auto-initialize when DOM is ready

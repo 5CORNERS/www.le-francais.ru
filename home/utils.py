@@ -128,8 +128,8 @@ DEFAULT_SETTINGS = {
 
 SVG_TEMPLATE = """
 <svg xmlns="http://www.w3.org/2000/svg" pointer-events="none"
-     width="{width}" height="{height}">
-  <rect width="{width}" height="{height}" style="{style}"></rect>
+     viewBox="0 0 {width} {height}" width="{width}" height="{height}">
+  <rect width="{width}" height="{height}" rx="{radius}" style="{style}"></rect>
   <text text-anchor="middle" y="50%" x="50%" dy="0.35em"
         pointer-events="auto" fill="#ffffff" font-family="{font-family}"
         style="{text-style}">{text}</text>
@@ -189,6 +189,7 @@ def get_svg_avatar(text, **kwargs):
     return SVG_TEMPLATE.format(**{
         'height': opts.get('height'),
         'width': opts.get('width'),
+        'radius': opts.get('radius'),
         'style': _from_dict_to_style(style),
         'font-family': opts.get('font-family'),
         'text-style': _from_dict_to_style(text_style),
