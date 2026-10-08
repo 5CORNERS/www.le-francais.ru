@@ -272,7 +272,7 @@
 							<div class="tooltip-who-liked-container {% if r.users|length > 5 %}show-chevrones{% endif %}">
 								<span class="fas fa-chevron-left"></span>
 								{% for u in r.users %}
-									<a href="{{ u.url }}" class="tooltip-like-entry" title="{{ u.username }}" data-toggle="tooltip">
+									<a href="{{ u.url }}" class="tooltip-like-entry" title="{{ u.username }}" data-toggle="tooltip" data-container="body" data-placement="top" data-boundary="window">
 										<div class="avatar">
 											<img src="{{ u.avatar_url }}" alt="{{ u.username }}">
 										</div>

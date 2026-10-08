@@ -7970,4 +7970,87 @@ kbd {
     transform: none !important;
 }
 
+/* Fix Bootstrap tooltip pointer-events to prevent hover flicker */
+.tooltip {
+    pointer-events: none !important;
+}
+
+/* Ensure button hover text color is never overridden by .block-forum a:hover */
+.block-forum a.btn:hover,
+.block-forum a.btn:focus,
+.block-forum .btn:hover,
+.block-forum .btn:focus {
+    text-decoration: none !important;
+}
+
+.block-forum a.btn-outline-primary:hover,
+.block-forum .btn-outline-primary:hover {
+    color: #ffffff !important;
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+}
+
+.block-forum a.btn-outline-secondary:hover,
+.block-forum .btn-outline-secondary:hover {
+    color: #ffffff !important;
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+}
+
+.block-forum a.btn-primary:hover,
+.block-forum .btn-primary:hover {
+    color: #ffffff !important;
+}
+
+.block-forum a.btn-secondary:hover,
+.block-forum .btn-secondary:hover {
+    color: #ffffff !important;
+}
+
+/* Topic controls toolbar and subscription button */
+.block-forum .topic-controls-bar {
+    gap: 0.5rem;
+}
+
+.block-forum .topic-subscribe-btn {
+    display: inline-flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none !important;
+    transition: all 0.15s ease-in-out;
+    white-space: nowrap;
+}
+
+.block-forum .topic-subscribe-btn.is-not-subscribed {
+    color: #0077bb !important;
+    background-color: #f0f7fc !important;
+    border: 1px solid #b8daff !important;
+}
+
+.block-forum .topic-subscribe-btn.is-not-subscribed:hover {
+    color: #ffffff !important;
+    background-color: #0077bb !important;
+    border-color: #0077bb !important;
+    text-decoration: none !important;
+}
+
+.block-forum .topic-subscribe-btn.is-subscribed {
+    color: #495057 !important;
+    background-color: #f8f9fa !important;
+    border: 1px solid #ced4da !important;
+}
+
+.block-forum .topic-subscribe-btn.is-subscribed:hover {
+    color: #ffffff !important;
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    text-decoration: none !important;
+}
+
+
 
