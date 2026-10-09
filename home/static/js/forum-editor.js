@@ -1220,10 +1220,13 @@
         var $resizer = this.$wrapper.find('.forum-editor-resizer');
         if (!$resizer.length) return;
 
+        var $doc = $(document);
+        var $body = $('body');
+
         function startResize(startY) {
             var startHeight = self.currentMode === 'markdown' ? self.$textarea.outerHeight() : self.$visualEditor.outerHeight();
-            $('body').css('user-select', 'none');
-            $(document).css('cursor', 'se-resize');
+            $body.css('user-select', 'none');
+            $doc.css('cursor', 'se-resize');
 
             function onMove(clientY) {
                 var delta = clientY - startY;
@@ -1243,22 +1246,24 @@
             }
 
             function onEnd() {
-                $(document).off('mousemove', onMouseMove).off('mouseup', onEnd);
-                $(document).off('touchmove', onTouchMove).off('touchend', onEnd);
-                $('body').css('user-select', '');
-                $(document).css('cursor', '');
+                $doc.off('mousemove', onMouseMove)
+                    .off('mouseup', onEnd)
+                    .off('touchmove', onTouchMove)
+                    .off('touchend', onEnd)
+                    .css('cursor', '');
+                $body.css('user-select', '');
             }
 
-            $(document).on('mousemove', onMouseMove).on('mouseup', onEnd);
-            $(document).on('touchmove', onTouchMove).on('touchend', onEnd);
+            $doc.on('mousemove', onMouseMove)
+                .on('mouseup', onEnd)
+                .on('touchmove', onTouchMove)
+                .on('touchend', onEnd);
         }
 
         $resizer.on('mousedown', function(e) {
             e.preventDefault();
             startResize(e.clientY);
-        });
-
-        $resizer.on('touchstart', function(e) {
+        }).on('touchstart', function(e) {
             if (e.originalEvent && e.originalEvent.touches && e.originalEvent.touches.length) {
                 startResize(e.originalEvent.touches[0].clientY);
             }

@@ -136,7 +136,7 @@
     display: inline-block;
     width: 36px;
     height: 20px;
-    margin: 5px 2px !important;
+    margin: 5px 2px;
     cursor: pointer;
     flex-shrink: 0;
     font-weight: normal;
@@ -198,7 +198,7 @@
     padding: 12px 14px;
     border: none;
     border-radius: 0;
-    font-size: 15px !important;
+    font-size: 15px;
     line-height: 1.6;
     color: #212529;
     background-color: #fff;
@@ -233,7 +233,7 @@
     border: none;
     border-radius: 0;
     font-family: inherit;
-    font-size: 15px !important;
+    font-size: 15px;
     line-height: 1.6;
     color: #212529;
     resize: none;
@@ -486,7 +486,7 @@
 .block-forum .forum-editor-footer .small,
 .forum-editor-footer .text-muted,
 .block-forum .forum-editor-footer .text-muted {
-    font-size: 90% !important;
+    font-size: 90%;
 }
 
 /* Custom corner resizer on footer / status bar */
@@ -514,9 +514,10 @@
 
 /* Remove 15px side padding from post-form so editor aligns with forum cards */
 .post-form,
-.block-forum .post-form {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+.block-forum .post-form,
+.block-forum form.post-form {
+    padding-left: 0;
+    padding-right: 0;
 }
 
 @media (max-width: 576px) {

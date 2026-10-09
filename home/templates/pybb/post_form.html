@@ -1,5 +1,5 @@
 {% load i18n pybb_tags staticfiles %}
-<link rel="stylesheet" href="{% static 'css/forum-editor.css' %}?v=2.3">
+<link rel="stylesheet" href="{% static 'css/forum-editor.css' %}">
 <form class="post-form" novalidate action="
     {% if forum %}
         {% url 'pybb:add_topic' forum.pk %}
@@ -60,7 +60,7 @@
 	</fieldset>
 </form>
 
-<script src="{% static 'js/forum-editor.js' %}?v=2.3"></script>
+<script src="{% static 'js/forum-editor.js' %}"></script>
 
 
 <script>

@@ -7289,19 +7289,17 @@ kbd {
 }
 
 .block-forum .post-card .post-avatar-link .avatar img {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    object-fit: cover !important;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     border-radius: 50%;
     display: block;
     margin: 0;
 }
 
 .block-forum .post-card .post-avatar-link .avatar svg {
-    width: 100% !important;
-    height: 100% !important;
+    width: 100%;
+    height: 100%;
     display: block;
     border-radius: 50%;
     margin: 0;
@@ -7972,7 +7970,7 @@ kbd {
 
 /* Fix Bootstrap tooltip pointer-events to prevent hover flicker */
 .tooltip {
-    pointer-events: none !important;
+    pointer-events: none;
 }
 
 /* Ensure button hover text color is never overridden by .block-forum a:hover */
@@ -7980,31 +7978,31 @@ kbd {
 .block-forum a.btn:focus,
 .block-forum .btn:hover,
 .block-forum .btn:focus {
-    text-decoration: none !important;
+    text-decoration: none;
 }
 
 .block-forum a.btn-outline-primary:hover,
 .block-forum .btn-outline-primary:hover {
-    color: #ffffff !important;
-    background-color: #007bff !important;
-    border-color: #007bff !important;
+    color: #ffffff;
+    background-color: #007bff;
+    border-color: #007bff;
 }
 
 .block-forum a.btn-outline-secondary:hover,
 .block-forum .btn-outline-secondary:hover {
-    color: #ffffff !important;
-    background-color: #6c757d !important;
-    border-color: #6c757d !important;
+    color: #ffffff;
+    background-color: #6c757d;
+    border-color: #6c757d;
 }
 
 .block-forum a.btn-primary:hover,
 .block-forum .btn-primary:hover {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 .block-forum a.btn-secondary:hover,
 .block-forum .btn-secondary:hover {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 /* Topic controls toolbar and subscription button */
@@ -8012,6 +8010,7 @@ kbd {
     gap: 0.5rem;
 }
 
+.block-forum a.topic-subscribe-btn,
 .block-forum .topic-subscribe-btn {
     display: inline-flex;
     align-items: center;
@@ -8021,35 +8020,39 @@ kbd {
     padding: 5px 12px;
     border-radius: 4px;
     cursor: pointer;
-    text-decoration: none !important;
+    text-decoration: none;
     transition: all 0.15s ease-in-out;
     white-space: nowrap;
 }
 
+.block-forum a.topic-subscribe-btn.is-not-subscribed,
 .block-forum .topic-subscribe-btn.is-not-subscribed {
-    color: #0077bb !important;
-    background-color: #f0f7fc !important;
-    border: 1px solid #b8daff !important;
+    color: #0077bb;
+    background-color: #f0f7fc;
+    border: 1px solid #b8daff;
 }
 
+.block-forum a.topic-subscribe-btn.is-not-subscribed:hover,
 .block-forum .topic-subscribe-btn.is-not-subscribed:hover {
-    color: #ffffff !important;
-    background-color: #0077bb !important;
-    border-color: #0077bb !important;
-    text-decoration: none !important;
+    color: #ffffff;
+    background-color: #0077bb;
+    border-color: #0077bb;
+    text-decoration: none;
 }
 
+.block-forum a.topic-subscribe-btn.is-subscribed,
 .block-forum .topic-subscribe-btn.is-subscribed {
-    color: #495057 !important;
-    background-color: #f8f9fa !important;
-    border: 1px solid #ced4da !important;
+    color: #495057;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
 }
 
+.block-forum a.topic-subscribe-btn.is-subscribed:hover,
 .block-forum .topic-subscribe-btn.is-subscribed:hover {
-    color: #ffffff !important;
-    background-color: #dc3545 !important;
-    border-color: #dc3545 !important;
-    text-decoration: none !important;
+    color: #ffffff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+    text-decoration: none;
 }
 
 
