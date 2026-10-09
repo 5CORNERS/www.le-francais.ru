@@ -118,9 +118,27 @@
 {% endblock %}
 <div class="_content">
 	<div class="block-forum">
+        <script>
+            (function() {
+                try {
+                    if (localStorage.getItem('lf_forum_wide_layout') === '1') {
+                        document.currentScript.parentElement.classList.add('forum-wide-layout');
+                    }
+                } catch (e) {}
+            })();
+        </script>
+        <button type="button"
+                id="forum-layout-toggle-btn"
+                class="forum-layout-toggle-btn d-none d-lg-flex"
+                title="Сдвинуть к левому краю"
+                aria-label="Переключить ширину страницы форума">
+            <svg class="forum-layout-toggle-icon" viewBox="0 0 18 18" width="16" height="16" fill="currentColor">
+                <path d="M14 3.5a1 1 0 0 1 1 1v9a1 1 0 0 1-2 0v-9a1 1 0 0 1 1-1zM2.293 8.293a1 1 0 0 0 0 1.414l4 4a1 1 0 0 0 1.414-1.414L5.414 10H11a1 1 0 1 0 0-2H5.414l2.293-2.293a1 1 0 0 0-1.414-1.414l-4 4z"/>
+            </svg>
+        </button>
 		<div class="container-fluid">
 			<div class="row" style="display: flex; flex-direction: row">
-				<div class="col-12 col-md-9 col-xl-7 col-lg-offset-2">
+				<div class="col-12 col-md-9 col-xl-7 col-lg-offset-2 forum-main-col">
 					<div class="breadcrumb">
 						{% block breadcrumb %}
 						{% endblock %}
@@ -244,6 +262,29 @@
 	<script defer
 	        type="text/javascript"
 	        src="{% static 'js/forum-reactions.js' %}"></script>
+	<script>
+		$(function() {
+			var $btn = $('#forum-layout-toggle-btn');
+			var $blockForum = $('.block-forum');
+			if (!$btn.length || !$blockForum.length) return;
+
+			function updateBtnState(isWide) {
+				var titleText = isWide ? 'Вернуть по центру' : 'Сдвинуть к левому краю';
+				$btn.attr('title', titleText).attr('aria-label', titleText);
+			}
+
+			updateBtnState($blockForum.hasClass('forum-wide-layout'));
+
+			$btn.on('click', function(e) {
+				e.preventDefault();
+				var isWide = $blockForum.toggleClass('forum-wide-layout').hasClass('forum-wide-layout');
+				try {
+					localStorage.setItem('lf_forum_wide_layout', isWide ? '1' : '0');
+				} catch (err) {}
+				updateBtnState(isWide);
+			});
+		});
+	</script>
 
 	{% get_full_path as full_path %}
 	{% if 'payment_success' in request.GET and request.GET.modal_open == 'success-payment-modal' %}

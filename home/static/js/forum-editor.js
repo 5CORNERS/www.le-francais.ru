@@ -244,9 +244,11 @@
         // Horizontal rules
         text = text.replace(/^---$/gim, '<hr>');
 
-        // Images: ![alt](url)
-        text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function(match, alt, url) {
-            return '<img src="' + sanitizeUrl(url) + '" alt="' + escapeHtml(alt) + '" class="forum-embedded-img">';
+        // Images: ![alt](url "title") or ![alt](url)
+        text = text.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+["']([^"']*)["'])?\)/g, function(match, alt, url, title) {
+            var finalTitle = (title !== undefined) ? title : (alt || '');
+            var titleAttr = ' title="' + escapeHtml(finalTitle) + '"';
+            return '<img src="' + sanitizeUrl(url) + '" alt="' + escapeHtml(alt) + '"' + titleAttr + ' class="forum-embedded-img">';
         });
 
         // Links: [text](url)
@@ -395,7 +397,11 @@
                 case 'img':
                     var src = node.getAttribute('src') || '';
                     var alt = node.getAttribute('alt') || '';
-                    return '![' + alt + '](' + src + ')';
+                    var title = node.getAttribute('title');
+                    if (title === null || title === undefined) {
+                        title = alt;
+                    }
+                    return '![' + alt + '](' + src + ' "' + title + '")';
                 case 'br':
                     return '\n';
                 case 'hr':
@@ -605,9 +611,9 @@
                     '<div class="forum-editor-tools-block">',
                         // Formatting
                         '<div class="btn-group btn-group-sm" role="group">',
-                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="bold" title="Жирный (**текст**)"><i class="fa fa-bold"></i></button>',
-                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="italic" title="Курсив (*текст*)"><i class="fa fa-italic"></i></button>',
-                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="underline" title="Подчеркнутый (^^текст^^)"><i class="fa fa-underline"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="bold" title="Жирный (**текст**, Ctrl+B)"><i class="fa fa-bold"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="italic" title="Курсив (*текст*, Ctrl+I)"><i class="fa fa-italic"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="underline" title="Подчеркнутый (^^текст^^, Ctrl+U)"><i class="fa fa-underline"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="strikethrough" title="Зачеркнутый (~~текст~~)"><i class="fa fa-strikethrough"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="mark" title="Выделение маркером (==текст==)"><i class="fa fa-pencil" style="background:#fff3cd;padding:1px 3px;border-radius:2px;"></i></button>',
                         '</div>',
@@ -629,7 +635,7 @@
                         '</div>',
                         // Insert
                         '<div class="btn-group btn-group-sm" role="group">',
-                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="link" title="Вставить ссылку"><i class="fa fa-link"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="link" title="Вставить ссылку (Ctrl+K)"><i class="fa fa-link"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="image" title="Вставить или загрузить изображение"><i class="fa fa-picture-o"></i></button>',
                             '<div class="btn-group btn-group-sm forum-emoji-group position-relative" role="group">',
                                 '<button type="button" class="btn btn-light forum-editor-btn forum-emoji-btn" title="Вставить эмодзи"><i class="fa fa-smile-o"></i></button>',
@@ -833,6 +839,47 @@
             self.$wrapper.find('.forum-emoji-dropdown').addClass('d-none');
         });
 
+        // Keyboard shortcuts (Ctrl+K / Cmd+K for link, formatting hotkeys, protect dead keys)
+        const handleKeydown = (e) => {
+            const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+            if (!isCtrlOrCmd) return;
+
+            // Normalize key to lowercase to avoid checking for both 'b' and 'B'
+            const key = e.key.toLowerCase();
+
+            // Free dead key: Never intercept Ctrl+Shift+6 (or Ctrl+6 / ^) for headings
+            if (key === '6' || key === '^') {
+                return;
+            }
+
+            // Hotkey Ctrl+K / Cmd+K: Insert Link
+            if (key === 'k') {
+                e.preventDefault();
+                e.stopPropagation();
+                self.executeCommand('link');
+                return;
+            }
+
+            // Hotkeys in Markdown mode
+            if (self.currentMode === 'markdown' && !e.shiftKey && !e.altKey) {
+                // Map keys to their respective commands to keep things DRY (Don't Repeat Yourself)
+                const markdownCommands = {
+                    'b': 'bold',
+                    'i': 'italic',
+                    'u': 'underline'
+                };
+
+                if (markdownCommands[key]) {
+                    e.preventDefault();
+                    self.executeMarkdownCommand(markdownCommands[key]);
+                    self.updateCharCounter();
+                }
+            }
+        };
+
+        this.$visualEditor.on('keydown', handleKeydown);
+        this.$textarea.on('keydown', handleKeydown);
+
         // Live continuous sync on input / changes in visual editor
         this.$visualEditor.on('input keyup paste change', function() {
             self.syncMarkdownFromVisual();
@@ -929,22 +976,54 @@
             case 'code':
                 wrapSelectionWithTag('code');
                 break;
-            case 'link':
-                var url = prompt('Введите URL ссылки:', 'https://');
-                if (url) {
-                    var sel = window.getSelection();
-                    var selectedText = sel ? sel.toString() : '';
-                    if (!selectedText) {
-                        var text = prompt('Введите текст ссылки:', url);
-                        document.execCommand('insertHTML', false, '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(text || url) + '</a>');
-                    } else {
-                        document.execCommand('createLink', false, url);
-                    }
+            case 'link': {
+                const rawUrl = prompt('Введите URL ссылки:', 'https://');
+
+                // Early exit if canceled, empty, or unmodified
+                if (!rawUrl || rawUrl.trim() === '' || rawUrl.trim() === 'https://') {
+                    break;
+                }
+
+                const url = rawUrl.trim();
+                const selection = window.getSelection();
+                const selectedText = selection ? selection.toString() : '';
+
+                const textInput = prompt('Введите текст ссылки:', selectedText);
+
+                // Early exit if user clicks cancel on the second prompt
+                if (textInput === null) {
+                    break;
+                }
+
+                const text = textInput.trim() || url;
+                const linkHtml = `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(text)}</a>`;
+
+                document.execCommand('insertHTML', false, linkHtml);
+                break;
+            }
+
+            case 'image': {
+                const imgChoice = prompt('Введите URL изображения (или оставьте пустым, чтобы выбрать файл с компьютера):', '');
+
+                if (imgChoice === null) {
+                    break;
+                }
+
+                const imgUrl = imgChoice.trim();
+
+                if (imgUrl) {
+                    // Fallback to empty string if canceled or left blank
+                    const imgTitle = prompt('Введите заголовок изображения (подсказка при наведении):', '') || '';
+
+                    // Use a template literal to avoid messy string concatenation
+                    const imgHtml = `<p><img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(imgTitle)}" title="${escapeHtml(imgTitle)}" class="forum-embedded-img"></p><p><br></p>`;
+
+                    document.execCommand('insertHTML', false, imgHtml);
+                } else {
+                    this.$fileInput.click();
                 }
                 break;
-            case 'image':
-                this.$fileInput.click();
-                break;
+            }
         }
         this.saveSelection();
     };
@@ -1002,12 +1081,41 @@
                 break;
             case 'link':
                 var linkUrl = prompt('Введите URL ссылки:', 'https://');
-                if (linkUrl) {
-                    wrapTextareaSelection(this.$textarea, '[', '](' + linkUrl + ')', 'текст ссылки');
+                if (linkUrl && linkUrl.trim() && linkUrl.trim() !== 'https://') {
+                    linkUrl = linkUrl.trim();
+                    var el = this.$textarea[0];
+                    var start = el.selectionStart;
+                    var end = el.selectionEnd;
+                    var selected = el.value.substring(start, end);
+                    var linkText = prompt('Введите текст ссылки:', selected || '');
+                    if (linkText !== null) {
+                        linkText = linkText || linkUrl;
+                        var replacement = '[' + linkText + '](' + linkUrl + ')';
+                        el.value = el.value.substring(0, start) + replacement + el.value.substring(end);
+                        el.focus();
+                        el.setSelectionRange(start + replacement.length, start + replacement.length);
+                        this.$textarea.trigger('input');
+                    }
                 }
                 break;
             case 'image':
-                this.$fileInput.click();
+                var imgChoice = prompt('Введите URL изображения (или оставьте пустым, чтобы выбрать файл с компьютера):', '');
+                if (imgChoice === null) {
+                    break;
+                }
+                if (imgChoice.trim()) {
+                    var imgUrl = imgChoice.trim();
+                    var imgTitle = prompt('Введите заголовок изображения (подсказка при наведении):', '');
+                    if (imgTitle === null) {
+                        imgTitle = '';
+                    }
+                    var alt = imgTitle || '';
+                    var title = alt;
+                    var md = '![' + alt + '](' + imgUrl + ' "' + title + '")';
+                    wrapTextareaSelection(this.$textarea, '', md, '');
+                } else {
+                    this.$fileInput.click();
+                }
                 break;
         }
     };
@@ -1170,7 +1278,7 @@
 
                     if (self.currentMode === 'visual') {
                         var $ph = $('#' + uploadId);
-                        var imgHtml = '<p><img src="' + escapeHtml(imgUrl) + '" alt="' + escapeHtml(altText) + '" class="forum-embedded-img"></p><p><br></p>';
+                        var imgHtml = '<p><img src="' + escapeHtml(imgUrl) + '" alt="' + escapeHtml(altText) + '" title="' + escapeHtml(altText) + '" class="forum-embedded-img"></p><p><br></p>';
                         if ($ph.length) {
                             $ph.replaceWith(imgHtml);
                         } else {
@@ -1179,7 +1287,7 @@
                         self.syncMarkdownFromVisual();
                     } else {
                         var currentVal = self.$textarea.val();
-                        var finalMd = '![' + altText + '](' + imgUrl + ')';
+                        var finalMd = '![' + altText + '](' + imgUrl + ' "' + altText + '")';
                         if (currentVal.indexOf(placeholderMd) !== -1) {
                             self.$textarea.val(currentVal.replace(placeholderMd, finalMd));
                         } else {
