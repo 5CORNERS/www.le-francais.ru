@@ -209,7 +209,7 @@
         // Spoilers: ???- "Title"\n(    body)*
         text = text.replace(/\?\?\?[-+]?\s*"([^"\n]+)"\n((?:(?:    |\t).*\n?)+)/g, function(match, title, body) {
             var cleanBody = body.replace(/^(?:    |\t)/gm, '');
-            return '\n<details class="forum-spoiler"><summary>' + escapeHtml(title) + '</summary><div class="spoiler-body">' + markdownToHtml(cleanBody) + '</div></details>\n';
+            return '\n<details class="forum-spoiler" open><summary>' + escapeHtml(title) + '</summary><div class="spoiler-body">' + markdownToHtml(cleanBody) + '</div></details>\n';
         });
 
         // Blockquotes
@@ -411,7 +411,8 @@
                     return lines.map(function(l) { return '> ' + l; }).join('\n') + '\n\n';
                 case 'details':
                     var summaryNode = node.querySelector('summary');
-                    var summary = summaryNode ? summaryNode.textContent.trim() : 'Спойлер';
+                    var summary = summaryNode ? summaryNode.textContent.trim() : '';
+                    if (!summary) summary = 'Спойлер';
                     var bodyNode = node.querySelector('.spoiler-body') || node;
                     var bodyMd = '';
                     for (var j = 0; j < bodyNode.childNodes.length; j++) {
@@ -419,7 +420,9 @@
                         if (child.tagName && child.tagName.toLowerCase() === 'summary') continue;
                         bodyMd += walk(child);
                     }
-                    var bodyLines = bodyMd.trim().split('\n').map(function(l) { return '    ' + l; }).join('\n');
+                    var bodyTrimmed = bodyMd.trim();
+                    if (!bodyTrimmed) bodyTrimmed = 'Текст спойлера';
+                    var bodyLines = bodyTrimmed.split('\n').map(function(l) { return '    ' + l; }).join('\n');
                     return '???- "' + summary + '"\n' + bodyLines + '\n\n';
                 case 'ul':
                     var uRes = '';
@@ -462,33 +465,137 @@
     }
 
     /**
-     * Helper to wrap selected text in contenteditable with an inline tag
+     * Toggles custom inline formatting tag (mark, code, kbd) on selection.
+     * If cursor/selection is inside the tag, it unwraps it (toggle off).
+     * If text is selected, wraps it while keeping content selected (stackable).
+     * If collapsed, inserts placeholder and selects it.
      */
-    function wrapSelectionWithTag(tagName, className) {
+    function toggleCustomInlineTag(tagName, className, placeholder) {
+        var sel = window.getSelection();
+        if (!sel || !sel.rangeCount) return;
+        var range = sel.getRangeAt(0);
+        var tagLower = tagName.toLowerCase();
+
+        // 1. Check if inside tagName
+        var container = range.commonAncestorContainer;
+        var tagNode = (container.nodeType === 1 ? container : container.parentNode).closest(tagLower);
+
+        if (tagNode && tagNode.closest('.forum-visual-editor')) {
+            // Unwrap tag
+            var parent = tagNode.parentNode;
+            var firstChild = tagNode.firstChild;
+            var lastChild = tagNode.lastChild;
+            while (tagNode.firstChild) {
+                parent.insertBefore(tagNode.firstChild, tagNode);
+            }
+            parent.removeChild(tagNode);
+
+            if (firstChild && lastChild) {
+                var newRange = document.createRange();
+                newRange.setStartBefore(firstChild);
+                newRange.setEndAfter(lastChild);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+            }
+            return;
+        }
+
+        // 2. Check if selected content contains tagName elements
+        if (!range.collapsed) {
+            var clone = range.cloneContents();
+            var existingTags = clone.querySelectorAll(tagLower);
+            if (existingTags.length > 0) {
+                var frag = range.extractContents();
+                var matching = frag.querySelectorAll(tagLower);
+                for (var m = 0; m < matching.length; m++) {
+                    var el = matching[m];
+                    var p = el.parentNode;
+                    while (el.firstChild) {
+                        p.insertBefore(el.firstChild, el);
+                    }
+                    p.removeChild(el);
+                }
+                range.insertNode(frag);
+                return;
+            }
+        }
+
+        // 3. Wrap selection or insert placeholder
+        var newEl = document.createElement(tagName);
+        if (className) newEl.className = className;
+
+        if (!range.collapsed) {
+            newEl.appendChild(range.extractContents());
+            range.insertNode(newEl);
+
+            // Add spacer outside if needed so typing afterwards doesn't stay trapped
+            if (!newEl.nextSibling || (newEl.nextSibling.nodeType === 3 && newEl.nextSibling.nodeValue === '')) {
+                var spacer = document.createTextNode('\u00A0');
+                newEl.parentNode.insertBefore(spacer, newEl.nextSibling);
+            }
+
+            var newRange = document.createRange();
+            newRange.selectNodeContents(newEl);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+        } else {
+            var text = placeholder || 'текст';
+            newEl.textContent = text;
+            range.insertNode(newEl);
+
+            var spacer = document.createTextNode('\u00A0');
+            newEl.parentNode.insertBefore(spacer, newEl.nextSibling);
+
+            var newRange = document.createRange();
+            newRange.selectNodeContents(newEl);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+        }
+    }
+
+    /**
+     * Clears formatting in Visual Editor (native removeFormat + unwrap custom tags)
+     */
+    function clearFormattingVisual(editorEl) {
+        document.execCommand('removeFormat', false, null);
+        document.execCommand('unlink', false, null);
+
         var sel = window.getSelection();
         if (!sel || !sel.rangeCount) return;
         var range = sel.getRangeAt(0);
 
-        var selectedText = range.toString();
-        var el = document.createElement(tagName);
-        if (className) el.className = className;
+        var tagsToRemove = ['kbd', 'mark', 'code', 'u', 'del', 's', 'strike', 'sup', 'sub', 'strong', 'b', 'em', 'i'];
+        var container = range.commonAncestorContainer;
+        var root = container.nodeType === 1 ? container : container.parentNode;
 
-        if (selectedText) {
-            el.textContent = selectedText;
-            range.deleteContents();
-            range.insertNode(el);
-        } else {
-            el.innerHTML = '&#8203;'; // Zero-width space so cursor can stay inside
-            range.insertNode(el);
-            range.selectNodeContents(el);
+        // Check ancestors within editor
+        tagsToRemove.forEach(function(tag) {
+            var el = root.closest(tag);
+            if (el && editorEl.contains(el)) {
+                var p = el.parentNode;
+                while (el.firstChild) {
+                    p.insertBefore(el.firstChild, el);
+                }
+                p.removeChild(el);
+            }
+        });
+
+        // Check descendants in selection
+        if (!range.collapsed) {
+            var frag = range.extractContents();
+            tagsToRemove.forEach(function(tag) {
+                var matching = frag.querySelectorAll(tag);
+                for (var m = 0; m < matching.length; m++) {
+                    var el = matching[m];
+                    var p = el.parentNode;
+                    while (el.firstChild) {
+                        p.insertBefore(el.firstChild, el);
+                    }
+                    p.removeChild(el);
+                }
+            });
+            range.insertNode(frag);
         }
-
-        // Collapse to end of element
-        var newRange = document.createRange();
-        newRange.setStartAfter(el);
-        newRange.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(newRange);
     }
 
     /**
@@ -566,6 +673,7 @@
         var initialMarkdown = this.$textarea.val() || '';
         if (this.currentMode === 'visual') {
             this.$visualEditor.html(markdownToHtml(initialMarkdown));
+            this.updateSpoilerPlaceholders();
             this.$visualEditor.show();
             this.$textarea.hide();
         } else {
@@ -609,29 +717,27 @@
                     '<div class="forum-toolbar-divider"></div>',
                     // Formatting & Insert Tools Block
                     '<div class="forum-editor-tools-block">',
-                        // Formatting
+                        // Inline text formatting
                         '<div class="btn-group btn-group-sm" role="group">',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="bold" title="Жирный (**текст**, Ctrl+B)"><i class="fa fa-bold"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="italic" title="Курсив (*текст*, Ctrl+I)"><i class="fa fa-italic"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="underline" title="Подчеркнутый (^^текст^^, Ctrl+U)"><i class="fa fa-underline"></i></button>',
-                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="strikethrough" title="Зачеркнутый (~~текст~~)"><i class="fa fa-strikethrough"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="strikethrough" title="Зачеркнутый (~~текст~~, Ctrl+Shift+X, Alt+Shift+5)"><i class="fa fa-strikethrough"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="mark" title="Выделение маркером (==текст==)"><i class="fa fa-pencil" style="background:#fff3cd;padding:1px 3px;border-radius:2px;"></i></button>',
-                        '</div>',
-                        // Script / Keys
-                        '<div class="btn-group btn-group-sm" role="group">',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="code" title="Моноширинный / код (`код`, Ctrl+Shift+M)"><i class="fa fa-code"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="kbd" title="Клавиша (++клавиша++)"><i class="fa fa-keyboard-o"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="superscript" title="Верхний индекс (^текст^)"><i class="fa fa-superscript"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="subscript" title="Нижний индекс (~текст~)"><i class="fa fa-subscript"></i></button>',
-                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="kbd" title="Клавиша (++клавиша++)"><i class="fa fa-keyboard-o"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="removeFormat" title="Очистить форматирование (Ctrl+Shift+N, Ctrl+\\)"><i class="fa fa-eraser"></i></button>',
                         '</div>',
-                        // Structure
+                        // Structure / Block tools
                         '<div class="btn-group btn-group-sm" role="group">',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="h2" title="Подзаголовок (## Заголовок)"><strong>H2</strong></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="h3" title="Подзаголовок (### Заголовок)"><strong>H3</strong></button>',
-                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="quote" title="Цитата (> текст)"><i class="fa fa-quote-left"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="quote" title="Цитата (> текст, Ctrl+Shift+.)"><i class="fa fa-quote-left"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="ul" title="Список (- пункт)"><i class="fa fa-list-ul"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="ol" title="Нумерованный список (1. пункт)"><i class="fa fa-list-ol"></i></button>',
-                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="spoiler" title="Спойлер (???- Заголовок)"><i class="fa fa-caret-square-o-down"></i></button>',
-                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="code" title="Код (`код`)"><i class="fa fa-code"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="spoiler" title="Спойлер (???- Заголовок, Ctrl+Shift+P)"><i class="fa fa-caret-square-o-down"></i></button>',
                         '</div>',
                         // Insert
                         '<div class="btn-group btn-group-sm" role="group">',
@@ -652,6 +758,20 @@
                 '</div>',
                 // Hidden file input
                 '<input type="file" class="forum-image-file-input d-none" accept="image/jpeg,image/png,image/gif,image/webp">',
+                // Custom Modal Dialog Overlay for Link & Image Insertion
+                '<div class="forum-editor-modal-overlay d-none">',
+                    '<div class="forum-editor-modal" role="dialog" aria-modal="true">',
+                        '<div class="forum-editor-modal-header">',
+                            '<h5 class="forum-editor-modal-title">Вставить ссылку</h5>',
+                            '<button type="button" class="forum-editor-modal-close" aria-label="Закрыть">&times;</button>',
+                        '</div>',
+                        '<div class="forum-editor-modal-body"></div>',
+                        '<div class="forum-editor-modal-footer">',
+                            '<button type="button" class="btn btn-sm btn-secondary forum-editor-modal-cancel">Отмена</button>',
+                            '<button type="button" class="btn btn-sm btn-primary forum-editor-modal-submit">Вставить</button>',
+                        '</div>',
+                    '</div>',
+                '</div>',
                 // Editor body container
                 '<div class="forum-editor-container position-relative">',
                     '<div class="forum-visual-editor" contenteditable="true" spellcheck="true" placeholder="Напишите ответ или перетащите изображение сюда..."></div>',
@@ -694,6 +814,9 @@
         this.$uploadProgress = this.$wrapper.find('.forum-upload-progress');
         this.$fileInput = this.$wrapper.find('.forum-image-file-input');
         this.$charCounter = this.$wrapper.find('.forum-char-counter');
+        this.$modalOverlay = this.$wrapper.find('.forum-editor-modal-overlay');
+        this.$modalTitle = this.$wrapper.find('.forum-editor-modal-title');
+        this.$modalBody = this.$wrapper.find('.forum-editor-modal-body');
 
         this.$container.append(this.$textarea);
     };
@@ -729,6 +852,7 @@
             // Convert Markdown -> Visual HTML
             var html = markdownToHtml(this.$textarea.val());
             this.$visualEditor.html(html);
+            this.updateSpoilerPlaceholders();
             this.$textarea.hide();
             this.$visualEditor.show().focus();
             this.currentMode = 'visual';
@@ -737,6 +861,20 @@
         localStorage.setItem('forum_editor_mode', this.currentMode);
         this.updateModeButtons();
         this.updateCharCounter();
+    };
+
+    ForumEditor.prototype.updateSpoilerPlaceholders = function() {
+        if (!this.$visualEditor || !this.$visualEditor.length) return;
+        this.$visualEditor.find('details.forum-spoiler').each(function() {
+            var $summary = $(this).find('summary');
+            var sText = $.trim($summary.text());
+            $summary.attr('data-empty', sText ? 'false' : 'true');
+
+            var $body = $(this).find('.spoiler-body');
+            var bText = $.trim($body.text());
+            var hasImg = $body.find('img').length > 0;
+            $body.attr('data-empty', (bText || hasImg) ? 'false' : 'true');
+        });
     };
 
     ForumEditor.prototype.syncMarkdownFromVisual = function() {
@@ -750,6 +888,7 @@
         var md = this.$textarea.val() || '';
         var html = markdownToHtml(md);
         this.$visualEditor.html(html);
+        this.updateSpoilerPlaceholders();
         this.updateCharCounter();
     };
 
@@ -839,49 +978,221 @@
             self.$wrapper.find('.forum-emoji-dropdown').addClass('d-none');
         });
 
-        // Keyboard shortcuts (Ctrl+K / Cmd+K for link, formatting hotkeys, protect dead keys)
-        const handleKeydown = (e) => {
-            const isCtrlOrCmd = e.ctrlKey || e.metaKey;
-            if (!isCtrlOrCmd) return;
+        // Modal overlay event handlers
+        this.$modalOverlay.on('click', '.forum-editor-modal-close, .forum-editor-modal-cancel', function(e) {
+            e.preventDefault();
+            self.closeModal();
+        });
 
-            // Normalize key to lowercase to avoid checking for both 'b' and 'B'
-            const key = e.key.toLowerCase();
+        this.$modalOverlay.on('click', '.forum-editor-modal-submit', function(e) {
+            e.preventDefault();
+            if (self.activeModalSubmit) {
+                self.activeModalSubmit();
+            }
+        });
 
+        this.$modalOverlay.on('click', function(e) {
+            if ($(e.target).hasClass('forum-editor-modal-overlay')) {
+                self.closeModal();
+            }
+        });
+
+        this.$modalOverlay.on('keydown', function(e) {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                e.preventDefault();
+                self.closeModal();
+            } else if (e.key === 'Enter' || e.keyCode === 13) {
+                if ($(e.target).is('input')) {
+                    e.preventDefault();
+                    if (self.activeModalSubmit) {
+                        self.activeModalSubmit();
+                    }
+                }
+            }
+        });
+
+        // Keyboard shortcuts (Telegram-style shortcuts, Ctrl+K for link, protect dead keys)
+        var handleKeydown = function(e) {
             // Free dead key: Never intercept Ctrl+Shift+6 (or Ctrl+6 / ^) for headings
-            if (key === '6' || key === '^') {
+            if (e.keyCode === 54 || e.key === '6' || e.key === '^') {
                 return;
             }
 
-            // Hotkey Ctrl+K / Cmd+K: Insert Link
-            if (key === 'k') {
+            // Google Docs style Strikethrough: Alt+Shift+5
+            if (e.altKey && e.shiftKey && (e.key === '5' || e.keyCode === 53 || e.code === 'Digit5')) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.executeCommand('strikethrough');
+                return false;
+            }
+
+            var isCtrlOrCmd = e.ctrlKey || e.metaKey;
+            if (!isCtrlOrCmd) return;
+
+            var code = e.code || '';
+            var key = (e.key || '').toLowerCase();
+            var keyCode = e.keyCode;
+
+            // Telegram: Ctrl+Shift+X -> Strikethrough
+            if (e.shiftKey && (code === 'KeyX' || key === 'x' || key === 'ч' || keyCode === 88)) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.executeCommand('strikethrough');
+                return false;
+            }
+
+            // Telegram: Ctrl+Shift+M -> Code / Monospace
+            if (e.shiftKey && (code === 'KeyM' || key === 'm' || key === 'ь' || keyCode === 77)) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.executeCommand('code');
+                return false;
+            }
+
+            // Telegram: Ctrl+Shift+P -> Spoiler
+            if (e.shiftKey && (code === 'KeyP' || key === 'p' || key === 'з' || keyCode === 80)) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.executeCommand('spoiler');
+                return false;
+            }
+
+            // Telegram: Ctrl+Shift+. (Period) -> Quote
+            if (e.shiftKey && (code === 'Period' || key === '.' || key === '>' || key === 'ю' || keyCode === 190)) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.executeCommand('quote');
+                return false;
+            }
+
+            // Clear formatting: Ctrl+Shift+N or Ctrl+\
+            if ((e.shiftKey && (code === 'KeyN' || key === 'n' || key === 'т' || keyCode === 78)) ||
+                (!e.shiftKey && (code === 'Backslash' || key === '\\' || keyCode === 220))) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.executeCommand('removeFormat');
+                return false;
+            }
+
+            // Ctrl+K -> Link
+            if (!e.shiftKey && !e.altKey && (code === 'KeyK' || key === 'k' || key === 'л' || keyCode === 75)) {
                 e.preventDefault();
                 e.stopPropagation();
                 self.executeCommand('link');
-                return;
+                return false;
             }
 
-            // Hotkeys in Markdown mode
-            if (self.currentMode === 'markdown' && !e.shiftKey && !e.altKey) {
-                // Map keys to their respective commands to keep things DRY (Don't Repeat Yourself)
-                const markdownCommands = {
-                    'b': 'bold',
-                    'i': 'italic',
-                    'u': 'underline'
-                };
+            // Ctrl+B -> Bold
+            if (!e.shiftKey && !e.altKey && (code === 'KeyB' || key === 'b' || key === 'и' || keyCode === 66)) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.executeCommand('bold');
+                return false;
+            }
 
-                if (markdownCommands[key]) {
-                    e.preventDefault();
-                    self.executeMarkdownCommand(markdownCommands[key]);
-                    self.updateCharCounter();
-                }
+            // Ctrl+I -> Italic
+            if (!e.shiftKey && !e.altKey && (code === 'KeyI' || key === 'i' || key === 'ш' || keyCode === 73)) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.executeCommand('italic');
+                return false;
+            }
+
+            // Ctrl+U -> Underline
+            if (!e.shiftKey && !e.altKey && (code === 'KeyU' || key === 'u' || key === 'г' || keyCode === 85)) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.executeCommand('underline');
+                return false;
             }
         };
 
         this.$visualEditor.on('keydown', handleKeydown);
         this.$textarea.on('keydown', handleKeydown);
 
+        // Visual editor special key handling: <kbd> navigation & spoiler <summary> Enter
+        this.$visualEditor.on('keydown', function(e) {
+            var sel = window.getSelection();
+            if (!sel || !sel.rangeCount) return;
+            var range = sel.getRangeAt(0);
+            var container = range.startContainer;
+            var parentEl = container.nodeType === 1 ? container : container.parentNode;
+
+            // 1. If inside <summary>: pressing Enter jumps to .spoiler-body without closing details
+            if (e.key === 'Enter') {
+                var summaryNode = parentEl.closest('summary');
+                if (summaryNode && self.$visualEditor[0].contains(summaryNode)) {
+                    e.preventDefault();
+                    var detailsNode = summaryNode.closest('details');
+                    if (detailsNode) {
+                        var bodyNode = detailsNode.querySelector('.spoiler-body');
+                        if (bodyNode) {
+                            var targetP = bodyNode.querySelector('p') || bodyNode;
+                            var r = document.createRange();
+                            r.selectNodeContents(targetP);
+                            r.collapse(true);
+                            sel.removeAllRanges();
+                            sel.addRange(r);
+                        }
+                    }
+                    return;
+                }
+            }
+
+            // 2. If inside <kbd>: prevent breaking <kbd> on Enter, exit on Space or ArrowRight at end
+            var kbdNode = parentEl.closest('kbd');
+            if (kbdNode && self.$visualEditor[0].contains(kbdNode)) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    var parentBlock = kbdNode.closest('p, div, blockquote') || kbdNode.parentNode;
+                    var newP = document.createElement('p');
+                    newP.innerHTML = '<br>';
+                    if (parentBlock && parentBlock.parentNode) {
+                        parentBlock.parentNode.insertBefore(newP, parentBlock.nextSibling);
+                    } else {
+                        kbdNode.parentNode.insertBefore(newP, kbdNode.nextSibling);
+                    }
+                    var r = document.createRange();
+                    r.setStart(newP, 0);
+                    r.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(r);
+                    return;
+                }
+
+                if (e.key === ' ' || e.key === 'Spacebar') {
+                    if (range.collapsed && range.startOffset === container.textContent.length) {
+                        e.preventDefault();
+                        var spaceNode = document.createTextNode('\u00A0');
+                        kbdNode.parentNode.insertBefore(spaceNode, kbdNode.nextSibling);
+                        var r = document.createRange();
+                        r.setStartAfter(spaceNode);
+                        r.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(r);
+                        return;
+                    }
+                }
+
+                if (e.key === 'ArrowRight' && range.collapsed && range.startOffset === container.textContent.length) {
+                    if (!kbdNode.nextSibling) {
+                        var spacer = document.createTextNode('\u00A0');
+                        kbdNode.parentNode.appendChild(spacer);
+                    }
+                    var r = document.createRange();
+                    r.setStartAfter(kbdNode);
+                    r.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(r);
+                    e.preventDefault();
+                    return;
+                }
+            }
+        });
+
         // Live continuous sync on input / changes in visual editor
         this.$visualEditor.on('input keyup paste change', function() {
+            self.updateSpoilerPlaceholders();
             self.syncMarkdownFromVisual();
             self.updateCharCounter();
         });
@@ -921,6 +1232,154 @@
         this.updateCharCounter();
     };
 
+    ForumEditor.prototype.showModal = function() {
+        this.$modalOverlay.removeClass('d-none');
+    };
+
+    ForumEditor.prototype.closeModal = function() {
+        this.$modalOverlay.addClass('d-none');
+        this.activeModalSubmit = null;
+        if (this.currentMode === 'visual') {
+            this.$visualEditor.focus();
+            this.restoreSelection();
+        } else {
+            this.$textarea.focus();
+        }
+    };
+
+    ForumEditor.prototype.openLinkModal = function() {
+        var self = this;
+        this.saveSelection();
+
+        var currentText = '';
+        if (this.currentMode === 'visual') {
+            var sel = window.getSelection();
+            if (sel && sel.rangeCount > 0) {
+                currentText = sel.toString();
+            }
+        } else {
+            var el = this.$textarea[0];
+            currentText = el.value.substring(el.selectionStart, el.selectionEnd);
+        }
+
+        this.$modalTitle.text('Вставить ссылку');
+        this.$modalBody.html([
+            '<div class="form-group mb-2">',
+                '<label for="forum-modal-link-url">URL ссылки</label>',
+                '<input type="text" id="forum-modal-link-url" class="form-control form-control-sm" placeholder="https://" value="https://">',
+            '</div>',
+            '<div class="form-group mb-0">',
+                '<label for="forum-modal-link-text">Текст ссылки</label>',
+                '<input type="text" id="forum-modal-link-text" class="form-control form-control-sm" placeholder="Отображаемый текст">',
+            '</div>'
+        ].join(''));
+
+        var $urlInput = this.$modalBody.find('#forum-modal-link-url');
+        var $textInput = this.$modalBody.find('#forum-modal-link-text');
+
+        if (currentText) {
+            $textInput.val(currentText);
+        }
+
+        this.activeModalSubmit = function() {
+            var url = $.trim($urlInput.val());
+            var text = $.trim($textInput.val());
+            if (!url || url === 'https://' || url === 'http://') {
+                $urlInput.focus();
+                return;
+            }
+            self.closeModal();
+
+            if (self.currentMode === 'visual') {
+                self.$visualEditor.focus();
+                self.restoreSelection();
+                var displayText = text || url;
+                document.execCommand('insertHTML', false, '<a href="' + sanitizeUrl(url) + '" target="_blank" rel="noopener">' + escapeHtml(displayText) + '</a>');
+                self.syncMarkdownFromVisual();
+            } else {
+                self.$textarea.focus();
+                var displayText = text || url;
+                wrapTextareaSelection(self.$textarea, '', '[' + displayText + '](' + url + ')', '');
+            }
+            self.updateCharCounter();
+        };
+
+        this.showModal();
+        setTimeout(function() {
+            $urlInput.focus();
+            var len = $urlInput.val().length;
+            if ($urlInput[0].setSelectionRange) {
+                $urlInput[0].setSelectionRange(len, len);
+            }
+        }, 50);
+    };
+
+    ForumEditor.prototype.openImageModal = function() {
+        var self = this;
+        this.saveSelection();
+
+        this.$modalTitle.text('Вставить изображение');
+        this.$modalBody.html([
+            '<div class="form-group mb-2">',
+                '<label for="forum-modal-img-url">URL изображения</label>',
+                '<input type="text" id="forum-modal-img-url" class="form-control form-control-sm" placeholder="https://example.com/image.jpg">',
+            '</div>',
+            '<div class="form-group mb-3">',
+                '<label for="forum-modal-img-title">Подпись / заголовок (title & alt)</label>',
+                '<input type="text" id="forum-modal-img-title" class="form-control form-control-sm" placeholder="Описание изображения (необязательно)">',
+            '</div>',
+            '<div class="text-center my-2">',
+                '<span class="text-muted small">— или —</span>',
+            '</div>',
+            '<div class="text-center mt-2">',
+                '<button type="button" class="btn btn-outline-primary btn-sm forum-modal-choose-file-btn">',
+                    '<i class="fa fa-folder-open-o mr-1"></i> Выбрать файл на устройстве',
+                '</button>',
+            '</div>'
+        ].join(''));
+
+        var $urlInput = this.$modalBody.find('#forum-modal-img-url');
+        var $titleInput = this.$modalBody.find('#forum-modal-img-title');
+        var $chooseBtn = this.$modalBody.find('.forum-modal-choose-file-btn');
+
+        $chooseBtn.on('click', function(e) {
+            e.preventDefault();
+            self.closeModal();
+            self.$fileInput.click();
+        });
+
+        this.activeModalSubmit = function() {
+            var url = $.trim($urlInput.val());
+            var title = $.trim($titleInput.val());
+            if (!url) {
+                $urlInput.focus();
+                return;
+            }
+            self.closeModal();
+
+            var alt = title || '';
+            var titleAttr = alt;
+
+            if (self.currentMode === 'visual') {
+                self.$visualEditor.focus();
+                self.restoreSelection();
+                var imgHtml = '<p><img src="' + sanitizeUrl(url) + '" alt="' + escapeHtml(alt) + '" title="' + escapeHtml(titleAttr) + '" class="forum-embedded-img"></p><p><br></p>';
+                document.execCommand('insertHTML', false, imgHtml);
+                self.syncMarkdownFromVisual();
+            } else {
+                self.$textarea.focus();
+                var md = '![' + alt + '](' + url + ' "' + titleAttr + '")';
+                wrapTextareaSelection(self.$textarea, '', md, '');
+            }
+            self.updateCharCounter();
+        };
+
+        this.showModal();
+        setTimeout(function() {
+            $urlInput.focus();
+        }, 50);
+    };
+
     ForumEditor.prototype.executeVisualCommand = function(cmd) {
         this.$visualEditor.focus();
         if (this.savedRange) {
@@ -934,13 +1393,19 @@
                 document.execCommand('italic', false, null);
                 break;
             case 'underline':
-                wrapSelectionWithTag('u', 'editor-underline');
+                document.execCommand('underline', false, null);
                 break;
             case 'strikethrough':
-                wrapSelectionWithTag('del', 'editor-del');
+                document.execCommand('strikeThrough', false, null);
                 break;
             case 'mark':
-                wrapSelectionWithTag('mark', 'editor-mark');
+                toggleCustomInlineTag('mark', 'editor-mark', 'текст');
+                break;
+            case 'code':
+                toggleCustomInlineTag('code', '', 'код');
+                break;
+            case 'kbd':
+                toggleCustomInlineTag('kbd', 'editor-key', 'клавиша');
                 break;
             case 'superscript':
                 document.execCommand('superscript', false, null);
@@ -948,8 +1413,8 @@
             case 'subscript':
                 document.execCommand('subscript', false, null);
                 break;
-            case 'kbd':
-                wrapSelectionWithTag('kbd', 'editor-key');
+            case 'removeFormat':
+                clearFormattingVisual(this.$visualEditor[0]);
                 break;
             case 'h2':
                 document.execCommand('formatBlock', false, '<h2>');
@@ -967,63 +1432,40 @@
                 document.execCommand('insertOrderedList', false, null);
                 break;
             case 'spoiler':
-                var title = prompt('Введите заголовок спойлера:', 'Спойлер');
-                if (title !== null) {
-                    var spoilerHtml = '<details class="forum-spoiler"><summary>' + escapeHtml(title || 'Спойлер') + '</summary><div class="spoiler-body"><p>Текст спойлера</p></div></details><p><br></p>';
-                    document.execCommand('insertHTML', false, spoilerHtml);
+                var spoilerHtml = '<details class="forum-spoiler" open>' +
+                    '<summary data-placeholder="Введите заголовок спойлера" data-empty="true"><br></summary>' +
+                    '<div class="spoiler-body" data-placeholder="Введите текст спойлера — можно также вставлять изображения" data-empty="true"><p><br></p></div>' +
+                    '</details><p><br></p>';
+                document.execCommand('insertHTML', false, spoilerHtml);
+                var sel = window.getSelection();
+                if (sel && sel.rangeCount > 0) {
+                    var range = sel.getRangeAt(0);
+                    var container = range.commonAncestorContainer;
+                    var parentNode = container.nodeType === 1 ? container : container.parentNode;
+                    var detailsNode = parentNode.closest ? parentNode.closest('details.forum-spoiler') : null;
+                    if (!detailsNode) {
+                        var spoilers = this.$visualEditor.find('details.forum-spoiler');
+                        if (spoilers.length) detailsNode = spoilers.last()[0];
+                    }
+                    if (detailsNode) {
+                        var summary = detailsNode.querySelector('summary');
+                        if (summary) {
+                            var newRange = document.createRange();
+                            newRange.selectNodeContents(summary);
+                            newRange.collapse(true);
+                            sel.removeAllRanges();
+                            sel.addRange(newRange);
+                        }
+                    }
                 }
+                this.updateSpoilerPlaceholders();
                 break;
-            case 'code':
-                wrapSelectionWithTag('code');
+            case 'link':
+                this.openLinkModal();
                 break;
-            case 'link': {
-                const rawUrl = prompt('Введите URL ссылки:', 'https://');
-
-                // Early exit if canceled, empty, or unmodified
-                if (!rawUrl || rawUrl.trim() === '' || rawUrl.trim() === 'https://') {
-                    break;
-                }
-
-                const url = rawUrl.trim();
-                const selection = window.getSelection();
-                const selectedText = selection ? selection.toString() : '';
-
-                const textInput = prompt('Введите текст ссылки:', selectedText);
-
-                // Early exit if user clicks cancel on the second prompt
-                if (textInput === null) {
-                    break;
-                }
-
-                const text = textInput.trim() || url;
-                const linkHtml = `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(text)}</a>`;
-
-                document.execCommand('insertHTML', false, linkHtml);
+            case 'image':
+                this.openImageModal();
                 break;
-            }
-
-            case 'image': {
-                const imgChoice = prompt('Введите URL изображения (или оставьте пустым, чтобы выбрать файл с компьютера):', '');
-
-                if (imgChoice === null) {
-                    break;
-                }
-
-                const imgUrl = imgChoice.trim();
-
-                if (imgUrl) {
-                    // Fallback to empty string if canceled or left blank
-                    const imgTitle = prompt('Введите заголовок изображения (подсказка при наведении):', '') || '';
-
-                    // Use a template literal to avoid messy string concatenation
-                    const imgHtml = `<p><img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(imgTitle)}" title="${escapeHtml(imgTitle)}" class="forum-embedded-img"></p><p><br></p>`;
-
-                    document.execCommand('insertHTML', false, imgHtml);
-                } else {
-                    this.$fileInput.click();
-                }
-                break;
-            }
         }
         this.saveSelection();
     };
@@ -1046,14 +1488,41 @@
             case 'mark':
                 wrapTextareaSelection(this.$textarea, '==', '==', 'выделенный текст');
                 break;
+            case 'code':
+                wrapTextareaSelection(this.$textarea, '`', '`', 'код');
+                break;
+            case 'kbd':
+                wrapTextareaSelection(this.$textarea, '++', '++', 'Ctrl+C');
+                break;
             case 'superscript':
                 wrapTextareaSelection(this.$textarea, '^', '^', '2');
                 break;
             case 'subscript':
                 wrapTextareaSelection(this.$textarea, '~', '~', '2');
                 break;
-            case 'kbd':
-                wrapTextareaSelection(this.$textarea, '++', '++', 'Ctrl+C');
+            case 'removeFormat':
+                var el = this.$textarea[0];
+                var start = el.selectionStart;
+                var end = el.selectionEnd;
+                var val = el.value;
+                var selected = val.substring(start, end);
+                if (selected) {
+                    var cleaned = selected
+                        .replace(/\*\*([^*]+)\*\*/g, '$1')
+                        .replace(/\*([^*]+)\*/g, '$1')
+                        .replace(/\^\^([^~^]+)\^\^/g, '$1')
+                        .replace(/~~([^~]+)~~/g, '$1')
+                        .replace(/==([^=]+)==/g, '$1')
+                        .replace(/\+\+([^+\n]+)\+\+/g, '$1')
+                        .replace(/`([^`\n]+)`/g, '$1')
+                        .replace(/\^([^\s^]+)\^/g, '$1')
+                        .replace(/~([^\s~]+)~/g, '$1')
+                        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+                    el.value = val.substring(0, start) + cleaned + val.substring(end);
+                    el.focus();
+                    el.setSelectionRange(start, start + cleaned.length);
+                    this.$textarea.trigger('input');
+                }
                 break;
             case 'h2':
                 wrapTextareaSelection(this.$textarea, '## ', '\n', 'Заголовок');
@@ -1071,51 +1540,25 @@
                 wrapTextareaSelection(this.$textarea, '1. ', '\n', 'Первый пункт');
                 break;
             case 'spoiler':
-                var title = prompt('Введите заголовок спойлера:', 'Спойлер');
-                if (title !== null) {
-                    wrapTextareaSelection(this.$textarea, '???- "' + (title || 'Спойлер') + '"\n    ', '\n\n', 'Текст спойлера');
-                }
-                break;
-            case 'code':
-                wrapTextareaSelection(this.$textarea, '`', '`', 'код');
+                var el = this.$textarea[0];
+                var start = el.selectionStart;
+                var end = el.selectionEnd;
+                var selected = el.value.substring(start, end) || 'Текст спойлера';
+                var prefix = '???- "Заголовок спойлера"\n    ';
+                var suffix = '\n\n';
+                var replacement = prefix + selected + suffix;
+                el.value = el.value.substring(0, start) + replacement + el.value.substring(end);
+                el.focus();
+                var titleStart = start + 6;
+                var titleEnd = titleStart + 18;
+                el.setSelectionRange(titleStart, titleEnd);
+                this.$textarea.trigger('input');
                 break;
             case 'link':
-                var linkUrl = prompt('Введите URL ссылки:', 'https://');
-                if (linkUrl && linkUrl.trim() && linkUrl.trim() !== 'https://') {
-                    linkUrl = linkUrl.trim();
-                    var el = this.$textarea[0];
-                    var start = el.selectionStart;
-                    var end = el.selectionEnd;
-                    var selected = el.value.substring(start, end);
-                    var linkText = prompt('Введите текст ссылки:', selected || '');
-                    if (linkText !== null) {
-                        linkText = linkText || linkUrl;
-                        var replacement = '[' + linkText + '](' + linkUrl + ')';
-                        el.value = el.value.substring(0, start) + replacement + el.value.substring(end);
-                        el.focus();
-                        el.setSelectionRange(start + replacement.length, start + replacement.length);
-                        this.$textarea.trigger('input');
-                    }
-                }
+                this.openLinkModal();
                 break;
             case 'image':
-                var imgChoice = prompt('Введите URL изображения (или оставьте пустым, чтобы выбрать файл с компьютера):', '');
-                if (imgChoice === null) {
-                    break;
-                }
-                if (imgChoice.trim()) {
-                    var imgUrl = imgChoice.trim();
-                    var imgTitle = prompt('Введите заголовок изображения (подсказка при наведении):', '');
-                    if (imgTitle === null) {
-                        imgTitle = '';
-                    }
-                    var alt = imgTitle || '';
-                    var title = alt;
-                    var md = '![' + alt + '](' + imgUrl + ' "' + title + '")';
-                    wrapTextareaSelection(this.$textarea, '', md, '');
-                } else {
-                    this.$fileInput.click();
-                }
+                this.openImageModal();
                 break;
         }
     };
