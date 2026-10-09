@@ -840,36 +840,38 @@
         });
 
         // Keyboard shortcuts (Ctrl+K / Cmd+K for link, formatting hotkeys, protect dead keys)
-        var handleKeydown = function(e) {
-            var isCtrlOrCmd = e.ctrlKey || e.metaKey;
+        const handleKeydown = (e) => {
+            const isCtrlOrCmd = e.ctrlKey || e.metaKey;
             if (!isCtrlOrCmd) return;
 
+            // Normalize key to lowercase to avoid checking for both 'b' and 'B'
+            const key = e.key.toLowerCase();
+
             // Free dead key: Never intercept Ctrl+Shift+6 (or Ctrl+6 / ^) for headings
-            if (e.keyCode === 54 || e.key === '6' || e.key === '^') {
+            if (key === '6' || key === '^') {
                 return;
             }
 
             // Hotkey Ctrl+K / Cmd+K: Insert Link
-            if (e.key === 'k' || e.key === 'K' || e.keyCode === 75) {
+            if (key === 'k') {
                 e.preventDefault();
                 e.stopPropagation();
                 self.executeCommand('link');
-                return false;
+                return;
             }
 
-            // Hotkeys in Markdown mode (Visual mode handles Ctrl+B/I/U natively via contenteditable)
+            // Hotkeys in Markdown mode
             if (self.currentMode === 'markdown' && !e.shiftKey && !e.altKey) {
-                if (e.key === 'b' || e.key === 'B' || e.keyCode === 66) {
+                // Map keys to their respective commands to keep things DRY (Don't Repeat Yourself)
+                const markdownCommands = {
+                    'b': 'bold',
+                    'i': 'italic',
+                    'u': 'underline'
+                };
+
+                if (markdownCommands[key]) {
                     e.preventDefault();
-                    self.executeMarkdownCommand('bold');
-                    self.updateCharCounter();
-                } else if (e.key === 'i' || e.key === 'I' || e.keyCode === 73) {
-                    e.preventDefault();
-                    self.executeMarkdownCommand('italic');
-                    self.updateCharCounter();
-                } else if (e.key === 'u' || e.key === 'U' || e.keyCode === 85) {
-                    e.preventDefault();
-                    self.executeMarkdownCommand('underline');
+                    self.executeMarkdownCommand(markdownCommands[key]);
                     self.updateCharCounter();
                 }
             }
@@ -974,38 +976,54 @@
             case 'code':
                 wrapSelectionWithTag('code');
                 break;
-            case 'link':
-                var url = prompt('Введите URL ссылки:', 'https://');
-                if (url && url.trim() && url.trim() !== 'https://') {
-                    url = url.trim();
-                    var sel = window.getSelection();
-                    var selectedText = sel ? sel.toString() : '';
-                    var text = prompt('Введите текст ссылки:', selectedText || '');
-                    if (text !== null) {
-                        text = text || url;
-                        document.execCommand('insertHTML', false, '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(text) + '</a>');
-                    }
+            case 'link': {
+                const rawUrl = prompt('Введите URL ссылки:', 'https://');
+
+                // Early exit if canceled, empty, or unmodified
+                if (!rawUrl || rawUrl.trim() === '' || rawUrl.trim() === 'https://') {
+                    break;
                 }
+
+                const url = rawUrl.trim();
+                const selection = window.getSelection();
+                const selectedText = selection ? selection.toString() : '';
+
+                const textInput = prompt('Введите текст ссылки:', selectedText);
+
+                // Early exit if user clicks cancel on the second prompt
+                if (textInput === null) {
+                    break;
+                }
+
+                const text = textInput.trim() || url;
+                const linkHtml = `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(text)}</a>`;
+
+                document.execCommand('insertHTML', false, linkHtml);
                 break;
-            case 'image':
-                var imgChoice = prompt('Введите URL изображения (или оставьте пустым, чтобы выбрать файл с компьютера):', '');
+            }
+
+            case 'image': {
+                const imgChoice = prompt('Введите URL изображения (или оставьте пустым, чтобы выбрать файл с компьютера):', '');
+
                 if (imgChoice === null) {
                     break;
                 }
-                if (imgChoice.trim()) {
-                    var imgUrl = imgChoice.trim();
-                    var imgTitle = prompt('Введите заголовок изображения (подсказка при наведении):', '');
-                    if (imgTitle === null) {
-                        imgTitle = '';
-                    }
-                    var alt = imgTitle || '';
-                    var title = alt;
-                    var imgHtml = '<p><img src="' + escapeHtml(imgUrl) + '" alt="' + escapeHtml(alt) + '" title="' + escapeHtml(title) + '" class="forum-embedded-img"></p><p><br></p>';
+
+                const imgUrl = imgChoice.trim();
+
+                if (imgUrl) {
+                    // Fallback to empty string if canceled or left blank
+                    const imgTitle = prompt('Введите заголовок изображения (подсказка при наведении):', '') || '';
+
+                    // Use a template literal to avoid messy string concatenation
+                    const imgHtml = `<p><img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(imgTitle)}" title="${escapeHtml(imgTitle)}" class="forum-embedded-img"></p><p><br></p>`;
+
                     document.execCommand('insertHTML', false, imgHtml);
                 } else {
                     this.$fileInput.click();
                 }
                 break;
+            }
         }
         this.saveSelection();
     };
