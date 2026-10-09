@@ -14,7 +14,7 @@
 		<div class="post-header-main d-flex justify-content-between align-items-center">
 			<div class="post-author-wrap d-flex align-items-center">
 				<a href="{% url 'pybb:user' post.user.username %}" class="post-avatar-link mr-2" title="{{ post.user.username }}">
-					{% include "pybb/avatar.html" with profile=post.user.pybb_profile PYBB_AVATAR_WIDTH=36 PYBB_AVATAR_HEIGHT=36 %}
+					{% include "pybb/avatar.html" with profile=post.user.pybb_profile PYBB_AVATAR_WIDTH=42 PYBB_AVATAR_HEIGHT=42 %}
 				</a>
 				<div class="post-meta-text d-flex align-items-center flex-wrap">
 					<div class="post-author-heading d-inline-flex align-items-center mr-2 text-nowrap">
@@ -272,7 +272,7 @@
 							<div class="tooltip-who-liked-container {% if r.users|length > 5 %}show-chevrones{% endif %}">
 								<span class="fas fa-chevron-left"></span>
 								{% for u in r.users %}
-									<a href="{{ u.url }}" class="tooltip-like-entry" title="{{ u.username }}" data-toggle="tooltip">
+									<a href="{{ u.url }}" class="tooltip-like-entry" title="{{ u.username }}" data-toggle="tooltip" data-container="body" data-placement="top" data-boundary="window">
 										<div class="avatar">
 											<img src="{{ u.avatar_url }}" alt="{{ u.username }}">
 										</div>

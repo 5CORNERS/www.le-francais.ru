@@ -193,7 +193,7 @@
                 for (var uIdx = 0; uIdx < users.length; uIdx++) {
                     var u = users[uIdx];
                     var avatarSrc = u.avatar_url || '/static/pybb/img/default_avatar.jpg';
-                    usersHtml += '<a href="' + (u.url || '#') + '" class="tooltip-like-entry" title="' + escapeHtml(u.username) + '" data-toggle="tooltip">' +
+                    usersHtml += '<a href="' + (u.url || '#') + '" class="tooltip-like-entry" title="' + escapeHtml(u.username) + '" data-toggle="tooltip" data-container="body" data-placement="top" data-boundary="window">' +
                         '<div class="avatar">' +
                         '<img src="' + avatarSrc + '" alt="' + escapeHtml(u.username) + '">' +
                         '</div></a>';
@@ -217,8 +217,13 @@
         }
         $badgesContainer.html(badgesHtml);
 
-        // Initialize tooltips on avatars
-        $badgesContainer.find('[data-toggle="tooltip"]').tooltip();
+        // Initialize tooltips on avatars with container body to prevent layout shift and flickering
+        $badgesContainer.find('[data-toggle="tooltip"]').tooltip({
+            container: 'body',
+            placement: 'top',
+            boundary: 'window',
+            trigger: 'hover'
+        });
 
         // 4. Update schema user interaction count
         $postRow.find('[itemprop="userInteractionCount"]').attr('content', data.total_count);
@@ -332,6 +337,7 @@
         clearTimeout(badgeShowTimer);
         clearTimeout(badgeHideTimer);
         $('.reaction-badge.show-tooltip').removeClass('show-tooltip');
+        $('.tooltip-like-entry').tooltip('hide');
     }
 
     $(document).on('mouseenter', '.reaction-badge', function () {
@@ -340,7 +346,7 @@
         clearTimeout(badgeHideTimer);
 
         // Immediately annihilate any neighbor's tooltip when moving onto a new badge
-        $('.reaction-badge').not($badge).removeClass('show-tooltip');
+        $('.reaction-badge').not($badge).removeClass('show-tooltip').find('.tooltip-like-entry').tooltip('hide');
 
         var $tooltip = $badge.find('.tooltip-who-liked');
         if (!$tooltip.length || !$tooltip.find('.tooltip-like-entry').length) {
@@ -348,7 +354,7 @@
         }
 
         badgeShowTimer = setTimeout(function () {
-            $('.reaction-badge').not($badge).removeClass('show-tooltip');
+            $('.reaction-badge').not($badge).removeClass('show-tooltip').find('.tooltip-like-entry').tooltip('hide');
             $badge.addClass('show-tooltip');
         }, 120);
     });
@@ -361,6 +367,7 @@
         // Generous buffer when moving cursor away, giving time to comfortably move without hurry
         badgeHideTimer = setTimeout(function () {
             $badge.removeClass('show-tooltip');
+            $badge.find('.tooltip-like-entry').tooltip('hide');
         }, 300);
     });
 
@@ -375,6 +382,16 @@
         if (e.key === 'Escape' || e.keyCode === 27) {
             hideAllBadgeTooltips();
         }
+    });
+
+    // Initialize who-liked tooltips with body container on initial page load
+    $(function () {
+        $('.tooltip-who-liked .tooltip-like-entry').tooltip({
+            container: 'body',
+            placement: 'top',
+            boundary: 'window',
+            trigger: 'hover'
+        });
     });
 
 })(jQuery);
