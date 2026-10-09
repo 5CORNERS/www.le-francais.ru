@@ -179,6 +179,22 @@ class CustomMarkdownParserTests(TestCase):
         self.assertIn('<summary>Мой секрет</summary>', html)
         self.assertIn('Скрытый текст', html)
 
+    def test_image_with_title_and_empty_title(self):
+        md1 = '![Котик](https://example.com/cat.jpg "Котик")'
+        html1 = self.parser.format(md1)
+        self.assertIn('src="https://example.com/cat.jpg"', html1)
+        self.assertIn('alt="Котик"', html1)
+        self.assertIn('title="Котик"', html1)
+
+        md2 = '![](https://example.com/cat.jpg "")'
+        html2 = self.parser.format(md2)
+        self.assertIn('src="https://example.com/cat.jpg"', html2)
+
+        md3 = '![Фото](https://example.com/photo.jpg)'
+        html3 = self.parser.format(md3)
+        self.assertIn('src="https://example.com/photo.jpg"', html3)
+        self.assertIn('alt="Фото"', html3)
+
     def test_emoji_formatting(self):
         html = self.parser.format(':heart:')
         self.assertTrue('<img' in html or '❤️' in html or 'emojione' in html)
@@ -608,3 +624,36 @@ class ForumEmailNotificationTestCase(TestCase):
         recipient_emails = [m.to[0] for m in mail.outbox]
         self.assertIn('charlie@test.com', recipient_emails)
         self.assertNotIn('bob@test.com', recipient_emails)
+
+
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+class ForumLayoutToggleTestCase(TestCase):
+    def setUp(self):
+        from wagtail.core.models import Site, Page
+        root = Page.objects.first()
+        if not root:
+            root = Page.add_root(title="Root", slug="root")
+        Site.objects.filter(is_default_site=True).delete()
+        Site.objects.create(hostname='testserver', port=80, root_page=root, is_default_site=True)
+        self.user = User.objects.create_user(username='layoutuser', email='layout@test.com', password='pw')
+        self.category = Category.objects.create(name='Layout Cat')
+        self.forum = Forum.objects.create(category=self.category, name='Layout Forum', slug='layout-forum')
+        self.topic = Topic.objects.create(forum=self.forum, name='Layout Topic', user=self.user)
+        self.post = Post.objects.create(topic=self.topic, user=self.user, body='Layout test post')
+
+    def test_forum_index_renders_toggle_button_and_main_col(self):
+        resp = self.client.get(reverse('pybb:index'))
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode('utf-8')
+        self.assertIn('forum-layout-toggle-btn', content)
+        self.assertIn('forum-main-col', content)
+        self.assertIn('lf_forum_wide_layout', content)
+
+    def test_topic_view_renders_toggle_button_and_main_col(self):
+        resp = self.client.get(reverse('pybb:topic', kwargs={'pk': self.topic.pk}))
+        self.assertEqual(resp.status_code, 200)
+        content = resp.content.decode('utf-8')
+        self.assertIn('forum-layout-toggle-btn', content)
+        self.assertIn('forum-main-col', content)
+        self.assertIn('lf_forum_wide_layout', content)
+
