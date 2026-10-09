@@ -54,42 +54,44 @@
             {% forum_advert forloop.counter0 post_list.count %}
         {% endfor %}
     </div>
-    <div>&nbsp;</div>
     {% with _('Posts') as label %}
         {% include "pybb/pagination.html" %}
     {% endwith %}
 
     {% if user.is_authenticated %}
-        <div class="controls btn-group">
-            {% if user.is_moderator %}
-                {% if topic.sticky %}
-                    <a class="btn btn-default"
-                       href="{% url 'pybb:unstick_topic' topic.id %}">{% trans "Unstick topic" %}</a>
-                {% else %}
-                    <a class="btn btn-default"
-                       href="{% url 'pybb:stick_topic' topic.id %}">{% trans "Stick topic" %}</a>
-                {% endif %}
+        <div class="controls topic-controls-bar d-flex justify-content-between align-items-center flex-wrap mb-3">
+            <div class="topic-mod-controls">
+                {% if user.is_moderator %}
+                    <div class="btn-group btn-group-sm">
+                        {% if topic.sticky %}
+                            <a class="btn btn-default" href="{% url 'pybb:unstick_topic' topic.id %}">{% trans "Unstick topic" %}</a>
+                        {% else %}
+                            <a class="btn btn-default" href="{% url 'pybb:stick_topic' topic.id %}">{% trans "Stick topic" %}</a>
+                        {% endif %}
 
-                {% if topic.closed %}
-                    <a class="btn btn-default" href="{% url 'pybb:open_topic' topic.id %}">{% trans "Open topic" %}</a>
-                {% else %}
-                    <a class="btn btn-default"
-                       href="{% url 'pybb:close_topic' topic.id %}">{% trans "Close topic" %}</a>
+                        {% if topic.closed %}
+                            <a class="btn btn-default" href="{% url 'pybb:open_topic' topic.id %}">{% trans "Open topic" %}</a>
+                        {% else %}
+                            <a class="btn btn-default" href="{% url 'pybb:close_topic' topic.id %}">{% trans "Close topic" %}</a>
+                        {% endif %}
+                        {% if perms.pybb.change_topic and user.is_staff %}
+                            <a class="btn btn-default" href="{% url 'admin:pybb_topic_change' topic.id %}">{% trans 'Admin' %}</a>
+                        {% endif %}
+                    </div>
                 {% endif %}
-                {% if perms.pybb.change_topic and user.is_staff %}
-                    <a class="btn btn-default"
-                       href="{% url 'admin:pybb_topic_change' topic.id %}">{% trans 'Admin' %}</a>
-                {% endif %}
-                {% comment %}
-                        <a class="btn" href="{% url 'pybb:merge_topics' %}?topic={{ topic.id }}">{% trans 'Merge topics' %}</a>
-                    {% endcomment %}
-            {% endif %}
+            </div>
 
-            {% if user.is_subscribed %}
-                <a class="btn btn-sm btn-outline-secondary" href="{% url 'pybb:delete_subscription' topic.id %}?from_topic"><i class="fa fa-bell-slash mr-1"></i> {% trans "Unsubscribe" %}</a>
-            {% elif user|pybb_may_subscribe_topic:topic %}
-                <a class="btn btn-sm btn-outline-primary" href="{% url 'pybb:add_subscription' topic.id %}"><i class="fa fa-bell mr-1"></i> {% trans "Subscribe" %}</a>
-            {% endif %}
+            <div class="topic-subscription-control">
+                {% if user.is_subscribed %}
+                    <a class="btn btn-sm topic-subscribe-btn is-subscribed" href="{% url 'pybb:delete_subscription' topic.id %}?from_topic" title="{% trans 'Отписаться от темы' %}">
+                        <i class="fa fa-bell-slash mr-1"></i> {% trans "Отписаться от темы" %}
+                    </a>
+                {% elif user|pybb_may_subscribe_topic:topic %}
+                    <a class="btn btn-sm topic-subscribe-btn is-not-subscribed" href="{% url 'pybb:add_subscription' topic.id %}" title="{% trans 'Подписаться на тему' %}">
+                        <i class="fa fa-bell mr-1"></i> {% trans "Подписаться на тему" %}
+                    </a>
+                {% endif %}
+            </div>
         </div>
     {% endif %}
 

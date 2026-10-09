@@ -6,7 +6,7 @@
         {% elif 'easy_thumbnails'|check_app_installed %}
             {% include 'pybb/_easy_thumbnail_avatar.html' %}
         {% else %}
-            <img src="{{ profile.avatar.url }}" alt="{{ profile.user.username }} avatar" width="{{ PYBB_AVATAR_WIDTH }}" height="{{ PYBB_AVATAR_HEIGHT }}" style="max-width: {{ PYBB_AVATAR_WIDTH }}px;"/>
+            <img src="{{ profile.avatar.url }}" alt="{{ profile.user.username }} avatar" width="{{ PYBB_AVATAR_WIDTH }}" height="{{ PYBB_AVATAR_HEIGHT }}"/>
         {% endif %}
     {% else %}
         {% avinit_initials profile.user.username PYBB_AVATAR_WIDTH %}
