@@ -1364,6 +1364,21 @@
                 self.executeCommand('underline');
                 return false;
             }
+
+            // Ctrl+A / Cmd+A in visual editor: select ALL contents of the visual editor
+            if (self.currentMode === 'visual' && !e.shiftKey && !e.altKey && (code === 'KeyA' || key === 'a' || key === 'ф' || keyCode === 65)) {
+                e.preventDefault();
+                e.stopPropagation();
+                var r = document.createRange();
+                r.selectNodeContents(self.$visualEditor[0]);
+                var sel = window.getSelection();
+                if (sel) {
+                    sel.removeAllRanges();
+                    sel.addRange(r);
+                }
+                self.saveSelection();
+                return false;
+            }
         };
 
         this.$visualEditor.on('keydown', handleKeydown);
@@ -1536,10 +1551,74 @@
                     }
                 }
             }
+
+            // 5. Backspace / Delete handling: allow clean deletion of entire editor or empty code blocks
+            if (e.key === 'Backspace' || e.key === 'Delete' || e.keyCode === 8 || e.keyCode === 46) {
+                // If entire editor is selected (e.g. after Ctrl+A): wipe cleanly to <p><br></p>
+                if (!range.collapsed) {
+                    var isAll = false;
+                    if (range.commonAncestorContainer === self.$visualEditor[0]) {
+                        if (range.startOffset === 0 && range.endOffset >= self.$visualEditor[0].childNodes.length) {
+                            isAll = true;
+                        }
+                    }
+                    if (!isAll) {
+                        var selText = sel.toString();
+                        var allText = self.$visualEditor.text();
+                        if (selText.length > 0 && selText === allText) {
+                            isAll = true;
+                        }
+                    }
+                    if (isAll) {
+                        e.preventDefault();
+                        self.$visualEditor.html('<p><br></p>');
+                        var r = document.createRange();
+                        r.setStart(self.$visualEditor.find('p')[0], 0);
+                        r.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(r);
+                        self.saveSelection();
+                        self.syncMarkdownFromVisual();
+                        self.updateCharCounter();
+                        return;
+                    }
+                }
+
+                // If inside an empty code block: delete the code block
+                var currentPre = parentEl ? parentEl.closest('pre') : null;
+                if (currentPre && self.$visualEditor[0].contains(currentPre)) {
+                    var preText = $.trim(currentPre.textContent);
+                    if (!preText) {
+                        e.preventDefault();
+                        var nextP = currentPre.nextSibling && currentPre.nextSibling.tagName && currentPre.nextSibling.tagName.toLowerCase() === 'p'
+                            ? currentPre.nextSibling
+                            : null;
+                        if (!nextP) {
+                            nextP = document.createElement('p');
+                            nextP.innerHTML = '<br>';
+                            currentPre.parentNode.insertBefore(nextP, currentPre);
+                        }
+                        currentPre.parentNode.removeChild(currentPre);
+                        var r = document.createRange();
+                        r.setStart(nextP, 0);
+                        r.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(r);
+                        self.saveSelection();
+                        self.syncMarkdownFromVisual();
+                        self.updateCharCounter();
+                        return;
+                    }
+                }
+            }
         });
 
         // Live continuous sync on input / changes in visual editor
         this.$visualEditor.on('input keyup paste change', function() {
+            // If the editor has only an empty pre left, clean it up to standard paragraph
+            if (self.$visualEditor.children().length === 1 && self.$visualEditor.find('pre').length === 1 && !$.trim(self.$visualEditor.text())) {
+                self.$visualEditor.html('<p><br></p>');
+            }
             var sel = window.getSelection();
             if (sel && sel.rangeCount > 0) {
                 var range = sel.getRangeAt(0);
@@ -1988,44 +2067,23 @@
 
     ForumEditor.prototype.unwrapCodeBlock = function(preNode) {
         var codeNode = preNode.querySelector('code') || preNode;
-        var text = codeNode.textContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        var text = (codeNode.textContent || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         var lines = text.split('\n');
-        var parent = preNode.parentNode;
-        var firstP = null;
-        var lastP = null;
-
-        var frag = document.createDocumentFragment();
-        for (var i = 0; i < lines.length; i++) {
-            var p = document.createElement('p');
-            var line = lines[i];
-            if (line.length === 0) {
-                p.innerHTML = '<br>';
-            } else {
-                p.textContent = line;
-            }
-            frag.appendChild(p);
-            if (!firstP) firstP = p;
-            lastP = p;
-        }
-        if (!firstP) {
-            var p = document.createElement('p');
-            p.innerHTML = '<br>';
-            frag.appendChild(p);
-            firstP = p;
-            lastP = p;
-        }
-
-        parent.insertBefore(frag, preNode);
-        parent.removeChild(preNode);
+        var unwrapHtml = lines.map(function(l) {
+            return l.length > 0 ? '<p>' + escapeHtml(l) + '</p>' : '<p><br></p>';
+        }).join('');
+        if (!unwrapHtml) unwrapHtml = '<p><br></p>';
 
         var sel = window.getSelection();
-        if (sel && firstP && lastP) {
+        if (sel) {
             var r = document.createRange();
-            r.setStartBefore(firstP);
-            r.setEndAfter(lastP);
+            r.selectNode(preNode);
             sel.removeAllRanges();
             sel.addRange(r);
+            document.execCommand('insertHTML', false, unwrapHtml);
             this.saveSelection();
+            this.syncMarkdownFromVisual();
+            this.updateCharCounter();
         }
     };
 
@@ -2092,51 +2150,50 @@
                     blocks.push(startBlock);
                 }
 
+                // Extract text with preserved newlines
                 var codeText = '';
-                if (blocks.length > 0) {
-                    var codeLines = blocks.map(function(b) {
-                        var clone = b.cloneNode(true);
-                        $(clone).find('br').replaceWith('\n');
-                        return clone.textContent;
-                    });
-                    codeText = codeLines.join('\n');
-                } else {
-                    var clone = cloneFrag.cloneNode(true);
-                    $(clone).find('br').replaceWith('\n');
-                    codeText = clone.textContent;
-                }
-
-                var pre = document.createElement('pre');
-                pre.className = 'editor-code-block';
-                var code = document.createElement('code');
-                code.textContent = codeText;
-                pre.appendChild(code);
-
-                if (blocks.length > 0 && blocks[0].parentNode) {
-                    editorEl.insertBefore(pre, blocks[0]);
-                    blocks.forEach(function(b) {
-                        if (b.parentNode) b.parentNode.removeChild(b);
-                    });
-                } else {
-                    range.deleteContents();
-                    range.insertNode(pre);
-                }
-
-                // Ensure trailing paragraph after pre
-                if (!pre.nextSibling || (pre.nextSibling.nodeType === 1 && pre.nextSibling.tagName.toLowerCase() !== 'p')) {
-                    var trailingP = document.createElement('p');
-                    trailingP.innerHTML = '<br>';
-                    if (pre.nextSibling) {
-                        editorEl.insertBefore(trailingP, pre.nextSibling);
-                    } else {
-                        editorEl.appendChild(trailingP);
+                if (blocks.length > 1) {
+                    var lines = [];
+                    for (var b = 0; b < blocks.length; b++) {
+                        var bClone = blocks[b].cloneNode(true);
+                        var bBrs = bClone.querySelectorAll ? bClone.querySelectorAll('br') : [];
+                        for (var brI = 0; brI < bBrs.length; brI++) {
+                            var brEl = bBrs[brI];
+                            if (brEl.parentNode) {
+                                brEl.parentNode.replaceChild(document.createTextNode('\n'), brEl);
+                            }
+                        }
+                        lines.push(bClone.textContent);
                     }
+                    codeText = lines.join('\n');
+                } else {
+                    var fClone = cloneFrag.cloneNode(true);
+                    var fBrs = fClone.querySelectorAll ? fClone.querySelectorAll('br') : [];
+                    for (var fI = 0; fI < fBrs.length; fI++) {
+                        var fBrEl = fBrs[fI];
+                        if (fBrEl.parentNode) {
+                            fBrEl.parentNode.replaceChild(document.createTextNode('\n'), fBrEl);
+                        }
+                    }
+                    var fBlocks = fClone.querySelectorAll ? fClone.querySelectorAll('p, div, li, h1, h2, h3, blockquote, pre') : [];
+                    for (var fB = 0; fB < fBlocks.length; fB++) {
+                        fBlocks[fB].appendChild(document.createTextNode('\n'));
+                    }
+                    codeText = (fClone.textContent || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n+$/, '');
                 }
 
-                var newRange = document.createRange();
-                newRange.selectNodeContents(code);
-                sel.removeAllRanges();
-                sel.addRange(newRange);
+                // Select all affected blocks before replacement so insertHTML replaces all and records in Undo stack
+                if (blocks.length > 0 && blocks[0].parentNode === editorEl) {
+                    var replaceRange = document.createRange();
+                    replaceRange.setStartBefore(blocks[0]);
+                    replaceRange.setEndAfter(blocks[blocks.length - 1]);
+                    sel.removeAllRanges();
+                    sel.addRange(replaceRange);
+                }
+
+                var preHtml = '<pre class="editor-code-block"><code>' + escapeHtml(codeText) + '</code></pre><p><br></p>';
+                document.execCommand('insertHTML', false, preHtml);
+
                 this.saveSelection();
                 return;
             } else {

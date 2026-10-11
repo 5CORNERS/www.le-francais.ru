@@ -329,6 +329,8 @@
     font-family: monospace;
     font-size: 13px;
     line-height: 1.42857143;
+    white-space: pre-wrap !important;
+    word-break: break-word;
 }
 
 .forum-visual-editor pre.editor-code-block code {
@@ -337,7 +339,8 @@
     padding: 0;
     font-size: inherit;
     border-radius: 0;
-    white-space: pre-wrap;
+    white-space: pre-wrap !important;
+    display: block;
 }
 
 /* Spoilers in Editor */
