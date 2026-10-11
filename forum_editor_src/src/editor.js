@@ -1,6 +1,6 @@
 import { Editor } from '@tiptap/core';
 import { Placeholder } from '@tiptap/extensions';
-import { TextSelection } from '@tiptap/pm/state';
+import { EditorState, TextSelection } from '@tiptap/pm/state';
 import { extensions } from './schema/index.js';
 import { parseMarkdown } from './markdown/parser.js';
 import { serializeMarkdown } from './markdown/serializer.js';
@@ -92,18 +92,25 @@ export function createForumEditor(options) {
     dom.container.parentNode.insertBefore(notice, dom.container);
   }
 
-  /** Parses `md` into the editor without emitting `update`. Returns false on parse failure. */
+  /**
+   * Parses `md` into the editor without emitting `update`. Returns false on
+   * parse failure. The state is recreated (same plugins), so the undo history
+   * starts afresh: undo can never cross a load or a mode switch.
+   */
   function loadMarkdown(md) {
-    let json;
+    let doc;
     try {
-      json = parseMarkdown(md || '').toJSON();
+      doc = api.tiptap.schema.nodeFromJSON(parseMarkdown(md || '').toJSON());
     } catch (e) {
       console.error('forum-editor: cannot parse Markdown', e);
       return false;
     }
-    api.tiptap.commands.setContent(json, { emitUpdate: false });
+    const view = api.tiptap.view;
+    view.updateState(EditorState.create({ doc: doc, plugins: view.state.plugins }));
     syncedDoc = api.tiptap.state.doc;
     selectionTouched = false;
+    // updateState emits no transaction, so refresh the toolbar here.
+    refreshActiveStates();
     return true;
   }
 

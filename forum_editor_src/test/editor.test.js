@@ -345,3 +345,48 @@ describe('index.js start-up', () => {
     delete window.forumEditor;
   });
 });
+
+describe('history is reset on every load (final review 2)', () => {
+  test('markdown -> visual, then undo keeps the content', () => {
+    ta.value = 'start';
+    const ed = make({ initialMode: 'markdown' });
+    ed.setMode('visual');
+    ed.tiptap.commands.undo();
+    expect(ed.tiptap.state.doc.textContent).toBe('start');
+    expect(ta.value).toBe('start');
+  });
+
+  test('visual edits, markdown edits, visual, then undo keeps the markdown edits', () => {
+    ta.value = 'a';
+    const ed = make({ initialMode: 'visual' });
+    ed.tiptap.commands.focus('end');
+    ed.tiptap.commands.insertContent('b');
+    expect(ta.value).toBe('ab');
+    ed.setMode('markdown');
+    ta.value = 'ab c';
+    ed.setMode('visual');
+    expect(ed.tiptap.commands.undo()).toBe(false);
+    expect(ta.value).toBe('ab c');
+    expect(ed.tiptap.state.doc.textContent).toBe('ab c');
+  });
+
+  test('undo right after the initial load or setMarkdown is a no-op', () => {
+    ta.value = 'x';
+    const ed = make({ initialMode: 'visual' });
+    expect(ed.tiptap.commands.undo()).toBe(false);
+    ed.setMarkdown('y');
+    expect(ed.tiptap.commands.undo()).toBe(false);
+    expect(ed.tiptap.state.doc.textContent).toBe('y');
+    expect(ta.value).toBe('y');
+  });
+
+  test('editing still records history after a load', () => {
+    ta.value = 'a';
+    const ed = make({ initialMode: 'markdown' });
+    ed.setMode('visual');
+    ed.tiptap.commands.focus('end');
+    ed.tiptap.commands.insertContent('b');
+    expect(ed.tiptap.commands.undo()).toBe(true);
+    expect(ta.value).toBe('a');
+  });
+});
