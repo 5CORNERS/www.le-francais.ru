@@ -17,10 +17,14 @@ describe('serializeMarkdown', () => {
   });
   test('nbsp preserved (review bug 8)', () => expect(rt('Bonjour !')).toBe('Bonjour !'));
   test('literal syntax typed in visual mode stays literal (Review Focus 1)', () => {
-    for (const s of ['**not bold**', '# 1', '2*3*4', 'a_b_c', 'my_var_name', '- not a list', '1. not a list', '> not quote', '==x==', '++x++', ':smile:']) {
-      const md = ser(doc(para(text(s))));
+    // `\n` in a probe = a hard break in the visual paragraph.
+    for (const s of ['**not bold**', '# 1', '2*3*4', 'a_b_c', 'my_var_name', '- not a list', '1. not a list', '> not quote', '==x==', '++x++', ':smile:',
+      '| a |\n|---|', 'a | b\n|---|---|']) {
+      const parts = [];
+      s.split('\n').forEach((line, i) => { if (i) parts.push({ type: 'hardBreak' }); parts.push(text(line)); });
+      const md = ser(doc(para(...parts)));
       const reparsed = parseMarkdown(md);
-      expect(reparsed.textContent).toBe(s);
+      expect(reparsed.textContent).toBe(s.replace(/\n/g, ''));
       expect(reparsed.firstChild.type.name).toBe('paragraph');
       expect(reparsed.firstChild.firstChild.marks).toHaveLength(0);
       expect(serializeMarkdown(reparsed)).toBe(md);
@@ -77,8 +81,8 @@ describe('serializeMarkdown', () => {
       '#hashtag': '\\#hashtag', // Python-Markdown headings need no space
       // Character references are shown literally by the server (safe_mode).
       '???- "T"': '???\\- "T"',
-      '??? "T"': '??? \\"T"',
-      '??? note': '\\??? note', // no escapable character: server shows the backslash
+      '??? "T"': '???\\ "T"',
+      '??? note': '???\\ note', // `\ ` is an escaped space on the server
       '<http://a.b>': '<http\\://a.b>',
       'a\\ b': 'a\\\\ b', // `\ ` is an escaped space on the server
       '[x]: http://y': '\\[x]: http://y',
@@ -91,6 +95,21 @@ describe('serializeMarkdown', () => {
       expect(ser(doc(para(text(s))))).toBe(md);
       expect(parseMarkdown(md).textContent).toBe(s);
     }
+  });
+  test('`???word` has no server escape: a visible backslash, but never a spoiler', () => {
+    const md = ser(doc(para(text('???note'))));
+    expect(md).toBe('\\???note');
+    expect(parseMarkdown(md).firstChild.type.name).toBe('paragraph');
+  });
+  test('character references are literal, as on the server (safe_mode)', () => {
+    expect(rt('AT&amp;T')).toBe('AT&amp;T');
+    expect(parseMarkdown('AT&amp;T').textContent).toBe('AT&amp;T');
+    expect(ser(doc(para(text('a &lt; b &#63;'))))).toBe('a &lt; b &#63;');
+  });
+  test('backslash escapes follow the server (Python-Markdown ESCAPED_CHARS)', () => {
+    expect(parseMarkdown('\\& \\< \\? \\*').textContent).toBe('\\& \\< \\? *');
+    expect(ser(doc(para(text('\\& \\*'))))).toBe('\\& \\\\*');
+    expect(rt('\\& \\< \\?')).toBe('\\& \\< \\?');
   });
   test('trailing hashes in headings survive both renderers', () => {
     const h = (s) => ser(doc({ type: 'heading', attrs: { level: 2 }, content: [text(s)] }));

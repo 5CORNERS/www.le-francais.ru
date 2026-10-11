@@ -7,6 +7,7 @@ import { keysPlugin } from './plugins/keys.js';
 import { emojiShortcodePlugin } from './plugins/emojiShortcode.js';
 import { spoilerPlugin } from './plugins/spoiler.js';
 import { rawBlockPlugin } from './plugins/rawBlock.js';
+import { pyEscapePlugin } from './plugins/pyEscape.js';
 
 export function createMarkdownIt() {
   const md = new MarkdownIt({ html: false, breaks: true, linkify: false, typographer: false });
@@ -16,5 +17,8 @@ export function createMarkdownIt() {
   md.use(underlinePlugin).use(keysPlugin).use(emojiShortcodePlugin);
   // Block rules: both are inserted before `table` (spoiler first).
   md.use(spoilerPlugin).use(rawBlockPlugin);
+  // safe_mode='escape': the server shows character references literally.
+  md.disable('entity');
+  md.use(pyEscapePlugin);
   return md;
 }

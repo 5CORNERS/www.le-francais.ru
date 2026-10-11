@@ -11,8 +11,9 @@ import { createMarkdownIt } from './md.js';
 
 const SENT = '\uE000';
 const SENT_RE = /\uE000/g;
-const MARKED_RE = /[\\*_^~=+[\]`:<#>\-.)?!{\uE000]/g;
-const ASCII_PUNCT = /[!-/:-@[-`{-~]/;
+const MARKED_RE = /[\\*_^~=+[\]`:<#>\-.)?!{|\uE000]/g;
+// Backslash escapes honoured by the server (and by our parser: pyEscape.js).
+const PY_ESCAPED = '\\`*_{}[]()>#+-.!"\'|^~=: ';
 const ALNUM = /[\p{L}\p{N}]/u;
 const WS = /\s/;
 const SHORTCODE_AFTER = /^:[\w+-]+:/;
@@ -21,17 +22,13 @@ const SHORTCODE_BEFORE = /:[\w+-]+:$/;
 // http/ftp). Escaping the colon defeats both; `\<` is not a server escape.
 const AUTOLINK_SCHEME = /^<[A-Za-z][A-Za-z0-9+.-]{1,31}:/;
 // Characters after `???` whose backslash escape breaks the pymdownx.details
-// START line on both sides (`\?` is not a Python-Markdown escape).
-const DETAILS_BREAKERS = '+-"_';
+// START line on both sides (`\?` is not a Python-Markdown escape; `\ ` is an
+// escaped space for pymdown caret/tilde).
+const DETAILS_BREAKERS = '+-"_ ';
 // Python-Markdown preprocessors drop these lines anywhere in a paragraph
 // (reference / footnote / abbreviation definitions).
 const PY_DEFINITION = /^\*?\[[^\]\n]*]:/;
 const MAX_GREEDY = 32;
-// The server (safe_mode='escape') shows character references literally while
-// markdown-it decodes them; `&` is never syntax on the server, so the check
-// neutralizes entity-like ampersands on both sides instead of escaping.
-const ENTITY_AMP = /&(?=#?[A-Za-z0-9]{1,32};)/g;
-const AMP = '';
 
 let mdIt = null;
 function normalizeHref(href) {
@@ -146,8 +143,7 @@ function candidate(c, p, kind) {
   const forced = { rep: '\\' + ch, forced: true };
   switch (ch) {
     case '\\':
-      if (next === ' ') return forced; // `\ ` is an escaped space for pymdown caret/tilde
-      return next === undefined || next === '\n' || ASCII_PUNCT.test(next) ? live : null;
+      return next === undefined || next === '\n' || PY_ESCAPED.indexOf(next) !== -1 ? live : null;
     case '*':
       if (lineStart && PY_DEFINITION.test(c.slice(p, p + 200))) return forced;
       return lineStart || !(isWs(prev) && isWs(next)) ? live : null;
@@ -199,6 +195,16 @@ function candidate(c, p, kind) {
     }
     case '!':
       return next === '[' || (lineStart && c.startsWith('!!!', p)) ? live : null;
+    case '|': {
+      // Tables: a pipe at a line start, or on a line right after a line
+      // with a pipe (header row + delimiter row).
+      if (lineStart) return live;
+      if (!kind.lineStarts) return null;
+      const start = c.lastIndexOf('\n', p - 1);
+      if (start === -1) return null;
+      const prevLine = c.slice(c.lastIndexOf('\n', start - 1) + 1, start);
+      return prevLine.indexOf('|') !== -1 ? live : null;
+    }
     case '{':
       return lineStart && next === ':' ? live : null;
     default:
@@ -249,11 +255,11 @@ function resolveEscapes(marked, kind, node) {
   const matches = (escaped, textOnly) => {
     const k = textOnly ? 1 : 0;
     if (expected[k] === undefined) {
-      expected[k] = normalizeSignature(rawSignature(node, kind.singleLine, textOnly)).replace(ENTITY_AMP, AMP);
+      expected[k] = normalizeSignature(rawSignature(node, kind.singleLine, textOnly));
     }
     let parsed;
     try {
-      parsed = parseMarkdown(kind.wrap(build(clean, cands, escaped), node).replace(ENTITY_AMP, AMP));
+      parsed = parseMarkdown(kind.wrap(build(clean, cands, escaped), node));
     } catch (e) {
       return false;
     }
