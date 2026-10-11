@@ -37,6 +37,29 @@ pymdownx.keys.RE_KBD = r'''(?x)
 )
 '''
 
+# Compatibility fix for pymdownx with Pygments >= 2.12
+# Pygments 2.12+ changed HtmlFormatter.wrap(self, source) to take only 1 argument (source),
+# whereas older pymdownx.highlight expected wrap(self, source, outfile).
+try:
+	import pymdownx.highlight
+	from pygments.formatters.html import HtmlFormatter
+
+	def _block_wrap(self, source, *args):
+		if self.linenos == 2 and getattr(self, 'pymdownx_inline', False):
+			source = self._wrap_customlinenums(source)
+		try:
+			return HtmlFormatter.wrap(self, source, *args)
+		except TypeError:
+			return HtmlFormatter.wrap(self, source)
+
+	def _inline_wrap(self, source, *args):
+		return self._wrap_code(source)
+
+	pymdownx.highlight.BlockHtmlFormatter.wrap = _block_wrap
+	pymdownx.highlight.InlineHtmlFormatter.wrap = _inline_wrap
+except Exception:
+	pass
+
 
 class CustomMarkdownParser(MarkdownParser):
 	def __init__(self):

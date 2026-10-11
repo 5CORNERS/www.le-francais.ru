@@ -187,7 +187,7 @@
      * Converts Markdown string to Visual HTML for contenteditable
      */
     function markdownToHtml(md) {
-        if (!md) return '';
+        if (!md || !$.trim(md)) return '<p><br></p>';
         var text = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
         // Protect code blocks
@@ -1563,9 +1563,24 @@
                         }
                     }
                     if (!isAll) {
-                        var selText = sel.toString();
-                        var allText = self.$visualEditor.text();
-                        if (selText.length > 0 && selText === allText) {
+                        var firstNode = self.$visualEditor[0].firstChild;
+                        var lastNode = self.$visualEditor[0].lastChild;
+                        if (firstNode && lastNode) {
+                            try {
+                                var fullRange = document.createRange();
+                                fullRange.setStartBefore(firstNode);
+                                fullRange.setEndAfter(lastNode);
+                                if (range.compareBoundaryPoints(Range.START_TO_START, fullRange) <= 0 &&
+                                    range.compareBoundaryPoints(Range.END_TO_END, fullRange) >= 0) {
+                                    isAll = true;
+                                }
+                            } catch (err) {}
+                        }
+                    }
+                    if (!isAll) {
+                        var selClean = (sel.toString() || '').replace(/\s+/g, '');
+                        var allClean = (self.$visualEditor.text() || '').replace(/\s+/g, '');
+                        if (allClean.length > 0 && selClean === allClean) {
                             isAll = true;
                         }
                     }
@@ -1615,9 +1630,11 @@
 
         // Live continuous sync on input / changes in visual editor
         this.$visualEditor.on('input keyup paste change', function() {
-            // If the editor has only an empty pre left, clean it up to standard paragraph
-            if (self.$visualEditor.children().length === 1 && self.$visualEditor.find('pre').length === 1 && !$.trim(self.$visualEditor.text())) {
-                self.$visualEditor.html('<p><br></p>');
+            // If the editor has no real content left, clean up leftover blocks (empty pre, etc.)
+            if (!$.trim(self.$visualEditor.text()) && self.$visualEditor.find('img').length === 0) {
+                if (self.$visualEditor.find('pre, blockquote, details, table').length > 0 || self.$visualEditor.children().length === 0) {
+                    self.$visualEditor.html('<p><br></p>');
+                }
             }
             var sel = window.getSelection();
             if (sel && sel.rangeCount > 0) {
@@ -2108,85 +2125,65 @@
             return;
         }
 
-        // 3. Selection analysis: multiple paragraphs vs single paragraph
+        // 3. Selection analysis: multiple paragraphs / lines vs single line
         if (!range.collapsed) {
-            function getTopBlock(node) {
-                var curr = node.nodeType === 1 ? node : node.parentNode;
-                while (curr && curr.parentNode && curr.parentNode !== editorEl) {
-                    curr = curr.parentNode;
+            function extractMultilineText(r) {
+                var frag = r.cloneContents();
+                var out = '';
+                function walk(n) {
+                    if (!n) return;
+                    if (n.nodeType === 3) {
+                        out += n.nodeValue;
+                        return;
+                    }
+                    if (n.nodeType !== 1) return;
+                    var tag = n.tagName.toLowerCase();
+                    if (tag === 'br') {
+                        out += '\n';
+                        return;
+                    }
+                    var isBlock = /^(p|div|li|h[1-6]|blockquote|pre|tr)$/.test(tag);
+                    if (isBlock && out.length > 0 && !out.endsWith('\n')) {
+                        out += '\n';
+                    }
+                    for (var i = 0; i < n.childNodes.length; i++) {
+                        walk(n.childNodes[i]);
+                    }
+                    if (isBlock && !out.endsWith('\n')) {
+                        out += '\n';
+                    }
                 }
-                return (curr && curr.parentNode === editorEl) ? curr : null;
+                walk(frag);
+                var walked = out.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                var sStr = (sel.toString() || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                var res = (walked.indexOf('\n') !== -1) ? walked : (sStr || walked);
+                return res.replace(/\n+$/, '');
             }
 
-            var startBlock = getTopBlock(range.startContainer);
-            var endBlock = getTopBlock(range.endContainer);
-
-            if (range.startContainer === editorEl) {
-                startBlock = editorEl.childNodes[range.startOffset] || editorEl.firstChild;
-            }
-            if (range.endContainer === editorEl) {
-                var idx = Math.max(0, range.endOffset - 1);
-                endBlock = editorEl.childNodes[idx] || editorEl.lastChild;
-            }
-
-            var isMultiBlock = (startBlock && endBlock && startBlock !== endBlock);
-            var cloneFrag = range.cloneContents();
-            var hasMultipleLines = isMultiBlock || (cloneFrag.querySelectorAll && cloneFrag.querySelectorAll('p, div, br, li, pre, blockquote').length > 0);
+            var codeText = extractMultilineText(range);
+            var hasMultipleLines = codeText.indexOf('\n') !== -1;
 
             if (hasMultipleLines) {
-                // Multi-paragraph or multi-line selection -> Block Code (pre.editor-code-block)
-                var blocks = [];
-                if (startBlock && endBlock) {
-                    var curr = startBlock;
-                    while (curr) {
-                        blocks.push(curr);
-                        if (curr === endBlock) break;
-                        curr = curr.nextSibling;
+                function getTopChild(n) {
+                    var curr = n;
+                    while (curr && curr.parentNode && curr.parentNode !== editorEl) {
+                        curr = curr.parentNode;
                     }
-                    if (blocks.indexOf(endBlock) === -1) {
-                        blocks = [startBlock, endBlock];
-                    }
-                } else if (startBlock) {
-                    blocks.push(startBlock);
+                    return (curr && curr.parentNode === editorEl) ? curr : null;
                 }
 
-                // Extract text with preserved newlines
-                var codeText = '';
-                if (blocks.length > 1) {
-                    var lines = [];
-                    for (var b = 0; b < blocks.length; b++) {
-                        var bClone = blocks[b].cloneNode(true);
-                        var bBrs = bClone.querySelectorAll ? bClone.querySelectorAll('br') : [];
-                        for (var brI = 0; brI < bBrs.length; brI++) {
-                            var brEl = bBrs[brI];
-                            if (brEl.parentNode) {
-                                brEl.parentNode.replaceChild(document.createTextNode('\n'), brEl);
-                            }
-                        }
-                        lines.push(bClone.textContent);
-                    }
-                    codeText = lines.join('\n');
-                } else {
-                    var fClone = cloneFrag.cloneNode(true);
-                    var fBrs = fClone.querySelectorAll ? fClone.querySelectorAll('br') : [];
-                    for (var fI = 0; fI < fBrs.length; fI++) {
-                        var fBrEl = fBrs[fI];
-                        if (fBrEl.parentNode) {
-                            fBrEl.parentNode.replaceChild(document.createTextNode('\n'), fBrEl);
-                        }
-                    }
-                    var fBlocks = fClone.querySelectorAll ? fClone.querySelectorAll('p, div, li, h1, h2, h3, blockquote, pre') : [];
-                    for (var fB = 0; fB < fBlocks.length; fB++) {
-                        fBlocks[fB].appendChild(document.createTextNode('\n'));
-                    }
-                    codeText = (fClone.textContent || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n+$/, '');
-                }
+                var startTop = (range.startContainer === editorEl)
+                    ? (editorEl.childNodes[range.startOffset] || editorEl.firstChild)
+                    : getTopChild(range.startContainer);
 
-                // Select all affected blocks before replacement so insertHTML replaces all and records in Undo stack
-                if (blocks.length > 0 && blocks[0].parentNode === editorEl) {
+                var endTop = (range.endContainer === editorEl)
+                    ? (editorEl.childNodes[Math.max(0, range.endOffset - 1)] || editorEl.lastChild)
+                    : getTopChild(range.endContainer);
+
+                if (startTop && endTop) {
                     var replaceRange = document.createRange();
-                    replaceRange.setStartBefore(blocks[0]);
-                    replaceRange.setEndAfter(blocks[blocks.length - 1]);
+                    replaceRange.setStartBefore(startTop);
+                    replaceRange.setEndAfter(endTop);
                     sel.removeAllRanges();
                     sel.addRange(replaceRange);
                 }
@@ -2197,7 +2194,7 @@
                 this.saveSelection();
                 return;
             } else {
-                // Single-paragraph selection -> Inline code
+                // Single-paragraph / single-line selection -> Inline code
                 toggleCustomInlineTag('code', '', 'код');
                 return;
             }

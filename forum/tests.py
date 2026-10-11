@@ -657,3 +657,12 @@ class ForumLayoutToggleTestCase(TestCase):
         self.assertIn('forum-main-col', content)
         self.assertIn('lf_forum_wide_layout', content)
 
+    def test_custom_markdown_parser_code_highlighting(self):
+        from forum.markup_engines import CustomMarkdownParser
+        parser = CustomMarkdownParser()
+        html = parser.format('```html\n<div class="test">Hello</div>\n```')
+        self.assertIn('<div class="highlight">', html)
+        self.assertIn('&lt;</span>', html)
+        self.assertIn('Hello', html)
+
+
