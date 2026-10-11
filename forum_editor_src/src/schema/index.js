@@ -45,7 +45,7 @@ const ForumStarterKit = StarterKit.extend({
 
 export const extensions = [
   ForumStarterKit.configure({
-    heading: { levels: [2, 3] },
+    heading: { levels: [1, 2, 3, 4, 5, 6] },
     horizontalRule: false,
     bulletList: false,
     orderedList: false,

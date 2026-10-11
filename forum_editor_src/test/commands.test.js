@@ -244,6 +244,13 @@ describe('visual commands', () => {
     expect(ed.getMarkdown()).toBe('Title\n\nafter');
   });
 
+  test('removeFormat turns h1 and h5 headings into paragraphs', () => {
+    ed.setMarkdown('# **Un**\n\n##### Cinq');
+    selectText(ed, 'Un', 'Cinq');
+    runVisualCommand(ed.tiptap, 'removeFormat', ctx);
+    expect(ed.getMarkdown()).toBe('Un\n\nCinq');
+  });
+
   test('removeFormat over a list and a heading keeps the list (user fix 2)', () => {
     ed.setMarkdown('- **a**\n\n## H\n\n### untouched');
     selectText(ed, 'a', 'H');

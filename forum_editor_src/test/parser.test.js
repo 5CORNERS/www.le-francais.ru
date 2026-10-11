@@ -29,7 +29,7 @@ describe('parseMarkdown', () => {
     expect(body.map(n => n.type)).toEqual(['bulletList', 'codeBlock', 'blockquote', 'spoiler']);
   });
   test.each(['| a | b |\n|---|---|\n| 1 | 2 |', '!!! note "N"\n    body', '[^1]: foot', 'Term\n: def',
-    '*[HTML]: Hyper', '- [ ] todo\n- [x] done', '# H1', '#### H4', 'Setext\n======'])
+    '*[HTML]: Hyper', '- [ ] todo\n- [x] done', ' # indented', '# a ![i](/x.png)', 'a\nb\n===', 'Titre\n   ---'])
     ('raw block %#', src => {
       const d = p('before\n\n' + src + '\n\nafter');
       expect(d.content[1]).toEqual({ type: 'rawMarkdownBlock', attrs: { source: src } });
@@ -147,12 +147,49 @@ describe('parseMarkdown', () => {
     const f = '[^1]: foot\n    more';
     expect(p(f).content[0]).toEqual({ type: 'rawMarkdownBlock', attrs: { source: f } });
   });
-  test('editable headings 2/3 stay editable, others raw', () => {
-    expect(p('## two').content[0].type).toBe('heading');
-    expect(p('Setext\n---').content[0]).toEqual({ type: 'rawMarkdownBlock', attrs: { source: 'Setext\n---' } });
+  const heading = (level, t) => (t ? { type: 'heading', attrs: { level }, content: [{ type: 'text', text: t }] }
+    : { type: 'heading', attrs: { level } });
+  const raw = (source) => ({ type: 'rawMarkdownBlock', attrs: { source } });
+  test('ATX headings of every level are editable', () => {
+    expect(html('# 1\n\n## 2\n\n### 3\n\n#### 4\n\n##### 5\n\n###### 6')).toBe(
+      '<h1>1</h1><h2>2</h2><h3>3</h3><h4>4</h4><h5>5</h5><h6>6</h6>');
+    expect(p('before\n\n#### H4\n\nafter').content[1]).toEqual(heading(4, 'H4'));
+  });
+  test('ATX headings follow Python-Markdown 2.6 (server-probed)', () => {
+    // Server rule: `(^|\n)(?P<level>#{1,6})(?P<header>.*?)#*(\n|$)`, text stripped.
+    expect(p('#').content[0]).toEqual(heading(1));
+    expect(p('#5').content[0]).toEqual(heading(1, '5'));
+    expect(p('####### seven').content[0]).toEqual(heading(6, '# seven'));
+    expect(p('# C#').content[0]).toEqual(heading(1, 'C'));
+    expect(p('#Titre#').content[0]).toEqual(heading(1, 'Titre'));
+    expect(p('#\tTab').content[0]).toEqual(heading(1, 'Tab'));
+    expect(p('# \\#').content[0]).toEqual(heading(1, '\\'));
+    expect(p('a #hashtag b').content[0].type).toBe('paragraph');
+    expect(p('\\#Titre').content[0].type).toBe('paragraph');
+    // Indented: a paragraph on the server at top level, a heading in list
+    // items; the source is kept.
+    expect(p(' #Titre').content[0]).toEqual(raw(' #Titre'));
+    expect(p('> # x').content[0].content[0]).toEqual(heading(1, 'x'));
+    expect(p('>  # x').content[0].content[0]).toEqual(raw(' # x'));
+    // An indented hash line does not interrupt a paragraph (server: one <p>).
+    expect(p('x\n # Titre').content.map((n) => n.type)).toEqual(['paragraph']);
+  });
+  test('setext headings that start a server block are editable', () => {
+    expect(p('Titre\n=====').content[0]).toEqual(heading(1, 'Titre'));
+    expect(p('x\n\nTitre\n---\ny').content.map((n) => n.type)).toEqual(['paragraph', 'heading', 'paragraph']);
+    expect(p('x\n\nTitre\n---').content[1]).toEqual(heading(2, 'Titre'));
+    expect(p('Titre\n--- ').content[0]).toEqual(heading(2, 'Titre'));
+    expect(p('**T**\n---').content[0]).toMatchObject({ type: 'heading', attrs: { level: 2 } });
+    expect(p('> Titre\n> ===').content[0].content[0]).toEqual(heading(1, 'Titre'));
+    expect(p('???- "T"\n    Titre\n    ---').content[0].content[1].content[0]).toEqual(heading(2, 'Titre'));
+    // Not the first two lines of a server block, or inside a list item: raw.
+    expect(p('# A\nTitre\n---').content[1]).toEqual(raw('Titre\n---'));
+    // (The list item gets its required leading paragraph.)
+    expect(p('- Titre\n  ---').content[0].content[0].content[1]).toEqual(raw('Titre\n---'));
   });
   test('headings without a space after the hashes, as on the server', () => {
-    expect(p('#Titre').content[0]).toEqual({ type: 'rawMarkdownBlock', attrs: { source: '#Titre' } });
+    expect(p('#Titre').content[0]).toEqual(heading(1, 'Titre'));
+    expect(p('##Titre').content[0]).toEqual(heading(2, 'Titre'));
     expect(p('###Titre').content[0]).toMatchObject({ type: 'heading', attrs: { level: 3 }, content: [{ text: 'Titre' }] });
     expect(p('Texte\n##Titre').content.map((n) => n.type)).toEqual(['paragraph', 'heading']);
   });

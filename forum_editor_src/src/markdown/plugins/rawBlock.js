@@ -4,9 +4,9 @@
 // Own detection (rule `raw_block`, before `table`): footnote definitions,
 // admonitions, definition lists, abbreviations, attr_list-only lines,
 // paragraphs with an inline attr_list right after an image or link.
-// Wrapped markdown-it rules: tables, horizontal rules, headings other than
-// h2/h3 (or containing an image), setext headings, and lists that contain a
-// task item.
+// Wrapped markdown-it rules: tables, horizontal rules, headings flagged by
+// pyHeading or containing an image, setext headings the server may read
+// differently (see isServerSetext), and lists that contain a task item.
 
 const FOOTNOTE_DEF = /^\[\^[^\]\s]+]:/;
 const ADMONITION = /^!!! ?[\p{L}\p{N}_-]/u;
@@ -117,13 +117,34 @@ function wrapRule(md, name, isRaw) {
     const first = state.tokens.length;
     if (!original(state, startLine, endLine, false)) return false;
     const produced = state.tokens.slice(first);
-    if (isRaw(produced)) {
+    if (isRaw(produced, state, startLine)) {
       const nextLine = state.line;
       state.tokens.length = first;
       pushRaw(state, startLine, nextLine);
     }
     return true;
   }, { alt: rule.alt.slice() });
+}
+
+const SETEXT_UNDERLINE = /^[=-]+[ \t]*$/;
+
+// Python-Markdown 2.6 reads a setext heading only from the first two lines of
+// a block (`^.*?\n[=-]+[ ]*(\n|$)`, underline not indented), before lists
+// and rules. Accepted when markdown-it saw a one-line setext heading that
+// starts a block (document, quote or spoiler body start, or after a blank
+// line) outside list items (detab differences); anything else stays raw.
+function isServerSetext(tokens, state, startLine) {
+  if (state.parentType === 'list' || tokens[0].map[1] - tokens[0].map[0] !== 2) return false;
+  const prev = state.tokens[state.tokens.length - tokens.length - 1];
+  const blockStart = startLine === 0 || state.isEmpty(startLine - 1) ||
+    (prev !== undefined && prev.type === 'blockquote_open');
+  const under = startLine + 1;
+  return blockStart && state.sCount[under] === state.blkIndent &&
+    SETEXT_UNDERLINE.test(lineText(state, under));
+}
+
+function hasImage(tokens) {
+  return tokens[1].type === 'inline' && tokens[1].content.indexOf('![') !== -1;
 }
 
 function hasTaskItem(tokens) {
@@ -149,8 +170,8 @@ export function rawBlockPlugin(md) {
   const always = () => true;
   wrapRule(md, 'table', always);
   wrapRule(md, 'hr', always);
-  wrapRule(md, 'lheading', always);
-  wrapRule(md, 'heading', (tokens) =>
-    (tokens[0].tag !== 'h2' && tokens[0].tag !== 'h3') || tokens[1].content.indexOf('![') !== -1);
+  wrapRule(md, 'lheading', (tokens, state, startLine) =>
+    !isServerSetext(tokens, state, startLine) || hasImage(tokens));
+  wrapRule(md, 'heading', (tokens) => (tokens[0].meta && tokens[0].meta.raw) || hasImage(tokens));
   wrapRule(md, 'list', hasTaskItem);
 }

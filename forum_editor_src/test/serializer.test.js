@@ -156,6 +156,16 @@ describe('serializeMarkdown', () => {
     expect(rt('## C# ')).toBe('## C# ');
     expect(parseMarkdown('## a \\## ').textContent).toBe('a ##');
   });
+  test('headings of every level are written as ATX with a space', () => {
+    const h = (level, s) => ser(doc({ type: 'heading', attrs: { level }, content: [text(s)] }));
+    expect(h(1, 'Titre')).toBe('# Titre');
+    expect(h(5, 'cinq')).toBe('##### cinq');
+    expect(h(6, '# seven')).toBe('###### # seven'); // server: h6 `# seven`
+    expect(parseMarkdown(h(6, '# seven')).textContent).toBe('# seven');
+    expect(rt('#Titre\n\n#### four')).toBe('# Titre\n\n#### four');
+    expect(rt('Titre\n=====\n\nSous\n---')).toBe('# Titre\n\n## Sous');
+    expect(rt('# 1\n\n## 2\n\n### 3\n\n#### 4\n\n##### 5\n\n###### 6')).toBe('# 1\n\n## 2\n\n### 3\n\n#### 4\n\n##### 5\n\n###### 6');
+  });
   test('task-like text at the start of a list item stays literal', () => {
     const md = ser(doc({ type: 'bulletList', content: [{ type: 'listItem', content: [para(text('[ ] todo'))] }] }));
     expect(md).toBe('- \\[ ] todo');
@@ -172,7 +182,8 @@ describe('serializeMarkdown', () => {
     expect(rt('a\n\n')).toBe('a');
     expect(rt('```\nx\n```\n')).toBe('```\nx\n```');
   });
-  test('2,000 paragraphs serialize in under 100 ms', () => {
+  // Timing-sensitive under a loaded machine: retried (controller ruling), bound unchanged.
+  test('2,000 paragraphs serialize in under 100 ms', { retry: 2 }, () => {
     const src = Array.from({ length: 2000 }, (_, i) => `Paragraphe **${i}** avec du texte_x et 2*3.`).join('\n\n');
     const d = parseMarkdown(src);
     expect(serializeMarkdown(d)).toBe(src);
