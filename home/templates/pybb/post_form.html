@@ -1,5 +1,6 @@
 {% load i18n pybb_tags staticfiles %}
-<link rel="stylesheet" href="{% static 'css/forum-editor.css' %}?v=2.0.0">
+{# Bump ?v= on forum-editor.js and forum-editor.css whenever the bundle or the CSS is rebuilt. #}
+<link rel="stylesheet" href="{% static 'css/forum-editor.css' %}?v=2.1.0">
 <form class="post-form" novalidate action="
     {% if forum %}
         {% url 'pybb:add_topic' forum.pk %}
@@ -63,7 +64,7 @@
 {% if forum_editor_legacy %}
 <script src="{% static 'js/forum-editor-legacy.js' %}?v=1.2.4"></script>
 {% else %}
-<script defer src="{% static 'js/forum-editor.js' %}?v=2.0.0"></script>
+<script defer src="{% static 'js/forum-editor.js' %}?v=2.1.0"></script>
 {% endif %}
 
 

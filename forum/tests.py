@@ -686,13 +686,13 @@ class ForumEditorSwitchTests(TestCase):
 
     def test_new_editor_by_default(self):
         html = self.client.get(self.topic_url).content.decode('utf-8')
-        self.assertIn('js/forum-editor.js?v=2.0.0', html)
-        self.assertIn('css/forum-editor.css?v=2.0.0', html)
+        self.assertIn('js/forum-editor.js?v=2.1.0', html)
+        self.assertIn('css/forum-editor.css?v=2.1.0', html)
         self.assertNotIn('forum-editor-legacy.js', html)
 
     def test_new_editor_script_is_deferred(self):
         html = self.client.get(self.topic_url).content.decode('utf-8')
-        self.assertRegex(html, r'<script defer src="[^"]*js/forum-editor[.]js[?]v=2[.]0[.]0"></script>')
+        self.assertRegex(html, r'<script defer src="[^"]*js/forum-editor[.]js[?]v=2[.]1[.]0"></script>')
 
     @override_settings(FORUM_EDITOR_LEGACY=True)
     def test_legacy_editor_by_setting(self):
