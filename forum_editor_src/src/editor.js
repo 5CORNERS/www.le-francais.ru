@@ -56,6 +56,10 @@ export function createForumEditor(options) {
   const dom = buildEditorDom(textarea);
   let notice = null;
   let selectionTouched = false;
+  // The doc whose Markdown is currently in the textarea (set on load and after
+  // each serialization); an unchanged doc is never re-serialized, so switching
+  // modes without editing keeps the author's original Markdown.
+  let syncedDoc = null;
 
   const api = {
     currentMode: 'markdown',
@@ -91,16 +95,21 @@ export function createForumEditor(options) {
       return false;
     }
     api.tiptap.commands.setContent(json, { emitUpdate: false });
+    syncedDoc = api.tiptap.state.doc;
     selectionTouched = false;
     return true;
   }
 
   function serializeDoc() {
-    return serializeMarkdown(api.tiptap.state.doc);
+    const doc = api.tiptap.state.doc;
+    const md = serializeMarkdown(doc);
+    syncedDoc = doc;
+    return md;
   }
 
   function syncMarkdownFromVisual() {
     if (api.currentMode !== 'visual') return;
+    if (api.tiptap.state.doc === syncedDoc) return;
     try {
       textarea.value = serializeDoc();
     } catch (e) {
@@ -241,14 +250,16 @@ export function createForumEditor(options) {
       const depth = $from.depth;
       if (!parent.isTextblock || depth === 0) throw new Error('no text caret');
       const before = $from.before(depth);
-      if (parent.type.name === 'paragraph' && parent.content.size === 0) {
+      if (sel.empty && parent.type.name === 'paragraph' && parent.content.size === 0) {
         // Empty paragraph: replace it with the quote and a fresh paragraph.
         tr.replaceWith(before, $from.after(depth), [quote, emptyP()]);
         return before + quote.nodeSize + 1;
       }
-      tr.deleteSelection();
-      const pos = tr.selection.from;
+      // Insert after the selection end; selected draft text is kept (legacy
+      // splits at the range end too).
+      const pos = sel.to;
       const $pos = tr.doc.resolve(pos);
+      if (!$pos.parent.isTextblock) throw new Error('selection does not end in text');
       if ($pos.parentOffset === 0) {
         // Caret at block start: the quote goes before the block.
         const at = $pos.before($pos.depth);
@@ -391,6 +402,7 @@ export function createForumEditor(options) {
   api.element = tiptap.view.dom;
   if (window.jQuery) api.$visualEditor = window.jQuery(api.element);
 
+  syncedDoc = tiptap.state.doc;
   tiptap.on('update', onUpdate);
   // Any focus or caret move makes the current selection the insertion point.
   tiptap.on('focus', () => { selectionTouched = true; });

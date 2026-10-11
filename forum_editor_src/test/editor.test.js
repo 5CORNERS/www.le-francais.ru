@@ -206,6 +206,38 @@ describe('createForumEditor', () => {
     expect(ed.tiptap.state.selection.$from.parentOffset).toBe(0);
   });
 
+  test('insertQuote keeps selected draft text and lands after it', () => {
+    ta.value = 'abcd';
+    const ed = make({ initialMode: 'visual' });
+    ed.tiptap.commands.setTextSelection({ from: 2, to: 4 }); // "bc"
+    expect(ed.tiptap.state.selection.empty).toBe(false);
+    ed.tiptap.commands.blur();
+    ed.insertQuote('> q');
+    const doc = ed.tiptap.state.doc;
+    expect(doc.childCount).toBe(3);
+    expect(doc.child(0).textContent).toBe('abc');
+    expect(doc.child(1).type.name).toBe('blockquote');
+    expect(doc.child(2).textContent).toBe('d');
+    expect(ed.tiptap.state.selection.$from.parent).toBe(doc.child(2));
+    expect(ta.value).toBe('abc\n\n> q\n\nd');
+  });
+
+  test('switching to markdown without edits keeps non-canonical Markdown', () => {
+    ta.value = '_i_ __b__';
+    const ed = make({ initialMode: 'visual' });
+    ed.setMode('markdown');
+    expect(ta.value).toBe('_i_ __b__');
+    ed.setMode('visual');
+    ed.tiptap.commands.focus();
+    ed.setMode('markdown');
+    expect(ta.value).toBe('_i_ __b__');
+    // A real edit is still serialized.
+    ed.setMode('visual');
+    ed.tiptap.commands.insertContentAt(1, 'x');
+    ed.setMode('markdown');
+    expect(ta.value).toBe('*xi* **b**'); // typed at the start of the italic run inherits it
+  });
+
   test('insertQuote with the caret in a spoiler title lands after the spoiler', () => {
     ta.value = '???- "Title"\n    body';
     const ed = make({ initialMode: 'visual' });
