@@ -12,6 +12,8 @@ await build({
   sourcemap: true,
   outfile,
   legalComments: 'none',
+  // StarterKit's unused Link extension (and linkifyjs with it) is not bundled.
+  alias: { '@tiptap/extension-link': './src/stubs/noTiptapLink.js' },
 });
 
 console.log('Built ' + outfile + ' (' + statSync(outfile).size + ' bytes)');
