@@ -198,18 +198,26 @@
             return id;
         });
 
+        // Spoilers: ???- "Title"\n(    body)*
+        text = text.replace(/\?\?\?[-+]?\s*"([^"\n]+)"\n((?:(?:    |\t).*\n?)+)/g, function(match, title, body) {
+            var cleanBody = body.replace(/^(?:    |\t)/gm, '');
+            return '\n<details class="forum-spoiler" open><summary>' + escapeHtml(title) + '</summary><div class="spoiler-body">' + markdownToHtml(cleanBody) + '</div></details>\n';
+        });
+
+        // Indented code blocks (4 spaces or tab at start of lines, after spoilers are extracted)
+        text = text.replace(/(^|\n\n)((?:(?:    |\t)[^\n]*(?:\n|$))+)/g, function(match, lead, block) {
+            var code = block.replace(/^(?:    |\t)/gm, '').replace(/\n+$/, '');
+            var id = '___CODEBLOCK_' + codeBlocks.length + '___';
+            codeBlocks.push({ lang: '', code: code });
+            return lead + id + '\n\n';
+        });
+
         // Protect inline code
         var inlineCodes = [];
         text = text.replace(/`([^`\n]+)`/g, function(match, code) {
             var id = '___INLINECODE_' + inlineCodes.length + '___';
             inlineCodes.push(code);
             return id;
-        });
-
-        // Spoilers: ???- "Title"\n(    body)*
-        text = text.replace(/\?\?\?[-+]?\s*"([^"\n]+)"\n((?:(?:    |\t).*\n?)+)/g, function(match, title, body) {
-            var cleanBody = body.replace(/^(?:    |\t)/gm, '');
-            return '\n<details class="forum-spoiler" open><summary>' + escapeHtml(title) + '</summary><div class="spoiler-body">' + markdownToHtml(cleanBody) + '</div></details>\n';
         });
 
         // Blockquotes
@@ -292,14 +300,21 @@
         text = text.replace(/^[-*]\s+(.*)$/gim, '<li>$1</li>');
         text = text.replace(/((?:<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>');
 
-        // Bold italic: ***text***
+        // Bold italic: ***text*** or ___text___
         text = text.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+        text = text.replace(/___([^_]+)___/g, '<strong><em>$1</em></strong>');
 
-        // Bold: **text**
+        // Bold: **text** or __text__
         text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        text = text.replace(/__([^_]+)__/g, '<strong>$1</strong>');
 
         // Italic: *text* (emulate negative lookbehind with capture group for cross-browser support)
         text = text.replace(/(^|[^*])\*([^\s*][^*\n]*?[^\s*]|\S)\*(?!\*)/g, '$1<em>$2</em>');
+
+        // Italic: _text_ (support Latin, Cyrillic, French accents, punctuation around)
+        var wordChars = 'a-zA-Z0-9\\u00C0-\\u024F\\u0400-\\u04FF';
+        var reItalicUnder = new RegExp('(^|[^' + wordChars + '_])_([^\\s_][^_\\n]*?[^\\s_]|[^\\s_])_(?=[^' + wordChars + '_]|$)', 'g');
+        text = text.replace(reItalicUnder, '$1<em>$2</em>');
 
         // Restore inline codes
         for (var j = 0; j < inlineCodes.length; j++) {
@@ -323,7 +338,11 @@
             return '<p>' + b.replace(/\n/g, '<br>') + '</p>';
         });
 
-        return res.filter(Boolean).join('');
+        var html = res.filter(Boolean).join('');
+        if (!html || html.endsWith('</blockquote>') || html.endsWith('</details>') || html.endsWith('</pre>')) {
+            html += '<p><br></p>';
+        }
+        return html;
     }
 
     /**
@@ -353,7 +372,7 @@
                     return childrenText.trim() ? '**' + childrenText.trim() + '**' : '';
                 case 'em':
                 case 'i':
-                    return childrenText.trim() ? '*' + childrenText.trim() + '*' : '';
+                    return childrenText.trim() ? '_' + childrenText.trim() + '_' : '';
                 case 'u':
                 case 'ins':
                     return childrenText.trim() ? '^^' + childrenText.trim() + '^^' : '';
@@ -451,7 +470,73 @@
             }
         }
 
-        return walk(domRoot).trim();
+        return walk(domRoot).replace(/\u00A0/g, ' ').trim();
+    }
+
+    /**
+     * Ensures an unstyled spacer exists after an inline tag if it's at the end of its parent container.
+     */
+    function ensureTrailingSpacer(inlineNode) {
+        if (!inlineNode || !inlineNode.parentNode) return;
+        var topInline = inlineNode;
+        while (topInline.parentNode && !/^(p|div|li|blockquote|summary|details|body)$/i.test(topInline.parentNode.tagName) && !(topInline.parentNode.classList && topInline.parentNode.classList.contains('forum-visual-editor'))) {
+            topInline = topInline.parentNode;
+        }
+        var next = topInline.nextSibling;
+        if (!next || next.nodeName.toLowerCase() === 'br' || (next.nodeType === 3 && next.nodeValue === '')) {
+            var spacer = document.createTextNode('\u00A0');
+            topInline.parentNode.insertBefore(spacer, next);
+        }
+    }
+
+    /**
+     * Checks if the collapsed range is at the end of the inline node.
+     */
+    function isAtEndOfInlineNode(range, node) {
+        if (!range || !range.collapsed || !node) return false;
+        var container = range.startContainer;
+        var offset = range.startOffset;
+        if (container.nodeType === 3) {
+            if (offset < container.textContent.length) return false;
+            var curr = container;
+            while (curr && curr !== node) {
+                var next = curr.nextSibling;
+                while (next) {
+                    if (next.textContent && next.textContent.length > 0) return false;
+                    next = next.nextSibling;
+                }
+                curr = curr.parentNode;
+            }
+            return true;
+        } else {
+            return offset >= node.childNodes.length;
+        }
+    }
+
+    /**
+     * Moves cursor outside of the inline tag into a trailing spacer.
+     */
+    function exitInlineTag(inlineNode) {
+        if (!inlineNode || !inlineNode.parentNode) return;
+        var topInline = inlineNode;
+        while (topInline.parentNode && !/^(p|div|li|blockquote|summary|details|body)$/i.test(topInline.parentNode.tagName) && !(topInline.parentNode.classList && topInline.parentNode.classList.contains('forum-visual-editor'))) {
+            topInline = topInline.parentNode;
+        }
+        ensureTrailingSpacer(topInline);
+        var sel = window.getSelection();
+        if (!sel) return;
+        var r = document.createRange();
+        if (topInline.nextSibling && topInline.nextSibling.nodeType === 3) {
+            var val = topInline.nextSibling.nodeValue || '';
+            var targetOffset = (val.length > 0 && (/^\s/.test(val) || val.charCodeAt(0) === 160)) ? 1 : 0;
+            r.setStart(topInline.nextSibling, targetOffset);
+            r.collapse(true);
+        } else {
+            r.setStartAfter(topInline);
+            r.collapse(true);
+        }
+        sel.removeAllRanges();
+        sel.addRange(r);
     }
 
     /**
@@ -481,6 +566,12 @@
         var tagNode = (container.nodeType === 1 ? container : container.parentNode).closest(tagLower);
 
         if (tagNode && tagNode.closest('.forum-visual-editor')) {
+            // If collapsed at the end of the tag: clicking button exits the tag!
+            if (range.collapsed && isAtEndOfInlineNode(range, tagNode)) {
+                exitInlineTag(tagNode);
+                return;
+            }
+
             // Unwrap tag
             var parent = tagNode.parentNode;
             var firstChild = tagNode.firstChild;
@@ -500,6 +591,19 @@
             return;
         }
 
+        // If toggling sup or sub, unwrap opposite tag if currently inside it
+        if (tagLower === 'sup' || tagLower === 'sub') {
+            var oppTag = tagLower === 'sup' ? 'sub' : 'sup';
+            var oppNode = (container.nodeType === 1 ? container : container.parentNode).closest(oppTag);
+            if (oppNode && oppNode.closest('.forum-visual-editor')) {
+                var oppParent = oppNode.parentNode;
+                while (oppNode.firstChild) {
+                    oppParent.insertBefore(oppNode.firstChild, oppNode);
+                }
+                oppParent.removeChild(oppNode);
+            }
+        }
+
         // 2. Check if selected content contains tagName elements
         if (!range.collapsed) {
             var clone = range.cloneContents();
@@ -515,7 +619,16 @@
                     }
                     p.removeChild(el);
                 }
+                var firstNode = frag.firstChild;
+                var lastNode = frag.lastChild;
                 range.insertNode(frag);
+                if (firstNode && lastNode) {
+                    var newRange = document.createRange();
+                    newRange.setStartBefore(firstNode);
+                    newRange.setEndAfter(lastNode);
+                    sel.removeAllRanges();
+                    sel.addRange(newRange);
+                }
                 return;
             }
         }
@@ -528,11 +641,7 @@
             newEl.appendChild(range.extractContents());
             range.insertNode(newEl);
 
-            // Add spacer outside if needed so typing afterwards doesn't stay trapped
-            if (!newEl.nextSibling || (newEl.nextSibling.nodeType === 3 && newEl.nextSibling.nodeValue === '')) {
-                var spacer = document.createTextNode('\u00A0');
-                newEl.parentNode.insertBefore(spacer, newEl.nextSibling);
-            }
+            ensureTrailingSpacer(newEl);
 
             var newRange = document.createRange();
             newRange.selectNodeContents(newEl);
@@ -543,8 +652,7 @@
             newEl.textContent = text;
             range.insertNode(newEl);
 
-            var spacer = document.createTextNode('\u00A0');
-            newEl.parentNode.insertBefore(spacer, newEl.nextSibling);
+            ensureTrailingSpacer(newEl);
 
             var newRange = document.createRange();
             newRange.selectNodeContents(newEl);
@@ -720,7 +828,7 @@
                         // Inline text formatting
                         '<div class="btn-group btn-group-sm" role="group">',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="bold" title="Жирный (**текст**, Ctrl+B)"><i class="fa fa-bold"></i></button>',
-                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="italic" title="Курсив (*текст*, Ctrl+I)"><i class="fa fa-italic"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="italic" title="Курсив (_текст_, Ctrl+I)"><i class="fa fa-italic"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="underline" title="Подчеркнутый (^^текст^^, Ctrl+U)"><i class="fa fa-underline"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="strikethrough" title="Зачеркнутый (~~текст~~, Ctrl+Shift+X, Alt+Shift+5)"><i class="fa fa-strikethrough"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="mark" title="Выделение маркером (==текст==)"><i class="fa fa-pencil" style="background:#fff3cd;padding:1px 3px;border-radius:2px;"></i></button>',
@@ -728,7 +836,7 @@
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="kbd" title="Клавиша (++клавиша++)"><i class="fa fa-keyboard-o"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="superscript" title="Верхний индекс (^текст^)"><i class="fa fa-superscript"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="subscript" title="Нижний индекс (~текст~)"><i class="fa fa-subscript"></i></button>',
-                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="removeFormat" title="Очистить форматирование (Ctrl+Shift+N, Ctrl+\\)"><i class="fa fa-eraser"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="removeFormat" title="Очистить форматирование (Ctrl+Shift+N, Ctrl+\\)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M5 6h14"></path><path d="M12 6v12"></path><line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2.2"></line></svg></button>',
                         '</div>',
                         // Structure / Block tools
                         '<div class="btn-group btn-group-sm" role="group">',
@@ -892,18 +1000,150 @@
         this.updateCharCounter();
     };
 
-    ForumEditor.prototype.insertMarkdown = function(md) {
+    ForumEditor.prototype.insertQuote = function(quoteMd) {
+        if (!quoteMd) return;
+
         if (this.currentMode === 'visual') {
+            var targetRange = this.savedRange ? this.savedRange.cloneRange() : null;
+            this.$visualEditor.focus();
+
+            var quoteHtml = markdownToHtml(quoteMd).trim();
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = quoteHtml;
+
+            var bqElement = tempDiv.querySelector('blockquote');
+            if (!bqElement) {
+                bqElement = document.createElement('blockquote');
+                while (tempDiv.firstChild) {
+                    bqElement.appendChild(tempDiv.firstChild);
+                }
+            }
+
+            var trailingP = document.createElement('p');
+            trailingP.innerHTML = '<br>';
+
+            var sel = window.getSelection();
+            var inserted = false;
+
+            if (targetRange && this.$visualEditor[0].contains(targetRange.commonAncestorContainer)) {
+                var container = targetRange.startContainer;
+                var currentBlock = container.nodeType === 1 ? container : container.parentNode;
+                while (currentBlock && currentBlock.parentNode && currentBlock.parentNode !== this.$visualEditor[0]) {
+                    currentBlock = currentBlock.parentNode;
+                }
+
+                if (currentBlock && currentBlock.parentNode === this.$visualEditor[0]) {
+                    var blockText = $.trim(currentBlock.textContent);
+                    var hasImg = currentBlock.querySelector && currentBlock.querySelector('img');
+
+                    if (!blockText && !hasImg) {
+                        // Current paragraph is empty, replace it with blockquote and trailingP
+                        this.$visualEditor[0].insertBefore(bqElement, currentBlock);
+                        this.$visualEditor[0].insertBefore(trailingP, currentBlock);
+                        currentBlock.parentNode.removeChild(currentBlock);
+                        inserted = true;
+                    } else {
+                        // Current block has text: split at cursor!
+                        var afterRange = document.createRange();
+                        try {
+                            afterRange.setStart(targetRange.endContainer, targetRange.endOffset);
+                            afterRange.setEndAfter(currentBlock.lastChild || currentBlock);
+                            var afterFrag = afterRange.extractContents();
+
+                            // Insert blockquote after currentBlock
+                            if (currentBlock.nextSibling) {
+                                this.$visualEditor[0].insertBefore(bqElement, currentBlock.nextSibling);
+                            } else {
+                                this.$visualEditor[0].appendChild(bqElement);
+                            }
+
+                            // If there was text after cursor, put it in trailingP
+                            var afterText = $.trim(afterFrag.textContent);
+                            var afterHasImg = afterFrag.querySelector && afterFrag.querySelector('img');
+                            if (afterText || afterHasImg) {
+                                trailingP.innerHTML = '';
+                                trailingP.appendChild(afterFrag);
+                            }
+
+                            if (bqElement.nextSibling) {
+                                this.$visualEditor[0].insertBefore(trailingP, bqElement.nextSibling);
+                            } else {
+                                this.$visualEditor[0].appendChild(trailingP);
+                            }
+                            inserted = true;
+                        } catch (e) {
+                            inserted = false;
+                        }
+                    }
+                }
+            }
+
+            if (!inserted) {
+                this.$visualEditor.append(bqElement);
+                this.$visualEditor.append(trailingP);
+            }
+
+            // Move cursor directly into trailingP outside the quote
+            if (sel) {
+                var r = document.createRange();
+                r.setStart(trailingP, 0);
+                r.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(r);
+                this.savedRange = r.cloneRange();
+            }
+
             this.syncMarkdownFromVisual();
-            var cur = this.$textarea.val();
-            if (cur && !cur.endsWith('\n')) cur += '\n\n';
-            this.$textarea.val(cur + md);
-            this.syncVisualFromMarkdown();
-        } else {
-            var curVal = this.$textarea.val();
-            if (curVal && !curVal.endsWith('\n')) curVal += '\n\n';
-            this.$textarea.val(curVal + md);
             this.updateCharCounter();
+        } else {
+            var el = this.$textarea[0];
+            var val = el.value;
+            var start = (typeof this.savedMarkdownCursor === 'number') ? this.savedMarkdownCursor : el.selectionStart;
+            if (typeof start !== 'number' || start < 0 || start > val.length) {
+                start = val.length;
+            }
+
+            var before = val.substring(0, start);
+            var after = val.substring(start);
+            var prefix = '';
+            if (before.length > 0 && !before.endsWith('\n')) {
+                prefix = before.endsWith('\n\n') ? '' : (before.endsWith('\n') ? '\n' : '\n\n');
+            }
+            var suffix = '';
+            if (after.length > 0 && !after.startsWith('\n')) {
+                suffix = '\n\n';
+            }
+            var cleanMd = quoteMd.trim();
+            var replacement = prefix + cleanMd + '\n\n' + suffix;
+            el.value = before + replacement + after;
+            var newPos = before.length + prefix.length + cleanMd.length + 2;
+            el.focus();
+            el.setSelectionRange(newPos, newPos);
+            this.savedMarkdownCursor = newPos;
+
+            this.$textarea.trigger('input');
+            this.updateCharCounter();
+        }
+    };
+
+    ForumEditor.prototype.insertMarkdown = function(md) {
+        if (!md) return;
+        if (md.trim().startsWith('>')) {
+            this.insertQuote(md);
+        } else {
+            if (this.currentMode === 'visual') {
+                this.$visualEditor.focus();
+                if (this.savedRange) {
+                    this.restoreSelection();
+                }
+                var html = markdownToHtml(md);
+                document.execCommand('insertHTML', false, html);
+                this.saveSelection();
+                this.syncMarkdownFromVisual();
+                this.updateCharCounter();
+            } else {
+                this.insertQuote(md);
+            }
         }
     };
 
@@ -920,9 +1160,14 @@
             e.preventDefault();
         });
 
-        // Save selection on cursor movement / click in visual editor
-        this.$visualEditor.on('mouseup keyup focus blur', function() {
+        // Save selection on cursor movement / click in visual editor (without blur/focus resetting it)
+        this.$visualEditor.on('mouseup keyup touchend input', function() {
             self.saveSelection();
+        });
+
+        // Track cursor position in markdown mode
+        this.$textarea.on('mouseup keyup touchend input', function() {
+            self.savedMarkdownCursor = this.selectionStart;
         });
 
         // Mode switch checkbox change
@@ -1110,7 +1355,7 @@
         this.$visualEditor.on('keydown', handleKeydown);
         this.$textarea.on('keydown', handleKeydown);
 
-        // Visual editor special key handling: <kbd> navigation & spoiler <summary> Enter
+        // Visual editor special key handling: inline formatting navigation & spoiler <summary> Enter
         this.$visualEditor.on('keydown', function(e) {
             var sel = window.getSelection();
             if (!sel || !sel.rangeCount) return;
@@ -1139,34 +1384,50 @@
                 }
             }
 
-            // 2. If inside <kbd>: prevent breaking <kbd> on Enter, exit on Space or ArrowRight at end
-            var kbdNode = parentEl.closest('kbd');
-            if (kbdNode && self.$visualEditor[0].contains(kbdNode)) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    var parentBlock = kbdNode.closest('p, div, blockquote') || kbdNode.parentNode;
-                    var newP = document.createElement('p');
-                    newP.innerHTML = '<br>';
-                    if (parentBlock && parentBlock.parentNode) {
-                        parentBlock.parentNode.insertBefore(newP, parentBlock.nextSibling);
-                    } else {
-                        kbdNode.parentNode.insertBefore(newP, kbdNode.nextSibling);
-                    }
-                    var r = document.createRange();
-                    r.setStart(newP, 0);
-                    r.collapse(true);
-                    sel.removeAllRanges();
-                    sel.addRange(r);
-                    return;
-                }
+            // 2. Inline formatting tags (em, strong, u, del, mark, code, kbd, sup, sub)
+            var INLINE_SELECTOR = 'em, i, strong, b, u, ins, del, s, strike, mark, code, kbd, sup, sub';
 
-                if (e.key === ' ' || e.key === 'Spacebar') {
-                    if (range.collapsed && range.startOffset === container.textContent.length) {
+            // ArrowRight: step out cleanly on ONE press (both when text is selected and when cursor is at end)
+            if (e.key === 'ArrowRight') {
+                if (!range.collapsed) {
+                    var endContainer = range.endContainer;
+                    var endEl = endContainer.nodeType === 1 ? endContainer : endContainer.parentNode;
+                    var endInline = endEl ? endEl.closest(INLINE_SELECTOR) : null;
+                    if (endInline && self.$visualEditor[0].contains(endInline)) {
                         e.preventDefault();
-                        var spaceNode = document.createTextNode('\u00A0');
-                        kbdNode.parentNode.insertBefore(spaceNode, kbdNode.nextSibling);
+                        exitInlineTag(endInline);
+                        return;
+                    }
+                } else {
+                    var activeInline = parentEl.closest(INLINE_SELECTOR);
+                    if (activeInline && self.$visualEditor[0].contains(activeInline)) {
+                        if (isAtEndOfInlineNode(range, activeInline)) {
+                            e.preventDefault();
+                            exitInlineTag(activeInline);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            var inlineNode = parentEl.closest(INLINE_SELECTOR);
+            if (inlineNode && self.$visualEditor[0].contains(inlineNode)) {
+                var isAtEnd = isAtEndOfInlineNode(range, inlineNode);
+
+                // Prevent Enter inside/at end of inline tag from cloning formatting to the new line
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    if (isAtEnd) {
+                        e.preventDefault();
+                        var parentBlock = inlineNode.closest('p, div, blockquote, li') || inlineNode.parentNode;
+                        var newP = document.createElement('p');
+                        newP.innerHTML = '<br>';
+                        if (parentBlock && parentBlock.parentNode) {
+                            parentBlock.parentNode.insertBefore(newP, parentBlock.nextSibling);
+                        } else {
+                            inlineNode.parentNode.insertBefore(newP, inlineNode.nextSibling);
+                        }
                         var r = document.createRange();
-                        r.setStartAfter(spaceNode);
+                        r.setStart(newP, 0);
                         r.collapse(true);
                         sel.removeAllRanges();
                         sel.addRange(r);
@@ -1174,24 +1435,82 @@
                     }
                 }
 
-                if (e.key === 'ArrowRight' && range.collapsed && range.startOffset === container.textContent.length) {
-                    if (!kbdNode.nextSibling) {
-                        var spacer = document.createTextNode('\u00A0');
-                        kbdNode.parentNode.appendChild(spacer);
-                    }
-                    var r = document.createRange();
-                    r.setStartAfter(kbdNode);
-                    r.collapse(true);
-                    sel.removeAllRanges();
-                    sel.addRange(r);
+                // For <kbd> and <code>: Space at end steps out
+                var tagUpper = inlineNode.tagName.toUpperCase();
+                if ((tagUpper === 'KBD' || tagUpper === 'CODE') && (e.key === ' ' || e.key === 'Spacebar') && range.collapsed && isAtEnd) {
                     e.preventDefault();
+                    exitInlineTag(inlineNode);
                     return;
+                }
+            }
+
+            // 3. Blockquote Enter & ArrowDown handling: breakout on empty line or move below
+            var bqNode = parentEl.closest('blockquote');
+            if (bqNode && self.$visualEditor[0].contains(bqNode)) {
+                // Ensure a trailing paragraph exists after blockquote so user can click or ArrowDown into it
+                if (!bqNode.nextSibling) {
+                    var trailingPara = document.createElement('p');
+                    trailingPara.innerHTML = '<br>';
+                    bqNode.parentNode.appendChild(trailingPara);
+                }
+
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    var currentLine = parentEl.closest('p, div, li') || parentEl;
+                    var textContent = $.trim(currentLine.textContent);
+                    var hasImg = currentLine.querySelector && currentLine.querySelector('img');
+                    // If current line inside blockquote is empty: break out of blockquote!
+                    if (!textContent && !hasImg) {
+                        e.preventDefault();
+                        if (currentLine !== bqNode && currentLine.parentNode === bqNode) {
+                            bqNode.removeChild(currentLine);
+                        }
+                        var newP = document.createElement('p');
+                        newP.innerHTML = '<br>';
+                        if (bqNode.nextSibling) {
+                            bqNode.parentNode.insertBefore(newP, bqNode.nextSibling);
+                        } else {
+                            bqNode.parentNode.appendChild(newP);
+                        }
+                        var r = document.createRange();
+                        r.setStart(newP, 0);
+                        r.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(r);
+                        self.saveSelection();
+                        self.syncMarkdownFromVisual();
+                        return;
+                    }
+                }
+
+                if (e.key === 'ArrowDown') {
+                    var lastChild = bqNode.lastElementChild || bqNode;
+                    var isAtBottom = range.collapsed && (parentEl === lastChild || lastChild.contains(parentEl));
+                    if (isAtBottom && bqNode.nextSibling && bqNode.nextSibling.tagName && bqNode.nextSibling.tagName.toLowerCase() === 'p') {
+                        var nextP = bqNode.nextSibling;
+                        var r = document.createRange();
+                        r.setStart(nextP, 0);
+                        r.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(r);
+                        e.preventDefault();
+                        return;
+                    }
                 }
             }
         });
 
         // Live continuous sync on input / changes in visual editor
         this.$visualEditor.on('input keyup paste change', function() {
+            var sel = window.getSelection();
+            if (sel && sel.rangeCount > 0) {
+                var range = sel.getRangeAt(0);
+                var container = range.endContainer;
+                var el = container.nodeType === 1 ? container : container.parentNode;
+                var inlineNode = el ? el.closest('em, i, strong, b, u, ins, del, s, strike, mark, code, kbd, sup, sub') : null;
+                if (inlineNode && self.$visualEditor[0].contains(inlineNode)) {
+                    ensureTrailingSpacer(inlineNode);
+                }
+            }
             self.updateSpoilerPlaceholders();
             self.syncMarkdownFromVisual();
             self.updateCharCounter();
@@ -1380,6 +1699,18 @@
         }, 50);
     };
 
+    ForumEditor.prototype.ensureActiveInlineSpacer = function() {
+        var sel = window.getSelection();
+        if (!sel || !sel.rangeCount) return;
+        var range = sel.getRangeAt(0);
+        var container = range.endContainer;
+        var el = container.nodeType === 1 ? container : container.parentNode;
+        var inlineNode = el ? el.closest('em, i, strong, b, u, ins, del, s, strike, mark, code, kbd, sup, sub') : null;
+        if (inlineNode && this.$visualEditor[0].contains(inlineNode)) {
+            ensureTrailingSpacer(inlineNode);
+        }
+    };
+
     ForumEditor.prototype.executeVisualCommand = function(cmd) {
         this.$visualEditor.focus();
         if (this.savedRange) {
@@ -1387,17 +1718,39 @@
         }
         switch (cmd) {
             case 'bold':
-                document.execCommand('bold', false, null);
-                break;
             case 'italic':
-                document.execCommand('italic', false, null);
-                break;
             case 'underline':
-                document.execCommand('underline', false, null);
+            case 'strikethrough': {
+                var sel = window.getSelection();
+                if (sel && sel.rangeCount > 0) {
+                    var range = sel.getRangeAt(0);
+                    if (range.collapsed) {
+                        var container = range.commonAncestorContainer;
+                        var parentEl = container.nodeType === 1 ? container : container.parentNode;
+                        var tagSelector = {
+                            'bold': 'strong, b',
+                            'italic': 'em, i',
+                            'underline': 'u, ins',
+                            'strikethrough': 'del, s, strike'
+                        }[cmd];
+                        var activeTag = parentEl ? parentEl.closest(tagSelector) : null;
+                        if (activeTag && this.$visualEditor[0].contains(activeTag)) {
+                            exitInlineTag(activeTag);
+                            this.saveSelection();
+                            break;
+                        }
+                    }
+                }
+                var nativeCmd = {
+                    'bold': 'bold',
+                    'italic': 'italic',
+                    'underline': 'underline',
+                    'strikethrough': 'strikeThrough'
+                }[cmd];
+                document.execCommand(nativeCmd, false, null);
+                this.ensureActiveInlineSpacer();
                 break;
-            case 'strikethrough':
-                document.execCommand('strikeThrough', false, null);
-                break;
+            }
             case 'mark':
                 toggleCustomInlineTag('mark', 'editor-mark', 'текст');
                 break;
@@ -1408,10 +1761,10 @@
                 toggleCustomInlineTag('kbd', 'editor-key', 'клавиша');
                 break;
             case 'superscript':
-                document.execCommand('superscript', false, null);
+                toggleCustomInlineTag('sup', '', '2');
                 break;
             case 'subscript':
-                document.execCommand('subscript', false, null);
+                toggleCustomInlineTag('sub', '', '2');
                 break;
             case 'removeFormat':
                 clearFormattingVisual(this.$visualEditor[0]);
@@ -1422,9 +1775,36 @@
             case 'h3':
                 document.execCommand('formatBlock', false, '<h3>');
                 break;
-            case 'quote':
+            case 'quote': {
+                var sel = window.getSelection();
+                if (sel && sel.rangeCount > 0) {
+                    var range = sel.getRangeAt(0);
+                    var container = range.commonAncestorContainer;
+                    var parentEl = container.nodeType === 1 ? container : container.parentNode;
+                    var bqNode = parentEl ? parentEl.closest('blockquote') : null;
+                    if (bqNode && this.$visualEditor[0].contains(bqNode)) {
+                        // Unwrap blockquote
+                        var p = bqNode.parentNode;
+                        var firstChild = bqNode.firstChild;
+                        var lastChild = bqNode.lastChild;
+                        while (bqNode.firstChild) {
+                            p.insertBefore(bqNode.firstChild, bqNode);
+                        }
+                        p.removeChild(bqNode);
+                        if (firstChild && lastChild) {
+                            var newRange = document.createRange();
+                            newRange.setStartBefore(firstChild);
+                            newRange.setEndAfter(lastChild);
+                            sel.removeAllRanges();
+                            sel.addRange(newRange);
+                        }
+                        this.saveSelection();
+                        break;
+                    }
+                }
                 document.execCommand('formatBlock', false, '<blockquote>');
                 break;
+            }
             case 'ul':
                 document.execCommand('insertUnorderedList', false, null);
                 break;
@@ -1477,7 +1857,7 @@
                 wrapTextareaSelection(this.$textarea, '**', '**', 'жирный текст');
                 break;
             case 'italic':
-                wrapTextareaSelection(this.$textarea, '*', '*', 'курсив');
+                wrapTextareaSelection(this.$textarea, '_', '_', 'курсив');
                 break;
             case 'underline':
                 wrapTextareaSelection(this.$textarea, '^^', '^^', 'подчеркнутый текст');
@@ -1509,7 +1889,9 @@
                 if (selected) {
                     var cleaned = selected
                         .replace(/\*\*([^*]+)\*\*/g, '$1')
+                        .replace(/__([^_]+)__/g, '$1')
                         .replace(/\*([^*]+)\*/g, '$1')
+                        .replace(/_([^_]+)_/g, '$1')
                         .replace(/\^\^([^~^]+)\^\^/g, '$1')
                         .replace(/~~([^~]+)~~/g, '$1')
                         .replace(/==([^=]+)==/g, '$1')

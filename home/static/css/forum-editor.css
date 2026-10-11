@@ -309,26 +309,35 @@
 }
 
 .forum-visual-editor code {
-    background-color: #e9ecef;
-    color: #d63384;
-    padding: 2px 5px;
-    border-radius: 3px;
-    font-size: 13px;
+    background-color: #f9f2f4;
+    color: #c7254e;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 90%;
+    font-family: monospace;
 }
 
 .forum-visual-editor pre.editor-code-block {
-    background-color: #282c34;
-    color: #abb2bf;
-    padding: 10px 14px;
-    border-radius: 4px;
-    overflow-x: auto;
+    display: block;
     margin: 8px 0;
+    padding: 9.5px 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    color: #333;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.42857143;
 }
 
 .forum-visual-editor pre.editor-code-block code {
     background: transparent;
     color: inherit;
     padding: 0;
+    font-size: inherit;
+    border-radius: 0;
+    white-space: pre-wrap;
 }
 
 /* Spoilers in Editor */
@@ -341,13 +350,27 @@
 }
 
 .forum-visual-editor details.forum-spoiler summary {
+    position: relative;
     background-color: #e9ecef;
     padding: 6px 12px;
     cursor: pointer;
     font-weight: 600;
     color: #495057;
     outline: none;
-    user-select: none;
+    user-select: text;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.forum-visual-editor details.forum-spoiler > summary::before {
+    content: "\25BC";
+    font-family: none;
+    padding-right: 0.5em;
+    display: inline-block;
+}
+
+.forum-visual-editor details.forum-spoiler:not([open]) > summary::before {
+    content: "\25B6";
 }
 
 .forum-visual-editor details.forum-spoiler summary:hover {
@@ -355,9 +378,15 @@
 }
 
 .forum-visual-editor details.forum-spoiler .spoiler-body {
+    position: relative;
     padding: 10px 12px;
     border-top: 1px solid #dee2e6;
     background-color: #fff;
+    min-height: 42px;
+}
+
+.forum-visual-editor details.forum-spoiler .spoiler-body > p:first-child {
+    margin-top: 0;
 }
 
 /* Images in Editor */
@@ -664,21 +693,34 @@ article[itemprop="articleBody"] img.emojione {
     background: #f8f9fa;
 }
 
-/* Spoiler placeholders in Visual Editor */
-.forum-visual-editor details.forum-spoiler summary:empty::before,
-.forum-visual-editor details.forum-spoiler summary[data-empty="true"]::before {
+/* Spoiler placeholders in Visual Editor: using ::after with absolute positioning so carets stay at position 0 */
+.forum-visual-editor details.forum-spoiler summary[data-empty="true"]::after {
     content: attr(data-placeholder);
+    position: absolute;
+    left: 31px;
+    top: 6px;
     color: #adb5bd;
     font-weight: normal;
+    font-size: 15px;
+    line-height: 1.6;
     pointer-events: none;
+    white-space: nowrap;
 }
 
-.forum-visual-editor details.forum-spoiler .spoiler-body:empty::before,
-.forum-visual-editor details.forum-spoiler .spoiler-body[data-empty="true"]::before,
-.forum-visual-editor details.forum-spoiler .spoiler-body > p:only-child:empty::before {
+.forum-visual-editor details.forum-spoiler .spoiler-body[data-empty="true"]::after {
     content: attr(data-placeholder);
+    position: absolute;
+    left: 12px;
+    top: 10px;
     color: #adb5bd;
+    font-weight: normal;
+    font-size: 15px;
+    line-height: 1.6;
     pointer-events: none;
+    max-width: calc(100% - 24px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .forum-visual-editor kbd.editor-key {
