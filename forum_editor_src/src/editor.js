@@ -240,20 +240,38 @@ export function createForumEditor(options) {
     return api.tiptap.schema.nodeFromJSON(node.toJSON());
   }
 
-  function insertQuoteVisual(md) {
+  /**
+   * The quote as one block: the parsed blockquote, or (when the Markdown can't
+   * be parsed or held by the schema) a raw Markdown block with its source.
+   */
+  function quoteNode(md) {
+    const schema = api.tiptap.schema;
+    const raw = () => schema.nodes.rawMarkdownBlock.create({ source: md.trim() });
     const fragment = parseFragment(md);
-    if (!fragment) return;
+    if (!fragment) return raw();
+    try {
+      const blocks = [];
+      fragment.forEach((n) => blocks.push(toEditorNode(n)));
+      if (!blocks.length) return null;
+      if (blocks.length === 1 && blocks[0].type.name === 'blockquote') return blocks[0];
+      return schema.nodes.blockquote.create(null, blocks);
+    } catch (e) {
+      console.error('forum-editor: cannot build the quote', e);
+      return raw();
+    }
+  }
+
+  function insertQuoteVisual(md) {
+    const quote = quoteNode(md);
+    if (!quote) return;
+    if (placeQuote(quote) || quote.type.name === 'rawMarkdownBlock') return;
+    placeQuote(api.tiptap.schema.nodes.rawMarkdownBlock.create({ source: md.trim() }));
+  }
+
+  /** Inserts the quote block followed by a paragraph holding the caret. Returns false if no placement fits. */
+  function placeQuote(quote) {
     const editor = api.tiptap;
     const schema = editor.schema;
-    const blocks = [];
-    fragment.forEach((n) => blocks.push(toEditorNode(n)));
-    let quote;
-    if (blocks.length === 1 && blocks[0].type.name === 'blockquote') {
-      quote = blocks[0];
-    } else {
-      if (!blocks.length) return;
-      quote = schema.nodes.blockquote.create(null, blocks);
-    }
     const emptyP = () => schema.nodes.paragraph.create();
     const state = editor.state;
     const sel = state.selection;
@@ -327,8 +345,9 @@ export function createForumEditor(options) {
       editor.view.dispatch(tr);
       selectionTouched = true;
       editor.commands.focus();
-      return;
+      return true;
     }
+    return false;
   }
 
   function insertQuoteMarkdown(md) {

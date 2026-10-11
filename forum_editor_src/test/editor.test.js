@@ -390,3 +390,30 @@ describe('history is reset on every load (final review 2)', () => {
     expect(ta.value).toBe('a');
   });
 });
+
+describe('insertQuote with unparseable Markdown (final review 4)', () => {
+  const QUOTE = '> **bob**:\n> [![pic](x)](y)';
+
+  test('falls back to a raw Markdown block holding the whole quote', () => {
+    ta.value = 'draft';
+    const ed = make({ initialMode: 'visual' });
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+    ed.insertQuote(QUOTE);
+    const doc = ed.tiptap.state.doc;
+    expect(doc.child(0).textContent).toBe('draft');
+    expect(doc.child(1).type.name).toBe('rawMarkdownBlock');
+    expect(doc.child(1).attrs.source).toBe(QUOTE);
+    expect(doc.child(2).type.name).toBe('paragraph');
+    expect(doc.child(2).content.size).toBe(0);
+    expect(ed.tiptap.state.selection.$from.parent).toBe(doc.child(2));
+    expect(ta.value).toBe('draft\n\n' + QUOTE);
+    expect(err).toHaveBeenCalled();
+  });
+
+  test('works in an empty editor too', () => {
+    const ed = make({ initialMode: 'visual' });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    ed.insertQuote(QUOTE + '\n');
+    expect(ta.value).toBe(QUOTE);
+  });
+});
