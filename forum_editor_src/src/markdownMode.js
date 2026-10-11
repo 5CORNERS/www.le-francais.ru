@@ -14,6 +14,14 @@ function markerTouchesSame(text, markerStart, markerEnd, marker) {
   return text.charAt(markerStart - 1) === marker || text.charAt(markerEnd) === marker;
 }
 
+const WORD_CHAR = /[\p{L}\p{N}_]/u;
+
+// Markers are only delimiters when the character beyond them is not a word
+// character: in my_var_name or 2^3^4 they are literal text.
+function isWordChar(ch) {
+  return !!ch && WORD_CHAR.test(ch);
+}
+
 /** Wraps the selection in prefix/suffix, or unwraps it if already wrapped. */
 export function wrapSelection(text, start, end, prefix, suffix, placeholder) {
   const selected = text.slice(start, end);
@@ -24,7 +32,8 @@ export function wrapSelection(text, start, end, prefix, suffix, placeholder) {
   if (selected.length >= prefix.length + suffix.length && prefix && suffix &&
       selected.startsWith(prefix) && selected.endsWith(suffix) &&
       !markerTouchesSame(selected, 0, prefix.length, prefix) &&
-      !markerTouchesSame(selected, selected.length - suffix.length, selected.length, suffix)) {
+      !markerTouchesSame(selected, selected.length - suffix.length, selected.length, suffix) &&
+      !isWordChar(text.charAt(start - 1)) && !isWordChar(text.charAt(end))) {
     const inner = selected.slice(prefix.length, selected.length - suffix.length);
     return result(before + inner + after, start, start + inner.length);
   }
@@ -32,7 +41,8 @@ export function wrapSelection(text, start, end, prefix, suffix, placeholder) {
   // Markers sit just outside the selection: **|b|**
   if (prefix && suffix && before.endsWith(prefix) && after.startsWith(suffix) &&
       !markerTouchesSame(text, start - prefix.length, start, prefix) &&
-      !markerTouchesSame(text, end, end + suffix.length, suffix)) {
+      !markerTouchesSame(text, end, end + suffix.length, suffix) &&
+      !isWordChar(text.charAt(start - prefix.length - 1)) && !isWordChar(text.charAt(end + suffix.length))) {
     const newStart = start - prefix.length;
     return result(before.slice(0, newStart) + selected + after.slice(suffix.length), newStart, newStart + selected.length);
   }
@@ -65,9 +75,23 @@ export function prefixLines(text, start, end, prefix, placeholder, strip) {
     return result(before + p + placeholder + after, lineStart + p.length, lineStart + p.length + placeholder.length);
   }
 
-  const allPrefixed = lines.every(function (line, i) { return line.startsWith(prefixFor(i)); });
+  // Blank lines separate blocks: they get no prefix (so 'a\n\nb' becomes two
+  // list items, not three) and numbering skips them.
+  const skipBlank = lines.some(function (line) { return line.trim() !== ''; });
+  const isSkipped = function (line) { return skipBlank && line.trim() === ''; };
+  const numbers = [];
+  let n = 0;
+  lines.forEach(function (line) { numbers.push(isSkipped(line) ? -1 : n++); });
+  const allPrefixed = lines.every(function (line, j) {
+    return isSkipped(line) || line.startsWith(prefixFor(numbers[j]));
+  });
   const deltas = [];
-  const out = lines.map(function (line, i) {
+  const out = lines.map(function (line, j) {
+    if (isSkipped(line)) {
+      deltas.push(0);
+      return line;
+    }
+    const i = numbers[j];
     if (allPrefixed) {
       deltas.push(-prefixFor(i).length);
       return line.slice(prefixFor(i).length);
@@ -148,10 +172,11 @@ export function toggleCode(text, start, end) {
   return result(before + replacement + after, start, start + replacement.length);
 }
 
-export const SPOILER_TITLE = 'Заголовок';
+// Legacy copy (forum-editor-legacy.js executeMarkdownCommand 'spoiler').
+export const SPOILER_TITLE = 'Заголовок спойлера';
 export const SPOILER_BODY = 'Текст спойлера';
 
-/** Inserts `???- "Заголовок"` with the selection as its indented body; selects the title. */
+/** Inserts `???- "Заголовок спойлера"` with the selection as its indented body; selects the title. */
 export function insertSpoilerTemplate(text, start, end) {
   const before = text.slice(0, start);
   const after = text.slice(end);

@@ -1,4 +1,4 @@
-import { TextSelection } from '@tiptap/pm/state';
+import { Selection, TextSelection } from '@tiptap/pm/state';
 import {
   wrapSelection,
   prefixLines,
@@ -25,7 +25,8 @@ const MARKS = {
 // Markdown-mode syntax and placeholders (legacy executeMarkdownCommand).
 const MD_WRAPS = {
   bold: ['**', '**', 'жирный текст'],
-  italic: ['_', '_', 'курсив'],
+  // '*' (not legacy '_'): works inside words and matches the serializer.
+  italic: ['*', '*', 'курсив'],
   underline: ['^^', '^^', 'подчеркнутый текст'],
   strikethrough: ['~~', '~~', 'зачеркнутый текст'],
   mark: ['==', '==', 'выделенный текст'],
@@ -87,12 +88,10 @@ function unwrapCodeBlock(editor, $pos) {
  * Converts the textblocks spanned by the selection into one code block.
  * Unselected text before/after the selection stays in its own block.
  */
-function blocksToCodeBlock(editor) {
+function blocksToCodeBlock(editor, $from, $to) {
   const state = editor.state;
   const schema = state.schema;
-  const sel = state.selection;
-  const $from = sel.$from;
-  const $to = sel.$to;
+  const sel = { from: $from.pos, to: $to.pos };
 
   const lines = [];
   state.doc.nodesBetween(sel.from, sel.to, function (node, pos) {
@@ -155,18 +154,76 @@ function blocksToCodeBlock(editor) {
   editor.view.dispatch(tr.scrollIntoView());
 }
 
+// Nodes a multi-block conversion may cut through or swallow. Anything else
+// (images, spoilers) would be lost or restructured, so the command is a no-op.
+const CODE_SAFE = ['text', 'hardBreak', 'rawMarkdownBlock', 'blockquote', 'bulletList', 'orderedList', 'listItem'];
+
+function rangeIsCodeSafe(doc, from, to) {
+  let safe = true;
+  doc.nodesBetween(from, to, function (node, pos) {
+    if (!safe) return false;
+    // Ancestors of the whole range (e.g. the spoiler body holding it) are untouched.
+    if (pos < from && pos + node.nodeSize > to) return true;
+    if (node.isTextblock) return false;
+    if (CODE_SAFE.indexOf(node.type.name) < 0) safe = false;
+    return safe;
+  });
+  return safe;
+}
+
+/**
+ * The selection as textblock positions: AllSelection / NodeSelection are
+ * narrowed to the first and last text positions they cover, and a range that
+ * starts in a spoiler summary and runs into the body is clamped to the body
+ * (likewise a range ending in a summary stops before the spoiler).
+ * Returns null when there is no usable text range.
+ */
+function codeRange(state) {
+  const doc = state.doc;
+  const sel = state.selection;
+  let $from = sel.$from;
+  let $to = sel.$to;
+  if (!$from.parent.isTextblock || !$to.parent.isTextblock) {
+    const t = TextSelection.between(doc.resolve(sel.from), doc.resolve(sel.to));
+    $from = t.$from;
+    $to = t.$to;
+    if (!$from.parent.isTextblock || !$to.parent.isTextblock) return null;
+  }
+  if ($from.sameParent($to)) return { $from: $from, $to: $to };
+
+  if ($from.parent.type.name === 'spoilerSummary') {
+    const next = Selection.findFrom(doc.resolve($from.after()), 1, true);
+    if (!next || next.from >= $to.pos) return null;
+    $from = next.$from;
+  }
+  if ($to.parent.type.name === 'spoilerSummary') {
+    const prev = Selection.findFrom(doc.resolve($to.before($to.depth - 1)), -1, true);
+    if (!prev || prev.to <= $from.pos) return null;
+    $to = prev.$to;
+  }
+  if (!$from.parent.isTextblock || !$to.parent.isTextblock) return null;
+  return { $from: $from, $to: $to };
+}
+
 function toggleVisualCode(editor) {
-  const sel = editor.state.selection;
-  const $from = sel.$from;
-  if ($from.sameParent(sel.$to)) {
+  const range = codeRange(editor.state);
+  if (!range) return;
+  const $from = range.$from;
+  const $to = range.$to;
+  if ($from.sameParent($to)) {
     if ($from.parent.type.name === 'codeBlock') {
       unwrapCodeBlock(editor, $from);
       return;
     }
+    const sel = editor.state.selection;
+    if (sel.from !== $from.pos || sel.to !== $to.pos || !(sel instanceof TextSelection)) {
+      editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, $from.pos, $to.pos)));
+    }
     editor.commands.toggleMark('code');
     return;
   }
-  blocksToCodeBlock(editor);
+  if (!rangeIsCodeSafe(editor.state.doc, $from.pos, $to.pos)) return;
+  blocksToCodeBlock(editor, $from, $to);
 }
 
 // --- Visual: spoiler --------------------------------------------------------

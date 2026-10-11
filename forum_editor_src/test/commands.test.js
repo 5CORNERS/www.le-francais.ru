@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { COMMANDS, runVisualCommand, runMarkdownCommand, isCommandActive } from '../src/commands.js';
 import { updateActiveStates } from '../src/ui/toolbar.js';
+import { AllSelection } from '@tiptap/pm/state';
 import { makeEditor, destroyEditors, selectText } from './helpers.js';
 
 let ed;
@@ -36,9 +37,47 @@ describe('visual commands', () => {
     ed.setMarkdown('- a\n- b\n- c\n- d');
     selectText(ed, 'b', 'c');
     runVisualCommand(ed.tiptap, 'code', ctx);
-    expect(ed.getMarkdown()).toContain('- a');
-    expect(ed.getMarkdown()).toContain('- d');
-    expect(ed.getMarkdown()).toContain('```\nb\nc\n```');
+    expect(ed.getMarkdown()).toBe('- a\n\n```\nb\nc\n```\n\n- d');
+  });
+
+  test('code on AllSelection over two paragraphs makes one code block (review fix 3)', () => {
+    ed.setMarkdown('p1 one\n\np2 two');
+    ed.tiptap.view.dispatch(ed.tiptap.state.tr.setSelection(new AllSelection(ed.tiptap.state.doc)));
+    runVisualCommand(ed.tiptap, 'code', ctx);
+    expect(ed.getMarkdown()).toBe('```\np1 one\np2 two\n```');
+  });
+
+  test('code on AllSelection over one paragraph toggles the inline mark', () => {
+    ed.setMarkdown('word');
+    ed.tiptap.view.dispatch(ed.tiptap.state.tr.setSelection(new AllSelection(ed.tiptap.state.doc)));
+    runVisualCommand(ed.tiptap, 'code', ctx);
+    expect(ed.getMarkdown()).toBe('`word`');
+  });
+
+  test('multi-block code over a block image is a no-op (review fix 4)', () => {
+    const md = 'aa\n\n![x](http://i/x.png)\n\nbb';
+    ed.setMarkdown(md);
+    selectText(ed, 'aa', 'bb');
+    runVisualCommand(ed.tiptap, 'code', ctx);
+    expect(ed.getMarkdown()).toBe(md);
+  });
+
+  test('code from spoiler summary into body only converts the body (review fix 5)', () => {
+    ed.setMarkdown('???- "title"\n    one\n\n    two');
+    selectText(ed, 'itle', 'two');
+    runVisualCommand(ed.tiptap, 'code', ctx);
+    const spoiler = ed.tiptap.state.doc.firstChild;
+    expect(spoiler.type.name).toBe('spoiler');
+    expect(spoiler.firstChild.textContent).toBe('title');
+    expect(ed.getMarkdown()).toBe('???- "title"\n    ```\n    one\n    two\n    ```');
+  });
+
+  test('code from outside a spoiler into its body is a no-op', () => {
+    const md = 'intro\n\n???- "title"\n    one';
+    ed.setMarkdown(md);
+    selectText(ed, 'intro', 'one');
+    runVisualCommand(ed.tiptap, 'code', ctx);
+    expect(ed.getMarkdown()).toBe(md);
   });
 
   test('code inside a code block unwraps it into paragraphs', () => {
@@ -133,6 +172,15 @@ describe('toolbar wiring', () => {
     expect(ta.value).toBe('a **b**');
     expect([ta.selectionStart, ta.selectionEnd]).toEqual([4, 5]);
     expect(onInput).toHaveBeenCalled();
+  });
+
+  test('markdown-mode italic inside a word uses * (review fix 1)', () => {
+    ed.setMode('markdown');
+    const ta = ed.dom.container.querySelector('textarea');
+    ta.value = 'motifs';
+    ta.setSelectionRange(3, 6);
+    ed.executeCommand('italic');
+    expect(ta.value).toBe('mot*ifs*');
   });
 
   test('runMarkdownCommand link delegates to ctx', () => {
