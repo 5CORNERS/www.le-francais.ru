@@ -1,5 +1,5 @@
 {% load i18n pybb_tags staticfiles %}
-<link rel="stylesheet" href="{% static 'css/forum-editor.css' %}?v=1.2.3">
+<link rel="stylesheet" href="{% static 'css/forum-editor.css' %}?v=2.0.0">
 <form class="post-form" novalidate action="
     {% if forum %}
         {% url 'pybb:add_topic' forum.pk %}
@@ -131,14 +131,24 @@
 
                     var currentVal = $textarea.val();
                     var greeting = '**' + username + '**, ';
+                    var newVal = null;
                     if (!currentVal.trim()) {
-                        $textarea.val(greeting);
+                        newVal = greeting;
                     } else if (currentVal.indexOf(greeting) === -1) {
-                        $textarea.val(greeting + '\n' + currentVal);
+                        newVal = greeting + '\n' + currentVal;
                     }
 
-                    if (window.forumEditor && window.forumEditor.syncVisualFromMarkdown) {
-                        window.forumEditor.syncVisualFromMarkdown();
+                    if (newVal !== null) {
+                        if (window.forumEditor && window.forumEditor.setMarkdown) {
+                            // TipTap editor: single call updates textarea and visual view
+                            window.forumEditor.setMarkdown(newVal);
+                        } else {
+                            // Legacy editor / no editor: write textarea, then resync
+                            $textarea.val(newVal);
+                            if (window.forumEditor && window.forumEditor.syncVisualFromMarkdown) {
+                                window.forumEditor.syncVisualFromMarkdown();
+                            }
+                        }
                     }
 
                     scrollToTextarea($textarea, $createPost);

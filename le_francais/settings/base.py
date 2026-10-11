@@ -213,8 +213,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', default=get_random_secret_key())
 
 SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT") == "True"
 
-# Use the legacy jQuery forum editor; set FORUM_EDITOR_LEGACY=False for the TipTap editor
-FORUM_EDITOR_LEGACY = os.environ.get("FORUM_EDITOR_LEGACY", "True") == "True"
+# TipTap forum editor is the default; set FORUM_EDITOR_LEGACY=True to roll back to the legacy jQuery editor
+FORUM_EDITOR_LEGACY = os.environ.get("FORUM_EDITOR_LEGACY", "False") == "True"
 
 # Redirect only /accounts/*
 # SECURE_REDIRECT_EXEMPT = [

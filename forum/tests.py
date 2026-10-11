@@ -686,10 +686,10 @@ class ForumEditorSwitchTests(TestCase):
         self.topic_url = reverse('pybb:topic', kwargs={'pk': topic.pk})
         self.client.force_login(self.user)
 
-    @override_settings(FORUM_EDITOR_LEGACY=False)
     def test_new_editor_by_default(self):
         html = self.client.get(self.topic_url).content.decode('utf-8')
-        self.assertIn('js/forum-editor.js', html)
+        self.assertIn('js/forum-editor.js?v=2.0.0', html)
+        self.assertIn('css/forum-editor.css?v=2.0.0', html)
         self.assertNotIn('forum-editor-legacy.js', html)
 
     @override_settings(FORUM_EDITOR_LEGACY=True)
