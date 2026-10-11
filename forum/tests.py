@@ -666,3 +666,38 @@ class ForumLayoutToggleTestCase(TestCase):
         self.assertIn('Hello', html)
 
 
+
+
+@override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+class ForumEditorSwitchTests(TestCase):
+    def setUp(self):
+        from wagtail.core.models import Site, Page
+        root = Page.objects.first()
+        if not root:
+            root = Page.add_root(title="Root", slug="root")
+        Site.objects.filter(is_default_site=True).delete()
+        Site.objects.create(hostname='testserver', port=80, root_page=root, is_default_site=True)
+        self.user = User.objects.create_user(username='editoruser', email='editor@test.com', password='pw')
+        pybb_util.get_pybb_profile(self.user)
+        category = Category.objects.create(name='Editor Cat')
+        forum = Forum.objects.create(category=category, name='Editor Forum', slug='editor-forum')
+        topic = Topic.objects.create(forum=forum, name='Editor Topic', user=self.user)
+        Post.objects.create(topic=topic, user=self.user, body='Editor test post')
+        self.topic_url = reverse('pybb:topic', kwargs={'pk': topic.pk})
+        self.client.force_login(self.user)
+
+    @override_settings(FORUM_EDITOR_LEGACY=False)
+    def test_new_editor_by_default(self):
+        html = self.client.get(self.topic_url).content.decode('utf-8')
+        self.assertIn('js/forum-editor.js', html)
+        self.assertNotIn('forum-editor-legacy.js', html)
+
+    @override_settings(FORUM_EDITOR_LEGACY=True)
+    def test_legacy_editor_by_setting(self):
+        html = self.client.get(self.topic_url).content.decode('utf-8')
+        self.assertIn('js/forum-editor-legacy.js', html)
+
+    @override_settings(FORUM_EDITOR_LEGACY=False)
+    def test_legacy_editor_by_query(self):
+        html = self.client.get(self.topic_url + '?editor=legacy').content.decode('utf-8')
+        self.assertIn('js/forum-editor-legacy.js', html)

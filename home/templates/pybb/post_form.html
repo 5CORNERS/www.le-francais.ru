@@ -60,7 +60,11 @@
 	</fieldset>
 </form>
 
-<script src="{% static 'js/forum-editor.js' %}?v=1.2.4"></script>
+{% if forum_editor_legacy %}
+<script src="{% static 'js/forum-editor-legacy.js' %}?v=1.2.4"></script>
+{% else %}
+<script src="{% static 'js/forum-editor.js' %}?v=2.0.0"></script>
+{% endif %}
 
 
 <script>
