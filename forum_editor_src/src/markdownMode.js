@@ -184,8 +184,11 @@ function stripMarks(json) {
 }
 
 // Container prefix of a Markdown line: indentation (spoiler bodies, nested
-// lists), quote markers, then a list or heading marker.
-const LINE_PREFIX = /^\s*(?:>\s?)*\s*(?:(?:[-*+]|\d+[.)])\s+|#{1,6}\s+)?/;
+// lists), quote markers, then a list marker.
+const LINE_PREFIX = /^\s*(?:>\s?)*\s*(?:(?:[-*+]|\d+[.)])\s+)?/;
+// An ATX heading marker after the container prefix, and its closing sequence.
+const HEADING_MARKER = /^#{1,6}\s+/;
+const HEADING_CLOSE = /\s+#+\s*$/;
 // A code fence, once indentation and quote markers are removed.
 const FENCE_LINE = /^[\s>]*(?:```|~~~)/;
 
@@ -205,19 +208,21 @@ function stripInline(run) {
 
 /**
  * Removes inline formatting from the selection line by line: each line's
- * container prefix (indentation, '>', list or heading marker) is kept as typed
- * and only the selected inline remainder is parsed, stripped of marks and
- * serialized again, so only real emphasis is removed (snake_case survives).
- * Lines of fenced code blocks (even one opened before the selection) are
- * left untouched.
+ * container prefix (indentation, '>', list marker) is kept as typed and only
+ * the selected inline remainder is parsed, stripped of marks and serialized
+ * again, so only real emphasis is removed (snake_case survives). An ATX
+ * heading on a selected line loses its '#' marker and closing sequence and
+ * becomes a plain line. Lines of fenced code blocks (even one opened before
+ * the selection) are left untouched.
  */
 export function removeFormatting(text, start, end) {
   if (start === end) return result(text, start, end);
   const lines = text.split('\n');
   const out = [];
+  // Replacements in original offsets, in document order: { from, to, insert }.
+  const edits = [];
   let pos = 0;
   let inFence = false;
-  let delta = 0;
   try {
     lines.forEach(function (line) {
       const ls = pos;
@@ -226,22 +231,52 @@ export function removeFormatting(text, start, end) {
       const isFence = FENCE_LINE.test(line);
       const fenced = inFence || isFence;
       if (isFence) inFence = !inFence;
-      const segStart = Math.max(start, ls + line.match(LINE_PREFIX)[0].length);
-      const segEnd = Math.min(end, le);
-      if (fenced || segStart >= segEnd) {
+      if (fenced || Math.max(start, ls) >= Math.min(end, le)) {
         out.push(line);
         return;
       }
-      const seg = text.slice(segStart, segEnd);
-      const cleaned = stripInline(seg);
-      delta += cleaned.length - seg.length;
-      out.push(text.slice(ls, segStart) + cleaned + text.slice(segEnd, le));
+      const lineEdits = [];
+      let textFrom = ls + line.match(LINE_PREFIX)[0].length;
+      let textTo = le;
+      const marker = text.slice(textFrom, le).match(HEADING_MARKER);
+      if (marker) {
+        lineEdits.push({ from: textFrom, to: textFrom + marker[0].length, insert: '' });
+        textFrom += marker[0].length;
+        const close = text.slice(textFrom, le).match(HEADING_CLOSE);
+        if (close) textTo = le - close[0].length;
+      }
+      const segStart = Math.max(start, textFrom);
+      const segEnd = Math.min(end, textTo);
+      if (segStart < segEnd) {
+        lineEdits.push({ from: segStart, to: segEnd, insert: stripInline(text.slice(segStart, segEnd)) });
+      }
+      if (textTo < le) lineEdits.push({ from: textTo, to: le, insert: '' });
+      let cursor = ls;
+      let newLine = '';
+      lineEdits.forEach(function (ed) {
+        newLine += text.slice(cursor, ed.from) + ed.insert;
+        cursor = ed.to;
+      });
+      out.push(newLine + text.slice(cursor, le));
+      Array.prototype.push.apply(edits, lineEdits);
     });
   } catch (e) {
     console.error('forum-editor: cannot remove formatting', e);
     return result(text, start, end);
   }
-  return result(out.join('\n'), start, end + delta);
+  // Maps an original offset into the new text; inside a replaced range it
+  // keeps its distance from the range start, capped by the replacement.
+  function map(p) {
+    let shift = 0;
+    for (let i = 0; i < edits.length; i++) {
+      const ed = edits[i];
+      if (ed.to <= p) shift += ed.insert.length - (ed.to - ed.from);
+      else if (ed.from < p) return ed.from + shift + Math.min(p - ed.from, ed.insert.length);
+      else break;
+    }
+    return p + shift;
+  }
+  return result(out.join('\n'), map(start), map(end));
 }
 
 const FENCED = /^```[a-zA-Z0-9_-]*\n[\s\S]*```$/;

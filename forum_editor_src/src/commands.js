@@ -216,8 +216,10 @@ function toggleVisualCode(editor) {
 // --- Visual: remove formatting ------------------------------------------------
 
 /**
- * Drops every mark (links included) from the selection; block structure is
- * kept. A selection inside one code block unwraps it (legacy parity).
+ * Drops every mark (links included) from the selection and turns the headings
+ * it touches (or the one holding the caret) into paragraphs; lists, quotes and
+ * spoilers are kept. A selection inside one code block unwraps it (legacy
+ * parity).
  */
 function removeFormatVisual(editor) {
   const sel = editor.state.selection;
@@ -225,7 +227,19 @@ function removeFormatVisual(editor) {
     unwrapCodeBlock(editor, sel.$from);
     return;
   }
-  editor.commands.unsetAllMarks();
+  editor.chain().unsetAllMarks().command(({ tr }) => {
+    const paragraph = tr.doc.type.schema.nodes.paragraph;
+    const headings = [];
+    const $from = tr.selection.$from;
+    if ($from.parent.type.name === 'heading') headings.push($from.before());
+    tr.doc.nodesBetween(tr.selection.from, tr.selection.to, (node, pos) => {
+      if (node.type.name === 'heading' && headings.indexOf(pos) === -1) headings.push(pos);
+      return !node.isTextblock;
+    });
+    // Same size, so positions stay valid.
+    headings.forEach((pos) => tr.setNodeMarkup(pos, paragraph));
+    return true;
+  }).run();
 }
 
 // --- Public API -------------------------------------------------------------

@@ -42,6 +42,20 @@ describe('markdownMode', () => {
     expect(removeFormatting(text, 4, text.length).text).toBe('```\n**code**\n```\nz');
   });
 
+  test('removeFormatting turns ATX headings into plain lines (user fix 2)', () => {
+    expect(whole('## Title')).toBe('Title');
+    expect(whole('### **Bold** title ###')).toBe('Bold title');
+    expect(whole('- **a**\n## H')).toBe('- a\nH');
+    expect(whole('> ## H')).toBe('> H');
+    expect(whole('> > ### *H*\n> text')).toBe('> > H\n> text');
+    expect(whole('???- "Titre"\n    ## H')).toBe('???- "Titre"\n    H');
+    expect(whole('- item\n    1. **x**')).toBe('- item\n    1. x');
+    // The heading marker is removed even when only part of the text is selected.
+    const r = removeFormatting('## Title here', 3, 8);
+    expect(r.text).toBe('Title here');
+    expect([r.selStart, r.selEnd]).toEqual([0, 5]);
+  });
+
   test('removeFormatting on a partial line keeps the rest of the line', () => {
     const r = removeFormatting('- **a** and **b**', 12, 17);
     expect(r.text).toBe('- **a** and b');

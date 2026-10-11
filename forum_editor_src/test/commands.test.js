@@ -230,11 +230,40 @@ describe('visual commands', () => {
     expect(ed.tiptap.state.selection.$from.parent).toBe(doc.child(1));
   });
 
-  test('removeFormat clears marks but keeps block structure (final review 3)', () => {
+  test('removeFormat clears marks and turns the heading into a paragraph (user fix 2)', () => {
     ed.setMarkdown('## **a** [b](https://x.y)');
     selectText(ed, 'a', 'b');
     runVisualCommand(ed.tiptap, 'removeFormat', ctx);
-    expect(ed.getMarkdown()).toBe('## a b');
+    expect(ed.getMarkdown()).toBe('a b');
+  });
+
+  test('removeFormat with the caret in a heading makes it a paragraph (user fix 2)', () => {
+    ed.setMarkdown('## Title\n\nafter');
+    ed.tiptap.commands.setTextSelection(3);
+    runVisualCommand(ed.tiptap, 'removeFormat', ctx);
+    expect(ed.getMarkdown()).toBe('Title\n\nafter');
+  });
+
+  test('removeFormat over a list and a heading keeps the list (user fix 2)', () => {
+    ed.setMarkdown('- **a**\n\n## H\n\n### untouched');
+    selectText(ed, 'a', 'H');
+    runVisualCommand(ed.tiptap, 'removeFormat', ctx);
+    expect(ed.getMarkdown()).toBe('- a\n\nH\n\n### untouched');
+  });
+
+  test('removeFormat on a heading inside a quote keeps the quote (user fix 2)', () => {
+    ed.setMarkdown('> ## H\n> text');
+    selectText(ed, 'H', 'H');
+    runVisualCommand(ed.tiptap, 'removeFormat', ctx);
+    expect(ed.tiptap.state.doc.child(0).type.name).toBe('blockquote');
+    expect(ed.getMarkdown()).toBe('> H\n>\n> text');
+  });
+
+  test('removeFormat on a heading inside a spoiler keeps the spoiler (user fix 2)', () => {
+    ed.setMarkdown('???- "T"\n    ## **H**');
+    selectText(ed, 'H', 'H');
+    runVisualCommand(ed.tiptap, 'removeFormat', ctx);
+    expect(ed.getMarkdown()).toBe('???- "T"\n    H');
   });
 
   test('removeFormat inside a list keeps the list (final review 3)', () => {
