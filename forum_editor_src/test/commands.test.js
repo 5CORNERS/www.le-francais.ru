@@ -2,6 +2,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { COMMANDS, runVisualCommand, runMarkdownCommand, isCommandActive } from '../src/commands.js';
 import { updateActiveStates } from '../src/ui/toolbar.js';
 import { AllSelection } from '@tiptap/pm/state';
+import { Node as PMNode } from '@tiptap/pm/model';
 import { makeEditor, destroyEditors, selectText } from './helpers.js';
 
 let ed;
@@ -182,6 +183,30 @@ describe('visual commands', () => {
     const $from = ed.tiptap.state.selection.$from;
     expect($from.parent.textContent).toBe('Title');
     expect($from.parentOffset).toBe(0);
+  });
+
+  test('spoiler moves a code block at a selection edge whole, keeping indentation', () => {
+    ed.setMarkdown('```\nline1\n  line2\n```\n\npara');
+    selectText(ed, 'line2', 'para');
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.getMarkdown()).toBe('???- ""\n    ```\n    line1\n      line2\n    ```\n\n    para');
+  });
+
+  test('spoiler ending inside a code block moves it whole', () => {
+    ed.setMarkdown('intro text\n\n```\n  a\n  b\n```');
+    selectText(ed, 'text', 'a');
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.getMarkdown()).toBe('intro\n\n???- ""\n    text\n\n    ```\n      a\n      b\n    ```');
+  });
+
+  test('a failed unwrap does nothing (no spoiler is inserted instead)', () => {
+    ed.setMarkdown('???- "T"\n    body');
+    selectText(ed, 'body', 'body');
+    ed.tiptap.commands.setTextSelection(ed.tiptap.state.selection.from);
+    const before = ed.tiptap.state.doc;
+    vi.spyOn(PMNode.prototype, 'check').mockImplementationOnce(() => { throw new Error('invalid'); });
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.tiptap.state.doc.eq(before)).toBe(true);
   });
 
   test('spoiler toggle in a nested spoiler unwraps the innermost one', () => {

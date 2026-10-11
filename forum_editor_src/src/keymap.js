@@ -1,22 +1,22 @@
 import { Extension } from '@tiptap/core';
 import { Selection, TextSelection } from '@tiptap/pm/state';
-import { unwrapSpoilerAt } from './spoilerCommands.js';
+import { unwrapSpoilerAt, UNWRAP_DONE } from './spoilerCommands.js';
 
 // Toolbar shortcuts (legacy handleKeydown, forum-editor-legacy.js:1274-1360).
 // `shift`: true = Shift required, false = Shift forbidden. `alt`: false =
 // Alt forbidden, undefined = either. Keys are lower-cased `e.key` values,
-// Latin and Cyrillic (ЙЦУКЕН) layouts.
+// Latin and Cyrillic (ЙЦУКЕН) layouts. `keyCodes`: legacy fallback.
 const SHORTCUTS = [
-  { cmd: 'strikethrough', shift: true, codes: ['KeyX'], keys: ['x', 'ч'] },
-  { cmd: 'code', shift: true, codes: ['KeyM'], keys: ['m', 'ь'] },
-  { cmd: 'spoiler', shift: true, codes: ['KeyP'], keys: ['p', 'з'] },
-  { cmd: 'quote', shift: true, codes: ['Period'], keys: ['.', '>', 'ю'] },
-  { cmd: 'removeFormat', shift: true, codes: ['KeyN'], keys: ['n', 'т'] },
-  { cmd: 'removeFormat', shift: false, codes: ['Backslash'], keys: ['\\'] },
-  { cmd: 'link', shift: false, alt: false, codes: ['KeyK'], keys: ['k', 'л'] },
-  { cmd: 'bold', shift: false, alt: false, codes: ['KeyB'], keys: ['b', 'и'] },
-  { cmd: 'italic', shift: false, alt: false, codes: ['KeyI'], keys: ['i', 'ш'] },
-  { cmd: 'underline', shift: false, alt: false, codes: ['KeyU'], keys: ['u', 'г'] },
+  { cmd: 'strikethrough', shift: true, codes: ['KeyX'], keys: ['x', 'ч'], keyCodes: [88] },
+  { cmd: 'code', shift: true, codes: ['KeyM'], keys: ['m', 'ь'], keyCodes: [77] },
+  { cmd: 'spoiler', shift: true, codes: ['KeyP'], keys: ['p', 'з'], keyCodes: [80] },
+  { cmd: 'quote', shift: true, codes: ['Period'], keys: ['.', '>', 'ю'], keyCodes: [190] },
+  { cmd: 'removeFormat', shift: true, codes: ['KeyN'], keys: ['n', 'т'], keyCodes: [78] },
+  { cmd: 'removeFormat', shift: false, codes: ['Backslash'], keys: ['\\'], keyCodes: [220] },
+  { cmd: 'link', shift: false, alt: false, codes: ['KeyK'], keys: ['k', 'л'], keyCodes: [75] },
+  { cmd: 'bold', shift: false, alt: false, codes: ['KeyB'], keys: ['b', 'и'], keyCodes: [66] },
+  { cmd: 'italic', shift: false, alt: false, codes: ['KeyI'], keys: ['i', 'ш'], keyCodes: [73] },
+  { cmd: 'underline', shift: false, alt: false, codes: ['KeyU'], keys: ['u', 'г'], keyCodes: [85] },
 ];
 
 function modifiersMatch(row, e) {
@@ -28,7 +28,8 @@ function modifiersMatch(row, e) {
 /**
  * The toolbar command for a keydown event, or null. Matched by `e.code`
  * first (physical key, any layout), then by `e.key` (including the Cyrillic
- * letter). Ctrl/Cmd+6 and `^` are never intercepted (dead key).
+ * letter), then by the legacy `e.keyCode`. Ctrl/Cmd+6 and `^` are never
+ * intercepted (dead key).
  */
 export function matchShortcut(e) {
   const code = e.code || '';
@@ -45,6 +46,9 @@ export function matchShortcut(e) {
   }
   for (i = 0; i < SHORTCUTS.length; i++) {
     if (SHORTCUTS[i].keys.indexOf(key) >= 0 && modifiersMatch(SHORTCUTS[i], e)) return SHORTCUTS[i].cmd;
+  }
+  for (i = 0; i < SHORTCUTS.length; i++) {
+    if (e.keyCode && SHORTCUTS[i].keyCodes.indexOf(e.keyCode) >= 0 && modifiersMatch(SHORTCUTS[i], e)) return SHORTCUTS[i].cmd;
   }
   return null;
 }
@@ -69,14 +73,24 @@ export function bindShortcuts(el, onCommand) {
   };
 }
 
-/** Enter in a spoiler summary: caret to the start of the spoiler body. */
+/**
+ * Enter in a spoiler summary: caret to the start of the spoiler body.
+ * The caret goes to the first text position inside the body (legacy: the
+ * body's first <p>), so a body starting with an image, list or quote gets the
+ * caret in the first textblock after/inside it. A body with no textblock at
+ * all (only images) gets its first block node-selected. The caret never
+ * leaves the body.
+ */
 function summaryEnter(editor) {
   const state = editor.state;
   const $from = state.selection.$from;
   if ($from.parent.type.name !== 'spoilerSummary') return false;
   const bodyStart = $from.after() + 1;
+  const bodyEnd = $from.end($from.depth - 1) - 1;
   const $body = state.doc.resolve(bodyStart);
-  const target = Selection.findFrom($body, 1, true) || TextSelection.near($body);
+  let target = Selection.findFrom($body, 1, true);
+  if (!target || target.to > bodyEnd) target = Selection.findFrom($body, 1, false);
+  if (!target || target.to > bodyEnd) target = TextSelection.near($body);
   editor.view.dispatch(state.tr.setSelection(target).scrollIntoView());
   return true;
 }
@@ -96,7 +110,7 @@ function exitMarks(editor) {
 function summaryBackspace(editor) {
   const $cursor = editor.state.selection.$cursor;
   if (!$cursor || $cursor.parentOffset !== 0 || $cursor.parent.type.name !== 'spoilerSummary') return false;
-  return unwrapSpoilerAt(editor, $cursor);
+  return unwrapSpoilerAt(editor, $cursor) === UNWRAP_DONE;
 }
 
 export const ForumKeys = Extension.create({

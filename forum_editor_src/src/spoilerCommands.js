@@ -25,12 +25,17 @@ export function spoilerDepth($pos) {
 /**
  * Replaces the innermost spoiler around `$pos` by its summary (as a
  * paragraph, omitted when empty) followed by the body's blocks; the caret
- * goes to the start of the first resulting block. Returns false if `$pos` is
- * not inside a spoiler.
+ * goes to the start of the first resulting block. Returns UNWRAP_DONE,
+ * UNWRAP_NONE (`$pos` is not inside a spoiler) or UNWRAP_FAILED (the result
+ * would be an invalid document; nothing changes).
  */
+export const UNWRAP_DONE = 'done';
+export const UNWRAP_NONE = 'none';
+export const UNWRAP_FAILED = 'failed';
+
 export function unwrapSpoilerAt(editor, $pos) {
   const depth = spoilerDepth($pos);
-  if (depth < 0) return false;
+  if (depth < 0) return UNWRAP_NONE;
   const state = editor.state;
   const schema = state.schema;
   const spoiler = $pos.node(depth);
@@ -44,12 +49,12 @@ export function unwrapSpoilerAt(editor, $pos) {
   try {
     tr.doc.check();
   } catch (e) {
-    return false;
+    return UNWRAP_FAILED;
   }
   const $start = tr.doc.resolve(start);
   tr.setSelection(Selection.findFrom($start, 1, true) || TextSelection.near($start));
   editor.view.dispatch(tr.scrollIntoView());
-  return true;
+  return UNWRAP_DONE;
 }
 
 /** Inserts an empty spoiler at the caret; the caret goes into its summary. */
@@ -134,6 +139,12 @@ function crossesSpoiler($pos, containerDepth) {
   return false;
 }
 
+// Code blocks are moved whole: cutting would split them and trimming would
+// drop indentation.
+function isCuttable(node) {
+  return node.isTextblock && !node.type.spec.code;
+}
+
 /** Cut of textblock `node` between offsets, whitespace-trimmed, or null if empty. */
 function cutText(node, from, to) {
   const s = trimStart(node, from);
@@ -165,8 +176,8 @@ function wrapInSpoiler(editor) {
   if (i1 < i0 || i1 >= container.childCount) return;
   const first = container.child(i0);
   const last = container.child(i1);
-  const fromInText = $from.depth === cd + 1 && first.isTextblock;
-  const toInText = $to.depth === cd + 1 && last.isTextblock;
+  const fromInText = $from.depth === cd + 1 && isCuttable(first);
+  const toInText = $to.depth === cd + 1 && isCuttable(last);
 
   const body = [];
   for (let i = i0; i <= i1; i++) {
@@ -218,7 +229,7 @@ function wrapInSpoiler(editor) {
 export function toggleSpoiler(editor) {
   const sel = editor.state.selection;
   if (sel.empty) {
-    if (!unwrapSpoilerAt(editor, sel.$from)) insertSpoiler(editor);
+    if (unwrapSpoilerAt(editor, sel.$from) === UNWRAP_NONE) insertSpoiler(editor);
     return;
   }
   wrapInSpoiler(editor);

@@ -54,6 +54,13 @@ describe('matchShortcut', () => {
     expect(matchShortcut(key('', 'ю', CTRL_SHIFT))).toBe('quote');
   });
 
+  test('legacy keyCode is the last fallback', () => {
+    expect(matchShortcut(key('', '', { ctrlKey: true, keyCode: 66 }))).toBe('bold');
+    expect(matchShortcut(key('', 'Unidentified', { ctrlKey: true, shiftKey: true, keyCode: 190 }))).toBe('quote');
+    expect(matchShortcut(key('', '', { altKey: true, shiftKey: true, keyCode: 53 }))).toBe('strikethrough');
+    expect(matchShortcut(key('', '', { ctrlKey: true, shiftKey: true, keyCode: 66 }))).toBe(null);
+  });
+
   test('metaKey works like ctrlKey', () => {
     expect(matchShortcut(key('KeyB', 'b', { metaKey: true }))).toBe('bold');
     expect(matchShortcut(key('KeyP', 'P', { metaKey: true, shiftKey: true }))).toBe('spoiler');
@@ -111,6 +118,45 @@ describe('bindShortcuts', () => {
     expect(ev.defaultPrevented).toBe(true);
   });
 
+  test.each([
+    ['Ctrl+E', 'KeyE', 'e', CTRL],
+    ['Ctrl+.', 'Period', '.', CTRL],
+    ['Ctrl+,', 'Comma', ',', CTRL],
+    ['Ctrl+Shift+B', 'KeyB', 'B', CTRL_SHIFT],
+    ['Ctrl+Shift+S', 'KeyS', 'S', { ctrlKey: true, shiftKey: true, keyCode: 83 }],
+    ['Ctrl+Shift+H', 'KeyH', 'H', { ctrlKey: true, shiftKey: true, keyCode: 72 }],
+    ['Ctrl+Shift+7', 'Digit7', '&', { ctrlKey: true, shiftKey: true, keyCode: 55 }],
+    ['Ctrl+Shift+8', 'Digit8', '*', { ctrlKey: true, shiftKey: true, keyCode: 56 }],
+    ['Ctrl+Alt+2', 'Digit2', '2', { ctrlKey: true, altKey: true }],
+    ['Ctrl+Alt+0', 'Digit0', '0', { ctrlKey: true, altKey: true }],
+    ['Ctrl+Alt+C', 'KeyC', 'c', { ctrlKey: true, altKey: true }],
+  ])('TipTap built-in shortcut %s does nothing (legacy parity)', (label, code, k, mods) => {
+    const ed = makeEditor('- word');
+    selectText(ed, 'word', 'word');
+    ed.element.dispatchEvent(key(code, k, mods));
+    expect(ed.getMarkdown()).toBe('- word');
+  });
+
+  test('Ctrl+B/I/U and Ctrl+Z/Ctrl+Y still work in the visual editor', () => {
+    const ed = makeEditor('word');
+    selectText(ed, 'word', 'word');
+    ed.element.dispatchEvent(key('KeyI', 'i', CTRL));
+    ed.element.dispatchEvent(key('KeyU', 'u', CTRL));
+    expect(ed.getMarkdown()).toBe('*^^word^^*');
+    ed.element.dispatchEvent(key('KeyZ', 'z', CTRL));
+    ed.element.dispatchEvent(key('KeyZ', 'z', CTRL));
+    expect(ed.getMarkdown()).toBe('word');
+    ed.element.dispatchEvent(key('KeyY', 'y', CTRL));
+    expect(ed.getMarkdown()).not.toBe('word');
+  });
+
+  test('Enter in a list item still splits it', () => {
+    const ed = makeEditor('- ab');
+    ed.tiptap.commands.setTextSelection(4);
+    ed.tiptap.view.someProp('handleKeyDown', (f) => f(ed.tiptap.view, new KeyboardEvent('keydown', { key: 'Enter' })));
+    expect(ed.tiptap.state.doc.firstChild.childCount).toBe(2);
+  });
+
   test('Ctrl+6 is never intercepted', () => {
     const ed = makeEditor('a', 'markdown');
     const ta = ed.dom.container.querySelector('textarea');
@@ -131,6 +177,22 @@ describe('ForumKeys', () => {
     ed.tiptap.view.someProp('handleKeyDown', f => f(ed.tiptap.view, new KeyboardEvent('keydown', { key: 'Enter' })));
     expect(ed.tiptap.state.selection.$from.parent.textContent).toBe('body');
     expect(ed.getMarkdown()).toBe('???- "T"\n    body');
+  });
+
+  test('Enter in a summary whose body starts with an image goes to the first text in the body', () => {
+    const ed = makeEditor('???- "T"\n    ![i](http://i/x.png)\n\n    after\n\nout');
+    ed.tiptap.commands.setTextSelection(2);
+    press(ed, 'Enter');
+    expect(ed.tiptap.state.selection.$from.parent.textContent).toBe('after');
+  });
+
+  test('Enter in a summary whose body is only an image selects the image', () => {
+    const ed = makeEditor('???- "T"\n    ![i](http://i/x.png)\n\nout');
+    ed.tiptap.commands.setTextSelection(2);
+    press(ed, 'Enter');
+    const sel = ed.tiptap.state.selection;
+    expect(sel.node && sel.node.type.name).toBe('image');
+    expect(ed.getMarkdown()).toBe('???- "T"\n    ![i](http://i/x.png)\n\nout');
   });
 
   test('ArrowRight at end of bold exits the mark without inserting characters', () => {

@@ -15,8 +15,36 @@ import { ForumKeys } from '../keymap.js';
 
 export { BOLD_PASTE_RULES };
 
+// Legacy parity: formatting shortcuts exist only in keymap.js (through
+// executeCommand). TipTap's built-in Mod-… shortcuts (Mod-E code, Mod-. sup,
+// Mod-Shift-B quote, Mod-Alt-2 heading, Mod-Shift-7 list…) are removed; the
+// editing keys of the same extensions (Enter, Backspace, Tab, arrows) stay.
+function withoutModShortcuts(ext) {
+  return ext.extend({
+    addKeyboardShortcuts() {
+      const map = Object.assign({}, this.parent ? this.parent() : {});
+      Object.keys(map).forEach(function (k) {
+        if (/(^|-)Mod-/.test(k)) delete map[k];
+      });
+      return map;
+    },
+  });
+}
+
+// StarterKit parts with formatting shortcuts. Undo/redo, hard break and the
+// list-item/list keymaps keep theirs.
+const STARTER_KIT_STRIPPED = ['blockquote', 'code', 'heading', 'italic', 'strike', 'underline', 'paragraph'];
+
+const ForumStarterKit = StarterKit.extend({
+  addExtensions() {
+    return this.parent().map(function (ext) {
+      return STARTER_KIT_STRIPPED.indexOf(ext.name) >= 0 ? withoutModShortcuts(ext) : ext;
+    });
+  },
+});
+
 export const extensions = [
-  StarterKit.configure({
+  ForumStarterKit.configure({
     heading: { levels: [2, 3] },
     horizontalRule: false,
     bulletList: false,
@@ -25,15 +53,15 @@ export const extensions = [
     bold: false,
     link: false,
   }),
-  ForumBold,
+  withoutModShortcuts(ForumBold),
   ForumLink,
-  ForumBulletList,
-  ForumOrderedList,
-  ForumCodeBlock,
+  withoutModShortcuts(ForumBulletList),
+  withoutModShortcuts(ForumOrderedList),
+  withoutModShortcuts(ForumCodeBlock),
   ForumImage,
-  Highlight,
-  Subscript,
-  Superscript,
+  withoutModShortcuts(Highlight),
+  withoutModShortcuts(Subscript),
+  withoutModShortcuts(Superscript),
   Kbd,
   Spoiler,
   SpoilerSummary,
