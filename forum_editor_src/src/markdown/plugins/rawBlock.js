@@ -77,6 +77,10 @@ function definitionListEnd(state, startLine, endLine) {
   }
 }
 
+function canInterrupt(text) {
+  return FOOTNOTE_DEF.test(text) || ADMONITION.test(text);
+}
+
 function detectRaw(state, startLine, endLine) {
   const text = lineText(state, startLine);
   if (FOOTNOTE_DEF.test(text)) return bodyEnd(state, startLine + 1, endLine, true);
@@ -119,11 +123,14 @@ function hasTaskItem(tokens) {
 export function rawBlockPlugin(md) {
   md.block.ruler.before('table', 'raw_block', (state, startLine, endLine, silent) => {
     if (isIndentedCode(state, startLine)) return false;
+    // Silent calls are terminator checks: only admonitions and footnote
+    // definitions interrupt a paragraph (pymdown matches them mid-block).
+    if (silent) return canInterrupt(lineText(state, startLine));
     const next = detectRaw(state, startLine, endLine);
     if (next < 0) return false;
-    if (!silent) pushRaw(state, startLine, next);
+    pushRaw(state, startLine, next);
     return true;
-  });
+  }, { alt: ['paragraph', 'reference', 'blockquote', 'list'] });
 
   const always = () => true;
   wrapRule(md, 'table', always);

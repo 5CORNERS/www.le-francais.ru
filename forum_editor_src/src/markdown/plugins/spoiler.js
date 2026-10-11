@@ -27,9 +27,16 @@ function stripColumns(state, line, indent) {
   return ' '.repeat(Math.max(extra, 0)) + state.src.slice(state.bMarks[line] + state.tShift[line], state.eMarks[line]);
 }
 
+// Like pymdown's START.search, a spoiler may start right after a paragraph line.
+const INTERRUPTS = ['paragraph', 'reference', 'blockquote', 'list'];
+
 export function spoilerPlugin(md) {
   md.block.ruler.before('table', 'spoiler', (state, startLine, endLine, silent) => {
-    if (state.sCount[startLine] - state.blkIndent >= 4) return false;
+    // pymdown requires `???` at column 0 of its block. At top level (and in
+    // quotes / spoiler bodies) that is blkIndent; inside markdown-it list items
+    // (blkIndent = marker width, pymdown detabs by 4) allow up to 3 extra columns.
+    const offset = state.sCount[startLine] - state.blkIndent;
+    if (offset < 0 || offset >= 4 || (state.parentType !== 'list' && offset !== 0)) return false;
     const pos = state.bMarks[startLine] + state.tShift[startLine];
     if (state.src.charCodeAt(pos) !== 0x3f /* ? */) return false;
     const m = START.exec(state.src.slice(pos, state.eMarks[startLine]));
@@ -69,5 +76,5 @@ export function spoilerPlugin(md) {
 
     state.line = last + 1;
     return true;
-  });
+  }, { alt: INTERRUPTS });
 }

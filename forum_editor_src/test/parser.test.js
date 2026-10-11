@@ -82,6 +82,16 @@ describe('parseMarkdown', () => {
     expect(item.content.map(n => n.type)).toEqual(['paragraph', 'spoiler']);
     expect(item.content[1].content[1].content[0].content[0].text).toBe('x');
   });
+  test('spoiler, admonition and footnote definition interrupt a paragraph (pymdown START.search)', () => {
+    expect(p('t\n???- "T"\n    x').content.map(n => n.type)).toEqual(['paragraph', 'spoiler']);
+    const d = p('Ex.3.\n???- "T"\n    1. a\n    2. b');
+    expect(d.content[1].content[1].content.map(n => n.type)).toEqual(['orderedList']);
+    expect(p('t\n!!! note\n    x').content[1]).toEqual({ type: 'rawMarkdownBlock', attrs: { source: '!!! note\n    x' } });
+    expect(p('t\n[^1]: foot').content[1]).toEqual({ type: 'rawMarkdownBlock', attrs: { source: '[^1]: foot' } });
+  });
+  test('top-level spoiler must start at column 0', () => {
+    expect(p('   ???- "T"\n    x').content[0].type).not.toBe('spoiler');
+  });
   test('tab-indented spoiler body', () => {
     const d = p('???- "T"\n\tline');
     expect(d.content[0].content[1].content[0].content[0].text).toBe('line');
@@ -114,6 +124,16 @@ describe('parseMarkdown', () => {
     expect(d.content[2].content[0].text).toBe(' after');
     expect(d.content[1].attrs).toMatchObject({ src: '/x.png', alt: 'a', title: null });
     expect(p('![a](/x.png)\n![b](/y.png)').content.map(n => n.type)).toEqual(['image', 'image']);
+  });
+  test('image split leaves no dangling hard breaks', () => {
+    const noBreaks = (d) => JSON.stringify(d).indexOf('hardBreak') === -1;
+    const d = p('a\n![i](x)\nb');
+    expect(d.content.map(n => n.type)).toEqual(['paragraph', 'image', 'paragraph']);
+    expect(d.content[0].content).toEqual([{ type: 'text', text: 'a' }]);
+    expect(d.content[2].content).toEqual([{ type: 'text', text: 'b' }]);
+    expect(noBreaks(d)).toBe(true);
+    expect(noBreaks(p('> a\n> ![i](x)'))).toBe(true);
+    expect(noBreaks(p('![](x)\nb'))).toBe(true);
   });
   test('image split keeps surrounding marks on the text', () => {
     const d = p('**x ![a](/x.png) y**');

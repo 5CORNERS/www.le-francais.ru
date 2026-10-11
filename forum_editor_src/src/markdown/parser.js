@@ -88,9 +88,22 @@ function splitAroundImages(children) {
   return segments;
 }
 
-function isBlankSegment(tokens) {
-  return tokens.every((t) => t.nesting !== 0 || t.type === 'softbreak' || t.type === 'hardbreak' ||
-    (t.type === 'text' && !t.content.trim()));
+function isFiller(t) {
+  return t.type === 'softbreak' || t.type === 'hardbreak' || (t.type === 'text' && !t.content.trim());
+}
+
+// Drops line breaks and whitespace-only text at both edges of a segment
+// (mark open/close tokens are kept). Returns null when nothing remains.
+function trimSegment(tokens) {
+  const keep = tokens.map(() => true);
+  for (let i = 0; i < tokens.length && (tokens[i].nesting !== 0 || isFiller(tokens[i])); i++) {
+    if (tokens[i].nesting === 0) keep[i] = false;
+  }
+  for (let i = tokens.length - 1; i >= 0 && (tokens[i].nesting !== 0 || isFiller(tokens[i])); i--) {
+    if (tokens[i].nesting === 0) keep[i] = false;
+  }
+  const out = tokens.filter((_, i) => keep[i]);
+  return out.some((t) => t.nesting === 0) ? out : null;
 }
 
 function assertNoImages(children) {
@@ -126,8 +139,9 @@ function transformTokens(tokens, Token) {
       for (const seg of splitAroundImages(inline.children)) {
         if (!Array.isArray(seg)) {
           out.push(seg);
-        } else if (!isBlankSegment(seg)) {
-          out.push(tok, Object.assign(synthetic(Token, 'inline', 0), { children: seg }), close);
+        } else {
+          const children = trimSegment(seg);
+          if (children) out.push(tok, Object.assign(synthetic(Token, 'inline', 0), { children }), close);
         }
       }
       i += 2;
