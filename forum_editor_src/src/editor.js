@@ -9,6 +9,7 @@ import { runVisualCommand, runMarkdownCommand } from './commands.js';
 import { bindShortcuts } from './keymap.js';
 import { openLinkModal } from './ui/linkModal.js';
 import { initEmojiPicker } from './ui/emojiPicker.js';
+import { bindUploadHandlers } from './upload.js';
 
 export const MODE_STORAGE_KEY = 'forum_editor_mode';
 export const EDITOR_PLACEHOLDER = 'Напишите ответ или перетащите изображение сюда...';
@@ -68,6 +69,7 @@ export function createForumEditor(options) {
   const api = {
     currentMode: 'markdown',
     uploadUrl: uploadUrl,
+    textarea: textarea,
     tiptap: null,
     dom: dom,
     element: null,
@@ -379,7 +381,7 @@ export function createForumEditor(options) {
 
   // --- Toolbar commands -------------------------------------------------------
 
-  // The file picker (Task 10) plugs in here. `showLinkModal` is the dialog
+  // `openFilePicker` is set once the upload handlers are bound. `showLinkModal` is the dialog
   // used by the link command (replaceable, e.g. in tests).
   const commandContext = {
     openLinkModal: function () {},
@@ -563,11 +565,14 @@ export function createForumEditor(options) {
   const unbindVisualKeys = bindShortcuts(api.element, executeCommand);
   const unbindTextareaKeys = bindShortcuts(textarea, executeCommand);
   const destroyEmojiPicker = initEmojiPicker(dom.emoji, insertEmoji);
+  const uploads = bindUploadHandlers(api, dom);
+  commandContext.openFilePicker = uploads.openFilePicker;
 
   function destroy() {
     unbindVisualKeys();
     unbindTextareaKeys();
     destroyEmojiPicker();
+    uploads.destroy();
     if (form) form.removeEventListener('submit', onSubmit, true);
     textarea.removeEventListener('input', onTextareaInput);
     checkbox.removeEventListener('change', onCheckbox);
