@@ -239,11 +239,13 @@ describe('editor upload lifecycle', () => {
     expect(images(ed)).toHaveLength(1);
   });
 
-  test('image toolbar button opens the file input; chosen files upload', async () => {
+  test('image toolbar button, then "choose file", opens the file input; chosen files upload', async () => {
     fetch.mockReturnValue(new Promise(() => {}));
     const ed = makeEditor('a');
     const click = vi.spyOn(ed.dom.fileInput, 'click').mockImplementation(() => {});
     ed.dom.wrapper.querySelector('[data-cmd="image"]').click();
+    expect(click).not.toHaveBeenCalled();
+    ed.dom.modal.body.querySelector('.forum-modal-choose-file-btn').click();
     expect(click).toHaveBeenCalled();
     Object.defineProperty(ed.dom.fileInput, 'files', { value: [file], configurable: true });
     ed.dom.fileInput.dispatchEvent(new Event('change'));

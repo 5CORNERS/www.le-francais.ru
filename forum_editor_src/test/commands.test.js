@@ -11,7 +11,7 @@ let ctx;
 beforeEach(() => {
   localStorage.clear();
   ed = makeEditor('');
-  ctx = { openLinkModal: vi.fn(), openFilePicker: vi.fn() };
+  ctx = { openLinkModal: vi.fn(), openImageModal: vi.fn(), openFilePicker: vi.fn() };
 });
 
 afterEach(() => {
@@ -263,7 +263,8 @@ describe('visual commands', () => {
     runVisualCommand(ed.tiptap, 'link', ctx);
     runVisualCommand(ed.tiptap, 'image', ctx);
     expect(ctx.openLinkModal).toHaveBeenCalledTimes(1);
-    expect(ctx.openFilePicker).toHaveBeenCalledTimes(1);
+    expect(ctx.openImageModal).toHaveBeenCalledTimes(1);
+    expect(ctx.openFilePicker).not.toHaveBeenCalled();
   });
 
   test.each(COMMANDS.filter((c) => !['link', 'image', 'removeFormat', 'spoiler'].includes(c)))('%s toggles and is active', (cmd) => {
@@ -328,6 +329,7 @@ describe('toolbar wiring', () => {
     runMarkdownCommand(ta, 'link', ctx);
     runMarkdownCommand(ta, 'image', ctx);
     expect(ctx.openLinkModal).toHaveBeenCalledTimes(1);
-    expect(ctx.openFilePicker).toHaveBeenCalledTimes(1);
+    expect(ctx.openImageModal).toHaveBeenCalledTimes(1);
+    expect(ctx.openFilePicker).not.toHaveBeenCalled();
   });
 });

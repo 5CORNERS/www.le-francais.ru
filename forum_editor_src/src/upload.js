@@ -78,6 +78,23 @@ function newlines(n) {
 }
 
 /**
+ * Inserts block-level Markdown (an image) after the textarea selection, on
+ * its own paragraph: blank lines are added before and after as needed. The
+ * caret goes after the inserted text; `input` is dispatched.
+ */
+export function insertBlockMarkdown(textarea, md) {
+  const val = textarea.value;
+  let pos = textarea.selectionEnd;
+  if (typeof pos !== 'number' || pos < 0 || pos > val.length) pos = val.length;
+  const before = val.slice(0, pos);
+  const after = val.slice(pos);
+  const prefix = before.length ? newlines(2 - countNewlines(before, true)) : '';
+  const suffix = newlines(2 - countNewlines(after, false));
+  textarea.setRangeText(prefix + md + suffix, pos, pos, 'end');
+  textarea.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+/**
  * Wires paste, drop and the hidden file input of `dom` to uploads into the
  * editor `api`. Returns `{ openFilePicker, uploadFile, destroy }`.
  */
@@ -155,18 +172,6 @@ export function bindUploadHandlers(api, dom) {
     dispatchQuiet(editor.state.tr.replaceSelectionWith(node, false).scrollIntoView());
   }
 
-  function insertMarkdownAtCaret(md) {
-    const val = textarea.value;
-    let pos = textarea.selectionEnd;
-    if (typeof pos !== 'number' || pos < 0 || pos > val.length) pos = val.length;
-    const before = val.slice(0, pos);
-    const after = val.slice(pos);
-    const prefix = before.length ? newlines(2 - countNewlines(before, true)) : '';
-    const suffix = newlines(2 - countNewlines(after, false));
-    textarea.setRangeText(prefix + md + suffix, pos, pos, 'end');
-    textarea.dispatchEvent(new Event('input', { bubbles: true }));
-  }
-
   function onUploaded(uploadId, result) {
     if (api.currentMode === 'visual') {
       const editor = api.tiptap;
@@ -184,7 +189,7 @@ export function bindUploadHandlers(api, dom) {
         editor.view.dispatch(tr);
       }
     } else {
-      insertMarkdownAtCaret('![' + result.filename + '](' + result.url + ')');
+      insertBlockMarkdown(textarea, '![' + result.filename + '](' + result.url + ')');
     }
     api.updateCharCounter();
   }

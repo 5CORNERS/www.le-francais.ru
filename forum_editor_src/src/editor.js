@@ -8,8 +8,10 @@ import { buildEditorDom, updateActiveStates } from './ui/toolbar.js';
 import { runVisualCommand, runMarkdownCommand } from './commands.js';
 import { bindShortcuts } from './keymap.js';
 import { openLinkModal } from './ui/linkModal.js';
+import { openImageModal } from './ui/imageModal.js';
+import { sanitizeUrl } from './url.js';
 import { initEmojiPicker } from './ui/emojiPicker.js';
-import { bindUploadHandlers } from './upload.js';
+import { bindUploadHandlers, insertBlockMarkdown } from './upload.js';
 import { initResizeHandle } from './ui/resizeHandle.js';
 
 export const MODE_STORAGE_KEY = 'forum_editor_mode';
@@ -408,12 +410,15 @@ export function createForumEditor(options) {
 
   // --- Toolbar commands -------------------------------------------------------
 
-  // `openFilePicker` is set once the upload handlers are bound. `showLinkModal` is the dialog
-  // used by the link command (replaceable, e.g. in tests).
+  // `openFilePicker` is set once the upload handlers are bound. `showLinkModal` and
+  // `showImageModal` are the dialogs used by the link and image commands
+  // (replaceable, e.g. in tests).
   const commandContext = {
     openLinkModal: function () {},
+    openImageModal: function () {},
     openFilePicker: function () {},
     showLinkModal: openLinkModal,
+    showImageModal: openImageModal,
   };
 
   function refreshActiveStates() {
@@ -493,6 +498,34 @@ export function createForumEditor(options) {
     });
   }
   commandContext.openLinkModal = linkCommand;
+
+  /** The `image` command: asks for a URL and caption (or a file to upload). */
+  function imageCommand() {
+    const mode = api.currentMode;
+    const options = { onChooseFile: function () { commandContext.openFilePicker(); } };
+    return Promise.resolve(commandContext.showImageModal(dom.modal, options)).then(function (image) {
+      if (api.currentMode !== mode) return;
+      if (!image || !image.url) {
+        focus();
+        return;
+      }
+      const src = sanitizeUrl(image.url);
+      const title = image.title || '';
+      if (mode === 'visual') {
+        // A block image at the selection, like upload placeholders.
+        const editor = api.tiptap;
+        const node = editor.schema.nodes.image.create({ src: src, alt: title, title: title || null });
+        editor.view.dispatch(editor.state.tr.replaceSelectionWith(node, false).scrollIntoView());
+        editor.view.focus();
+      } else {
+        textarea.focus();
+        insertBlockMarkdown(textarea, '![' + title + '](' + src + (title ? ' "' + title + '"' : '') + ')');
+      }
+      updateCharCounter();
+      refreshActiveStates();
+    });
+  }
+  commandContext.openImageModal = imageCommand;
 
   function insertEmoji(char) {
     if (api.currentMode === 'visual') {

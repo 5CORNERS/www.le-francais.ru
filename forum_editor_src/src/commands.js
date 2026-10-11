@@ -234,7 +234,7 @@ function removeFormatVisual(editor) {
 export function runVisualCommand(editor, cmd, ctx) {
   const c = ctx || {};
   if (cmd === 'link') { call(c.openLinkModal); return; }
-  if (cmd === 'image') { call(c.openFilePicker); return; }
+  if (cmd === 'image') { call(c.openImageModal); return; }
 
   editor.commands.focus();
   if (MARKS[cmd]) {
@@ -295,7 +295,7 @@ function applyToTextarea(textarea, newText, selStart, selEnd) {
 export function runMarkdownCommand(textarea, cmd, ctx) {
   const c = ctx || {};
   if (cmd === 'link') { call(c.openLinkModal); return; }
-  if (cmd === 'image') { call(c.openFilePicker); return; }
+  if (cmd === 'image') { call(c.openImageModal); return; }
   const text = textarea.value;
   const start = textarea.selectionStart;
   const end = textarea.selectionEnd;
