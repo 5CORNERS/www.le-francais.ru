@@ -1,6 +1,8 @@
 // Image upload: paste, drag-and-drop and the toolbar file picker.
 // Server endpoint: forum/views.py upload_image_ajax (form key 'file').
 
+import { Plugin, PluginKey } from '@tiptap/pm/state';
+
 export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 export const MAX_UPLOAD_SIZE = 10 * 1024 * 1024;
 export const UPLOAD_ERROR = 'Ошибка при загрузке изображения.';
@@ -85,6 +87,11 @@ export function bindUploadHandlers(api, dom) {
   let queue = Promise.resolve();
   let dragCounter = 0;
   let destroyed = false;
+  // uploadId -> true while uploading; finished uploads map to their final attrs.
+  const pendingIds = Object.create(null);
+  const finished = Object.create(null);
+  let anyUpload = false;
+  const pluginKey = new PluginKey('forumUploadPlaceholders');
 
   function updateProgress() {
     dom.uploadProgress.classList.toggle('d-none', pending === 0);
@@ -110,8 +117,40 @@ export function bindUploadHandlers(api, dom) {
     api.tiptap.view.dispatch(tr);
   }
 
+  // Undo/redo of neighbouring edits can still bring back a placeholder whose
+  // upload has settled (history steps are not rebased onto the quiet ones).
+  // After every doc change, such placeholders become the final image, or are
+  // removed when the upload failed.
+  const placeholderGuard = new Plugin({
+    key: pluginKey,
+    appendTransaction(transactions, oldState, newState) {
+      if (!anyUpload || !transactions.some((t) => t.docChanged)) return null;
+      const stale = [];
+      newState.doc.descendants((node, pos) => {
+        if (node.type.name === 'image' && node.attrs.uploadId !== null && !pendingIds[node.attrs.uploadId]) {
+          stale.push({ node: node, pos: pos });
+        }
+        return true;
+      });
+      if (!stale.length) return null;
+      const tr = newState.tr;
+      // Back to front, so earlier positions stay valid.
+      for (let i = stale.length - 1; i >= 0; i--) {
+        const item = stale[i];
+        const final = finished[item.node.attrs.uploadId];
+        if (final) tr.setNodeMarkup(item.pos, null, Object.assign({}, item.node.attrs, final));
+        else tr.delete(item.pos, item.pos + item.node.nodeSize);
+      }
+      tr.setMeta('addToHistory', false);
+      return tr;
+    },
+  });
+  api.tiptap.registerPlugin(placeholderGuard);
+
   function insertPlaceholder(uploadId, blobUrl, filename) {
     const editor = api.tiptap;
+    // Selected content is removed in a normal (undoable) step, like a paste.
+    if (!editor.state.selection.empty) editor.view.dispatch(editor.state.tr.deleteSelection());
     const node = editor.schema.nodes.image.create({ src: blobUrl, alt: 'Загрузка ' + filename + '...', uploadId: uploadId });
     dispatchQuiet(editor.state.tr.replaceSelectionWith(node, false).scrollIntoView());
   }
@@ -131,12 +170,15 @@ export function bindUploadHandlers(api, dom) {
   function onUploaded(uploadId, result) {
     if (api.currentMode === 'visual') {
       const editor = api.tiptap;
-      const attrs = { src: result.url, alt: result.filename, uploadId: null };
+      const attrs = finished[uploadId];
       const found = findPlaceholder(uploadId);
       if (found) {
         dispatchQuiet(editor.state.tr.setNodeMarkup(found.pos, null, Object.assign({}, found.node.attrs, attrs)));
       } else {
-        // The placeholder was dropped (mode switch or reload): append the image.
+        // The placeholder was dropped (mode switch, reload, or deleted by the
+        // author): append the image. This is a new edit with no placeholder
+        // behind it, so it goes into the history like any other insertion and
+        // can be undone.
         const tr = editor.state.tr;
         tr.insert(tr.doc.content.size, editor.schema.nodes.image.create(attrs));
         editor.view.dispatch(tr);
@@ -156,13 +198,21 @@ export function bindUploadHandlers(api, dom) {
     api.updateCharCounter();
   }
 
+  /**
+   * Uploads one file. Returns a promise for this file's own upload: it resolves
+   * with `{url, filename}` once the upload has settled successfully, or with
+   * null when it failed or was rejected up front (the error has been shown).
+   * It never rejects.
+   */
   function uploadFile(file) {
     const filename = file.name || 'image.jpg';
     if (file.size > MAX_UPLOAD_SIZE) {
       window.alert('Файл «' + filename + '» превышает 10 МБ. Пожалуйста, сожмите изображение или используйте сторонний сервис.');
-      return Promise.resolve();
+      return Promise.resolve(null);
     }
     const uploadId = 'upload_' + Math.random().toString(36).slice(2, 11);
+    pendingIds[uploadId] = true;
+    anyUpload = true;
     let blobUrl = null;
     if (api.currentMode === 'visual') {
       blobUrl = URL.createObjectURL(file);
@@ -172,18 +222,33 @@ export function bindUploadHandlers(api, dom) {
     updateProgress();
 
     function settle(handler, value) {
+      delete pendingIds[uploadId];
       pending--;
       updateProgress();
       if (blobUrl) URL.revokeObjectURL(blobUrl);
-      if (!destroyed) handler(uploadId, value);
+      if (destroyed) return;
+      try {
+        handler(uploadId, value);
+      } catch (e) {
+        // One broken completion must not stall the uploads queued after it.
+        console.error('forum-editor: image upload handler failed', e);
+      }
     }
 
     // Uploads run one at a time; each file already has its placeholder.
-    queue = queue.then(() => uploadImage(file, api.uploadUrl).then(
-      (result) => settle(onUploaded, result),
-      (err) => settle(onFailed, err)
+    const done = queue.then(() => uploadImage(file, api.uploadUrl).then(
+      (result) => {
+        finished[uploadId] = { src: result.url, alt: result.filename, uploadId: null };
+        settle(onUploaded, result);
+        return result;
+      },
+      (err) => {
+        settle(onFailed, err);
+        return null;
+      }
     ));
-    return queue;
+    queue = done;
+    return done;
   }
 
   function uploadAll(files) {
@@ -252,6 +317,7 @@ export function bindUploadHandlers(api, dom) {
 
   function destroy() {
     destroyed = true;
+    if (!api.tiptap.isDestroyed) api.tiptap.unregisterPlugin(pluginKey);
     dom.fileInput.removeEventListener('change', onFileChange);
     wrapper.removeEventListener('dragenter', onDragEnter, true);
     wrapper.removeEventListener('dragover', onDragOver, true);

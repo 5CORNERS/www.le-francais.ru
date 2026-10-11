@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { getCsrfToken, uploadImage } from '../src/upload.js';
-import { makeEditor, destroyEditors } from './helpers.js';
+import { TextSelection } from '@tiptap/pm/state';
+import { makeEditor, destroyEditors, selectText } from './helpers.js';
 
 const file = new File(['x'], 'a.png', { type: 'image/png' });
 
@@ -77,6 +78,15 @@ describe('getCsrfToken / uploadImage', () => {
   test('server error rejects with its message', async () => {
     fetch.mockResolvedValue({ json: async () => ({ success: false, error: 'Файл изображения не был передан.' }) });
     await expect(uploadImage(file, '/u/')).rejects.toThrow('Файл изображения не был передан.');
+  });
+
+  test('default error message is the legacy string', async () => {
+    fetch.mockResolvedValueOnce({ json: async () => ({ success: false }) });
+    await expect(uploadImage(file, '/u/')).rejects.toThrow('Ошибка при загрузке изображения.');
+    fetch.mockResolvedValueOnce({ json: async () => { throw new SyntaxError('not JSON'); } });
+    await expect(uploadImage(file, '/u/')).rejects.toThrow('Ошибка при загрузке изображения.');
+    fetch.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    await expect(uploadImage(file, '/u/')).rejects.toThrow('Ошибка при загрузке изображения.');
   });
 
   test('network error rejects', async () => {
@@ -251,5 +261,73 @@ describe('editor upload lifecycle', () => {
     expect(fetch).not.toHaveBeenCalled();
     expect(alertSpy).toHaveBeenCalledWith('Файл «big.png» превышает 10 МБ. Пожалуйста, сожмите изображение или используйте сторонний сервис.');
     expect(images(ed)).toHaveLength(0);
+  });
+
+  test('undo after a successful upload never resurrects the placeholder', async () => {
+    const d = deferred();
+    fetch.mockReturnValue(d.promise);
+    const ed = makeEditor('a');
+    const end = ed.tiptap.state.doc.content.size - 1;
+    ed.tiptap.view.dispatch(ed.tiptap.state.tr.setSelection(TextSelection.create(ed.tiptap.state.doc, end)));
+    ed.element.dispatchEvent(pasteEvent([file]));
+    ed.tiptap.commands.insertContent('XY');
+    d.resolve(okResponse());
+    await flush();
+    ed.tiptap.commands.undo();
+    const imgs = images(ed);
+    expect(imgs.some((i) => i.uploadId !== null || /^blob:/.test(i.src))).toBe(false);
+    // The uploaded image stays in the post, as the final image.
+    expect(imgs).toEqual([expect.objectContaining({ src: '/m/a.png', alt: 'a.png', uploadId: null })]);
+    expect(ed.getMarkdown()).toContain('![a.png](/m/a.png)');
+    expect(ed.getMarkdown()).not.toContain('XY');
+  });
+
+  test('undo after a failed upload does not bring the placeholder back', async () => {
+    const d = deferred();
+    fetch.mockReturnValue(d.promise);
+    const ed = makeEditor('a');
+    const end = ed.tiptap.state.doc.content.size - 1;
+    ed.tiptap.view.dispatch(ed.tiptap.state.tr.setSelection(TextSelection.create(ed.tiptap.state.doc, end)));
+    ed.element.dispatchEvent(pasteEvent([file]));
+    ed.tiptap.commands.insertContent('XY');
+    d.resolve({ json: async () => ({ success: false, error: 'E' }) });
+    await flush();
+    ed.tiptap.commands.undo();
+    expect(images(ed)).toHaveLength(0);
+    expect(ed.getMarkdown()).toBe('a');
+  });
+
+  test('pasting over selected text deletes it in an undoable step', async () => {
+    fetch.mockReturnValue(new Promise(() => {}));
+    const ed = makeEditor('hello world');
+    selectText(ed, 'world', 'world');
+    ed.element.dispatchEvent(pasteEvent([file]));
+    expect(ed.tiptap.state.doc.textContent).toBe('hello ');
+    expect(images(ed)).toHaveLength(1);
+    ed.tiptap.commands.undo();
+    expect(ed.tiptap.state.doc.textContent).toBe('hello world');
+  });
+
+  test('an exception while finishing one upload does not stall the queue', async () => {
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    fetch
+      .mockResolvedValueOnce(okResponse())
+      .mockResolvedValueOnce({ json: async () => ({ success: true, url: '/m/b.gif', filename: 'b.gif' }) });
+    const ed = makeEditor('a');
+    const counter = ed.updateCharCounter;
+    let calls = 0;
+    ed.updateCharCounter = function () {
+      calls++;
+      if (calls === 1) throw new Error('boom');
+      return counter.apply(this, arguments);
+    };
+    const b = new File(['y'], 'b.gif', { type: 'image/gif' });
+    ed.element.dispatchEvent(pasteEvent([file, b]));
+    await flush();
+    await flush();
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(images(ed).map((i) => i.src)).toEqual(['/m/a.png', '/m/b.gif']);
+    expect(ed.dom.uploadProgress.classList.contains('d-none')).toBe(true);
+    expect(errSpy).toHaveBeenCalled();
   });
 });

@@ -176,14 +176,16 @@ describe('serializeMarkdown', () => {
     const src = Array.from({ length: 2000 }, (_, i) => `Paragraphe **${i}** avec du texte_x et 2*3.`).join('\n\n');
     const d = parseMarkdown(src);
     expect(serializeMarkdown(d)).toBe(src);
-    // Best of three: the full suite runs files in parallel, and one run can
-    // lose its CPU slice to another worker.
-    let best = Infinity;
-    for (let i = 0; i < 3; i++) {
+    // Median of five after a warm-up run: the full suite runs files in
+    // parallel, and single runs can lose their CPU slice to another worker.
+    serializeMarkdown(d);
+    const times = [];
+    for (let i = 0; i < 5; i++) {
       const t0 = performance.now();
       serializeMarkdown(d);
-      best = Math.min(best, performance.now() - t0);
+      times.push(performance.now() - t0);
     }
-    expect(best).toBeLessThan(100);
+    times.sort((x, y) => x - y);
+    expect(times[2]).toBeLessThan(100);
   });
 });
