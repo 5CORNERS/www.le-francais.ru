@@ -6,6 +6,7 @@ import { Plugin, PluginKey } from '@tiptap/pm/state';
 export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 export const MAX_UPLOAD_SIZE = 10 * 1024 * 1024;
 export const UPLOAD_ERROR = 'Ошибка при загрузке изображения.';
+export const UPLOAD_PENDING_CONFIRM = 'Изображение ещё загружается. Отправить сообщение без него?';
 
 /** Django CSRF token: the hidden form field first, then the `csrftoken` cookie. */
 export function getCsrfToken(doc = document) {
@@ -96,7 +97,7 @@ export function insertBlockMarkdown(textarea, md) {
 
 /**
  * Wires paste, drop and the hidden file input of `dom` to uploads into the
- * editor `api`. Returns `{ openFilePicker, uploadFile, destroy }`.
+ * editor `api`. Returns `{ openFilePicker, uploadFile, pendingCount, destroy }`.
  */
 export function bindUploadHandlers(api, dom) {
   const textarea = api.textarea;
@@ -331,5 +332,11 @@ export function bindUploadHandlers(api, dom) {
     wrapper.removeEventListener('paste', onPaste, true);
   }
 
-  return { openFilePicker: openFilePicker, uploadFile: uploadFile, destroy: destroy };
+  return {
+    openFilePicker: openFilePicker,
+    uploadFile: uploadFile,
+    /** Number of uploads not yet settled. */
+    pendingCount: function () { return pending; },
+    destroy: destroy,
+  };
 }

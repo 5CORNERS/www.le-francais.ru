@@ -11,7 +11,7 @@ import { openLinkModal } from './ui/linkModal.js';
 import { openImageModal } from './ui/imageModal.js';
 import { sanitizeUrl } from './url.js';
 import { initEmojiPicker } from './ui/emojiPicker.js';
-import { bindUploadHandlers, insertBlockMarkdown } from './upload.js';
+import { bindUploadHandlers, insertBlockMarkdown, UPLOAD_PENDING_CONFIRM } from './upload.js';
 import { initResizeHandle } from './ui/resizeHandle.js';
 
 export const MODE_STORAGE_KEY = 'forum_editor_mode';
@@ -491,8 +491,11 @@ export function createForumEditor(options) {
         focus();
         return;
       }
-      if (mode === 'visual') applyLinkVisual(range, text, link);
-      else applyLinkMarkdown(range, link);
+      // Legacy sanitizeUrl: only http(s):, /, mailto: and # links; others become '#'.
+      // The display text stays what the author typed.
+      const safe = { text: link.text || link.url, url: sanitizeUrl(link.url) };
+      if (mode === 'visual') applyLinkVisual(range, text, safe);
+      else applyLinkMarkdown(range, safe);
       updateCharCounter();
       refreshActiveStates();
     });
@@ -590,7 +593,14 @@ export function createForumEditor(options) {
 
   // --- DOM events -------------------------------------------------------------
 
-  const onSubmit = () => syncMarkdownFromVisual();
+  // Capture phase: runs before the page's own submit handlers.
+  const onSubmit = (e) => {
+    if (uploads.pendingCount() > 0 && !window.confirm(UPLOAD_PENDING_CONFIRM)) {
+      e.preventDefault();
+      return;
+    }
+    syncMarkdownFromVisual();
+  };
   const onTextareaInput = () => {
     if (api.currentMode === 'markdown') updateCharCounter();
   };
@@ -631,7 +641,12 @@ export function createForumEditor(options) {
   });
   commandContext.openFilePicker = uploads.openFilePicker;
 
+  let destroyed = false;
+
+  /** Unmounts the editor and puts the textarea back. Safe to call twice. */
   function destroy() {
+    if (destroyed) return;
+    destroyed = true;
     unbindVisualKeys();
     unbindTextareaKeys();
     destroyEmojiPicker();
@@ -649,6 +664,7 @@ export function createForumEditor(options) {
     dom.wrapper.parentNode.insertBefore(textarea, dom.wrapper);
     dom.wrapper.parentNode.removeChild(dom.wrapper);
     hideNotice();
+    if (window.forumEditor === api) delete window.forumEditor;
   }
 
   Object.assign(api, {

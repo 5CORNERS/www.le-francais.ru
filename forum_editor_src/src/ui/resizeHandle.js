@@ -38,6 +38,7 @@ export function initResizeHandle(resizerEl, getTargets) {
       document.removeEventListener('mouseup', onEnd);
       document.removeEventListener('touchmove', onTouchMove);
       document.removeEventListener('touchend', onEnd);
+      document.removeEventListener('touchcancel', onEnd);
       document.documentElement.style.cursor = '';
       document.body.style.userSelect = '';
       active = null;
@@ -47,6 +48,8 @@ export function initResizeHandle(resizerEl, getTargets) {
     document.addEventListener('mouseup', onEnd);
     document.addEventListener('touchmove', onTouchMove);
     document.addEventListener('touchend', onEnd);
+    // An interrupted touch (system gesture, alert) ends the drag too.
+    document.addEventListener('touchcancel', onEnd);
     active = onEnd;
   }
 

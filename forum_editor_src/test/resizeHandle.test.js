@@ -11,7 +11,7 @@ function mouse(el, type, y) {
 
 function touch(el, type, y) {
   const ev = new Event(type, { bubbles: true, cancelable: true });
-  ev.touches = type === 'touchend' ? [] : [{ clientY: y }];
+  ev.touches = type === 'touchend' || type === 'touchcancel' ? [] : [{ clientY: y }];
   el.dispatchEvent(ev);
 }
 
@@ -42,6 +42,16 @@ describe('initResizeHandle', () => {
     expect(target.style.height).toBe('260px');
     touch(document, 'touchend', 160);
     expect(document.body.style.userSelect).toBe('');
+  });
+
+  test('touchcancel ends the drag like touchend (final review 12)', () => {
+    touch(handle, 'touchstart', 100);
+    touch(document, 'touchmove', 160);
+    touch(document, 'touchcancel', 160);
+    expect(document.body.style.userSelect).toBe('');
+    expect(document.documentElement.style.cursor).toBe('');
+    touch(document, 'touchmove', 300);
+    expect(target.style.height).toBe('260px');
   });
 
   test('height never drops below 140px', () => {

@@ -169,3 +169,39 @@ describe('link command integration', () => {
     expect(openModal.mock.calls[0][1]).toEqual({ text: 'ici', url: '' });
   });
 });
+
+describe('link URL validation (final review 7, legacy sanitizeUrl)', () => {
+  test.each([
+    ['javascript:alert(1)', '#'],
+    ['  JavaScript:alert(1)', '#'],
+    ['data:text/html,x', '#'],
+    ['example.com', '#'],
+    ['HTTPS://a.b', 'HTTPS://a.b'],
+    ['/forum/', '/forum/'],
+    ['mailto:a@b.c', 'mailto:a@b.c'],
+    ['#top', '#top'],
+  ])('visual: %s is stored as %s', async (url, href) => {
+    const ed = makeEditor('voir ici');
+    selectText(ed, 'ici', 'ici');
+    ed.commandContext.showLinkModal = vi.fn(() => Promise.resolve({ text: 'ici', url: url }));
+    ed.executeCommand('link');
+    await vi.waitFor(() => expect(ed.getMarkdown()).toBe('voir [ici](' + href + ')'));
+  });
+
+  test('markdown: a disallowed scheme becomes #', async () => {
+    const ed = makeEditor('voir ici', 'markdown');
+    const ta = ed.dom.container.querySelector('textarea');
+    ta.setSelectionRange(5, 8);
+    ed.commandContext.showLinkModal = vi.fn(() => Promise.resolve({ text: 'ici', url: 'javascript:alert(1)' }));
+    ed.executeCommand('link');
+    await vi.waitFor(() => expect(ta.value).toBe('voir [ici](#)'));
+  });
+
+  test('without link text the typed URL is the display text', async () => {
+    const ed = makeEditor('', 'markdown');
+    const ta = ed.dom.container.querySelector('textarea');
+    ed.commandContext.showLinkModal = vi.fn(() => Promise.resolve({ text: '', url: 'ftp://x' }));
+    ed.executeCommand('link');
+    await vi.waitFor(() => expect(ta.value).toBe('[ftp://x](#)'));
+  });
+});

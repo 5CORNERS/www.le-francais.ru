@@ -333,3 +333,52 @@ describe('editor upload lifecycle', () => {
     expect(errSpy).toHaveBeenCalled();
   });
 });
+
+describe('submit while an upload is pending (final review 10)', () => {
+  const MSG = 'Изображение ещё загружается. Отправить сообщение без него?';
+
+  function submitForm(ed) {
+    const form = ed.textarea.form;
+    const seen = vi.fn();
+    form.addEventListener('submit', (e) => { seen(e.defaultPrevented); e.preventDefault(); });
+    const ev = new Event('submit', { bubbles: true, cancelable: true });
+    form.dispatchEvent(ev);
+    return { ev: ev, seen: seen };
+  }
+
+  test('declining the confirm blocks the submit', async () => {
+    fetch.mockReturnValue(new Promise(() => {}));
+    const confirmSpy = vi.fn(() => false);
+    vi.stubGlobal('confirm', confirmSpy);
+    const ed = makeEditor('a');
+    ed.element.dispatchEvent(pasteEvent([file]));
+    const r = submitForm(ed);
+    expect(confirmSpy).toHaveBeenCalledWith(MSG);
+    expect(r.seen).toHaveBeenCalledWith(true);
+  });
+
+  test('accepting the confirm lets the submit through, synced', async () => {
+    fetch.mockReturnValue(new Promise(() => {}));
+    const confirmSpy = vi.fn(() => true);
+    vi.stubGlobal('confirm', confirmSpy);
+    const ed = makeEditor('a');
+    ed.element.dispatchEvent(pasteEvent([file]));
+    const r = submitForm(ed);
+    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    expect(r.seen).toHaveBeenCalledWith(false);
+    expect(ed.textarea.value).toBe('a');
+  });
+
+  test('no pending upload: no confirm', async () => {
+    fetch.mockResolvedValue(okResponse());
+    const confirmSpy = vi.fn(() => false);
+    vi.stubGlobal('confirm', confirmSpy);
+    const ed = makeEditor('a');
+    ed.element.dispatchEvent(pasteEvent([file]));
+    await flush();
+    await flush();
+    const r = submitForm(ed);
+    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(r.seen).toHaveBeenCalledWith(false);
+  });
+});

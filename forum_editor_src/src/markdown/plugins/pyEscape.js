@@ -3,7 +3,7 @@
 // pymdown caret/tilde (^ ~ space), mark (=), keys (+) and emoji (:).
 // Any other `\x` stays a literal backslash (markdown-it would escape every
 // ASCII punctuation character, e.g. `\&`, `\<`, `\?`).
-const PY_ESCAPED = '\\`*_{}[]()>#+-.!"\'|^~=: ';
+export const PY_ESCAPED = '\\`*_{}[]()>#+-.!"\'|^~=: ';
 
 export function pyEscapePlugin(md) {
   const rule = md.inline.ruler.__rules__.find((r) => r.name === 'escape');

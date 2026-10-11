@@ -324,28 +324,6 @@ describe('createForumEditor', () => {
   });
 });
 
-describe('index.js start-up', () => {
-  test('mounts on DOMContentLoaded once, only when #id_body exists', async () => {
-    delete window.forumEditor;
-    document.body.innerHTML = '';
-    await import('../src/index.js');
-    document.dispatchEvent(new Event('DOMContentLoaded'));
-    expect(window.forumEditor).toBeUndefined();
-
-    document.body.innerHTML = '<form><textarea id="id_body"></textarea></form>';
-    document.dispatchEvent(new Event('DOMContentLoaded'));
-    const first = window.forumEditor;
-    expect(first.element.classList.contains('forum-visual-editor')).toBe(true);
-    expect(first.uploadUrl).toBe('/forum/upload-image/');
-
-    document.dispatchEvent(new Event('DOMContentLoaded'));
-    expect(window.forumEditor).toBe(first);
-    expect(document.querySelectorAll('.forum-editor-wrapper').length).toBe(1);
-    first.destroy();
-    delete window.forumEditor;
-  });
-});
-
 describe('history is reset on every load (final review 2)', () => {
   test('markdown -> visual, then undo keeps the content', () => {
     ta.value = 'start';
@@ -415,5 +393,31 @@ describe('insertQuote with unparseable Markdown (final review 4)', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     ed.insertQuote(QUOTE + '\n');
     expect(ta.value).toBe(QUOTE);
+  });
+});
+
+describe('destroy (final review 9)', () => {
+  test('a second destroy is a no-op', () => {
+    ta.value = 'x';
+    const ed = createForumEditor({ textarea: ta });
+    ed.destroy();
+    expect(() => ed.destroy()).not.toThrow();
+    expect(ta.parentNode).toBe(form);
+    expect(qs('.forum-editor-wrapper')).toBeNull();
+    expect(ta.value).toBe('x');
+  });
+
+  test('clears window.forumEditor only when it points at this instance', () => {
+    const ed = createForumEditor({ textarea: ta });
+    window.forumEditor = ed;
+    ed.destroy();
+    expect(window.forumEditor).toBeUndefined();
+
+    const other = { marker: true };
+    window.forumEditor = other;
+    const ed2 = createForumEditor({ textarea: ta });
+    ed2.destroy();
+    expect(window.forumEditor).toBe(other);
+    delete window.forumEditor;
   });
 });

@@ -1,6 +1,7 @@
 import { MarkdownSerializer, MarkdownSerializerState } from 'prosemirror-markdown';
 import { parseMarkdown } from './parser.js';
 import { createMarkdownIt } from './md.js';
+import { PY_ESCAPED } from './plugins/pyEscape.js';
 
 // ProseMirror doc -> Markdown for Python-Markdown 2.6.11 + pymdown-extensions 5.0.
 //
@@ -12,8 +13,6 @@ import { createMarkdownIt } from './md.js';
 const SENT = '\uE000';
 const SENT_RE = /\uE000/g;
 const MARKED_RE = /[\\*_^~=+[\]`:<#>\-.)?!{|\uE000]/g;
-// Backslash escapes honoured by the server (and by our parser: pyEscape.js).
-const PY_ESCAPED = '\\`*_{}[]()>#+-.!"\'|^~=: ';
 const ALNUM = /[\p{L}\p{N}]/u;
 const WS = /\s/;
 const SHORTCODE_AFTER = /^:[\w+-]+:/;
