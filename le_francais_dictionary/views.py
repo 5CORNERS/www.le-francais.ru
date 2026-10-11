@@ -140,6 +140,8 @@ def get_words(request, packet_id):
         'errors': [],
     }
     packet_id = int(packet_id)
+    if packet_id == 88888888:
+        return get_repetition_words(request)
     if packet_id == 99999999:
         standalone_packet = UserStandalonePacket.objects.get(user=request.user)
         words = Word.objects.filter(pk__in=standalone_packet.words)
@@ -400,6 +402,19 @@ def get_packet_progress(request, pk):
                 "wordsCount": 0,
                 "isAuthenticated": True
             }
+        return JsonResponse(result)
+    if int(pk) == 88888888:
+        is_authenticated = request.user.is_authenticated
+        result = {
+            "pk": 88888888,
+            "name": "Слова на повторение",
+            "lessonNumber": None,
+            "demo": True,
+            "activated": True if is_authenticated else None,
+            "added": True if is_authenticated else None,
+            "wordsCount": count_repetition_words(request.user) if is_authenticated else 0,
+            "isAuthenticated": is_authenticated,
+        }
         return JsonResponse(result)
     try:
         result = Packet.objects.get(pk=pk).to_dict(user=request.user)
@@ -670,19 +685,22 @@ def attach_info(request, result):
     return result
 
 
+def count_repetition_words(user):
+    return Word.objects.filter(
+        userwordrepetition__repetition_datetime__lte=timezone.now(),
+        userwordrepetition__user=user,
+        userwordrepetition__time__lt=5
+    ).exclude(userwordignore__user=user).values('cd_id').distinct().count()
+
+
 def get_repetition_words_count(request):
     if request.user.is_anonymous:
         result = {
             'count': 0
         }
     else:
-        words = Word.objects.filter(
-            userwordrepetition__repetition_datetime__lte=timezone.now(),
-            userwordrepetition__user=request.user,
-            userwordrepetition__time__lt=5
-        ).exclude(userwordignore__user=request.user).values('cd_id').distinct()
         result = {
-            'count': words.count()
+            'count': count_repetition_words(request.user)
         }
     return JsonResponse(result, status=200)
 
