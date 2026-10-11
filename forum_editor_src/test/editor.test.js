@@ -324,38 +324,96 @@ describe('createForumEditor', () => {
   });
 });
 
-describe('history is reset on every load (final review 2)', () => {
-  test('markdown -> visual, then undo keeps the content', () => {
+describe('visual undo across loads (user fix 1)', () => {
+  test('markdown -> visual (first load), then undo keeps the content', () => {
     ta.value = 'start';
     const ed = make({ initialMode: 'markdown' });
     ed.setMode('visual');
-    ed.tiptap.commands.undo();
+    expect(ed.tiptap.commands.undo()).toBe(false);
     expect(ed.tiptap.state.doc.textContent).toBe('start');
     expect(ta.value).toBe('start');
   });
 
-  test('visual edits, markdown edits, visual, then undo keeps the markdown edits', () => {
+  test('undo right after the initial load is a no-op', () => {
+    ta.value = 'x';
+    const ed = make({ initialMode: 'visual' });
+    expect(ed.tiptap.commands.undo()).toBe(false);
+    expect(ed.tiptap.state.doc.textContent).toBe('x');
+    expect(ta.value).toBe('x');
+  });
+
+  test('markdown-mode edits undo in one step, then earlier visual edits; redo is symmetric', () => {
     ta.value = 'a';
     const ed = make({ initialMode: 'visual' });
     ed.tiptap.commands.focus('end');
     ed.tiptap.commands.insertContent('b');
     expect(ta.value).toBe('ab');
     ed.setMode('markdown');
-    ta.value = 'ab c';
+    ta.value = 'ab c\n\nd';
     ed.setMode('visual');
+    expect(ta.value).toBe('ab c\n\nd');
+    expect(ed.tiptap.state.doc.childCount).toBe(2);
+
+    expect(ed.tiptap.commands.undo()).toBe(true);
+    expect(ed.tiptap.state.doc.textContent).toBe('ab');
+    expect(ta.value).toBe('ab');
+
+    expect(ed.tiptap.commands.undo()).toBe(true);
+    expect(ed.tiptap.state.doc.textContent).toBe('a');
+    expect(ta.value).toBe('a');
     expect(ed.tiptap.commands.undo()).toBe(false);
-    expect(ta.value).toBe('ab c');
-    expect(ed.tiptap.state.doc.textContent).toBe('ab c');
+    expect(ta.value).toBe('a');
+
+    expect(ed.tiptap.commands.redo()).toBe(true);
+    expect(ta.value).toBe('ab');
+    expect(ed.tiptap.commands.redo()).toBe(true);
+    expect(ta.value).toBe('ab c\n\nd');
+    expect(ed.tiptap.commands.redo()).toBe(false);
   });
 
-  test('undo right after the initial load or setMarkdown is a no-op', () => {
+  test('the load itself does not rewrite the textarea with normalized Markdown', () => {
+    ta.value = 'a';
+    const ed = make({ initialMode: 'visual' });
+    ed.tiptap.commands.focus('end');
+    ed.tiptap.commands.insertContent('b');
+    ed.setMode('markdown');
+    // `__x__` is serialized as `**x**`; the author's spelling must survive the switch.
+    ta.value = '__x__';
+    const changes = vi.fn();
+    ta.addEventListener('change', changes);
+    ed.setMode('visual');
+    expect(ed.tiptap.state.doc.textContent).toBe('x');
+    expect(ta.value).toBe('__x__');
+    expect(changes).not.toHaveBeenCalled();
+    ed.setMode('markdown');
+    expect(ta.value).toBe('__x__');
+  });
+
+  test('a round trip without changes adds no history step', () => {
+    ta.value = 'a';
+    const ed = make({ initialMode: 'visual' });
+    ed.tiptap.commands.focus('end');
+    ed.tiptap.commands.insertContent('b');
+    ed.setMode('markdown');
+    ta.value = 'ab\n';
+    ed.setMode('visual');
+    expect(ta.value).toBe('ab\n');
+    expect(ed.tiptap.commands.undo()).toBe(true);
+    expect(ed.tiptap.state.doc.textContent).toBe('a');
+    expect(ta.value).toBe('a');
+    expect(ed.tiptap.commands.undo()).toBe(false);
+  });
+
+  test('setMarkdown (reply button) is one undoable step', () => {
     ta.value = 'x';
     const ed = make({ initialMode: 'visual' });
-    expect(ed.tiptap.commands.undo()).toBe(false);
     ed.setMarkdown('y');
-    expect(ed.tiptap.commands.undo()).toBe(false);
     expect(ed.tiptap.state.doc.textContent).toBe('y');
     expect(ta.value).toBe('y');
+    expect(ed.tiptap.commands.undo()).toBe(true);
+    expect(ed.tiptap.state.doc.textContent).toBe('x');
+    expect(ta.value).toBe('x');
+    expect(ed.tiptap.commands.undo()).toBe(false);
   });
 
   test('editing still records history after a load', () => {

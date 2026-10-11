@@ -1,6 +1,7 @@
 import { Editor } from '@tiptap/core';
 import { Placeholder } from '@tiptap/extensions';
-import { EditorState, TextSelection } from '@tiptap/pm/state';
+import { EditorState, Selection, TextSelection } from '@tiptap/pm/state';
+import { closeHistory } from '@tiptap/pm/history';
 import { extensions } from './schema/index.js';
 import { parseMarkdown } from './markdown/parser.js';
 import { serializeMarkdown } from './markdown/serializer.js';
@@ -68,6 +69,11 @@ export function createForumEditor(options) {
   // each serialization); an unchanged doc is never re-serialized, so switching
   // modes without editing keeps the author's original Markdown.
   let syncedDoc = null;
+  // False until the editor holds the post (initial visual mount or the first
+  // switch to visual); that load stays out of the undo history.
+  let historyStarted = false;
+  // True while a load is dispatched: its update must not rewrite the textarea.
+  let loading = false;
 
   const api = {
     currentMode: 'markdown',
@@ -95,9 +101,10 @@ export function createForumEditor(options) {
   }
 
   /**
-   * Parses `md` into the editor without emitting `update`. Returns false on
-   * parse failure. The state is recreated (same plugins), so the undo history
-   * starts afresh: undo can never cross a load or a mode switch.
+   * Parses `md` into the editor. Returns false on parse failure. The first
+   * load recreates the state (same plugins) so undo can never empty the post;
+   * every later load that changes the doc is one undoable history step. The
+   * load never rewrites the textarea: it is the source of the new doc.
    */
   function loadMarkdown(md) {
     let doc;
@@ -108,7 +115,22 @@ export function createForumEditor(options) {
       return false;
     }
     const view = api.tiptap.view;
-    view.updateState(EditorState.create({ doc: doc, plugins: view.state.plugins }));
+    if (!historyStarted) {
+      view.updateState(EditorState.create({ doc: doc, plugins: view.state.plugins }));
+      historyStarted = true;
+    } else if (!doc.eq(view.state.doc)) {
+      // Own history groups: the load neither merges with the edits before it
+      // nor with the typing after it.
+      const tr = closeHistory(view.state.tr.replaceWith(0, view.state.doc.content.size, doc.content));
+      tr.setSelection(Selection.atStart(tr.doc));
+      loading = true;
+      try {
+        view.dispatch(tr);
+        view.dispatch(closeHistory(view.state.tr));
+      } finally {
+        loading = false;
+      }
+    }
     syncedDoc = api.tiptap.state.doc;
     selectionTouched = false;
     // updateState emits no transaction, so refresh the toolbar here.
@@ -139,7 +161,7 @@ export function createForumEditor(options) {
   }
 
   function onUpdate() {
-    if (api.currentMode !== 'visual') return;
+    if (loading || api.currentMode !== 'visual') return;
     let md;
     try {
       md = serializeDoc();
@@ -581,6 +603,7 @@ export function createForumEditor(options) {
   });
 
   if (startVisual && !parseFailed) {
+    historyStarted = true;
     api.currentMode = 'visual';
     showVisual(true);
   } else {
