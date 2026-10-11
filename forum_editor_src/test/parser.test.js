@@ -39,6 +39,39 @@ describe('parseMarkdown', () => {
     expect(p('- a\n\n- b').content[0].attrs.tight).toBe(false);
     expect(p('1. a\n\n2. b').content[0].attrs.tight).toBe(false);
   });
+  test('a list does not interrupt a paragraph, as on the server', () => {
+    expect(p('Texte\n1. un\n2. deux').content.map((n) => n.type)).toEqual(['paragraph']);
+    expect(p('Texte\n- un').content.map((n) => n.type)).toEqual(['paragraph']);
+    expect(p('> Texte\n> - un').content[0].content.map((n) => n.type)).toEqual(['paragraph']);
+    expect(p('???- "T"\n    Texte\n    - un').content[0].content[1].content.map((n) => n.type)).toEqual(['paragraph']);
+    // List items still end each other, and nested lists still start.
+    expect(p('- a\n- b').content[0].content.length).toBe(2);
+    expect(p('- a\n    - b').content[0].content[0].content.map((n) => n.type)).toEqual(['paragraph', 'bulletList']);
+    expect(p('1. a\n2. b').content[0].content.length).toBe(2);
+  });
+  test('a paragraph with an inline attr_list after an image or link is raw', () => {
+    const src = '![a](/x.jpg){: width="50%"}\nTexte';
+    expect(p(src + '\n\nSuite').content).toEqual([
+      { type: 'rawMarkdownBlock', attrs: { source: src } },
+      { type: 'paragraph', content: [{ type: 'text', text: 'Suite' }] },
+    ]);
+    expect(p('Voir [ici](/x){width=50%}').content[0].type).toBe('rawMarkdownBlock');
+    expect(p('f(x){y}').content[0].type).toBe('paragraph');
+  });
+  test('`1)` is no list marker, as on the server', () => {
+    expect(p('1) un\n2) deux').content.map((n) => n.type)).toEqual(['paragraph']);
+    expect(p('> 8) huit').content[0].content.map((n) => n.type)).toEqual(['paragraph']);
+  });
+  test('a bullet marker change continues the list, as on the server', () => {
+    const tight = p('* a\n+ b').content;
+    expect(tight.length).toBe(1);
+    expect(tight[0].content.length).toBe(2);
+    expect(tight[0].attrs.tight).toBe(true);
+    const loose = p('* a\n* b\n\n+ c\n  + x\n+ d').content;
+    expect(loose.length).toBe(1);
+    expect(loose[0].content.length).toBe(4);
+    expect(loose[0].attrs.tight).toBe(false);
+  });
   test('CRLF parses like LF', () => expect(p('a\r\nb\r\n\r\n- x\r\n- y')).toEqual(p('a\nb\n\n- x\n- y')));
   test('raw HTML is literal text', () => expect(html('<iframe src=x>')).toBe('<p>&lt;iframe src=x&gt;</p>'));
   test('inline code and fences survive bold-like underscores (review bug 1)', () => {
@@ -65,6 +98,10 @@ describe('parseMarkdown', () => {
   test('spoiler title has inline marks', () => {
     const s = p('???- "**B** t"\n    x').content[0].content[0];
     expect(s.content[0]).toEqual({ type: 'text', text: 'B', marks: [{ type: 'bold' }] });
+  });
+  test('backslash escapes in a spoiler title', () => {
+    const s = p('???- "**1\\. Titre**"\n    x').content[0].content[0];
+    expect(s.content).toEqual([{ type: 'text', text: '1. Titre', marks: [{ type: 'bold' }] }]);
   });
   test('spoiler without body gets an empty paragraph and validates', () => {
     const d = parseMarkdown('???- "T"\n\nafter');
@@ -113,6 +150,23 @@ describe('parseMarkdown', () => {
   test('editable headings 2/3 stay editable, others raw', () => {
     expect(p('## two').content[0].type).toBe('heading');
     expect(p('Setext\n---').content[0]).toEqual({ type: 'rawMarkdownBlock', attrs: { source: 'Setext\n---' } });
+  });
+  test('headings without a space after the hashes, as on the server', () => {
+    expect(p('#Titre').content[0]).toEqual({ type: 'rawMarkdownBlock', attrs: { source: '#Titre' } });
+    expect(p('###Titre').content[0]).toMatchObject({ type: 'heading', attrs: { level: 3 }, content: [{ text: 'Titre' }] });
+    expect(p('Texte\n##Titre').content.map((n) => n.type)).toEqual(['paragraph', 'heading']);
+  });
+  test('image destinations: parentheses do not nest, as on the server', () => {
+    expect(p('![C](/a%20(1250\\).jpg "C")').content[0].attrs).toMatchObject({ src: '/a%20(1250).jpg', title: 'C' });
+    // `-` in the alt makes the label parser re-enter the image rule.
+    expect(p('![C-d](/a_(1\\).jpg) x').content[0].attrs.src).toBe('/a_(1).jpg');
+    expect(p('![C](/a_(1).jpg)').content[0].attrs.src).toBe('/a_(1');
+    // Links keep balanced parentheses (the server does too).
+    expect(p('[l](/a_(1).jpg)').content[0].content[0].marks[0].attrs.href).toBe('/a_(1).jpg');
+  });
+  test('link and image destinations are kept as written (no percent-encoding)', () => {
+    expect(p('[a](/le%C3%A7ons/ça)').content[0].content[0].marks[0].attrs.href).toBe('/le%C3%A7ons/ça');
+    expect(p('![](/La-Défense.jpg)').content[0].attrs.src).toBe('/La-Défense.jpg');
   });
   test('inline footnote reference stays literal', () => {
     expect(html('a[^1] b')).toBe('<p>a[^1] b</p>');

@@ -67,6 +67,8 @@ export function spoilerPlugin(md) {
     summary.content = titleFromMatch(m);
     summary.children = [];
     state.md.inline.parse(summary.content, state.md, state.env, summary.children);
+    // Done by the core `text_join` rule for normal inline content.
+    for (const t of summary.children) if (t.type === 'text_special') t.type = 'text';
 
     if (lines.length) state.md.block.parse(lines.join('\n'), state.md, state.env, state.tokens);
 

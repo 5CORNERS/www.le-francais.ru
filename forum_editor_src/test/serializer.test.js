@@ -15,6 +15,19 @@ describe('serializeMarkdown', () => {
     expect(ser(doc(para(text('mot'), text('ifs', ['italic']))))).toBe('mot*ifs*');
     expect(rt('_i_ __b__')).toBe('*i* **b**');
   });
+  test('italic inside bold uses `_` where Python-Markdown needs it', () => {
+    // Python-Markdown 2.6 renders `**a *b* c**` as `<em><em>a *b</em> c</em>*`.
+    expect(rt('**a *b* c**')).toBe('**a _b_ c**');
+    expect(rt('**a *b***')).toBe('**a _b_**');
+    expect(rt('**a (*b*), *c* d**')).toBe('**a (_b_), _c_ d**');
+    // Cases the server renders fine with `*` stay as they are.
+    expect(rt('***a*** **b**')).toBe('***a*** **b**');
+    expect(rt('***a***')).toBe('***a***');
+    expect(rt('*a **b** c*')).toBe('*a **b** c*');
+    expect(rt('**a *b*c**')).toBe('**a *b*c**');
+    expect(rt('**a*b* c**')).toBe('**a*b* c**');
+    expect(rt('**a *b* c** *d*')).toBe('**a _b_ c** *d*');
+  });
   test('nbsp preserved (review bug 8)', () => expect(rt('Bonjour !')).toBe('Bonjour !'));
   test('literal syntax typed in visual mode stays literal (Review Focus 1)', () => {
     // `\n` in a probe = a hard break in the visual paragraph.
@@ -32,6 +45,20 @@ describe('serializeMarkdown', () => {
   });
   test('no gratuitous escapes', () => {
     expect(ser(doc(para(text('my_var_name 2*3 a ~ b'))))).toBe('my_var_name 2*3 a ~ b');
+  });
+  test('runs of three or more stars are escaped (Python-Markdown: `a *** b` is `a <em>*</em> b`)', () => {
+    expect(ser(doc(para(text('a *** b **** c'))))).toBe('a \\*\\*\\* b \\*\\*\\*\\* c');
+    expect(rt('a \\*\\*\\* b')).toBe('a \\*\\*\\* b');
+    expect(ser(doc(para(text('a ** b'))))).toBe('a ** b');
+  });
+  test('literal stars are escaped when the block has another star (Python-Markdown pairs any two)', () => {
+    // Server: `*ehmi, *h1 et *am*` renders `<em>ehmi, </em>h1 et <em>am</em>`-like garbage.
+    expect(ser(doc(para(text('*ehmi, de *h1 et '), text('am', ['italic']))))).toBe('\\*ehmi, de \\*h1 et *am*');
+    expect(ser(doc(para(text('2*3 '), text('a', ['italic']))))).toBe('2\\*3 *a*');
+    // markdown-it pairs these too: escaping the first settles both servers.
+    expect(ser(doc(para(text('2*3 et 4*5'))))).toBe('2\\*3 et 4*5');
+    // `**` pairs do not count: Python-Markdown matches them first.
+    expect(ser(doc(para(text('2*3 '), text('a', ['bold']))))).toBe('2*3 **a**');
   });
   test('code is literal', () => {
     expect(ser(doc(para(text('a `b` c', ['code']))))).toBe('`` a `b` c ``');
@@ -62,10 +89,21 @@ describe('serializeMarkdown', () => {
     expect(rt('- ![a](x)')).toBe('- ![a](x)');
     expect(rt('- ![a](x)\n- b')).toBe('- ![a](x)\n- b');
   });
+  test('destinations: parentheses escaped, non-ASCII kept as written', () => {
+    // Python-Markdown 2.6 cuts `![](/a_(1250).jpg)` at the first `)`.
+    expect(rt('![](/x_\\(1250\\).jpg)')).toBe('![](/x_\\(1250\\).jpg)');
+    expect(rt('[a](/x_(1250).jpg)')).toBe('[a](/x_\\(1250\\).jpg)');
+    expect(rt('[a](/le%C3%A7ons/ça)')).toBe('[a](/le%C3%A7ons/ça)');
+  });
   test('images', () => {
     expect(rt('![a](/m/a.png "t")')).toBe('![a](/m/a.png "t")');
     expect(rt('a\n\n![my_photo](/x.png)\n\nb')).toBe('a\n\n![my_photo](/x.png)\n\nb');
     expect(rt('![a\\*b\\*c](/x.png)')).toBe('![a\\*b\\*c](/x.png)');
+  });
+  test('link titles are kept', () => {
+    expect(rt('voir [la page](/forum/ "Le forum") ici')).toBe('voir [la page](/forum/ "Le forum") ici');
+    expect(rt('[a](/x "say \\"hi\\"")')).toBe('[a](/x "say \\"hi\\"")');
+    expect(rt('[a](/x "t") [b](/x)')).toBe('[a](/x "t") [b](/x)');
   });
   test('raw blocks nested in containers are re-indented', () => {
     for (const md of ['- x\n\n    | a |\n    |---|', '> # H1\n>\n> after', '???- "T"\n    | a |\n    |---|\n\n    ---'])
@@ -125,7 +163,8 @@ describe('serializeMarkdown', () => {
   });
   test('literal syntax after a hard break stays literal', () => {
     const md = ser(doc(para(text('a'), { type: 'hardBreak' }, text('- b'), { type: 'hardBreak' }, text('---'))));
-    expect(md).toBe('a\n\\- b\n\\---');
+    // `- b` after a line break is no list (Python-Markdown needs a blank line).
+    expect(md).toBe('a\n- b\n\\---');
     expect(rt(md)).toBe(md);
   });
   test('output has no trailing newline and empty doc is empty', () => {

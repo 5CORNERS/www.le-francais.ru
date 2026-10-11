@@ -43,7 +43,7 @@ function normalizeHref(href) {
 
 function markKey(marks) {
   let key = '';
-  for (const m of marks) key += m.type.name === 'link' ? 'link:' + normalizeHref(m.attrs.href) + ';' : m.type.name + ';';
+  for (const m of marks) key += m.type.name === 'link' ? 'link:' + normalizeHref(m.attrs.href) + ' ' + (m.attrs.title || '') + ';' : m.type.name + ';';
   return key;
 }
 
@@ -82,6 +82,8 @@ function paragraphsSignature(nodes, textOnly) {
   }
   return normalizeSignature(parts.join('\n\n'));
 }
+
+const hasMark = (node, name) => !!node && node.marks.some((m) => m.type.name === name);
 
 function children(node) {
   const list = [];
@@ -133,6 +135,15 @@ function isWs(ch) {
   return ch === undefined || ch === '\n' || WS.test(ch);
 }
 
+// Length of the run of identical characters around position p.
+function runLength(c, p) {
+  let start = p;
+  let end = p + 1;
+  while (start > 0 && c[start - 1] === c[p]) start--;
+  while (end < c.length && c[end] === c[p]) end++;
+  return end - start;
+}
+
 // Returns null (never syntax), or { rep, forced }.
 function candidate(c, p, kind) {
   const ch = c[p];
@@ -146,6 +157,8 @@ function candidate(c, p, kind) {
       return next === undefined || next === '\n' || PY_ESCAPED.indexOf(next) !== -1 ? live : null;
     case '*':
       if (lineStart && PY_DEFINITION.test(c.slice(p, p + 200))) return forced;
+      // Python-Markdown reads `***` as `<em>*</em>`, even between spaces.
+      if (runLength(c, p) >= 3) return forced;
       return lineStart || !(isWs(prev) && isWs(next)) ? live : null;
     case '_':
       if (isWs(prev) && isWs(next)) return null;
@@ -267,7 +280,7 @@ function resolveEscapes(marked, kind, node) {
   };
 
   const escaped = cands.map((c) => c.forced);
-  if (cands.every((c) => c.forced) || matches(escaped, false)) return build(clean, cands, escaped);
+  if (cands.every((c) => c.forced) || matches(escaped, false)) return buildPy(clean, cands, escaped, node);
   const all = cands.map(() => true);
   if (cands.length > MAX_GREEDY) return build(clean, cands, all);
   // When even full escaping does not give the marks back, the mark layout
@@ -281,7 +294,22 @@ function resolveEscapes(marked, kind, node) {
     all[i] = false;
     all[i] = !matches(all, textOnly);
   }
-  return build(clean, cands, all);
+  return buildPy(clean, cands, all, node);
+}
+
+// Python-Markdown pairs any two single `*` of a block that are not
+// surrounded by spaces (`*ehmi, de *h1 et *am*`), where markdown-it often
+// reads them literally. `**` pairs are matched first, so only literal stars
+// and italics count: with two of them, every literal star is escaped.
+function buildPy(clean, cands, escaped, node) {
+  // `**` runs are left alone: markdown-it may read `a**,**` literally where
+  // Python-Markdown makes it bold, and keeping them keeps that rendering.
+  const single = (c) => c.rep === '\\*' && runLength(clean, c.pos) === 1;
+  const literal = cands.filter((c, i) => !escaped[i] && single(c)).length;
+  let italic = false;
+  if (literal === 1) node.forEach((child) => { italic = italic || hasMark(child, 'italic'); });
+  if (literal < 2 && !italic) return build(clean, cands, escaped);
+  return build(clean, cands, cands.map((c, i) => escaped[i] || single(c)));
 }
 
 // ---------------------------------------------------------------------------
@@ -362,6 +390,11 @@ function escapeUrl(url) {
   return String(url || '').replace(/ /g, '%20').replace(/[()]/g, '\\$&');
 }
 
+// Link and image titles, with `"` and `\\` backslash-escaped.
+function linkTitle(title) {
+  return title ? ' "' + title.replace(/["\\]/g, '\\$&') + '"' : '';
+}
+
 function imageAlt(alt) {
   if (!alt || !/[\\`*_[\]~^=+:<!]/.test(alt)) return alt || '';
   try {
@@ -425,8 +458,7 @@ const nodes = {
   image(state, node) {
     if (node.attrs.uploadId != null) return;
     const { src, alt, title } = node.attrs;
-    state.write('![' + imageAlt(alt) + '](' + escapeUrl(src) +
-      (title ? ' "' + title.replace(/["\\]/g, '\\$&') + '"' : '') + ')');
+    state.write('![' + imageAlt(alt) + '](' + escapeUrl(src) + linkTitle(title) + ')');
     state.closeBlock(node);
   },
   spoiler(state, node) {
@@ -451,9 +483,36 @@ const nodes = {
 
 const wrapMark = (delim) => ({ open: delim, close: delim, mixable: true, expelEnclosingWhitespace: true });
 
+// Python-Markdown 2.6 cannot close `*i*` inside an open `**`
+// (`**a *b* c**` renders as `<em><em>a *b</em> c</em>*`), but handles
+// `**a _b_ c**`. Italic opened inside an already open bold therefore uses `_`,
+// unless it touches a word character (in-word `_` is literal on both sides,
+// and `**a *b*c**` renders fine).
+function italicDelim(state, parent, index) {
+  if (!hasMark(parent.child(index), 'bold') || index === 0 || !hasMark(parent.child(index - 1), 'bold')) return '*';
+  // Characters on both sides, looking through other delimiters (`a**_b_**`).
+  if (ALNUM.test(state.out.replace(/[*_~^=+]+$/, '').slice(-1))) return '*';
+  let end = index;
+  while (end < parent.childCount && hasMark(parent.child(end), 'italic') && hasMark(parent.child(end), 'bold')) end++;
+  const last = parent.child(end - 1);
+  if (end < parent.childCount && !(last.isText && /\s$/.test(last.text))) {
+    const after = parent.child(end);
+    if (after.isText && ALNUM.test(after.text[0])) return '*';
+  }
+  return '_';
+}
+
 const marks = {
   bold: wrapMark('**'),
-  italic: wrapMark('*'),
+  italic: {
+    open: (state, _mark, parent, index) => {
+      state.italicDelim = italicDelim(state, parent, index);
+      return state.italicDelim;
+    },
+    close: (state) => state.italicDelim || '*',
+    mixable: true,
+    expelEnclosingWhitespace: true,
+  },
   underline: wrapMark('^^'),
   strike: wrapMark('~~'),
   highlight: wrapMark('=='),
@@ -467,7 +526,7 @@ const marks = {
   },
   link: {
     open: () => '[',
-    close: (_state, mark) => '](' + escapeUrl(mark.attrs.href) + ')',
+    close: (_state, mark) => '](' + escapeUrl(mark.attrs.href) + linkTitle(mark.attrs.title) + ')',
     mixable: true,
   },
 };

@@ -51,8 +51,17 @@ const TOKEN_SPEC = {
   sup: { mark: 'superscript' },
   kbd: { mark: 'kbd', noCloseToken: true },
   code_inline: { mark: 'code', noCloseToken: true },
-  link: { mark: 'link', getAttrs: (tok) => ({ href: tok.attrGet('href') }) },
+  link: { mark: 'link', getAttrs: (tok) => ({ href: tok.attrGet('href'), title: tok.attrGet('title') || null }) },
 };
+
+// End line of the last leaf block before `close` (list and item maps include
+// trailing blank lines, leaf maps do not).
+function lastLeafEnd(tokens, close) {
+  for (let i = close - 1; i >= 0; i--) {
+    if (tokens[i].nesting === 0 && tokens[i].map) return tokens[i].map[1];
+  }
+  return -1;
+}
 
 function synthetic(Token, type, nesting, extra) {
   const tok = new Token(type, '', nesting);
@@ -117,11 +126,26 @@ function assertNoImages(children) {
 // understands: spoiler body wrappers, block-level images, empty bodies.
 function transformTokens(tokens, Token) {
   const out = [];
+  const lists = [];
   for (let i = 0; i < tokens.length; i++) {
     const tok = tokens[i];
     if (tok.type === 'bullet_list_open' || tok.type === 'ordered_list_open') {
       // Computed on the original stream: image lifting may replace paragraphs.
       tok.meta = Object.assign({}, tok.meta, { tight: listIsTight(tokens, i) });
+      lists.push(tok);
+      out.push(tok);
+    } else if (tok.type === 'bullet_list_close' && tokens[i + 1] && tokens[i + 1].type === 'bullet_list_open') {
+      // A bullet marker change (`*` then `+`) starts a new list for
+      // markdown-it only; Python-Markdown continues the list, and the
+      // serializer writes `-` for both. Merge them, loose if a blank line or
+      // either list is loose.
+      const first = lists[lists.length - 1];
+      const next = tokens[i + 1];
+      const blank = next.map && lastLeafEnd(tokens, i) < next.map[0];
+      first.meta.tight = first.meta.tight && listIsTight(tokens, i + 1) && !blank;
+      i += 1;
+    } else if (tok.type === 'bullet_list_close' || tok.type === 'ordered_list_close') {
+      lists.pop();
       out.push(tok);
     } else if (tok.type === 'spoiler_summary') {
       out.push(synthetic(Token, 'spoiler_summary_open', 1));

@@ -2,7 +2,8 @@
 // token whose `content` is the exact source slice (lines joined with \n).
 //
 // Own detection (rule `raw_block`, before `table`): footnote definitions,
-// admonitions, definition lists, abbreviations, attr_list-only lines.
+// admonitions, definition lists, abbreviations, attr_list-only lines,
+// paragraphs with an inline attr_list right after an image or link.
 // Wrapped markdown-it rules: tables, horizontal rules, headings other than
 // h2/h3 (or containing an image), setext headings, and lists that contain a
 // task item.
@@ -11,6 +12,8 @@ const FOOTNOTE_DEF = /^\[\^[^\]\s]+]:/;
 const ADMONITION = /^!!! ?[\p{L}\p{N}_-]/u;
 const ABBREVIATION = /^\*\[[^\]]+]:/;
 const ATTR_LIST = /^\{:[^}]*}\s*$/;
+// `![a](x){: width="50%"}`, `[a](x){.class}`: attributes for that element.
+const INLINE_ATTR_LIST = /]\([^)\n]*\)\{[^}\n]*}/;
 const DEF_LINE = /^: {1,3}\S/;
 const TASK_ITEM = /^\[[ xX]]\s/;
 
@@ -81,6 +84,17 @@ function canInterrupt(text) {
   return FOOTNOTE_DEF.test(text) || ADMONITION.test(text);
 }
 
+// End of the paragraph starting at startLine when one of its lines carries
+// an inline attr_list, else -1.
+function inlineAttrListEnd(state, startLine, endLine) {
+  let line = startLine;
+  let found = false;
+  for (; line < endLine && !state.isEmpty(line); line++) {
+    if (INLINE_ATTR_LIST.test(lineText(state, line))) found = true;
+  }
+  return found ? line : -1;
+}
+
 function detectRaw(state, startLine, endLine) {
   const text = lineText(state, startLine);
   if (FOOTNOTE_DEF.test(text)) return bodyEnd(state, startLine + 1, endLine, true);
@@ -92,7 +106,7 @@ function detectRaw(state, startLine, endLine) {
   }
   if (ATTR_LIST.test(text)) return startLine + 1;
   if (isDefinitionStart(state, startLine, endLine)) return definitionListEnd(state, startLine, endLine);
-  return -1;
+  return inlineAttrListEnd(state, startLine, endLine);
 }
 
 function wrapRule(md, name, isRaw) {
