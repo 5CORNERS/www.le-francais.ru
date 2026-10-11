@@ -4,7 +4,8 @@ import { TextSelection } from '@tiptap/pm/state';
 import { extensions } from './schema/index.js';
 import { parseMarkdown } from './markdown/parser.js';
 import { serializeMarkdown } from './markdown/serializer.js';
-import { buildEditorDom } from './ui/toolbar.js';
+import { buildEditorDom, updateActiveStates } from './ui/toolbar.js';
+import { runVisualCommand, runMarkdownCommand } from './commands.js';
 
 export const MODE_STORAGE_KEY = 'forum_editor_mode';
 export const EDITOR_PLACEHOLDER = 'Напишите ответ или перетащите изображение сюда...';
@@ -196,6 +197,7 @@ export function createForumEditor(options) {
 
     storeMode(api.currentMode);
     updateModeButtons();
+    refreshActiveStates();
     updateCharCounter();
   }
 
@@ -204,6 +206,7 @@ export function createForumEditor(options) {
       showNotice();
       enterMarkdown();
       updateModeButtons();
+      refreshActiveStates();
     }
     updateCharCounter();
   }
@@ -371,9 +374,23 @@ export function createForumEditor(options) {
     else textarea.focus();
   }
 
-  // executeCommand(cmd): stub, filled in by Task 8 (toolbar commands).
-  function executeCommand() {
-    return false;
+  // --- Toolbar commands -------------------------------------------------------
+
+  // Link modal (Task 9) and file picker (Task 10) plug in here.
+  const commandContext = {
+    openLinkModal: function () {},
+    openFilePicker: function () {},
+  };
+
+  function refreshActiveStates() {
+    updateActiveStates(dom.toolbar, api.currentMode === 'visual' ? api.tiptap : null);
+  }
+
+  function executeCommand(cmd) {
+    if (api.currentMode === 'visual') runVisualCommand(api.tiptap, cmd, commandContext);
+    else runMarkdownCommand(textarea, cmd, commandContext);
+    updateCharCounter();
+    refreshActiveStates();
   }
 
   // --- Mount ------------------------------------------------------------------
@@ -407,6 +424,9 @@ export function createForumEditor(options) {
   // Any focus or caret move makes the current selection the insertion point.
   tiptap.on('focus', () => { selectionTouched = true; });
   tiptap.on('selectionUpdate', () => { selectionTouched = true; });
+  tiptap.on('transaction', () => {
+    if (api.currentMode === 'visual') refreshActiveStates();
+  });
 
   if (startVisual && !parseFailed) {
     api.currentMode = 'visual';
@@ -417,6 +437,7 @@ export function createForumEditor(options) {
   }
   updateModeButtons();
   updateCharCounter();
+  refreshActiveStates();
 
   // --- DOM events -------------------------------------------------------------
 
@@ -432,6 +453,17 @@ export function createForumEditor(options) {
     e.stopPropagation();
     setMode(btn.getAttribute('data-mode'));
   };
+  // Toolbar buttons and emoji items must not steal focus from the editor.
+  const onWrapperMousedown = (e) => {
+    const target = e.target.closest('.forum-editor-btn, .forum-emoji-item, .forum-emoji-close');
+    if (target && dom.wrapper.contains(target)) e.preventDefault();
+  };
+  const onToolbarClick = (e) => {
+    const btn = e.target.closest('.forum-editor-btn[data-cmd]');
+    if (!btn || !dom.toolbar.contains(btn)) return;
+    e.preventDefault();
+    executeCommand(btn.getAttribute('data-cmd'));
+  };
   const checkbox = dom.wrapper.querySelector('.forum-mode-checkbox');
   const modeSwitch = dom.wrapper.querySelector('.forum-mode-switch');
 
@@ -439,12 +471,16 @@ export function createForumEditor(options) {
   textarea.addEventListener('input', onTextareaInput);
   checkbox.addEventListener('change', onCheckbox);
   modeSwitch.addEventListener('click', onSwitchClick);
+  dom.wrapper.addEventListener('mousedown', onWrapperMousedown);
+  dom.toolbar.addEventListener('click', onToolbarClick);
 
   function destroy() {
     if (form) form.removeEventListener('submit', onSubmit, true);
     textarea.removeEventListener('input', onTextareaInput);
     checkbox.removeEventListener('change', onCheckbox);
     modeSwitch.removeEventListener('click', onSwitchClick);
+    dom.wrapper.removeEventListener('mousedown', onWrapperMousedown);
+    dom.toolbar.removeEventListener('click', onToolbarClick);
     syncMarkdownFromVisual();
     tiptap.destroy();
     textarea.style.display = '';
@@ -470,6 +506,7 @@ export function createForumEditor(options) {
     restoreSelection: restoreSelection,
     focus: focus,
     executeCommand: executeCommand,
+    commandContext: commandContext,
     destroy: destroy,
     updateCharCounter: updateCharCounter,
   });

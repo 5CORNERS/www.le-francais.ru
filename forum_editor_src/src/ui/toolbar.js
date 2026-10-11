@@ -1,4 +1,5 @@
 import { EMOJIS } from '../emoji.js';
+import { isCommandActive } from '../commands.js';
 
 // Markup copied verbatim from the legacy editor (forum-editor-legacy.js
 // buildUI), minus the old contenteditable div: the TipTap view is mounted in
@@ -153,4 +154,16 @@ export function buildEditorDom(textarea) {
     },
     resizer: q('.forum-editor-resizer'),
   };
+}
+
+/**
+ * Toggles the `active` class on every [data-cmd] button from the editor state.
+ * Pass a null editor (Markdown mode) to clear all active states.
+ */
+export function updateActiveStates(toolbarEl, editor) {
+  const buttons = toolbarEl.querySelectorAll('[data-cmd]');
+  for (let i = 0; i < buttons.length; i++) {
+    const btn = buttons[i];
+    btn.classList.toggle('active', !!editor && isCommandActive(editor, btn.getAttribute('data-cmd')));
+  }
 }
