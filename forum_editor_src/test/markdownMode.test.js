@@ -13,8 +13,39 @@ describe('markdownMode', () => {
     expect(replaceSelection('voir ici', 5, 8, '[ici](https://x.y)').text).toBe('voir [ici](https://x.y)'));
 
   test('removeFormatting keeps list markers and snake_case (review bug 9)', () => {
-    expect(removeFormatting('* item1\n* item2', 0, 15).text).toBe('- item1\n- item2');
+    // Container prefixes are kept as typed (final review 3: was normalised to '- ').
+    expect(removeFormatting('* item1\n* item2', 0, 15).text).toBe('* item1\n* item2');
     expect(removeFormatting('my_var_name **b**', 0, 17).text).toBe('my_var_name b');
+  });
+
+  const whole = (s) => removeFormatting(s, 0, s.length).text;
+
+  test('removeFormatting keeps spoiler body indentation (final review 3)', () => {
+    expect(whole('    **a** one\n    **b** two')).toBe('    a one\n    b two');
+    expect(whole('???- "Titre"\n    **a** one')).toBe('???- "Titre"\n    a one');
+  });
+
+  test('removeFormatting keeps nested list structure (final review 3)', () => {
+    expect(whole('- **x**\n    - *nested*')).toBe('- x\n    - nested');
+    expect(whole('1. **x**\n2. ~~y~~')).toBe('1. x\n2. y');
+  });
+
+  test('removeFormatting keeps quote prefixes (final review 3)', () => {
+    expect(whole('**bob**:\n> some *quoted* text')).toBe('bob:\n> some quoted text');
+    expect(whole('> > **deep**')).toBe('> > deep');
+  });
+
+  test('removeFormatting leaves fenced code untouched (final review 3)', () => {
+    expect(whole('**a**\n```\n**code**\n```\n*b*')).toBe('a\n```\n**code**\n```\nb');
+    // A fence opened before the selection still protects its lines.
+    const text = '```\n**code**\n```\n**z**';
+    expect(removeFormatting(text, 4, text.length).text).toBe('```\n**code**\n```\nz');
+  });
+
+  test('removeFormatting on a partial line keeps the rest of the line', () => {
+    const r = removeFormatting('- **a** and **b**', 12, 17);
+    expect(r.text).toBe('- **a** and b');
+    expect([r.selStart, r.selEnd]).toEqual([12, 13]);
   });
 
   test('removeFormatting only touches the selection', () => {

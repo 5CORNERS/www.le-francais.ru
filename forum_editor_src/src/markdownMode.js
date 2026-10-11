@@ -183,27 +183,65 @@ function stripMarks(json) {
   return copy;
 }
 
+// Container prefix of a Markdown line: indentation (spoiler bodies, nested
+// lists), quote markers, then a list or heading marker.
+const LINE_PREFIX = /^\s*(?:>\s?)*\s*(?:(?:[-*+]|\d+[.)])\s+|#{1,6}\s+)?/;
+// A code fence, once indentation and quote markers are removed.
+const FENCE_LINE = /^[\s>]*(?:```|~~~)/;
+
 /**
- * Removes inline formatting from the selection by parsing it, dropping every
- * mark and serializing again; block structure (lists, quotes…) is kept and
- * only real emphasis is removed (snake_case survives).
+ * Strips the marks of one inline run (no container prefix). Only a run that
+ * parses as a single paragraph is changed; anything else is returned as is.
+ * The whitespace around the run, which serializing would trim, is kept.
+ */
+function stripInline(run) {
+  const lead = run.match(/^\s*/)[0];
+  if (lead.length === run.length) return run;
+  const trail = run.slice(lead.length).match(/\s*$/)[0];
+  const doc = parseMarkdown(run);
+  if (doc.childCount !== 1 || doc.firstChild.type.name !== 'paragraph') return run;
+  return lead + serializeMarkdown(doc.type.schema.nodeFromJSON(stripMarks(doc.toJSON()))) + trail;
+}
+
+/**
+ * Removes inline formatting from the selection line by line: each line's
+ * container prefix (indentation, '>', list or heading marker) is kept as typed
+ * and only the selected inline remainder is parsed, stripped of marks and
+ * serialized again, so only real emphasis is removed (snake_case survives).
+ * Lines of fenced code blocks (even one opened before the selection) are
+ * left untouched.
  */
 export function removeFormatting(text, start, end) {
   if (start === end) return result(text, start, end);
-  const selected = text.slice(start, end);
-  let cleaned;
+  const lines = text.split('\n');
+  const out = [];
+  let pos = 0;
+  let inFence = false;
+  let delta = 0;
   try {
-    const doc = parseMarkdown(selected);
-    cleaned = serializeMarkdown(doc.type.schema.nodeFromJSON(stripMarks(doc.toJSON())));
+    lines.forEach(function (line) {
+      const ls = pos;
+      const le = ls + line.length;
+      pos = le + 1;
+      const isFence = FENCE_LINE.test(line);
+      const fenced = inFence || isFence;
+      if (isFence) inFence = !inFence;
+      const segStart = Math.max(start, ls + line.match(LINE_PREFIX)[0].length);
+      const segEnd = Math.min(end, le);
+      if (fenced || segStart >= segEnd) {
+        out.push(line);
+        return;
+      }
+      const seg = text.slice(segStart, segEnd);
+      const cleaned = stripInline(seg);
+      delta += cleaned.length - seg.length;
+      out.push(text.slice(ls, segStart) + cleaned + text.slice(segEnd, le));
+    });
   } catch (e) {
     console.error('forum-editor: cannot remove formatting', e);
     return result(text, start, end);
   }
-  // Keep the whitespace around the selection that serializing would trim.
-  const lead = selected.match(/^\s*/)[0];
-  const trail = selected.slice(lead.length).match(/\s*$/)[0];
-  cleaned = lead + cleaned + trail;
-  return result(text.slice(0, start) + cleaned + text.slice(end), start, start + cleaned.length);
+  return result(out.join('\n'), start, end + delta);
 }
 
 const FENCED = /^```[a-zA-Z0-9_-]*\n[\s\S]*```$/;

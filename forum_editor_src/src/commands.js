@@ -213,6 +213,21 @@ function toggleVisualCode(editor) {
   blocksToCodeBlock(editor, $from, $to);
 }
 
+// --- Visual: remove formatting ------------------------------------------------
+
+/**
+ * Drops every mark (links included) from the selection; block structure is
+ * kept. A selection inside one code block unwraps it (legacy parity).
+ */
+function removeFormatVisual(editor) {
+  const sel = editor.state.selection;
+  if (sel.$from.sameParent(sel.$to) && sel.$from.parent.type.name === 'codeBlock') {
+    unwrapCodeBlock(editor, sel.$from);
+    return;
+  }
+  editor.commands.unsetAllMarks();
+}
+
 // --- Public API -------------------------------------------------------------
 
 /** Runs a toolbar command on the TipTap editor. */
@@ -228,7 +243,7 @@ export function runVisualCommand(editor, cmd, ctx) {
   }
   switch (cmd) {
     case 'code': toggleVisualCode(editor); break;
-    case 'removeFormat': editor.chain().unsetAllMarks().clearNodes().run(); break;
+    case 'removeFormat': removeFormatVisual(editor); break;
     case 'h2': editor.commands.toggleHeading({ level: 2 }); break;
     case 'h3': editor.commands.toggleHeading({ level: 3 }); break;
     case 'quote': editor.commands.toggleBlockquote(); break;

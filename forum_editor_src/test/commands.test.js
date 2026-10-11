@@ -230,11 +230,33 @@ describe('visual commands', () => {
     expect(ed.tiptap.state.selection.$from.parent).toBe(doc.child(1));
   });
 
-  test('removeFormat clears marks and blocks', () => {
-    ed.setMarkdown('## **a** b');
+  test('removeFormat clears marks but keeps block structure (final review 3)', () => {
+    ed.setMarkdown('## **a** [b](https://x.y)');
     selectText(ed, 'a', 'b');
     runVisualCommand(ed.tiptap, 'removeFormat', ctx);
-    expect(ed.getMarkdown()).toBe('a b');
+    expect(ed.getMarkdown()).toBe('## a b');
+  });
+
+  test('removeFormat inside a list keeps the list (final review 3)', () => {
+    ed.setMarkdown('- **one**\n- two');
+    selectText(ed, 'one', 'one');
+    runVisualCommand(ed.tiptap, 'removeFormat', ctx);
+    expect(ed.getMarkdown()).toBe('- one\n- two');
+  });
+
+  test('removeFormat inside a quote keeps the quote (final review 3)', () => {
+    ed.setMarkdown('> **bob**: x');
+    selectText(ed, 'bob', 'bob');
+    runVisualCommand(ed.tiptap, 'removeFormat', ctx);
+    expect(ed.getMarkdown()).toBe('> bob: x');
+  });
+
+  test('removeFormat inside a code block unwraps it (legacy parity)', () => {
+    ed.setMarkdown('```\nx\ny\n```');
+    selectText(ed, 'x', 'x');
+    runVisualCommand(ed.tiptap, 'removeFormat', ctx);
+    expect(ed.tiptap.state.doc.child(0).type.name).toBe('paragraph');
+    expect(ed.getMarkdown()).toBe('x\n\ny');
   });
 
   test('link and image delegate to ctx', () => {
