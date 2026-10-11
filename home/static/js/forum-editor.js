@@ -676,6 +676,15 @@
         var container = range.commonAncestorContainer;
         var root = container.nodeType === 1 ? container : container.parentNode;
 
+        // Check if inside pre (code block)
+        var pre = root.closest('pre');
+        if (pre && editorEl.contains(pre)) {
+            if (window.forumEditor && window.forumEditor.unwrapCodeBlock) {
+                window.forumEditor.unwrapCodeBlock(pre);
+                return;
+            }
+        }
+
         // Check ancestors within editor
         tagsToRemove.forEach(function(tag) {
             var el = root.closest(tag);
@@ -832,7 +841,7 @@
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="underline" title="Подчеркнутый (^^текст^^, Ctrl+U)"><i class="fa fa-underline"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="strikethrough" title="Зачеркнутый (~~текст~~, Ctrl+Shift+X, Alt+Shift+5)"><i class="fa fa-strikethrough"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="mark" title="Выделение маркером (==текст==)"><i class="fa fa-pencil" style="background:#fff3cd;padding:1px 3px;border-radius:2px;"></i></button>',
-                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="code" title="Моноширинный / код (`код`, Ctrl+Shift+M)"><i class="fa fa-code"></i></button>',
+                            '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="code" title="Код / блок кода (`код` в строке, ```блок``` для нескольких строк, Ctrl+Shift+M)"><i class="fa fa-code"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="kbd" title="Клавиша (++клавиша++)"><i class="fa fa-keyboard-o"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="superscript" title="Верхний индекс (^текст^)"><i class="fa fa-superscript"></i></button>',
                             '<button type="button" class="btn btn-light forum-editor-btn" data-cmd="subscript" title="Нижний индекс (~текст~)"><i class="fa fa-subscript"></i></button>',
@@ -1163,6 +1172,11 @@
         // Save selection on cursor movement / click in visual editor (without blur/focus resetting it)
         this.$visualEditor.on('mouseup keyup touchend input', function() {
             self.saveSelection();
+        });
+        $(document).on('mouseup.forumEditor touchend.forumEditor selectionchange.forumEditor', function() {
+            if (self.currentMode === 'visual') {
+                self.saveSelection();
+            }
         });
 
         // Track cursor position in markdown mode
@@ -1497,6 +1511,31 @@
                     }
                 }
             }
+
+            // 4. Pre (code block) ArrowDown handling: move into paragraph below
+            var preNode = parentEl.closest('pre');
+            if (preNode && self.$visualEditor[0].contains(preNode)) {
+                if (!preNode.nextSibling) {
+                    var trailingPara = document.createElement('p');
+                    trailingPara.innerHTML = '<br>';
+                    preNode.parentNode.appendChild(trailingPara);
+                }
+
+                if (e.key === 'ArrowDown') {
+                    var lastChild = preNode.lastElementChild || preNode;
+                    var isAtBottom = range.collapsed && (parentEl === lastChild || lastChild.contains(parentEl));
+                    if (isAtBottom && preNode.nextSibling && preNode.nextSibling.tagName && preNode.nextSibling.tagName.toLowerCase() === 'p') {
+                        var nextP = preNode.nextSibling;
+                        var r = document.createRange();
+                        r.setStart(nextP, 0);
+                        r.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(r);
+                        e.preventDefault();
+                        return;
+                    }
+                }
+            }
         });
 
         // Live continuous sync on input / changes in visual editor
@@ -1712,9 +1751,10 @@
     };
 
     ForumEditor.prototype.executeVisualCommand = function(cmd) {
-        this.$visualEditor.focus();
         if (this.savedRange) {
             this.restoreSelection();
+        } else {
+            this.$visualEditor.focus();
         }
         switch (cmd) {
             case 'bold':
@@ -1755,7 +1795,7 @@
                 toggleCustomInlineTag('mark', 'editor-mark', 'текст');
                 break;
             case 'code':
-                toggleCustomInlineTag('code', '', 'код');
+                this.toggleVisualCode();
                 break;
             case 'kbd':
                 toggleCustomInlineTag('kbd', 'editor-key', 'клавиша');
@@ -1869,7 +1909,7 @@
                 wrapTextareaSelection(this.$textarea, '==', '==', 'выделенный текст');
                 break;
             case 'code':
-                wrapTextareaSelection(this.$textarea, '`', '`', 'код');
+                this.toggleMarkdownCode();
                 break;
             case 'kbd':
                 wrapTextareaSelection(this.$textarea, '++', '++', 'Ctrl+C');
@@ -1888,6 +1928,7 @@
                 var selected = val.substring(start, end);
                 if (selected) {
                     var cleaned = selected
+                        .replace(/```[a-zA-Z0-9_-]*\n([\s\S]*?)\n```/g, '$1')
                         .replace(/\*\*([^*]+)\*\*/g, '$1')
                         .replace(/__([^_]+)__/g, '$1')
                         .replace(/\*([^*]+)\*/g, '$1')
@@ -1942,6 +1983,226 @@
             case 'image':
                 this.openImageModal();
                 break;
+        }
+    };
+
+    ForumEditor.prototype.unwrapCodeBlock = function(preNode) {
+        var codeNode = preNode.querySelector('code') || preNode;
+        var text = codeNode.textContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        var lines = text.split('\n');
+        var parent = preNode.parentNode;
+        var firstP = null;
+        var lastP = null;
+
+        var frag = document.createDocumentFragment();
+        for (var i = 0; i < lines.length; i++) {
+            var p = document.createElement('p');
+            var line = lines[i];
+            if (line.length === 0) {
+                p.innerHTML = '<br>';
+            } else {
+                p.textContent = line;
+            }
+            frag.appendChild(p);
+            if (!firstP) firstP = p;
+            lastP = p;
+        }
+        if (!firstP) {
+            var p = document.createElement('p');
+            p.innerHTML = '<br>';
+            frag.appendChild(p);
+            firstP = p;
+            lastP = p;
+        }
+
+        parent.insertBefore(frag, preNode);
+        parent.removeChild(preNode);
+
+        var sel = window.getSelection();
+        if (sel && firstP && lastP) {
+            var r = document.createRange();
+            r.setStartBefore(firstP);
+            r.setEndAfter(lastP);
+            sel.removeAllRanges();
+            sel.addRange(r);
+            this.saveSelection();
+        }
+    };
+
+    ForumEditor.prototype.toggleVisualCode = function() {
+        var sel = window.getSelection();
+        if (!sel || !sel.rangeCount) return;
+        var range = sel.getRangeAt(0);
+        var editorEl = this.$visualEditor[0];
+
+        // 1. Inside existing <pre> (code block) -> unwrap to normal paragraphs
+        var container = range.commonAncestorContainer;
+        var preNode = (container.nodeType === 1 ? container : container.parentNode).closest('pre');
+        if (preNode && editorEl.contains(preNode)) {
+            this.unwrapCodeBlock(preNode);
+            return;
+        }
+
+        // 2. Inside existing inline <code> -> unwrap or exit inline code
+        var codeNode = (container.nodeType === 1 ? container : container.parentNode).closest('code');
+        if (codeNode && editorEl.contains(codeNode) && (!codeNode.parentNode || codeNode.parentNode.tagName.toLowerCase() !== 'pre')) {
+            toggleCustomInlineTag('code', '', 'код');
+            return;
+        }
+
+        // 3. Selection analysis: multiple paragraphs vs single paragraph
+        if (!range.collapsed) {
+            function getTopBlock(node) {
+                var curr = node.nodeType === 1 ? node : node.parentNode;
+                while (curr && curr.parentNode && curr.parentNode !== editorEl) {
+                    curr = curr.parentNode;
+                }
+                return (curr && curr.parentNode === editorEl) ? curr : null;
+            }
+
+            var startBlock = getTopBlock(range.startContainer);
+            var endBlock = getTopBlock(range.endContainer);
+
+            if (range.startContainer === editorEl) {
+                startBlock = editorEl.childNodes[range.startOffset] || editorEl.firstChild;
+            }
+            if (range.endContainer === editorEl) {
+                var idx = Math.max(0, range.endOffset - 1);
+                endBlock = editorEl.childNodes[idx] || editorEl.lastChild;
+            }
+
+            var isMultiBlock = (startBlock && endBlock && startBlock !== endBlock);
+            var cloneFrag = range.cloneContents();
+            var hasMultipleLines = isMultiBlock || (cloneFrag.querySelectorAll && cloneFrag.querySelectorAll('p, div, br, li, pre, blockquote').length > 0);
+
+            if (hasMultipleLines) {
+                // Multi-paragraph or multi-line selection -> Block Code (pre.editor-code-block)
+                var blocks = [];
+                if (startBlock && endBlock) {
+                    var curr = startBlock;
+                    while (curr) {
+                        blocks.push(curr);
+                        if (curr === endBlock) break;
+                        curr = curr.nextSibling;
+                    }
+                    if (blocks.indexOf(endBlock) === -1) {
+                        blocks = [startBlock, endBlock];
+                    }
+                } else if (startBlock) {
+                    blocks.push(startBlock);
+                }
+
+                var codeText = '';
+                if (blocks.length > 0) {
+                    var codeLines = blocks.map(function(b) {
+                        var clone = b.cloneNode(true);
+                        $(clone).find('br').replaceWith('\n');
+                        return clone.textContent;
+                    });
+                    codeText = codeLines.join('\n');
+                } else {
+                    var clone = cloneFrag.cloneNode(true);
+                    $(clone).find('br').replaceWith('\n');
+                    codeText = clone.textContent;
+                }
+
+                var pre = document.createElement('pre');
+                pre.className = 'editor-code-block';
+                var code = document.createElement('code');
+                code.textContent = codeText;
+                pre.appendChild(code);
+
+                if (blocks.length > 0 && blocks[0].parentNode) {
+                    editorEl.insertBefore(pre, blocks[0]);
+                    blocks.forEach(function(b) {
+                        if (b.parentNode) b.parentNode.removeChild(b);
+                    });
+                } else {
+                    range.deleteContents();
+                    range.insertNode(pre);
+                }
+
+                // Ensure trailing paragraph after pre
+                if (!pre.nextSibling || (pre.nextSibling.nodeType === 1 && pre.nextSibling.tagName.toLowerCase() !== 'p')) {
+                    var trailingP = document.createElement('p');
+                    trailingP.innerHTML = '<br>';
+                    if (pre.nextSibling) {
+                        editorEl.insertBefore(trailingP, pre.nextSibling);
+                    } else {
+                        editorEl.appendChild(trailingP);
+                    }
+                }
+
+                var newRange = document.createRange();
+                newRange.selectNodeContents(code);
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+                this.saveSelection();
+                return;
+            } else {
+                // Single-paragraph selection -> Inline code
+                toggleCustomInlineTag('code', '', 'код');
+                return;
+            }
+        } else {
+            // Collapsed selection
+            toggleCustomInlineTag('code', '', 'код');
+            return;
+        }
+    };
+
+    ForumEditor.prototype.toggleMarkdownCode = function() {
+        var el = this.$textarea[0];
+        var start = el.selectionStart;
+        var end = el.selectionEnd;
+        var val = el.value;
+        var selected = val.substring(start, end);
+
+        // 1. Collapsed selection
+        if (start === end) {
+            wrapTextareaSelection(this.$textarea, '`', '`', 'код');
+            return;
+        }
+
+        // 2. Multi-line selection -> Block Code (```...```)
+        if (selected.indexOf('\n') !== -1) {
+            var trimmed = selected.trim();
+            if (/^```[a-zA-Z0-9_-]*\n[\s\S]*```$/.test(trimmed)) {
+                // Unwrap code block
+                var unwrapped = trimmed.replace(/^```[a-zA-Z0-9_-]*\n?/, '').replace(/\n?```$/, '');
+                el.value = val.substring(0, start) + unwrapped + val.substring(end);
+                el.focus();
+                el.setSelectionRange(start, start + unwrapped.length);
+                this.$textarea.trigger('input');
+                return;
+            }
+
+            // Wrap into code block
+            var prefix = (start > 0 && val.charAt(start - 1) !== '\n') ? '\n```\n' : '```\n';
+            var suffix = (end < val.length && val.charAt(end) !== '\n') ? '\n```\n' : '\n```';
+            var replacement = prefix + selected + suffix;
+            el.value = val.substring(0, start) + replacement + val.substring(end);
+            el.focus();
+            el.setSelectionRange(start, start + replacement.length);
+            this.$textarea.trigger('input');
+            return;
+        }
+
+        // 3. Single-line selection -> Inline Code (`...`)
+        if (selected.startsWith('`') && selected.endsWith('`') && selected.length >= 2) {
+            var unwrapped = selected.slice(1, -1);
+            el.value = val.substring(0, start) + unwrapped + val.substring(end);
+            el.focus();
+            el.setSelectionRange(start, start + unwrapped.length);
+            this.$textarea.trigger('input');
+            return;
+        } else {
+            var replacement = '`' + selected + '`';
+            el.value = val.substring(0, start) + replacement + val.substring(end);
+            el.focus();
+            el.setSelectionRange(start + 1, start + 1 + selected.length);
+            this.$textarea.trigger('input');
+            return;
         }
     };
 
