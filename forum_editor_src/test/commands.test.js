@@ -113,6 +113,98 @@ describe('visual commands', () => {
     expect(ed.tiptap.state.selection.$from.parent.type.name).toBe('spoilerSummary');
   });
 
+  test('spoiler wraps a multi-block selection; edge text stays outside; caret in summary', () => {
+    ed.setMarkdown('alpha beta\n\ngamma delta');
+    selectText(ed, 'beta', 'gamma');
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.getMarkdown()).toBe('alpha\n\n???- ""\n    beta\n\n    gamma\n\ndelta');
+    const sel = ed.tiptap.state.selection;
+    expect(sel.empty).toBe(true);
+    expect(sel.$from.parent.type.name).toBe('spoilerSummary');
+  });
+
+  test('spoiler wraps part of one paragraph and keeps marks', () => {
+    ed.setMarkdown('a **bold** *it* c');
+    selectText(ed, 'bold', 'it');
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.getMarkdown()).toBe('a\n\n???- ""\n    **bold** *it*\n\nc');
+  });
+
+  test('spoiler wraps a whole paragraph without empty neighbours', () => {
+    ed.setMarkdown('one\n\ntwo\n\nthree');
+    selectText(ed, 'two', 'two');
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.getMarkdown()).toBe('one\n\n???- ""\n    two\n\nthree');
+  });
+
+  test('spoiler moves lists, images, quotes and spoilers intact', () => {
+    ed.setMarkdown('x\n\n- a\n- b\n\n![i](http://i/x.png)\n\n> q\n\n???- "T"\n    s\n\ny z');
+    selectText(ed, 'b', 'y');
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.getMarkdown()).toBe('x\n\n???- ""\n    - a\n    - b\n\n    ![i](http://i/x.png)\n\n    > q\n\n    ???- "T"\n        s\n\n    y\n\nz');
+  });
+
+  test('spoiler on a selection inside a spoiler body nests within that body', () => {
+    ed.setMarkdown('???- "T"\n    one two\n\n    three');
+    selectText(ed, 'two', 'two');
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.getMarkdown()).toBe('???- "T"\n    one\n\n    ???- ""\n        two\n\n    three');
+    expect(ed.tiptap.state.selection.$from.parent.type.name).toBe('spoilerSummary');
+  });
+
+  test('spoiler from a summary into its body wraps only body content', () => {
+    ed.setMarkdown('???- "title"\n    one\n\n    two');
+    selectText(ed, 'itle', 'one');
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.getMarkdown()).toBe('???- "title"\n    ???- ""\n        one\n\n    two');
+  });
+
+  test.each([
+    ['outside into a spoiler body', 'intro\n\n???- "title"\n    one', 'intro', 'one'],
+    ['a spoiler body out of it', '???- "title"\n    one\n\nafter', 'one', 'after'],
+    ['one spoiler into another', '???- "A"\n    one\n\n???- "B"\n    two', 'one', 'two'],
+    ['inside one summary', '???- "title"\n    one', 'it', 'le'],
+  ])('spoiler crossing a spoiler boundary is a no-op: %s', (label, md, a, b) => {
+    ed.setMarkdown(md);
+    selectText(ed, a, b);
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.getMarkdown()).toBe(md);
+  });
+
+  test('spoiler with a caret inside a spoiler unwraps it (toggle) and is active there', () => {
+    ed.setMarkdown('a\n\n???- "Title"\n    body\n\n    more\n\nz');
+    selectText(ed, 'more', 'more');
+    ed.tiptap.commands.setTextSelection(ed.tiptap.state.selection.from + 1);
+    expect(isCommandActive(ed.tiptap, 'spoiler')).toBe(true);
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.getMarkdown()).toBe('a\n\nTitle\n\nbody\n\nmore\n\nz');
+    expect(isCommandActive(ed.tiptap, 'spoiler')).toBe(false);
+    const $from = ed.tiptap.state.selection.$from;
+    expect($from.parent.textContent).toBe('Title');
+    expect($from.parentOffset).toBe(0);
+  });
+
+  test('spoiler toggle in a nested spoiler unwraps the innermost one', () => {
+    ed.setMarkdown('???- "outer"\n    ???- "inner"\n        deep');
+    selectText(ed, 'deep', 'deep');
+    ed.tiptap.commands.setTextSelection(ed.tiptap.state.selection.from);
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.getMarkdown()).toBe('???- "outer"\n    inner\n\n    deep');
+  });
+
+  test('spoiler toggle on an empty spoiler leaves an empty paragraph', () => {
+    ed.setMarkdown('a');
+    ed.tiptap.commands.setTextSelection(2);
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    expect(ed.tiptap.state.selection.$from.parent.type.name).toBe('spoilerSummary');
+    runVisualCommand(ed.tiptap, 'spoiler', ctx);
+    const doc = ed.tiptap.state.doc;
+    expect(doc.childCount).toBe(3);
+    expect(doc.child(1).type.name).toBe('paragraph');
+    expect(doc.child(1).content.size).toBe(0);
+    expect(ed.tiptap.state.selection.$from.parent).toBe(doc.child(1));
+  });
+
   test('removeFormat clears marks and blocks', () => {
     ed.setMarkdown('## **a** b');
     selectText(ed, 'a', 'b');

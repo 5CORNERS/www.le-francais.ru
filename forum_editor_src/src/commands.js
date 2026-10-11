@@ -6,6 +6,8 @@ import {
   toggleCode,
   insertSpoilerTemplate,
 } from './markdownMode.js';
+import { trimEnd, trimStart } from './blockRange.js';
+import { toggleSpoiler } from './spoilerCommands.js';
 
 /** Toolbar commands, in toolbar order (`data-cmd` values). */
 export const COMMANDS = ['bold', 'italic', 'underline', 'strikethrough', 'mark', 'code', 'kbd', 'superscript', 'subscript', 'removeFormat', 'h2', 'h3', 'quote', 'ul', 'ol', 'spoiler', 'link', 'image'];
@@ -54,21 +56,6 @@ function call(fn) {
 
 function hardBreakText(leaf) {
   return leaf.type.name === 'hardBreak' ? '\n' : '';
-}
-
-/** Offset in `node` after dropping whitespace that precedes `offset`. */
-function trimEnd(node, offset) {
-  let o = offset;
-  while (o > 0 && /\s/.test(node.textBetween(o - 1, o, '', '￼'))) o--;
-  return o;
-}
-
-/** Offset in `node` after skipping whitespace that follows `offset`. */
-function trimStart(node, offset) {
-  let o = offset;
-  const size = node.content.size;
-  while (o < size && /\s/.test(node.textBetween(o, o + 1, '', '￼'))) o++;
-  return o;
 }
 
 function unwrapCodeBlock(editor, $pos) {
@@ -226,66 +213,6 @@ function toggleVisualCode(editor) {
   blocksToCodeBlock(editor, $from, $to);
 }
 
-// --- Visual: spoiler --------------------------------------------------------
-
-function insertSpoiler(editor) {
-  const state = editor.state;
-  const schema = state.schema;
-  const sel = state.selection;
-  const spoiler = schema.nodes.spoiler.create(null, [
-    schema.nodes.spoilerSummary.create(),
-    schema.nodes.spoilerBody.create(null, schema.nodes.paragraph.create()),
-  ]);
-  const emptyP = function () { return schema.nodes.paragraph.create(); };
-
-  // Each plan edits `tr` and returns the spoiler's position.
-  function atCaret(tr) {
-    const $pos = tr.doc.resolve(sel.to);
-    const parent = $pos.parent;
-    const depth = $pos.depth;
-    if (!parent.isTextblock || depth === 0) throw new Error('no text caret');
-    const before = $pos.before(depth);
-    if (sel.empty && parent.type.name === 'paragraph' && parent.content.size === 0) {
-      tr.replaceWith(before, $pos.after(depth), [spoiler, emptyP()]);
-      return before;
-    }
-    if ($pos.parentOffset === 0) {
-      tr.insert(before, spoiler);
-      return before;
-    }
-    if ($pos.parentOffset === parent.content.size) {
-      const at = $pos.after(depth);
-      tr.insert(at, [spoiler, emptyP()]);
-      return at;
-    }
-    tr.split(sel.to);
-    tr.insert(sel.to + 1, spoiler);
-    return sel.to + 1;
-  }
-
-  function afterTopLevelBlock(tr) {
-    const at = sel.$to.depth > 0 ? sel.$to.after(1) : sel.to;
-    tr.insert(at, [spoiler, emptyP()]);
-    return at;
-  }
-
-  const plans = [atCaret, afterTopLevelBlock];
-  for (let i = 0; i < plans.length; i++) {
-    const tr = state.tr;
-    try {
-      const at = plans[i](tr);
-      tr.doc.check();
-      if (tr.doc.nodeAt(at).type.name !== 'spoiler') throw new Error('spoiler not placed');
-      // Inside spoiler (+1), inside summary (+1).
-      tr.setSelection(TextSelection.create(tr.doc, at + 2)).scrollIntoView();
-    } catch (e) {
-      continue;
-    }
-    editor.view.dispatch(tr);
-    return;
-  }
-}
-
 // --- Public API -------------------------------------------------------------
 
 /** Runs a toolbar command on the TipTap editor. */
@@ -307,7 +234,7 @@ export function runVisualCommand(editor, cmd, ctx) {
     case 'quote': editor.commands.toggleBlockquote(); break;
     case 'ul': editor.commands.toggleBulletList(); break;
     case 'ol': editor.commands.toggleOrderedList(); break;
-    case 'spoiler': insertSpoiler(editor); break;
+    case 'spoiler': toggleSpoiler(editor); break;
     default: break;
   }
 }

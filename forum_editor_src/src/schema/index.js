@@ -11,6 +11,7 @@ import { RawMarkdownBlock } from './RawMarkdownBlock.js';
 import { ForumBulletList, ForumOrderedList } from './Lists.js';
 import { ForumLink } from './Link.js';
 import { ForumBold, BOLD_PASTE_RULES } from './Paste.js';
+import { ForumKeys } from '../keymap.js';
 
 export { BOLD_PASTE_RULES };
 
@@ -38,6 +39,7 @@ export const extensions = [
   SpoilerSummary,
   SpoilerBody,
   RawMarkdownBlock,
+  ForumKeys,
 ];
 
 let cached = null;

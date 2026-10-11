@@ -82,6 +82,36 @@ describe('markdownMode', () => {
     expect([r.selStart, r.selEnd]).toEqual([4, 4]);
   });
 
+  test('italic twice on an in-word selection unwraps again (Task 8 minor)', () => {
+    const r1 = wrapSelection('motifs', 3, 6, '*', '*', 'курсив');
+    expect(r1.text).toBe('mot*ifs*');
+    expect(r1.text.slice(r1.selStart, r1.selEnd)).toBe('ifs');
+    const r2 = wrapSelection(r1.text, r1.selStart, r1.selEnd, '*', '*', 'курсив');
+    expect(r2.text).toBe('motifs');
+    expect(r2.text.slice(r2.selStart, r2.selEnd)).toBe('ifs');
+    expect(wrapSelection('mot**ifs**s', 5, 8, '**', '**', 'жирный текст').text).toBe('motifss');
+    // Selection including the markers.
+    expect(wrapSelection('mot*ifs*', 3, 8, '*', '*', 'курсив').text).toBe('motifs');
+  });
+
+  test('in-word markers that are not an emphasis pair stay literal', () => {
+    expect(wrapSelection('a*b*c`x*y*z`', 8, 9, '*', '*', 'курсив').text).toBe('a*b*c`x**y**z`');
+    expect(wrapSelection('my_var_name', 3, 6, '_', '_', 'x').text).toBe('my__var__name');
+    expect(wrapSelection('2^3^4', 2, 3, '^', '^', '2').text).toBe('2^^3^^4');
+  });
+
+  test('prefixLines quote over a blank line makes one blockquote (Task 8 minor)', () => {
+    expect(prefixLines('a\n\nb', 0, 4, '> ').text).toBe('> a\n>\n> b');
+    expect(prefixLines('> a\n>\n> b', 0, 10, '> ').text).toBe('a\n\nb');
+    expect(prefixLines('a\n\nb', 0, 4, '- ').text).toBe('- a\n\n- b');
+  });
+
+  test('insertSpoilerTemplate indents selected lines under the title', () => {
+    const r = insertSpoilerTemplate('before\n\nl1\nl2\n\nl3\n\nafter', 8, 17);
+    expect(r.text).toBe('before\n\n???- "Заголовок спойлера"\n    l1\n    l2\n\n    l3\n\nafter');
+    expect(r.text.slice(r.selStart, r.selEnd)).toBe('Заголовок спойлера');
+  });
+
   test('insertSpoilerTemplate indents the selection', () => {
     const r = insertSpoilerTemplate('x\ny', 0, 3);
     expect(r.text.startsWith('???- "Заголовок спойлера"\n    x\n    y')).toBe(true);

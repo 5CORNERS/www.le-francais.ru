@@ -6,6 +6,9 @@ import { parseMarkdown } from './markdown/parser.js';
 import { serializeMarkdown } from './markdown/serializer.js';
 import { buildEditorDom, updateActiveStates } from './ui/toolbar.js';
 import { runVisualCommand, runMarkdownCommand } from './commands.js';
+import { bindShortcuts } from './keymap.js';
+import { openLinkModal } from './ui/linkModal.js';
+import { initEmojiPicker } from './ui/emojiPicker.js';
 
 export const MODE_STORAGE_KEY = 'forum_editor_mode';
 export const EDITOR_PLACEHOLDER = 'Напишите ответ или перетащите изображение сюда...';
@@ -376,10 +379,12 @@ export function createForumEditor(options) {
 
   // --- Toolbar commands -------------------------------------------------------
 
-  // Link modal (Task 9) and file picker (Task 10) plug in here.
+  // The file picker (Task 10) plugs in here. `showLinkModal` is the dialog
+  // used by the link command (replaceable, e.g. in tests).
   const commandContext = {
     openLinkModal: function () {},
     openFilePicker: function () {},
+    showLinkModal: openLinkModal,
   };
 
   function refreshActiveStates() {
@@ -391,6 +396,88 @@ export function createForumEditor(options) {
     else runMarkdownCommand(textarea, cmd, commandContext);
     updateCharCounter();
     refreshActiveStates();
+  }
+
+  // --- Link & emoji -----------------------------------------------------------
+
+  /** Sets the link on the selection if its text is unchanged, else inserts linked text. */
+  function applyLinkVisual(range, selectedText, link) {
+    const editor = api.tiptap;
+    const state = editor.state;
+    const size = state.doc.content.size;
+    const from = Math.min(range.from, size);
+    const to = Math.min(range.to, size);
+    const linkType = state.schema.marks.link;
+    const linkMark = linkType.create({ href: link.url });
+    const display = link.text || link.url;
+    const tr = state.tr;
+    let end;
+    if (from < to && display === selectedText.trim()) {
+      tr.addMark(from, to, linkMark);
+      end = to;
+    } else {
+      const $from = state.doc.resolve(from);
+      const around = from < to ? ($from.marksAcross(state.doc.resolve(to)) || []) : $from.marks();
+      tr.replaceWith(from, to, state.schema.text(display, linkMark.addToSet(around)));
+      end = from + display.length;
+    }
+    const $end = tr.doc.resolve(end);
+    tr.setSelection(TextSelection.create(tr.doc, end));
+    // Typing after the link must not extend it.
+    tr.setStoredMarks(linkType.removeFromSet($end.marks()));
+    editor.view.dispatch(tr.scrollIntoView());
+    editor.view.focus();
+  }
+
+  function applyLinkMarkdown(range, link) {
+    const len = textarea.value.length;
+    const insert = '[' + (link.text || link.url) + '](' + link.url + ')';
+    textarea.focus();
+    textarea.setRangeText(insert, Math.min(range.from, len), Math.min(range.to, len), 'end');
+    fire(textarea, 'input');
+  }
+
+  /** The `link` command: asks for text and URL, then applies them in the current mode. */
+  function linkCommand() {
+    const mode = api.currentMode;
+    let range;
+    let text;
+    if (mode === 'visual') {
+      const sel = api.tiptap.state.selection;
+      text = api.tiptap.state.doc.textBetween(sel.from, sel.to, ' ');
+      // A selection without text (a selected image) is kept; the link goes after it.
+      range = { from: text ? sel.from : sel.to, to: sel.to };
+    } else {
+      range = { from: textarea.selectionStart, to: textarea.selectionEnd };
+      text = textarea.value.slice(range.from, range.to);
+    }
+    return Promise.resolve(commandContext.showLinkModal(dom.modal, { text: text, url: '' })).then(function (link) {
+      if (api.currentMode !== mode) return;
+      if (!link || !link.url) {
+        focus();
+        return;
+      }
+      if (mode === 'visual') applyLinkVisual(range, text, link);
+      else applyLinkMarkdown(range, link);
+      updateCharCounter();
+      refreshActiveStates();
+    });
+  }
+  commandContext.openLinkModal = linkCommand;
+
+  function insertEmoji(char) {
+    if (api.currentMode === 'visual') {
+      const editor = api.tiptap;
+      editor.view.dispatch(editor.state.tr.insertText(char).scrollIntoView());
+      editor.view.focus();
+    } else {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      textarea.focus();
+      textarea.setRangeText(char, start, end, 'end');
+      fire(textarea, 'input');
+    }
+    updateCharCounter();
   }
 
   // --- Mount ------------------------------------------------------------------
@@ -473,8 +560,14 @@ export function createForumEditor(options) {
   modeSwitch.addEventListener('click', onSwitchClick);
   dom.wrapper.addEventListener('mousedown', onWrapperMousedown);
   dom.toolbar.addEventListener('click', onToolbarClick);
+  const unbindVisualKeys = bindShortcuts(api.element, executeCommand);
+  const unbindTextareaKeys = bindShortcuts(textarea, executeCommand);
+  const destroyEmojiPicker = initEmojiPicker(dom.emoji, insertEmoji);
 
   function destroy() {
+    unbindVisualKeys();
+    unbindTextareaKeys();
+    destroyEmojiPicker();
     if (form) form.removeEventListener('submit', onSubmit, true);
     textarea.removeEventListener('input', onTextareaInput);
     checkbox.removeEventListener('change', onCheckbox);

@@ -22,6 +22,54 @@ function isWordChar(ch) {
   return !!ch && WORD_CHAR.test(ch);
 }
 
+// Emphasis markers ('*', '**') may sit inside a word: visual mode writes
+// `mot*ifs*`. There they are unwrapped only when parsing the line(s) confirms
+// that the pair opening at `open` and closing at `close` delimits real emphasis
+// around exactly its content. Other markers ('_', '^', '~'…) next to word
+// characters always stay literal (my_var_name, 2^3^4).
+const EMPHASIS_MARKS = { '*': 'italic', '**': 'bold' };
+
+function markRuns(doc, markName) {
+  const runs = [];
+  doc.descendants(function (node) {
+    if (!node.isTextblock) return true;
+    let run = null;
+    node.forEach(function (child) {
+      const marked = child.isText && child.marks.some(function (m) { return m.type.name === markName; });
+      if (marked) {
+        run = (run || '') + child.text;
+      } else if (run !== null) {
+        runs.push(run);
+        run = null;
+      }
+    });
+    if (run !== null) runs.push(run);
+    return false;
+  });
+  return runs;
+}
+
+function isEmphasisPair(text, open, close, marker) {
+  const markName = EMPHASIS_MARKS[marker];
+  if (!markName) return false;
+  const lineStart = text.lastIndexOf('\n', open - 1) + 1;
+  let lineEnd = text.indexOf('\n', close + marker.length);
+  if (lineEnd < 0) lineEnd = text.length;
+  const line = text.slice(lineStart, lineEnd);
+  const o = open - lineStart;
+  const c = close - lineStart;
+  const inner = line.slice(o + marker.length, c);
+  const unwrapped = line.slice(0, o) + inner + line.slice(c + marker.length);
+  try {
+    const doc = parseMarkdown(line);
+    // Literal markers are visible text; real delimiters are not.
+    if (doc.textContent !== parseMarkdown(unwrapped).textContent) return false;
+    return markRuns(doc, markName).indexOf(parseMarkdown(inner).textContent) >= 0;
+  } catch (e) {
+    return false;
+  }
+}
+
 /** Wraps the selection in prefix/suffix, or unwraps it if already wrapped. */
 export function wrapSelection(text, start, end, prefix, suffix, placeholder) {
   const selected = text.slice(start, end);
@@ -33,7 +81,8 @@ export function wrapSelection(text, start, end, prefix, suffix, placeholder) {
       selected.startsWith(prefix) && selected.endsWith(suffix) &&
       !markerTouchesSame(selected, 0, prefix.length, prefix) &&
       !markerTouchesSame(selected, selected.length - suffix.length, selected.length, suffix) &&
-      !isWordChar(text.charAt(start - 1)) && !isWordChar(text.charAt(end))) {
+      ((!isWordChar(text.charAt(start - 1)) && !isWordChar(text.charAt(end))) ||
+       (prefix === suffix && isEmphasisPair(text, start, end - suffix.length, prefix)))) {
     const inner = selected.slice(prefix.length, selected.length - suffix.length);
     return result(before + inner + after, start, start + inner.length);
   }
@@ -42,7 +91,8 @@ export function wrapSelection(text, start, end, prefix, suffix, placeholder) {
   if (prefix && suffix && before.endsWith(prefix) && after.startsWith(suffix) &&
       !markerTouchesSame(text, start - prefix.length, start, prefix) &&
       !markerTouchesSame(text, end, end + suffix.length, suffix) &&
-      !isWordChar(text.charAt(start - prefix.length - 1)) && !isWordChar(text.charAt(end + suffix.length))) {
+      ((!isWordChar(text.charAt(start - prefix.length - 1)) && !isWordChar(text.charAt(end + suffix.length))) ||
+       (prefix === suffix && isEmphasisPair(text, start - prefix.length, end, prefix)))) {
     const newStart = start - prefix.length;
     return result(before.slice(0, newStart) + selected + after.slice(suffix.length), newStart, newStart + selected.length);
   }
@@ -76,9 +126,12 @@ export function prefixLines(text, start, end, prefix, placeholder, strip) {
   }
 
   // Blank lines separate blocks: they get no prefix (so 'a\n\nb' becomes two
-  // list items, not three) and numbering skips them.
-  const skipBlank = lines.some(function (line) { return line.trim() !== ''; });
-  const isSkipped = function (line) { return skipBlank && line.trim() === ''; };
+  // list items, not three) and numbering skips them. A quote instead marks
+  // them with a bare '>' so 'a\n\nb' stays one blockquote.
+  const quote = prefix === '> ';
+  const isBlank = function (line) { return line.trim() === '' || (quote && /^>\s*$/.test(line)); };
+  const skipBlank = lines.some(function (line) { return !isBlank(line); });
+  const isSkipped = function (line) { return skipBlank && isBlank(line); };
   const numbers = [];
   let n = 0;
   lines.forEach(function (line) { numbers.push(isSkipped(line) ? -1 : n++); });
@@ -88,8 +141,10 @@ export function prefixLines(text, start, end, prefix, placeholder, strip) {
   const deltas = [];
   const out = lines.map(function (line, j) {
     if (isSkipped(line)) {
-      deltas.push(0);
-      return line;
+      let kept = line;
+      if (quote) kept = allPrefixed ? '' : (line.trim() === '' ? '>' : line);
+      deltas.push(kept.length - line.length);
+      return kept;
     }
     const i = numbers[j];
     if (allPrefixed) {
