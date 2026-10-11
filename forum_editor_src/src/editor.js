@@ -10,6 +10,7 @@ import { bindShortcuts } from './keymap.js';
 import { openLinkModal } from './ui/linkModal.js';
 import { initEmojiPicker } from './ui/emojiPicker.js';
 import { bindUploadHandlers } from './upload.js';
+import { initResizeHandle } from './ui/resizeHandle.js';
 
 export const MODE_STORAGE_KEY = 'forum_editor_mode';
 export const EDITOR_PLACEHOLDER = 'Напишите ответ или перетащите изображение сюда...';
@@ -566,6 +567,9 @@ export function createForumEditor(options) {
   const unbindTextareaKeys = bindShortcuts(textarea, executeCommand);
   const destroyEmojiPicker = initEmojiPicker(dom.emoji, insertEmoji);
   const uploads = bindUploadHandlers(api, dom);
+  const destroyResizer = initResizeHandle(dom.resizer, function () {
+    return [api.element, textarea];
+  });
   commandContext.openFilePicker = uploads.openFilePicker;
 
   function destroy() {
@@ -573,6 +577,7 @@ export function createForumEditor(options) {
     unbindTextareaKeys();
     destroyEmojiPicker();
     uploads.destroy();
+    destroyResizer();
     if (form) form.removeEventListener('submit', onSubmit, true);
     textarea.removeEventListener('input', onTextareaInput);
     checkbox.removeEventListener('change', onCheckbox);
