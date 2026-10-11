@@ -4,7 +4,7 @@ import { unwrapSpoilerAt, UNWRAP_DONE } from './spoilerCommands.js';
 
 // Toolbar shortcuts (legacy handleKeydown, forum-editor-legacy.js:1274-1360).
 // `shift`: true = Shift required, false = Shift forbidden. `alt`: false =
-// Alt forbidden, undefined = either. Keys are lower-cased `e.key` values,
+// Alt forbidden, undefined = either. `ctrlOnly`: Cmd (metaKey) forbidden. Keys are lower-cased `e.key` values,
 // Latin and Cyrillic (ЙЦУКЕН) layouts. `keyCodes`: legacy fallback.
 const SHORTCUTS = [
   { cmd: 'strikethrough', shift: true, codes: ['KeyX'], keys: ['x', 'ч'], keyCodes: [88] },
@@ -13,6 +13,7 @@ const SHORTCUTS = [
   { cmd: 'quote', shift: true, codes: ['Period'], keys: ['.', '>', 'ю'], keyCodes: [190] },
   { cmd: 'removeFormat', shift: true, codes: ['KeyN'], keys: ['n', 'т'], keyCodes: [78] },
   { cmd: 'removeFormat', shift: false, codes: ['Backslash'], keys: ['\\'], keyCodes: [220] },
+  { cmd: 'removeFormat', shift: false, alt: false, ctrlOnly: true, codes: ['Space'], keys: [' '], keyCodes: [32] },
   { cmd: 'link', shift: false, alt: false, codes: ['KeyK'], keys: ['k', 'л'], keyCodes: [75] },
   { cmd: 'bold', shift: false, alt: false, codes: ['KeyB'], keys: ['b', 'и'], keyCodes: [66] },
   { cmd: 'italic', shift: false, alt: false, codes: ['KeyI'], keys: ['i', 'ш'], keyCodes: [73] },
@@ -22,6 +23,7 @@ const SHORTCUTS = [
 function modifiersMatch(row, e) {
   if (row.shift !== !!e.shiftKey) return false;
   if (row.alt === false && e.altKey) return false;
+  if (row.ctrlOnly && e.metaKey) return false;
   return true;
 }
 

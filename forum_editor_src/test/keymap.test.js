@@ -287,3 +287,42 @@ describe('ForumKeys', () => {
     expect(ed.getMarkdown()).toBe('');
   });
 });
+
+describe('Ctrl+Space (remove formatting)', () => {
+  test('Ctrl+Space matches removeFormat (by code, key and keyCode)', () => {
+    expect(matchShortcut(key('Space', ' ', CTRL))).toBe('removeFormat');
+    expect(matchShortcut(key('', ' ', CTRL))).toBe('removeFormat');
+    expect(matchShortcut(key('', '', { ctrlKey: true, keyCode: 32 }))).toBe('removeFormat');
+  });
+
+  test('Cmd+Space, Ctrl+Shift+Space, Ctrl+Alt+Space and plain Space are not shortcuts', () => {
+    expect(matchShortcut(key('Space', ' ', { metaKey: true }))).toBe(null);
+    expect(matchShortcut(key('Space', ' ', { ctrlKey: true, metaKey: true }))).toBe(null);
+    expect(matchShortcut(key('Space', ' ', CTRL_SHIFT))).toBe(null);
+    expect(matchShortcut(key('Space', ' ', { ctrlKey: true, altKey: true }))).toBe(null);
+    expect(matchShortcut(key('Space', ' '))).toBe(null);
+  });
+
+  test('Ctrl+Space removes bold in the visual editor', () => {
+    const ed = makeEditor('**word**');
+    selectText(ed, 'word', 'word');
+    ed.element.dispatchEvent(key('Space', ' ', CTRL));
+    expect(ed.getMarkdown()).toBe('word');
+  });
+
+  test('Ctrl+Space strips ** in the Markdown textarea', () => {
+    const ed = makeEditor('a **b**', 'markdown');
+    const ta = ed.dom.container.querySelector('textarea');
+    ta.setSelectionRange(0, ta.value.length);
+    const ev = key('Space', ' ', CTRL);
+    ta.dispatchEvent(ev);
+    expect(ta.value).toBe('a b');
+    expect(ev.defaultPrevented).toBe(true);
+  });
+
+  test('the removeFormat toolbar button title lists Ctrl+Space', () => {
+    const ed = makeEditor('a');
+    const btn = ed.dom.toolbar.querySelector('[data-cmd="removeFormat"]');
+    expect(btn.getAttribute('title')).toBe('Очистить форматирование (Ctrl+Space, Ctrl+\\)');
+  });
+});
