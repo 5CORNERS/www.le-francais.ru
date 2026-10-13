@@ -808,7 +808,7 @@ class LessonPage(Page):
             context['transcript_html'], context['transcript_map'] = self.transcript, self.transcript_html
         elif self.has_transcript:
             context['has_transcript'] = True
-            context['transcript_html'], context['transcript_map'] = self.transcript, self.transcript_html
+            context['transcript_html'], context['transcript_map'] = self.transcript_html, self.transcript
 
         return context
 
@@ -869,8 +869,8 @@ LessonPage.settings_panels = LessonPage.settings_panels + [
     FieldPanel('enable_next_lesson_button'),
     FieldPanel('next_lesson_button',  widget=TextInput(attrs={'placeholder':'Следующий урок'})),
     FieldPanel('has_transcript'),
-    FieldPanel('transcript', widget=Textarea(attrs={'rows': 10})),
-    FieldPanel('transcript_html', widget=Textarea(attrs={'rows': 10}))
+    FieldPanel('transcript', widget=Textarea(attrs={'rows': 10, 'required': False,})),
+    FieldPanel('transcript_html', widget=Textarea(attrs={'rows': 10, 'required': False,} ))
 ]
 
 
