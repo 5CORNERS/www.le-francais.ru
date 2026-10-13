@@ -12,6 +12,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import Count, Sum
 from django.forms import CheckboxInput, TextInput
+from django.forms.widgets import Textarea
 from django.http import HttpRequest
 from django.utils import timezone
 from modelcluster.fields import ParentalKey
@@ -485,8 +486,8 @@ class LessonPage(Page):
     need_payment = models.BooleanField(default=False)
 
     has_transcript = models.BooleanField(default=False)
-    transcript = JSONField(default=[], blank=True)
-    transcript_html = models.fields.TextField(default='', blank=True)
+    transcript = JSONField(default=[], blank=True, verbose_name="transcript JSON")
+    transcript_html = models.fields.TextField(default='', blank=True, verbose_name='transcript HTML')
 
     transcript_srt = models.FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
     transcript_docx = models.FileField(null=True, blank=True, default=None, upload_to='home/transcripts')
@@ -867,6 +868,9 @@ LessonPage.settings_panels = LessonPage.settings_panels + [
     FieldPanel('previous_lesson_button', widget=TextInput(attrs={'placeholder':'Предыдущий урок'})),
     FieldPanel('enable_next_lesson_button'),
     FieldPanel('next_lesson_button',  widget=TextInput(attrs={'placeholder':'Следующий урок'})),
+    FieldPanel('has_transcript'),
+    FieldPanel('transcript', widget=Textarea(attrs={'rows': 10})),
+    FieldPanel('transcript_html', widget=Textarea(attrs={'rows': 10}))
 ]
 
 
