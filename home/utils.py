@@ -1,4 +1,5 @@
 import os
+import re
 from collections import defaultdict
 import binascii
 from hashlib import md5
@@ -21,6 +22,10 @@ from html import escape as html_escape, unescape
 from home.consts import COLUMN_TEXT, COLUMN_START, COLUMN_END, COLUMN_SPEAKER, EU_COUNTRIES
 from le_francais.settings.base import FILES_LE_FRANCAIS_HTTPS, \
     FILES_LE_FRANCAIS_SITENAME
+
+ZERO_WIDTH_SPACE = '\u200b'
+ZERO_WIDTH_CHARS_RE = re.compile(r'[\u200b\ufeff\u2060\u200c\u200d]')
+
 
 
 def is_gpt_disabled(request):
@@ -302,22 +307,26 @@ def create_document_from_transcript_srt(table_csv) -> BytesIO:
             current_p:Paragraph = document.add_paragraph('— ')
         else:
             current_p.add_run(' ')
-        new_run:Run = current_p.add_run(f'{l}')
+        anchored_l = l if l.startswith(ZERO_WIDTH_SPACE) else f'{ZERO_WIDTH_SPACE}{l}'
+        new_run:Run = current_p.add_run(anchored_l)
         comment = new_run.add_comment(
             text=f'{data["speaker"]} {data["start"]} {data["end"]} {data["id"]}'
         )
         last_speaker = speaker
     file = BytesIO()
     document.save(file)
+    file.seek(0)
     return file
 
 
 def text_postprocessor(html):
+    html = ZERO_WIDTH_CHARS_RE.sub('', html)
     return html \
             .replace(' »', '&nbsp;»')\
             .replace('« ', '«&nbsp;')\
             .replace(' ?', '&nbsp;?')\
             .replace(' !', '&nbsp;!')
+
 
 
 def docx_parse_document(document):
@@ -396,7 +405,12 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
     for sub in element.xpath('./*'):
         sub_name = sub.xpath('name()')
         if sub_name == 'w:t':
-            t_html = html_escape(sub.xpath('text()')[0])
+            text_nodes = sub.xpath('text()')
+            t_text = text_nodes[0] if text_nodes else ''
+            t_text = ZERO_WIDTH_CHARS_RE.sub('', t_text)
+            if not t_text:
+                continue
+            t_html = html_escape(t_text)
             if current_style['bold']:
                 t_html = f'<strong>{t_html}</strong>'
             if current_style['italic']:
@@ -652,7 +666,8 @@ def map_to_docx(transcript_map, separate_speakers=True):
         else:
             pre_line, line, post_line = eaf_string_to_docx(text)
             current_p.add_run(' ') # FIXME referenced before assignment
-        new_run = current_p.add_run(text)
+        anchored_text = text if text.startswith(ZERO_WIDTH_SPACE) else f'{ZERO_WIDTH_SPACE}{text}'
+        new_run = current_p.add_run(anchored_text)
         new_run.add_comment(f'{speaker} {start} {end}')
         last_speaker = speaker
     file = BytesIO()
