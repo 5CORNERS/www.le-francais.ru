@@ -485,7 +485,7 @@ class LessonPage(Page):
 
     need_payment = models.BooleanField(default=False)
 
-    has_transcript = models.BooleanField(default=False)
+    has_transcript = models.BooleanField(default=False, blank=True)
     transcript = JSONField(default=[], blank=True, verbose_name="transcript JSON")
     transcript_html = models.fields.TextField(default='', blank=True, verbose_name='transcript HTML')
 
