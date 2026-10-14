@@ -1144,9 +1144,13 @@ button.collapsed{
 
     .bs-callout-info {
         border-left-color: var(--info);
+        background-color: #f1f3f5;
+        font-style: italic;
+        font-weight: 500;
+        margin-left: 20px;
     }
     .bs-callout-info h4 {
-        color: var(--info)
+        color: var(--info);
     }
 
 	.bs-callout.disabled {
