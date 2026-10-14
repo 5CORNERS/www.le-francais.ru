@@ -33,3 +33,8 @@ def courses_base_url(request):
         return {
             'COURSES_BASE_URL': 'https://courses.le-francais.ru'
         }
+
+def forum_editor_legacy(request):
+    return {
+        'forum_editor_legacy': settings.FORUM_EDITOR_LEGACY or request.GET.get('editor') == 'legacy'
+    }

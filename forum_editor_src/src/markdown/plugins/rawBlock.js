@@ -1,0 +1,177 @@
+// Block constructs the visual editor cannot edit become a single `raw_block`
+// token whose `content` is the exact source slice (lines joined with \n).
+//
+// Own detection (rule `raw_block`, before `table`): footnote definitions,
+// admonitions, definition lists, abbreviations, attr_list-only lines,
+// paragraphs with an inline attr_list right after an image or link.
+// Wrapped markdown-it rules: tables, horizontal rules, headings flagged by
+// pyHeading or containing an image, setext headings the server may read
+// differently (see isServerSetext), and lists that contain a task item.
+
+const FOOTNOTE_DEF = /^\[\^[^\]\s]+]:/;
+const ADMONITION = /^!!! ?[\p{L}\p{N}_-]/u;
+const ABBREVIATION = /^\*\[[^\]]+]:/;
+const ATTR_LIST = /^\{:[^}]*}\s*$/;
+// `![a](x){: width="50%"}`, `[a](x){.class}`: attributes for that element.
+const INLINE_ATTR_LIST = /]\([^)\n]*\)\{[^}\n]*}/;
+const DEF_LINE = /^: {1,3}\S/;
+const TASK_ITEM = /^\[[ xX]]\s/;
+
+function lineText(state, line) {
+  return state.src.slice(state.bMarks[line] + state.tShift[line], state.eMarks[line]);
+}
+
+function isIndentedCode(state, line) {
+  return state.sCount[line] - state.blkIndent >= 4;
+}
+
+// Source of one line relative to the current block context.
+function sourceLine(state, line) {
+  if (state.blkIndent === 0) return state.src.slice(state.bMarks[line], state.eMarks[line]);
+  if (state.isEmpty(line)) return '';
+  return ' '.repeat(Math.max(state.sCount[line] - state.blkIndent, 0)) + lineText(state, line);
+}
+
+function pushRaw(state, startLine, nextLine) {
+  let end = nextLine;
+  while (end > startLine + 1 && state.isEmpty(end - 1)) end--;
+  const lines = [];
+  for (let line = startLine; line < end; line++) lines.push(sourceLine(state, line));
+  const token = state.push('raw_block', '', 0);
+  token.block = true;
+  token.content = lines.join('\n');
+  token.map = [startLine, end];
+  state.line = nextLine;
+}
+
+// End (exclusive) of a body made of lines indented 4+ columns, with blank
+// lines between them. With `lazy`, unindented lines directly following
+// `from` (until the first blank line) belong to the body as well.
+function bodyEnd(state, from, endLine, lazy) {
+  let line = from;
+  let last = from - 1;
+  if (lazy) {
+    while (line < endLine && !state.isEmpty(line)) last = line++;
+  }
+  for (; line < endLine; line++) {
+    if (state.isEmpty(line)) continue;
+    if (!isIndentedCode(state, line)) break;
+    last = line;
+  }
+  return last + 1;
+}
+
+function isDefinitionStart(state, line, endLine) {
+  return line + 1 < endLine && !state.isEmpty(line) && !state.isEmpty(line + 1) &&
+    !isIndentedCode(state, line + 1) && DEF_LINE.test(lineText(state, line + 1));
+}
+
+function definitionListEnd(state, startLine, endLine) {
+  let next = startLine;
+  for (;;) {
+    while (next < endLine && !state.isEmpty(next)) next++;
+    let line = next;
+    while (line < endLine && state.isEmpty(line)) line++;
+    if (line >= endLine) return next;
+    const continues = isIndentedCode(state, line) || DEF_LINE.test(lineText(state, line)) ||
+      isDefinitionStart(state, line, endLine);
+    if (!continues) return next;
+    next = line;
+  }
+}
+
+function canInterrupt(text) {
+  return FOOTNOTE_DEF.test(text) || ADMONITION.test(text);
+}
+
+// End of the paragraph starting at startLine when one of its lines carries
+// an inline attr_list, else -1.
+function inlineAttrListEnd(state, startLine, endLine) {
+  let line = startLine;
+  let found = false;
+  for (; line < endLine && !state.isEmpty(line); line++) {
+    if (INLINE_ATTR_LIST.test(lineText(state, line))) found = true;
+  }
+  return found ? line : -1;
+}
+
+function detectRaw(state, startLine, endLine) {
+  const text = lineText(state, startLine);
+  if (FOOTNOTE_DEF.test(text)) return bodyEnd(state, startLine + 1, endLine, true);
+  if (ADMONITION.test(text)) return bodyEnd(state, startLine + 1, endLine, false);
+  if (ABBREVIATION.test(text)) {
+    let line = startLine + 1;
+    while (line < endLine && !isIndentedCode(state, line) && ABBREVIATION.test(lineText(state, line))) line++;
+    return line;
+  }
+  if (ATTR_LIST.test(text)) return startLine + 1;
+  if (isDefinitionStart(state, startLine, endLine)) return definitionListEnd(state, startLine, endLine);
+  return inlineAttrListEnd(state, startLine, endLine);
+}
+
+function wrapRule(md, name, isRaw) {
+  const rule = md.block.ruler.__rules__.find((r) => r.name === name);
+  const original = rule.fn;
+  md.block.ruler.at(name, (state, startLine, endLine, silent) => {
+    if (silent) return original(state, startLine, endLine, true);
+    const first = state.tokens.length;
+    if (!original(state, startLine, endLine, false)) return false;
+    const produced = state.tokens.slice(first);
+    if (isRaw(produced, state, startLine)) {
+      const nextLine = state.line;
+      state.tokens.length = first;
+      pushRaw(state, startLine, nextLine);
+    }
+    return true;
+  }, { alt: rule.alt.slice() });
+}
+
+const SETEXT_UNDERLINE = /^[=-]+[ \t]*$/;
+
+// Python-Markdown 2.6 reads a setext heading only from the first two lines of
+// a block (`^.*?\n[=-]+[ ]*(\n|$)`, underline not indented), before lists
+// and rules. Accepted when markdown-it saw a one-line setext heading that
+// starts a block (document, quote or spoiler body start, or after a blank
+// line) outside list items (detab differences); anything else stays raw.
+function isServerSetext(tokens, state, startLine) {
+  if (state.parentType === 'list' || tokens[0].map[1] - tokens[0].map[0] !== 2) return false;
+  const prev = state.tokens[state.tokens.length - tokens.length - 1];
+  const blockStart = startLine === 0 || state.isEmpty(startLine - 1) ||
+    (prev !== undefined && prev.type === 'blockquote_open');
+  const under = startLine + 1;
+  return blockStart && state.sCount[under] === state.blkIndent &&
+    SETEXT_UNDERLINE.test(lineText(state, under));
+}
+
+function hasImage(tokens) {
+  return tokens[1].type === 'inline' && tokens[1].content.indexOf('![') !== -1;
+}
+
+function hasTaskItem(tokens) {
+  for (let i = 2; i < tokens.length; i++) {
+    if (tokens[i].type === 'inline' && tokens[i - 2].type === 'list_item_open' &&
+      TASK_ITEM.test(tokens[i].content)) return true;
+  }
+  return false;
+}
+
+export function rawBlockPlugin(md) {
+  md.block.ruler.before('table', 'raw_block', (state, startLine, endLine, silent) => {
+    if (isIndentedCode(state, startLine)) return false;
+    // Silent calls are terminator checks: only admonitions and footnote
+    // definitions interrupt a paragraph (pymdown matches them mid-block).
+    if (silent) return canInterrupt(lineText(state, startLine));
+    const next = detectRaw(state, startLine, endLine);
+    if (next < 0) return false;
+    pushRaw(state, startLine, next);
+    return true;
+  }, { alt: ['paragraph', 'reference', 'blockquote', 'list'] });
+
+  const always = () => true;
+  wrapRule(md, 'table', always);
+  wrapRule(md, 'hr', always);
+  wrapRule(md, 'lheading', (tokens, state, startLine) =>
+    !isServerSetext(tokens, state, startLine) || hasImage(tokens));
+  wrapRule(md, 'heading', (tokens) => (tokens[0].meta && tokens[0].meta.raw) || hasImage(tokens));
+  wrapRule(md, 'list', hasTaskItem);
+}

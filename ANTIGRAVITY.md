@@ -24,6 +24,7 @@ This document serves as the primary system context for **Antigravity CLI (`agy`)
 | **Secondary Database** | PostgreSQL (`courses`) | **16.x** | Secondary database routing via `COURSES_DATABASE_URL` (`DATABASES['courses']`). |
 | **Runtime Manager** | Micromamba | **2.9.x** | Portable conda runner (`tools\bin\micromamba.exe`). Keeps all caches isolated to `tools\mamba_root` via `MAMBA_ROOT_PREFIX`. |
 | **Frontend Assets** | Vanilla CSS / JS | Pre-compiled | Compiled static assets are tracked in Git in `static_compiled/`. **No Node.js or Gulp installation is needed for backend Python/template development.** |
+| **Forum Post Editor** | TipTap 3 (ProseMirror) + markdown-it | `forum_editor_src/package.json` | Source in `forum_editor_src/` (ES modules, esbuild, Vitest; Node ≥ 20 — only needed when changing the editor). Built bundle `home/static/js/forum-editor.js` (+ `.map`) is committed. Legacy jQuery editor kept as `home/static/js/forum-editor-legacy.js` behind `FORUM_EDITOR_LEGACY`. See **`forum_editor_src/README.md`**. |
 | **GeoIP Location** | MaxMind GeoIP2 | `geoip2==3.0.0` | Uses databases `geoip/GeoLite2-City.mmdb` and `geoip/GeoLite2-Country.mmdb`. `le_francais.middleware.GeoIpSessionMiddleware` runs on every request. |
 | **Payment Gateway** | Tinkoff Merchant | Custom app | Located in `tinkoff_merchant/`. Requires combined Russian root CA certificates bundle `tinkoff_merchant/certs/combined_ca.pem`. |
 | **Audio & TTS** | FFmpeg & Yandex / AWS | Custom apps | `ffmpeg/ffmpeg.exe` appended to PATH by `yandex_speechkit/models.py`. Polly integration in `polly/`. |
@@ -49,6 +50,7 @@ le-francais/
 ├── le_francais_dictionary/        # Vocabulary database, flashcard packets, pronunciation audio
 ├── tinkoff_merchant/              # Tinkoff payment notifications, webhooks, receipts, CA certs
 ├── forum/ & forum_messages/       # PyBBM-based discussion forum and notifications
+├── forum_editor_src/              # Forum post editor source (TipTap/ProseMirror, Markdown converter, tests) — see its README.md
 ├── mass_mailer/                   # Email newsletters and automated student reminder campaigns
 ├── yandex_speechkit/              # Text-to-speech audio generation via Yandex SpeechKit
 ├── polly/                         # Text-to-speech audio generation via AWS Polly
@@ -126,6 +128,20 @@ tools\pgsql\bin\pg_ctl.exe -D tools\data -m fast stop
 tools\pgsql\bin\psql.exe -h 127.0.0.1 -p 5433 -U postgres -d le_francais --pset=pager=off -c "SELECT COUNT(*) FROM auth_user;"
 ```
 
+#### 5. Forum Post Editor (`forum_editor_src/`)
+Full details: **`forum_editor_src/README.md`**.
+```powershell
+cd forum_editor_src
+npm install      # once
+npm test         # Vitest + jsdom: converter, commands, keys, upload, round-trip fixtures
+npm run build    # writes ..\home\static\js\forum-editor.js and .map (commit both with the source change)
+cd ..
+# Server parity check (renders fixtures / sampled DB posts with the real forum Markdown parser):
+$env:MAMBA_ROOT_PREFIX = "$pwd\tools\mamba_root"
+tools\bin\micromamba.exe run -p tools\env python forum_editor_src/scripts/parity.py
+tools\bin\micromamba.exe run -p tools\env python forum_editor_src/scripts/parity.py --db 500
+```
+
 ---
 
 ## 5. Critical Code Conventions & Development Guardrails
@@ -155,3 +171,10 @@ tools\pgsql\bin\psql.exe -h 127.0.0.1 -p 5433 -U postgres -d le_francais --pset=
    * **Target branch is `render`.**
    * Never stage or commit changes without explicit instructions from the user.
    * Never use `git add .` or `git add -A`. Only stage the specific modified or created files.
+
+6. **Forum Post Editor:**
+   * Read **`forum_editor_src/README.md`** before changing the editor, the post form (`home/templates/pybb/post_form.html`) or forum Markdown rendering (`forum/markup_engines.py`).
+   * Posts are stored as Markdown for Python-Markdown 2.6 + pymdown-extensions 5.0; the editor's parser/serializer mirror that renderer. After changing either side, run `npm test` and `scripts/parity.py`.
+   * Never hand-edit `home/static/js/forum-editor.js`; change `forum_editor_src/src/`, run `npm run build`, commit source + bundle + `.map` together.
+   * Do not add `?v=` query strings to `{% static %}` tags — `CompressedManifestStaticFilesStorage` hashes file names at `collectstatic`. Locally (`DEBUG`), hard-reload the page to pick up a rebuilt bundle.
+   * Rollback to the legacy editor: env `FORUM_EDITOR_LEGACY=True` (also `true`/`1`/`yes`) or `?editor=legacy` on a page URL.

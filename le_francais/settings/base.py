@@ -192,6 +192,7 @@ TEMPLATES = [
                 'le_francais.context_processors.geoip',
                 'le_francais.context_processors.gpt_disabled',
                 'le_francais.context_processors.courses_base_url',
+                'le_francais.context_processors.forum_editor_legacy',
             ],
             'libraries': {
                 'conjugation_tags': 'conjugation.templatetags.conjugation_tags',
@@ -211,6 +212,9 @@ WSGI_APPLICATION = 'le_francais.wsgi.application'
 SECRET_KEY = os.getenv('SECRET_KEY', default=get_random_secret_key())
 
 SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT") == "True"
+
+# TipTap forum editor is the default; set FORUM_EDITOR_LEGACY=True to roll back to the legacy jQuery editor
+FORUM_EDITOR_LEGACY = os.environ.get("FORUM_EDITOR_LEGACY", "False").strip().lower() in ("true", "1", "yes")
 
 # Redirect only /accounts/*
 # SECURE_REDIRECT_EXEMPT = [

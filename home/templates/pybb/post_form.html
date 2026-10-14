@@ -60,7 +60,11 @@
 	</fieldset>
 </form>
 
-<script src="{% static 'js/forum-editor.js' %}"></script>
+{% if forum_editor_legacy %}
+<script src="{% static 'js/forum-editor-legacy.js' %}"></script>
+{% else %}
+<script defer src="{% static 'js/forum-editor.js' %}"></script>
+{% endif %}
 
 
 <script>
@@ -78,12 +82,11 @@
         var focusEditor = function() {
             if (window.forumEditor && window.forumEditor.currentMode === 'visual') {
                 window.forumEditor.$visualEditor.focus();
+                if (window.forumEditor.restoreSelection) {
+                    window.forumEditor.restoreSelection();
+                }
             } else {
                 $textarea.focus();
-                var len = $textarea.val().length;
-                if ($textarea[0].setSelectionRange) {
-                    $textarea[0].setSelectionRange(len, len);
-                }
             }
         };
         if ($createPost && $createPost.length) {
@@ -128,14 +131,24 @@
 
                     var currentVal = $textarea.val();
                     var greeting = '**' + username + '**, ';
+                    var newVal = null;
                     if (!currentVal.trim()) {
-                        $textarea.val(greeting);
+                        newVal = greeting;
                     } else if (currentVal.indexOf(greeting) === -1) {
-                        $textarea.val(greeting + '\n' + currentVal);
+                        newVal = greeting + '\n' + currentVal;
                     }
 
-                    if (window.forumEditor && window.forumEditor.syncVisualFromMarkdown) {
-                        window.forumEditor.syncVisualFromMarkdown();
+                    if (newVal !== null) {
+                        if (window.forumEditor && window.forumEditor.setMarkdown) {
+                            // TipTap editor: single call updates textarea and visual view
+                            window.forumEditor.setMarkdown(newVal);
+                        } else {
+                            // Legacy editor / no editor: write textarea, then resync
+                            $textarea.val(newVal);
+                            if (window.forumEditor && window.forumEditor.syncVisualFromMarkdown) {
+                                window.forumEditor.syncVisualFromMarkdown();
+                            }
+                        }
                     }
 
                     scrollToTextarea($textarea, $createPost);
@@ -180,17 +193,26 @@
                     quoteBlock = quotedLines + '\n\n';
                 }
 
-                var currentVal = $textarea.val();
-                if (currentVal && !currentVal.endsWith('\n')) {
-                    $textarea.val(currentVal + '\n\n' + quoteBlock);
-                } else if (currentVal) {
-                    $textarea.val(currentVal + '\n' + quoteBlock);
+                if (window.forumEditor && window.forumEditor.insertQuote) {
+                    window.forumEditor.insertQuote(quoteBlock);
+                } else if (window.forumEditor && window.forumEditor.insertMarkdown) {
+                    window.forumEditor.insertMarkdown(quoteBlock);
                 } else {
-                    $textarea.val(quoteBlock);
-                }
-
-                if (window.forumEditor && window.forumEditor.syncVisualFromMarkdown) {
-                    window.forumEditor.syncVisualFromMarkdown();
+                    var el = $textarea[0];
+                    var start = el.selectionStart;
+                    var end = el.selectionEnd;
+                    var val = el.value;
+                    if (typeof start === 'number') {
+                        var before = val.substring(0, start);
+                        var after = val.substring(end);
+                        var prefix = (before && !before.endsWith('\n')) ? '\n\n' : '';
+                        var suffix = (after && !after.startsWith('\n')) ? '\n\n' : '';
+                        el.value = before + prefix + quoteBlock.trim() + suffix + after;
+                        var newPos = before.length + prefix.length + quoteBlock.trim().length;
+                        el.setSelectionRange(newPos, newPos);
+                    } else {
+                        $textarea.val(val ? val + '\n\n' + quoteBlock : quoteBlock);
+                    }
                 }
 
                 scrollToTextarea($textarea, $createPost);
@@ -219,17 +241,26 @@
                                     data = '> **' + username + '**:\n' + data;
                                 }
                             }
-                            var currentVal = $textarea.val();
-                            if (currentVal && !currentVal.endsWith('\n')) {
-                                $textarea.val(currentVal + '\n\n' + data);
-                            } else if (currentVal) {
-                                $textarea.val(currentVal + '\n' + data);
+                            if (window.forumEditor && window.forumEditor.insertQuote) {
+                                window.forumEditor.insertQuote(data);
+                            } else if (window.forumEditor && window.forumEditor.insertMarkdown) {
+                                window.forumEditor.insertMarkdown(data);
                             } else {
-                                $textarea.val(data);
-                            }
-
-                            if (window.forumEditor && window.forumEditor.syncVisualFromMarkdown) {
-                                window.forumEditor.syncVisualFromMarkdown();
+                                var el = $textarea[0];
+                                var start = el.selectionStart;
+                                var end = el.selectionEnd;
+                                var val = el.value;
+                                if (typeof start === 'number') {
+                                    var before = val.substring(0, start);
+                                    var after = val.substring(end);
+                                    var prefix = (before && !before.endsWith('\n')) ? '\n\n' : '';
+                                    var suffix = (after && !after.startsWith('\n')) ? '\n\n' : '';
+                                    el.value = before + prefix + data.trim() + suffix + after;
+                                    var newPos = before.length + prefix.length + data.trim().length;
+                                    el.setSelectionRange(newPos, newPos);
+                                } else {
+                                    $textarea.val(val ? val + '\n\n' + data : data);
+                                }
                             }
 
                             scrollToTextarea($textarea, $createPost);
