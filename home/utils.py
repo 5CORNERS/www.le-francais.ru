@@ -515,14 +515,14 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 html += f'<span id="{bookmark_name}">'
             opened_tags.append({'name':'span', 'attrs':{'id': bookmark_name}})
         elif sub_name == 'w:bookmarkEnd':
-            if opened_tags[-1]['attrs']['id'] == '_GoBack':
+            if opened_tags and opened_tags[-1]['attrs']['id'] == '_GoBack':
                 pass
-            else:
+            elif opened_tags:
                 html += f'</span>'
-            if opened_tags[-1]['name'] == 'span':
-                opened_tags.pop(-1)
-            else:
-                print(f'CAN NOT CLOSE TAG: SPAN')
+                if opened_tags[-1]['name'] == 'span':
+                    opened_tags.pop(-1)
+                else:
+                    print(f'CAN NOT CLOSE TAG: SPAN')
         elif sub_name == 'w:commentRangeStart':
             comment_text = "".join(document.comments_part._element.get_comment_by_id(
                     int(sub.xpath('./@w:id')[0])).xpath('.//w:t/text()'))
