@@ -450,7 +450,7 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
         html += f'<li>{opening_tags_html}{p_html}{closing_tags_html}</li>'
     elif is_callout_style:
         if not is_callout:
-            html += '<div class="bs-callout bs-callout-info">'
+            html += '<div class="bs-callout bs-callout-info" style="background-color: #f1f3f5;">'
             is_callout = True
         html += f'<p>{opening_tags_html}{p_html}{closing_tags_html}</p>'
     elif is_quote_style:
