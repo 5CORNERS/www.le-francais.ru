@@ -335,8 +335,22 @@ def docx_parse_document(document):
     opened_tags = []
     toc_nodes = []
     is_list = False
+    is_callout = False
+    is_quote = False
     for p in document.paragraphs:
-        html, lines_map, opened_tags, is_list = docx_parse_through_paragraph(document, p, html, lines_map, opened_tags, toc_nodes, is_list)
+        html, lines_map, opened_tags, is_list, is_callout, is_quote = docx_parse_through_paragraph(
+            document, p, html, lines_map, opened_tags, toc_nodes,
+            is_list=is_list, is_callout=is_callout, is_quote=is_quote
+        )
+    if is_list:
+        html += '</ul>'
+        is_list = False
+    if is_callout:
+        html += '</div>'
+        is_callout = False
+    if is_quote:
+        html += '</blockquote>'
+        is_quote = False
     html = re.sub('!\[(.+?)]\((.+?)\s&quot;(.+?)&quot;\)',
                   '<img title="\g<1>" src="\g<2>" alt="\g<3>">', html)
     for match in re.finditer('<p>\[HTML](.*?)\[/HTML]</p>', html):
@@ -346,7 +360,8 @@ def docx_parse_document(document):
     # html = re.sub('<p>\[HTML](.*?)\[/HTML]</p>', '\g<1>', html)
     return html, lines_map
 
-def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map, opened_tags, toc_nodes, is_list=False):
+def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map, opened_tags, toc_nodes,
+                                 is_list=False, is_callout=False, is_quote=False):
     p_html = ''
     p_map = []
     runs_iterator = (run for run in paragraph.runs)
@@ -369,13 +384,57 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
     p_html = re.sub('(</span>)([.,:])', '\g<2>\g<1>', p_html)
 
     p_style: _ParagraphStyle = paragraph.style
+    style_name = getattr(p_style, 'name', '') or ''
+    style_id = getattr(p_style, 'style_id', '') or ''
+    style_name_lower = style_name.lower()
+    style_id_lower = style_id.lower()
 
-    if not 'List Paragraph' in p_style.name and is_list:
+    is_heading = (
+        ('heading' in style_name_lower or 'heading' in style_id_lower or 'заголовок' in style_name_lower)
+        and bool(re.search(r'\d', style_name_lower or style_id_lower))
+    )
+
+    is_callout_style = (
+        'intensequote' in style_id_lower
+        or 'intense quote' in style_name_lower
+        or 'выделенная цитата' in style_name_lower
+        or 'выделенная_цитата' in style_name_lower
+        or 'callout' in style_name_lower
+        or 'callout' in style_id_lower
+        or 'колаут' in style_name_lower
+    )
+
+    is_quote_style = (
+        not is_callout_style and (
+            style_id_lower == 'quote'
+            or style_name_lower == 'quote'
+            or style_name_lower == 'цитата'
+            or ('quote' in style_name_lower and 'intense' not in style_name_lower)
+            or ('цитата' in style_name_lower and 'выделенн' not in style_name_lower)
+        )
+    )
+
+    is_list_p = (
+        'list paragraph' in style_name_lower
+        or 'listparagraph' in style_id_lower
+        or 'список' in style_name_lower
+    )
+
+    if not is_list_p and is_list:
         html += '</ul>'
         is_list = False
 
-    if 'Heading' in p_style.name or 'heading' in p_style.name:
-        heading_value = int(re.match('[Hh]eading\s?(?P<value>\d)', p_style.name).group('value'))
+    if not is_callout_style and is_callout:
+        html += '</div>'
+        is_callout = False
+
+    if not is_quote_style and is_quote:
+        html += '</blockquote>'
+        is_quote = False
+
+    if is_heading:
+        m = re.search(r'(\d)', style_name) or re.search(r'(\d)', style_id)
+        heading_value = int(m.group(1)) if m else 1
 
         # TODO: TOC support
         # if heading_value > toc_nodes[-1].head_value:
@@ -384,15 +443,26 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
         #     )
 
         html += f'<h{heading_value + 1}>{opening_tags_html}{p_html}{closing_tags_html}</h{heading_value + 1}>'
-    elif 'List Paragraph' in p_style.name:
+    elif is_list_p:
         if not is_list:
             html += '<ul>'
             is_list = True
         html += f'<li>{opening_tags_html}{p_html}{closing_tags_html}</li>'
+    elif is_callout_style:
+        if not is_callout:
+            html += '<div class="bs-callout bs-callout-info">'
+            is_callout = True
+        html += f'<p>{opening_tags_html}{p_html}{closing_tags_html}</p>'
+    elif is_quote_style:
+        if not is_quote:
+            html += '<blockquote class="font-italic pl-4">'
+            is_quote = True
+        p_content = f'<em>{p_html}</em>' if p_html else ''
+        html += f'<p>{opening_tags_html}{p_content}{closing_tags_html}</p>'
     else:
         html += f'<p>{opening_tags_html}{p_html}{closing_tags_html}</p>'
     lines_map += p_map
-    return html, lines_map, opened_tags, is_list
+    return html, lines_map, opened_tags, is_list, is_callout, is_quote
 
 def get_bookmark_name_id(e):
     s = tostring(e, encoding='utf-8').decode('utf-8')
@@ -483,6 +553,8 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 opened_tags.pop(-1)
             else:
                 print(f'CAN NOT CLOSE: SPAN')
+        elif sub_name == 'w:br':
+            html += '<br/>'
         elif sub_name == 'w:instrText':
             # TODO parse instrText
             ...
