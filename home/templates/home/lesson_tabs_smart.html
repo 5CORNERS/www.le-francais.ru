@@ -1,0 +1,594 @@
+{# Smart Sticky Tabs with Detach & Dissolve Transition, Independent Scroll Positions & Haut Button #}
+<style>
+/* --- Natural Tabs on Page: Clean layout & borders --- */
+#lessonTabsContainer .lesson-tabs {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    border-bottom: 1px solid #dee2e6 !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+}
+
+#lessonTabsContainer .lesson-tabs .nav-item {
+    margin-bottom: -1px;
+    margin-right: 2px;
+    flex: 0 0 auto;
+}
+
+#lessonTabsContainer .lesson-tabs .nav-link {
+    white-space: nowrap !important;
+    width: auto !important;
+    flex: 0 0 auto !important;
+    padding: 0.5rem 10px !important;
+    font-size: 1rem !important;
+    font-weight: normal !important;
+    line-height: 1.5 !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 4px 4px 0 0 !important;
+    color: #337ab7 !important;
+    background-color: #ffffff;
+}
+
+#lessonTabsContainer .lesson-tabs .nav-link:hover {
+    color: #23527c !important;
+    background-color: #f8f9fa;
+}
+
+#lessonTabsContainer .lesson-tabs .nav-link.active {
+    color: #495057 !important;
+    background-color: #ffffff !important;
+    border-color: #dee2e6 #dee2e6 #ffffff !important;
+    border-bottom: 1px solid #ffffff !important;
+    font-weight: normal !important;
+}
+
+/* --- Floating Sticky Dock --- */
+.lesson-tabs-floating-wrapper {
+    position: fixed;
+    z-index: 1020;
+    box-sizing: border-box;
+    background-color: #ffffff !important;
+    border: 1px solid #dee2e6 !important;
+    border-top: none !important;
+    border-radius: 0 0 10px 10px !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    pointer-events: auto;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+}
+
+/* 0.5s smooth slide transition when tucking behind #topMenu */
+.lesson-tabs-floating-wrapper.is-hidden {
+    transform: translateY(-100%) !important;
+    box-shadow: none !important;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease !important;
+}
+
+.lesson-tabs-floating-wrapper:not(.is-hidden) {
+    transform: none !important;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease !important;
+}
+
+.lesson-tabs-floating-inner {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.lesson-tabs-floating-list {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    flex: 1 1 auto;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+}
+
+.lesson-tabs-floating-list .nav-item {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    margin-right: 2px !important;
+    flex: 0 0 auto;
+}
+
+/* Inactive floating tabs: blue links like on page, hanging downwards */
+.lesson-tabs-floating-list .nav-link {
+    white-space: nowrap !important;
+    width: auto !important;
+    flex: 0 0 auto !important;
+    padding: 0.5rem 10px !important;
+    font-size: 1rem !important;
+    font-family: inherit !important;
+    font-weight: normal !important;
+    line-height: 1.5 !important;
+    border: 1px solid #dee2e6 !important;
+    border-top: none !important;
+    border-radius: 0 0 4px 4px !important;
+    background-color: #ffffff !important;
+    color: #337ab7 !important;
+    margin-top: 0 !important;
+    height: auto !important;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.lesson-tabs-floating-list .nav-link:hover,
+.lesson-tabs-floating-list .nav-link:focus {
+    background-color: #f8f9fa !important;
+    color: #23527c !important;
+}
+
+/* Active floating tab: dark grey text (NOT blue), hangs down with label positioned lower */
+.lesson-tabs-floating-list .nav-link.active {
+    background-color: #ffffff !important;
+    color: #495057 !important;
+    font-weight: normal !important;
+    border: 1px solid #dee2e6 !important;
+    border-top: none !important;
+    border-radius: 0 0 4px 4px !important;
+    padding-top: 0.65rem !important;
+    padding-bottom: 0.65rem !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    margin-top: 0 !important;
+    height: auto !important;
+    position: relative;
+    z-index: 2;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+}
+
+/* Scroll-to-Top Button item in last row of floating tabs */
+.lesson-tabs-floating-list .lesson-scroll-top-item {
+    display: flex !important;
+    margin-left: auto !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    align-self: center !important;
+    padding-right: 6px !important;
+}
+
+.lesson-tabs-scroll-top-btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    background-color: rgba(248, 249, 250, 0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #337ab7;
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.18s ease;
+    outline: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    user-select: none;
+}
+
+.lesson-tabs-scroll-top-btn .scroll-top-icon {
+    margin-top: 1px;
+}
+
+.lesson-tabs-scroll-top-btn .scroll-top-text {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.lesson-tabs-scroll-top-btn:hover {
+    background-color: #337ab7 !important;
+    color: #ffffff !important;
+    border-color: #337ab7 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(51, 122, 183, 0.35) !important;
+}
+
+.lesson-tabs-scroll-top-btn:active {
+    transform: translateY(0);
+}
+
+/* Pull-tab (язычок) */
+.lesson-tabs-floating-wrapper .lesson-tabs-pull-tab {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%);
+    cursor: pointer;
+    z-index: 1025;
+    user-select: none;
+    outline: none;
+    line-height: 1;
+}
+
+.lesson-tabs-floating-wrapper.is-hidden .lesson-tabs-pull-tab {
+    display: block !important;
+}
+
+.pull-tab-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 18px 4px 18px;
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    color: #6c757d;
+    transition: all 0.2s ease;
+}
+
+.lesson-tabs-pull-tab:hover .pull-tab-pill {
+    background-color: #f8f9fa;
+    color: #337ab7;
+    padding-bottom: 6px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+</style>
+
+<script>
+(function ($) {
+    $(document).ready(function () {
+        const $naturalContainer = $('#lessonTabsContainer');
+        const $naturalTabs = $naturalContainer.find('.lesson-tabs');
+        const $topMenu = $('#topMenu');
+
+        if (!$naturalContainer.length || !$naturalTabs.length) return;
+
+        function getNavbarHeight() {
+            if ($topMenu.length && $topMenu.is(':visible')) {
+                return $topMenu.outerHeight();
+            }
+            return 48;
+        }
+
+        // 1. Build the floating dock clone
+        const $floatingWrapper = $(`
+            <div class="lesson-tabs-floating-wrapper is-hidden" id="lessonTabsFloatingWrapper" style="opacity: 0; pointer-events: none;">
+                <div class="lesson-tabs-floating-inner">
+                    <ul class="nav nav-tabs lesson-tabs-floating-list" role="tablist"></ul>
+                </div>
+                <div class="lesson-tabs-pull-tab" id="lessonTabsPullTab" title="Показать вкладки" role="button" tabindex="0" aria-label="Показать вкладки">
+                    <span class="pull-tab-pill">
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+        `);
+
+        const $floatingList = $floatingWrapper.find('.lesson-tabs-floating-list');
+
+        // Clone all tab links from natural tabs
+        $naturalTabs.children('li').each(function () {
+            const $clonedLi = $(this).clone();
+            $floatingList.append($clonedLi);
+        });
+
+        // Append the Haut button item to the last row of the floating list
+        $floatingList.append(`
+            <li class="nav-item lesson-scroll-top-item" role="presentation">
+                <button type="button" class="lesson-tabs-scroll-top-btn" id="lessonTabsScrollTopBtn" title="Haut (Наверх)" aria-label="Haut">
+                    <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="scroll-top-icon">
+                        <line x1="12" y1="19" x2="12" y2="5"></line>
+                        <polyline points="6 11 12 5 18 11"></polyline>
+                        <line x1="4" y1="2" x2="20" y2="2"></line>
+                    </svg>
+                    <span class="scroll-top-text">Haut</span>
+                </button>
+            </li>
+        `);
+
+        $('body').append($floatingWrapper);
+
+        const $scrollTopBtn = $floatingWrapper.find('#lessonTabsScrollTopBtn');
+        const $pullTab = $floatingWrapper.find('#lessonTabsPullTab');
+
+        // 2. Geometry & Horizontal Alignment (Match exact $naturalTabs width and left position)
+        function updateFloatingGeometry() {
+            if (!$naturalTabs.length) return;
+            const tabsOffset = $naturalTabs.offset();
+            const tabsWidth = $naturalTabs.outerWidth();
+            $floatingWrapper.css({
+                left: (tabsOffset.left - $(window).scrollLeft()) + 'px',
+                width: tabsWidth + 'px'
+            });
+        }
+        updateFloatingGeometry();
+
+        // 3. Independent Scroll Positions per Tab
+        const tabScrollPositions = {};
+        let currentTabHref = $naturalTabs.find('.nav-link.active').attr('href') || '#body';
+        tabScrollPositions[currentTabHref] = window.scrollY;
+
+        function isMobileMode() {
+            return window.innerWidth < 768;
+        }
+
+        // 4. Scroll Tracking, Detach & Dissolve Transition, and Inactivity Timer
+        let lastScrollY = window.scrollY;
+        let isHidden = true;
+        let downScrollAccumulator = 0;
+        let upScrollAccumulator = 0;
+        let canHideAfter = 0;
+        let isMouseOver = false;
+        let wasSticky = false;
+        let autoHideTimer = null;
+        const dissolveDistance = 60; // px over which floating bar dissolves into natural tabs
+
+        function clearAutoHideTimer() {
+            if (autoHideTimer) {
+                clearTimeout(autoHideTimer);
+                autoHideTimer = null;
+            }
+        }
+
+        function startAutoHideTimer(delay) {
+            delay = delay || 10000;
+            clearAutoHideTimer();
+            autoHideTimer = setTimeout(function () {
+                if (!isMouseOver && !isHidden) {
+                    isHidden = true;
+                    $floatingWrapper.addClass('is-hidden');
+                }
+            }, delay);
+        }
+
+        // Only track mouse hover on devices that have a real fine pointer (mouse), NOT touchscreens!
+        if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+            $floatingWrapper.on('mouseenter', function () {
+                isMouseOver = true;
+                clearAutoHideTimer();
+            });
+            $floatingWrapper.on('mouseleave', function () {
+                isMouseOver = false;
+                if (!isHidden) {
+                    startAutoHideTimer(10000);
+                }
+            });
+        }
+
+        // On touch devices, touching the floating dock resets the inactivity timer
+        $floatingWrapper.on('touchstart', function () {
+            if (!isHidden) {
+                startAutoHideTimer(10000);
+            }
+        });
+
+        function handleScroll() {
+            const currentScrollY = Math.max(0, window.scrollY);
+            const originalTop = $naturalContainer.offset().top;
+            const navH = getNavbarHeight();
+            const stickyTrigger = originalTop - navH;
+            const delta = currentScrollY - lastScrollY;
+            const isSticky = currentScrollY > stickyTrigger;
+
+            // Continually save current tab's scroll position
+            if (currentTabHref) {
+                tabScrollPositions[currentTabHref] = currentScrollY;
+            }
+
+            // Case A: Near or above natural tabs (DETACH & DISSOLVE EFFECT)
+            if (!isSticky) {
+                wasSticky = false;
+                clearAutoHideTimer();
+                const distanceBelowMenu = stickyTrigger - currentScrollY; // >= 0
+
+                if (distanceBelowMenu <= dissolveDistance) {
+                    // Floating bar detaches from menu, glides down exactly over natural tabs, and dissolves
+                    const currentTop = navH + distanceBelowMenu;
+                    const currentOpacity = Math.max(0, 1 - (distanceBelowMenu / dissolveDistance));
+
+                    $floatingWrapper.css({
+                        top: currentTop + 'px',
+                        opacity: currentOpacity,
+                        pointerEvents: currentOpacity > 0.2 ? 'auto' : 'none'
+                    }).removeClass('is-hidden');
+                    isHidden = false;
+                } else {
+                    // Scrolled completely into natural view: fully dissolve floating bar
+                    $floatingWrapper.css({
+                        opacity: 0,
+                        pointerEvents: 'none',
+                        top: navH + 'px'
+                    }).addClass('is-hidden');
+                    isHidden = true;
+                }
+
+                lastScrollY = currentScrollY;
+                downScrollAccumulator = 0;
+                upScrollAccumulator = 0;
+                return;
+            }
+
+            // Case B: Deep in content past stickyTrigger (STICKY FLOATING MODE)
+            // Pin floating bar directly below navbar at full opacity
+            $floatingWrapper.css({
+                top: navH + 'px',
+                opacity: 1,
+                pointerEvents: 'auto'
+            });
+
+            // If just crossed into sticky mode from above, guarantee 1-second visibility!
+            if (!wasSticky) {
+                wasSticky = true;
+                isHidden = false;
+                $floatingWrapper.removeClass('is-hidden');
+                canHideAfter = Date.now() + 1000;
+                if (!isMobileMode()) {
+                    startAutoHideTimer(10000);
+                }
+            }
+
+            if (delta > 0) {
+                // Scrolling DOWN
+                upScrollAccumulator = 0;
+
+                // Only block hiding during the initial 1-second reveal lock or desktop mouse hover
+                if (Date.now() < canHideAfter || isMouseOver) {
+                    downScrollAccumulator = 0;
+                } else {
+                    downScrollAccumulator += delta;
+                    const hideThreshold = isMobileMode() ? 25 : 50;
+                    if (downScrollAccumulator >= hideThreshold && !isHidden) {
+                        isHidden = true;
+                        $floatingWrapper.addClass('is-hidden');
+                        clearAutoHideTimer();
+                    }
+                }
+            } else if (delta < 0) {
+                // Scrolling UP:
+                downScrollAccumulator = 0;
+
+                // On mobile, DO NOT auto-reveal on scroll up (tabs take 5 rows and block the screen).
+                // Auto-reveal on scroll up is strictly for desktop:
+                if (!isMobileMode()) {
+                    upScrollAccumulator += Math.abs(delta);
+                    if (isHidden && upScrollAccumulator >= 15) {
+                        isHidden = false;
+                        $floatingWrapper.removeClass('is-hidden');
+                        startAutoHideTimer(10000);
+                    } else if (!isHidden) {
+                        // While already visible and scrolling up continues, reset the 10s timer
+                        startAutoHideTimer(10000);
+                    }
+                } else {
+                    // On mobile, if already revealed via pull-tab and user scrolls up, keep timer refreshed
+                    if (!isHidden) {
+                        startAutoHideTimer(10000);
+                    }
+                }
+            }
+
+            lastScrollY = currentScrollY;
+        }
+
+        // Throttle scroll events via requestAnimationFrame
+        let scrollTicking = false;
+        window.addEventListener('scroll', function () {
+            updateFloatingGeometry();
+            if (!scrollTicking) {
+                window.requestAnimationFrame(function () {
+                    handleScroll();
+                    scrollTicking = false;
+                });
+                scrollTicking = true;
+            }
+        }, { passive: true });
+
+        window.addEventListener('resize', updateFloatingGeometry);
+
+        // 5. Tab Click Handlers (Synchronized across natural and floating tabs)
+        // Click on floating tab
+        $floatingWrapper.on('click', 'a[data-toggle="tab"]', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $('html, body').stop(true, true);
+            const href = $(this).attr('href');
+            $naturalTabs.find('a[href="' + href + '"]').tab('show');
+            if (isMobileMode()) {
+                clearAutoHideTimer();
+                // On mobile, auto-tuck the 5-row dock away after picking a tab so content is immediately visible
+                setTimeout(function () {
+                    isHidden = true;
+                    $floatingWrapper.addClass('is-hidden');
+                }, 350);
+            } else {
+                startAutoHideTimer(10000);
+            }
+        });
+
+        // Click on natural tab
+        $naturalTabs.on('click', 'a[data-toggle="tab"]', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $('html, body').stop(true, true);
+            $(this).tab('show');
+        });
+
+        // When tab is hidden, record departing tab's position
+        $(document).on('hide.bs.tab', '.lesson-tabs a[data-toggle="tab"]', function (e) {
+            const leavingHref = $(e.target).attr('href');
+            if (leavingHref) {
+                tabScrollPositions[leavingHref] = window.scrollY;
+            }
+        });
+
+        // When tab is shown, synchronize active states and restore position
+        $(document).on('shown.bs.tab', '.lesson-tabs a[data-toggle="tab"]', function (e) {
+            $('html, body').stop(true, true);
+            const enteringHref = $(e.target).attr('href');
+            currentTabHref = enteringHref;
+            const originalTop = $naturalContainer.offset().top;
+            const navH = getNavbarHeight();
+            const naturalTarget = Math.max(0, originalTop - navH);
+
+            // Synchronize active class in floating bar
+            $floatingWrapper.find('.nav-link').removeClass('active');
+            $floatingWrapper.find('a[href="' + enteringHref + '"]').addClass('active');
+
+            if (tabScrollPositions[enteringHref] !== undefined) {
+                window.scrollTo(0, tabScrollPositions[enteringHref]);
+            } else {
+                if (window.scrollY > naturalTarget) {
+                    window.scrollTo(0, naturalTarget);
+                    tabScrollPositions[enteringHref] = naturalTarget;
+                } else {
+                    tabScrollPositions[enteringHref] = window.scrollY;
+                }
+            }
+
+            lastScrollY = window.scrollY;
+            downScrollAccumulator = 0;
+            upScrollAccumulator = 0;
+            canHideAfter = Date.now() + 1000;
+
+            // Make sure floating bar is revealed and geometry updated
+            isHidden = false;
+            $floatingWrapper.removeClass('is-hidden');
+            updateFloatingGeometry();
+            if (!isMobileMode()) {
+                startAutoHideTimer(10000);
+            }
+        });
+
+        // 6. Scroll-to-Top (Haut) Button Click
+        $scrollTopBtn.on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            clearAutoHideTimer();
+            $('html, body').stop(true, true);
+            const originalTop = $naturalContainer.offset().top;
+            const navH = getNavbarHeight();
+            const targetY = Math.max(0, originalTop - navH);
+            $('html, body').animate({ scrollTop: targetY }, 450);
+            canHideAfter = Date.now() + 1000;
+        });
+
+        // 7. Pull-Tab (язычок) Click
+        $pullTab.on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            isHidden = false;
+            $floatingWrapper.removeClass('is-hidden');
+            canHideAfter = Date.now() + 600;
+            downScrollAccumulator = 0;
+            upScrollAccumulator = 0;
+            startAutoHideTimer(10000);
+        });
+    });
+})(jQuery);
+</script>

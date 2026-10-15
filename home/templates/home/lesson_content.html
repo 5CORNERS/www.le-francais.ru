@@ -4,8 +4,9 @@
     <div class="col-12">{% check_user_lesson request.user self as userlesson %}
         {% if self.audio_material != 'None' %}
             {% include 'home/lesson_audio.html' %}
-        {% endif %}</div>
-    <div class="col-12">
+        {% endif %}
+    </div>
+    <div class="col-12" id="lessonTabsContainer">
         <ul class="nav nav-tabs lesson-tabs" role="tablist">
             {% if self.comments_for_lesson %}
                 <li class="nav-item" role="presentation">
@@ -204,6 +205,7 @@
             {% endif %}
         </ul>
     </div>
+    {% include 'home/lesson_tabs_smart.html' %}
 
 	<div class="col-12 tab-content">
         {% with self.lesson_number|stringformat:'i' as lesson_number_str %}
