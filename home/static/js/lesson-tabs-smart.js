@@ -106,6 +106,15 @@
                 left: (cachedTabsLeft - currentScrollLeft - 1) + 'px',
                 width: (cachedTabsWidth + 2) + 'px'
             });
+
+            // Position scroll-to-top button at the bottom-right within the central content column
+            const btnRightOffset = 20;
+            const btnWidth = $scrollTopBtn.outerWidth() || 46;
+            const btnLeft = cachedTabsLeft + cachedTabsWidth - btnWidth - btnRightOffset - currentScrollLeft;
+            $scrollTopBtn.css({
+                left: btnLeft + 'px',
+                right: 'auto'
+            });
         }
         updateFloatingDimensions();
         window.addEventListener('load', updateFloatingDimensions);
