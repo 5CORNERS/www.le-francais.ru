@@ -11,6 +11,8 @@
     padding: 0;
     margin: 0;
     pointer-events: auto;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
 }
 
 #lessonTabsFloatingWrapper.is-hidden {
@@ -48,18 +50,18 @@
 }
 
 #lessonTabsFloatingWrapper .lesson-tabs-floating-list .nav-item {
-    margin: 0;
-    padding: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-right: 2px;
     flex: 0 0 auto;
 }
 
 #lessonTabsFloatingWrapper .lesson-tabs-floating-list .nav-link {
-    display: block;
     white-space: nowrap;
     width: auto;
     flex: 0 0 auto;
-    padding: 0.5rem 1rem;
-    font-size: inherit;
+    padding: 0.5rem 10px;
+    font-size: 1rem;
     font-family: inherit;
     font-weight: normal;
     line-height: 1.5;
@@ -70,6 +72,8 @@
     color: #337ab7;
     margin-top: 0;
     height: auto;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
@@ -84,16 +88,19 @@
     color: #495057;
     font-weight: normal;
     border: 1px solid #dee2e6;
-    border-top: 3px solid #337ab7;
+    border-top: none;
+    border-bottom: 3px solid #337ab7;
     border-radius: 0 0 4px 4px;
-    padding-top: calc(0.5rem - 2px);
-    padding-bottom: 0.5rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+    padding-left: 10px;
+    padding-right: 10px;
     margin-top: 0;
     height: auto;
     position: relative;
     z-index: 2;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
 }
 
 #lessonTabsFloatingWrapper .lesson-scroll-top-item {
