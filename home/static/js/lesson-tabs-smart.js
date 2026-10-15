@@ -39,13 +39,13 @@
                 <div class="lesson-tabs-floating-inner">
                     <ul class="nav lesson-tabs-floating-list" role="tablist"></ul>
                 </div>
-                <div class="lesson-tabs-pull-tab" id="lessonTabsPullTab" title="Показать вкладки" role="button" tabindex="0" aria-label="Показать вкладки">
+                <button type="button" class="lesson-tabs-pull-tab" id="lessonTabsPullTab" title="Показать вкладки" aria-label="Показать вкладки">
                     <span class="pull-tab-pill">
                         <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </span>
-                </div>
+                </button>
             </div>
         `);
 
@@ -79,17 +79,27 @@
         const $scrollTopBtn = $floatingWrapper.find('#lessonTabsScrollTopBtn');
         const $pullTab = $floatingWrapper.find('#lessonTabsPullTab');
 
-        // 2. Geometry & Horizontal Alignment
-        function updateFloatingGeometry() {
+        // 2. Geometry & Horizontal Alignment (Cached to prevent layout thrashing on vertical scroll)
+        let cachedTabsLeft = 0;
+        let cachedTabsWidth = 0;
+        let lastScrollLeft = -1;
+
+        function updateFloatingDimensions() {
             if (!$naturalTabs.length) return;
             const tabsOffset = $naturalTabs.offset();
-            const tabsWidth = $naturalTabs.outerWidth();
+            cachedTabsLeft = tabsOffset.left;
+            cachedTabsWidth = $naturalTabs.outerWidth();
+            updateFloatingPosition();
+        }
+
+        function updateFloatingPosition() {
+            const currentScrollLeft = window.pageXOffset || document.documentElement.scrollLeft || 0;
             $floatingWrapper.css({
-                left: (tabsOffset.left - $(window).scrollLeft()) + 'px',
-                width: tabsWidth + 'px'
+                left: (cachedTabsLeft - currentScrollLeft) + 'px',
+                width: cachedTabsWidth + 'px'
             });
         }
-        updateFloatingGeometry();
+        updateFloatingDimensions();
 
         // 3. Independent Scroll Positions per Tab
         const tabScrollPositions = {};
@@ -252,9 +262,13 @@
         // Throttle scroll events via requestAnimationFrame
         let scrollTicking = false;
         window.addEventListener('scroll', function () {
-            updateFloatingGeometry();
             if (!scrollTicking) {
                 window.requestAnimationFrame(function () {
+                    const currentScrollLeft = window.pageXOffset || document.documentElement.scrollLeft || 0;
+                    if (currentScrollLeft !== lastScrollLeft) {
+                        updateFloatingPosition();
+                        lastScrollLeft = currentScrollLeft;
+                    }
                     handleScroll();
                     scrollTicking = false;
                 });
@@ -262,7 +276,7 @@
             }
         }, { passive: true });
 
-        window.addEventListener('resize', updateFloatingGeometry);
+        window.addEventListener('resize', updateFloatingDimensions);
 
         // 5. Tab Click Handlers
         // Click on floating tab: forward directly to original tab link so lessons.js paywall or Bootstrap activates!
@@ -335,7 +349,7 @@
             // Make sure floating bar is revealed and geometry updated
             isHidden = false;
             $floatingWrapper.removeClass('is-hidden');
-            updateFloatingGeometry();
+            updateFloatingDimensions();
             if (!isMobileMode()) {
                 startAutoHideTimer(AUTO_HIDE_DELAY_MS);
             }
