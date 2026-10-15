@@ -454,7 +454,7 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
             if current_style['is_superscript']:
                 t_html = f'<sup>{t_html}</sup>'
             if current_style['is_subscript']:
-                t_html = f'<sub>{t_html}<sub>'
+                t_html = f'<sub>{t_html}</sub>'
             html += t_html
         elif sub_name == 'w:r':
             current_run:Run = next(runs_iterator)
@@ -571,7 +571,7 @@ def parse_toc_file(file):
 
 def set_headings(html, headings:List[Tuple[str, int]]):
     for line, h_value in headings:
-        html = html.replace(f'<p>{line}</p>', f'<h{h_value}>{line}</h>')
+        html = html.replace(f'<p>{line}</p>', f'<h{h_value}>{line}</h{h_value}>')
     return html
 
 def parse_tags_file(file:TextIOWrapper):
