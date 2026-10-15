@@ -47,21 +47,21 @@
 }
 
 #lessonTabsFloatingWrapper .lesson-tabs-floating-list .nav-item {
-    margin-top: 0;
-    margin-bottom: 0;
-    margin-right: 2px;
+    margin: 0;
+    padding: 0;
     flex: 0 0 auto;
 }
 
 #lessonTabsFloatingWrapper .lesson-tabs-floating-list .nav-link {
+    display: block;
+    width: 100%;
+    text-align: center;
     white-space: nowrap;
-    width: auto;
-    flex: 0 0 auto;
-    padding: 0.5rem 10px;
-    font-size: 1rem;
+    padding: 0.45rem 1rem;
+    font-size: inherit;
     font-family: inherit;
     font-weight: normal;
-    line-height: 1.5;
+    line-height: inherit;
     border: 1px solid #dee2e6;
     border-top: none;
     border-radius: 0 0 4px 4px;
@@ -85,17 +85,18 @@
     color: #495057;
     font-weight: normal;
     border: 1px solid #dee2e6;
-    border-top: none;
-    border-bottom: 3px solid #337ab7;
+    border-top: 3px solid #337ab7;
     border-radius: 0 0 4px 4px;
-    padding-top: 0.65rem;
-    padding-bottom: 0.65rem;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-top: 1rem;
+    padding-bottom: 0.8rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
     margin-top: 0;
+    margin-bottom: -12px;
     height: auto;
     position: relative;
     z-index: 2;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     -webkit-font-smoothing: subpixel-antialiased;
     -moz-osx-font-smoothing: auto;
 }

@@ -84,22 +84,39 @@
         let cachedTabsWidth = 0;
         let lastScrollLeft = -1;
 
+        function syncTabWidths() {
+            if (!$naturalTabs.length) return;
+            $naturalTabs.children('li').each(function (index) {
+                const naturalLiWidth = $(this).outerWidth();
+                if (naturalLiWidth > 0) {
+                    $floatingList.children('li[data-tab-index="' + index + '"]').css({
+                        'width': naturalLiWidth + 'px'
+                    });
+                }
+            });
+        }
+
         function updateFloatingDimensions() {
             if (!$naturalTabs.length) return;
             const tabsOffset = $naturalTabs.offset();
             cachedTabsLeft = tabsOffset.left;
             cachedTabsWidth = $naturalTabs.outerWidth();
+            syncTabWidths();
             updateFloatingPosition();
         }
 
         function updateFloatingPosition() {
             const currentScrollLeft = window.pageXOffset || document.documentElement.scrollLeft || 0;
             $floatingWrapper.css({
-                left: (cachedTabsLeft - currentScrollLeft) + 'px',
-                width: cachedTabsWidth + 'px'
+                left: (cachedTabsLeft - currentScrollLeft - 1) + 'px',
+                width: (cachedTabsWidth + 2) + 'px'
             });
         }
         updateFloatingDimensions();
+        window.addEventListener('load', updateFloatingDimensions);
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(updateFloatingDimensions);
+        }
 
         // 3. Independent Scroll Positions per Tab
         const tabScrollPositions = {};
