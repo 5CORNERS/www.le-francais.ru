@@ -1,4 +1,5 @@
 import os
+import re
 from collections import defaultdict
 import binascii
 from hashlib import md5
@@ -21,6 +22,14 @@ from html import escape as html_escape, unescape
 from home.consts import COLUMN_TEXT, COLUMN_START, COLUMN_END, COLUMN_SPEAKER, EU_COUNTRIES
 from le_francais.settings.base import FILES_LE_FRANCAIS_HTTPS, \
     FILES_LE_FRANCAIS_SITENAME
+
+ZERO_WIDTH_SPACE = '\u200b'
+ZERO_WIDTH_CHARS_RE = re.compile(r'[\u200b\ufeff\u2060\u200c\u200d]')
+HEADING_STYLE_RE = re.compile(r'^Heading (\d)$')
+LIST_STYLES = {'List Paragraph'}
+CALLOUT_STYLES = {'Intense Quote'}
+QUOTE_STYLES = {'Quote'}
+
 
 
 def is_gpt_disabled(request):
@@ -302,17 +311,20 @@ def create_document_from_transcript_srt(table_csv) -> BytesIO:
             current_p:Paragraph = document.add_paragraph('— ')
         else:
             current_p.add_run(' ')
-        new_run:Run = current_p.add_run(f'{l}')
+        anchored_l = l if l.startswith(ZERO_WIDTH_SPACE) else f'{ZERO_WIDTH_SPACE}{l}'
+        new_run:Run = current_p.add_run(anchored_l)
         comment = new_run.add_comment(
             text=f'{data["speaker"]} {data["start"]} {data["end"]} {data["id"]}'
         )
         last_speaker = speaker
     file = BytesIO()
     document.save(file)
+    file.seek(0)
     return file
 
 
 def text_postprocessor(html):
+    html = ZERO_WIDTH_CHARS_RE.sub('', html)
     return html \
             .replace(' »', '&nbsp;»')\
             .replace('« ', '«&nbsp;')\
@@ -320,14 +332,30 @@ def text_postprocessor(html):
             .replace(' !', '&nbsp;!')
 
 
+
+def _close_open_block(html, open_block):
+    if open_block == 'ul':
+        html += '</ul>'
+    elif open_block == 'callout':
+        html += '</div>'
+    elif open_block == 'blockquote':
+        html += '</blockquote>'
+    return html, None
+
+
 def docx_parse_document(document):
     html = ""
     lines_map = []
     opened_tags = []
     toc_nodes = []
-    is_list = False
+    open_block = None
     for p in document.paragraphs:
-        html, lines_map, opened_tags, is_list = docx_parse_through_paragraph(document, p, html, lines_map, opened_tags, toc_nodes, is_list)
+        html, lines_map, opened_tags, open_block = docx_parse_through_paragraph(
+            document, p, html, lines_map, opened_tags, toc_nodes,
+            open_block=open_block
+        )
+    if open_block:
+        html, open_block = _close_open_block(html, open_block)
     html = re.sub('!\[(.+?)]\((.+?)\s&quot;(.+?)&quot;\)',
                   '<img title="\g<1>" src="\g<2>" alt="\g<3>">', html)
     for match in re.finditer('<p>\[HTML](.*?)\[/HTML]</p>', html):
@@ -337,7 +365,8 @@ def docx_parse_document(document):
     # html = re.sub('<p>\[HTML](.*?)\[/HTML]</p>', '\g<1>', html)
     return html, lines_map
 
-def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map, opened_tags, toc_nodes, is_list=False):
+def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map, opened_tags, toc_nodes,
+                                 open_block=None):
     p_html = ''
     p_map = []
     runs_iterator = (run for run in paragraph.runs)
@@ -360,30 +389,42 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
     p_html = re.sub('(</span>)([.,:])', '\g<2>\g<1>', p_html)
 
     p_style: _ParagraphStyle = paragraph.style
+    style_name = getattr(p_style, 'name', '') or ''
 
-    if not 'List Paragraph' in p_style.name and is_list:
-        html += '</ul>'
-        is_list = False
+    heading_match = HEADING_STYLE_RE.match(style_name)
+    target_block = None
+    if style_name in LIST_STYLES:
+        target_block = 'ul'
+    elif style_name in CALLOUT_STYLES:
+        target_block = 'callout'
+    elif style_name in QUOTE_STYLES:
+        target_block = 'blockquote'
 
-    if 'Heading' in p_style.name or 'heading' in p_style.name:
-        heading_value = int(re.match('[Hh]eading\s?(?P<value>\d)', p_style.name).group('value'))
+    if open_block and open_block != target_block:
+        html, open_block = _close_open_block(html, open_block)
 
-        # TODO: TOC support
-        # if heading_value > toc_nodes[-1].head_value:
-        #     sub = Node(
-        #         parent=toc_nodes[-1],
-        #     )
-
+    if heading_match:
+        heading_value = int(heading_match.group(1))
         html += f'<h{heading_value + 1}>{opening_tags_html}{p_html}{closing_tags_html}</h{heading_value + 1}>'
-    elif 'List Paragraph' in p_style.name:
-        if not is_list:
+    elif target_block == 'ul':
+        if not open_block:
             html += '<ul>'
-            is_list = True
+            open_block = 'ul'
         html += f'<li>{opening_tags_html}{p_html}{closing_tags_html}</li>'
+    elif target_block == 'callout':
+        if not open_block:
+            html += '<div class="bs-callout bs-callout-info bs-callout-transcript">'
+            open_block = 'callout'
+        html += f'<p>{opening_tags_html}{p_html}{closing_tags_html}</p>'
+    elif target_block == 'blockquote':
+        if not open_block:
+            html += '<blockquote class="font-italic pl-4">'
+            open_block = 'blockquote'
+        html += f'<p>{opening_tags_html}{p_html}{closing_tags_html}</p>'
     else:
         html += f'<p>{opening_tags_html}{p_html}{closing_tags_html}</p>'
     lines_map += p_map
-    return html, lines_map, opened_tags, is_list
+    return html, lines_map, opened_tags, open_block
 
 def get_bookmark_name_id(e):
     s = tostring(e, encoding='utf-8').decode('utf-8')
@@ -396,7 +437,12 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
     for sub in element.xpath('./*'):
         sub_name = sub.xpath('name()')
         if sub_name == 'w:t':
-            t_html = html_escape(sub.xpath('text()')[0])
+            text_nodes = sub.xpath('text()')
+            t_text = text_nodes[0] if text_nodes else ''
+            t_text = ZERO_WIDTH_CHARS_RE.sub('', t_text)
+            if not t_text:
+                continue
+            t_html = html_escape(t_text)
             if current_style['bold']:
                 t_html = f'<strong>{t_html}</strong>'
             if current_style['italic']:
@@ -425,20 +471,18 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                                              transcript_map, opened_tags, current_style)
         elif sub_name == 'w:bookmarkStart':
             bookmark_name, bookmark_id = get_bookmark_name_id(sub)
-            if bookmark_name == '_GoBack':
-                pass
-            else:
+            if bookmark_name != '_GoBack':
                 html += f'<span id="{bookmark_name}">'
-            opened_tags.append({'name':'span', 'attrs':{'id': bookmark_name}})
+            opened_tags.append({'name': 'span', 'attrs': {'id': bookmark_name}})
         elif sub_name == 'w:bookmarkEnd':
-            if opened_tags[-1]['attrs']['id'] == '_GoBack':
-                pass
-            else:
-                html += f'</span>'
-            if opened_tags[-1]['name'] == 'span':
-                opened_tags.pop(-1)
-            else:
-                print(f'CAN NOT CLOSE TAG: SPAN')
+            if opened_tags:
+                tag = opened_tags[-1]
+                if tag.get('attrs', {}).get('id') != '_GoBack':
+                    html += '</span>'
+                if tag.get('name') == 'span':
+                    opened_tags.pop(-1)
+                else:
+                    print('CAN NOT CLOSE TAG: SPAN')
         elif sub_name == 'w:commentRangeStart':
             comment_text = "".join(document.comments_part._element.get_comment_by_id(
                     int(sub.xpath('./@w:id')[0])).xpath('.//w:t/text()'))
@@ -469,6 +513,8 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 opened_tags.pop(-1)
             else:
                 print(f'CAN NOT CLOSE: SPAN')
+        elif sub_name == 'w:br':
+            html += '<br/>'
         elif sub_name == 'w:instrText':
             # TODO parse instrText
             ...
@@ -652,7 +698,8 @@ def map_to_docx(transcript_map, separate_speakers=True):
         else:
             pre_line, line, post_line = eaf_string_to_docx(text)
             current_p.add_run(' ') # FIXME referenced before assignment
-        new_run = current_p.add_run(text)
+        anchored_text = text if text.startswith(ZERO_WIDTH_SPACE) else f'{ZERO_WIDTH_SPACE}{text}'
+        new_run = current_p.add_run(anchored_text)
         new_run.add_comment(f'{speaker} {start} {end}')
         last_speaker = speaker
     file = BytesIO()

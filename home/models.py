@@ -803,9 +803,9 @@ class LessonPage(Page):
         context['has_transcript'] = False
         if self.transcript_docx.name and self.has_transcript == False:
             self.has_transcript = context['has_transcript'] = True
-            self.transcript, self.transcript_html = get_html_and_map_from_docx(BytesIO(self.transcript_docx.read()))
+            self.transcript_html, self.transcript = get_html_and_map_from_docx(BytesIO(self.transcript_docx.read()))
             self.save()
-            context['transcript_html'], context['transcript_map'] = self.transcript, self.transcript_html
+            context['transcript_html'], context['transcript_map'] = self.transcript_html, self.transcript
         elif self.has_transcript:
             context['has_transcript'] = True
             context['transcript_html'], context['transcript_map'] = self.transcript_html, self.transcript

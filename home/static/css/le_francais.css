@@ -1146,7 +1146,18 @@ button.collapsed{
         border-left-color: var(--info);
     }
     .bs-callout-info h4 {
-        color: var(--info)
+        color: var(--info);
+    }
+
+    .bs-callout-transcript {
+        border-left-color: var(--info);
+        background-color: #f1f3f5;
+        font-style: italic;
+        font-weight: 500;
+        margin-left: 20px;
+    }
+    .bs-callout-transcript h4 {
+        color: var(--info);
     }
 
 	.bs-callout.disabled {
@@ -1366,4 +1377,194 @@ span.underline.play *{
 
 h1, h2, h3, h4 {
     margin-top: 1.2rem;
+}
+
+/* --- Floating Sticky Tabs Dock --- */
+#lessonTabsFloatingWrapper {
+    position: fixed;
+    z-index: 1020;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    padding: 0;
+    margin: 0;
+    pointer-events: auto;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+}
+
+#lessonTabsFloatingWrapper.is-hidden {
+    transform: translateY(-100%);
+    box-shadow: none;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease;
+}
+
+#lessonTabsFloatingWrapper:not(.is-hidden) {
+    transform: none;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-floating-inner {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-floating-list {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    border: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    list-style: none;
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-floating-list .nav-item {
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-right: 2px;
+    flex: 0 0 auto;
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-floating-list .nav-link {
+    white-space: nowrap;
+    width: auto;
+    flex: 0 0 auto;
+    padding: 0.5rem 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: normal;
+    line-height: 1.5;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    background-color: #ffffff;
+    color: var(--info, #337ab7);
+    margin-top: 0;
+    height: auto;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-floating-list .nav-link:hover,
+#lessonTabsFloatingWrapper .lesson-tabs-floating-list .nav-link:focus {
+    background-color: #f8f9fa;
+    color: #23527c;
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-floating-list .nav-link.active {
+    background-color: #ffffff;
+    color: #495057;
+    font-weight: normal;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: 0;
+    height: auto;
+    position: relative;
+    z-index: 2;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+}
+
+#lessonTabsFloatingWrapper .lesson-scroll-top-item {
+    display: flex;
+    margin-left: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    align-self: center;
+    padding-right: 6px;
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-scroll-top-btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    background-color: rgba(248, 249, 250, 0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: var(--info, #337ab7);
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.18s ease;
+    outline: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    user-select: none;
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-scroll-top-btn .scroll-top-icon {
+    margin-top: 1px;
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-scroll-top-btn .scroll-top-text {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-scroll-top-btn:hover {
+    background-color: var(--info, #337ab7);
+    color: #ffffff;
+    border-color: var(--info, #337ab7);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(51, 122, 183, 0.35);
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-scroll-top-btn:active {
+    transform: translateY(0);
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-pull-tab {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%);
+    cursor: pointer;
+    z-index: 1025;
+    user-select: none;
+    outline: none;
+    line-height: 1;
+}
+
+#lessonTabsFloatingWrapper.is-hidden .lesson-tabs-pull-tab {
+    display: block;
+}
+
+#lessonTabsFloatingWrapper .pull-tab-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 18px 4px 18px;
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    color: var(--secondary, #6c757d);
+    transition: all 0.2s ease;
+}
+
+#lessonTabsFloatingWrapper .lesson-tabs-pull-tab:hover .pull-tab-pill {
+    background-color: #f8f9fa;
+    color: var(--info, #337ab7);
+    padding-bottom: 6px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
 }
