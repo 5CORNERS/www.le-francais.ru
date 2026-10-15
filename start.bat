@@ -18,4 +18,4 @@ rem Launch bounded background browser poller with hidden window (30s timeout)
 start "" powershell -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -Command "$r = 0; while (!(Test-NetConnection 127.0.0.1 -Port 8000 -WarningAction SilentlyContinue).TcpTestSucceeded -and $r -lt 60) { Start-Sleep -Milliseconds 500; $r++ }; if ($r -lt 60) { Start-Process 'http://127.0.0.1:8000' }"
 
 echo Starting le-francais development server...
-"%~dp0tools\bin\micromamba.exe" run -p "%~dp0tools\env" python manage.py runserver 0.0.0.0:8000
+"%~dp0tools\bin\micromamba.exe" run -p "%~dp0tools\env" python manage.py runserver 127.0.0.1:8000
