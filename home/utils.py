@@ -10,7 +10,6 @@ from typing import List, Dict, Tuple, BinaryIO
 import docx
 import shortuuid
 
-logger = logging.getLogger(__name__)
 from anytree import Node
 from docx import Document
 from django.conf import settings
@@ -25,6 +24,8 @@ from html import escape as html_escape, unescape
 from home.consts import COLUMN_TEXT, COLUMN_START, COLUMN_END, COLUMN_SPEAKER, EU_COUNTRIES
 from le_francais.settings.base import FILES_LE_FRANCAIS_HTTPS, \
     FILES_LE_FRANCAIS_SITENAME
+
+logger = logging.getLogger(__name__)
 
 ZERO_WIDTH_SPACE = '\u200b'
 ZERO_WIDTH_CHARS_RE = re.compile(r'[\u200b\ufeff\u2060\u200c\u200d]')
