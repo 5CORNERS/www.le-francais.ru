@@ -78,4 +78,16 @@ class DocxParserTestCase(TestCase):
 
         html, lines_map = docx_parse_document(doc)
         self.assertIn('<span id="my_anchor">', html)
-        self.assertIn('</span>', html)
+        self.assertIn('</span>', html)
+
+    def test_non_timing_comment_is_balanced_and_not_leaked(self):
+        doc = docx.Document()
+        p = doc.add_paragraph('Commented text')
+        p.add_comment('Fix&"later" <soon>', author='editor')
+
+        html, lines_map = docx_parse_document(doc)
+        self.assertIn('<span class="comment">', html)
+        self.assertEqual(html.count('<span'), html.count('</span>'))
+        self.assertNotIn('Fix', html)
+        self.assertNotIn('data-text', html)
+        self.assertEqual(lines_map, [])

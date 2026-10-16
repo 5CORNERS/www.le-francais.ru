@@ -60,23 +60,18 @@
             $floatingList.append($clonedLi);
         });
 
-        // Append Haut (scroll-to-top) button item to the last row of the floating list
-        $floatingList.append(`
-            <li class="nav-item lesson-scroll-top-item" role="presentation">
-                <button type="button" class="lesson-tabs-scroll-top-btn" id="lessonTabsScrollTopBtn" title="Haut (Наверх)" aria-label="Haut">
-                    <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="scroll-top-icon">
-                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                        <polyline points="6 11 12 5 18 11"></polyline>
-                        <line x1="4" y1="2" x2="20" y2="2"></line>
-                    </svg>
-                    <span class="scroll-top-text">Haut</span>
-                </button>
-            </li>
-        `);
-
         $('body').append($floatingWrapper);
 
-        const $scrollTopBtn = $floatingWrapper.find('#lessonTabsScrollTopBtn');
+        // Floating scroll-to-top button in the bottom-right corner
+        const $scrollTopBtn = $(`
+            <button type="button" class="lesson-scroll-top-btn is-hidden" id="lessonScrollTopBtn" title="Наверх" aria-label="Наверх">
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+            </button>
+        `);
+        $('body').append($scrollTopBtn);
+
         const $pullTab = $floatingWrapper.find('#lessonTabsPullTab');
 
         // 2. Geometry & Horizontal Alignment (Cached to prevent layout thrashing on vertical scroll)
@@ -84,22 +79,56 @@
         let cachedTabsWidth = 0;
         let lastScrollLeft = -1;
 
+        function syncTabWidths() {
+            if (!$naturalTabs.length) return;
+            $naturalTabs.children('li').each(function (index) {
+                const naturalLiWidth = $(this).outerWidth();
+                if (naturalLiWidth > 0) {
+                    $floatingList.children('li[data-tab-index="' + index + '"]').css({
+                        'width': naturalLiWidth + 'px'
+                    });
+                }
+            });
+        }
+
         function updateFloatingDimensions() {
             if (!$naturalTabs.length) return;
             const tabsOffset = $naturalTabs.offset();
             cachedTabsLeft = tabsOffset.left;
             cachedTabsWidth = $naturalTabs.outerWidth();
+            syncTabWidths();
             updateFloatingPosition();
         }
 
         function updateFloatingPosition() {
             const currentScrollLeft = window.pageXOffset || document.documentElement.scrollLeft || 0;
             $floatingWrapper.css({
-                left: (cachedTabsLeft - currentScrollLeft) + 'px',
-                width: cachedTabsWidth + 'px'
+                left: (cachedTabsLeft - currentScrollLeft - 1) + 'px',
+                width: (cachedTabsWidth + 2) + 'px'
             });
+
+            // Position scroll-to-top button at the bottom-right within the central content column on desktop;
+            // on mobile, let the CSS media query rules (right: 18px; bottom: 20px) take natural precedence
+            if (isMobileMode()) {
+                $scrollTopBtn.css({
+                    left: '',
+                    right: ''
+                });
+            } else {
+                const btnRightOffset = 20;
+                const btnWidth = $scrollTopBtn.outerWidth() || 46;
+                const btnLeft = cachedTabsLeft + cachedTabsWidth - btnWidth - btnRightOffset - currentScrollLeft;
+                $scrollTopBtn.css({
+                    left: btnLeft + 'px',
+                    right: 'auto'
+                });
+            }
         }
         updateFloatingDimensions();
+        window.addEventListener('load', updateFloatingDimensions);
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(updateFloatingDimensions);
+        }
 
         // 3. Independent Scroll Positions per Tab
         const tabScrollPositions = {};
@@ -161,6 +190,9 @@
             const stickyTrigger = getTabsScrollTarget();
             const delta = currentScrollY - lastScrollY;
             const isSticky = currentScrollY > stickyTrigger;
+
+            // Toggle floating scroll-to-top button visibility
+            $scrollTopBtn.toggleClass('is-hidden', !isSticky);
 
             // Continually save current tab's scroll position
             if (currentTabHref) {

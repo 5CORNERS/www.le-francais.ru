@@ -21,9 +21,6 @@
     transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease;
 }
 
-#lessonTabsFloatingWrapper.is-hidden .lesson-tabs-floating-inner {
-    visibility: hidden;
-}
 
 #lessonTabsFloatingWrapper:not(.is-hidden) {
     transform: none;
@@ -50,26 +47,26 @@
 }
 
 #lessonTabsFloatingWrapper .lesson-tabs-floating-list .nav-item {
-    margin-top: 0;
-    margin-bottom: 0;
-    margin-right: 2px;
+    margin: 0;
+    padding: 0;
     flex: 0 0 auto;
 }
 
 #lessonTabsFloatingWrapper .lesson-tabs-floating-list .nav-link {
+    display: block;
+    width: 100%;
+    text-align: center;
     white-space: nowrap;
-    width: auto;
-    flex: 0 0 auto;
-    padding: 0.5rem 10px;
-    font-size: 1rem;
+    padding: 0.45rem 0.75rem;
+    font-size: inherit;
     font-family: inherit;
     font-weight: normal;
-    line-height: 1.5;
+    line-height: inherit;
     border: 1px solid #dee2e6;
     border-top: none;
     border-radius: 0 0 4px 4px;
     background-color: #ffffff;
-    color: var(--info, #337ab7);
+    color: #337ab7;
     margin-top: 0;
     height: auto;
     -webkit-font-smoothing: subpixel-antialiased;
@@ -88,70 +85,80 @@
     color: #495057;
     font-weight: normal;
     border: 1px solid #dee2e6;
-    border-top: none;
+    border-top: 3px solid #337ab7;
     border-radius: 0 0 4px 4px;
-    padding-top: 0.65rem;
-    padding-bottom: 0.65rem;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-top: 0.55rem;
+    padding-bottom: 0.4rem;
+    padding-left: 0.7rem;
+    padding-right: 1rem;
     margin-top: 0;
+    margin-bottom: -12px;
     height: auto;
     position: relative;
     z-index: 2;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     -webkit-font-smoothing: subpixel-antialiased;
     -moz-osx-font-smoothing: auto;
 }
 
-#lessonTabsFloatingWrapper .lesson-scroll-top-item {
-    display: flex;
-    margin-left: auto;
-    margin-top: 0;
-    margin-bottom: 0;
-    align-self: center;
-    padding-right: 6px;
-}
-
-#lessonTabsFloatingWrapper .lesson-tabs-scroll-top-btn {
+/* --- Floating Scroll-to-Top Button in bottom-right corner --- */
+.lesson-scroll-top-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 1010;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    margin: 0;
+    border-radius: 50%;
     display: inline-flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1px;
-    padding: 3px 10px;
-    border-radius: 6px;
-    border: 1px solid #dee2e6;
-    background-color: rgba(248, 249, 250, 0.92);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    color: var(--info, #337ab7);
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2.5px solid rgba(108, 117, 125, 0.45);
+    color: rgba(108, 117, 125, 0.85);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
     cursor: pointer;
-    line-height: 1;
-    transition: all 0.18s ease;
     outline: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     user-select: none;
-}
-
-#lessonTabsFloatingWrapper .lesson-tabs-scroll-top-btn .scroll-top-icon {
-    margin-top: 1px;
-}
-
-#lessonTabsFloatingWrapper .lesson-tabs-scroll-top-btn .scroll-top-text {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-}
-
-#lessonTabsFloatingWrapper .lesson-tabs-scroll-top-btn:hover {
-    background-color: var(--info, #337ab7);
-    color: #ffffff;
-    border-color: var(--info, #337ab7);
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(51, 122, 183, 0.35);
-}
-
-#lessonTabsFloatingWrapper .lesson-tabs-scroll-top-btn:active {
+    opacity: 1;
     transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lesson-scroll-top-btn.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(14px);
+}
+
+.lesson-scroll-top-btn:hover,
+.lesson-scroll-top-btn:focus {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-color: #337ab7;
+    color: #337ab7;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(51, 122, 183, 0.28);
+}
+
+.lesson-scroll-top-btn:active {
+    transform: translateY(0);
+}
+
+.lesson-scroll-top-btn svg {
+    margin-top: -1px;
+}
+
+@media (max-width: 767px) {
+    .lesson-scroll-top-btn {
+        bottom: 20px;
+        right: 18px;
+        width: 42px;
+        height: 42px;
+    }
 }
 
 #lessonTabsFloatingWrapper .lesson-tabs-pull-tab {
@@ -184,14 +191,14 @@
     border-top: none;
     border-radius: 0 0 10px 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-    color: var(--secondary, #6c757d);
+    color: #6c757d;
     transition: all 0.2s ease;
 }
 
 #lessonTabsFloatingWrapper .lesson-tabs-pull-tab:hover .pull-tab-pill,
 #lessonTabsFloatingWrapper .lesson-tabs-pull-tab:focus .pull-tab-pill {
     background-color: #f8f9fa;
-    color: var(--info, #337ab7);
+    color: #337ab7;
     padding-bottom: 6px;
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
 }
