@@ -508,8 +508,9 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 }})
             except ValueError:
                 logger.warning('Wrong Comment: %s', comment_text)
-                html += f'<span class="comment" data-text="{comment_text}">'
-                opened_tags.append({'name': 'span', 'attrs': {'class': 'comment', 'data-text':comment_text}})
+                # Open a span to balance the </span> emitted on commentRangeEnd;
+                html += '<span class="comment">'
+                opened_tags.append({'name': 'span', 'attrs': {'class': 'comment'}})
         elif sub_name == 'w:commentRangeEnd':
             html += '</span>'
             if opened_tags and opened_tags[-1]['name'] == 'span':
