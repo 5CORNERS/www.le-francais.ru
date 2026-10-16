@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 from collections import defaultdict
@@ -8,6 +9,8 @@ from typing import List, Dict, Tuple, BinaryIO
 
 import docx
 import shortuuid
+
+logger = logging.getLogger(__name__)
 from anytree import Node
 from docx import Document
 from django.conf import settings
@@ -482,7 +485,7 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 if tag.get('name') == 'span':
                     opened_tags.pop(-1)
                 else:
-                    print('CAN NOT CLOSE TAG: SPAN')
+                    logger.warning('CAN NOT CLOSE TAG: SPAN')
         elif sub_name == 'w:commentRangeStart':
             comment_text = "".join(document.comments_part._element.get_comment_by_id(
                     int(sub.xpath('./@w:id')[0])).xpath('.//w:t/text()'))
@@ -504,15 +507,15 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                     'data-speaker': speaker
                 }})
             except ValueError:
-                print('Wrong Comment')
-                print(comment_text)
+                logger.warning('Wrong Comment: %s', comment_text)
+                html += f'<span class="comment" data-text="{comment_text}">'
                 opened_tags.append({'name': 'span', 'attrs': {'class': 'comment', 'data-text':comment_text}})
         elif sub_name == 'w:commentRangeEnd':
             html += '</span>'
             if opened_tags and opened_tags[-1]['name'] == 'span':
                 opened_tags.pop(-1)
             else:
-                print(f'CAN NOT CLOSE: SPAN')
+                logger.warning('CAN NOT CLOSE: SPAN')
         elif sub_name == 'w:br':
             html += '<br/>'
         elif sub_name == 'w:instrText':

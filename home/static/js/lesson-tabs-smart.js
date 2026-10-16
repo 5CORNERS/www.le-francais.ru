@@ -107,14 +107,22 @@
                 width: (cachedTabsWidth + 2) + 'px'
             });
 
-            // Position scroll-to-top button at the bottom-right within the central content column
-            const btnRightOffset = 20;
-            const btnWidth = $scrollTopBtn.outerWidth() || 46;
-            const btnLeft = cachedTabsLeft + cachedTabsWidth - btnWidth - btnRightOffset - currentScrollLeft;
-            $scrollTopBtn.css({
-                left: btnLeft + 'px',
-                right: 'auto'
-            });
+            // Position scroll-to-top button at the bottom-right within the central content column on desktop;
+            // on mobile, let the CSS media query rules (right: 18px; bottom: 20px) take natural precedence
+            if (isMobileMode()) {
+                $scrollTopBtn.css({
+                    left: '',
+                    right: ''
+                });
+            } else {
+                const btnRightOffset = 20;
+                const btnWidth = $scrollTopBtn.outerWidth() || 46;
+                const btnLeft = cachedTabsLeft + cachedTabsWidth - btnWidth - btnRightOffset - currentScrollLeft;
+                $scrollTopBtn.css({
+                    left: btnLeft + 'px',
+                    right: 'auto'
+                });
+            }
         }
         updateFloatingDimensions();
         window.addEventListener('load', updateFloatingDimensions);
