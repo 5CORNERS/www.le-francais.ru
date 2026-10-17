@@ -640,6 +640,7 @@ def get_verbs(request, packet_id:int, more_lessons:int=None):
             "code": consts.PACKET_DOES_NOT_EXIST_CODE,
         })
         return JsonResponse(result, status=404)
+    result['packet'] = {"id": packet.id, "name": packet.name}
     if more_lessons:
         current_lesson = packet.lesson.lesson_number
         more_packets = list(VerbPacket.objects.filter(
