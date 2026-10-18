@@ -808,7 +808,17 @@ class LessonPage(Page):
             context['transcript_html'], context['transcript_map'] = self.transcript_html, self.transcript
         elif self.has_transcript:
             context['has_transcript'] = True
-            context['transcript_html'], context['transcript_map'] = self.transcript_html, self.transcript
+            t_html = self.transcript_html
+            t_map = self.transcript
+            # Auto-heal legacy database rows where transcript and transcript_html were inverted
+            if isinstance(t_html, str) and t_html.strip().startswith('[') and isinstance(t_map, str) and '<' in t_map:
+                try:
+                    import ast
+                    t_map_parsed = ast.literal_eval(t_html)
+                    t_html, t_map = t_map, t_map_parsed
+                except Exception:
+                    t_html, t_map = t_map, t_html
+            context['transcript_html'], context['transcript_map'] = t_html, t_map
 
         return context
 

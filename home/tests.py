@@ -91,3 +91,283 @@ class DocxParserTestCase(TestCase):
         self.assertNotIn('Fix', html)
         self.assertNotIn('data-text', html)
         self.assertEqual(lines_map, [])
+    def test_interjection_with_dialogue_dash_is_attributed_to_unknown(self):
+        doc = docx.Document()
+        p1 = doc.add_paragraph('— Première partie du cours.')
+        p1.runs[0].add_comment('Teacher 0 100')
+
+        p2 = doc.add_paragraph('— Oui, madame ?')
+        p2.runs[0].add_comment('Teacher 100 200')
+
+        p3 = doc.add_paragraph('— Deuxième partie du cours.')
+        p3.runs[0].add_comment('Teacher 200 300')
+
+        html, lines_map = docx_parse_document(doc)
+        self.assertEqual(len(lines_map), 3)
+        self.assertEqual(lines_map[0]['speaker'], 'Teacher')
+        self.assertEqual(lines_map[1]['speaker'], 'unknown')
+        self.assertEqual(lines_map[2]['speaker'], 'Teacher')
+
+        self.assertIn('data-speaker="Teacher"', html)
+        self.assertIn('data-speaker="unknown"', html)
+
+    def test_normal_dialogue_alternation_does_not_become_unknown(self):
+        doc = docx.Document()
+        p1 = doc.add_paragraph('— Bonjour.')
+        p1.runs[0].add_comment('Teacher 0 100')
+
+        p2 = doc.add_paragraph('— Bonjour, madame.')
+        p2.runs[0].add_comment('Student 100 200')
+
+        p3 = doc.add_paragraph('— Asseyez-vous.')
+        p3.runs[0].add_comment('Teacher 200 300')
+
+        html, lines_map = docx_parse_document(doc)
+        self.assertEqual(len(lines_map), 3)
+        self.assertEqual(lines_map[0]['speaker'], 'Teacher')
+        self.assertEqual(lines_map[1]['speaker'], 'Student')
+        self.assertEqual(lines_map[2]['speaker'], 'Teacher')
+        self.assertNotIn('unknown', html)
+
+    def test_continuation_without_dash_after_unknown_remains_unknown(self):
+        doc = docx.Document()
+        p1 = doc.add_paragraph('— Début du professeur.')
+        p1.runs[0].add_comment('Teacher 0 100')
+
+        p2 = doc.add_paragraph('— Interjection élève.')
+        p2.runs[0].add_comment('Teacher 100 200')
+
+        p3 = doc.add_paragraph('Suite de l\'élève sans tiret.')
+        p3.runs[0].add_comment('Teacher 200 300')
+
+        p4 = doc.add_paragraph('— Reprise du professeur avec tiret.')
+        p4.runs[0].add_comment('Teacher 300 400')
+
+        html, lines_map = docx_parse_document(doc)
+        self.assertEqual(len(lines_map), 4)
+        self.assertEqual(lines_map[0]['speaker'], 'Teacher')
+        self.assertEqual(lines_map[1]['speaker'], 'unknown')
+        self.assertEqual(lines_map[2]['speaker'], 'unknown')
+        self.assertEqual(lines_map[3]['speaker'], 'Teacher')
+
+    def test_teacher_speech_continuation_without_dash_remains_teacher(self):
+        doc = docx.Document()
+        p1 = doc.add_paragraph('— Début du cours magistral.')
+        p1.runs[0].add_comment('Teacher 0 100')
+
+        p2 = doc.add_paragraph('Deuxième paragraphe sans tiret.')
+        p2.runs[0].add_comment('Teacher 100 200')
+
+        p3 = doc.add_paragraph('Troisième paragraphe sans tiret.')
+        p3.runs[0].add_comment('Teacher 200 300')
+
+        html, lines_map = docx_parse_document(doc)
+        self.assertEqual(len(lines_map), 3)
+        self.assertEqual(lines_map[0]['speaker'], 'Teacher')
+        self.assertEqual(lines_map[1]['speaker'], 'Teacher')
+        self.assertEqual(lines_map[2]['speaker'], 'Teacher')
+        self.assertNotIn('unknown', html)
+
+    def test_bookmarks_parsed_into_transcript_map_and_reproduced_in_docx(self):
+        from home.utils import map_to_docx
+        doc = docx.Document()
+        p1 = doc.add_paragraph('— Première réplique avec signet.')
+        r1 = p1.runs[0]
+        r1.add_comment('Teacher 0 100')
+
+        from docx.oxml import OxmlElement
+        from docx.oxml.ns import qn
+        b_start = OxmlElement('w:bookmarkStart')
+        b_start.set(qn('w:id'), '10')
+        b_start.set(qn('w:name'), 'chapitre_1')
+        p1._p.insert(0, b_start)
+        b_end = OxmlElement('w:bookmarkEnd')
+        b_end.set(qn('w:id'), '10')
+        p1._p.append(b_end)
+
+        html, lines_map = docx_parse_document(doc)
+        self.assertEqual(len(lines_map), 1)
+        self.assertEqual(lines_map[0]['bookmark'], 'chapitre_1')
+        self.assertIn('chapitre_1', lines_map[0]['bookmarks'])
+        self.assertEqual(lines_map[0]['text'], '— Première réplique avec signet.')
+        self.assertIn('<span id="chapitre_1">', html)
+
+        docx_file = map_to_docx(lines_map)
+        roundtrip_doc = docx.Document(docx_file)
+        roundtrip_html, roundtrip_map = docx_parse_document(roundtrip_doc)
+
+        self.assertEqual(len(roundtrip_map), 1)
+        self.assertEqual(roundtrip_map[0]['bookmark'], 'chapitre_1')
+        self.assertIn('chapitre_1', roundtrip_map[0]['bookmarks'])
+        self.assertEqual(roundtrip_map[0]['speaker'], 'Teacher')
+        self.assertIn('<span id="chapitre_1">', roundtrip_html)
+
+    def test_interjection_with_multiple_runs_in_paragraph(self):
+        doc = docx.Document()
+        p1 = doc.add_paragraph('— Discours prof.')
+        p1.runs[0].add_comment('Teacher 0 100')
+
+        p2 = doc.add_paragraph('— Réplique élève phrase 1. ')
+        p2.runs[0].add_comment('Teacher 100 200')
+        r2 = p2.add_run('Réplique élève phrase 2.')
+        r2.add_comment('Teacher 200 300')
+
+        p3 = doc.add_paragraph('— Suite prof.')
+        p3.runs[0].add_comment('Teacher 300 400')
+
+        html, lines_map = docx_parse_document(doc)
+        self.assertEqual(len(lines_map), 4)
+        self.assertEqual(lines_map[0]['speaker'], 'Teacher')
+        self.assertEqual(lines_map[1]['speaker'], 'unknown')
+        self.assertEqual(lines_map[2]['speaker'], 'unknown')
+        self.assertEqual(lines_map[3]['speaker'], 'Teacher')
+
+    def test_pipe_marker_splits_replica_proportionally(self):
+        doc = docx.Document()
+        p1 = doc.add_paragraph('— Première phrase courte. || Deuxième phrase un peu plus longue.')
+        p1.runs[0].add_comment('Teacher 0 1000')
+
+        html, lines_map = docx_parse_document(doc)
+        self.assertEqual(len(lines_map), 2)
+        self.assertEqual(lines_map[0]['speaker'], 'Teacher')
+        self.assertEqual(lines_map[0]['text'], '— Première phrase courte.')
+        self.assertEqual(lines_map[0]['start'], '0')
+
+        self.assertEqual(lines_map[1]['speaker'], 'Teacher')
+        self.assertEqual(lines_map[1]['text'], 'Deuxième phrase un peu plus longue.')
+        self.assertEqual(lines_map[1]['end'], '1000')
+        self.assertTrue(lines_map[1]['is_split'])
+        self.assertTrue(lines_map[1]['split_adjacent'])
+
+        # End of part 1 equals start of part 2
+        self.assertEqual(lines_map[0]['end'], lines_map[1]['start'])
+        self.assertNotIn('||', html)
+
+    def test_ass_to_map_and_docx_roundtrip(self):
+        from home.utils import ass_to_map, map_to_docx
+
+        ass_content = (
+            "[Script Info]\n"
+            "Title: Test\n"
+            "[V4+ Styles]\n"
+            "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n"
+            "Style: Default,Arial,42,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,2,2,10,10,10,1\n"
+            "Style: Наташа,Arial,42,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,2,2,10,10,10,1\n"
+            "[Events]\n"
+            "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
+            "Comment: 0,0:00:00.05,0:00:03.04,Bookmark,,0,0,0,bookmark,=== BOOKMARK: Vocabulaire ===\n"
+            "Dialogue: 0,0:00:00.05,0:00:03.04,Наташа,Наташа,0,0,0,BOOKMARK:Vocabulaire,Bonjour à tous !\n"
+            "Dialogue: 0,0:00:03.05,0:00:05.10,unknown,Миша,0,0,0,SPLIT_1,{\\c&H0000FFFF&}Bonjour professeur.\n"
+        )
+        t_map = ass_to_map(ass_content)
+        self.assertEqual(len(t_map), 2)
+        # Entry 1
+        self.assertEqual(t_map[0]['speaker'], 'Наташа')
+        self.assertEqual(t_map[0]['start'], '50')
+        self.assertEqual(t_map[0]['end'], '3040')
+        self.assertEqual(t_map[0]['text'], 'Bonjour à tous\u202f!')
+        self.assertEqual(t_map[0]['bookmark'], 'Vocabulaire')
+
+        # Entry 2 (edited in SE: actor changed to Миша, visual tag stripped)
+        self.assertEqual(t_map[1]['speaker'], 'Миша')
+        self.assertEqual(t_map[1]['start'], '3050')
+        self.assertEqual(t_map[1]['end'], '5100')
+        self.assertEqual(t_map[1]['text'], 'Bonjour professeur.')
+
+        # Roundtrip to DOCX
+        docx_bytes = map_to_docx(t_map)
+        doc = docx.Document(docx_bytes)
+        html, parsed_map = docx_parse_document(doc)
+
+        self.assertEqual(len(parsed_map), 2)
+        self.assertEqual(parsed_map[0]['speaker'], 'Наташа')
+        self.assertEqual(parsed_map[0]['text'], 'Bonjour à tous\u202f!')
+        self.assertEqual(parsed_map[0]['bookmark'], 'Vocabulaire')
+
+        self.assertEqual(parsed_map[1]['speaker'], 'Миша')
+        self.assertEqual(parsed_map[1]['text'], 'Bonjour professeur.')
+
+    def test_sticky_material_hyperlink_unwrapped(self):
+        from docx.oxml import parse_xml
+        from docx.oxml.ns import nsdecls
+        doc = docx.Document()
+
+        # Add a Callout paragraph with an internal hyperlink
+        p_callout = doc.add_paragraph(style='Intense Quote')
+        p_callout.add_run('Attention : ')
+        hl_xml = parse_xml(
+            f'<w:hyperlink {nsdecls("w")} w:anchor="anchor_point_1">'
+            f'  <w:r><w:rPr><w:b/></w:rPr><w:t>Règle importante</w:t></w:r>'
+            f'</w:hyperlink>'
+        )
+        p_callout._p.append(hl_xml)
+
+        # Downstream paragraph with the target bookmark
+        p_target = doc.add_paragraph('Suite du cours...')
+        b_start = parse_xml(f'<w:bookmarkStart {nsdecls("w")} w:id="101" w:name="anchor_point_1"/>')
+        b_end = parse_xml(f'<w:bookmarkEnd {nsdecls("w")} w:id="101"/>')
+        p_target._p.insert(0, b_start)
+        p_target._p.append(b_end)
+
+        html, lines_map = docx_parse_document(doc)
+
+        # 1. The callout container must have data-sticky-until="anchor_point_1"
+        self.assertIn('data-sticky-until="anchor_point_1"', html)
+        self.assertIn('<div class="bs-callout bs-callout-info bs-callout-transcript"', html)
+
+        # 2. Hyperlink must be unwrapped (no <a> or <w:hyperlink> tag in HTML)
+        self.assertNotIn('<a ', html)
+        self.assertNotIn('</a>', html)
+
+        # 3. Formatting of text inside the hyperlink must be preserved
+        self.assertIn('<strong>Règle importante</strong>', html)
+        self.assertIn('Attention : ', html)
+
+    def test_sticky_anchor_missing_raises_error(self):
+        from docx.oxml import parse_xml
+        from docx.oxml.ns import nsdecls
+        doc = docx.Document()
+
+        # Callout paragraph references anchor "non_existent_bookmark" which doesn't exist anywhere
+        p_callout = doc.add_paragraph(style='Intense Quote')
+        hl_xml = parse_xml(
+            f'<w:hyperlink {nsdecls("w")} w:anchor="non_existent_bookmark">'
+            f'  <w:r><w:t>Règle avec signet manquant</w:t></w:r>'
+            f'</w:hyperlink>'
+        )
+        p_callout._p.append(hl_xml)
+
+        with self.assertRaises(ValueError) as ctx:
+            docx_parse_document(doc)
+
+        self.assertIn('non_existent_bookmark', str(ctx.exception))
+
+    def test_sticky_anchor_reverse_order_logs_warning(self):
+        from docx.oxml import parse_xml
+        from docx.oxml.ns import nsdecls
+        import logging
+        doc = docx.Document()
+
+        # Paragraph 1: target bookmark is placed here (BEFORE the callout)
+        p1 = doc.add_paragraph('Paragraphe initial avec signet.')
+        b_start = parse_xml(f'<w:bookmarkStart {nsdecls("w")} w:id="201" w:name="upstream_anchor"/>')
+        b_end = parse_xml(f'<w:bookmarkEnd {nsdecls("w")} w:id="201"/>')
+        p1._p.insert(0, b_start)
+        p1._p.append(b_end)
+
+        # Paragraph 2: Callout referencing upstream_anchor
+        p_callout = doc.add_paragraph(style='Intense Quote')
+        hl_xml = parse_xml(
+            f'<w:hyperlink {nsdecls("w")} w:anchor="upstream_anchor">'
+            f'  <w:r><w:t>Règle pointant vers le haut</w:t></w:r>'
+            f'</w:hyperlink>'
+        )
+        p_callout._p.append(hl_xml)
+
+        with self.assertLogs('home.utils', level='WARNING') as cm:
+            html, lines_map = docx_parse_document(doc)
+
+        self.assertTrue(any('upstream_anchor' in msg for msg in cm.output))
+
+
+

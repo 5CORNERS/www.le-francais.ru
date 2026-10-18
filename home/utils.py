@@ -16,6 +16,8 @@ from django.conf import settings
 from docx.styles.style import _ParagraphStyle, _CharacterStyle
 from docx.text.paragraph import Paragraph
 from docx.text.run import Run
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from lxml import etree
 from lxml.etree import tostring
 from markdown import Markdown
@@ -33,6 +35,7 @@ HEADING_STYLE_RE = re.compile(r'^Heading (\d)$')
 LIST_STYLES = {'List Paragraph'}
 CALLOUT_STYLES = {'Intense Quote'}
 QUOTE_STYLES = {'Quote'}
+PARAGRAPH_DIALOGUE_DASH_RE = re.compile(r'^(?:[—–―]|--)\s')
 
 
 
@@ -272,11 +275,14 @@ def parse_tab_delimited_srt_file(file):
     result = OrderedDict()
     c = 0
     for row in DictReader(file, dialect=excel_tab):
+        b_name = row.get('bookmark') or row.get('Bookmark') or None
         result[row[COLUMN_TEXT]] = {
             "id": f'line{c}',
             "start":row[COLUMN_START],
             "end":row[COLUMN_END],
-            "speaker":row[COLUMN_SPEAKER]
+            "speaker":row[COLUMN_SPEAKER],
+            "bookmark": b_name,
+            "bookmarks": [b_name] if b_name else []
         }
         c += 1
     #return OrderedDict(sorted(result.items(), key=lambda x: x[1]['start']))
@@ -309,17 +315,35 @@ def create_document_from_transcript_srt(table_csv) -> BytesIO:
     parsed_table = parse_tab_delimited_srt_file(StringIO(table_csv))
     document = docx.Document()
     last_speaker = None
+    bookmark_id = 1
     for l, data in parsed_table.items():
         speaker = data['speaker']
         if speaker != last_speaker:
             current_p:Paragraph = document.add_paragraph('— ')
         else:
             current_p.add_run(' ')
+
+        bookmarks = data.get('bookmarks') or ([] if not data.get('bookmark') else [data['bookmark']])
+        opened_bms = []
+        for b_name in bookmarks:
+            b_start = OxmlElement('w:bookmarkStart')
+            b_start.set(qn('w:id'), str(bookmark_id))
+            b_start.set(qn('w:name'), str(b_name))
+            current_p._p.append(b_start)
+            opened_bms.append(bookmark_id)
+            bookmark_id += 1
+
         anchored_l = l if l.startswith(ZERO_WIDTH_SPACE) else f'{ZERO_WIDTH_SPACE}{l}'
         new_run:Run = current_p.add_run(anchored_l)
         comment = new_run.add_comment(
             text=f'{data["speaker"]} {data["start"]} {data["end"]} {data["id"]}'
         )
+
+        for b_id in opened_bms:
+            b_end = OxmlElement('w:bookmarkEnd')
+            b_end.set(qn('w:id'), str(b_id))
+            current_p._p.append(b_end)
+
         last_speaker = speaker
     file = BytesIO()
     document.save(file)
@@ -329,11 +353,18 @@ def create_document_from_transcript_srt(table_csv) -> BytesIO:
 
 def text_postprocessor(html):
     html = ZERO_WIDTH_CHARS_RE.sub('', html)
-    return html \
+    html = html \
             .replace(' »', '&nbsp;»')\
+            .replace('\u202f»', '&nbsp;»')\
             .replace('« ', '«&nbsp;')\
+            .replace('«\u202f', '«&nbsp;')\
             .replace(' ?', '&nbsp;?')\
-            .replace(' !', '&nbsp;!')
+            .replace('\u202f?', '&nbsp;?')\
+            .replace(' !', '&nbsp;!')\
+            .replace('\u202f!', '&nbsp;!')
+    # Replace space followed by hyphen before letters with non-breaking hyphen
+    html = re.sub(r' -([A-Za-zА-Яа-яÀ-ÿ])', r' ‑\g<1>', html)
+    return html
 
 
 
@@ -353,27 +384,128 @@ def docx_parse_document(document):
     opened_tags = []
     toc_nodes = []
     open_block = None
-    for p in document.paragraphs:
+
+    declared_bookmarks = {}
+    for p_idx, p in enumerate(document.paragraphs):
+        for b_name in p._element.xpath('.//w:bookmarkStart/@*[local-name()="name"]'):
+            if b_name != '_GoBack' and b_name not in declared_bookmarks:
+                declared_bookmarks[b_name] = p_idx
+
+    for b_name in document._element.xpath('.//w:bookmarkStart/@*[local-name()="name"]'):
+        if b_name != '_GoBack' and b_name not in declared_bookmarks:
+            declared_bookmarks[b_name] = len(document.paragraphs) + 1
+
+    state = {
+        'last_speaker': None,
+        'active_bookmarks': [],
+        'pending_bookmarks': [],
+        'active_replica_entry': None,
+        'callout_sticky_until': None,
+        'sticky_materials': [],
+    }
+    for p_idx, p in enumerate(document.paragraphs):
         html, lines_map, opened_tags, open_block = docx_parse_through_paragraph(
             document, p, html, lines_map, opened_tags, toc_nodes,
-            open_block=open_block
+            open_block=open_block, state=state, p_index=p_idx
         )
     if open_block:
         html, open_block = _close_open_block(html, open_block)
+
+    # Validate sticky materials
+    seen_stickies = set()
+    for sticky in state.get('sticky_materials', []):
+        target = sticky['anchor']
+        mat_idx = sticky['p_index']
+        if (target, mat_idx) in seen_stickies:
+            continue
+        seen_stickies.add((target, mat_idx))
+
+        snippet = sticky.get('snippet', '')
+        if target not in declared_bookmarks:
+            raise ValueError(f"Sticky material in block '{snippet}' references non-existent anchor/bookmark '{target}'.")
+        target_p_idx = declared_bookmarks[target]
+        if target_p_idx <= mat_idx:
+            logger.warning(
+                f"Sticky material in block '{snippet}' references anchor '{target}' "
+                f"which appears before or at the material itself (material at paragraph {mat_idx}, anchor at paragraph {target_p_idx})."
+            )
+
     html = re.sub('!\[(.+?)]\((.+?)\s&quot;(.+?)&quot;\)',
                   '<img title="\g<1>" src="\g<2>" alt="\g<3>">', html)
-    for match in re.finditer('<p>\[HTML](.*?)\[/HTML]</p>', html):
-        html_block = unescape(match.group(1))
-        html = html.replace(match.group(0), html_block)
+    def _replace_html_block(match):
+        sticky_anchor = match.group(1)
+        html_block = unescape(match.group(2))
+        if sticky_anchor:
+            tag_end = html_block.find('>')
+            if tag_end != -1:
+                html_block = html_block[:tag_end] + f' data-sticky-until="{sticky_anchor}"' + html_block[tag_end:]
+        return html_block
+
+    html = re.sub(r'<p>\[HTML(?:\s+data-sticky-until="([^"]+)")?\](.*?)\[/HTML\]</p>', _replace_html_block, html, flags=re.DOTALL)
     html = text_postprocessor(html)
-    # html = re.sub('<p>\[HTML](.*?)\[/HTML]</p>', '\g<1>', html)
+    # Strip literal || markers from rendered html
+    html = html.replace('||', '')
+
+    # Split lines containing '||' with proportional timestamp distribution
+    final_lines_map = []
+    for entry in lines_map:
+        raw_text = entry.get('text', '')
+        if '||' in raw_text:
+            raw_parts = raw_text.split('||')
+            parts = [p.strip() for p in raw_parts if p.strip()]
+            if len(parts) > 1:
+                total_start = int(entry['start'])
+                total_end = int(entry['end'])
+                total_duration = total_end - total_start
+                total_len = sum(len(p) for p in parts)
+                current_start = total_start
+                for idx, part_text in enumerate(parts):
+                    if idx == len(parts) - 1:
+                        part_end = total_end
+                    else:
+                        dur = int(round(total_duration * len(part_text) / float(total_len))) if total_len > 0 else total_duration // len(parts)
+                        part_end = min(current_start + dur, total_end)
+                    final_lines_map.append({
+                        'id': f"{entry['id']}-p{idx + 1}" if idx > 0 else entry['id'],
+                        'speaker': entry['speaker'],
+                        'start': str(current_start),
+                        'end': str(part_end),
+                        'text': part_text,
+                        'bookmark': entry.get('bookmark') if idx == 0 else None,
+                        'bookmarks': entry.get('bookmarks', []) if idx == 0 else [],
+                        'is_split': True,
+                        'split_index': idx,
+                        'split_adjacent': (idx > 0),
+                    })
+                    current_start = part_end
+                continue
+            else:
+                entry['text'] = raw_text.replace('||', '').strip()
+        final_lines_map.append(entry)
+    lines_map = final_lines_map
+
     return html, lines_map
 
 def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map, opened_tags, toc_nodes,
-                                 open_block=None):
+                                 open_block=None, state=None, p_index=0):
+    if state is None:
+        state = {'last_speaker': None, 'active_bookmarks': [], 'pending_bookmarks': [], 'active_replica_entry': None, 'callout_sticky_until': None, 'sticky_materials': []}
     p_html = ''
     p_map = []
     runs_iterator = (run for run in paragraph.runs)
+
+    cleaned_p_text = ZERO_WIDTH_CHARS_RE.sub('', paragraph.text).lstrip()
+    starts_with_dash = bool(PARAGRAPH_DIALOGUE_DASH_RE.match(cleaned_p_text))
+    p_context = {
+        'starts_with_dash': starts_with_dash,
+        'paragraph_speaker': None,
+        'current_replica_entry': state.get('active_replica_entry'),
+        'state': state,
+    }
+    if state.get('active_replica_entry') is not None and paragraph.text.strip():
+        curr_text = state['active_replica_entry']['text']
+        if curr_text and not curr_text.endswith(' ') and not curr_text.endswith('||'):
+            state['active_replica_entry']['text'] += ' '
 
     opening_tags_html = ''
     if opened_tags:
@@ -381,7 +513,10 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
             attrs = "".join((f' {attr}="{value}"' for attr, value in tag['attrs'].items()))
             opening_tags_html += f'<{tag["name"]}{attrs}>'
 
-    p_html, p_map, opened_tags = xml_parse_through_element(document, runs_iterator, paragraph._element, p_html, p_map, opened_tags)
+    p_html, p_map, opened_tags = xml_parse_through_element(
+        document, runs_iterator, paragraph._element, p_html, p_map, opened_tags,
+        p_context=p_context
+    )
 
     closing_tags_html = ''
     if opened_tags:
@@ -406,6 +541,8 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
 
     if open_block and open_block != target_block:
         html, open_block = _close_open_block(html, open_block)
+        if state:
+            state['callout_sticky_until'] = None
 
     if heading_match:
         heading_value = int(heading_match.group(1))
@@ -416,9 +553,25 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
             open_block = 'ul'
         html += f'<li>{opening_tags_html}{p_html}{closing_tags_html}</li>'
     elif target_block == 'callout':
+        sticky_anchor = p_context.get('sticky_until') or (p_context.get('state', {}).get('callout_sticky_until') if p_context else None)
+        if sticky_anchor and state and state.get('sticky_materials') is not None:
+            state['sticky_materials'].append({
+                'anchor': sticky_anchor,
+                'p_index': p_index,
+                'snippet': cleaned_p_text[:60]
+            })
         if not open_block:
-            html += '<div class="bs-callout bs-callout-info bs-callout-transcript">'
+            sticky_attr = f' data-sticky-until="{sticky_anchor}"' if sticky_anchor else ''
+            html += f'<div class="bs-callout bs-callout-info bs-callout-transcript"{sticky_attr}>'
             open_block = 'callout'
+        else:
+            if sticky_anchor:
+                callout_idx = html.rfind('<div class="bs-callout')
+                if callout_idx != -1:
+                    tag_end = html.find('>', callout_idx)
+                    open_tag = html[callout_idx:tag_end + 1]
+                    if 'data-sticky-until' not in open_tag:
+                        html = html[:tag_end] + f' data-sticky-until="{sticky_anchor}"' + html[tag_end:]
         html += f'<p>{opening_tags_html}{p_html}{closing_tags_html}</p>'
     elif target_block == 'blockquote':
         if not open_block:
@@ -426,18 +579,44 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
             open_block = 'blockquote'
         html += f'<p>{opening_tags_html}{p_html}{closing_tags_html}</p>'
     else:
+        sticky_anchor = p_context.get('sticky_until') if p_context else None
+        if sticky_anchor and state and state.get('sticky_materials') is not None:
+            state['sticky_materials'].append({
+                'anchor': sticky_anchor,
+                'p_index': p_index,
+                'snippet': cleaned_p_text[:60]
+            })
+            if '[HTML]' in p_html:
+                p_html = p_html.replace('[HTML]', f'[HTML data-sticky-until="{sticky_anchor}"]', 1)
+            else:
+                opening_tags_html = f'<div data-sticky-until="{sticky_anchor}">' + opening_tags_html
+                closing_tags_html = closing_tags_html + '</div>'
         html += f'<p>{opening_tags_html}{p_html}{closing_tags_html}</p>'
     lines_map += p_map
     return html, lines_map, opened_tags, open_block
 
 def get_bookmark_name_id(e):
-    s = tostring(e, encoding='utf-8').decode('utf-8')
-    e_id = re.findall('w:id="(\d+)"', s)[0]
-    e_name = re.findall("w:name=[\"'](.+?)[\"']", s)[0]
+    e_id = e.get(qn('w:id')) or (e.xpath('./@w:id')[0] if e.xpath('./@w:id') else None)
+    e_name = e.get(qn('w:name')) or (e.xpath('./@w:name')[0] if e.xpath('./@w:name') else None)
+    if e_name:
+        e_name = unescape(e_name)
     return e_name, e_id
 
+def get_run_style(run_obj: Run):
+    font = getattr(run_obj, 'font', None)
+    return {
+        'italic': run_obj.italic,
+        'bold': run_obj.bold,
+        'underline': run_obj.underline,
+        'strikethrough': getattr(font, 'strike', None) if font else None,
+        'is_hyperlink': getattr(run_obj, 'is_hyperlink', False),
+        'is_superscript': getattr(font, 'superscript', None) if font else None,
+        'is_subscript': getattr(font, 'subscript', None) if font else None,
+    }
+
 def xml_parse_through_element(document:Document, runs_iterator, element,
-                              html:str, transcript_map:list, opened_tags, current_style=None):
+                              html:str, transcript_map:list, opened_tags, current_style=None,
+                              p_context=None):
     for sub in element.xpath('./*'):
         sub_name = sub.xpath('name()')
         if sub_name == 'w:t':
@@ -446,6 +625,8 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
             t_text = ZERO_WIDTH_CHARS_RE.sub('', t_text)
             if not t_text:
                 continue
+            if p_context and p_context.get('current_replica_entry') is not None:
+                p_context['current_replica_entry']['text'] += t_text
             t_html = html_escape(t_text)
             if current_style['bold']:
                 t_html = f'<strong>{t_html}</strong>'
@@ -462,27 +643,64 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
             html += t_html
         elif sub_name == 'w:r':
             current_run:Run = next(runs_iterator)
-            current_style = {
-                'italic': current_run.italic,
-                'bold': current_run.bold,
-                'underline': current_run.underline,
-                'strikethrough': current_run.font.strike,
-                'is_hyperlink': current_run.is_hyperlink,
-                'is_superscript': current_run.font.superscript,
-                'is_subscript': current_run.font.subscript,
-            }
-            html, transcript_map, opened_tags = xml_parse_through_element(document, runs_iterator, sub, html,
-                                             transcript_map, opened_tags, current_style)
+            current_style = get_run_style(current_run)
+            html, transcript_map, opened_tags = xml_parse_through_element(
+                document, runs_iterator, sub, html,
+                transcript_map, opened_tags, current_style,
+                p_context=p_context
+            )
+        elif sub_name == 'w:hyperlink':
+            anchor_attrs = sub.xpath('./@*[local-name()="anchor"]')
+            if anchor_attrs and p_context:
+                anchor_name = anchor_attrs[0]
+                p_context['sticky_until'] = anchor_name
+                state = p_context.get('state', {})
+                state['callout_sticky_until'] = anchor_name
+
+            for h_child in sub.xpath('./*'):
+                h_name = h_child.xpath('name()')
+                if h_name == 'w:r':
+                    h_run = Run(h_child, None)
+                    h_style = get_run_style(h_run)
+                    html, transcript_map, opened_tags = xml_parse_through_element(
+                        document, runs_iterator, h_child, html,
+                        transcript_map, opened_tags, h_style,
+                        p_context=p_context
+                    )
+                else:
+                    html, transcript_map, opened_tags = xml_parse_through_element(
+                        document, runs_iterator, h_child, html,
+                        transcript_map, opened_tags, current_style,
+                        p_context=p_context
+                    )
         elif sub_name == 'w:bookmarkStart':
             bookmark_name, bookmark_id = get_bookmark_name_id(sub)
             if bookmark_name != '_GoBack':
                 html += f'<span id="{bookmark_name}">'
+                if p_context:
+                    state = p_context.get('state', {})
+                    if bookmark_name not in state.setdefault('active_bookmarks', []):
+                        state['active_bookmarks'].append(bookmark_name)
+                    if bookmark_name not in state.setdefault('pending_bookmarks', []):
+                        state['pending_bookmarks'].append(bookmark_name)
+                    curr = p_context.get('current_replica_entry')
+                    if curr is not None:
+                        if bookmark_name not in curr['bookmarks']:
+                            curr['bookmarks'].append(bookmark_name)
+                        if not curr.get('bookmark'):
+                            curr['bookmark'] = bookmark_name
             opened_tags.append({'name': 'span', 'attrs': {'id': bookmark_name}})
         elif sub_name == 'w:bookmarkEnd':
             if opened_tags:
                 tag = opened_tags[-1]
-                if tag.get('attrs', {}).get('id') != '_GoBack':
+                b_name = tag.get('attrs', {}).get('id')
+                if b_name != '_GoBack':
                     html += '</span>'
+                    if p_context:
+                        state = p_context.get('state', {})
+                        active = state.get('active_bookmarks', [])
+                        if b_name in active:
+                            active.remove(b_name)
                 if tag.get('name') == 'span':
                     opened_tags.pop(-1)
                 else:
@@ -491,21 +709,78 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
             comment_text = "".join(document.comments_part._element.get_comment_by_id(
                     int(sub.xpath('./@w:id')[0])).xpath('.//w:t/text()'))
             try:
-                speaker, mm_start, mm_end = comment_text.rsplit(' ', 2)
-                id_name = f"{speaker}{mm_start}{mm_end}"
-                line_id = f'line-{shortuuid.uuid(name=id_name)}'
-                transcript_map.append({
-                    'start': mm_start, 'end': mm_end,
+                tokens = comment_text.strip().split(' ')
+                l_id = None
+                if len(tokens) >= 4 and tokens[-1].startswith('line'):
+                    l_id = tokens[-1]
+                    mm_end = tokens[-2]
+                    mm_start = tokens[-3]
+                    speaker = " ".join(tokens[:-3]).strip()
+                else:
+                    speaker, mm_start, mm_end = comment_text.rsplit(' ', 2)
+                    speaker = speaker.strip()
+
+                if p_context:
+                    state = p_context.get('state', {})
+                    last_speaker = state.get('last_speaker')
+                    starts_with_dash = p_context.get('starts_with_dash')
+
+                    if p_context.get('paragraph_speaker') is None:
+                        if starts_with_dash:
+                            if last_speaker is not None and speaker == last_speaker:
+                                p_context['paragraph_speaker'] = 'unknown'
+                            else:
+                                p_context['paragraph_speaker'] = speaker
+                        else:
+                            if last_speaker is not None:
+                                p_context['paragraph_speaker'] = last_speaker
+                            else:
+                                p_context['paragraph_speaker'] = speaker
+
+                    effective_speaker = p_context['paragraph_speaker']
+                    state['last_speaker'] = effective_speaker
+                else:
+                    effective_speaker = speaker
+
+                # Collect bookmarks
+                entry_bookmarks = []
+                if p_context:
+                    state = p_context.get('state', {})
+                    for b in state.get('active_bookmarks', []):
+                        if b not in entry_bookmarks:
+                            entry_bookmarks.append(b)
+                    for b in state.get('pending_bookmarks', []):
+                        if b not in entry_bookmarks:
+                            entry_bookmarks.append(b)
+                    state['pending_bookmarks'] = []
+
+                primary_bookmark = entry_bookmarks[0] if entry_bookmarks else None
+
+                id_name = f"{effective_speaker}{mm_start}{mm_end}"
+                line_id = l_id if l_id else f'line-{shortuuid.uuid(name=id_name)}'
+
+                entry = {
+                    'start': mm_start,
+                    'end': mm_end,
                     'id': line_id,
-                    'speaker': speaker,
-                })
-                html += f'<span class="transcript-line" id="{line_id}" data-start="{mm_start}" data-end="{mm_end}" data-speaker="{speaker}">'
+                    'speaker': effective_speaker,
+                    'text': '',
+                    'bookmark': primary_bookmark,
+                    'bookmarks': entry_bookmarks,
+                }
+                if p_context:
+                    p_context['current_replica_entry'] = entry
+                    if 'state' in p_context:
+                        p_context['state']['active_replica_entry'] = entry
+                transcript_map.append(entry)
+
+                html += f'<span class="transcript-line" id="{line_id}" data-start="{mm_start}" data-end="{mm_end}" data-speaker="{effective_speaker}">'
                 opened_tags.append({'name':'span', 'attrs':{
                     'class':'transcript-line',
                     'id':line_id,
                     'data-start': mm_start,
                     'data-end': mm_end,
-                    'data-speaker': speaker
+                    'data-speaker': effective_speaker
                 }})
             except ValueError:
                 logger.warning('Wrong Comment: %s', comment_text)
@@ -513,6 +788,10 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 html += '<span class="comment">'
                 opened_tags.append({'name': 'span', 'attrs': {'class': 'comment'}})
         elif sub_name == 'w:commentRangeEnd':
+            if p_context:
+                p_context['current_replica_entry'] = None
+                if 'state' in p_context:
+                    p_context['state']['active_replica_entry'] = None
             html += '</span>'
             if opened_tags and opened_tags[-1]['name'] == 'span':
                 opened_tags.pop(-1)
@@ -639,14 +918,14 @@ def text_preprocessor(text:str):
     #.replace('..', '…')\
     # new_text = re.sub('—(\w)', '— \g<1>', new_text)
     # new_text = re.sub('(\w)—', '\g<1> —', new_text)
-    new_text = re.sub("([A-zÀ-ÿ])'([A-zÀ-ÿ])", "\g<1>+++\g<1>", new_text)
-    new_text = re.sub("\'", "\"", new_text)
-    new_text = re.sub("\+\+\+", "\'", new_text)
-    new_text = re.sub('"([\w\d\-])', '«\g<1>', new_text)
-    new_text = re.sub('([\w\d\-]|…|\.|!|\?)"', '\g<1>»', new_text)
-    new_text = re.sub('«\s', '« ', new_text)
-    new_text = re.sub('\s»', ' »', new_text)
-    new_text = re.sub('(\S)\(', '\g<1> (', new_text)
+    new_text = re.sub(r"([A-Za-zÀ-ÿ])'([A-Za-zÀ-ÿ])", r"\g<1>+++\g<2>", new_text)
+    new_text = re.sub(r"\'", '"', new_text)
+    new_text = re.sub(r"\+\+\+", "'", new_text)
+    new_text = re.sub(r'"([\w\d\-])', r'«\g<1>', new_text)
+    new_text = re.sub(r'([\w\d\-]|…|\.|!|\?)"', r'\g<1>»', new_text)
+    new_text = re.sub(r'«\s', '« ', new_text)
+    new_text = re.sub(r'\s»', ' »', new_text)
+    new_text = re.sub(r'(\S)\(', r'\g<1> (', new_text)
     return new_text.lstrip(' ')
 
 
@@ -694,23 +973,159 @@ def eaf_string_to_docx(s:str):
 def map_to_docx(transcript_map, separate_speakers=True):
     document = docx.Document()
     last_speaker = None
+    bookmark_id = 1
     if not separate_speakers:
         current_p = document.add_paragraph('')
-    for line in transcript_map:
-        speaker, start, end, text = line['speaker'], line['start'], line['end'], line['text']
+    for entry in transcript_map:
+        speaker, start, end, text = entry['speaker'], entry['start'], entry['end'], entry['text']
+        starts_with_numbered_list = bool(re.match(r'^\d+\)', text.strip()))
         if separate_speakers and speaker != last_speaker:
             current_p:Paragraph = document.add_paragraph('— ')
+        elif starts_with_numbered_list:
+            current_p:Paragraph = document.add_paragraph('')
         else:
-            pre_line, line, post_line = eaf_string_to_docx(text)
-            current_p.add_run(' ') # FIXME referenced before assignment
-        anchored_text = text if text.startswith(ZERO_WIDTH_SPACE) else f'{ZERO_WIDTH_SPACE}{text}'
+            pre_line, line_text, post_line = eaf_string_to_docx(text)
+            current_p.add_run(' ')
+
+        bookmarks = entry.get('bookmarks') or ([] if not entry.get('bookmark') else [entry['bookmark']])
+        opened_bms = []
+        for b_name in bookmarks:
+            b_start = OxmlElement('w:bookmarkStart')
+            b_start.set(qn('w:id'), str(bookmark_id))
+            b_start.set(qn('w:name'), str(b_name))
+            current_p._p.append(b_start)
+            opened_bms.append(bookmark_id)
+            bookmark_id += 1
+
+        clean_run_text = PARAGRAPH_DIALOGUE_DASH_RE.sub('', text)
+        clean_run_text = clean_run_text.replace('||', '').strip()
+        anchored_text = clean_run_text if clean_run_text.startswith(ZERO_WIDTH_SPACE) else f'{ZERO_WIDTH_SPACE}{clean_run_text}'
         new_run = current_p.add_run(anchored_text)
         new_run.add_comment(f'{speaker} {start} {end}')
+
+        for b_id in opened_bms:
+            b_end = OxmlElement('w:bookmarkEnd')
+            b_end.set(qn('w:id'), str(b_id))
+            current_p._p.append(b_end)
+
         last_speaker = speaker
     file = BytesIO()
     document.save(file)
     file.seek(0)
     return file
+
+
+def parse_ass_time(time_str):
+    parts = time_str.strip().split(':')
+    h = int(parts[0])
+    m = int(parts[1])
+    s_parts = parts[2].split('.')
+    s = int(s_parts[0])
+    cs = int(s_parts[1]) if len(s_parts) > 1 else 0
+    return (h * 3600 + m * 60 + s) * 1000 + cs * 10
+
+
+def ms_to_ass_time(ms_val):
+    if isinstance(ms_val, str):
+        ms_val = int(ms_val)
+    total_cs = int(round(ms_val / 10.0))
+    cs = total_cs % 100
+    total_s = total_cs // 100
+    s = total_s % 60
+    total_m = total_s // 60
+    m = total_m % 60
+    h = total_m // 60
+    return f"{h}:{m:02d}:{s:02d}.{cs:02d}"
+
+
+def clean_ass_text(text):
+    text = re.sub(r'\{.*?\}', '', text)
+    text = text.replace(r'\N', ' ').replace(r'\n', ' ').replace(r'\h', ' ')
+    text = text.replace('\r', ' ').replace('\n', ' ')
+    text = text.replace('||', ' ')
+    text = re.sub(r'\s+', ' ', text)
+    text = text_preprocessor(text)
+    return text.strip()
+
+
+def ass_to_map(ass_content_or_path):
+    if hasattr(ass_content_or_path, 'read'):
+        content = ass_content_or_path.read()
+        if isinstance(content, bytes):
+            content = content.decode('utf-8')
+        lines = content.splitlines()
+    elif isinstance(ass_content_or_path, str) and os.path.exists(ass_content_or_path):
+        with open(ass_content_or_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+    elif isinstance(ass_content_or_path, str):
+        lines = ass_content_or_path.splitlines()
+    else:
+        raise ValueError('Unsupported input type for ass_to_map')
+
+    transcript_map = []
+    pending_bookmark = None
+
+    for line in lines:
+        line = line.strip()
+        if line.startswith('Comment:'):
+            match = re.search(r'===\s*BOOKMARK:\s*(.*?)\s*===', line)
+            if match:
+                pending_bookmark = match.group(1).strip()
+            continue
+
+        if not line.startswith('Dialogue:'):
+            continue
+
+        payload = line[len('Dialogue:'):].strip()
+        parts = payload.split(',', 9)
+        if len(parts) < 10:
+            continue
+
+        start_ms = parse_ass_time(parts[1])
+        end_ms = parse_ass_time(parts[2])
+        style = parts[3].strip()
+        actor = parts[4].strip()
+        effect = parts[8].strip()
+        raw_text = parts[9]
+        clean_text = clean_ass_text(raw_text)
+
+        # Determine speaker: prioritize Actor (Subtitle Edit column), then style
+        if actor:
+            speaker = actor
+        elif style and style not in ['Default', 'Split', 'Bookmark'] and not style.endswith('_Split'):
+            speaker = style
+        elif style.endswith('_Split'):
+            speaker = style[:-6]
+        else:
+            speaker = 'unknown'
+
+        # Determine bookmark
+        bm_name = None
+        if 'BOOKMARK:' in effect:
+            bm_match = re.search(r'BOOKMARK:([^;]+)', effect)
+            if bm_match:
+                bm_name = bm_match.group(1).strip()
+        elif pending_bookmark:
+            bm_name = pending_bookmark
+            pending_bookmark = None
+
+        item = {
+            'id': f"line-{len(transcript_map) + 1}",
+            'speaker': speaker,
+            'start': str(start_ms),
+            'end': str(end_ms),
+            'text': clean_text,
+            'bookmark': bm_name,
+            'bookmarks': [bm_name] if bm_name else [],
+        }
+        transcript_map.append(item)
+
+    return transcript_map
+
+
+def ass_to_docx(ass_content_or_path, separate_speakers=True):
+    t_map = ass_to_map(ass_content_or_path)
+    return map_to_docx(t_map, separate_speakers=separate_speakers)
 
 
 def eaf_to_docx(eaf_file:BinaryIO, separate_speakers=True, sort_by_speaker=False):

@@ -416,7 +416,7 @@
                 </div>{% endif %}
                 <div class="row">
                     <div class="col">
-                        <audio id="newAudioTranscript">
+                        <audio id="newAudioTranscript" preload="metadata">
                             <source
                                     {% if self.audio_new %}
                                         src="{{ self.audio_new }}"
@@ -424,6 +424,7 @@
                                         src="{{ self.audio_material }}"
                                     {% endif %}>
                         </audio>
+                        <div id="playerPlusNaturalContainer"></div>
                     </div>
                 </div>
                 <div class="row">
