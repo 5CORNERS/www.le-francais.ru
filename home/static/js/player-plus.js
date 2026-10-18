@@ -27,6 +27,7 @@
 
         var activeScrollAnim = null;
         var stickyMaterials = [];
+        var stickyMaterialsInitialized = false;
         var currentPinnedItem = null;
         var $stickyControls = null;
         var stickyRafPending = false;
@@ -84,7 +85,7 @@
                 var $active = activeLineId ? $('#' + activeLineId) : null;
                 if ($active && $active.length) {
                     var zone = getViewingZone();
-                    var lineTopInView = $active.offset().top - window.scrollY;
+                    var lineTopInView = $active.offset().top - (window.scrollY || window.pageYOffset || 0);
                     var lineBottomInView = lineTopInView + ($active.outerHeight() || 24);
                     // If active line moved outside viewing zone, pause autoscroll gently
                     if (lineBottomInView < zone.zoneTop || lineTopInView > zone.zoneBottom) {
@@ -719,19 +720,25 @@
             }
         }
 
-        $(document).on('mousedown touchstart', '.player-plus-progress-container', function (e) {
-            isScrubbing = true;
-            seekFromEvent(e, $(this));
-        });
-
-        $(document).on('mousemove touchmove', function (e) {
+        function onScrubMove(e) {
             if (isScrubbing) {
                 seekFromEvent(e, $('.player-plus-progress-container'));
             }
-        });
+        }
 
-        $(document).on('mouseup touchend', function () {
-            isScrubbing = false;
+        function onScrubEnd() {
+            if (isScrubbing) {
+                isScrubbing = false;
+                $(document).off('mousemove.playerPlusScrub touchmove.playerPlusScrub', onScrubMove);
+                $(document).off('mouseup.playerPlusScrub touchend.playerPlusScrub', onScrubEnd);
+            }
+        }
+
+        $(document).on('mousedown touchstart', '.player-plus-progress-container', function (e) {
+            isScrubbing = true;
+            seekFromEvent(e, $(this));
+            $(document).on('mousemove.playerPlusScrub touchmove.playerPlusScrub', onScrubMove);
+            $(document).on('mouseup.playerPlusScrub touchend.playerPlusScrub', onScrubEnd);
         });
 
         // --- Highlighting Logic ---
@@ -1169,6 +1176,7 @@
         }
 
         function initStickyMaterials() {
+            stickyMaterialsInitialized = true;
             // Unpin any active item before reinitializing
             if (currentPinnedItem) {
                 unpinItem(currentPinnedItem);
@@ -1313,7 +1321,7 @@
                 return;
             }
 
-            if (!stickyMaterials.length) {
+            if (!stickyMaterialsInitialized) {
                 initStickyMaterials();
             }
             if (!stickyMaterials.length) return;

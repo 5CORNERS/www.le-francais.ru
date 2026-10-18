@@ -243,6 +243,12 @@ class DocxParserTestCase(TestCase):
         self.assertEqual(lines_map[0]['end'], lines_map[1]['start'])
         self.assertNotIn('||', html)
 
+        # Verify that HTML DOM was synchronized with split spans
+        self.assertIn(f'id="{lines_map[0]["id"]}"', html)
+        self.assertIn(f'id="{lines_map[1]["id"]}"', html)
+        self.assertIn(f'data-end="{lines_map[0]["end"]}"', html)
+        self.assertIn(f'data-start="{lines_map[1]["start"]}"', html)
+
     def test_ass_to_map_and_docx_roundtrip(self):
         from home.utils import ass_to_map, map_to_docx
 

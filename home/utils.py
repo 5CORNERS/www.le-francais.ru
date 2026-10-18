@@ -443,9 +443,6 @@ def docx_parse_document(document):
 
     html = re.sub(r'<p>\[HTML(?:\s+data-sticky-until="([^"]+)")?\](.*?)\[/HTML\]</p>', _replace_html_block, html, flags=re.DOTALL)
     html = text_postprocessor(html)
-    # Strip literal || markers from rendered html
-    html = html.replace('||', '')
-
     # Split lines containing '||' with proportional timestamp distribution
     final_lines_map = []
     for entry in lines_map:
@@ -459,13 +456,14 @@ def docx_parse_document(document):
                 total_duration = total_end - total_start
                 total_len = sum(len(p) for p in parts)
                 current_start = total_start
+                generated_sub_entries = []
                 for idx, part_text in enumerate(parts):
                     if idx == len(parts) - 1:
                         part_end = total_end
                     else:
                         dur = int(round(total_duration * len(part_text) / float(total_len))) if total_len > 0 else total_duration // len(parts)
                         part_end = min(current_start + dur, total_end)
-                    final_lines_map.append({
+                    sub_entry = {
                         'id': f"{entry['id']}-p{idx + 1}" if idx > 0 else entry['id'],
                         'speaker': entry['speaker'],
                         'start': str(current_start),
@@ -476,13 +474,40 @@ def docx_parse_document(document):
                         'is_split': True,
                         'split_index': idx,
                         'split_adjacent': (idx > 0),
-                    })
+                    }
+                    generated_sub_entries.append(sub_entry)
+                    final_lines_map.append(sub_entry)
                     current_start = part_end
+
+                # Synchronize HTML: split the single DOM span into multiple spans matching generated_sub_entries
+                entry_id = entry['id']
+                span_pattern = rf'<span class="transcript-line"[^>]*id="{re.escape(entry_id)}"[^>]*>(.*?)</span>'
+                span_match = re.search(span_pattern, html, flags=re.DOTALL)
+                if span_match:
+                    full_span_str = span_match.group(0)
+                    inner_html = span_match.group(1)
+                    if '||' in inner_html:
+                        inner_parts = inner_html.split('||')
+                        if len(inner_parts) == len(generated_sub_entries):
+                            replacement_spans = []
+                            for idx, sub_e in enumerate(generated_sub_entries):
+                                p_content = inner_parts[idx].strip()
+                                spk = sub_e['speaker']
+                                s_id = sub_e['id']
+                                s_st = sub_e['start']
+                                s_en = sub_e['end']
+                                replacement_spans.append(
+                                    f'<span class="transcript-line" id="{s_id}" data-start="{s_st}" data-end="{s_en}" data-speaker="{spk}">{p_content}</span>'
+                                )
+                            html = html.replace(full_span_str, ' '.join(replacement_spans), 1)
                 continue
             else:
                 entry['text'] = raw_text.replace('||', '').strip()
         final_lines_map.append(entry)
     lines_map = final_lines_map
+
+    # Strip any remaining literal || markers from rendered html
+    html = html.replace('||', '')
 
     return html, lines_map
 
@@ -974,15 +999,16 @@ def map_to_docx(transcript_map, separate_speakers=True):
     document = docx.Document()
     last_speaker = None
     bookmark_id = 1
+    current_p = None
     if not separate_speakers:
         current_p = document.add_paragraph('')
     for entry in transcript_map:
         speaker, start, end, text = entry['speaker'], entry['start'], entry['end'], entry['text']
         starts_with_numbered_list = bool(re.match(r'^\d+\)', text.strip()))
-        if separate_speakers and speaker != last_speaker:
-            current_p:Paragraph = document.add_paragraph('— ')
+        if current_p is None or (separate_speakers and speaker != last_speaker):
+            current_p = document.add_paragraph('— ')
         elif starts_with_numbered_list:
-            current_p:Paragraph = document.add_paragraph('')
+            current_p = document.add_paragraph('')
         else:
             pre_line, line_text, post_line = eaf_string_to_docx(text)
             current_p.add_run(' ')
@@ -1021,8 +1047,12 @@ def parse_ass_time(time_str):
     m = int(parts[1])
     s_parts = parts[2].split('.')
     s = int(s_parts[0])
-    cs = int(s_parts[1]) if len(s_parts) > 1 else 0
-    return (h * 3600 + m * 60 + s) * 1000 + cs * 10
+    if len(s_parts) > 1:
+        fraction_str = s_parts[1].ljust(3, '0')[:3]
+        ms = int(fraction_str)
+    else:
+        ms = 0
+    return (h * 3600 + m * 60 + s) * 1000 + ms
 
 
 def ms_to_ass_time(ms_val):
