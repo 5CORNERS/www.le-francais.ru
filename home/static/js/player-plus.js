@@ -501,6 +501,13 @@
             initInitialHighlight();
         }
 
+        // --- Mobile Device Helper ---
+        function isMobileDevice() {
+            var width = window.innerWidth || document.documentElement.clientWidth || 0;
+            var hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+            return width < 768 || (hasTouch && width < 992);
+        }
+
         // --- Time Formatting Helper ---
         function formatTime(seconds) {
             if (isNaN(seconds) || seconds < 0) return '00:00';
@@ -849,6 +856,12 @@
             var lineId = $(this).attr('id');
             var a = getAudio();
             if (a) {
+                // On mobile devices: tapping the currently sounding replica pauses playback
+                if (isMobileDevice() && !a.paused && (lineId === activeLineId || $(this).hasClass('transcript-line-playing'))) {
+                    a.pause();
+                    return;
+                }
+
                 a.currentTime = startSec;
                 if (a.paused) {
                     setPausedHighlight(lineId);
@@ -1072,8 +1085,7 @@
 
         function getMaxPinnedHeight() {
             var vh = window.innerHeight || document.documentElement.clientHeight || 600;
-            var isMobile = (window.innerWidth || document.documentElement.clientWidth || 360) < 768;
-            return isMobile ? Math.min(260, Math.round(vh * 0.38)) : Math.min(340, Math.round(vh * 0.40));
+            return isMobileDevice() ? Math.min(260, Math.round(vh * 0.38)) : Math.min(340, Math.round(vh * 0.40));
         }
 
         var $stickyControls = null;
