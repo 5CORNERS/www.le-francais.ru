@@ -11,9 +11,8 @@
         const AUTO_TUCK_DELAY_MS = 350;
         const REVEAL_LOCK_MS = 1000;
         const PULL_TAB_LOCK_MS = 600;
-        const DISSOLVE_DISTANCE = 60;
         const SCROLL_HIDE_THRESHOLD_DESKTOP = 50;
-        const SCROLL_HIDE_THRESHOLD_MOBILE = 25;
+        const SCROLL_HIDE_THRESHOLD_MOBILE = 15;
         const SCROLL_REVEAL_THRESHOLD = 15;
 
         function getNavbarHeight() {
@@ -144,6 +143,15 @@
         let isMouseOver = false;
         let wasSticky = false;
         let autoHideTimer = null;
+        let floatingTop = null;
+        const $playerPlusNaturalContainer = $('#playerPlusNaturalContainer');
+
+        function setFloatingTop(top) {
+            if (top !== floatingTop) {
+                floatingTop = top;
+                $floatingWrapper.css('top', top + 'px');
+            }
+        }
 
         function clearAutoHideTimer() {
             if (autoHideTimer) {
@@ -152,13 +160,30 @@
             }
         }
 
+        function hideFloatingWrapper() {
+            isHidden = true;
+            $floatingWrapper.addClass('is-hidden');
+            $floatingWrapper.find('#floatingPlayerPlusTocWrapper').hide();
+            $floatingWrapper.find('.player-plus-toc-wrapper').removeClass('is-open');
+            $floatingWrapper.find('.player-plus-drawer').removeClass('is-open');
+            $floatingWrapper.find('.player-plus-btn-settings').removeClass('is-active');
+            clearAutoHideTimer();
+        }
+
+        function showFloatingWrapper() {
+            isHidden = false;
+            $floatingWrapper.removeClass('is-hidden');
+            if ($('#playerPlus').hasClass('active') || $('#playerPlusTab').hasClass('active')) {
+                $floatingWrapper.find('#floatingPlayerPlusTocWrapper').show();
+            }
+        }
+
         function startAutoHideTimer(delay) {
             delay = delay || AUTO_HIDE_DELAY_MS;
             clearAutoHideTimer();
             autoHideTimer = setTimeout(function () {
                 if (!isMouseOver && !isHidden) {
-                    isHidden = true;
-                    $floatingWrapper.addClass('is-hidden');
+                    hideFloatingWrapper();
                 }
             }, delay);
         }
@@ -199,32 +224,19 @@
                 tabScrollPositions[currentTabHref] = currentScrollY;
             }
 
-            // Case A: Near or above natural tabs (DETACH & DISSOLVE EFFECT)
+            // Case A: Near or above natural tabs (Hide floating dock completely to prevent ghost overlays)
             if (!isSticky) {
-                wasSticky = false;
-                clearAutoHideTimer();
-                const distanceBelowMenu = stickyTrigger - currentScrollY; // >= 0
-
-                if (distanceBelowMenu <= DISSOLVE_DISTANCE) {
-                    // Floating bar detaches from menu, glides down exactly over natural tabs, and dissolves
-                    const currentTop = navH + distanceBelowMenu;
-                    const currentOpacity = Math.max(0, 1 - (distanceBelowMenu / DISSOLVE_DISTANCE));
-
-                    $floatingWrapper.css({
-                        top: currentTop + 'px',
-                        opacity: currentOpacity,
-                        pointerEvents: currentOpacity > 0.2 ? 'auto' : 'none'
-                    }).removeClass('is-hidden');
-                    isHidden = false;
-                } else {
-                    // Scrolled completely into natural view: fully dissolve floating bar
+                // Touch the DOM only when leaving sticky mode or when the dock was revealed meanwhile
+                if (wasSticky || !isHidden) {
+                    wasSticky = false;
+                    hideFloatingWrapper();
                     $floatingWrapper.css({
                         opacity: 0,
-                        pointerEvents: 'none',
-                        top: navH + 'px'
-                    }).addClass('is-hidden');
-                    isHidden = true;
+                        pointerEvents: 'none'
+                    });
+                    $playerPlusNaturalContainer.css('visibility', 'visible');
                 }
+                setFloatingTop(navH);
 
                 lastScrollY = currentScrollY;
                 downScrollAccumulator = 0;
@@ -233,19 +245,22 @@
             }
 
             // Case B: Deep in content past stickyTrigger (STICKY FLOATING MODE)
-            $floatingWrapper.css({
-                top: navH + 'px',
-                opacity: 1,
-                pointerEvents: 'auto'
-            });
+            setFloatingTop(navH);
 
-            // If just crossed into sticky mode from above, guarantee initial visibility lock
+            // If just crossed into sticky mode from above
             if (!wasSticky) {
                 wasSticky = true;
-                isHidden = false;
-                $floatingWrapper.removeClass('is-hidden');
-                canHideAfter = Date.now() + REVEAL_LOCK_MS;
-                if (!isMobileMode()) {
+                $playerPlusNaturalContainer.css('visibility', 'hidden');
+                $floatingWrapper.css({
+                    opacity: 1,
+                    pointerEvents: 'auto'
+                });
+                showFloatingWrapper();
+                if (isMobileMode()) {
+                    canHideAfter = 0; // Immediate downward scroll hides without delay on mobile
+                    startAutoHideTimer(3000); // Also auto-tuck after 3s if user pauses
+                } else {
+                    canHideAfter = Date.now() + REVEAL_LOCK_MS;
                     startAutoHideTimer(AUTO_HIDE_DELAY_MS);
                 }
             }
@@ -261,9 +276,7 @@
                     downScrollAccumulator += delta;
                     const hideThreshold = isMobileMode() ? SCROLL_HIDE_THRESHOLD_MOBILE : SCROLL_HIDE_THRESHOLD_DESKTOP;
                     if (downScrollAccumulator >= hideThreshold && !isHidden) {
-                        isHidden = true;
-                        $floatingWrapper.addClass('is-hidden');
-                        clearAutoHideTimer();
+                        hideFloatingWrapper();
                     }
                 }
             } else if (delta < 0) {
@@ -275,8 +288,7 @@
                 if (!isMobileMode()) {
                     upScrollAccumulator += Math.abs(delta);
                     if (isHidden && upScrollAccumulator >= SCROLL_REVEAL_THRESHOLD) {
-                        isHidden = false;
-                        $floatingWrapper.removeClass('is-hidden');
+                        showFloatingWrapper();
                         startAutoHideTimer(AUTO_HIDE_DELAY_MS);
                     } else if (!isHidden) {
                         startAutoHideTimer(AUTO_HIDE_DELAY_MS);
@@ -324,8 +336,7 @@
             if (isMobileMode()) {
                 clearAutoHideTimer();
                 setTimeout(function () {
-                    isHidden = true;
-                    $floatingWrapper.addClass('is-hidden');
+                    hideFloatingWrapper();
                 }, AUTO_TUCK_DELAY_MS);
             } else {
                 startAutoHideTimer(AUTO_HIDE_DELAY_MS);
@@ -376,13 +387,14 @@
             lastScrollY = window.scrollY;
             downScrollAccumulator = 0;
             upScrollAccumulator = 0;
-            canHideAfter = Date.now() + REVEAL_LOCK_MS;
-
             // Make sure floating bar is revealed and geometry updated
-            isHidden = false;
-            $floatingWrapper.removeClass('is-hidden');
+            showFloatingWrapper();
             updateFloatingDimensions();
-            if (!isMobileMode()) {
+            if (isMobileMode()) {
+                canHideAfter = 0;
+                startAutoHideTimer(3000);
+            } else {
+                canHideAfter = Date.now() + REVEAL_LOCK_MS;
                 startAutoHideTimer(AUTO_HIDE_DELAY_MS);
             }
         });
@@ -402,8 +414,7 @@
         $pullTab.on('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            isHidden = false;
-            $floatingWrapper.removeClass('is-hidden');
+            showFloatingWrapper();
             canHideAfter = Date.now() + PULL_TAB_LOCK_MS;
             downScrollAccumulator = 0;
             upScrollAccumulator = 0;

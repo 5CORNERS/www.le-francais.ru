@@ -47,7 +47,7 @@ from .blocks.PlayerPlusBlock import PlayerPlusBlock
 from .blocks.RichTextBlockWithFeatures import RichTextBlock
 from .pay54 import Pay34API
 from .utils import message, parse_tab_delimited_srt_file, sub_html, create_document_from_transcript_srt, \
-    get_html_and_map_from_docx
+    get_html_and_map_from_docx, json_for_script
 
 PAGE_CHOICES = (
     ('lesson_a1', 'Lesson A1'),
@@ -809,6 +809,8 @@ class LessonPage(Page):
         elif self.has_transcript:
             context['has_transcript'] = True
             context['transcript_html'], context['transcript_map'] = self.transcript_html, self.transcript
+        if context.get('transcript_map'):
+            context['transcript_map_json'] = json_for_script(context['transcript_map'])
 
         return context
 
