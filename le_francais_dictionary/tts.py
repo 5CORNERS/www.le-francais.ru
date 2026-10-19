@@ -39,6 +39,15 @@ GOOGLE_RU_VOICE_NEUTRAL = GOOGLE_RU_VOICE_MALE
 
 POLLY_FR_VOICE_NEUTRAL = POLLY_FR_VOICE_FEMALE
 
+# Verb cards (verbs=True) are voiced from plain text, so they use Chirp 3 HD voices,
+# which do not accept SSML; words keep the voices above.
+VERB_VOICES = {
+    (LANGUAGE_FR, GENRE_MASCULINE): 'fr-FR-Chirp3-HD-Charon',
+    (LANGUAGE_FR, GENRE_FEMININE): 'fr-FR-Chirp3-HD-Zephyr',
+    (LANGUAGE_RU, GENRE_MASCULINE): 'ru-RU-Chirp3-HD-Charon',
+    (LANGUAGE_RU, GENRE_FEMININE): 'ru-RU-Chirp3-HD-Zephyr',
+}
+
 FTP_PATHS = {
     'words': {
         LANGUAGE_FR: FTP_FR_WORDS_PATH,
@@ -80,6 +89,10 @@ def google_cloud_tts(s, filename, language=LANGUAGE_FR, genre=GENRE_FEMININE, fi
     else:
         voice_name = GOOGLE_FR_VOICE_NEUTRAL if language == LANGUAGE_FR else GOOGLE_RU_VOICE_NEUTRAL
     voice_name = language + '-' + voice_name
+    if verbs and (language, genre) in VERB_VOICES:
+        voice_name = VERB_VOICES[(language, genre)]
+        if voice_name not in {voice.name for voice in voices}:
+            raise ValueError(f'Google TTS voice {voice_name} is not available')
     for voice in voices:
         if voice.name == voice_name:
             break

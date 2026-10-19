@@ -356,7 +356,7 @@ class VerbAdmin(admin.ModelAdmin):
 
 @admin.register(VerbForm)
 class VerbFormAdmin(admin.ModelAdmin):
-	search_fields = ['verb', 'translation']
+	search_fields = ['verb__verb', 'form', 'translation', 'translation_text']
 
 @admin.register(DictionaryError)
 class DictionaryErrorAdmin(admin.ModelAdmin):
