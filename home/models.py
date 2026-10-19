@@ -47,7 +47,7 @@ from .blocks.PlayerPlusBlock import PlayerPlusBlock
 from .blocks.RichTextBlockWithFeatures import RichTextBlock
 from .pay54 import Pay34API
 from .utils import message, parse_tab_delimited_srt_file, sub_html, create_document_from_transcript_srt, \
-    get_html_and_map_from_docx
+    get_html_and_map_from_docx, json_for_script
 
 PAGE_CHOICES = (
     ('lesson_a1', 'Lesson A1'),
@@ -808,22 +808,9 @@ class LessonPage(Page):
             context['transcript_html'], context['transcript_map'] = self.transcript_html, self.transcript
         elif self.has_transcript:
             context['has_transcript'] = True
-            t_html = self.transcript_html
-            t_map = self.transcript
-            # Auto-heal legacy database rows where transcript and transcript_html were inverted
-            if isinstance(t_html, str) and t_html.strip().startswith('[') and isinstance(t_map, str) and '<' in t_map:
-                try:
-                    import json
-                    t_map_parsed = json.loads(t_html)
-                    t_html, t_map = t_map, t_map_parsed
-                except Exception:
-                    try:
-                        import ast
-                        t_map_parsed = ast.literal_eval(t_html)
-                        t_html, t_map = t_map, t_map_parsed
-                    except Exception:
-                        t_html, t_map = t_map, t_html
-            context['transcript_html'], context['transcript_map'] = t_html, t_map
+            context['transcript_html'], context['transcript_map'] = self.transcript_html, self.transcript
+        if context.get('transcript_map'):
+            context['transcript_map_json'] = json_for_script(context['transcript_map'])
 
         return context
 

@@ -72,9 +72,9 @@
 	</script>
 	<script type="text/javascript"
             src="{% static 'components/js/bootstrap-treeview.min.js' %}"></script>
-    {% if transcript_map %}
+    {% if transcript_map_json %}
         <script>
-            window.transcriptMap = {{ transcript_map|safe }};
+            window.transcriptMap = {{ transcript_map_json|safe }};
         </script>
     {% endif %}
 	{% if request.GET.modal_open %}

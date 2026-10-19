@@ -344,9 +344,110 @@ class DocxParserTestCase(TestCase):
         p_callout._p.append(hl_xml)
 
         with self.assertRaises(ValueError) as ctx:
-            docx_parse_document(doc)
+            docx_parse_document(doc, strict=True)
 
         self.assertIn('non_existent_bookmark', str(ctx.exception))
+
+    def test_sticky_anchor_missing_is_dropped_when_not_strict(self):
+        doc = docx.Document()
+        p_callout = doc.add_paragraph(style='Intense Quote')
+        p_callout._p.append(self._hyperlink('non_existent_bookmark', 'Règle avec signet manquant'))
+
+        with self.assertLogs('home.utils', level='WARNING') as cm:
+            html, lines_map = docx_parse_document(doc)
+
+        self.assertTrue(any('non_existent_bookmark' in msg for msg in cm.output))
+        self.assertNotIn('data-sticky-until', html)
+        self.assertIn('Règle avec signet manquant', html)
+
+    @staticmethod
+    def _hyperlink(anchor, text):
+        from docx.oxml import parse_xml
+        from docx.oxml.ns import nsdecls
+        return parse_xml(
+            f'<w:hyperlink {nsdecls("w")} w:anchor="{anchor}"><w:r><w:t>{text}</w:t></w:r></w:hyperlink>'
+        )
+
+    @staticmethod
+    def _add_bookmark(paragraph, name, b_id):
+        from docx.oxml import parse_xml
+        from docx.oxml.ns import nsdecls
+        paragraph._p.insert(0, parse_xml(f'<w:bookmarkStart {nsdecls("w")} w:id="{b_id}" w:name="{name}"/>'))
+        paragraph._p.append(parse_xml(f'<w:bookmarkEnd {nsdecls("w")} w:id="{b_id}"/>'))
+
+    def test_link_in_regular_paragraph_does_not_leak_into_next_callout(self):
+        doc = docx.Document()
+        p_link = doc.add_paragraph('Voir ')
+        p_link._p.append(self._hyperlink('chapitre2', 'le chapitre 2'))
+        doc.add_paragraph('Paragraphe intermédiaire.')
+        doc.add_paragraph('Encadré sans lien.', style='Intense Quote')
+        self._add_bookmark(doc.add_paragraph('Chapitre 2'), 'chapitre2', 301)
+
+        html, lines_map = docx_parse_document(doc)
+
+        self.assertIn('<div class="bs-callout bs-callout-info bs-callout-transcript"><p>Encadré sans lien.', html)
+        # Regular sticky paragraph is wrapped in a div around (not inside) the <p>
+        self.assertIn('<div data-sticky-until="chapitre2"><p>Voir le chapitre 2</p></div>', html)
+        self.assertNotIn('<p><div', html)
+
+    def test_hidden_word_bookmarks_are_not_sticky(self):
+        doc = docx.Document()
+        p_toc = doc.add_paragraph()
+        p_toc._p.append(self._hyperlink('_Toc12345', 'Chapitre 1'))
+        self._add_bookmark(doc.add_paragraph('Chapitre 1'), '_Toc12345', 302)
+
+        html, lines_map = docx_parse_document(doc, strict=True)
+
+        self.assertNotIn('data-sticky-until', html)
+
+    def test_pipe_marker_split_with_nested_tags(self):
+        from docx.oxml import parse_xml
+        from docx.oxml.ns import nsdecls
+        doc = docx.Document()
+        p = doc.add_paragraph()
+        p.add_run('— Première ')
+        bold_run = p.add_run('partie || seconde')
+        bold_run.bold = True
+        p.add_run(' partie.')
+        p.add_comment('Teacher 0 1000', rangeStart=0, rangeEnd=2)
+        bold_run._r.addprevious(parse_xml(f'<w:bookmarkStart {nsdecls("w")} w:id="303" w:name="signet"/>'))
+        bold_run._r.addnext(parse_xml(f'<w:bookmarkEnd {nsdecls("w")} w:id="303"/>'))
+
+        html, lines_map = docx_parse_document(doc)
+
+        self.assertEqual(len(lines_map), 2)
+        first, second = lines_map
+        self.assertNotIn('||', html)
+        self.assertEqual(html.count('id="signet"'), 1)
+        self.assertIn(
+            f'— Première <span id="signet"><strong>partie</strong></span></span> '
+            f'<span class="transcript-line" id="{second["id"]}" data-start="{second["start"]}" '
+            f'data-end="{second["end"]}" data-speaker="Teacher"><span><strong>seconde</strong></span>',
+            html
+        )
+        self.assertIn(f'id="{first["id"]}" data-start="0" data-end="{first["end"]}"', html)
+
+    def test_raw_html_block_is_not_altered_by_text_processing(self):
+        doc = docx.Document()
+        doc.add_paragraph('[HTML]<div class="btn -primary"><script>if (a || b) { x = 1 -y; }</script></div>[/HTML]')
+        doc.add_paragraph('Texte || normal ?')
+
+        html, lines_map = docx_parse_document(doc)
+
+        self.assertIn('<div class="btn -primary"><script>if (a || b) { x = 1 -y; }</script></div>', html)
+        # Markers outside transcript lines are kept, typography is still applied to text
+        self.assertIn('<p>Texte || normal&nbsp;?</p>', html)
+
+    def test_json_for_script(self):
+        import json
+        from home.utils import json_for_script
+        value = [{'bookmark': None, 'is_split': True, 'text': '</script><b>&'}]
+        result = json_for_script(value)
+        self.assertNotIn('<', result)
+        self.assertNotIn('&', result)
+        self.assertIn('null', result)
+        self.assertIn('true', result)
+        self.assertEqual(json.loads(result), value)
 
     def test_sticky_anchor_reverse_order_logs_warning(self):
         from docx.oxml import parse_xml

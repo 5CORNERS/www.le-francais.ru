@@ -1,7 +1,7 @@
 import json
 
 import docx
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, CommandError
 
 from home.utils import docx_parse_document
 from home.utils import eaf_to_docx
@@ -16,13 +16,20 @@ class Command(BaseCommand):
         :type parser:  argparse.ArgumentParser
         """
         parser.add_argument('-f', '--filepath', dest='filepath', help='Path to .eaf, .docx, or .ass file')
-        parser.add_argument('-s', '--separate', dest='separate_speech', default=True, action='store_true')
+        parser.add_argument('--no-separate-speakers', dest='separate_speakers', default=True, action='store_false',
+                            help='.eaf/.ass: do not start a new paragraph when the speaker changes')
+        parser.add_argument('--sort-by-speaker', dest='sort_by_speaker', default=False, action='store_true',
+                            help='.eaf only: order replicas by speaker instead of chronologically')
 
     def handle(self, *args, **options):
-        main(file_path=options['filepath'], separate_speech=options['separate_speech'])
+        file_path = options['filepath']
+        if options['sort_by_speaker'] and not file_path.lower().endswith('.eaf'):
+            raise CommandError('--sort-by-speaker is only supported for .eaf files')
+        main(file_path=file_path, separate_speakers=options['separate_speakers'],
+             sort_by_speaker=options['sort_by_speaker'])
 
 
-def main(file_path, separate_speech=True):
+def main(file_path, separate_speakers=True, sort_by_speaker=False):
     file_name_without_extension = file_path.rsplit('.', 1)[0]
     if file_path.lower().endswith('.docx'):
         with open(file_path, 'rb') as f:
@@ -30,14 +37,14 @@ def main(file_path, separate_speech=True):
     elif file_path.lower().endswith('.ass'):
         from home.utils import ass_to_docx
         with open(file_path, 'r', encoding='utf-8') as ass_file:
-            docx_file_obj = ass_to_docx(ass_file, separate_speech)
+            docx_file_obj = ass_to_docx(ass_file, separate_speakers=separate_speakers)
         with open(f'{file_name_without_extension}.docx', 'wb') as docx_file:
             docx_file.write(docx_file_obj.read())
         with open(f'{file_name_without_extension}.docx', 'rb') as f:
             document = docx.Document(f)
     else:
         with open(file_path, 'rb') as eaf_file:
-            eaf_docx = eaf_to_docx(eaf_file, True, separate_speech)
+            eaf_docx = eaf_to_docx(eaf_file, separate_speakers=separate_speakers, sort_by_speaker=sort_by_speaker)
         with open(f'{file_name_without_extension}.docx',
                   'wb') as docx_file:
             docx_file.write(eaf_docx.read())
@@ -45,7 +52,7 @@ def main(file_path, separate_speech=True):
         with open(f'{file_name_without_extension}.docx', 'rb') as f:
             document = docx.Document(f)
 
-    html, transcript_map = docx_parse_document(document)
+    html, transcript_map = docx_parse_document(document, strict=True)
 
     # Full master JSON with all metadata
     with open(f'{file_name_without_extension}.json', 'w', encoding='utf-8') as map_json_file:

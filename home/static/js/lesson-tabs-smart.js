@@ -143,6 +143,15 @@
         let isMouseOver = false;
         let wasSticky = false;
         let autoHideTimer = null;
+        let floatingTop = null;
+        const $playerPlusNaturalContainer = $('#playerPlusNaturalContainer');
+
+        function setFloatingTop(top) {
+            if (top !== floatingTop) {
+                floatingTop = top;
+                $floatingWrapper.css('top', top + 'px');
+            }
+        }
 
         function clearAutoHideTimer() {
             if (autoHideTimer) {
@@ -217,15 +226,17 @@
 
             // Case A: Near or above natural tabs (Hide floating dock completely to prevent ghost overlays)
             if (!isSticky) {
-                wasSticky = false;
-                clearAutoHideTimer();
-                hideFloatingWrapper();
-                $floatingWrapper.css({
-                    opacity: 0,
-                    pointerEvents: 'none',
-                    top: navH + 'px'
-                });
-                $('#playerPlusNaturalContainer').css('visibility', 'visible');
+                // Touch the DOM only when leaving sticky mode or when the dock was revealed meanwhile
+                if (wasSticky || !isHidden) {
+                    wasSticky = false;
+                    hideFloatingWrapper();
+                    $floatingWrapper.css({
+                        opacity: 0,
+                        pointerEvents: 'none'
+                    });
+                    $playerPlusNaturalContainer.css('visibility', 'visible');
+                }
+                setFloatingTop(navH);
 
                 lastScrollY = currentScrollY;
                 downScrollAccumulator = 0;
@@ -234,16 +245,16 @@
             }
 
             // Case B: Deep in content past stickyTrigger (STICKY FLOATING MODE)
-            $('#playerPlusNaturalContainer').css('visibility', 'hidden');
-            $floatingWrapper.css({
-                top: navH + 'px',
-                opacity: 1,
-                pointerEvents: 'auto'
-            });
+            setFloatingTop(navH);
 
             // If just crossed into sticky mode from above
             if (!wasSticky) {
                 wasSticky = true;
+                $playerPlusNaturalContainer.css('visibility', 'hidden');
+                $floatingWrapper.css({
+                    opacity: 1,
+                    pointerEvents: 'auto'
+                });
                 showFloatingWrapper();
                 if (isMobileMode()) {
                     canHideAfter = 0; // Immediate downward scroll hides without delay on mobile
