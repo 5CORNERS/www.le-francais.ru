@@ -44,6 +44,7 @@ HTML_VOID_TAGS = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'l
 HTML_RAW_TEXT_TAGS = {'script', 'style'}
 SPLIT_MARKER = '||'
 SCRIPT_JSON_ESCAPES = {ord('<'): '\\u003C', ord('>'): '\\u003E', ord('&'): '\\u0026'}
+WORD_SYSTEM_BOOKMARKS = ('_Toc', '_Ref', '_Hlk', '_GoBack')
 
 
 def json_for_script(value):
@@ -785,7 +786,7 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
         elif sub_name == 'w:hyperlink':
             anchor_attrs = sub.xpath('./@*[local-name()="anchor"]')
             # Internal links mark sticky materials; Word's hidden bookmarks (_Toc, _Ref, ...) are not ones
-            if anchor_attrs and p_context and not anchor_attrs[0].startswith('_'):
+            if anchor_attrs and p_context and not anchor_attrs[0].startswith(WORD_SYSTEM_BOOKMARKS):
                 p_context['sticky_until'] = anchor_attrs[0]
 
             for h_child in sub.xpath('./*'):
@@ -850,6 +851,10 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 else:
                     speaker, mm_start, mm_end = comment_text.rsplit(' ', 2)
                     speaker = speaker.strip()
+
+                # Validate timestamps are numeric
+                int(mm_start)
+                int(mm_end)
 
                 if p_context:
                     state = p_context.get('state', {})

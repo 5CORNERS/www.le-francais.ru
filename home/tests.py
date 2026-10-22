@@ -400,6 +400,16 @@ class DocxParserTestCase(TestCase):
 
         self.assertNotIn('data-sticky-until', html)
 
+    def test_heading_bookmarks_with_leading_underscore_are_sticky(self):
+        doc = docx.Document()
+        p = doc.add_paragraph('Exercise text', style='Intense Quote')
+        p._p.append(self._hyperlink('_Упражнение_на_чтение', 'Exercise link'))
+        self._add_bookmark(doc.add_paragraph('Next heading'), '_Упражнение_на_чтение', 303)
+
+        html, lines_map = docx_parse_document(doc, strict=True)
+
+        self.assertIn('data-sticky-until="_Упражнение_на_чтение"', html)
+
     def test_pipe_marker_split_with_nested_tags(self):
         from docx.oxml import parse_xml
         from docx.oxml.ns import nsdecls

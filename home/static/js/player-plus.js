@@ -107,6 +107,14 @@
             return ($topMenu.length && $topMenu.is(':visible')) ? $topMenu.outerHeight() : 48;
         }
 
+        function getStickyPinTop() {
+            const navH = getNavbarHeight();
+            const $floatingWrapper = $('#lessonTabsFloatingWrapper');
+            const isDockVisible = ($floatingWrapper.length && $floatingWrapper.is(':visible') && !$floatingWrapper.hasClass('is-hidden') && $floatingWrapper.css('opacity') !== '0');
+            const dockH = isDockVisible ? $floatingWrapper.outerHeight() : 0;
+            return navH + dockH;
+        }
+
         function getAudio() {
             return $('#newAudioTranscript')[0];
         }
@@ -897,11 +905,8 @@
 
         // --- Viewing Zone & Autoscroll Implementation ---
         function getViewingZone($line) {
-            const navH = getNavbarHeight();
-            const $floatingWrapper = $('#lessonTabsFloatingWrapper');
-            const isDockVisible = ($floatingWrapper.length && $floatingWrapper.is(':visible') && !$floatingWrapper.hasClass('is-hidden'));
-            const dockH = isDockVisible ? $floatingWrapper.outerHeight() : 0;
-            let topObstruction = navH + dockH;
+            const pinTop = getStickyPinTop();
+            let topObstruction = pinTop;
 
             // 1. Check if any sticky material is currently pinned
             if (isStickyMaterialsEnabled && currentPinnedItem) {
@@ -927,7 +932,7 @@
                         const cardH = item.isExpanded
                             ? Math.min(natH, Math.round(window.innerHeight * 0.78))
                             : Math.min(natH, getMaxPinnedHeight());
-                        const expectedBottom = navH + cardH + 24; // Card height + navbar + 24px safety buffer
+                        const expectedBottom = pinTop + cardH + 24; // Card height + pinTop + 24px safety buffer
                         if (expectedBottom > topObstruction) {
                             topObstruction = expectedBottom;
                         }
@@ -1337,10 +1342,10 @@
             if (!stickyMaterials.length) return;
 
             const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
-            const navH = getNavbarHeight();
+            const pinTop = getStickyPinTop();
 
             let activeCandidate = null;
-            let candidateTop = navH;
+            let candidateTop = pinTop;
             let candidateHeight = 0;
 
             for (let i = 0; i < stickyMaterials.length; i++) {
@@ -1352,7 +1357,7 @@
                 const anchorTop = getElementDocTop(item.$anchor);
 
                 // CRITICAL SAFETY GUARDS:
-                if (origTop <= (navH + 10)) {
+                if (origTop <= (pinTop + 10)) {
                     continue;
                 }
                 if (anchorTop <= origTop) {
@@ -1360,7 +1365,7 @@
                 }
 
                 // If user scrolled back up above the item's natural top position, clear dismissed state
-                if (item.isDismissed && scrollY < (origTop - navH - 40)) {
+                if (item.isDismissed && scrollY < (origTop - pinTop - 40)) {
                     item.isDismissed = false;
                 }
 
@@ -1374,10 +1379,10 @@
                 let currentH = targetH;
                 if (!item.isExpanded) {
                     // DYNAMIC TEXT-FOLLOWING COMPRESSION:
-                    // 1. As top of card reaches navbar, it pins at navH.
+                    // 1. As top of card reaches pinTop, it pins at pinTop.
                     // 2. The document text begins at (origTop + natH).
-                    // In viewport coordinates, distance from navH down to text is:
-                    const distanceToText = (origTop + natH) - scrollY - navH;
+                    // In viewport coordinates, distance from pinTop down to text is:
+                    const distanceToText = (origTop + natH) - scrollY - pinTop;
 
                     // 3. While distanceToText > targetH, the bottom border of the card is pushed up
                     // in exact lockstep by the scrolling text: card height = distanceToText.
@@ -1385,12 +1390,12 @@
                     currentH = Math.max(targetH, Math.min(natH, distanceToText));
                 }
 
-                const pinStart = origTop - navH;
-                const pushStart = anchorTop - navH - currentH;
-                const releaseEnd = anchorTop - navH;
+                const pinStart = origTop - pinTop;
+                const pushStart = anchorTop - pinTop - currentH;
+                const releaseEnd = anchorTop - pinTop;
 
                 if (scrollY >= pinStart && scrollY < releaseEnd) {
-                    let topY = navH;
+                    let topY = pinTop;
                     if (scrollY >= pushStart) {
                         topY = (anchorTop - scrollY) - currentH;
                     }
@@ -1408,7 +1413,7 @@
             }
 
             if (activeCandidate) {
-                pinItem(activeCandidate, candidateTop, navH, candidateHeight);
+                pinItem(activeCandidate, candidateTop, pinTop, candidateHeight);
             } else if (currentPinnedItem) {
                 unpinItem(currentPinnedItem);
             }
