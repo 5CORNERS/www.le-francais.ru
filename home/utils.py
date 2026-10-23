@@ -45,6 +45,23 @@ HTML_RAW_TEXT_TAGS = {'script', 'style'}
 SPLIT_MARKER = '||'
 SCRIPT_JSON_ESCAPES = {ord('<'): '\\u003C', ord('>'): '\\u003E', ord('&'): '\\u0026'}
 WORD_SYSTEM_BOOKMARKS = ('_Toc', '_Ref', '_Hlk', '_GoBack')
+HYPERLINK_INSTR_RE = re.compile(
+    r'HYPERLINK\b.*?(?:\\l|/l|-l)\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"]+))',
+    re.IGNORECASE
+)
+
+
+def extract_hyperlink_anchor(instr_text):
+    if not instr_text:
+        return None
+    match = HYPERLINK_INSTR_RE.search(instr_text)
+    if match:
+        anchor = match.group(1) or match.group(2) or match.group(3)
+        if anchor:
+            anchor = anchor.replace('\\', '').strip()
+            if not anchor.startswith(WORD_SYSTEM_BOOKMARKS):
+                return anchor
+    return None
 
 
 class TranscriptList(list):
@@ -618,9 +635,12 @@ def docx_parse_document(document, strict=False):
         sticky_anchor = match.group(1)
         html_block = unescape(match.group(2))
         if sticky_anchor:
-            tag_end = html_block.find('>')
-            if tag_end != -1:
+            tag_match = re.search(r'<(?!style\b|script\b)([a-zA-Z][\w:-]*)([^>]*)>', html_block, re.IGNORECASE)
+            if tag_match:
+                tag_end = tag_match.end() - 1
                 html_block = html_block[:tag_end] + f' data-sticky-until="{sticky_anchor}"' + html_block[tag_end:]
+            else:
+                html_block = f'<div data-sticky-until="{sticky_anchor}">{html_block}</div>'
         return html_block
 
     html = re.sub(r'<p>\[HTML(?:\s+data-sticky-until="([^"]+)")?\](.*?)\[/HTML\]</p>', _replace_html_block, html, flags=re.DOTALL)
@@ -816,8 +836,10 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
         elif sub_name == 'w:hyperlink':
             anchor_attrs = sub.xpath('./@*[local-name()="anchor"]')
             # Internal links mark sticky materials; Word's hidden bookmarks (_Toc, _Ref, ...) are not ones
-            if anchor_attrs and p_context and not anchor_attrs[0].startswith(WORD_SYSTEM_BOOKMARKS):
-                p_context['sticky_until'] = anchor_attrs[0]
+            if anchor_attrs and p_context:
+                cleaned_anchor = anchor_attrs[0].replace('\\', '').strip()
+                if cleaned_anchor and not cleaned_anchor.startswith(WORD_SYSTEM_BOOKMARKS):
+                    p_context['sticky_until'] = cleaned_anchor
 
             for h_child in sub.xpath('./*'):
                 h_name = h_child.xpath('name()')
@@ -832,6 +854,27 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 else:
                     html, transcript_map, opened_tags = xml_parse_through_element(
                         document, runs_iterator, h_child, html,
+                        transcript_map, opened_tags, current_style,
+                        p_context=p_context
+                    )
+        elif sub_name == 'w:fldSimple':
+            instr_attr = sub.xpath('./@*[local-name()="instr"]')
+            if instr_attr and p_context:
+                anchor = extract_hyperlink_anchor(instr_attr[0])
+                if anchor:
+                    p_context['sticky_until'] = anchor
+            for f_child in sub.xpath('./*'):
+                if f_child.xpath('name()') == 'w:r':
+                    f_run = Run(f_child, None)
+                    f_style = get_run_style(f_run)
+                    html, transcript_map, opened_tags = xml_parse_through_element(
+                        document, runs_iterator, f_child, html,
+                        transcript_map, opened_tags, f_style,
+                        p_context=p_context
+                    )
+                else:
+                    html, transcript_map, opened_tags = xml_parse_through_element(
+                        document, runs_iterator, f_child, html,
                         transcript_map, opened_tags, current_style,
                         p_context=p_context
                     )
@@ -1003,8 +1046,10 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
         elif sub_name == 'w:br':
             html += '<br/>'
         elif sub_name == 'w:instrText':
-            # TODO parse instrText
-            ...
+            instr_text = "".join(sub.xpath('text()'))
+            anchor = extract_hyperlink_anchor(instr_text)
+            if anchor and p_context:
+                p_context['sticky_until'] = anchor
     return html, transcript_map, opened_tags
 
 def get_html_and_map_from_docx(docx_file):
