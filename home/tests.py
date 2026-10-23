@@ -429,6 +429,35 @@ class DocxParserTestCase(TestCase):
 
         self.assertIn('data-sticky-until="_Упражнение_на_чтение"', html)
 
+    def test_complex_field_hyperlink_makes_image_sticky(self):
+        from docx.oxml import parse_xml
+        from docx.oxml.ns import nsdecls
+        doc = docx.Document()
+        p = doc.add_paragraph()
+        p.add_run('![')
+        p._p.append(parse_xml(f'<w:r {nsdecls("w")}><w:fldChar w:fldCharType="begin"/></w:r>'))
+        p._p.append(parse_xml(f'<w:r {nsdecls("w")}><w:instrText xml:space="preserve"> HYPERLINK \\l "_Открытый_звук" </w:instrText></w:r>'))
+        p._p.append(parse_xml(f'<w:r {nsdecls("w")}><w:fldChar w:fldCharType="separate"/></w:r>'))
+        p.add_run('Photo title')
+        p._p.append(parse_xml(f'<w:r {nsdecls("w")}><w:fldChar w:fldCharType="end"/></w:r>'))
+        p.add_run('](https://example.com/photo.jpg "Photo alt")')
+        self._add_bookmark(doc.add_paragraph('Next heading'), '_Открытый_звук', 401)
+
+        html, lines_map = docx_parse_document(doc, strict=True)
+        self.assertIn('<div data-sticky-until="_Открытый_звук">', html)
+        self.assertIn('<img title="Photo title" src="https://example.com/photo.jpg" alt="Photo alt">', html)
+
+    def test_html_block_with_leading_style_attaches_sticky_to_container_div(self):
+        doc = docx.Document()
+        p = doc.add_paragraph('[')
+        p._p.append(self._hyperlink('_Анкета', 'HTML'))
+        p.add_run(']<style>.foo{color:red;}</style><div class="lf-container"><img src="test.jpg"></div>[/HTML]')
+        self._add_bookmark(doc.add_paragraph('Next heading'), '_Анкета', 402)
+
+        html, lines_map = docx_parse_document(doc, strict=True)
+        self.assertNotIn('<style data-sticky-until', html)
+        self.assertIn('<div class="lf-container" data-sticky-until="_Анкета">', html)
+
     def test_pipe_marker_split_with_nested_tags(self):
         from docx.oxml import parse_xml
         from docx.oxml.ns import nsdecls
