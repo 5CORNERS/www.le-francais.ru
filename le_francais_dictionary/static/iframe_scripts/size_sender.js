@@ -1,10 +1,10 @@
 $(
-    function (force=false) {
+    function () {
         // Track the last sent height to prevent feedback loops
         let lastSentHeight = 0;
 
         // Function to calculate and send the height
-        function sendHeight() {
+        function sendHeight(force=false) {
             // Get the height of the document
             const height = Math.max(
                 document.body.scrollHeight,
