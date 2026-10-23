@@ -86,11 +86,30 @@ class DocxParserTestCase(TestCase):
         p.add_comment('Fix&"later" <soon>', author='editor')
 
         html, lines_map = docx_parse_document(doc)
-        self.assertIn('<span class="comment">', html)
+        self.assertNotIn('<span class="comment">', html)
         self.assertEqual(html.count('<span'), html.count('</span>'))
         self.assertNotIn('Fix', html)
         self.assertNotIn('data-text', html)
-        self.assertEqual(lines_map, [])
+        self.assertEqual(lines_map, [])
+        self.assertEqual(len(lines_map.comments), 1)
+        self.assertEqual(lines_map.comments[0]['text'], 'Fix&"later" <soon>')
+        self.assertEqual(lines_map.comments[0]['author'], 'editor')
+
+    def test_non_timing_comment_inside_replica_does_not_break_tags_and_is_captured(self):
+        doc = docx.Document()
+        p = doc.add_paragraph('— Bonjour tout le monde !')
+        p.runs[0].add_comment('Teacher 0 1000')
+        p.add_comment('Note for editor', author='editor')
+
+        html, lines_map = docx_parse_document(doc)
+        self.assertNotIn('<span class="comment">', html)
+        self.assertEqual(html.count('<span'), html.count('</span>'))
+        self.assertEqual(len(lines_map), 1)
+        self.assertIn('comments', lines_map[0])
+        self.assertEqual(lines_map[0]['comments'][0]['text'], 'Note for editor')
+        self.assertEqual(len(lines_map.comments), 1)
+        self.assertEqual(lines_map.comments[0]['text'], 'Note for editor')
+
     def test_interjection_with_dialogue_dash_is_attributed_to_unknown(self):
         doc = docx.Document()
         p1 = doc.add_paragraph('— Première partie du cours.')
@@ -399,6 +418,16 @@ class DocxParserTestCase(TestCase):
         html, lines_map = docx_parse_document(doc, strict=True)
 
         self.assertNotIn('data-sticky-until', html)
+
+    def test_heading_bookmarks_with_leading_underscore_are_sticky(self):
+        doc = docx.Document()
+        p = doc.add_paragraph('Exercise text', style='Intense Quote')
+        p._p.append(self._hyperlink('_Упражнение_на_чтение', 'Exercise link'))
+        self._add_bookmark(doc.add_paragraph('Next heading'), '_Упражнение_на_чтение', 303)
+
+        html, lines_map = docx_parse_document(doc, strict=True)
+
+        self.assertIn('data-sticky-until="_Упражнение_на_чтение"', html)
 
     def test_pipe_marker_split_with_nested_tags(self):
         from docx.oxml import parse_xml

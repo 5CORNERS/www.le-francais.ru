@@ -44,6 +44,14 @@ HTML_VOID_TAGS = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'l
 HTML_RAW_TEXT_TAGS = {'script', 'style'}
 SPLIT_MARKER = '||'
 SCRIPT_JSON_ESCAPES = {ord('<'): '\\u003C', ord('>'): '\\u003E', ord('&'): '\\u0026'}
+WORD_SYSTEM_BOOKMARKS = ('_Toc', '_Ref', '_Hlk', '_GoBack')
+
+
+class TranscriptList(list):
+    """Subclass of list carrying extracted editorial comments without breaking list APIs or serialization."""
+    def __init__(self, *args, **kwargs):
+        super(TranscriptList, self).__init__(*args, **kwargs)
+        self.comments = []
 
 
 def json_for_script(value):
@@ -428,7 +436,7 @@ def _split_lines_map(lines_map):
                     else:
                         dur = int(round(total_duration * len(part_text) / float(total_len))) if total_len > 0 else total_duration // len(parts)
                         part_end = min(current_start + dur, total_end)
-                    sub_entries.append({
+                    sub_dict = {
                         'id': f"{entry['id']}-p{idx + 1}" if idx > 0 else entry['id'],
                         'speaker': entry['speaker'],
                         'start': str(current_start),
@@ -439,7 +447,13 @@ def _split_lines_map(lines_map):
                         'is_split': True,
                         'split_index': idx,
                         'split_adjacent': (idx > 0),
-                    })
+                    }
+                    if idx == 0:
+                        if 'comment' in entry:
+                            sub_dict['comment'] = entry['comment']
+                        if 'comments' in entry:
+                            sub_dict['comments'] = entry['comments']
+                    sub_entries.append(sub_dict)
                     current_start = part_end
                 segment_targets = []
                 non_empty_seen = 0
@@ -562,6 +576,9 @@ def docx_parse_document(document, strict=False):
         'active_replica_entry': None,
         'callout_sticky_until': None,
         'sticky_materials': [],
+        'ignored_comment_ids': set(),
+        'editorial_comments': [],
+        'active_editorial_comments': [],
     }
     for p_idx, p in enumerate(document.paragraphs):
         html, lines_map, opened_tags, open_block = docx_parse_through_paragraph(
@@ -611,13 +628,26 @@ def docx_parse_document(document, strict=False):
     lines_map, split_entries = _split_lines_map(lines_map)
     html = _split_transcript_spans(html, split_entries)
 
+    lines_map = TranscriptList(lines_map)
+    lines_map.comments = state.get('editorial_comments', [])
+
     return html, lines_map
 
 
 def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map, opened_tags, toc_nodes,
                                  open_block=None, state=None, p_index=0):
     if state is None:
-        state = {'last_speaker': None, 'active_bookmarks': [], 'pending_bookmarks': [], 'active_replica_entry': None, 'callout_sticky_until': None, 'sticky_materials': []}
+        state = {
+            'last_speaker': None,
+            'active_bookmarks': [],
+            'pending_bookmarks': [],
+            'active_replica_entry': None,
+            'callout_sticky_until': None,
+            'sticky_materials': [],
+            'ignored_comment_ids': set(),
+            'editorial_comments': [],
+            'active_editorial_comments': [],
+        }
     p_html = ''
     p_map = []
     runs_iterator = (run for run in paragraph.runs)
@@ -629,6 +659,7 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
         'paragraph_speaker': None,
         'current_replica_entry': state.get('active_replica_entry'),
         'state': state,
+        'p_index': p_index,
     }
     if state.get('active_replica_entry') is not None and paragraph.text.strip():
         curr_text = state['active_replica_entry']['text']
@@ -785,7 +816,7 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
         elif sub_name == 'w:hyperlink':
             anchor_attrs = sub.xpath('./@*[local-name()="anchor"]')
             # Internal links mark sticky materials; Word's hidden bookmarks (_Toc, _Ref, ...) are not ones
-            if anchor_attrs and p_context and not anchor_attrs[0].startswith('_'):
+            if anchor_attrs and p_context and not anchor_attrs[0].startswith(WORD_SYSTEM_BOOKMARKS):
                 p_context['sticky_until'] = anchor_attrs[0]
 
             for h_child in sub.xpath('./*'):
@@ -837,8 +868,9 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 else:
                     logger.warning('CAN NOT CLOSE TAG: SPAN')
         elif sub_name == 'w:commentRangeStart':
-            comment_text = "".join(document.comments_part._element.get_comment_by_id(
-                    int(sub.xpath('./@w:id')[0])).xpath('.//w:t/text()'))
+            comment_id_str = sub.xpath('./@w:id')[0]
+            comment_elem = document.comments_part._element.get_comment_by_id(int(comment_id_str))
+            comment_text = "".join(comment_elem.xpath('.//w:t/text()'))
             try:
                 tokens = comment_text.strip().split(' ')
                 l_id = None
@@ -850,6 +882,10 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 else:
                     speaker, mm_start, mm_end = comment_text.rsplit(' ', 2)
                     speaker = speaker.strip()
+
+                # Validate timestamps are numeric
+                int(mm_start)
+                int(mm_end)
 
                 if p_context:
                     state = p_context.get('state', {})
@@ -902,7 +938,12 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 if p_context:
                     p_context['current_replica_entry'] = entry
                     if 'state' in p_context:
-                        p_context['state']['active_replica_entry'] = entry
+                        state = p_context['state']
+                        state['active_replica_entry'] = entry
+                        if state.get('active_editorial_comments'):
+                            entry['comments'] = [dict(c) for c in state['active_editorial_comments']]
+                            entry['comment'] = state['active_editorial_comments'][-1]['text']
+
                 transcript_map.append(entry)
 
                 html += f'<span class="transcript-line" id="{line_id}" data-start="{mm_start}" data-end="{mm_end}" data-speaker="{effective_speaker}">'
@@ -914,20 +955,51 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                     'data-speaker': effective_speaker
                 }})
             except ValueError:
-                logger.warning('Wrong Comment: %s', comment_text)
-                # Open a span to balance the </span> emitted on commentRangeEnd;
-                html += '<span class="comment">'
-                opened_tags.append({'name': 'span', 'attrs': {'class': 'comment'}})
+                # Non-timing author / editorial comment (e.g. "[Отсылка к моей переписке...]")
+                # Must be completely ignored for HTML and admin output, and retained only in masterfile metadata.
+                logger.info('Editorial/Non-timing Comment (id=%s): %s', comment_id_str, comment_text)
+                author = comment_elem.xpath('./@w:author')
+                author_str = author[0] if author else ''
+                date_attr = comment_elem.xpath('./@w:date')
+                date_str = date_attr[0] if date_attr else ''
+                p_idx = p_context.get('p_index') if p_context else None
+                comment_info = {
+                    'id': comment_id_str,
+                    'author': author_str,
+                    'date': date_str,
+                    'text': comment_text,
+                    'p_index': p_idx,
+                }
+                if p_context and 'state' in p_context:
+                    state = p_context['state']
+                    state.setdefault('ignored_comment_ids', set()).add(comment_id_str)
+                    state.setdefault('editorial_comments', []).append(comment_info)
+                    state.setdefault('active_editorial_comments', []).append(comment_info)
+                    active_replica = state.get('active_replica_entry')
+                    if active_replica is not None:
+                        active_replica.setdefault('comments', []).append(comment_info)
+                        active_replica['comment'] = comment_text
         elif sub_name == 'w:commentRangeEnd':
-            if p_context:
-                p_context['current_replica_entry'] = None
-                if 'state' in p_context:
-                    p_context['state']['active_replica_entry'] = None
-            html += '</span>'
-            if opened_tags and opened_tags[-1]['name'] == 'span':
-                opened_tags.pop(-1)
-            else:
-                logger.warning('CAN NOT CLOSE: SPAN')
+            comment_id_str = sub.xpath('./@w:id')[0]
+            is_ignored = False
+            if p_context and 'state' in p_context:
+                state = p_context['state']
+                if comment_id_str in state.get('ignored_comment_ids', set()):
+                    state['ignored_comment_ids'].discard(comment_id_str)
+                    is_ignored = True
+                    active_ed = state.get('active_editorial_comments', [])
+                    state['active_editorial_comments'] = [c for c in active_ed if c.get('id') != comment_id_str]
+
+            if not is_ignored:
+                if p_context:
+                    p_context['current_replica_entry'] = None
+                    if 'state' in p_context:
+                        p_context['state']['active_replica_entry'] = None
+                html += '</span>'
+                if opened_tags and opened_tags[-1]['name'] == 'span':
+                    opened_tags.pop(-1)
+                else:
+                    logger.warning('CAN NOT CLOSE: SPAN')
         elif sub_name == 'w:br':
             html += '<br/>'
         elif sub_name == 'w:instrText':
