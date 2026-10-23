@@ -1,5 +1,5 @@
 $(
-    function () {
+    function (force=false) {
         // Track the last sent height to prevent feedback loops
         let lastSentHeight = 0;
 
@@ -16,7 +16,7 @@ $(
 
             // Only send message if height actually changed by more than 5px
             // This prevents minor fluctuations from causing messages
-            if (Math.abs(height - lastSentHeight) > 5) {
+            if (Math.abs(force || height - lastSentHeight) > 5) {
                 lastSentHeight = height;
 
                 // Send the height to the parent
@@ -76,6 +76,6 @@ $(
         });
 
         // Periodically check and send height as a fallback
-        setInterval(sendHeight, 500);
+        setInterval(sendHeight, 1000, [true]);
     }
 );
