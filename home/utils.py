@@ -593,7 +593,8 @@ def docx_parse_document(document, strict=False):
         'active_replica_entry': None,
         'callout_sticky_until': None,
         'sticky_materials': [],
-        'ignored_comment_ids': set(),
+        'timing_comment_ids': set(),
+        'editorial_comment_ids': set(),
         'editorial_comments': [],
         'active_editorial_comments': [],
     }
@@ -664,7 +665,8 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
             'active_replica_entry': None,
             'callout_sticky_until': None,
             'sticky_materials': [],
-            'ignored_comment_ids': set(),
+            'timing_comment_ids': set(),
+            'editorial_comment_ids': set(),
             'editorial_comments': [],
             'active_editorial_comments': [],
         }
@@ -982,6 +984,7 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                     p_context['current_replica_entry'] = entry
                     if 'state' in p_context:
                         state = p_context['state']
+                        state.setdefault('timing_comment_ids', set()).add(comment_id_str)
                         state['active_replica_entry'] = entry
                         if state.get('active_editorial_comments'):
                             entry['comments'] = [dict(c) for c in state['active_editorial_comments']]
@@ -990,55 +993,84 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 transcript_map.append(entry)
 
                 html += f'<span class="transcript-line" id="{line_id}" data-start="{mm_start}" data-end="{mm_end}" data-speaker="{effective_speaker}">'
-                opened_tags.append({'name':'span', 'attrs':{
-                    'class':'transcript-line',
-                    'id':line_id,
-                    'data-start': mm_start,
-                    'data-end': mm_end,
-                    'data-speaker': effective_speaker
-                }})
+                opened_tags.append({
+                    'name': 'span',
+                    'attrs': {
+                        'class': 'transcript-line',
+                        'id': line_id,
+                        'data-start': mm_start,
+                        'data-end': mm_end,
+                        'data-speaker': effective_speaker
+                    },
+                    'comment_id': comment_id_str,
+                })
             except ValueError:
-                # Non-timing author / editorial comment (e.g. "[Отсылка к моей переписке...]")
-                # Must be completely ignored for HTML and admin output, and retained only in masterfile metadata.
-                logger.info('Editorial/Non-timing Comment (id=%s): %s', comment_id_str, comment_text)
+                # Non-timing comment -> wrap in <span class="arnaud-comment" ...>
                 author = comment_elem.xpath('./@w:author')
                 author_str = author[0] if author else ''
                 date_attr = comment_elem.xpath('./@w:date')
                 date_str = date_attr[0] if date_attr else ''
                 p_idx = p_context.get('p_index') if p_context else None
+                clean_text = comment_text.strip()
                 comment_info = {
                     'id': comment_id_str,
                     'author': author_str,
                     'date': date_str,
-                    'text': comment_text,
+                    'text': clean_text,
                     'p_index': p_idx,
                 }
                 if p_context and 'state' in p_context:
                     state = p_context['state']
-                    state.setdefault('ignored_comment_ids', set()).add(comment_id_str)
+                    state.setdefault('editorial_comment_ids', set()).add(comment_id_str)
                     state.setdefault('editorial_comments', []).append(comment_info)
                     state.setdefault('active_editorial_comments', []).append(comment_info)
                     active_replica = state.get('active_replica_entry')
                     if active_replica is not None:
                         active_replica.setdefault('comments', []).append(comment_info)
-                        active_replica['comment'] = comment_text
+                        active_replica['comment'] = clean_text
+
+                escaped_content = html_escape(clean_text, quote=True)
+                html += (
+                    '<span class="arnaud-comment" data-container="body"'
+                    f' data-content="{escaped_content}" data-placement="top"'
+                    ' data-toggle="popover">'
+                )
+                opened_tags.append({
+                    'name': 'span',
+                    'attrs': {
+                        'class': 'arnaud-comment',
+                        'data-container': 'body',
+                        'data-content': escaped_content,
+                        'data-placement': 'top',
+                        'data-toggle': 'popover',
+                    },
+                    'comment_id': comment_id_str,
+                })
         elif sub_name == 'w:commentRangeEnd':
             comment_id_str = sub.xpath('./@w:id')[0]
-            is_ignored = False
+            is_timing = True
             if p_context and 'state' in p_context:
                 state = p_context['state']
-                if comment_id_str in state.get('ignored_comment_ids', set()):
-                    state['ignored_comment_ids'].discard(comment_id_str)
-                    is_ignored = True
+                if comment_id_str in state.get('timing_comment_ids', set()):
+                    state['timing_comment_ids'].discard(comment_id_str)
+                    is_timing = True
+                elif comment_id_str in state.get('editorial_comment_ids', set()):
+                    state['editorial_comment_ids'].discard(comment_id_str)
+                    is_timing = False
                     active_ed = state.get('active_editorial_comments', [])
                     state['active_editorial_comments'] = [c for c in active_ed if c.get('id') != comment_id_str]
 
-            if not is_ignored:
-                if p_context:
-                    p_context['current_replica_entry'] = None
-                    if 'state' in p_context:
-                        p_context['state']['active_replica_entry'] = None
-                html += '</span>'
+            if is_timing and p_context:
+                p_context['current_replica_entry'] = None
+                if 'state' in p_context:
+                    p_context['state']['active_replica_entry'] = None
+
+            html += '</span>'
+            for idx in range(len(opened_tags) - 1, -1, -1):
+                if opened_tags[idx].get('name') == 'span' and opened_tags[idx].get('comment_id') == comment_id_str:
+                    opened_tags.pop(idx)
+                    break
+            else:
                 if opened_tags and opened_tags[-1]['name'] == 'span':
                     opened_tags.pop(-1)
                 else:
