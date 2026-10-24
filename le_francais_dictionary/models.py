@@ -113,16 +113,50 @@ class Packet(models.Model):
         if self.cross_site_id:
             try:
                 with connections['courses'].cursor() as cursor:
-                    cursor.execute("""
-                        SELECT flash_cards_table.remote_id
-                        FROM flash_cards_table 
-                        JOIN courses_lecturepage ON courses_lecturepage.flashcards_id = flash_cards_table.id
-                        LEFT JOIN courses_boughtlecture ON courses_boughtlecture.lecture_id = courses_lecturepage.page_ptr_id
-                        LEFT JOIN courses_userprofile ON courses_boughtlecture.user_profile_id = courses_userprofile.user_id
-                        LEFT JOIN courses_user_user ON courses_userprofile.user_id = courses_user_user.id
-                        WHERE courses_lecturepage.for_free OR (courses_user_user.le_francais_id = %s AND flash_cards_table.remote_id = %s)
-                        LIMIT 1;
-                    """, [user.pk, self.cross_site_id])
+                    cursor.execute("""SELECT flash_cards_table.remote_id
+                                      FROM flash_cards_table
+         JOIN courses_lecturepage ON (
+    courses_lecturepage.flashcards_id = flash_cards_table.id
+        OR EXISTS (SELECT 1
+                   FROM wagtailcore_referenceindex ri
+                            JOIN django_content_type ct_lec ON ct_lec.id = ri.content_type_id
+                       AND ct_lec.app_label = 'courses' AND ct_lec.model = 'lecturepage'
+                            JOIN django_content_type ct_tab ON ct_tab.id = ri.to_content_type_id
+                       AND ct_tab.app_label = 'flash_cards' AND ct_tab.model = 'table'
+                   WHERE ri.object_id = courses_lecturepage.page_ptr_id::text
+                     AND ri.to_object_id = flash_cards_table.id::text)
+    )
+    -- Unit hierarchy (parent page in Wagtail path)
+         JOIN wagtailcore_page AS lecture_page ON lecture_page.id = courses_lecturepage.page_ptr_id
+         JOIN wagtailcore_page AS unit_page ON unit_page.path = SUBSTRING(lecture_page.path FROM 1 FOR 20)
+         JOIN courses_unitpage ON courses_unitpage.page_ptr_id = unit_page.id
+         LEFT JOIN courses_user_user ON courses_user_user.le_francais_id = %s
+    -- Individual lecture purchase
+         LEFT JOIN courses_boughtlecture ON (
+    courses_boughtlecture.lecture_id = courses_lecturepage.page_ptr_id
+        AND courses_boughtlecture.user_profile_id = courses_user_user.id
+    )
+    -- Unit purchase
+         LEFT JOIN courses_boughtunit ON (
+    courses_boughtunit.unit_id = unit_page.id
+        AND courses_boughtunit.user_profile_id = courses_user_user.id
+    )
+    -- Partner group permissions
+         LEFT JOIN courses_user_user_groups ON courses_user_user_groups.user_id = courses_user_user.id
+         LEFT JOIN wagtailcore_grouppagepermission ON (
+    wagtailcore_grouppagepermission.group_id = courses_user_user_groups.group_id
+        AND wagtailcore_grouppagepermission.page_id = flash_cards_table.partner_id
+    )
+WHERE flash_cards_table.remote_id = %s
+  AND (
+    courses_lecturepage.for_free
+        OR courses_unitpage.price = 0
+        OR courses_boughtlecture.id IS NOT NULL
+        OR courses_boughtunit.id IS NOT NULL
+        OR wagtailcore_grouppagepermission.id IS NOT NULL
+        OR courses_user_user.is_superuser
+    )
+                                      LIMIT 1;""", [user.pk, self.cross_site_id])
                     result = cursor.fetchone()
                     if result:
                         return True
