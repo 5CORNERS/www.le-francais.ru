@@ -881,6 +881,7 @@
                         scrollToLine($(this));
                     }
                 }
+                requestUpdateStickyMaterials();
             }
         });
 
@@ -901,6 +902,7 @@
                 }
             }
             a.currentTime = startSec;
+            requestUpdateStickyMaterials();
             const p = a.play();
             if (p && p.catch) p.catch(function () {});
         });
@@ -1069,6 +1071,71 @@
         });
 
         // --- Sticky Educational Materials Controller ---
+        function hasActiveLineReachedOrPassedAnchor($active, $anchor) {
+            if (!$active || !$active.length || !$anchor || !$anchor.length) return false;
+            const activeEl = $active[0];
+            const anchorEl = $anchor[0];
+            if (activeEl === anchorEl) return true;
+
+            // DOM tree order comparison
+            try {
+                const position = anchorEl.compareDocumentPosition(activeEl);
+                if (position & (Node.DOCUMENT_POSITION_FOLLOWING | Node.DOCUMENT_POSITION_CONTAINED_BY | Node.DOCUMENT_POSITION_CONTAINS)) {
+                    return true;
+                }
+            } catch (err) {}
+
+            // Document vertical coordinate fallback
+            const activeTop = getElementDocTop($active);
+            const anchorTop = getElementDocTop($anchor);
+            if (activeTop >= (anchorTop - 4)) {
+                return true;
+            }
+
+            return false;
+        }
+
+        function findLastLineBefore($anchor) {
+            if (!$anchor || !$anchor.length) return null;
+            const anchorEl = $anchor[0];
+            const $lines = $('#playerPlus .transcript-line');
+            let $lastLine = null;
+            for (let i = 0; i < $lines.length; i++) {
+                const lineEl = $lines[i];
+                try {
+                    const pos = anchorEl.compareDocumentPosition(lineEl);
+                    if (pos & Node.DOCUMENT_POSITION_PRECEDING) {
+                        $lastLine = $($lines[i]);
+                    } else {
+                        break;
+                    }
+                } catch (e) {
+                    break;
+                }
+            }
+            return $lastLine;
+        }
+
+        function getPushTriggerDocTop(item) {
+            if (item.$lastLine && item.$lastLine.length) {
+                const lineTop = getElementDocTop(item.$lastLine);
+                const lineH = item.$lastLine.outerHeight() || 24;
+                return lineTop + lineH;
+            }
+            if (item.$anchor && item.$anchor.length) {
+                const $block = item.$anchor.closest('h1, h2, h3, h4, h5, h6, p, div, blockquote, ul, ol');
+                const $prevBlock = $block.length ? $block.prev() : null;
+                if ($prevBlock && $prevBlock.length && !$prevBlock.is('body, html, #playerPlus')) {
+                    const prevTop = getElementDocTop($prevBlock);
+                    const prevH = $prevBlock.outerHeight() || 24;
+                    return prevTop + prevH;
+                }
+                const aTop = getElementDocTop(item.$anchor);
+                return Math.max(0, aTop - 30);
+            }
+            return 0;
+        }
+
         function getElementDocTop($el) {
             if (!$el || !$el.length) return 0;
             const el = $el[0];
@@ -1227,6 +1294,7 @@
 
                 const $img = $el.find('img').first();
                 const isImageWrapper = $img.length > 0 && !$el.hasClass('bs-callout');
+                const $lastLine = findLastLineBefore($(anchorEl));
 
                 stickyMaterials.push({
                     id: 'sticky_mat_' + idx,
@@ -1234,11 +1302,13 @@
                     $placeholder: $placeholder,
                     anchorId: anchorId,
                     $anchor: $(anchorEl),
+                    $lastLine: $lastLine,
                     originalStyle: origStyle,
                     isImageWrapper: isImageWrapper,
                     isPinned: false,
                     isDismissed: false,
                     isExpanded: false,
+                    unpinnedByPlayback: false,
                     currentTop: 0,
                     currentLeft: 0,
                     currentWidth: 0,
@@ -1450,6 +1520,10 @@
             if (!stickyMaterials.length) return;
 
             const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+            const a = getAudio();
+            const isAudioPlaying = !!(a && !a.paused && !a.ended);
+            const isAutonomousPlayback = isAudioPlaying && isAutoScrollEnabled && !isAutoscrollPausedByManualScroll && !isUserInteracting;
+            const $active = (isAutonomousPlayback && activeLineId) ? $('#' + activeLineId) : null;
             const pinTop = getStickyPinTop();
 
             let activeCandidate = null;
@@ -1473,9 +1547,16 @@
                     continue;
                 }
 
-                // If user scrolled back up above the item's natural top position, clear dismissed state
-                if (item.isDismissed && scrollY < (origTop - pinTop - 40)) {
+                // Push-up trigger boundary: bottom of the last line belonging to this topic
+                let pushTop = getPushTriggerDocTop(item);
+                if (pushTop <= (origTop + 10)) {
+                    pushTop = anchorTop;
+                }
+
+                // If user scrolled back up above the item's natural top position, clear dismissed state & unpinned
+                if (scrollY < (origTop - pinTop - 40)) {
                     item.isDismissed = false;
+                    item.unpinnedByPlayback = false;
                 }
 
                 if (item.isDismissed) {
@@ -1495,14 +1576,42 @@
                     currentH = Math.max(targetH, Math.min(natH, distanceToText));
                 }
 
-                const pinStart = origTop - pinTop;
-                const releaseEnd = anchorTop - pinTop;
+                // If user scrolled back up into this topic area, allow card to be pinned again
+                if (scrollY < (pushTop - pinTop - currentH)) {
+                    item.unpinnedByPlayback = false;
+                }
 
-                if (scrollY >= pinStart && scrollY < releaseEnd) {
+                const pinStart = origTop - pinTop;
+                const releaseEnd = pushTop - pinTop;
+
+                // Mode 2: Autonomous Playback check
+                if (isAutonomousPlayback && $active && $active.length) {
+                    const hasPassedAnchor = hasActiveLineReachedOrPassedAnchor($active, item.$anchor);
+                    if (hasPassedAnchor) {
+                        item.unpinnedByPlayback = true;
+                    } else {
+                        // If active playback line is within this topic, reset unpinned flag
+                        item.unpinnedByPlayback = false;
+                    }
+                }
+
+                // Eligibility check: within scroll range [pinStart, releaseEnd) and not unpinned by playback
+                if (scrollY >= pinStart && scrollY < releaseEnd && !item.unpinnedByPlayback) {
                     activeCandidate = item;
-                    candidateTop = pinTop;
+
+                    // Mode 1: Push-up physics by last line of topic
+                    // When the last line of the topic approaches the bottom of the card, the card pushes up with the page
+                    const distanceToTrigger = pushTop - scrollY;
+                    if (distanceToTrigger < (pinTop + currentH)) {
+                        candidateTop = Math.round(distanceToTrigger - currentH);
+                    } else {
+                        candidateTop = pinTop;
+                    }
+
                     candidateHeight = currentH;
-                    if (!item.isPinned && scrollY > (pinStart + 40)) {
+
+                    // Only animate gentle fade/float from below if entering at full resting height
+                    if (!item.isPinned && scrollY > (pinStart + 40) && candidateTop >= pinTop) {
                         enteringFromBelow = true;
                     }
                 }
@@ -1512,8 +1621,11 @@
                 const it = stickyMaterials[j];
                 if (it !== activeCandidate && it.isPinned) {
                     const itOrigTop = it.$placeholder ? getElementDocTop(it.$placeholder) : 0;
-                    // If scrolled above original spot, immediately dock into flow; if past anchor, dissolve smoothly
-                    const immediateUnpin = scrollY < (itOrigTop - pinTop);
+                    // Scrolled above original flow spot: dock immediately
+                    const scrolledAbove = scrollY < (itOrigTop - pinTop);
+                    // Pushed completely above pinTop behind the dock: clean up immediately
+                    const scrolledCompletelyPast = (it.currentTop + (it.pinnedHeight || it.naturalHeight)) <= pinTop;
+                    const immediateUnpin = scrolledAbove || scrolledCompletelyPast;
                     unpinItem(it, immediateUnpin);
                 }
             }
