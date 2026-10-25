@@ -2,6 +2,9 @@
 
 This document serves as the primary system context for **Antigravity CLI (`agy`)** and other autonomous developer agents working in the `le-francais` repository. Read this file completely before inspecting files or making changes.
 
+> [!IMPORTANT]
+> **Superpowers Workflow:** Always use `superpowers` skills when starting a new task. Never jump immediately into implementing after a user asks for something—explore intent, plan, and verify before writing code.
+
 ---
 
 ## 1. Core Metadata & Production Architecture
@@ -178,3 +181,12 @@ tools\bin\micromamba.exe run -p tools\env python forum_editor_src/scripts/parity
    * Never hand-edit `home/static/js/forum-editor.js`; change `forum_editor_src/src/`, run `npm run build`, commit source + bundle + `.map` together.
    * Do not add `?v=` query strings to `{% static %}` tags — `CompressedManifestStaticFilesStorage` hashes file names at `collectstatic`. Locally (`DEBUG`), hard-reload the page to pick up a rebuilt bundle.
    * Rollback to the legacy editor: env `FORUM_EDITOR_LEGACY=True` (also `true`/`1`/`yes`) or `?editor=legacy` on a page URL.
+
+---
+
+## 6. Task Execution & Superpowers Directives
+
+* **Always Use Superpowers Skills:** When starting any new task, always invoke and follow the relevant `superpowers` skills (e.g., `using-superpowers`, `brainstorming`, `writing-plans`, `systematic-debugging`, `test-driven-development`).
+* **Never Jump Immediately to Implementation:** Never immediately jump into implementing code or modifying files after a user asks for something. Always take the necessary prerequisite steps first: explore user intent and requirements (`brainstorming`), establish an implementation plan (`writing-plans`), or diagnose root causes (`systematic-debugging`) before writing code.
+* **Prefer Internal Tools for Reading & Searching:** Always prefer internal agent tools (`read_file`, codebase search tools, or IDE/MCP tools) to inspect, read, and search files. Do not use terminal shell commands (e.g. `Get-Content`, `cat`, `type`, `Select-String`, `grep`, `findstr`) or ad-hoc scripts to read or search codebase files.
+* **Prefer Internal Tools for File Modifications:** Always prefer internal agent editing tools (`edit_file`, `write_file`, or IDE/MCP editing tools) to create and modify files. Never modify files through terminal commands or ad-hoc scripts (e.g. `Set-Content`, `Out-File`, shell redirects, `sed`, or one-off python file modifiers) unless it is a massive change that needs to cover multiple places simultaneously.
