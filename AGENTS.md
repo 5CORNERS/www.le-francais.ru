@@ -171,6 +171,9 @@ tools\bin\micromamba.exe run -p tools\env python forum_editor_src/scripts/parity
    * **Target branch is `render`.**
    * Never stage or commit changes without explicit instructions from the user.
    * Never use `git add .` or `git add -A`. Only stage the specific modified or created files.
+   * **Always check the remote before starting work:** run `git fetch origin`, then check whether the current branch has already been merged into `render`. Use `gh pr list --head <current-branch> --state all` together with `git log --oneline origin/render..HEAD`; `git branch -r --merged origin/render` alone misses squash merges.
+   * The branch counts as merged when its latest PR is merged and it has no open PR. Commits that are already in `render` don't count as new work. A branch with an open PR is still active, so keep working on it.
+   * **If the current branch is already merged, do not continue on it.** Start a new branch from the latest `render` (`git switch -c <new-branch> origin/render`). Uncommitted changes in the working tree carry over to the new branch.
 
 6. **Forum Post Editor:**
    * Read **`forum_editor_src/README.md`** before changing the editor, the post form (`home/templates/pybb/post_form.html`) or forum Markdown rendering (`forum/markup_engines.py`).
