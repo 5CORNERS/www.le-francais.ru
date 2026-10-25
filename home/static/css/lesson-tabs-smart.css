@@ -1030,14 +1030,14 @@
 
 [data-sticky-until].is-sticky-pinned.is-sticky-entering,
 [data-sticky-until].is-sticky-pinned.is-sticky-leaving {
-    opacity: 0 !important;
-    transform: translateY(-24px) !important;
-    filter: blur(8px) !important;
-    pointer-events: none !important;
+    opacity: 0;
+    transform: translateY(-24px);
+    filter: blur(8px);
+    pointer-events: none;
 }
 
 [data-sticky-until].is-sticky-pinned.has-scrollbar {
-    overflow-y: auto !important;
+    overflow-y: auto;
 }
 
 [data-sticky-until].is-sticky-pinned::-webkit-scrollbar {
@@ -1061,25 +1061,24 @@
     background-color: #ffffff;
     border: 1px solid #dee2e6;
     border-radius: 6px;
-    padding: 8px !important;
-    box-sizing: border-box !important;
+    padding: 8px;
 }
 
 #playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout) p {
-    margin: 0 !important;
-    padding: 0 !important;
-    line-height: 0 !important;
-    font-size: 0 !important;
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+    font-size: 0;
 }
 
 #playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout) img {
-    display: block !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
+    display: block;
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+    height: auto;
     border-radius: 4px;
-    vertical-align: bottom !important;
+    vertical-align: bottom;
 }
 
 .bs-callout[data-sticky-until].is-sticky-pinned {
@@ -1122,9 +1121,9 @@
 }
 
 .sticky-material-controls.is-leaving {
-    opacity: 0 !important;
-    transform: translateY(-16px) !important;
-    pointer-events: none !important;
+    opacity: 0;
+    transform: translateY(-16px);
+    pointer-events: none;
 }
 
 .sticky-material-ctrl-btn {

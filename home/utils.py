@@ -564,6 +564,49 @@ def _close_open_block(html, open_block):
     return html, None
 
 
+def _render_open_tag(tag, keep_id=True):
+    attrs = "".join(f' {attr}="{value}"' for attr, value in tag['attrs'].items()
+                    if keep_id or attr != 'id')
+    return f'<{tag["name"]}{attrs}>'
+
+
+def _close_comment_span(opened_tags, comment_id):
+    """Close the span opened for a Word comment range, keeping overlapping ranges well nested.
+
+    Spans opened after the target are closed and reopened around it (without ``id`` to avoid
+    duplicates). An editorial span that would split a transcript line is closed later instead,
+    together with the innermost span that closes after it.
+    """
+    for idx in range(len(opened_tags) - 1, -1, -1):
+        tag = opened_tags[idx]
+        if tag.get('name') != 'span' or tag.get('comment_id') != comment_id:
+            continue
+        inner = opened_tags[idx + 1:]
+        if not inner:
+            opened_tags.pop()
+            return '</span>' + _close_pending_spans(opened_tags)
+        is_editorial = tag['attrs'].get('class') == 'arnaud-comment'
+        if is_editorial and any(t['attrs'].get('class') == 'transcript-line' for t in inner):
+            tag['pending_close'] = True
+            return ''
+        del opened_tags[idx:]
+        opened_tags.extend(inner)
+        return (''.join(f'</{t["name"]}>' for t in reversed(inner)) + '</span>'
+                + ''.join(_render_open_tag(t, keep_id=False) for t in inner))
+    if opened_tags and opened_tags[-1]['name'] == 'span':
+        opened_tags.pop()
+    else:
+        logger.warning('CAN NOT CLOSE: SPAN')
+    return '</span>' + _close_pending_spans(opened_tags)
+
+
+def _close_pending_spans(opened_tags):
+    html = ''
+    while opened_tags and opened_tags[-1].get('pending_close'):
+        html += f'</{opened_tags.pop()["name"]}>'
+    return html
+
+
 def docx_parse_document(document, strict=False):
     """Convert a transcript docx into (html, lines_map).
 
@@ -634,14 +677,25 @@ def docx_parse_document(document, strict=False):
                   '<img title="\g<1>" src="\g<2>" alt="\g<3>">', html)
     def _replace_html_block(match):
         sticky_anchor = match.group(1)
-        html_block = unescape(match.group(2))
-        # Strip all soft line-break <br/> tags between HTML tags to prevent browser foster parenting
-        # (e.g. <table><br/>, <tr><br/>, <br/><div>, etc.), while preserving inline <br> within cell text
+        # Editorial comment spans are real markup emitted by the parser (with escaped attributes):
+        # hide them from unescape() and from the sticky container lookup, restore them at the end
+        comment_spans = []
+
+        def _stash_comment_span(m):
+            comment_spans.append(m.group(0))
+            return f'\x00{len(comment_spans) - 1}\x00'
+
+        html_block = re.sub(r'<span class="arnaud-comment"[^>]*>', _stash_comment_span, match.group(2))
+        html_block = unescape(html_block)
+        # Strip soft line-break <br/> tags next to structural tags to prevent browser foster parenting
+        # (e.g. <table><br/>, <tr><br/>, <br/><div>, etc.), while preserving inline <br> within text
+        structural = (r'</?(?:table|thead|tbody|tfoot|tr|td|th|caption|colgroup|col|div|section|'
+                      r'ul|ol|li|p|h[1-6]|blockquote|style|script)\b[^>]*>')
         prev_h = None
         while prev_h != html_block:
             prev_h = html_block
-            html_block = re.sub(r'(>)\s*<br\s*/?>', r'\1', html_block)
-            html_block = re.sub(r'<br\s*/?>\s*(<)', r'\1', html_block)
+            html_block = re.sub(r'(' + structural + r')\s*<br\s*/?>', r'\1', html_block, flags=re.IGNORECASE)
+            html_block = re.sub(r'<br\s*/?>\s*(' + structural + r')', r'\1', html_block, flags=re.IGNORECASE)
 
         if sticky_anchor:
             tag_match = re.search(r'<(?!style\b|script\b)([a-zA-Z][\w:-]*)([^>]*)>', html_block, re.IGNORECASE)
@@ -650,7 +704,7 @@ def docx_parse_document(document, strict=False):
                 html_block = html_block[:tag_end] + f' data-sticky-until="{sticky_anchor}"' + html_block[tag_end:]
             else:
                 html_block = f'<div data-sticky-until="{sticky_anchor}">{html_block}</div>'
-        return html_block
+        return re.sub('\x00(\\d+)\x00', lambda m: comment_spans[int(m.group(1))], html_block)
 
     html = re.sub(r'<p>\[HTML(?:\s+data-sticky-until="([^"]+)")?\](.*?)\[/HTML\]</p>', _replace_html_block, html, flags=re.DOTALL)
     html = text_postprocessor(html)
@@ -699,8 +753,7 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
     opening_tags_html = ''
     if opened_tags:
         for tag in opened_tags:
-            attrs = "".join((f' {attr}="{value}"' for attr, value in tag['attrs'].items()))
-            opening_tags_html += f'<{tag["name"]}{attrs}>'
+            opening_tags_html += _render_open_tag(tag)
 
     p_html, p_map, opened_tags = xml_parse_through_element(
         document, runs_iterator, paragraph._element, p_html, p_map, opened_tags,
@@ -1079,16 +1132,7 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 if 'state' in p_context:
                     p_context['state']['active_replica_entry'] = None
 
-            html += '</span>'
-            for idx in range(len(opened_tags) - 1, -1, -1):
-                if opened_tags[idx].get('name') == 'span' and opened_tags[idx].get('comment_id') == comment_id_str:
-                    opened_tags.pop(idx)
-                    break
-            else:
-                if opened_tags and opened_tags[-1]['name'] == 'span':
-                    opened_tags.pop(-1)
-                else:
-                    logger.warning('CAN NOT CLOSE: SPAN')
+            html += _close_comment_span(opened_tags, comment_id_str)
         elif sub_name == 'w:br':
             html += '<br/>'
         elif sub_name == 'w:instrText':

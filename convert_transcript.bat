@@ -5,7 +5,7 @@ set MAMBA_ROOT_PREFIX=%~dp0tools\mamba_root
 
 if "%1"=="" goto usage
 
-"%~dp0tools\bin\micromamba.exe" run -p "%~dp0tools\env" python bin\convert_transcript.py %*
+"%~dp0tools\bin\micromamba.exe" run -p "%~dp0tools\env" python manage.py convert_transcript %*
 exit /b %ERRORLEVEL%
 
 :usage
@@ -16,7 +16,8 @@ echo =======================================================
 echo.
 echo  Usage:
 echo    convert_transcript.bat ^<lesson_number^> [--db]
-echo    convert_transcript.bat ^<path_to_docx^> [--db]
+echo    convert_transcript.bat ^<path_to_docx^> [^<output_prefix^>] [--db]
+echo    Options: --docx-dir ^<folder^>  --output-dir ^<folder^>
 echo.
 echo  Or drag and drop your .docx file onto convert_transcript.bat!
 echo.
