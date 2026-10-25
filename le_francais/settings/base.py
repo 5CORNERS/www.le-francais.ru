@@ -578,7 +578,10 @@ LOGGING = {
         'skip_static_requests': {
             '()': 'django.utils.log.CallbackFilter',
             'callback': skip_static_requests
-        }
+        },
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
     },
     'formatters': {
         # django's default formatter
@@ -595,8 +598,30 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'django.server',
         },
+        'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler',
+        },
     },
     'loggers': {
+        '': {
+            'handlers': [
+                'console',
+                'mail_admins'
+            ],
+            'level': 'DEBUG',
+            'propagate': False
+        },
+        'filelock': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
         # django's default logger
         'django.server': {
             'handlers': ['django.server'],
@@ -605,6 +630,10 @@ LOGGING = {
         },
     }
 }
+
+ADMINS = [
+    ('Anton Dumov', 'anton.dumov@gmail.com'),
+]
 
 # ReCaptcha V3 settings
 

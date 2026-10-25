@@ -10,7 +10,9 @@
             return;
         }
 
-        const transcriptMap = window.transcriptMap || [];
+        const transcriptMap = (typeof window.transcriptMap === 'string')
+            ? (function () { try { return JSON.parse(window.transcriptMap); } catch (e) { return []; } })()
+            : (window.transcriptMap || []);
         let chapters = [];
         let chaptersById = {};
         let currentDepth = 3;
@@ -879,6 +881,7 @@
                         scrollToLine($(this));
                     }
                 }
+                requestUpdateStickyMaterials();
             }
         });
 
@@ -899,6 +902,7 @@
                 }
             }
             a.currentTime = startSec;
+            requestUpdateStickyMaterials();
             const p = a.play();
             if (p && p.catch) p.catch(function () {});
         });
@@ -1067,6 +1071,71 @@
         });
 
         // --- Sticky Educational Materials Controller ---
+        function hasActiveLineReachedOrPassedAnchor($active, $anchor) {
+            if (!$active || !$active.length || !$anchor || !$anchor.length) return false;
+            const activeEl = $active[0];
+            const anchorEl = $anchor[0];
+            if (activeEl === anchorEl) return true;
+
+            // DOM tree order comparison
+            try {
+                const position = anchorEl.compareDocumentPosition(activeEl);
+                if (position & (Node.DOCUMENT_POSITION_FOLLOWING | Node.DOCUMENT_POSITION_CONTAINED_BY | Node.DOCUMENT_POSITION_CONTAINS)) {
+                    return true;
+                }
+            } catch (err) {}
+
+            // Document vertical coordinate fallback
+            const activeTop = getElementDocTop($active);
+            const anchorTop = getElementDocTop($anchor);
+            if (activeTop >= (anchorTop - 4)) {
+                return true;
+            }
+
+            return false;
+        }
+
+        function findLastLineBefore($anchor) {
+            if (!$anchor || !$anchor.length) return null;
+            const anchorEl = $anchor[0];
+            const $lines = $('#playerPlus .transcript-line');
+            let $lastLine = null;
+            for (let i = 0; i < $lines.length; i++) {
+                const lineEl = $lines[i];
+                try {
+                    const pos = anchorEl.compareDocumentPosition(lineEl);
+                    if (pos & Node.DOCUMENT_POSITION_PRECEDING) {
+                        $lastLine = $($lines[i]);
+                    } else {
+                        break;
+                    }
+                } catch (e) {
+                    break;
+                }
+            }
+            return $lastLine;
+        }
+
+        function getPushTriggerDocTop(item) {
+            if (item.$lastLine && item.$lastLine.length) {
+                const lineTop = getElementDocTop(item.$lastLine);
+                const lineH = item.$lastLine.outerHeight() || 24;
+                return lineTop + lineH;
+            }
+            if (item.$anchor && item.$anchor.length) {
+                const $block = item.$anchor.closest('h1, h2, h3, h4, h5, h6, p, div, blockquote, ul, ol');
+                const $prevBlock = $block.length ? $block.prev() : null;
+                if ($prevBlock && $prevBlock.length && !$prevBlock.is('body, html, #playerPlus')) {
+                    const prevTop = getElementDocTop($prevBlock);
+                    const prevH = $prevBlock.outerHeight() || 24;
+                    return prevTop + prevH;
+                }
+                const aTop = getElementDocTop(item.$anchor);
+                return Math.max(0, aTop - 30);
+            }
+            return 0;
+        }
+
         function getElementDocTop($el) {
             if (!$el || !$el.length) return 0;
             const el = $el[0];
@@ -1089,8 +1158,10 @@
         }
 
         function getMaxPinnedHeight() {
-            const vh = window.innerHeight || document.documentElement.clientHeight || 600;
-            return isMobileDevice() ? Math.min(260, Math.round(vh * 0.38)) : Math.min(340, Math.round(vh * 0.40));
+            const vh = window.innerHeight || document.documentElement.clientHeight || 700;
+            const pinTop = getStickyPinTop();
+            // Allow card to occupy full available vertical viewport space minus 24px bottom buffer
+            return Math.max(200, Math.round(vh - pinTop - 24));
         }
 
         function getStickyControls() {
@@ -1156,18 +1227,17 @@
             if (!item || !item.isPinned) return;
             const $ctrl = getStickyControls();
             const $el = item.$el;
-            const elH = activeHeight !== undefined ? activeHeight : $el.outerHeight();
+            const elH = (item.pinnedIsTruncated && activeHeight !== undefined) ? activeHeight : $el.outerHeight();
             const topY = item.currentTop;
-            const pOffset = item.$placeholder.offset();
-            const pLeft = pOffset.left - (window.pageXOffset || document.documentElement.scrollLeft || 0);
-            const pWidth = $el.outerWidth();
+            const cardLeft = item.currentLeft || ($el.offset().left - (window.pageXOffset || document.documentElement.scrollLeft || 0));
+            const cardWidth = item.currentWidth || $el.outerWidth();
 
             const winW = window.innerWidth || document.documentElement.clientWidth || 360;
             const winH = window.innerHeight || document.documentElement.clientHeight || 600;
 
             const ctrlW = $ctrl.outerWidth() || 56;
             let btnTop = Math.round(topY + elH + 4);
-            let btnLeft = Math.round(pLeft + pWidth - ctrlW - 8);
+            let btnLeft = Math.round(cardLeft + cardWidth - ctrlW);
 
             btnLeft = Math.max(10, Math.min(winW - ctrlW - 12, btnLeft));
             if (btnTop > winH - 34) {
@@ -1222,30 +1292,71 @@
                     $el.before($placeholder);
                 }
 
+                const $img = $el.find('img').first();
+                const isImageWrapper = $img.length > 0 && !$el.hasClass('bs-callout');
+                const $lastLine = findLastLineBefore($(anchorEl));
+
                 stickyMaterials.push({
                     id: 'sticky_mat_' + idx,
                     $el: $el,
                     $placeholder: $placeholder,
                     anchorId: anchorId,
                     $anchor: $(anchorEl),
+                    $lastLine: $lastLine,
                     originalStyle: origStyle,
+                    isImageWrapper: isImageWrapper,
                     isPinned: false,
                     isDismissed: false,
                     isExpanded: false,
+                    unpinnedByPlayback: false,
                     currentTop: 0,
+                    currentLeft: 0,
+                    currentWidth: 0,
                     naturalHeight: 0,
                     naturalWidth: 0,
                     naturalLeft: 0,
+                    imgWidth: 0,
+                    imgHeight: 0,
+                    imgRelLeft: 0,
                     pinnedHeight: 0
                 });
             });
         }
 
-        function unpinItem(item) {
+        function unpinItem(item, immediate) {
             if (!item || !item.isPinned) return;
+            if (item.isLeaving) return; // Exit transition already running; keep going
+
+            if (item.unpinTimer) {
+                clearTimeout(item.unpinTimer);
+                item.unpinTimer = null;
+            }
+
+            if (immediate) {
+                cleanupUnpinnedItem(item);
+                return;
+            }
+
+            // Animate exit: float up and blur/dissolve out over 350ms
+            item.isLeaving = true;
+            item.$el.addClass('is-sticky-leaving');
+            if ($stickyControls && currentPinnedItem === item) {
+                $stickyControls.addClass('is-leaving');
+            }
+
+            item.unpinTimer = setTimeout(function () {
+                cleanupUnpinnedItem(item);
+            }, 350);
+        }
+
+        function cleanupUnpinnedItem(item) {
             item.isPinned = false;
+            item.isLeaving = false;
             item.isExpanded = false;
-            item.$el.removeClass('is-sticky-pinned is-expanded');
+            item.currentLeft = 0;
+            item.currentWidth = 0;
+            item.unpinTimer = null;
+            item.$el.removeClass('is-sticky-pinned is-sticky-entering is-sticky-leaving has-scrollbar is-expanded');
             const origStyle = item.$el.data('original-inline-style');
             if (origStyle !== undefined && origStyle !== null && origStyle !== '') {
                 item.$el.attr('style', origStyle);
@@ -1255,17 +1366,30 @@
             if (item.$placeholder) {
                 item.$placeholder.hide();
             }
-            if ($stickyControls) {
-                $stickyControls.removeClass('is-visible');
+            if ($stickyControls && currentPinnedItem === item) {
+                $stickyControls.removeClass('is-visible is-leaving');
             }
             if (currentPinnedItem === item) {
                 currentPinnedItem = null;
             }
         }
 
-        function pinItem(item, topY, navH, activeHeight) {
+        function pinItem(item, topY, navH, activeHeight, enteringFromBelow) {
             const $placeholder = item.$placeholder;
             const $el = item.$el;
+
+            // If item was currently leaving, cancel exit and resume pinned state
+            if (item.unpinTimer) {
+                clearTimeout(item.unpinTimer);
+                item.unpinTimer = null;
+            }
+            if (item.isLeaving) {
+                item.isLeaving = false;
+                $el.removeClass('is-sticky-leaving');
+                if ($stickyControls) {
+                    $stickyControls.removeClass('is-leaving');
+                }
+            }
 
             if (!item.isPinned) {
                 // Measure natural dimensions in flow before detaching
@@ -1281,6 +1405,14 @@
                 item.naturalWidth = naturalWidth;
                 item.naturalLeft = elOffset.left;
 
+                if (item.isImageWrapper) {
+                    const $img = $el.find('img').first();
+                    item.imgWidth = $img.outerWidth();
+                    item.imgHeight = $img.outerHeight();
+                    // Measure exact relative horizontal offset of image within container in flow
+                    item.imgRelLeft = Math.max(0, $img.offset().left - elOffset.left);
+                }
+
                 $placeholder.css({
                     width: naturalWidth + 'px',
                     height: naturalHeight + 'px',
@@ -1291,30 +1423,76 @@
                 }).show();
 
                 item.isPinned = true;
-                $el.addClass('is-sticky-pinned');
-                $el.scrollTop(0);
+
+                if (enteringFromBelow) {
+                    $el.addClass('is-sticky-pinned is-sticky-entering');
+                    $el.scrollTop(0);
+                    // Force synchronous reflow so starting state is registered before transition
+                    void $el[0].offsetHeight;
+                    requestAnimFrame(function () {
+                        $el.removeClass('is-sticky-entering');
+                    });
+                } else {
+                    $el.addClass('is-sticky-pinned');
+                    $el.scrollTop(0);
+                }
             }
 
             const pOffset = $placeholder.offset();
-            let pLeft = pOffset.left - (window.pageXOffset || document.documentElement.scrollLeft || 0);
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft || 0;
+            const pLeft = pOffset.left - scrollLeft;
             const pWidth = $placeholder.outerWidth() || item.naturalWidth;
 
-            if (pLeft <= 0 && item.naturalLeft > 0) {
-                pLeft = item.naturalLeft - (window.pageXOffset || document.documentElement.scrollLeft || 0);
+            let targetLeft = pLeft;
+            let targetWidth = pWidth;
+
+            if (item.isImageWrapper && item.imgWidth > 0) {
+                // Keep image at its EXACT horizontal pixel position from the flow (pLeft + imgRelLeft).
+                // Card has 8px padding + 1px border on each side (total 18px).
+                // Placing card at (pLeft + imgRelLeft - 9) keeps the image at EXACTLY (pLeft + imgRelLeft).
+                // Zero horizontal movement whether image was left-aligned, centered, or indented!
+                targetWidth = item.imgWidth + 18;
+                targetLeft = pLeft + item.imgRelLeft - 9;
+            } else if (pLeft <= 0 && item.naturalLeft > 0) {
+                targetLeft = item.naturalLeft - scrollLeft;
             }
 
             item.currentTop = topY;
+            item.currentLeft = targetLeft;
+            item.currentWidth = targetWidth;
             item.pinnedHeight = activeHeight;
 
-            $el.css({
-                position: 'fixed',
-                top: Math.round(topY) + 'px',
-                left: Math.round(pLeft) + 'px',
-                width: Math.round(pWidth) + 'px',
-                height: Math.round(activeHeight) + 'px',
-                marginTop: 0,
-                marginBottom: 0
-            });
+            // Determine if card needs a scrollbar:
+            // Only if activeHeight is genuinely less than natural height (truncated/compressed)
+            const isTruncated = activeHeight < (item.naturalHeight - 4);
+            item.pinnedIsTruncated = isTruncated;
+            $el.toggleClass('has-scrollbar', isTruncated);
+
+            if (!isTruncated) {
+                $el.css({
+                    position: 'fixed',
+                    top: Math.round(topY) + 'px',
+                    left: Math.round(targetLeft) + 'px',
+                    width: Math.round(targetWidth) + 'px',
+                    maxWidth: '100%',
+                    height: 'auto',
+                    maxHeight: '', // Never clip bottom border/padding when card fits naturally!
+                    marginTop: 0,
+                    marginBottom: 0
+                });
+            } else {
+                $el.css({
+                    position: 'fixed',
+                    top: Math.round(topY) + 'px',
+                    left: Math.round(targetLeft) + 'px',
+                    width: Math.round(targetWidth) + 'px',
+                    maxWidth: '100%',
+                    height: Math.round(activeHeight) + 'px',
+                    maxHeight: '',
+                    marginTop: 0,
+                    marginBottom: 0
+                });
+            }
 
             currentPinnedItem = item;
             updateStickyControlsPosition(item, activeHeight);
@@ -1323,11 +1501,11 @@
         function updateStickyMaterials() {
             if (!isPlayerPlusActive() || !isStickyMaterialsEnabled) {
                 if (currentPinnedItem) {
-                    unpinItem(currentPinnedItem);
+                    unpinItem(currentPinnedItem, true);
                 }
                 for (let k = 0; k < stickyMaterials.length; k++) {
                     if (stickyMaterials[k].isPinned) {
-                        unpinItem(stickyMaterials[k]);
+                        unpinItem(stickyMaterials[k], true);
                     }
                 }
                 if ($stickyControls) {
@@ -1342,11 +1520,16 @@
             if (!stickyMaterials.length) return;
 
             const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+            const a = getAudio();
+            const isAudioPlaying = !!(a && !a.paused && !a.ended);
+            const isAutonomousPlayback = isAudioPlaying && isAutoScrollEnabled && !isAutoscrollPausedByManualScroll && !isUserInteracting;
+            const $active = (isAutonomousPlayback && activeLineId) ? $('#' + activeLineId) : null;
             const pinTop = getStickyPinTop();
 
             let activeCandidate = null;
             let candidateTop = pinTop;
             let candidateHeight = 0;
+            let enteringFromBelow = false;
 
             for (let i = 0; i < stickyMaterials.length; i++) {
                 const item = stickyMaterials[i];
@@ -1364,9 +1547,16 @@
                     continue;
                 }
 
-                // If user scrolled back up above the item's natural top position, clear dismissed state
-                if (item.isDismissed && scrollY < (origTop - pinTop - 40)) {
+                // Push-up trigger boundary: bottom of the last line belonging to this topic
+                let pushTop = getPushTriggerDocTop(item);
+                if (pushTop <= (origTop + 10)) {
+                    pushTop = anchorTop;
+                }
+
+                // If user scrolled back up above the item's natural top position, clear dismissed state & unpinned
+                if (scrollY < (origTop - pinTop - 40)) {
                     item.isDismissed = false;
+                    item.unpinnedByPlayback = false;
                 }
 
                 if (item.isDismissed) {
@@ -1374,48 +1564,76 @@
                 }
 
                 const maxPinnedH = getMaxPinnedHeight();
-                const targetH = item.isExpanded ? Math.min(natH, Math.round(window.innerHeight * 0.78)) : Math.min(natH, maxPinnedH);
+                const targetH = item.isExpanded ? Math.min(natH, Math.round(window.innerHeight * 0.85)) : Math.min(natH, maxPinnedH);
 
                 let currentH = targetH;
                 if (!item.isExpanded) {
-                    // DYNAMIC TEXT-FOLLOWING COMPRESSION:
-                    // 1. As top of card reaches pinTop, it pins at pinTop.
-                    // 2. The document text begins at (origTop + natH).
-                    // In viewport coordinates, distance from pinTop down to text is:
+                    // Dynamic text-following compression:
+                    // If card is taller than available viewport (targetH < natH), incoming text pushes
+                    // bottom border up until it reaches targetH, then slides underneath.
+                    // If card fits on screen, targetH == natH, so currentH stays at natH (no compression, no scrollbars).
                     const distanceToText = (origTop + natH) - scrollY - pinTop;
-
-                    // 3. While distanceToText > targetH, the bottom border of the card is pushed up
-                    // in exact lockstep by the scrolling text: card height = distanceToText.
-                    // 4. Once distanceToText <= targetH, height freezes at targetH, and text slides underneath.
                     currentH = Math.max(targetH, Math.min(natH, distanceToText));
                 }
 
-                const pinStart = origTop - pinTop;
-                const pushStart = anchorTop - pinTop - currentH;
-                const releaseEnd = anchorTop - pinTop;
+                // If user scrolled back up into this topic area, allow card to be pinned again
+                if (scrollY < (pushTop - pinTop - currentH)) {
+                    item.unpinnedByPlayback = false;
+                }
 
-                if (scrollY >= pinStart && scrollY < releaseEnd) {
-                    let topY = pinTop;
-                    if (scrollY >= pushStart) {
-                        topY = (anchorTop - scrollY) - currentH;
+                const pinStart = origTop - pinTop;
+                const releaseEnd = pushTop - pinTop;
+
+                // Mode 2: Autonomous Playback check
+                if (isAutonomousPlayback && $active && $active.length) {
+                    const hasPassedAnchor = hasActiveLineReachedOrPassedAnchor($active, item.$anchor);
+                    if (hasPassedAnchor) {
+                        item.unpinnedByPlayback = true;
+                    } else {
+                        // If active playback line is within this topic, reset unpinned flag
+                        item.unpinnedByPlayback = false;
                     }
+                }
+
+                // Eligibility check: within scroll range [pinStart, releaseEnd) and not unpinned by playback
+                if (scrollY >= pinStart && scrollY < releaseEnd && !item.unpinnedByPlayback) {
                     activeCandidate = item;
-                    candidateTop = topY;
+
+                    // Mode 1: Push-up physics by last line of topic
+                    // When the last line of the topic approaches the bottom of the card, the card pushes up with the page
+                    const distanceToTrigger = pushTop - scrollY;
+                    if (distanceToTrigger < (pinTop + currentH)) {
+                        candidateTop = Math.round(distanceToTrigger - currentH);
+                    } else {
+                        candidateTop = pinTop;
+                    }
+
                     candidateHeight = currentH;
+
+                    // Only animate gentle fade/float from below if entering at full resting height
+                    if (!item.isPinned && scrollY > (pinStart + 40) && candidateTop >= pinTop) {
+                        enteringFromBelow = true;
+                    }
                 }
             }
 
             for (let j = 0; j < stickyMaterials.length; j++) {
                 const it = stickyMaterials[j];
                 if (it !== activeCandidate && it.isPinned) {
-                    unpinItem(it);
+                    const itOrigTop = it.$placeholder ? getElementDocTop(it.$placeholder) : 0;
+                    // Scrolled above original flow spot: dock immediately
+                    const scrolledAbove = scrollY < (itOrigTop - pinTop);
+                    // Pushed completely above pinTop behind the dock: clean up immediately
+                    const scrolledCompletelyPast = (it.currentTop + (it.pinnedHeight || it.naturalHeight)) <= pinTop;
+                    const immediateUnpin = scrolledAbove || scrolledCompletelyPast;
+                    unpinItem(it, immediateUnpin);
                 }
             }
 
             if (activeCandidate) {
-                pinItem(activeCandidate, candidateTop, pinTop, candidateHeight);
+                pinItem(activeCandidate, candidateTop, pinTop, candidateHeight, enteringFromBelow);
             } else if (currentPinnedItem) {
-                unpinItem(currentPinnedItem);
+                unpinItem(currentPinnedItem, false);
             }
             updateLocateButtonVisibility();
         }
