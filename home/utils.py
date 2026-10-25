@@ -635,6 +635,14 @@ def docx_parse_document(document, strict=False):
     def _replace_html_block(match):
         sticky_anchor = match.group(1)
         html_block = unescape(match.group(2))
+        # Strip all soft line-break <br/> tags between HTML tags to prevent browser foster parenting
+        # (e.g. <table><br/>, <tr><br/>, <br/><div>, etc.), while preserving inline <br> within cell text
+        prev_h = None
+        while prev_h != html_block:
+            prev_h = html_block
+            html_block = re.sub(r'(>)\s*<br\s*/?>', r'\1', html_block)
+            html_block = re.sub(r'<br\s*/?>\s*(<)', r'\1', html_block)
+
         if sticky_anchor:
             tag_match = re.search(r'<(?!style\b|script\b)([a-zA-Z][\w:-]*)([^>]*)>', html_block, re.IGNORECASE)
             if tag_match:
@@ -768,15 +776,21 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
         sticky_anchor = p_context.get('sticky_until')
         p_block = f'<p>{opening_tags_html}{p_html}{closing_tags_html}</p>'
         if sticky_anchor and state.get('sticky_materials') is not None:
-            state['sticky_materials'].append({
-                'anchor': sticky_anchor,
-                'p_index': p_index,
-                'snippet': cleaned_p_text[:60]
-            })
             if '[HTML]' in p_html:
+                state['sticky_materials'].append({
+                    'anchor': sticky_anchor,
+                    'p_index': p_index,
+                    'snippet': cleaned_p_text[:60]
+                })
                 p_block = p_block.replace('[HTML]', f'[HTML data-sticky-until="{sticky_anchor}"]', 1)
-            else:
+            elif not p_map or p_html.strip().startswith('![') or p_html.strip().startswith('<img') or '<img ' in p_html:
+                state['sticky_materials'].append({
+                    'anchor': sticky_anchor,
+                    'p_index': p_index,
+                    'snippet': cleaned_p_text[:60]
+                })
                 p_block = f'<div data-sticky-until="{sticky_anchor}">{p_block}</div>'
+            # Do NOT wrap standard dialogue/transcript lines (with p_map timestamps) into sticky containers!
         html += p_block
     lines_map += p_map
     return html, lines_map, opened_tags, open_block

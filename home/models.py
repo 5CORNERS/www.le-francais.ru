@@ -825,7 +825,14 @@ class LessonPage(Page):
                         t_html, t_map = t_map, t_html
             context['transcript_html'], context['transcript_map'] = t_html, t_map
         if context.get('transcript_map'):
-            context['transcript_map_json'] = json_for_script(context['transcript_map'])
+            t_map_val = context['transcript_map']
+            if isinstance(t_map_val, (str, bytes)):
+                try:
+                    import json
+                    t_map_val = json.loads(t_map_val)
+                except Exception:
+                    pass
+            context['transcript_map_json'] = json_for_script(t_map_val)
 
         return context
 

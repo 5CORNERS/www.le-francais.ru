@@ -178,3 +178,40 @@ tools\bin\micromamba.exe run -p tools\env python forum_editor_src/scripts/parity
    * Never hand-edit `home/static/js/forum-editor.js`; change `forum_editor_src/src/`, run `npm run build`, commit source + bundle + `.map` together.
    * Do not add `?v=` query strings to `{% static %}` tags — `CompressedManifestStaticFilesStorage` hashes file names at `collectstatic`. Locally (`DEBUG`), hard-reload the page to pick up a rebuilt bundle.
    * Rollback to the legacy editor: env `FORUM_EDITOR_LEGACY=True` (also `true`/`1`/`yes`) or `?editor=legacy` on a page URL.
+
+---
+
+## 6. Task Execution & Superpowers Directives
+
+* **Always Use Superpowers Skills:** When starting any new task, always invoke and follow the relevant `superpowers` skills (e.g., `using-superpowers`, `brainstorming`, `writing-plans`, `systematic-debugging`, `test-driven-development`).
+* **Never Jump Immediately to Implementation:** Never immediately jump into implementing code or modifying files after a user asks for something. Always take the necessary prerequisite steps first: explore user intent and requirements (`brainstorming`), establish an implementation plan (`writing-plans`), or diagnose root causes (`systematic-debugging`) before writing code.
+* **Prefer Internal Tools for Reading & Searching:** Always prefer internal agent tools (`read_file`, codebase search tools, or IDE/MCP tools) to inspect, read, and search files. Do not use terminal shell commands (e.g. `Get-Content`, `cat`, `type`, `Select-String`, `grep`, `findstr`) or ad-hoc scripts to read or search codebase files.
+* **Prefer Internal Tools for File Modifications:** Always prefer internal agent editing tools (`edit_file`, `write_file`, or IDE/MCP editing tools) to create and modify files. Never modify files through terminal commands or ad-hoc scripts (e.g. `Set-Content`, `Out-File`, shell redirects, `sed`, or one-off python file modifiers) unless it is a massive change that needs to cover multiple places simultaneously.
+
+---
+
+## 7. Lesson DOCX Transcripts & Sticky Materials Standards
+
+1. **Editorial Word Comments (`arnaud-comment`):**
+   * Non-timing comments in transcript `.docx` files (i.e. not timing codes like `ts_...`, `s_...`, `f_...`, `p_...`) are editorial annotations (e.g., Arnaud's corrections).
+   * They must NOT be stripped or converted to empty comments in production files.
+   * Wrap the commented text in:
+     `<span class="arnaud-comment" data-container="body" data-content="<COMMENT_TEXT>" data-placement="top" data-toggle="popover"><TARGET_TEXT></span>`.
+
+2. **DOCX `[HTML]` Invariants:**
+   * **Single Paragraph**: Every `[HTML]...[/HTML]` block in Word MUST be contained within a **single Word paragraph** (`<w:p>`). All internal line breaks must be soft line breaks (`<w:br/>` / Shift+Enter), never hard paragraph breaks (`Enter`).
+   * **Root Tag Placement**: The opening `[HTML]` (or hyperlink `[<a href="#anchor">HTML</a>]`) must be separated from the first HTML tag by a space, NOT a soft line break (`<br/>`), ensuring `data-sticky-until` attaches to the outer container tag (`<div>`) rather than `<br>`.
+
+3. **Textbook Style for Conjugation & Grammar Tables:**
+   * **Structure**: Wrap in `<div class="dcf-overflow-x-auto">` with `<table class="dcf-table dcf-table-bordered dcf-table-striped" style="width: auto; min-width: 440px; margin: 12px 0;">`.
+   * **Compact Header**: Override the default tall `.dcf-table-bordered thead th` padding with `<th colspan="2" style="text-align: center; padding: 4px 10px; font-weight: 600;">...</th>`.
+   * **No Folding**: All `<td>` cells must specify `style="white-space: nowrap; padding: 4px 16px;"` so phrases never wrap across multiple lines.
+   * **2 Columns**: Default to 2 columns (Left: Singular / Right: Plural) with French text only (no Russian translations unless requested).
+
+4. **Sticky Anchors & Bookmarks:**
+   * Sticky materials link to a target bookmark via internal hyperlink on `HTML` inside the brackets: `[<a href="#target_bookmark">HTML</a>]`.
+   * The target replica/paragraph in the DOCX must contain the corresponding bookmark (`<w:bookmarkStart w:name="target_bookmark"/>`).
+   * Always verify with `docx_parse_document(document, strict=True)` to confirm zero missing anchors or malformed blocks.
+
+
+

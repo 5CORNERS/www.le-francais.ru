@@ -10,7 +10,9 @@
             return;
         }
 
-        const transcriptMap = window.transcriptMap || [];
+        const transcriptMap = (typeof window.transcriptMap === 'string')
+            ? (function () { try { return JSON.parse(window.transcriptMap); } catch (e) { return []; } })()
+            : (window.transcriptMap || []);
         let chapters = [];
         let chaptersById = {};
         let currentDepth = 3;
@@ -1089,8 +1091,10 @@
         }
 
         function getMaxPinnedHeight() {
-            const vh = window.innerHeight || document.documentElement.clientHeight || 600;
-            return isMobileDevice() ? Math.min(260, Math.round(vh * 0.38)) : Math.min(340, Math.round(vh * 0.40));
+            const vh = window.innerHeight || document.documentElement.clientHeight || 700;
+            const pinTop = getStickyPinTop();
+            // Allow card to occupy full available vertical viewport space minus 24px bottom buffer
+            return Math.max(200, Math.round(vh - pinTop - 24));
         }
 
         function getStickyControls() {
@@ -1156,18 +1160,17 @@
             if (!item || !item.isPinned) return;
             const $ctrl = getStickyControls();
             const $el = item.$el;
-            const elH = activeHeight !== undefined ? activeHeight : $el.outerHeight();
+            const elH = (item.pinnedIsTruncated && activeHeight !== undefined) ? activeHeight : $el.outerHeight();
             const topY = item.currentTop;
-            const pOffset = item.$placeholder.offset();
-            const pLeft = pOffset.left - (window.pageXOffset || document.documentElement.scrollLeft || 0);
-            const pWidth = $el.outerWidth();
+            const cardLeft = item.currentLeft || ($el.offset().left - (window.pageXOffset || document.documentElement.scrollLeft || 0));
+            const cardWidth = item.currentWidth || $el.outerWidth();
 
             const winW = window.innerWidth || document.documentElement.clientWidth || 360;
             const winH = window.innerHeight || document.documentElement.clientHeight || 600;
 
             const ctrlW = $ctrl.outerWidth() || 56;
             let btnTop = Math.round(topY + elH + 4);
-            let btnLeft = Math.round(pLeft + pWidth - ctrlW - 8);
+            let btnLeft = Math.round(cardLeft + cardWidth - ctrlW);
 
             btnLeft = Math.max(10, Math.min(winW - ctrlW - 12, btnLeft));
             if (btnTop > winH - 34) {
@@ -1222,6 +1225,9 @@
                     $el.before($placeholder);
                 }
 
+                const $img = $el.find('img').first();
+                const isImageWrapper = $img.length > 0 && !$el.hasClass('bs-callout');
+
                 stickyMaterials.push({
                     id: 'sticky_mat_' + idx,
                     $el: $el,
@@ -1229,23 +1235,58 @@
                     anchorId: anchorId,
                     $anchor: $(anchorEl),
                     originalStyle: origStyle,
+                    isImageWrapper: isImageWrapper,
                     isPinned: false,
                     isDismissed: false,
                     isExpanded: false,
                     currentTop: 0,
+                    currentLeft: 0,
+                    currentWidth: 0,
                     naturalHeight: 0,
                     naturalWidth: 0,
                     naturalLeft: 0,
+                    imgWidth: 0,
+                    imgHeight: 0,
+                    imgRelLeft: 0,
                     pinnedHeight: 0
                 });
             });
         }
 
-        function unpinItem(item) {
+        function unpinItem(item, immediate) {
             if (!item || !item.isPinned) return;
+            if (item.isLeaving) return; // Exit transition already running; keep going
+
+            if (item.unpinTimer) {
+                clearTimeout(item.unpinTimer);
+                item.unpinTimer = null;
+            }
+
+            if (immediate) {
+                cleanupUnpinnedItem(item);
+                return;
+            }
+
+            // Animate exit: float up and blur/dissolve out over 350ms
+            item.isLeaving = true;
+            item.$el.addClass('is-sticky-leaving');
+            if ($stickyControls && currentPinnedItem === item) {
+                $stickyControls.addClass('is-leaving');
+            }
+
+            item.unpinTimer = setTimeout(function () {
+                cleanupUnpinnedItem(item);
+            }, 350);
+        }
+
+        function cleanupUnpinnedItem(item) {
             item.isPinned = false;
+            item.isLeaving = false;
             item.isExpanded = false;
-            item.$el.removeClass('is-sticky-pinned is-expanded');
+            item.currentLeft = 0;
+            item.currentWidth = 0;
+            item.unpinTimer = null;
+            item.$el.removeClass('is-sticky-pinned is-sticky-entering is-sticky-leaving has-scrollbar is-expanded');
             const origStyle = item.$el.data('original-inline-style');
             if (origStyle !== undefined && origStyle !== null && origStyle !== '') {
                 item.$el.attr('style', origStyle);
@@ -1255,17 +1296,30 @@
             if (item.$placeholder) {
                 item.$placeholder.hide();
             }
-            if ($stickyControls) {
-                $stickyControls.removeClass('is-visible');
+            if ($stickyControls && currentPinnedItem === item) {
+                $stickyControls.removeClass('is-visible is-leaving');
             }
             if (currentPinnedItem === item) {
                 currentPinnedItem = null;
             }
         }
 
-        function pinItem(item, topY, navH, activeHeight) {
+        function pinItem(item, topY, navH, activeHeight, enteringFromBelow) {
             const $placeholder = item.$placeholder;
             const $el = item.$el;
+
+            // If item was currently leaving, cancel exit and resume pinned state
+            if (item.unpinTimer) {
+                clearTimeout(item.unpinTimer);
+                item.unpinTimer = null;
+            }
+            if (item.isLeaving) {
+                item.isLeaving = false;
+                $el.removeClass('is-sticky-leaving');
+                if ($stickyControls) {
+                    $stickyControls.removeClass('is-leaving');
+                }
+            }
 
             if (!item.isPinned) {
                 // Measure natural dimensions in flow before detaching
@@ -1281,6 +1335,14 @@
                 item.naturalWidth = naturalWidth;
                 item.naturalLeft = elOffset.left;
 
+                if (item.isImageWrapper) {
+                    const $img = $el.find('img').first();
+                    item.imgWidth = $img.outerWidth();
+                    item.imgHeight = $img.outerHeight();
+                    // Measure exact relative horizontal offset of image within container in flow
+                    item.imgRelLeft = Math.max(0, $img.offset().left - elOffset.left);
+                }
+
                 $placeholder.css({
                     width: naturalWidth + 'px',
                     height: naturalHeight + 'px',
@@ -1291,30 +1353,76 @@
                 }).show();
 
                 item.isPinned = true;
-                $el.addClass('is-sticky-pinned');
-                $el.scrollTop(0);
+
+                if (enteringFromBelow) {
+                    $el.addClass('is-sticky-pinned is-sticky-entering');
+                    $el.scrollTop(0);
+                    // Force synchronous reflow so starting state is registered before transition
+                    void $el[0].offsetHeight;
+                    requestAnimFrame(function () {
+                        $el.removeClass('is-sticky-entering');
+                    });
+                } else {
+                    $el.addClass('is-sticky-pinned');
+                    $el.scrollTop(0);
+                }
             }
 
             const pOffset = $placeholder.offset();
-            let pLeft = pOffset.left - (window.pageXOffset || document.documentElement.scrollLeft || 0);
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft || 0;
+            const pLeft = pOffset.left - scrollLeft;
             const pWidth = $placeholder.outerWidth() || item.naturalWidth;
 
-            if (pLeft <= 0 && item.naturalLeft > 0) {
-                pLeft = item.naturalLeft - (window.pageXOffset || document.documentElement.scrollLeft || 0);
+            let targetLeft = pLeft;
+            let targetWidth = pWidth;
+
+            if (item.isImageWrapper && item.imgWidth > 0) {
+                // Keep image at its EXACT horizontal pixel position from the flow (pLeft + imgRelLeft).
+                // Card has 8px padding + 1px border on each side (total 18px).
+                // Placing card at (pLeft + imgRelLeft - 9) keeps the image at EXACTLY (pLeft + imgRelLeft).
+                // Zero horizontal movement whether image was left-aligned, centered, or indented!
+                targetWidth = item.imgWidth + 18;
+                targetLeft = pLeft + item.imgRelLeft - 9;
+            } else if (pLeft <= 0 && item.naturalLeft > 0) {
+                targetLeft = item.naturalLeft - scrollLeft;
             }
 
             item.currentTop = topY;
+            item.currentLeft = targetLeft;
+            item.currentWidth = targetWidth;
             item.pinnedHeight = activeHeight;
 
-            $el.css({
-                position: 'fixed',
-                top: Math.round(topY) + 'px',
-                left: Math.round(pLeft) + 'px',
-                width: Math.round(pWidth) + 'px',
-                height: Math.round(activeHeight) + 'px',
-                marginTop: 0,
-                marginBottom: 0
-            });
+            // Determine if card needs a scrollbar:
+            // Only if activeHeight is genuinely less than natural height (truncated/compressed)
+            const isTruncated = activeHeight < (item.naturalHeight - 4);
+            item.pinnedIsTruncated = isTruncated;
+            $el.toggleClass('has-scrollbar', isTruncated);
+
+            if (!isTruncated) {
+                $el.css({
+                    position: 'fixed',
+                    top: Math.round(topY) + 'px',
+                    left: Math.round(targetLeft) + 'px',
+                    width: Math.round(targetWidth) + 'px',
+                    maxWidth: '100%',
+                    height: 'auto',
+                    maxHeight: '', // Never clip bottom border/padding when card fits naturally!
+                    marginTop: 0,
+                    marginBottom: 0
+                });
+            } else {
+                $el.css({
+                    position: 'fixed',
+                    top: Math.round(topY) + 'px',
+                    left: Math.round(targetLeft) + 'px',
+                    width: Math.round(targetWidth) + 'px',
+                    maxWidth: '100%',
+                    height: Math.round(activeHeight) + 'px',
+                    maxHeight: '',
+                    marginTop: 0,
+                    marginBottom: 0
+                });
+            }
 
             currentPinnedItem = item;
             updateStickyControlsPosition(item, activeHeight);
@@ -1323,11 +1431,11 @@
         function updateStickyMaterials() {
             if (!isPlayerPlusActive() || !isStickyMaterialsEnabled) {
                 if (currentPinnedItem) {
-                    unpinItem(currentPinnedItem);
+                    unpinItem(currentPinnedItem, true);
                 }
                 for (let k = 0; k < stickyMaterials.length; k++) {
                     if (stickyMaterials[k].isPinned) {
-                        unpinItem(stickyMaterials[k]);
+                        unpinItem(stickyMaterials[k], true);
                     }
                 }
                 if ($stickyControls) {
@@ -1347,6 +1455,7 @@
             let activeCandidate = null;
             let candidateTop = pinTop;
             let candidateHeight = 0;
+            let enteringFromBelow = false;
 
             for (let i = 0; i < stickyMaterials.length; i++) {
                 const item = stickyMaterials[i];
@@ -1374,48 +1483,45 @@
                 }
 
                 const maxPinnedH = getMaxPinnedHeight();
-                const targetH = item.isExpanded ? Math.min(natH, Math.round(window.innerHeight * 0.78)) : Math.min(natH, maxPinnedH);
+                const targetH = item.isExpanded ? Math.min(natH, Math.round(window.innerHeight * 0.85)) : Math.min(natH, maxPinnedH);
 
                 let currentH = targetH;
                 if (!item.isExpanded) {
-                    // DYNAMIC TEXT-FOLLOWING COMPRESSION:
-                    // 1. As top of card reaches pinTop, it pins at pinTop.
-                    // 2. The document text begins at (origTop + natH).
-                    // In viewport coordinates, distance from pinTop down to text is:
+                    // Dynamic text-following compression:
+                    // If card is taller than available viewport (targetH < natH), incoming text pushes
+                    // bottom border up until it reaches targetH, then slides underneath.
+                    // If card fits on screen, targetH == natH, so currentH stays at natH (no compression, no scrollbars).
                     const distanceToText = (origTop + natH) - scrollY - pinTop;
-
-                    // 3. While distanceToText > targetH, the bottom border of the card is pushed up
-                    // in exact lockstep by the scrolling text: card height = distanceToText.
-                    // 4. Once distanceToText <= targetH, height freezes at targetH, and text slides underneath.
                     currentH = Math.max(targetH, Math.min(natH, distanceToText));
                 }
 
                 const pinStart = origTop - pinTop;
-                const pushStart = anchorTop - pinTop - currentH;
                 const releaseEnd = anchorTop - pinTop;
 
                 if (scrollY >= pinStart && scrollY < releaseEnd) {
-                    let topY = pinTop;
-                    if (scrollY >= pushStart) {
-                        topY = (anchorTop - scrollY) - currentH;
-                    }
                     activeCandidate = item;
-                    candidateTop = topY;
+                    candidateTop = pinTop;
                     candidateHeight = currentH;
+                    if (!item.isPinned && scrollY > (pinStart + 40)) {
+                        enteringFromBelow = true;
+                    }
                 }
             }
 
             for (let j = 0; j < stickyMaterials.length; j++) {
                 const it = stickyMaterials[j];
                 if (it !== activeCandidate && it.isPinned) {
-                    unpinItem(it);
+                    const itOrigTop = it.$placeholder ? getElementDocTop(it.$placeholder) : 0;
+                    // If scrolled above original spot, immediately dock into flow; if past anchor, dissolve smoothly
+                    const immediateUnpin = scrollY < (itOrigTop - pinTop);
+                    unpinItem(it, immediateUnpin);
                 }
             }
 
             if (activeCandidate) {
-                pinItem(activeCandidate, candidateTop, pinTop, candidateHeight);
+                pinItem(activeCandidate, candidateTop, pinTop, candidateHeight, enteringFromBelow);
             } else if (currentPinnedItem) {
-                unpinItem(currentPinnedItem);
+                unpinItem(currentPinnedItem, false);
             }
             updateLocateButtonVisibility();
         }
