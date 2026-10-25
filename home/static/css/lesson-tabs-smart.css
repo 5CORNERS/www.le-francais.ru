@@ -1012,12 +1012,32 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.08);
     box-sizing: border-box;
     pointer-events: auto;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     scrollbar-color: #adb5bd transparent;
-    transition: box-shadow 0.25s ease;
+    width: fit-content;
+    max-width: 100%;
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.25s ease;
+    will-change: opacity, transform, filter;
+}
+
+[data-sticky-until].is-sticky-pinned.is-sticky-entering,
+[data-sticky-until].is-sticky-pinned.is-sticky-leaving {
+    opacity: 0;
+    transform: translateY(-24px);
+    filter: blur(8px);
+    pointer-events: none;
+}
+
+[data-sticky-until].is-sticky-pinned.has-scrollbar {
+    overflow-y: auto;
 }
 
 [data-sticky-until].is-sticky-pinned::-webkit-scrollbar {
@@ -1037,23 +1057,28 @@
     max-height: 80vh;
 }
 
-div[data-sticky-until].is-sticky-pinned:not(.bs-callout) {
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout) {
     background-color: #ffffff;
     border: 1px solid #dee2e6;
     border-radius: 6px;
     padding: 8px;
 }
 
-div[data-sticky-until].is-sticky-pinned:not(.bs-callout) p {
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout) p {
     margin: 0;
+    padding: 0;
+    line-height: 0;
+    font-size: 0;
 }
 
-div[data-sticky-until].is-sticky-pinned:not(.bs-callout) img {
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout) img {
     display: block;
-    margin: 0 auto;
+    margin: 0;
+    padding: 0;
     max-width: 100%;
     height: auto;
     border-radius: 4px;
+    vertical-align: bottom;
 }
 
 .bs-callout[data-sticky-until].is-sticky-pinned {
@@ -1086,11 +1111,19 @@ div[data-sticky-until].is-sticky-pinned:not(.bs-callout) img {
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
     line-height: 1;
     pointer-events: auto;
-    transition: top 0.15s ease, left 0.15s ease, opacity 0.2s ease;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sticky-material-controls.is-visible {
     display: inline-flex;
+}
+
+.sticky-material-controls.is-leaving {
+    opacity: 0;
+    transform: translateY(-16px);
+    pointer-events: none;
 }
 
 .sticky-material-ctrl-btn {

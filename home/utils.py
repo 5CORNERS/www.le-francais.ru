@@ -564,6 +564,49 @@ def _close_open_block(html, open_block):
     return html, None
 
 
+def _render_open_tag(tag, keep_id=True):
+    attrs = "".join(f' {attr}="{value}"' for attr, value in tag['attrs'].items()
+                    if keep_id or attr != 'id')
+    return f'<{tag["name"]}{attrs}>'
+
+
+def _close_comment_span(opened_tags, comment_id):
+    """Close the span opened for a Word comment range, keeping overlapping ranges well nested.
+
+    Spans opened after the target are closed and reopened around it (without ``id`` to avoid
+    duplicates). An editorial span that would split a transcript line is closed later instead,
+    together with the innermost span that closes after it.
+    """
+    for idx in range(len(opened_tags) - 1, -1, -1):
+        tag = opened_tags[idx]
+        if tag.get('name') != 'span' or tag.get('comment_id') != comment_id:
+            continue
+        inner = opened_tags[idx + 1:]
+        if not inner:
+            opened_tags.pop()
+            return '</span>' + _close_pending_spans(opened_tags)
+        is_editorial = tag['attrs'].get('class') == 'arnaud-comment'
+        if is_editorial and any(t['attrs'].get('class') == 'transcript-line' for t in inner):
+            tag['pending_close'] = True
+            return ''
+        del opened_tags[idx:]
+        opened_tags.extend(inner)
+        return (''.join(f'</{t["name"]}>' for t in reversed(inner)) + '</span>'
+                + ''.join(_render_open_tag(t, keep_id=False) for t in inner))
+    if opened_tags and opened_tags[-1]['name'] == 'span':
+        opened_tags.pop()
+    else:
+        logger.warning('CAN NOT CLOSE: SPAN')
+    return '</span>' + _close_pending_spans(opened_tags)
+
+
+def _close_pending_spans(opened_tags):
+    html = ''
+    while opened_tags and opened_tags[-1].get('pending_close'):
+        html += f'</{opened_tags.pop()["name"]}>'
+    return html
+
+
 def docx_parse_document(document, strict=False):
     """Convert a transcript docx into (html, lines_map).
 
@@ -593,7 +636,8 @@ def docx_parse_document(document, strict=False):
         'active_replica_entry': None,
         'callout_sticky_until': None,
         'sticky_materials': [],
-        'ignored_comment_ids': set(),
+        'timing_comment_ids': set(),
+        'editorial_comment_ids': set(),
         'editorial_comments': [],
         'active_editorial_comments': [],
     }
@@ -633,7 +677,26 @@ def docx_parse_document(document, strict=False):
                   '<img title="\g<1>" src="\g<2>" alt="\g<3>">', html)
     def _replace_html_block(match):
         sticky_anchor = match.group(1)
-        html_block = unescape(match.group(2))
+        # Editorial comment spans are real markup emitted by the parser (with escaped attributes):
+        # hide them from unescape() and from the sticky container lookup, restore them at the end
+        comment_spans = []
+
+        def _stash_comment_span(m):
+            comment_spans.append(m.group(0))
+            return f'\x00{len(comment_spans) - 1}\x00'
+
+        html_block = re.sub(r'<span class="arnaud-comment"[^>]*>', _stash_comment_span, match.group(2))
+        html_block = unescape(html_block)
+        # Strip soft line-break <br/> tags next to structural tags to prevent browser foster parenting
+        # (e.g. <table><br/>, <tr><br/>, <br/><div>, etc.), while preserving inline <br> within text
+        structural = (r'</?(?:table|thead|tbody|tfoot|tr|td|th|caption|colgroup|col|div|section|'
+                      r'ul|ol|li|p|h[1-6]|blockquote|style|script)\b[^>]*>')
+        prev_h = None
+        while prev_h != html_block:
+            prev_h = html_block
+            html_block = re.sub(r'(' + structural + r')\s*<br\s*/?>', r'\1', html_block, flags=re.IGNORECASE)
+            html_block = re.sub(r'<br\s*/?>\s*(' + structural + r')', r'\1', html_block, flags=re.IGNORECASE)
+
         if sticky_anchor:
             tag_match = re.search(r'<(?!style\b|script\b)([a-zA-Z][\w:-]*)([^>]*)>', html_block, re.IGNORECASE)
             if tag_match:
@@ -641,7 +704,7 @@ def docx_parse_document(document, strict=False):
                 html_block = html_block[:tag_end] + f' data-sticky-until="{sticky_anchor}"' + html_block[tag_end:]
             else:
                 html_block = f'<div data-sticky-until="{sticky_anchor}">{html_block}</div>'
-        return html_block
+        return re.sub('\x00(\\d+)\x00', lambda m: comment_spans[int(m.group(1))], html_block)
 
     html = re.sub(r'<p>\[HTML(?:\s+data-sticky-until="([^"]+)")?\](.*?)\[/HTML\]</p>', _replace_html_block, html, flags=re.DOTALL)
     html = text_postprocessor(html)
@@ -664,7 +727,8 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
             'active_replica_entry': None,
             'callout_sticky_until': None,
             'sticky_materials': [],
-            'ignored_comment_ids': set(),
+            'timing_comment_ids': set(),
+            'editorial_comment_ids': set(),
             'editorial_comments': [],
             'active_editorial_comments': [],
         }
@@ -689,8 +753,7 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
     opening_tags_html = ''
     if opened_tags:
         for tag in opened_tags:
-            attrs = "".join((f' {attr}="{value}"' for attr, value in tag['attrs'].items()))
-            opening_tags_html += f'<{tag["name"]}{attrs}>'
+            opening_tags_html += _render_open_tag(tag)
 
     p_html, p_map, opened_tags = xml_parse_through_element(
         document, runs_iterator, paragraph._element, p_html, p_map, opened_tags,
@@ -766,15 +829,21 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
         sticky_anchor = p_context.get('sticky_until')
         p_block = f'<p>{opening_tags_html}{p_html}{closing_tags_html}</p>'
         if sticky_anchor and state.get('sticky_materials') is not None:
-            state['sticky_materials'].append({
-                'anchor': sticky_anchor,
-                'p_index': p_index,
-                'snippet': cleaned_p_text[:60]
-            })
             if '[HTML]' in p_html:
+                state['sticky_materials'].append({
+                    'anchor': sticky_anchor,
+                    'p_index': p_index,
+                    'snippet': cleaned_p_text[:60]
+                })
                 p_block = p_block.replace('[HTML]', f'[HTML data-sticky-until="{sticky_anchor}"]', 1)
-            else:
+            elif not p_map or p_html.strip().startswith('![') or p_html.strip().startswith('<img') or '<img ' in p_html:
+                state['sticky_materials'].append({
+                    'anchor': sticky_anchor,
+                    'p_index': p_index,
+                    'snippet': cleaned_p_text[:60]
+                })
                 p_block = f'<div data-sticky-until="{sticky_anchor}">{p_block}</div>'
+            # Do NOT wrap standard dialogue/transcript lines (with p_map timestamps) into sticky containers!
         html += p_block
     lines_map += p_map
     return html, lines_map, opened_tags, open_block
@@ -982,6 +1051,7 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                     p_context['current_replica_entry'] = entry
                     if 'state' in p_context:
                         state = p_context['state']
+                        state.setdefault('timing_comment_ids', set()).add(comment_id_str)
                         state['active_replica_entry'] = entry
                         if state.get('active_editorial_comments'):
                             entry['comments'] = [dict(c) for c in state['active_editorial_comments']]
@@ -990,59 +1060,79 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
                 transcript_map.append(entry)
 
                 html += f'<span class="transcript-line" id="{line_id}" data-start="{mm_start}" data-end="{mm_end}" data-speaker="{effective_speaker}">'
-                opened_tags.append({'name':'span', 'attrs':{
-                    'class':'transcript-line',
-                    'id':line_id,
-                    'data-start': mm_start,
-                    'data-end': mm_end,
-                    'data-speaker': effective_speaker
-                }})
+                opened_tags.append({
+                    'name': 'span',
+                    'attrs': {
+                        'class': 'transcript-line',
+                        'id': line_id,
+                        'data-start': mm_start,
+                        'data-end': mm_end,
+                        'data-speaker': effective_speaker
+                    },
+                    'comment_id': comment_id_str,
+                })
             except ValueError:
-                # Non-timing author / editorial comment (e.g. "[Отсылка к моей переписке...]")
-                # Must be completely ignored for HTML and admin output, and retained only in masterfile metadata.
-                logger.info('Editorial/Non-timing Comment (id=%s): %s', comment_id_str, comment_text)
+                # Non-timing comment -> wrap in <span class="arnaud-comment" ...>
                 author = comment_elem.xpath('./@w:author')
                 author_str = author[0] if author else ''
                 date_attr = comment_elem.xpath('./@w:date')
                 date_str = date_attr[0] if date_attr else ''
                 p_idx = p_context.get('p_index') if p_context else None
+                clean_text = comment_text.strip()
                 comment_info = {
                     'id': comment_id_str,
                     'author': author_str,
                     'date': date_str,
-                    'text': comment_text,
+                    'text': clean_text,
                     'p_index': p_idx,
                 }
                 if p_context and 'state' in p_context:
                     state = p_context['state']
-                    state.setdefault('ignored_comment_ids', set()).add(comment_id_str)
+                    state.setdefault('editorial_comment_ids', set()).add(comment_id_str)
                     state.setdefault('editorial_comments', []).append(comment_info)
                     state.setdefault('active_editorial_comments', []).append(comment_info)
                     active_replica = state.get('active_replica_entry')
                     if active_replica is not None:
                         active_replica.setdefault('comments', []).append(comment_info)
-                        active_replica['comment'] = comment_text
+                        active_replica['comment'] = clean_text
+
+                escaped_content = html_escape(clean_text, quote=True)
+                html += (
+                    '<span class="arnaud-comment" data-container="body"'
+                    f' data-content="{escaped_content}" data-placement="top"'
+                    ' data-toggle="popover">'
+                )
+                opened_tags.append({
+                    'name': 'span',
+                    'attrs': {
+                        'class': 'arnaud-comment',
+                        'data-container': 'body',
+                        'data-content': escaped_content,
+                        'data-placement': 'top',
+                        'data-toggle': 'popover',
+                    },
+                    'comment_id': comment_id_str,
+                })
         elif sub_name == 'w:commentRangeEnd':
             comment_id_str = sub.xpath('./@w:id')[0]
-            is_ignored = False
+            is_timing = True
             if p_context and 'state' in p_context:
                 state = p_context['state']
-                if comment_id_str in state.get('ignored_comment_ids', set()):
-                    state['ignored_comment_ids'].discard(comment_id_str)
-                    is_ignored = True
+                if comment_id_str in state.get('timing_comment_ids', set()):
+                    state['timing_comment_ids'].discard(comment_id_str)
+                    is_timing = True
+                elif comment_id_str in state.get('editorial_comment_ids', set()):
+                    state['editorial_comment_ids'].discard(comment_id_str)
+                    is_timing = False
                     active_ed = state.get('active_editorial_comments', [])
                     state['active_editorial_comments'] = [c for c in active_ed if c.get('id') != comment_id_str]
 
-            if not is_ignored:
-                if p_context:
-                    p_context['current_replica_entry'] = None
-                    if 'state' in p_context:
-                        p_context['state']['active_replica_entry'] = None
-                html += '</span>'
-                if opened_tags and opened_tags[-1]['name'] == 'span':
-                    opened_tags.pop(-1)
-                else:
-                    logger.warning('CAN NOT CLOSE: SPAN')
+            if is_timing and p_context:
+                p_context['current_replica_entry'] = None
+                if 'state' in p_context:
+                    p_context['state']['active_replica_entry'] = None
+
+            html += _close_comment_span(opened_tags, comment_id_str)
         elif sub_name == 'w:br':
             html += '<br/>'
         elif sub_name == 'w:instrText':

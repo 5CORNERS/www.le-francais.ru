@@ -20,6 +20,9 @@ class Page2ArticleTestCase(TestCase):
         )
 
 
+import io
+import os
+
 import docx
 from lxml import etree
 from home.utils import docx_parse_document
@@ -88,8 +91,11 @@ class DocxParserTestCase(TestCase):
         html, lines_map = docx_parse_document(doc)
         self.assertNotIn('<span class="comment">', html)
         self.assertEqual(html.count('<span'), html.count('</span>'))
-        self.assertNotIn('Fix', html)
-        self.assertNotIn('data-text', html)
+        self.assertIn('class="arnaud-comment"', html)
+        self.assertIn('data-content="Fix&amp;&quot;later&quot; &lt;soon&gt;"', html)
+        self.assertIn('data-toggle="popover"', html)
+        self.assertIn('data-container="body"', html)
+        self.assertIn('data-placement="top"', html)
         self.assertEqual(lines_map, [])
         self.assertEqual(len(lines_map.comments), 1)
         self.assertEqual(lines_map.comments[0]['text'], 'Fix&"later" <soon>')
@@ -104,12 +110,14 @@ class DocxParserTestCase(TestCase):
         html, lines_map = docx_parse_document(doc)
         self.assertNotIn('<span class="comment">', html)
         self.assertEqual(html.count('<span'), html.count('</span>'))
+        self.assertIn('class="arnaud-comment"', html)
+        self.assertIn('data-content="Note for editor"', html)
         self.assertEqual(len(lines_map), 1)
         self.assertIn('comments', lines_map[0])
         self.assertEqual(lines_map[0]['comments'][0]['text'], 'Note for editor')
         self.assertEqual(len(lines_map.comments), 1)
         self.assertEqual(lines_map.comments[0]['text'], 'Note for editor')
-
+
     def test_interjection_with_dialogue_dash_is_attributed_to_unknown(self):
         doc = docx.Document()
         p1 = doc.add_paragraph('— Première partie du cours.')
@@ -388,6 +396,17 @@ class DocxParserTestCase(TestCase):
         )
 
     @staticmethod
+    def _comment_runs(paragraph, text, first_run, last_run, author='Teacher'):
+        """Add a Word comment whose range spans runs[first_run..last_run] (ranges may overlap)."""
+        from docx.oxml.ns import qn
+        runs = [r for r in paragraph.runs if r.text]
+        comment = runs[first_run].add_comment(text, author=author)
+        for end in paragraph._p.iter(qn('w:commentRangeEnd')):
+            if end.get(qn('w:id')) == str(comment._id):
+                runs[last_run]._r.addnext(end)
+                break
+
+    @staticmethod
     def _add_bookmark(paragraph, name, b_id):
         from docx.oxml import parse_xml
         from docx.oxml.ns import nsdecls
@@ -535,4 +554,158 @@ class DocxParserTestCase(TestCase):
         self.assertTrue(any('upstream_anchor' in msg for msg in cm.output))
 
 
-
+
+
+    def test_overlapping_timing_and_editorial_comments_nest_correctly(self):
+        import lxml.html
+        doc = docx.Document()
+        p = doc.add_paragraph()
+        p.add_run('— Alpha ')
+        p.add_run('beta ')
+        p.add_run('gamma')
+        # Timing range covers runs 0-1, editorial range covers runs 1-2 (overlap on "beta ")
+        self._comment_runs(p, 'Teacher 0 1000', 0, 1)
+        self._comment_runs(p, 'Note', 1, 2, author='editor')
+
+        html, lines_map = docx_parse_document(doc)
+
+        tree = lxml.html.fragment_fromstring(html, create_parent='div')
+        lines = tree.find_class('transcript-line')
+        self.assertEqual(len(lines), 1)
+        self.assertEqual(lines[0].text_content(), '— Alpha beta ')
+        notes = tree.find_class('arnaud-comment')
+        self.assertEqual(''.join(n.text_content() for n in notes), 'beta gamma')
+        self.assertTrue(all(n.get('data-content') == 'Note' for n in notes))
+
+    def test_html_block_keeps_inline_breaks_and_strips_structural_ones(self):
+        doc = docx.Document()
+        p = doc.add_paragraph()
+        p.add_run('[HTML]<table>').add_break()
+        p.add_run('<tr><td><b>Je suis</b>').add_break()
+        p.add_run('tu es</td></tr></table><div class="lf-container">Ligne 1')
+        run = p.add_run()
+        run.add_break()
+        run.add_break()
+        p.add_run('Ligne 2</div>[/HTML]')
+
+        html, lines_map = docx_parse_document(doc)
+
+        self.assertIn('<table><tr><td>', html)
+        self.assertIn('<b>Je suis</b><br/>tu es', html)
+        self.assertIn('Ligne 1<br/><br/>Ligne 2', html)
+
+    def test_editorial_comment_inside_html_block_keeps_escaping_and_sticky_container(self):
+        doc = docx.Document()
+        p = doc.add_paragraph('[')
+        p._p.append(self._hyperlink('_Tableau', 'HTML'))
+        p.add_run('] ')
+        commented = p.add_run('<div class="lf-container"><p>Bonjour</p></div>')
+        commented.add_comment('a "b" & c', author='editor')
+        p.add_run('[/HTML]')
+        self._add_bookmark(doc.add_paragraph('Next heading'), '_Tableau', 403)
+
+        html, lines_map = docx_parse_document(doc, strict=True)
+
+        self.assertIn('data-content="a &quot;b&quot; &amp; c"', html)
+        self.assertIn('<div class="lf-container" data-sticky-until="_Tableau">', html)
+        self.assertNotIn('arnaud-comment" data-container="body" data-content="a &quot;b&quot; &amp; c" '
+                         'data-placement="top" data-toggle="popover" data-sticky-until', html)
+
+    def test_editorial_comment_ending_inside_timing_range_is_closed_after_it(self):
+        import lxml.html
+        doc = docx.Document()
+        p = doc.add_paragraph()
+        p.add_run('Remarque ')
+        p.add_run('— Alpha ')
+        p.add_run('beta')
+        # Editorial range covers runs 0-1, timing range covers runs 1-2 (overlap on "— Alpha ")
+        self._comment_runs(p, 'Note', 0, 1, author='editor')
+        self._comment_runs(p, 'Teacher 0 1000', 1, 2)
+
+        html, lines_map = docx_parse_document(doc)
+
+        self.assertEqual(len(lines_map), 1)
+        self.assertEqual(html.count(f'id="{lines_map[0]["id"]}"'), 1)
+        tree = lxml.html.fragment_fromstring(html, create_parent='div')
+        lines = tree.find_class('transcript-line')
+        self.assertEqual(len(lines), 1)
+        self.assertEqual(lines[0].text_content(), '— Alpha beta')
+        notes = tree.find_class('arnaud-comment')
+        self.assertTrue(notes[0].text_content().startswith('Remarque — Alpha '))
+
+
+class ConvertTranscriptCommandTestCase(TestCase):
+    def setUp(self):
+        import tempfile
+        self._tmp = tempfile.TemporaryDirectory()
+        self.docx_dir = os.path.join(self._tmp.name, 'DOCX')
+        self.output_dir = os.path.join(self._tmp.name, 'JSON')
+        os.makedirs(self.docx_dir)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def _write_docx(self, name):
+        doc = docx.Document()
+        p = doc.add_paragraph('— Bonjour !')
+        p.runs[0].add_comment('Teacher 0 1000')
+        path = os.path.join(self.docx_dir, name)
+        doc.save(path)
+        return path
+
+    def test_extract_lesson_number_ignores_dates(self):
+        from home.management.commands.convert_transcript import extract_lesson_number
+        self.assertEqual(extract_lesson_number('2020-11-19 - Lecon_003_Xv.docx'), 3)
+        self.assertEqual(extract_lesson_number('Lecon_004_V.docx'), 4)
+        self.assertEqual(extract_lesson_number('French-012-admin.docx'), 12)
+        self.assertEqual(extract_lesson_number('Lesson 7.docx'), 7)
+        self.assertEqual(extract_lesson_number('Урок_3.docx'), 3)
+        self.assertEqual(extract_lesson_number('Leçon_15.docx'), 15)
+        self.assertIsNone(extract_lesson_number('notes 2020-11-19.docx'))
+
+    def test_resolve_docx_path_by_number_does_not_match_dates(self):
+        from home.management.commands.convert_transcript import resolve_docx_path
+        dated = self._write_docx('2003-01-01 - Lecon_007.docx')
+        wanted = self._write_docx('2020-11-19 - Lecon_003_Xv.docx')
+        self.assertEqual(resolve_docx_path('3', self.docx_dir), wanted)
+        self.assertEqual(resolve_docx_path('7', self.docx_dir), dated)
+        self.assertEqual(resolve_docx_path('2003-01-01 - Lecon_007', self.docx_dir), dated)
+        self.assertIsNone(resolve_docx_path('42', self.docx_dir))
+
+    def test_update_lesson_page_stores_list_and_enables_transcript(self):
+        from types import SimpleNamespace
+        from unittest import mock
+        from home.management.commands.convert_transcript import update_lesson_page
+        from home.utils import TranscriptList
+        page = SimpleNamespace(transcript='[]', transcript_html='', has_transcript=False, save=mock.Mock())
+        lines_map = TranscriptList([{'id': 'line-1', 'start': 0, 'end': 1000}])
+
+        update_lesson_page(page, '<p>html</p>', lines_map)
+
+        self.assertEqual(page.transcript, [{'id': 'line-1', 'start': 0, 'end': 1000}])
+        self.assertIs(type(page.transcript), list)
+        self.assertEqual(page.transcript_html, '<p>html</p>')
+        self.assertTrue(page.has_transcript)
+        page.save.assert_called_once_with()
+
+    def test_command_writes_admin_and_masterfile_outputs(self):
+        import json
+        from django.core.management import call_command
+        self._write_docx('2020-11-19 - Lecon_005.docx')
+
+        call_command('convert_transcript', '5', docx_dir=self.docx_dir, output_dir=self.output_dir,
+                     stdout=io.StringIO())
+
+        prefix = os.path.join(self.output_dir, 'French-005')
+        with open(prefix + '-admin.html', encoding='utf-8') as f:
+            self.assertIn('transcript-line', f.read())
+        with open(prefix + '-admin.json', encoding='utf-8') as f:
+            self.assertEqual(len(json.load(f)), 1)
+        with open(prefix + '-masterfile.json', encoding='utf-8') as f:
+            self.assertEqual(json.load(f)['lesson_number'], 5)
+
+    def test_command_reports_missing_file(self):
+        from django.core.management import call_command, CommandError
+        with self.assertRaises(CommandError):
+            call_command('convert_transcript', '99', docx_dir=self.docx_dir, output_dir=self.output_dir,
+                         stdout=io.StringIO())
