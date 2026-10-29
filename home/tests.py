@@ -114,7 +114,7 @@ class DocxParserTestCase(TestCase):
         self.assertEqual(lines_map[0]['comments'][0]['text'], 'Note for editor')
         self.assertEqual(len(lines_map.comments), 1)
         self.assertEqual(lines_map.comments[0]['text'], 'Note for editor')
-
+
     def test_interjection_with_dialogue_dash_is_attributed_to_unknown(self):
         doc = docx.Document()
         p1 = doc.add_paragraph('— Première partie du cours.')
@@ -463,6 +463,38 @@ class DocxParserTestCase(TestCase):
         self.assertNotIn('<style data-sticky-until', html)
         self.assertIn('<div class="lf-container" data-sticky-until="_Анкета">', html)
 
+    def test_html_block_with_soft_breaks_in_style_preserves_css_and_attaches_sticky_to_container(self):
+        doc = docx.Document()
+        p = doc.add_paragraph('[')
+        p._p.append(self._hyperlink('_Таблица', 'HTML'))
+        p.add_run(']<style>\n.compact-table td,\n.compact-table th {\n  padding: 3px !important;\n}\n</style>\n<div class="dcf-overflow-x-auto">\n<table class="compact-table"><tr><td>0</td><td>zéro</td></tr></table>\n</div>[/HTML]')
+        self._add_bookmark(doc.add_paragraph('Next heading'), '_Таблица', 403)
+
+        html, lines_map = docx_parse_document(doc, strict=True)
+        style_content = html[html.find('<style>'):html.find('</style>')]
+        self.assertNotIn('<br', style_content)
+        self.assertNotIn('<br/ data-sticky-until', html)
+        self.assertIn('<div class="dcf-overflow-x-auto" data-sticky-until="_Таблица">', html)
+
+    def test_html_block_preserves_user_typed_br_in_cells(self):
+        doc = docx.Document()
+        p = doc.add_paragraph()
+        p.add_run('[HTML]<div class="box">\n<table>\n<tr>\n<td>First line<br>Second line</td>\n<td>Another<br/>break</td>\n</tr>\n</table>\n</div>[/HTML]')
+
+        html, lines_map = docx_parse_document(doc)
+        self.assertIn('<td>First line<br>Second line</td>', html)
+        self.assertIn('<td>Another<br/>break</td>', html)
+        self.assertNotIn('<table><br', html)
+        self.assertNotIn('<tr><br', html)
+
+    def test_html_block_preserves_br_between_img_and_caption(self):
+        doc = docx.Document()
+        p = doc.add_paragraph()
+        p.add_run('[HTML]<p><img title="Montmartre" src="//files.le-francais.ru/img.jpg" alt="Монмартр"><br><em>La butte Montmartre</em></p>[/HTML]')
+
+        html, lines_map = docx_parse_document(doc)
+        self.assertIn('<p><img title="Montmartre" src="//files.le-francais.ru/img.jpg" alt="Монмартр"><br><em>La butte Montmartre</em></p>', html)
+
     def test_pipe_marker_split_with_nested_tags(self):
         from docx.oxml import parse_xml
         from docx.oxml.ns import nsdecls
@@ -539,5 +571,60 @@ class DocxParserTestCase(TestCase):
 
         self.assertTrue(any('upstream_anchor' in msg for msg in cm.output))
 
+    def test_sticky_anchor_word_truncation_resolves_forward_bookmark(self):
+        from docx.oxml import parse_xml
+        from docx.oxml.ns import nsdecls
+        doc = docx.Document()
 
-
+        # Paragraph 1: Callout with hyperlink truncated at quote: "_Упражнение_на_"
+        p_callout = doc.add_paragraph(style='Intense Quote')
+        hl_xml = parse_xml(
+            f'<w:hyperlink {nsdecls("w")} w:anchor="_Упражнение_на_">'
+            f'  <w:r><w:t>Правило произношения</w:t></w:r>'
+            f'</w:hyperlink>'
+        )
+        p_callout._p.append(hl_xml)
+
+        # Paragraph 2: Target heading with bookmark "_Упражнение_на_«oi»"
+        p_target = doc.add_paragraph('Упражнение на «oi»')
+        b_start = parse_xml(f'<w:bookmarkStart {nsdecls("w")} w:id="301" w:name="_Упражнение_на_«oi»"/>')
+        b_end = parse_xml(f'<w:bookmarkEnd {nsdecls("w")} w:id="301"/>')
+        p_target._p.insert(0, b_start)
+        p_target._p.append(b_end)
+
+        html, lines_map = docx_parse_document(doc, strict=True)
+        self.assertIn('data-sticky-until="_Упражнение_на_«oi»"', html)
+
+    def test_strict_sticky_missing_anchor_error_includes_paragraph_and_snippet(self):
+        from docx.oxml import parse_xml
+        from docx.oxml.ns import nsdecls
+        doc = docx.Document()
+
+        p_callout = doc.add_paragraph(style='Intense Quote')
+        hl_xml = parse_xml(
+            f'<w:hyperlink {nsdecls("w")} w:anchor="non_existent_bookmark">'
+            f'  <w:r><w:t>Важное примечание к уроку</w:t></w:r>'
+            f'</w:hyperlink>'
+        )
+        p_callout._p.append(hl_xml)
+
+        with self.assertRaises(ValueError) as ctx:
+            docx_parse_document(doc, strict=True)
+
+        err_msg = str(ctx.exception)
+        self.assertIn("paragraph 1", err_msg)
+        self.assertIn("Важное примечание", err_msg)
+        self.assertIn("non_existent_bookmark", err_msg)
+
+    def test_html_block_with_multiple_elements_wraps_in_sticky_div(self):
+        doc = docx.Document()
+        p = doc.add_paragraph('[')
+        p._p.append(self._hyperlink('_Якорь', 'HTML'))
+        p.add_run(']<p><strong>Titre</strong></p><p><em>Exemple</em></p><ul><li>Item 1</li><li>Item 2</li></ul>[/HTML]')
+        self._add_bookmark(doc.add_paragraph('Next heading'), '_Якорь', 404)
+
+        html, lines_map = docx_parse_document(doc, strict=True)
+        self.assertIn('<div data-sticky-until="_Якорь"><div style="margin: 0 0 6px 0; line-height: 1.4;"><strong>Titre</strong></div><div style="margin: 0 0 6px 0; line-height: 1.4;"><em>Exemple</em></div><ul><li>Item 1</li><li>Item 2</li></ul></div>', html)
+
+
+

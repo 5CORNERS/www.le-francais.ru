@@ -1057,7 +1057,7 @@
     max-height: 80vh;
 }
 
-#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout) {
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) {
     background-color: #ffffff;
     border: 1px solid #dee2e6;
     border-radius: 6px;
@@ -1065,21 +1065,34 @@
     box-sizing: border-box !important;
 }
 
-#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout) p {
-    margin: 0 !important;
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) p {
+    margin: 0 0 6px 0;
     padding: 0 !important;
-    line-height: 0 !important;
-    font-size: 0 !important;
+    line-height: 1.4 !important;
 }
 
-#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout) img {
-    display: block !important;
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) p:has(> img:only-child) {
     margin: 0 !important;
+    line-height: 0 !important;
+}
+
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) p:last-child,
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) ul:last-child {
+    margin-bottom: 0 !important;
+}
+
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) img {
+    display: block !important;
+    margin: 0 auto !important;
     padding: 0 !important;
     max-width: 100% !important;
     height: auto !important;
     border-radius: 4px;
     vertical-align: bottom !important;
+}
+
+#playerPlus figure.figure {
+    margin-bottom: 0;
 }
 
 .bs-callout[data-sticky-until].is-sticky-pinned {

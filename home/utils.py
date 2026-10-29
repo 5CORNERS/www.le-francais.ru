@@ -20,6 +20,7 @@ from docx.text.run import Run
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from lxml import etree
+import lxml.html
 from lxml.etree import tostring
 from markdown import Markdown
 from html import escape as html_escape, unescape
@@ -564,6 +565,54 @@ def _close_open_block(html, open_block):
     return html, None
 
 
+def resolve_sticky_anchor(target: str, p_index: int, declared_bookmarks: dict) -> str:
+    """
+    Resolves a hyperlink anchor or bookmark name against declared bookmarks.
+    Handles Word truncations (at non-ASCII chars like '«' or 40-character bookmark limits).
+    Prioritizes forward bookmarks appearing after p_index.
+    """
+    if not target or not declared_bookmarks:
+        return target
+    if target in declared_bookmarks:
+        return target
+
+    # Forward candidates (bookmarks defined after the material)
+    forward_bms = [(b, idx) for b, idx in declared_bookmarks.items() if idx > p_index]
+    forward_bms.sort(key=lambda x: x[1])
+
+    # 1. Exact prefix match: bookmark starts with target (e.g. "_Упражнение_на_«oi»" starts with "_Упражнение_на_")
+    for b, idx in forward_bms:
+        if b.startswith(target):
+            return b
+
+    # 2. Target starts with bookmark (e.g. 40-char truncation: target is 60 chars, bookmark is 40 chars)
+    for b, idx in forward_bms:
+        if target.startswith(b):
+            return b
+
+    # 3. Normalized alphanumeric prefix match (ignoring symbols, quotes, punctuation)
+    norm_target = re.sub(r'[\W_]+', '', target)
+    if norm_target:
+        for b, idx in forward_bms:
+            norm_b = re.sub(r'[\W_]+', '', b)
+            if norm_b.startswith(norm_target) or norm_target.startswith(norm_b):
+                return b
+
+    # 4. Fallback: check backward bookmarks if no forward bookmark found
+    backward_bms = [(b, idx) for b, idx in declared_bookmarks.items() if idx <= p_index]
+    backward_bms.sort(key=lambda x: x[1], reverse=True)
+    for b, idx in backward_bms:
+        if b.startswith(target) or target.startswith(b):
+            return b
+    if norm_target:
+        for b, idx in backward_bms:
+            norm_b = re.sub(r'[\W_]+', '', b)
+            if norm_b.startswith(norm_target) or norm_target.startswith(norm_b):
+                return b
+
+    return target
+
+
 def docx_parse_document(document, strict=False):
     """Convert a transcript docx into (html, lines_map).
 
@@ -597,6 +646,7 @@ def docx_parse_document(document, strict=False):
         'editorial_comment_ids': set(),
         'editorial_comments': [],
         'active_editorial_comments': [],
+        'declared_bookmarks': declared_bookmarks,
     }
     for p_idx, p in enumerate(document.paragraphs):
         html, lines_map, opened_tags, open_block = docx_parse_through_paragraph(
@@ -611,13 +661,25 @@ def docx_parse_document(document, strict=False):
     for sticky in state.get('sticky_materials', []):
         target = sticky['anchor']
         mat_idx = sticky['p_index']
+        snippet = sticky.get('snippet', '')
+
+        resolved = resolve_sticky_anchor(target, mat_idx, declared_bookmarks)
+        if resolved in declared_bookmarks and resolved != target:
+            logger.info(
+                f"Resolved sticky anchor '{target}' to bookmark '{resolved}' at paragraph {declared_bookmarks[resolved] + 1}."
+            )
+            html = html.replace(f'data-sticky-until="{target}"', f'data-sticky-until="{resolved}"')
+            target = resolved
+            sticky['anchor'] = resolved
+
         if (target, mat_idx) in seen_stickies:
             continue
         seen_stickies.add((target, mat_idx))
 
-        snippet = sticky.get('snippet', '')
         if target not in declared_bookmarks:
-            error = f"Sticky material in block '{snippet}' references non-existent anchor/bookmark '{target}'."
+            p_num = mat_idx + 1
+            snip_display = f" '{snippet}'" if snippet else ""
+            error = f"Sticky material in paragraph {p_num}{snip_display} references non-existent anchor/bookmark '{target}'."
             if strict:
                 raise ValueError(error)
             logger.warning(error)
@@ -625,34 +687,129 @@ def docx_parse_document(document, strict=False):
             continue
         target_p_idx = declared_bookmarks[target]
         if target_p_idx <= mat_idx:
+            p_num = mat_idx + 1
+            snip_display = f" '{snippet}'" if snippet else ""
             logger.warning(
-                f"Sticky material in block '{snippet}' references anchor '{target}' "
-                f"which appears before or at the material itself (material at paragraph {mat_idx}, anchor at paragraph {target_p_idx})."
+                f"Sticky material in paragraph {p_num}{snip_display} references anchor '{target}' "
+                f"which appears before or at the material itself (material at paragraph {p_num}, anchor at paragraph {target_p_idx + 1})."
             )
 
     html = re.sub('!\[(.+?)]\((.+?)\s&quot;(.+?)&quot;\)',
                   '<img title="\g<1>" src="\g<2>" alt="\g<3>">', html)
     def _replace_html_block(match):
         sticky_anchor = match.group(1)
-        html_block = unescape(match.group(2))
+        raw_content = match.group(2)
+        trailing_content = match.group(3) if match.lastindex >= 3 else ''
+        # Soft line-breaks (<w:br/>) inside [HTML] are line breaks in HTML/CSS/JS source code,
+        # not HTML <br> tags. Replace unescaped <br/> with newline before unescaping.
+        raw_content = re.sub(r'<br\s*/?>', '\n', raw_content)
+        html_block = unescape(raw_content)
+
+        # Ensure <style> and <script> blocks never contain literal <br> tags
+        def _clean_code_tags(m):
+            tag = m.group(1)
+            attrs = m.group(2)
+            code = re.sub(r'<br\s*/?>', '\n', m.group(3), flags=re.IGNORECASE)
+            return f'<{tag}{attrs}>{code}</{tag}>'
+
+        html_block = re.sub(
+            r'<(style|script)\b([^>]*)>(.*?)</\1>',
+            _clean_code_tags,
+            html_block,
+            flags=re.DOTALL | re.IGNORECASE
+        )
+
         # Strip all soft line-break <br/> tags between HTML tags to prevent browser foster parenting
         # (e.g. <table><br/>, <tr><br/>, <br/><div>, etc.), while preserving inline <br> within cell text
+        table_list_tags = r'table|thead|tbody|tfoot|tr|colgroup|ul|ol'
         prev_h = None
         while prev_h != html_block:
             prev_h = html_block
-            html_block = re.sub(r'(>)\s*<br\s*/?>', r'\1', html_block)
-            html_block = re.sub(r'<br\s*/?>\s*(<)', r'\1', html_block)
+            html_block = re.sub(rf'(<(?:/?(?:{table_list_tags})|li)\b[^>]*>)\s*<br\s*/?>', r'\1', html_block, flags=re.IGNORECASE)
+            html_block = re.sub(rf'<br\s*/?>\s*(<(?:/?(?:{table_list_tags})|td|th|li)\b[^>]*)>', r'\1>', html_block, flags=re.IGNORECASE)
 
         if sticky_anchor:
-            tag_match = re.search(r'<(?!style\b|script\b)([a-zA-Z][\w:-]*)([^>]*)>', html_block, re.IGNORECASE)
-            if tag_match:
-                tag_end = tag_match.end() - 1
-                html_block = html_block[:tag_end] + f' data-sticky-until="{sticky_anchor}"' + html_block[tag_end:]
+            if sticky_anchor not in declared_bookmarks:
+                resolved = resolve_sticky_anchor(sticky_anchor, 0, declared_bookmarks)
+                if resolved in declared_bookmarks:
+                    sticky_anchor = resolved
+
+            try:
+                frags = [
+                    f for f in lxml.html.fragments_fromstring(html_block)
+                    if getattr(f, 'tag', None) not in ('style', 'script', 'link', 'meta')
+                    and (not isinstance(f, str) or f.strip())
+                ]
+            except Exception:
+                frags = []
+
+            if len(frags) == 1 and getattr(frags[0], 'tag', '').lower() == 'div':
+                pattern = re.compile(
+                    r'<!--.*?-->'
+                    r'|<style\b[^>]*>.*?</style>'
+                    r'|<script\b[^>]*>.*?</script>'
+                    r'|<(?P<tag>div)\b(?P<attrs>[^>]*)>',
+                    re.DOTALL | re.IGNORECASE
+                )
+                target_match = None
+                for m in pattern.finditer(html_block):
+                    if m.group('tag'):
+                        target_match = m
+                        break
+                if target_match:
+                    tag_end = target_match.end() - 1
+                    html_block = html_block[:tag_end] + f' data-sticky-until="{sticky_anchor}"' + html_block[tag_end:]
+                else:
+                    html_block = f'<div data-sticky-until="{sticky_anchor}">{html_block}</div>'
             else:
-                html_block = f'<div data-sticky-until="{sticky_anchor}">{html_block}</div>'
+                pattern = re.compile(
+                    r'^\s*(?:<!--.*?-->\s*|<style\b[^>]*>.*?</style>\s*|<script\b[^>]*>.*?</script>\s*)*',
+                    re.DOTALL | re.IGNORECASE
+                )
+                head_match = pattern.match(html_block)
+                if head_match and head_match.end() > 0:
+                    head = html_block[:head_match.end()]
+                    body = html_block[head_match.end():]
+                else:
+                    head = ''
+                    body = html_block
+
+                prod_override = (
+                    '<style>#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) p{'
+                    'font-size:inherit!important;line-height:1.4!important;margin:0 0 6px 0!important;}</style>'
+                )
+
+                def _p_to_div(m):
+                    attrs = m.group(1) or ''
+                    if 'style="' in attrs.lower():
+                        attrs = re.sub(r'style="([^"]*)"', r'style="margin: 0 0 6px 0; line-height: 1.4; \1"', attrs, flags=re.IGNORECASE)
+                        return f'<div{attrs}>'
+                    elif "style='" in attrs.lower():
+                        attrs = re.sub(r"style='([^']*)'", r"style='margin: 0 0 6px 0; line-height: 1.4; \1'", attrs, flags=re.IGNORECASE)
+                        return f'<div{attrs}>'
+                    return f'<div style="margin: 0 0 6px 0; line-height: 1.4;"{attrs}>'
+
+                body = re.sub(r'<p\b([^>]*)>', _p_to_div, body, flags=re.IGNORECASE)
+                body = re.sub(r'</p>', '</div>', body, flags=re.IGNORECASE)
+                html_block = f'{head}{prod_override}<div data-sticky-until="{sticky_anchor}">{body}</div>'
+
+
+        if trailing_content and trailing_content.strip():
+            return f'{html_block}<p>{trailing_content}</p>'
         return html_block
 
-    html = re.sub(r'<p>\[HTML(?:\s+data-sticky-until="([^"]+)")?\](.*?)\[/HTML\]</p>', _replace_html_block, html, flags=re.DOTALL)
+    html = re.sub(
+        r'<p>\s*\[HTML(?:\s+data-sticky-until="([^"]+)")?\]\s*((?:(?!\[HTML).)*?)\s*\[/HTML\](?:\s*<br\s*/?>)?\s*(.*?)</p>',
+        _replace_html_block,
+        html,
+        flags=re.DOTALL
+    )
+    html = re.sub(
+        r'\[HTML(?:\s+data-sticky-until="([^"]+)")?\]\s*((?:(?!\[HTML).)*?)\s*\[/HTML\]',
+        _replace_html_block,
+        html,
+        flags=re.DOTALL
+    )
     html = text_postprocessor(html)
     lines_map, split_entries = _split_lines_map(lines_map)
     html = _split_transcript_spans(html, split_entries)
@@ -682,7 +839,8 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
     p_map = []
     runs_iterator = (run for run in paragraph.runs)
 
-    cleaned_p_text = ZERO_WIDTH_CHARS_RE.sub('', paragraph.text).lstrip()
+    raw_p_text = ''.join(paragraph._element.xpath('.//w:t/text()'))
+    cleaned_p_text = ZERO_WIDTH_CHARS_RE.sub('', raw_p_text).strip()
     starts_with_dash = bool(PARAGRAPH_DIALOGUE_DASH_RE.match(cleaned_p_text))
     p_context = {
         'starts_with_dash': starts_with_dash,
@@ -691,7 +849,16 @@ def docx_parse_through_paragraph(document, paragraph:Paragraph, html, lines_map,
         'state': state,
         'p_index': p_index,
     }
-    if state.get('active_replica_entry') is not None and paragraph.text.strip():
+    # Check if paragraph has complex field hyperlinks (which Word splits across instrText elements)
+    all_instr = ''.join(paragraph._element.xpath('.//w:instrText/text()'))
+    if all_instr and 'HYPERLINK' in all_instr:
+        anchor = extract_hyperlink_anchor(all_instr)
+        if anchor:
+            bms = state.get('declared_bookmarks')
+            if bms:
+                anchor = resolve_sticky_anchor(anchor, p_index, bms)
+            p_context['sticky_until'] = anchor
+    if state.get('active_replica_entry') is not None and cleaned_p_text:
         curr_text = state['active_replica_entry']['text']
         if curr_text and not curr_text.endswith(' ') and not curr_text.endswith('||'):
             state['active_replica_entry']['text'] += ' '
@@ -823,6 +990,16 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
             text_nodes = sub.xpath('text()')
             t_text = text_nodes[0] if text_nodes else ''
             t_text = ZERO_WIDTH_CHARS_RE.sub('', t_text)
+            if 'HYPERLINK' in t_text:
+                anchor = extract_hyperlink_anchor(t_text)
+                if anchor and p_context and not p_context.get('sticky_until'):
+                    bms = p_context.get('state', {}).get('declared_bookmarks')
+                    if bms:
+                        anchor = resolve_sticky_anchor(anchor, p_context.get('p_index', 0), bms)
+                    p_context['sticky_until'] = anchor
+                t_text = HYPERLINK_INSTR_RE.sub('', t_text)
+                if not t_text.strip():
+                    continue
             if not t_text:
                 continue
             if p_context and p_context.get('current_replica_entry') is not None:
@@ -855,6 +1032,9 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
             if anchor_attrs and p_context:
                 cleaned_anchor = anchor_attrs[0].replace('\\', '').strip()
                 if cleaned_anchor and not cleaned_anchor.startswith(WORD_SYSTEM_BOOKMARKS):
+                    bms = p_context.get('state', {}).get('declared_bookmarks')
+                    if bms:
+                        cleaned_anchor = resolve_sticky_anchor(cleaned_anchor, p_context.get('p_index', 0), bms)
                     p_context['sticky_until'] = cleaned_anchor
 
             for h_child in sub.xpath('./*'):
@@ -878,6 +1058,9 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
             if instr_attr and p_context:
                 anchor = extract_hyperlink_anchor(instr_attr[0])
                 if anchor:
+                    bms = p_context.get('state', {}).get('declared_bookmarks')
+                    if bms:
+                        anchor = resolve_sticky_anchor(anchor, p_context.get('p_index', 0), bms)
                     p_context['sticky_until'] = anchor
             for f_child in sub.xpath('./*'):
                 if f_child.xpath('name()') == 'w:r':
@@ -1095,6 +1278,9 @@ def xml_parse_through_element(document:Document, runs_iterator, element,
             instr_text = "".join(sub.xpath('text()'))
             anchor = extract_hyperlink_anchor(instr_text)
             if anchor and p_context:
+                bms = p_context.get('state', {}).get('declared_bookmarks')
+                if bms:
+                    anchor = resolve_sticky_anchor(anchor, p_context.get('p_index', 0), bms)
                 p_context['sticky_until'] = anchor
     return html, transcript_map, opened_tags
 
