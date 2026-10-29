@@ -1057,28 +1057,41 @@
     max-height: 80vh;
 }
 
-#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout) {
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) {
     background-color: #ffffff;
     border: 1px solid #dee2e6;
     border-radius: 6px;
     padding: 8px;
 }
 
-#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout) p {
-    margin: 0;
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) p {
+    margin: 0 0 6px 0;
     padding: 0;
-    line-height: 0;
-    font-size: 0;
+    line-height: 1.4;
 }
 
-#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout) img {
-    display: block;
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) p:has(> img:only-child) {
     margin: 0;
+    line-height: 0;
+}
+
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) p:last-child,
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) ul:last-child {
+    margin-bottom: 0;
+}
+
+#playerPlus div[data-sticky-until].is-sticky-pinned:not(.bs-callout):not(.campus-card) img {
+    display: block;
+    margin: 0 auto;
     padding: 0;
     max-width: 100%;
     height: auto;
     border-radius: 4px;
     vertical-align: bottom;
+}
+
+#playerPlus figure.figure {
+    margin-bottom: 0;
 }
 
 .bs-callout[data-sticky-until].is-sticky-pinned {

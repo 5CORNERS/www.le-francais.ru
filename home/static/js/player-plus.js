@@ -1235,15 +1235,6 @@
             const winW = window.innerWidth || document.documentElement.clientWidth || 360;
             const winH = window.innerHeight || document.documentElement.clientHeight || 600;
 
-            const ctrlW = $ctrl.outerWidth() || 56;
-            let btnTop = Math.round(topY + elH + 4);
-            let btnLeft = Math.round(cardLeft + cardWidth - ctrlW);
-
-            btnLeft = Math.max(10, Math.min(winW - ctrlW - 12, btnLeft));
-            if (btnTop > winH - 34) {
-                btnTop = winH - 34;
-            }
-
             const maxPinnedH = getMaxPinnedHeight();
             const canExpand = item.naturalHeight > (maxPinnedH + 20);
             $ctrl.find('.sticky-material-btn-expand').toggle(canExpand);
@@ -1253,6 +1244,18 @@
             $expandBtn.attr('title', item.isExpanded ? 'Свернуть' : 'Развернуть');
             $expandBtn.find('.sticky-icon-expand').toggle(!item.isExpanded);
             $expandBtn.find('.sticky-icon-collapse').toggle(item.isExpanded);
+
+            const ctrlW = $ctrl.outerWidth() || (canExpand ? 56 : 30);
+            const ctrlH = $ctrl.outerHeight() || 30;
+
+            // Position control pill straddling bottom-right border of the pinned card
+            let btnTop = Math.round(topY + elH - Math.round(ctrlH / 2));
+            let btnLeft = Math.round(cardLeft + cardWidth - ctrlW - 12);
+
+            btnLeft = Math.max(10, Math.min(winW - ctrlW - 12, btnLeft));
+            if (btnTop > winH - 34) {
+                btnTop = winH - 34;
+            }
 
             $ctrl.css({
                 top: btnTop + 'px',
@@ -1293,7 +1296,7 @@
                 }
 
                 const $img = $el.find('img').first();
-                const isImageWrapper = $img.length > 0 && !$el.hasClass('bs-callout');
+                const isImageWrapper = $img.length > 0 && !$el.hasClass('bs-callout') && !$el.hasClass('campus-card') && ($el.is('figure') || $el.hasClass('figure') || $el.text().trim().length < 30);
                 const $lastLine = findLastLineBefore($(anchorEl));
 
                 stickyMaterials.push({
