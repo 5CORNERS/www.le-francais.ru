@@ -785,7 +785,12 @@ def manage_words_standalone(request, lesson_number):
         cross_site_key = None
     else:
         template_name = 'dictionary/manage_words_iframe.html'
-        packets_ids = list(map(lambda x: int(x), request.GET.getlist('p')))
+        packets_ids = []
+        for p in request.GET.getlist('p'):
+            try:
+                packets_ids.append(int(p))
+            except (ValueError, TypeError):
+                pass
         cross_site_key = request.GET.get('ck', None)
         init_packets = list(Packet.objects.filter(pk__in=packets_ids).values_list('pk', flat=True))
         if 88888888 in packets_ids:

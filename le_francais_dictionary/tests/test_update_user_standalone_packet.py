@@ -13,7 +13,7 @@ class UpdateUserStandalonePacketTest(TestCase):
         self.user = User.objects.create(username="testuser")
         
     def test_update_user_standalone_packet_success(self):
-        with patch('le_francais_dictionary.views.jwt.decode') as mock_decode, \
+        with patch('jwt.decode') as mock_decode, \
              patch('le_francais_dictionary.views.load_courses_public_key') as mock_load_key:
             
             mock_decode.return_value = {"user_id": self.user.pk}

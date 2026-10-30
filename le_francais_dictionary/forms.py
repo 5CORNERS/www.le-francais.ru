@@ -49,7 +49,11 @@ class WordsManagementFilterForm(forms.Form):
 		# Selects user-specific packets based on authentication, payment status, and lesson access
 		if cross_site is not None:
 			# check with courses what packets available to the user
-			self.packets = Packet.objects.filter(pk__in=get_courses_packets(user.pk, settings.CROSS_SITE_KEYS_DOMAINS[cross_site]))
+			domain = settings.CROSS_SITE_KEYS_DOMAINS.get(cross_site)
+			if self.user.is_authenticated and self.user.pk and domain:
+				self.packets = Packet.objects.filter(pk__in=get_courses_packets(self.user.pk, domain))
+			else:
+				self.packets = Packet.objects.none()
 		else:
 			if self.user.is_authenticated and not self.user.must_pay:
 				self.packets = Packet.objects.all()
@@ -96,12 +100,8 @@ class WordsManagementFilterForm(forms.Form):
 				words = repetition_words + packet_words
 				words = list(dict.fromkeys(words))
 			else:
-				if self.cross_site is None:
-					query = Word.objects.filter(packet_id__in=data['packets'])
-					words = list(query.distinct())
-				else:
-					...
-					# check with courses what packets available to the user
+				query = Word.objects.filter(packet_id__in=data['packets'])
+				words = list(query.distinct())
 
 			# time = datetime.now()
 			words = prefetch_words_data(words, self.user)
