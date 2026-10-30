@@ -144,6 +144,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
+    # Log500ErrorsMiddleware must be placed before SocialAuthExceptionMiddleware
+    # and other exception-handling middlewares because Django processes exception
+    # middleware in reverse order (bottom-to-top). This ensures that handled exceptions
+    # (e.g. AuthCanceled redirecting to login) are not falsely logged as 500 errors.
+    'log_errors.middleware.Log500ErrorsMiddleware',
+
     'wagtail.core.middleware.SiteMiddleware',
     'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 
@@ -157,7 +163,7 @@ MIDDLEWARE = [
 
     'le_francais.middleware.GeoIpSessionMiddleware',
     # 'custom_user.middleware.GetPush4SiteId',
-    'log_errors.middleware.Log500ErrorsMiddleware',
+
 ]
 
 SESSION_ENGINE = 'user_sessions.backends.db'
