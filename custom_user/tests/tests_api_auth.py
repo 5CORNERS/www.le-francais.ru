@@ -84,3 +84,40 @@ class AuthAPITests(APITestCase):
         url = reverse('api-session', kwargs={'session_id': 'expiredsession'})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_issue_session_success(self):
+        url = reverse('api-issue-session')
+        data = {'user_id': self.user.pk}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['username'], 'testuser')
+        self.assertIn('session_key', response.data)
+        session_key = response.data['session_key']
+        self.assertTrue(Session.objects.filter(session_key=session_key, user=self.user).exists())
+
+    def test_issue_session_missing_user_id(self):
+        url = reverse('api-issue-session')
+        response = self.client.post(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_issue_session_user_not_found(self):
+        url = reverse('api-issue-session')
+        response = self.client.post(url, {'user_id': 9999999}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_issue_session_inactive_user(self):
+        self.user.is_active = False
+        self.user.save()
+        url = reverse('api-issue-session')
+        response = self.client.post(url, {'user_id': self.user.pk}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_issue_session_forbidden_without_service_jwt(self):
+        # Stop patcher temporarily to test real IsValidCourses check failure
+        self.patcher.stop()
+        try:
+            url = reverse('api-issue-session')
+            response = self.client.post(url, {'user_id': self.user.pk}, format='json')
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        finally:
+            self.patcher.start()

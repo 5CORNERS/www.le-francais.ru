@@ -135,3 +135,22 @@ class SetPasswordView(APIView):
         user.save()
 
         return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+
+
+class IssueSessionView(APIView):
+    permission_classes = [IsValidCourses]
+
+    def post(self, request):
+        user_id = request.data.get('user_id')
+        if not user_id:
+            return Response({"detail": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(pk=user_id, is_active=True)
+        except (User.DoesNotExist, ValueError, TypeError):
+            return Response({"detail": "User not found or inactive"}, status=status.HTTP_404_NOT_FOUND)
+
+        session_key = _create_user_session(user, request)
+        data = UserSerializer(user).data
+        data['session_key'] = session_key
+        return Response(data, status=status.HTTP_200_OK)
