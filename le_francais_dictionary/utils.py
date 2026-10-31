@@ -100,3 +100,58 @@ def copy_file(src, dest):
 
 def escape_non_url_characters(str):
 	return str.replace(' ', '_').replace('\\', '_').replace('/', '_')
+
+
+_courses_public_key = None
+
+
+def load_courses_public_key():
+    global _courses_public_key
+    if _courses_public_key is None:
+        import os
+        from django.conf import settings
+        key_path = os.path.join(settings.BASE_DIR, 'courses_public.pem')
+        if not os.path.exists(key_path):
+            key_path = 'courses_public.pem'
+        with open(key_path, 'r') as key_file:
+            _courses_public_key = key_file.read()
+    return _courses_public_key
+
+
+def login_from_courses_token(request):
+    token = request.GET.get('token')
+    if not hasattr(request, 'user'):
+        from django.contrib.auth.models import AnonymousUser
+        request.user = AnonymousUser()
+    if not token:
+        return None
+    import sys
+    import jwt
+    from django.contrib.auth import login
+    from custom_user.models import User
+    try:
+        views_mod = sys.modules.get('le_francais_dictionary.views')
+        if views_mod and hasattr(views_mod, 'load_courses_public_key'):
+            public_key = views_mod.load_courses_public_key()
+        else:
+            public_key = load_courses_public_key()
+        payload = jwt.decode(
+            token,
+            public_key,
+            algorithms=['RS256'],
+            issuer='courses.le-francais.ru',
+            audience='www.le-francais.ru'
+        )
+        user_id = payload.get('user_id')
+        if not user_id:
+            return None
+        user = User.objects.get(pk=user_id, is_active=True)
+        if request.user.is_authenticated and request.user.pk == user.pk:
+            return user
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        request.user = user
+        if hasattr(request, 'session'):
+            request.session.save()
+        return user
+    except Exception:
+        return None
