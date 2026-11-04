@@ -960,7 +960,7 @@ def get_lesson_content(request, n, render_pdf, tab_id=None):
 
 
 def get_learning_apps_iframe(request, id):
-    return render(request, 'learning_apps.html', {'app_id': id})
+    return HttpResponseRedirect(f'//files.le-francais.ru/learning-apps/{id}/index.html')
 
 
 def redirect2static(path):
