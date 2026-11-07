@@ -1,4 +1,4 @@
-﻿# -*- coding: UTF-8 -*-
+# -*- coding: UTF-8 -*-
 import json
 from datetime import datetime
 
@@ -177,3 +177,80 @@ def login_config(request):
         'next': next_url,
         'force_render': True
     })
+
+
+from custom_user.exercise_texts import (
+    get_all_lessons_summary,
+    get_lesson_exercises_data,
+    save_exercise_text
+)
+
+
+class ExerciseTextEditorView(View):
+    @method_decorator(staff_member_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ExerciseTextEditorView, self).dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        lesson = request.GET.get('lesson')
+        lessons = get_all_lessons_summary()
+        if not lesson and lessons:
+            lesson = str(lessons[0]['lesson'])
+        elif not lesson:
+            lesson = '1'
+
+        exercises = get_lesson_exercises_data(lesson)
+
+        if request.is_ajax() or request.GET.get('format') == 'json':
+            return JsonResponse({'lesson': int(lesson), 'exercises': exercises})
+
+        field = request.GET.get('field', '')
+        total_sugg_count = sum(l.get('sugg_count', 0) for l in lessons)
+        lessons_with_sugg = [l['lesson'] for l in lessons if l.get('sugg_count', 0) > 0]
+
+        return render(request, 'custom_user/exercise_text_editor.html', {
+            'lessons': lessons,
+            'current_lesson': int(lesson),
+            'current_field': field,
+            'exercises': exercises,
+            'exercises_json': json.dumps(exercises, ensure_ascii=False),
+            'total_sugg_count': total_sugg_count,
+            'lessons_with_sugg_json': json.dumps(lessons_with_sugg),
+        })
+
+
+class ExerciseTextSaveView(View):
+    @method_decorator(staff_member_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ExerciseTextSaveView, self).dispatch(request, *args, **kwargs)
+
+    def post(self, request):
+        if request.content_type == 'application/json':
+            try:
+                payload = json.loads(request.body.decode('utf-8'))
+            except Exception:
+                payload = {}
+        else:
+            payload = request.POST
+
+        items = payload.get('items')
+        if items and isinstance(items, list):
+            try:
+                from custom_user.exercise_texts import save_exercise_texts_batch
+                res = save_exercise_texts_batch(items)
+                return JsonResponse(res)
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+        app_id = payload.get('app_id')
+        field = payload.get('field')
+        value = payload.get('value', '')
+
+        if not app_id or not field:
+            return JsonResponse({'status': 'error', 'message': 'Missing app_id or field'}, status=400)
+
+        try:
+            res = save_exercise_text(app_id, field, value)
+            return JsonResponse(res)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)

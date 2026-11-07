@@ -1,0 +1,2339 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Редактор текстов упражнений | Le-francais.ru{% endblock %}
+
+{% block adsense %}{% endblock %}
+{% block adfinity %}{% endblock %}
+
+{% block menu %}
+<div style="background: #212529; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; color: #fff;">
+  <div style="font-size: 15px; font-weight: bold;">
+    <a href="/" style="color: #fff; text-decoration: none;">Le-Francais.ru</a>
+    <span style="color: #adb5bd; margin: 0 8px;">/</span>
+    <a href="{% url 'custom_user:admin_commands' %}" style="color: #adb5bd; text-decoration: none;">Admin Commands</a>
+    <span style="color: #adb5bd; margin: 0 8px;">/</span>
+    <span style="color: #0dcaf0;">Редактор текстов упражнений</span>
+  </div>
+  <div>
+    <span style="color: #ced4da; margin-right: 15px; font-size: 13px;">{{ request.user.username }} (Staff)</span>
+    <a href="{% url 'custom_user:admin_commands' %}" style="color: #ced4da; border: 1px solid #495057; border-radius: 4px; padding: 4px 12px; font-size: 12px; text-decoration: none; background: #343a40;">Назад к командам</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Full viewport width and height optimization for 2560x1440 */
+  .editor-page-wrapper {
+    max-width: 100%;
+    padding: 15px 30px 40px 30px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .top-controls-bar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 10px 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .controls-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .field-tabs {
+    display: flex;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #0d6efd;
+  }
+  .field-tab {
+    padding: 7px 12px;
+    cursor: pointer;
+    background: #fff;
+    color: #0d6efd;
+    font-weight: 600;
+    font-size: 13px;
+    border: none;
+    border-right: 1px solid #0d6efd;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field-tab:last-child {
+    border-right: none;
+  }
+  .field-tab.active {
+    background: #0d6efd;
+    color: #ffffff;
+  }
+  .field-tab.active .tab-badge {
+    background: #ffffff;
+    color: #0d6efd;
+  }
+  .field-tab-all-sugg {
+    background: #fff8eb;
+    color: #b45309;
+    border-left: 2px solid #f59e0b;
+  }
+  .field-tab-all-sugg:hover {
+    background: #fef3c7;
+  }
+  .field-tab-all-sugg.active {
+    background: #f59e0b;
+    color: #ffffff;
+    border-left-color: #d97706;
+  }
+  .field-tab-all-sugg.active .tab-badge {
+    background: #ffffff;
+    color: #b45309;
+  }
+  .tab-badge {
+    display: none;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 1px 7px;
+    background: #dc3545;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-left: 2px;
+  }
+  .tab-badge.has-count {
+    display: inline-block;
+  }
+  .tab-badge-highlight {
+    background: #d97706;
+    color: #ffffff;
+  }
+  .exercise-field-badge {
+    font-size: 12px;
+    background: #e7f1ff;
+    color: #0d6efd;
+    border: 1px solid #b6d4fe;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-weight: 600;
+  }
+  .btn-sugg-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    background: #fff;
+    color: #495057;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    white-space: nowrap;
+    height: 34px;
+    box-sizing: border-box;
+  }
+  .btn-sugg-nav:hover {
+    background: #e7f1ff;
+    color: #0d6efd;
+    border-color: #86b7fe;
+  }
+  .btn-back-commands {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    background: #ffffff;
+    color: #6c757d;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    user-select: none;
+    white-space: nowrap;
+    height: 34px;
+    box-sizing: border-box;
+    margin-left: auto;
+  }
+  .btn-back-commands:hover {
+    background: #f8f9fa;
+    color: #212529;
+    border-color: #ced4da;
+    text-decoration: none;
+  }
+  .lesson-sugg-pill {
+    background: #0d6efd;
+    color: #fff;
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+  .lesson-select {
+    padding: 7px 12px;
+    font-size: 13px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background: #fff;
+    min-width: 190px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .exercise-select {
+    padding: 7px 12px;
+    font-size: 13px;
+    border: 1px solid #0d6efd;
+    border-radius: 6px;
+    background: #f8faff;
+    min-width: 170px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #0d6efd;
+  }
+
+  /* Custom Dropdowns */
+  .custom-select-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  .custom-select-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    text-align: left;
+    height: 35px;
+    box-sizing: border-box;
+    transition: all 0.15s ease-in-out;
+    user-select: none;
+  }
+  .custom-select-trigger:focus,
+  .custom-select-wrapper.is-open .custom-select-trigger {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+  }
+  .custom-select-arrow {
+    font-size: 9px;
+    color: #6c757d;
+    transition: transform 0.2s ease;
+    margin-left: 6px;
+    pointer-events: none;
+  }
+  .custom-select-wrapper.is-open .custom-select-arrow {
+    transform: rotate(180deg);
+  }
+  .custom-select-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 100%;
+    max-width: 320px;
+    width: max-content;
+    max-height: 360px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 2000;
+    padding: 4px 0;
+  }
+  .custom-select-menu.open {
+    display: block;
+  }
+  .custom-select-menu::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-select-menu::-webkit-scrollbar-track {
+    background: #f8f9fa;
+  }
+  .custom-select-menu::-webkit-scrollbar-thumb {
+    background: #ced4da;
+    border-radius: 3px;
+  }
+  .custom-select-menu::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
+  }
+
+  .custom-select-item {
+    padding: 7px 12px;
+    font-size: 13px;
+    color: #212529;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-left: 3px solid transparent;
+    transition: background-color 0.1s ease;
+    user-select: none;
+    white-space: nowrap;
+    gap: 12px;
+  }
+  .custom-select-item:hover {
+    background-color: #f1f3f5;
+    color: #111827;
+  }
+  .custom-select-item .item-check {
+    display: none;
+    font-weight: bold;
+    font-size: 13px;
+  }
+
+  /* Current active item: distinct soft-blue underlay, bold font, left accent bar, checkmark */
+  .custom-select-item.is-current {
+    font-weight: 700 !important;
+    color: #0d6efd !important;
+    background-color: #e7f1ff;
+    border-left: 3px solid #0d6efd;
+  }
+  .custom-select-item.is-current .item-check {
+    display: inline-block;
+    color: #0d6efd;
+  }
+  /* When hovering over current item */
+  .custom-select-item.is-current:hover {
+    background-color: #d0e2ff !important;
+    color: #0a58ca !important;
+  }
+  .status-badge {
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-clean { background: #e9ecef; color: #495057; }
+  .badge-dirty { background: #fff3cd; color: #856404; }
+  .badge-saved { background: #d1e7dd; color: #0f5132; }
+
+  /* Hotkeys info bar */
+  .hotkeys-banner {
+    display: flex;
+    gap: 18px;
+    font-size: 13px;
+    color: #495057;
+    background: #f8f9fa;
+    border: 1px dashed #ced4da;
+    border-radius: 6px;
+    padding: 8px 16px;
+    margin-bottom: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .kbd-key {
+    background: #fff;
+    border: 1px solid #adb5bd;
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+    padding: 2px 6px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #212529;
+    font-weight: bold;
+  }
+
+  /* Exercises list container */
+  .exercises-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .exercise-card {
+    background: #ffffff;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 18px 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    transition: all 0.2s ease-in-out;
+  }
+  .exercise-card:focus-within {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 1px #86b7fe;
+  }
+  .exercise-card.active-scroll-card {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25), 0 4px 14px rgba(0,0,0,0.08);
+  }
+  .card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+  }
+  .exercise-title {
+    font-size: 17px;
+    font-weight: bold;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .exercise-tag {
+    font-size: 12px;
+    color: #6c757d;
+    font-family: monospace;
+    background: #f1f3f5;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: normal;
+  }
+  .save-action-btn {
+    padding: 7px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s ease-in-out;
+  }
+  .save-action-btn:enabled {
+    background: #198754;
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(25, 135, 84, 0.3);
+  }
+  .save-action-btn:disabled {
+    background: #e9ecef;
+    color: #adb5bd;
+    cursor: not-allowed;
+  }
+
+  /* Save all changes on page button */
+  .btn-save-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    background: #f8f9fa;
+    color: #adb5bd;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: not-allowed;
+    transition: all 0.2s ease;
+    user-select: none;
+    white-space: nowrap;
+    height: 34px;
+    box-sizing: border-box;
+  }
+  .btn-save-all.has-changes {
+    background: #198754;
+    color: #ffffff;
+    border-color: #146c43;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);
+  }
+  .btn-save-all.has-changes:hover {
+    background: #157347;
+    border-color: #0f5132;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.45);
+  }
+  .btn-save-all.is-saving {
+    background: #0d6efd;
+    color: #ffffff;
+    border-color: #0a58ca;
+    cursor: wait;
+  }
+  .save-all-count-badge {
+    background: #ffffff;
+    color: #198754;
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-left: 2px;
+  }
+
+  /* Split Grid */
+  .editor-preview-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .column-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .column-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #495057;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Toolbar */
+  .format-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    padding: 6px 8px;
+  }
+  .fmt-btn {
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1.2;
+    transition: all 0.1s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fmt-btn:hover { background: #e9ecef; }
+  .fmt-btn-cascade {
+    background: #fff8e6;
+    border-color: #ffd88a;
+    padding: 3px 8px;
+    color: #d67c00;
+  }
+  .fmt-btn-cascade:hover {
+    background: #ffecb5;
+    border-color: #ffc107;
+  }
+  .fmt-btn-color {
+    padding: 4px 6px;
+    min-width: 28px;
+    height: 28px;
+  }
+  .color-swatch-box {
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .fmt-separator {
+    width: 1px;
+    height: 20px;
+    background: #ced4da;
+    margin: 0 4px;
+  }
+  .text-source-area {
+    width: 100%;
+    min-height: 140px;
+    padding: 10px 14px;
+    font-size: 15px;
+    line-height: 1.5;
+    font-family: inherit;
+    border: 1px solid #ced4da;
+    border-radius: 0 0 6px 6px;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .text-source-area:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+  }
+
+  /* LearningApps Live Preview Canvas */
+  .la-preview-canvas {
+    background: #cee1f7; /* Characteristic LearningApps background */
+    border-radius: 6px;
+    padding: 20px;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ced4da;
+  }
+  .la-modal-box {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    border: 2px solid #ced4da;
+    width: 100%;
+    max-width: 540px;
+    padding: 20px 26px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+  }
+  .la-modal-heading {
+    font-size: 19px;
+    font-weight: bold;
+    color: #333333;
+    margin-bottom: 12px;
+  }
+  .la-modal-content {
+    font-size: 15px;
+    line-height: 1.55;
+    color: #212529;
+    text-align: left;
+    margin-bottom: 16px;
+    min-height: 36px;
+    word-break: break-word;
+  }
+  .la-modal-content:empty:before {
+    content: "(поле пустое)";
+    color: #999;
+    font-style: italic;
+  }
+  .la-modal-ok-btn {
+    display: inline-block;
+    background: #ffffff;
+    border: 1px solid #999999;
+    padding: 4px 22px;
+    font-size: 14px;
+    border-radius: 3px;
+    cursor: default;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    font-weight: 500;
+  }
+
+  /* Floating Heading / Word List Card Preview */
+  .la-heading-card {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+    border: 1px solid #ced4da;
+    width: 100%;
+    max-width: 580px;
+    padding: 16px 22px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+  }
+  .la-heading-badge {
+    font-size: 12px;
+    color: #6c757d;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed #dee2e6;
+    padding-bottom: 5px;
+  }
+  .la-heading-content {
+    font-size: 15px;
+    line-height: 1.55;
+    color: #212529;
+    min-height: 30px;
+    word-break: break-word;
+  }
+  .la-heading-content:empty:before {
+    content: "(поле пустое)";
+    color: #999;
+    font-style: italic;
+  }
+
+  /* Lists inside live preview */
+  .la-modal-content ul, .la-modal-content ol,
+  .la-heading-content ul, .la-heading-content ol {
+    text-align: left;
+    margin: 8px 0 8px 24px;
+    padding-left: 0;
+  }
+  .la-modal-content li, .la-heading-content li {
+    margin-bottom: 4px;
+  }
+
+  /* Bootstrap Color Classes inside Preview */
+  .text-warning { color: #d67c00 !important; font-weight: 500; }
+  .text-danger { color: #dc3545 !important; font-weight: 500; }
+  .text-success { color: #198754 !important; font-weight: 500; }
+  .text-primary { color: #0d6efd !important; font-weight: 500; }
+  .text-info { color: #0dcaf0 !important; font-weight: 500; }
+
+  /* Exercise Runner Button */
+  .btn-run-exercise {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #0d6efd;
+    color: #ffffff;
+    border: 1px solid #0b5ed7;
+    box-shadow: 0 2px 5px rgba(13, 110, 253, 0.25);
+    transition: all 0.15s ease-in-out;
+  }
+  .btn-run-exercise:hover {
+    background: #0b5ed7;
+    box-shadow: 0 3px 8px rgba(13, 110, 253, 0.35);
+  }
+
+  /* AI Suggestion Box & Word-level Diff */
+  .ai-suggestion-box {
+    margin-bottom: 10px;
+    background: #f8fbff;
+    border: 1px solid #c5d7f2;
+    border-left: 4px solid #0d6efd;
+    border-radius: 6px;
+    padding: 10px 14px;
+    box-shadow: 0 2px 6px rgba(13, 110, 253, 0.06);
+  }
+  .ai-suggestion-box.ai-suggestion-applied {
+    background: #f6fcf8;
+    border-color: #b7e4c7;
+    border-left-color: #198754;
+  }
+  .ai-suggestion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ai-suggestion-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0b5ed7;
+  }
+  .ai-suggestion-applied .ai-suggestion-title {
+    color: #198754;
+  }
+  .ai-sparkle-icon {
+    font-size: 14px;
+  }
+  .ai-reason-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 10px;
+    background: #e7f1ff;
+    color: #0a58ca;
+    border: 1px solid #b6d4fe;
+  }
+  .ai-reason-badge.badge-grammar {
+    background: #f8d7da;
+    color: #842029;
+    border-color: #f5c2c7;
+  }
+  .ai-reason-badge.badge-spacing {
+    background: #fff3cd;
+    color: #664d03;
+    border-color: #ffecb5;
+  }
+  .ai-suggestion-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-sugg-apply {
+    background: #198754;
+    color: #ffffff;
+    border: 1px solid #146c43;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.1s ease;
+  }
+  .btn-sugg-apply:hover {
+    background: #157347;
+  }
+  .btn-sugg-dismiss {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+  }
+  .btn-sugg-dismiss:hover {
+    background: #e9ecef;
+    color: #212529;
+  }
+  .ai-suggestion-diff {
+    font-size: 14px;
+    line-height: 1.5;
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: #212529;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: inherit;
+  }
+  del.diff-del {
+    background: #ffebe9;
+    color: #cf222e;
+    text-decoration: line-through;
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+  ins.diff-ins {
+    background: #dafbe1;
+    color: #1a7f37;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+
+  /* Interactive Runner Modal Dialog */
+  dialog#exerciseRunnerModal {
+    width: 92vw;
+    max-width: 1280px;
+    height: 90vh;
+    max-height: 920px;
+    padding: 0;
+    border: 1px solid #ced4da;
+    border-radius: 10px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+    background: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+    margin: auto;
+  }
+  dialog#exerciseRunnerModal:not([open]) {
+    display: none;
+  }
+  dialog#exerciseRunnerModal:modal {
+    overscroll-behavior: contain;
+  }
+  dialog#exerciseRunnerModal::backdrop {
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(3px);
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+  .runner-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    flex-shrink: 0;
+  }
+  .runner-modal-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .runner-modal-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .runner-btn-reload, .runner-btn-ext {
+    padding: 5px 12px;
+    font-size: 13px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    background: #fff;
+    color: #495057;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+    transition: all 0.1s ease;
+  }
+  .runner-btn-reload:hover, .runner-btn-ext:hover {
+    background: #e9ecef;
+    color: #212529;
+    text-decoration: none;
+  }
+  .runner-btn-close {
+    background: #f1f3f5;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    line-height: 1;
+    color: #495057;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s ease;
+  }
+  .runner-btn-close:hover {
+    background: #e03131;
+    color: #ffffff;
+    border-color: #c92a2a;
+  }
+  .runner-dirty-alert {
+    background: #fff3cd;
+    color: #664d03;
+    border-bottom: 1px solid #ffe69c;
+    padding: 8px 20px;
+    font-size: 13px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .runner-modal-body {
+    position: relative;
+    flex: 1 1 auto;
+    width: 100%;
+    background: #cee1f7;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .runner-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    flex: 1 1 auto;
+    background: #ffffff;
+  }
+  .runner-loading-indicator {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 14px;
+    color: #495057;
+    z-index: 5;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  @keyframes runnerSpin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="editor-page-wrapper">
+  <!-- Top Navigation & Controls Bar (Sticky) -->
+  <div class="top-controls-bar">
+    <div class="controls-group">
+      <span style="font-weight: bold; font-size: 14px;">Поле:</span>
+      <div class="field-tabs">
+        <button type="button" class="field-tab active" id="tab-tasktext" onclick="switchFieldTab('tasktext')">
+          <span>Задание (tasktext)</span>
+          <span class="tab-badge" id="tab-badge-tasktext"></span>
+        </button>
+        <button type="button" class="field-tab" id="tab-titel" onclick="switchFieldTab('titel')">
+          <span>Список слов (titel)</span>
+          <span class="tab-badge" id="tab-badge-titel"></span>
+        </button>
+        <button type="button" class="field-tab" id="tab-untertitel" onclick="switchFieldTab('untertitel')">
+          <span>Пример (untertitel)</span>
+          <span class="tab-badge" id="tab-badge-untertitel"></span>
+        </button>
+        <button type="button" class="field-tab" id="tab-helptext" onclick="switchFieldTab('helptext')">
+          <span>Подсказка (helptext)</span>
+          <span class="tab-badge" id="tab-badge-helptext"></span>
+        </button>
+        <button type="button" class="field-tab" id="tab-feedback" onclick="switchFieldTab('feedback')">
+          <span>Комплимент (feedback)</span>
+          <span class="tab-badge" id="tab-badge-feedback"></span>
+        </button>
+        <button type="button" class="field-tab field-tab-all-sugg" id="tab-all_suggestions" onclick="switchFieldTab('all_suggestions')" title="Показать только поля с предложенными правками на этом уроке">
+          <span>✨ Только поля с правками</span>
+          <span class="tab-badge tab-badge-highlight has-count" id="tab-badge-all_suggestions">0</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="controls-group" style="flex: 1 1 100%;">
+      <label style="font-weight: bold; font-size: 14px; margin-bottom: 0;">Урок:</label>
+      <div class="custom-select-wrapper" id="lessonDropdownWrapper">
+        <button type="button" class="custom-select-trigger lesson-select" id="lessonDropdownBtn" onclick="toggleDropdown('lessonDropdown')">
+          <span id="lessonDropdownLabel">
+            {% for l in lessons %}{% if l.lesson == current_lesson %}Урок {{ l.lesson }} ({{ l.count }} упр.){% endif %}{% endfor %}
+          </span>
+          <span class="custom-select-arrow">▼</span>
+        </button>
+        <div class="custom-select-menu" id="lessonDropdownMenu">
+          <div style="padding: 6px 12px; border-bottom: 1px solid #dee2e6; background: #f8f9fa;">
+            <label style="margin: 0; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #495057;">
+              <input type="checkbox" id="filterLessonsWithSuggsOnly" onchange="toggleLessonDropdownFilter(this.checked)" style="margin: 0; cursor: pointer;">
+              <span>Только уроки с правками</span>
+            </label>
+          </div>
+          {% for l in lessons %}
+            <div class="custom-select-item {% if l.lesson == current_lesson %}is-current{% endif %} {% if l.sugg_count %}has-sugg-item{% endif %}"
+                 id="lesson-item-{{ l.lesson }}"
+                 data-value="{{ l.lesson }}"
+                 data-has-sugg="{% if l.sugg_count %}1{% else %}0{% endif %}"
+                 onclick="selectCustomLesson('{{ l.lesson }}')">
+              <span class="item-text">
+                Урок {{ l.lesson }} ({{ l.count }} упр.)
+                {% if l.sugg_count %}
+                  <span class="lesson-sugg-pill" title="{{ l.sugg_count }} предложений правок">✨ {{ l.sugg_count }}</span>
+                {% endif %}
+              </span>
+              <span class="item-check">✓</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Hidden native select for DOM compatibility -->
+      <select id="lessonSelector" style="display:none;" onchange="changeLessonSelection(this.value)">
+        {% for l in lessons %}
+          <option value="{{ l.lesson }}" {% if l.lesson == current_lesson %}selected{% endif %}>
+            Урок {{ l.lesson }} ({{ l.count }} упр.)
+          </option>
+        {% endfor %}
+      </select>
+
+      <label style="font-weight: bold; font-size: 14px; margin-bottom: 0;">Упражнение:</label>
+      <div class="custom-select-wrapper" id="exerciseDropdownWrapper">
+        <button type="button" class="custom-select-trigger exercise-select" id="exerciseDropdownBtn" onclick="toggleDropdown('exerciseDropdown')">
+          <span id="exerciseDropdownLabel">
+            {% if exercises %}{{ exercises.0.num_display }} ({{ exercises.0.app_id }}){% else %}—{% endif %}
+          </span>
+          <span class="custom-select-arrow">▼</span>
+        </button>
+        <div class="custom-select-menu" id="exerciseDropdownMenu">
+          {% for ex in exercises %}
+            <div class="custom-select-item {% if forloop.first %}is-current{% endif %}"
+                 id="ex-item-{{ ex.app_id }}"
+                 data-value="{{ ex.app_id }}"
+                 onclick="selectCustomExercise('{{ ex.app_id }}')">
+              <span class="item-text">{{ ex.num_display }} ({{ ex.app_id }})</span>
+              <span class="item-check">✓</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <!-- Hidden native select for DOM compatibility -->
+      <select id="exerciseSelector" style="display:none;" onchange="jumpToExercise(this.value)">
+        {% for ex in exercises %}
+          <option value="{{ ex.app_id }}">
+            {{ ex.num_display }} ({{ ex.app_id }})
+          </option>
+        {% endfor %}
+      </select>
+
+      <span class="status-badge badge-clean" id="lessonExerciseCountBadge">Всего: {{ exercises|length }}</span>
+
+      <!-- Always visible filter checkbox with count -->
+      <label id="filterSuggWrapper" style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:13px; font-weight:600; margin:0 4px 0 6px; user-select:none; background:#f0f7ff; border:1px solid #b6d4fe; border-radius:6px; padding:6px 10px; color:#0b5ed7;">
+        <input type="checkbox" id="onlySuggestionsCheckbox" onchange="toggleOnlySuggestionsFilter(this.checked)" style="cursor:pointer; margin:0;">
+        <span>Только с правками</span>
+        <span class="badge" id="suggTotalBadge" style="background:#0d6efd; color:#fff; border-radius:10px; padding:2px 7px; font-size:11px;">0</span>
+      </label>
+
+      <button type="button" id="btnApplyLessonTypo" onclick="applyAllTypographyOnLesson()" title="Применить кавычки и тире ко всем упражнениям этого урока" style="display:none; font-size:13px; font-weight:600; background:#fff; border:1px solid #ced4da; border-radius:6px; padding:6px 12px; cursor:pointer; color:#495057;">
+        ⚡ Вся типографика на уроке
+      </button>
+
+      <!-- Save & Sugg Lesson Navigation Group -->
+      <div class="save-nav-group" style="display:inline-flex; align-items:center; gap:6px;">
+        <button type="button" class="btn-sugg-nav" id="btnPrevSuggLesson" onclick="jumpToAdjacentLessonWithSuggestions(-1)" title="Перейти к предыдущему уроку с нерассмотренными правками">
+          ◀ Урок с правкой
+        </button>
+
+        <button type="button" id="btnSaveAllChanges" class="btn-save-all" onclick="saveAllChanges()" disabled title="Нет несохранённых изменений на этой странице">
+          💾 Сохранить все изменения
+        </button>
+
+        <button type="button" class="btn-sugg-nav" id="btnNextSuggLesson" onclick="jumpToAdjacentLessonWithSuggestions(1)" title="Перейти к следующему уроку с нерассмотренными правками">
+          Урок с правкой ▶
+        </button>
+      </div>
+
+      <a href="{% url 'custom_user:admin_commands' %}" class="btn-back-commands" title="Вернуться к списку команд администратора">← Команды</a>
+    </div>
+  </div>
+
+  <!-- Hotkeys summary -->
+  <div class="hotkeys-banner">
+    <span>💡 <b>Горячие клавиши (RU и EN):</b></span>
+    <span><span class="kbd-key">Ctrl</span> + <span class="kbd-key">B</span> жирный</span>
+    <span><span class="kbd-key">Ctrl</span> + <span class="kbd-key">I</span> курсив</span>
+    <span><span class="kbd-key">Ctrl</span> + <span class="kbd-key">U</span> подчёркивание</span>
+    <span><span class="kbd-key">Ctrl</span> + <span class="kbd-key">Shift</span> + <span class="kbd-key">B</span> оранжевый курсив полужирный</span>
+    <span><span class="kbd-key">Ctrl</span> + <span class="kbd-key">S</span> сохранить упражнение</span>
+    <span style="margin-left: auto; color: #198754; font-size: 12px; font-weight: 500;">Синхронизация с files.le-francais.ru активна ✓</span>
+  </div>
+
+  <!-- Exercises Container -->
+  <div class="exercises-stream" id="exercisesStream">
+    <!-- Populated by JavaScript below -->
+  </div>
+
+  <!-- Interactive Exercise Runner Modal Dialog (Modern Native <dialog>) -->
+  <dialog id="exerciseRunnerModal" closedby="any" aria-labelledby="runnerModalTitle">
+    <div class="runner-modal-header">
+      <h3 class="runner-modal-title" id="runnerModalTitle">Запуск упражнения</h3>
+      <div class="runner-modal-actions">
+        <button type="button" class="runner-btn-reload" onclick="reloadModalIframe()" title="Перезагрузить упражнение (полезно после сохранения правок)">
+          <span>⟳</span> Обновить
+        </button>
+        <a href="#" target="_blank" rel="noopener" class="runner-btn-ext" id="runnerExtLink" title="Открыть в отдельной вкладке браузера">
+          <span>↗</span> В новой вкладке
+        </a>
+        <button type="button" class="runner-btn-close" onclick="closeExerciseModal()" title="Закрыть (Esc)" aria-label="Закрыть">
+          ✕
+        </button>
+      </div>
+    </div>
+    <div class="runner-dirty-alert" id="runnerDirtyAlert">
+      <span>⚠️ <b>Внимание:</b> в редакторе есть несохранённые правки этого упражнения. Нажмите <b>«Сохранить»</b> в карточке и затем <b>«⟳ Обновить»</b> здесь, чтобы увидеть их в интерактиве.</span>
+    </div>
+    <div class="runner-modal-body">
+      <div class="runner-loading-indicator" id="runnerLoadingIndicator">
+        <div style="width: 38px; height: 38px; border: 3px solid #ced4da; border-top-color: #0d6efd; border-radius: 50%; animation: runnerSpin 0.8s linear infinite;"></div>
+        <div>Загрузка упражнения...</div>
+      </div>
+      <iframe class="runner-iframe" id="runnerIframe" allow="autoplay; fullscreen" onload="handleIframeLoaded()" src="about:blank"></iframe>
+    </div>
+  </dialog>
+</div>
+
+<script>
+  // Initial data serialized from Django view
+  const currentExercises = {{ exercises_json|safe }};
+
+  const validFields = ['tasktext', 'titel', 'untertitel', 'helptext', 'feedback', 'all_suggestions'];
+  const serverField = '{{ current_field|default:"" }}';
+  const storedField = localStorage.getItem('la_editor_active_field');
+
+  // Determine active field: server query param > localStorage > 'tasktext' default
+  let currentField = (validFields.includes(serverField)) ? serverField :
+                     (validFields.includes(storedField) ? storedField : 'tasktext');
+
+  const currentLesson = {{ current_lesson }};
+  const lessonsWithSuggs = {{ lessons_with_sugg_json|default:"[]"|safe }};
+
+  const fieldLabels = {
+    'tasktext': 'Задание',
+    'titel': 'Список слов / Заголовок (titel)',
+    'untertitel': 'Пример / Подзаголовок (untertitel)',
+    'helptext': 'Подсказка',
+    'feedback': 'Комплимент',
+    'all_suggestions': 'Только поля с правками'
+  };
+
+  // State store keeping track of edited values and originals
+  const store = {};
+
+  function initStore() {
+    currentExercises.forEach(ex => {
+      store[ex.app_id] = {
+        tasktext: ex.tasktext || '',
+        titel: ex.titel || '',
+        untertitel: ex.untertitel || '',
+        helptext: ex.helptext || '',
+        feedback: ex.feedback || '',
+        orig_tasktext: ex.tasktext || '',
+        orig_titel: ex.titel || '',
+        orig_untertitel: ex.untertitel || '',
+        orig_helptext: ex.helptext || '',
+        orig_feedback: ex.feedback || ''
+      };
+    });
+  }
+
+  function switchFieldTab(field) {
+    if (!validFields.includes(field)) return;
+    currentField = field;
+    localStorage.setItem('la_editor_active_field', field);
+
+    document.querySelectorAll('.field-tab').forEach(b => b.classList.remove('active'));
+    const tabEl = document.getElementById(`tab-${field}`);
+    if (tabEl) tabEl.classList.add('active');
+
+    renderExercises();
+  }
+
+  let filterOnlySuggestions = false;
+
+  function toggleOnlySuggestionsFilter(checked) {
+    filterOnlySuggestions = !!checked;
+    renderExercises();
+  }
+
+  function jumpToAdjacentLessonWithSuggestions(direction) {
+    const pending = getPendingChanges();
+    if (pending.length > 0) {
+      if (!confirm(`На этом уроке есть несохранённые изменения (${pending.length}). Перейти к другому уроку без сохранения?`)) {
+        return;
+      }
+    }
+    if (!lessonsWithSuggs || lessonsWithSuggs.length === 0) {
+      alert("Нет уроков с нерассмотренными предложениями.");
+      return;
+    }
+    let target = null;
+    if (direction > 0) {
+      target = lessonsWithSuggs.find(les => les > currentLesson);
+      if (!target) target = lessonsWithSuggs[0];
+    } else {
+      const reversed = [...lessonsWithSuggs].reverse();
+      target = reversed.find(les => les < currentLesson);
+      if (!target) target = lessonsWithSuggs[lessonsWithSuggs.length - 1];
+    }
+    if (target && target !== currentLesson) {
+      window.location.href = `?lesson=${target}&field=${currentField}`;
+    } else if (target === currentLesson) {
+      alert("Вы находитесь на единственном уроке с нерассмотренными правками.");
+    }
+  }
+
+  function toggleLessonDropdownFilter(onlyWithSuggs) {
+    const items = document.querySelectorAll('#lessonDropdownMenu .custom-select-item');
+    items.forEach(it => {
+      const hasSugg = it.getAttribute('data-has-sugg') === '1';
+      if (onlyWithSuggs && !hasSugg) {
+        it.style.display = 'none';
+      } else {
+        it.style.display = 'flex';
+      }
+    });
+  }
+
+  function updateTabBadges() {
+    const counts = { tasktext: 0, titel: 0, untertitel: 0, helptext: 0, feedback: 0, total: 0 };
+    if (currentExercises) {
+      currentExercises.forEach(ex => {
+        ['tasktext', 'titel', 'untertitel', 'helptext', 'feedback'].forEach(f => {
+          const s = ex.suggestions && ex.suggestions[f];
+          const dis = store[ex.app_id] && store[ex.app_id]['dismissed_' + f];
+          if (s && !dis) {
+            counts[f]++;
+            counts.total++;
+          }
+        });
+      });
+    }
+
+    ['tasktext', 'titel', 'untertitel', 'helptext', 'feedback'].forEach(f => {
+      const el = document.getElementById(`tab-badge-${f}`);
+      if (el) {
+        if (counts[f] > 0) {
+          el.innerText = `${counts[f]} ✨`;
+          el.className = 'tab-badge has-count';
+        } else {
+          el.innerText = '';
+          el.className = 'tab-badge';
+        }
+      }
+    });
+
+    const allSuggBadge = document.getElementById('tab-badge-all_suggestions');
+    if (allSuggBadge) {
+      allSuggBadge.innerText = counts.total;
+      allSuggBadge.className = counts.total > 0 ? 'tab-badge tab-badge-highlight has-count' : 'tab-badge tab-badge-highlight';
+    }
+
+    // Update filter toggle badge and interactive state
+    const filterWrapper = document.getElementById('filterSuggWrapper');
+    const filterCheckbox = document.getElementById('onlySuggestionsCheckbox');
+    const filterBadge = document.getElementById('suggTotalBadge');
+    const currentCount = (currentField === 'all_suggestions') ? counts.total : counts[currentField];
+
+    if (filterWrapper && filterBadge && filterCheckbox) {
+      filterBadge.innerText = currentCount;
+      if (currentCount === 0) {
+        filterWrapper.style.opacity = '0.55';
+        filterWrapper.style.borderColor = '#ced4da';
+        filterWrapper.style.background = '#f8f9fa';
+        filterWrapper.style.color = '#6c757d';
+        filterWrapper.title = 'На этом уроке нет предложений для текущего поля';
+        filterCheckbox.disabled = true;
+        if (filterOnlySuggestions) {
+          filterCheckbox.checked = false;
+          filterOnlySuggestions = false;
+        }
+      } else {
+        filterWrapper.style.opacity = '1';
+        filterWrapper.style.borderColor = '#b6d4fe';
+        filterWrapper.style.background = '#f0f7ff';
+        filterWrapper.style.color = '#0b5ed7';
+        filterWrapper.title = `Оставить только упражнения с предложениями (${currentCount})`;
+        filterCheckbox.disabled = false;
+      }
+    }
+  }
+
+  function getEditorElements(appId, field) {
+    const f = field || currentField;
+    const isAllSugg = (currentField === 'all_suggestions');
+    if (!isAllSugg && f !== currentField) {
+      return { field: f, ta: null, prevBody: null, saveBtn: null, badge: null };
+    }
+    const suffix = isAllSugg ? `-${appId}-${f}` : `-${appId}`;
+    return {
+      field: f,
+      ta: document.getElementById(`textarea${suffix}`),
+      prevBody: document.getElementById(`prev-body${suffix}`),
+      saveBtn: document.getElementById(`save${suffix}`),
+      badge: document.getElementById(`badge${suffix}`)
+    };
+  }
+
+  function buildExerciseCard(ex, field, isAllSuggMode) {
+    const appId = ex.app_id;
+    const currentVal = store[appId][field] || '';
+    const origVal = store[appId]['orig_' + field] || '';
+    const isDirty = (currentVal !== origVal);
+
+    const sugg = (ex.suggestions && ex.suggestions[field]) ? ex.suggestions[field] : null;
+    const isDismissed = store[appId] && store[appId]['dismissed_' + field];
+    const elementSuffix = isAllSuggMode ? `-${appId}-${field}` : `-${appId}`;
+
+    let suggestionBoxHtml = '';
+    if (sugg && !isDismissed) {
+      const isApplied = (currentVal === sugg.suggested);
+      const reasonBadges = sugg.reasons.map(r => {
+        let bClass = 'ai-reason-badge';
+        if (['запятая', 'так же', 'так же, как', 'наращение', 'в течение'].includes(r.tag)) {
+          bClass += ' badge-grammar';
+        } else if (['т. е.', 'т. д.', 'т. п.', 'женск.', 'муж.', 'франц.', 'англ.'].includes(r.tag)) {
+          bClass += ' badge-spacing';
+        }
+        return `<span class="${bClass}" title="${escapeHtmlEntities(r.description)}">${r.tag}</span>`;
+      }).join(' ');
+
+      if (isApplied) {
+        suggestionBoxHtml = `
+          <div class="ai-suggestion-box ai-suggestion-applied">
+            <div class="ai-suggestion-header">
+              <div class="ai-suggestion-title">
+                <span class="ai-sparkle-icon">✓</span>
+                <span>Предложение ИИ применено (нажмите «Сохранить»)</span>
+                ${reasonBadges}
+              </div>
+              <div class="ai-suggestion-actions">
+                <button type="button" class="btn-sugg-dismiss" onclick="revertSuggestion('${appId}', '${field}')" title="Вернуть исходный текст">
+                  Отменить
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        suggestionBoxHtml = `
+          <div class="ai-suggestion-box" id="sugg-box${elementSuffix}">
+            <div class="ai-suggestion-header">
+              <div class="ai-suggestion-title">
+                <span class="ai-sparkle-icon">✨</span>
+                <span>Найдена неточность:</span>
+                ${reasonBadges}
+              </div>
+              <div class="ai-suggestion-actions">
+                <button type="button" class="btn-sugg-apply" onclick="applySuggestion('${appId}', '${field}')" title="Подставить исправленный текст в поле ввода">
+                  ✓ Применить
+                </button>
+                <button type="button" class="btn-sugg-dismiss" onclick="dismissSuggestion('${appId}', '${field}')" title="Отклонить предложение">
+                  ✕
+                </button>
+              </div>
+            </div>
+            <div class="ai-suggestion-diff">
+              ${sugg.diff_html}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    const isHeadingType = (field === 'titel' || field === 'untertitel');
+    let previewBoxHtml = '';
+    if (isHeadingType) {
+      previewBoxHtml = `
+        <div class="la-preview-canvas">
+          <div class="la-heading-card">
+            <div class="la-heading-badge">${fieldLabels[field]}</div>
+            <div class="la-heading-content" id="prev-body${elementSuffix}">${currentVal}</div>
+          </div>
+        </div>
+      `;
+    } else {
+      previewBoxHtml = `
+        <div class="la-preview-canvas">
+          <div class="la-modal-box">
+            <div class="la-modal-heading" id="prev-title${elementSuffix}">${fieldLabels[field]}</div>
+            <div class="la-modal-content" id="prev-body${elementSuffix}">${currentVal}</div>
+            <div class="la-modal-ok-btn">OK</div>
+          </div>
+        </div>
+      `;
+    }
+
+    const titleFieldBadge = isAllSuggMode
+      ? `<span class="exercise-field-badge">${fieldLabels[field]}</span>`
+      : '';
+
+    const card = document.createElement('div');
+    card.className = 'exercise-card';
+    card.id = `card${elementSuffix}`;
+
+    card.innerHTML = `
+      <div class="card-top-row">
+        <div class="exercise-title">
+          <span>Упражнение ${ex.num_display}</span>
+          ${titleFieldBadge}
+          <span class="exercise-tag">ID: ${ex.app_id} · ${ex.tool ? 'Тип: ' + ex.tool : ex.title}</span>
+          <span class="status-badge ${isDirty ? 'badge-dirty' : 'badge-clean'}" id="badge${elementSuffix}">
+            ${isDirty ? 'Есть несохранённые правки' : 'Без изменений'}
+          </span>
+          ${(sugg && !isDismissed && currentVal !== sugg.suggested) ? '<span class="status-badge" style="background:#e7f1ff; color:#0c63e4; border:1px solid #b6d4fe;">✨ Есть правка ИИ</span>' : ''}
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" class="btn-run-exercise" onclick="openExerciseModal('${appId}', '${ex.num_display}')" title="Запустить интерактивное упражнение">
+            <span>▶</span> Запустить
+          </button>
+          <button type="button" class="save-action-btn" id="save${elementSuffix}" ${isDirty ? '' : 'disabled'} onclick="saveSingleExercise('${appId}', '${field}')">
+            Сохранить
+          </button>
+        </div>
+      </div>
+
+      <div class="editor-preview-split">
+        <div class="column-box">
+          <div class="column-title">Редактирование HTML (${fieldLabels[field]})</div>
+          ${suggestionBoxHtml}
+          <div class="format-toolbar" id="tb${elementSuffix}">
+            <button type="button" class="fmt-btn" title="Жирный (Ctrl+B)" onmousedown="event.preventDefault()" onclick="applyFormattingTag('${appId}', 'b', '${field}')"><b>B</b></button>
+            <button type="button" class="fmt-btn" title="Курсив (Ctrl+I)" onmousedown="event.preventDefault()" onclick="applyFormattingTag('${appId}', 'i', '${field}')"><i>I</i></button>
+            <button type="button" class="fmt-btn" title="Подчёркнутый (Ctrl+U)" onmousedown="event.preventDefault()" onclick="applyFormattingTag('${appId}', 'u', '${field}')"><u>U</u></button>
+            <button type="button" class="fmt-btn" title="Верхний индекс" onmousedown="event.preventDefault()" onclick="applyFormattingTag('${appId}', 'sup', '${field}')">X<sup>2</sup></button>
+            <button type="button" class="fmt-btn" title="Нижний индекс" onmousedown="event.preventDefault()" onclick="applyFormattingTag('${appId}', 'sub', '${field}')">X<sub>2</sub></button>
+            <button type="button" class="fmt-btn" title="Вставить перенос строки &lt;br&gt;" onmousedown="event.preventDefault()" onclick="insertBrTag('${appId}', '${field}')"><span style="font-family: monospace; font-size: 12px; font-weight: bold;">&lt;br&gt;</span></button>
+            <div class="fmt-separator"></div>
+            <button type="button" class="fmt-btn" title="Превратить строки в маркированный список &lt;ul&gt;" onmousedown="event.preventDefault()" onclick="applyListFormat('${appId}', 'ul', '${field}')"><span style="font-family: monospace; font-size: 11px; font-weight: bold;">• &lt;ul&gt;</span></button>
+            <button type="button" class="fmt-btn" title="Превратить строки в нумерованный список &lt;ol&gt;" onmousedown="event.preventDefault()" onclick="applyListFormat('${appId}', 'ol', '${field}')"><span style="font-family: monospace; font-size: 11px; font-weight: bold;">1. &lt;ol&gt;</span></button>
+            <div class="fmt-separator"></div>
+            <button type="button" class="fmt-btn fmt-btn-cascade" title="Оранжевый + курсив + жирный (<span class='text-warning'><i><b>...</b></i></span>) [Ctrl+Shift+B]" onmousedown="event.preventDefault()" onclick="applyCascadeWarning('${appId}', '${field}')">
+              <span style="display:inline-flex; align-items:center; gap:4px; font-weight:bold; font-size:13px;">
+                <span class="color-swatch-box" style="background:#fd7e14; width:10px; height:10px; border-radius:2px;"></span>
+                <i><b>BI</b></i>
+              </span>
+            </button>
+            <div class="fmt-separator"></div>
+            <button type="button" class="fmt-btn fmt-btn-color" title="Оранжевый (.text-warning)" onmousedown="event.preventDefault()" onclick="applyFormattingClass('${appId}', 'text-warning', '${field}')"><span class="color-swatch-box" style="background:#fd7e14;"></span></button>
+            <button type="button" class="fmt-btn fmt-btn-color" title="Красный (.text-danger)" onmousedown="event.preventDefault()" onclick="applyFormattingClass('${appId}', 'text-danger', '${field}')"><span class="color-swatch-box" style="background:#dc3545;"></span></button>
+            <button type="button" class="fmt-btn fmt-btn-color" title="Зелёный (.text-success)" onmousedown="event.preventDefault()" onclick="applyFormattingClass('${appId}', 'text-success', '${field}')"><span class="color-swatch-box" style="background:#198754;"></span></button>
+            <button type="button" class="fmt-btn fmt-btn-color" title="Синий (.text-primary)" onmousedown="event.preventDefault()" onclick="applyFormattingClass('${appId}', 'text-primary', '${field}')"><span class="color-swatch-box" style="background:#0d6efd;"></span></button>
+            <button type="button" class="fmt-btn fmt-btn-color" title="Голубой (.text-info)" onmousedown="event.preventDefault()" onclick="applyFormattingClass('${appId}', 'text-info', '${field}')"><span class="color-swatch-box" style="background:#0dcaf0;"></span></button>
+          </div>
+          <textarea class="text-source-area" id="textarea${elementSuffix}"
+            oninput="handleEditorInput('${appId}', '${field}')"
+            onkeydown="handleEditorKeydown(event, '${appId}', '${field}')">${escapeHtmlEntities(currentVal)}</textarea>
+        </div>
+
+        <div class="column-box">
+          <div class="column-title">Предпросмотр (как на сайте)</div>
+          ${previewBoxHtml}
+        </div>
+      </div>
+    `;
+    return card;
+  }
+
+  function renderExercises() {
+    const container = document.getElementById('exercisesStream');
+    container.innerHTML = '';
+
+    // Update active tab visual
+    document.querySelectorAll('.field-tab').forEach(b => b.classList.remove('active'));
+    const activeTab = document.getElementById(`tab-${currentField}`);
+    if (activeTab) activeTab.classList.add('active');
+
+    // Update dynamic badges on tabs & filter checkbox
+    updateTabBadges();
+
+    // Typography button check
+    let lessonTypoCount = 0;
+    if (currentExercises) {
+      currentExercises.forEach(ex => {
+        const fieldsToCheck = (currentField === 'all_suggestions')
+          ? ['tasktext', 'titel', 'untertitel', 'helptext', 'feedback']
+          : [currentField];
+        fieldsToCheck.forEach(f => {
+          const s = ex.suggestions && ex.suggestions[f];
+          const dis = store[ex.app_id] && store[ex.app_id]['dismissed_' + f];
+          if (s && !dis) {
+            const onlyTypo = s.reasons.every(r => r.tag === 'кавычки' || r.tag === 'тире');
+            const currentVal = store[ex.app_id] ? store[ex.app_id][f] : '';
+            if (onlyTypo && currentVal !== s.suggested) {
+              lessonTypoCount++;
+            }
+          }
+        });
+      });
+    }
+
+    const typoBtn = document.getElementById('btnApplyLessonTypo');
+    if (typoBtn) {
+      typoBtn.style.display = lessonTypoCount > 0 ? 'inline-block' : 'none';
+      typoBtn.innerText = `⚡ Вся типографика на уроке (${lessonTypoCount})`;
+    }
+
+    if (!currentExercises || currentExercises.length === 0) {
+      container.innerHTML = '<div style="padding: 40px; text-align: center; color: #6c757d; font-size: 16px;">В этом уроке нет упражнений LearningApps.</div>';
+      return;
+    }
+
+    let renderedCount = 0;
+
+    if (currentField === 'all_suggestions') {
+      currentExercises.forEach(ex => {
+        ['tasktext', 'titel', 'untertitel', 'helptext', 'feedback'].forEach(f => {
+          const s = ex.suggestions && ex.suggestions[f];
+          const dis = store[ex.app_id] && store[ex.app_id]['dismissed_' + f];
+          if (s && !dis) {
+            container.appendChild(buildExerciseCard(ex, f, true));
+            renderedCount++;
+          }
+        });
+      });
+
+      if (renderedCount === 0) {
+        container.innerHTML = `
+          <div style="padding: 50px 20px; text-align: center; color: #495057;">
+            <div style="font-size: 36px; margin-bottom: 12px;">✨</div>
+            <div style="font-size: 18px; font-weight: 700; color: #212529;">На уроке ${currentLesson} нет нерассмотренных предложений ИИ</div>
+            <div style="color: #6c757d; margin: 8px 0 20px 0; font-size: 14px;">Все поля чистые либо правки уже сохранены/отклонены.</div>
+            <button type="button" class="btn btn-primary" onclick="jumpToAdjacentLessonWithSuggestions(1)">
+              Перейти к следующему уроку с правками ▶
+            </button>
+          </div>
+        `;
+        return;
+      }
+    } else {
+      currentExercises.forEach(ex => {
+        const sugg = (ex.suggestions && ex.suggestions[currentField]) ? ex.suggestions[currentField] : null;
+        const isDismissed = store[ex.app_id] && store[ex.app_id]['dismissed_' + currentField];
+
+        if (filterOnlySuggestions && (!sugg || isDismissed)) {
+          return;
+        }
+
+        container.appendChild(buildExerciseCard(ex, currentField, false));
+        renderedCount++;
+      });
+
+      if (renderedCount === 0 && filterOnlySuggestions) {
+        container.innerHTML = `
+          <div style="padding: 40px; text-align: center; color: #6c757d; font-size: 16px;">
+            В этом уроке нет нерассмотренных предложений ИИ для поля «${fieldLabels[currentField]}».
+            <div style="margin-top: 14px;">
+              <button type="button" class="btn btn-default btn-sm" onclick="switchFieldTab('all_suggestions')">
+                ✨ Показать все поля с правками на уроке
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Update active highlight after rendering
+    updateActiveExerciseOnScroll();
+    updateSaveAllButtonState();
+  }
+
+  function escapeHtmlEntities(text) {
+    if (!text) return '';
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function handleEditorInput(appId, field) {
+    const { ta, prevBody, saveBtn, badge, field: f } = getEditorElements(appId, field);
+    if (!ta) return;
+
+    if (!store[appId]) store[appId] = {};
+    store[appId][f] = ta.value;
+    if (prevBody) prevBody.innerHTML = ta.value;
+
+    const isDirty = (ta.value !== store[appId]['orig_' + f]);
+    if (saveBtn) saveBtn.disabled = !isDirty;
+
+    if (badge) {
+      if (isDirty) {
+        badge.className = 'status-badge badge-dirty';
+        badge.innerText = 'Есть несохранённые правки';
+      } else {
+        badge.className = 'status-badge badge-clean';
+        badge.innerText = 'Без изменений';
+      }
+    }
+    updateSaveAllButtonState();
+  }
+
+  // AI Suggestions Handlers
+  function applySuggestion(appId, field) {
+    const f = field || currentField;
+    const ex = currentExercises.find(e => e.app_id === appId);
+    if (!ex || !ex.suggestions || !ex.suggestions[f]) return;
+    const sugg = ex.suggestions[f];
+    const { ta } = getEditorElements(appId, f);
+    if (ta) {
+      ta.value = sugg.suggested;
+      handleEditorInput(appId, f);
+      renderExercises();
+    }
+  }
+
+  function dismissSuggestion(appId, field) {
+    const f = field || currentField;
+    if (!store[appId]) store[appId] = {};
+    store[appId]['dismissed_' + f] = true;
+    renderExercises();
+  }
+
+  function revertSuggestion(appId, field) {
+    const f = field || currentField;
+    if (!store[appId]) return;
+    const { ta } = getEditorElements(appId, f);
+    if (ta) {
+      ta.value = store[appId]['orig_' + f];
+      handleEditorInput(appId, f);
+      renderExercises();
+    }
+  }
+
+  function applyAllTypographyOnLesson() {
+    let count = 0;
+    currentExercises.forEach(ex => {
+      const fieldsToCheck = (currentField === 'all_suggestions')
+        ? ['tasktext', 'titel', 'untertitel', 'helptext', 'feedback']
+        : [currentField];
+      fieldsToCheck.forEach(f => {
+        const sugg = ex.suggestions && ex.suggestions[f];
+        if (!sugg) return;
+        const isDismissed = store[ex.app_id] && store[ex.app_id]['dismissed_' + f];
+        if (isDismissed) return;
+        const onlyTypo = sugg.reasons.every(r => r.tag === 'кавычки' || r.tag === 'тире');
+        const currentVal = store[ex.app_id] ? store[ex.app_id][f] : '';
+        if (onlyTypo && currentVal !== sugg.suggested) {
+          store[ex.app_id][f] = sugg.suggested;
+          const { ta } = getEditorElements(ex.app_id, f);
+          if (ta) ta.value = sugg.suggested;
+          handleEditorInput(ex.app_id, f);
+          count++;
+        }
+      });
+    });
+    if (count > 0) {
+      renderExercises();
+    }
+  }
+
+  function saveSingleExercise(appId, field) {
+    const { ta, saveBtn, badge, field: f } = getEditorElements(appId, field);
+    if (!ta || !saveBtn || !badge) return;
+    const val = ta.value;
+
+    saveBtn.disabled = true;
+    badge.className = 'status-badge badge-dirty';
+    badge.innerText = 'Сохранение...';
+
+    fetch("{% url 'custom_user:exercise_texts_save' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCsrfToken()
+      },
+      body: JSON.stringify({
+        app_id: appId,
+        field: f,
+        value: val
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'ok') {
+        store[appId]['orig_' + f] = val;
+        updateSaveAllButtonState();
+        badge.className = 'status-badge badge-saved';
+        if (data.sftp_synced) {
+          badge.innerText = 'Сохранено и отправлено на files ✓';
+        } else if (data.sftp_error) {
+          badge.innerText = 'Сохранено локально (ошибка SFTP: ' + data.sftp_error + ')';
+        } else {
+          badge.innerText = 'Сохранено локально ✓';
+        }
+        setTimeout(() => {
+          if (saveBtn.disabled) {
+            badge.className = 'status-badge badge-clean';
+            badge.innerText = 'Без изменений';
+          }
+        }, 3000);
+      } else {
+        alert("Ошибка при сохранении: " + (data.message || 'Неизвестная ошибка'));
+        saveBtn.disabled = false;
+        badge.className = 'status-badge badge-dirty';
+        badge.innerText = 'Ошибка сохранения';
+        updateSaveAllButtonState();
+      }
+    })
+    .catch(err => {
+      alert("Сетевая ошибка при сохранении: " + err);
+      saveBtn.disabled = false;
+      badge.className = 'status-badge badge-dirty';
+      badge.innerText = 'Ошибка сети';
+      updateSaveAllButtonState();
+    });
+  }
+
+  // --- Batch Save All Changes on Current Lesson ---
+  function getPendingChanges() {
+    const pending = [];
+    if (!currentExercises) return pending;
+
+    currentExercises.forEach(ex => {
+      const appId = ex.app_id;
+      if (!store[appId]) return;
+
+      ['tasktext', 'titel', 'untertitel', 'helptext', 'feedback'].forEach(f => {
+        // Sync open textarea value if available
+        const { ta } = getEditorElements(appId, f);
+        if (ta) {
+          store[appId][f] = ta.value;
+        }
+
+        const currentVal = store[appId][f];
+        const origVal = store[appId]['orig_' + f];
+        if (currentVal !== undefined && origVal !== undefined && currentVal !== origVal) {
+          pending.push({
+            app_id: appId,
+            num_display: ex.num_display,
+            field: f,
+            value: currentVal
+          });
+        }
+      });
+    });
+    return pending;
+  }
+
+  function updateSaveAllButtonState() {
+    const btn = document.getElementById('btnSaveAllChanges');
+    if (!btn) return;
+    const pending = getPendingChanges();
+    const count = pending.length;
+
+    if (count > 0) {
+      btn.disabled = false;
+      btn.className = 'btn-save-all has-changes';
+      btn.innerHTML = `💾 <b>Сохранить все изменения</b> <span class="save-all-count-badge">${count}</span>`;
+      btn.title = `Сохранить все несохранённые изменения на этом уроке (${count})`;
+    } else {
+      btn.disabled = true;
+      btn.className = 'btn-save-all';
+      btn.innerHTML = `💾 Сохранить все изменения`;
+      btn.title = 'Нет несохранённых изменений на этой странице';
+    }
+  }
+
+  function saveAllChanges() {
+    const pending = getPendingChanges();
+    if (pending.length === 0) {
+      alert("Нет несохранённых изменений на этой странице.");
+      return;
+    }
+
+    const btn = document.getElementById('btnSaveAllChanges');
+    if (btn) {
+      btn.disabled = true;
+      btn.className = 'btn-save-all is-saving';
+      btn.innerHTML = `⏳ Сохранение (${pending.length})...`;
+    }
+
+    // Set badges of all affected cards to saving
+    pending.forEach(item => {
+      const { badge, saveBtn } = getEditorElements(item.app_id, item.field);
+      if (badge) {
+        badge.className = 'status-badge badge-dirty';
+        badge.innerText = 'Сохранение...';
+      }
+      if (saveBtn) {
+        saveBtn.disabled = true;
+      }
+    });
+
+    fetch("{% url 'custom_user:exercise_texts_save' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCsrfToken()
+      },
+      body: JSON.stringify({
+        items: pending.map(it => ({
+          app_id: it.app_id,
+          field: it.field,
+          value: it.value
+        }))
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'ok') {
+        pending.forEach(item => {
+          store[item.app_id]['orig_' + item.field] = item.value;
+          const { badge, saveBtn } = getEditorElements(item.app_id, item.field);
+          if (badge) {
+            badge.className = 'status-badge badge-saved';
+            if (data.sftp_synced) {
+              badge.innerText = 'Сохранено и отправлено на files ✓';
+            } else if (data.sftp_error) {
+              badge.innerText = 'Сохранено локально (ошибка SFTP: ' + data.sftp_error + ')';
+            } else {
+              badge.innerText = 'Сохранено локально ✓';
+            }
+          }
+          if (saveBtn) {
+            saveBtn.disabled = true;
+          }
+        });
+
+        if (btn) {
+          btn.className = 'btn-save-all has-changes';
+          btn.style.background = '#198754';
+          btn.innerHTML = `✓ Все изменения сохранены (${pending.length})!`;
+          setTimeout(() => {
+            btn.style.background = '';
+            updateSaveAllButtonState();
+          }, 2500);
+        }
+
+        setTimeout(() => {
+          pending.forEach(item => {
+            const { badge } = getEditorElements(item.app_id, item.field);
+            if (badge && badge.className.includes('badge-saved')) {
+              badge.className = 'status-badge badge-clean';
+              badge.innerText = 'Без изменений';
+            }
+          });
+        }, 3000);
+
+        updateTabBadges();
+      } else {
+        alert("Ошибка при пакетном сохранении: " + (data.message || 'Неизвестная ошибка'));
+        if (btn) updateSaveAllButtonState();
+        pending.forEach(item => {
+          const { badge, saveBtn } = getEditorElements(item.app_id, item.field);
+          if (badge) {
+            badge.className = 'status-badge badge-dirty';
+            badge.innerText = 'Ошибка сохранения';
+          }
+          if (saveBtn) {
+            saveBtn.disabled = false;
+          }
+        });
+      }
+    })
+    .catch(err => {
+      alert("Сетевая ошибка при пакетном сохранении: " + err);
+      if (btn) updateSaveAllButtonState();
+      pending.forEach(item => {
+        const { badge, saveBtn } = getEditorElements(item.app_id, item.field);
+        if (badge) {
+          badge.className = 'status-badge badge-dirty';
+          badge.innerText = 'Ошибка сети';
+        }
+        if (saveBtn) {
+          saveBtn.disabled = false;
+        }
+      });
+    });
+  }
+
+  function wrapSelectedText(textarea, before, after) {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const val = textarea.value;
+    const selected = val.substring(start, end);
+    const replacement = before + selected + after;
+    textarea.value = val.substring(0, start) + replacement + val.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + before.length, end + before.length);
+  }
+
+  function applyFormattingTag(appId, tagName, field) {
+    const { ta } = getEditorElements(appId, field);
+    if (!ta) return;
+    wrapSelectedText(ta, `<${tagName}>`, `</${tagName}>`);
+    handleEditorInput(appId, field);
+  }
+
+  function applyFormattingClass(appId, className, field) {
+    const { ta } = getEditorElements(appId, field);
+    if (!ta) return;
+    wrapSelectedText(ta, `<span class="${className}">`, `</span>`);
+    handleEditorInput(appId, field);
+  }
+
+  function applyCascadeWarning(appId, field) {
+    const { ta } = getEditorElements(appId, field);
+    if (!ta) return;
+    wrapSelectedText(ta, '<span class="text-warning"><i><b>', '</b></i></span>');
+    handleEditorInput(appId, field);
+  }
+
+  function insertBrTag(appId, field) {
+    const { ta } = getEditorElements(appId, field);
+    if (!ta) return;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const val = ta.value;
+    const replacement = '<br>';
+    ta.value = val.substring(0, start) + replacement + val.substring(end);
+    ta.focus();
+    const newPos = start + replacement.length;
+    ta.setSelectionRange(newPos, newPos);
+    handleEditorInput(appId, field);
+  }
+
+  function applyListFormat(appId, listType, field) {
+    const { ta } = getEditorElements(appId, field);
+    if (!ta) return;
+
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const val = ta.value;
+
+    // Find the full lines spanned by selection
+    const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+    let adjustedEnd = end;
+    if (adjustedEnd > start && val[adjustedEnd - 1] === '\n') {
+      adjustedEnd--;
+    }
+    let lineEnd = val.indexOf('\n', adjustedEnd);
+    if (lineEnd === -1) lineEnd = val.length;
+
+    const textToFormat = val.substring(lineStart, lineEnd);
+    const lines = textToFormat.split('\n');
+
+    // If completely empty on a single line, insert skeleton with cursor inside <li>
+    if (lines.length === 1 && !lines[0].trim()) {
+      const listHtml = `<${listType}>\n  <li></li>\n</${listType}>`;
+      ta.value = val.substring(0, lineStart) + listHtml + val.substring(lineEnd);
+      ta.focus();
+      const cursorInside = lineStart + `<${listType}>\n  <li>`.length;
+      ta.setSelectionRange(cursorInside, cursorInside);
+      handleEditorInput(appId, field);
+      return;
+    }
+
+    const items = lines.map(line => {
+      let trimmed = line.trim();
+      if (/^<\/?(ul|ol)>$/i.test(trimmed)) {
+        return null;
+      }
+      if (!trimmed && lines.length > 1) {
+        return null;
+      }
+      trimmed = trimmed.replace(/^([-*•]|\d+[\.\)])\s+/, '');
+      const liMatch = trimmed.match(/^<li>(.*?)<\/li>$/i);
+      if (liMatch) {
+        trimmed = liMatch[1];
+      }
+      return `  <li>${trimmed}</li>`;
+    }).filter(item => item !== null);
+
+    if (items.length === 0) {
+      items.push('  <li></li>');
+    }
+
+    const listHtml = `<${listType}>\n${items.join('\n')}\n</${listType}>`;
+    ta.value = val.substring(0, lineStart) + listHtml + val.substring(lineEnd);
+    ta.focus();
+    ta.setSelectionRange(lineStart, lineStart + listHtml.length);
+    handleEditorInput(appId, field);
+  }
+
+  function handleEditorKeydown(e, appId, field) {
+    if (e.ctrlKey || e.metaKey) {
+      const code = e.code || '';
+      const key = e.key ? e.key.toLowerCase() : '';
+
+      // Ctrl + Shift + B (or Russian И): Cascade warning + i + b
+      if (e.shiftKey && (code === 'KeyB' || key === 'b' || key === 'и')) {
+        e.preventDefault();
+        applyCascadeWarning(appId, field);
+        return;
+      }
+
+      if (code === 'KeyB' || key === 'b' || key === 'и') {
+        e.preventDefault();
+        applyFormattingTag(appId, 'b', field);
+      } else if (code === 'KeyI' || key === 'i' || key === 'ш') {
+        e.preventDefault();
+        applyFormattingTag(appId, 'i', field);
+      } else if (code === 'KeyU' || key === 'u' || key === 'г') {
+        e.preventDefault();
+        applyFormattingTag(appId, 'u', field);
+      } else if (code === 'KeyS' || key === 's' || key === 'ы') {
+        e.preventDefault();
+        const { saveBtn } = getEditorElements(appId, field);
+        if (saveBtn && !saveBtn.disabled) {
+          saveSingleExercise(appId, field);
+        }
+      }
+    }
+  }
+
+  // Custom dropdown controller
+  function toggleDropdown(dropdownId) {
+    const menu = document.getElementById(dropdownId + 'Menu');
+    if (!menu) return;
+    const isCurrentlyOpen = menu.classList.contains('open');
+    closeAllDropdowns();
+    if (!isCurrentlyOpen) {
+      openDropdown(dropdownId);
+    }
+  }
+
+  function openDropdown(dropdownId) {
+    closeAllDropdowns();
+    const wrapper = document.getElementById(dropdownId + 'Wrapper');
+    const menu = document.getElementById(dropdownId + 'Menu');
+    if (!menu) return;
+    menu.classList.add('open');
+    if (wrapper) wrapper.classList.add('is-open');
+
+    // Auto-scroll so current item is centered in the scroll list
+    const currentItem = menu.querySelector('.custom-select-item.is-current');
+    if (currentItem) {
+      setTimeout(() => {
+        const menuHeight = menu.clientHeight;
+        const itemTop = currentItem.offsetTop;
+        const itemHeight = currentItem.offsetHeight;
+        menu.scrollTop = itemTop - (menuHeight / 2) + (itemHeight / 2);
+      }, 10);
+    }
+  }
+
+  function closeAllDropdowns() {
+    document.querySelectorAll('.custom-select-menu').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.custom-select-wrapper').forEach(w => w.classList.remove('is-open'));
+  }
+
+  // Click outside closes dropdowns
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.custom-select-wrapper')) {
+      closeAllDropdowns();
+    }
+  });
+
+  // ESC key closes modal or dropdowns
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const runnerModal = document.getElementById('exerciseRunnerModal');
+      if (runnerModal && (runnerModal.open || runnerModal.hasAttribute('open'))) {
+        closeExerciseModal();
+        return;
+      }
+      closeAllDropdowns();
+    }
+  });
+
+  function selectCustomLesson(lessonNum) {
+    closeAllDropdowns();
+    changeLessonSelection(lessonNum);
+  }
+
+  function selectCustomExercise(appId) {
+    closeAllDropdowns();
+    updateCustomExerciseDropdown(appId);
+    jumpToExercise(appId);
+  }
+
+  function updateCustomExerciseDropdown(activeAppId) {
+    const labelEl = document.getElementById('exerciseDropdownLabel');
+    const menu = document.getElementById('exerciseDropdownMenu');
+    if (!menu) return;
+
+    const prevItem = menu.querySelector('.custom-select-item.is-current');
+    const newItem = document.getElementById(`ex-item-${activeAppId}`);
+
+    if (prevItem && prevItem !== newItem) {
+      prevItem.classList.remove('is-current');
+    }
+    if (newItem) {
+      newItem.classList.add('is-current');
+      if (labelEl) {
+        const textSpan = newItem.querySelector('.item-text');
+        labelEl.textContent = textSpan ? textSpan.textContent.trim() : activeAppId;
+      }
+    }
+    const sel = document.getElementById('exerciseSelector');
+    if (sel && sel.value !== activeAppId) {
+      sel.value = activeAppId;
+    }
+  }
+
+  function changeLessonSelection(lessonNum) {
+    localStorage.setItem('la_editor_active_field', currentField);
+    window.location.href = `{% url 'custom_user:exercise_texts_editor' %}?lesson=${lessonNum}&field=${currentField}`;
+  }
+
+  function jumpToExercise(appId) {
+    const el = document.getElementById(`card-${appId}`);
+    if (el) {
+      const topBar = document.querySelector('.top-controls-bar');
+      const topBarHeight = topBar ? topBar.offsetHeight + 15 : 70;
+      const y = el.getBoundingClientRect().top + window.pageYOffset - topBarHeight;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }
+
+  // Scrollspy to synchronize the exercise selector and highlight the active card
+  let isScrollingSync = false;
+  function updateActiveExerciseOnScroll() {
+    const topBar = document.querySelector('.top-controls-bar');
+    const offset = (topBar ? topBar.offsetHeight : 60) + 70;
+    let activeAppId = null;
+
+    for (let i = 0; i < currentExercises.length; i++) {
+      const ex = currentExercises[i];
+      const card = document.getElementById(`card-${ex.app_id}`);
+      if (card) {
+        const rect = card.getBoundingClientRect();
+        if (rect.top <= offset && rect.bottom > offset) {
+          activeAppId = ex.app_id;
+          break;
+        } else if (rect.top > offset && !activeAppId) {
+          activeAppId = ex.app_id;
+          break;
+        }
+      }
+    }
+
+    if (!activeAppId && currentExercises.length > 0) {
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
+        activeAppId = currentExercises[currentExercises.length - 1].app_id;
+      } else {
+        activeAppId = currentExercises[0].app_id;
+      }
+    }
+
+    if (activeAppId) {
+      updateCustomExerciseDropdown(activeAppId);
+      document.querySelectorAll('.exercise-card').forEach(c => {
+        c.classList.toggle('active-scroll-card', c.id === `card-${activeAppId}`);
+      });
+    }
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!isScrollingSync) {
+      isScrollingSync = true;
+      window.requestAnimationFrame(() => {
+        updateActiveExerciseOnScroll();
+        isScrollingSync = false;
+      });
+    }
+  }, { passive: true });
+
+  // Mouse wheel cycling over exercise button directly
+  document.addEventListener('DOMContentLoaded', () => {
+    const exBtn = document.getElementById('exerciseDropdownBtn');
+    if (exBtn) {
+      exBtn.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        const currentItem = document.querySelector('#exerciseDropdownMenu .custom-select-item.is-current');
+        if (!currentItem) return;
+        if (e.deltaY > 0) {
+          const next = currentItem.nextElementSibling;
+          if (next && next.classList.contains('custom-select-item')) {
+            selectCustomExercise(next.getAttribute('data-value'));
+          }
+        } else if (e.deltaY < 0) {
+          const prev = currentItem.previousElementSibling;
+          if (prev && prev.classList.contains('custom-select-item')) {
+            selectCustomExercise(prev.getAttribute('data-value'));
+          }
+        }
+      }, { passive: false });
+    }
+  });
+
+  function getCsrfToken() {
+    const cookies = document.cookie.split(';');
+    for (let c of cookies) {
+      c = c.trim();
+      if (c.startsWith('csrftoken=')) {
+        return c.substring('csrftoken='.length);
+      }
+    }
+    return '{{ csrf_token }}';
+  }
+
+  // Exercise Runner Modal Controller
+  let currentModalAppId = null;
+
+  function openExerciseModal(appId, numDisplay) {
+    currentModalAppId = appId;
+    const modal = document.getElementById('exerciseRunnerModal');
+    const titleEl = document.getElementById('runnerModalTitle');
+    const extLink = document.getElementById('runnerExtLink');
+    const iframe = document.getElementById('runnerIframe');
+    const loader = document.getElementById('runnerLoadingIndicator');
+    const dirtyAlert = document.getElementById('runnerDirtyAlert');
+
+    if (!modal || !iframe) return;
+
+    titleEl.innerHTML = `Упражнение ${numDisplay || ''} <span style="font-weight:normal; color:#6c757d; font-size:13px; font-family:monospace;">(${appId})</span>`;
+
+    const baseUrl = `https://files.le-francais.ru/learning-apps/${appId}/index.html`;
+    extLink.href = baseUrl;
+
+    // Check if card currently has unsaved changes
+    const ta = document.getElementById(`textarea-${appId}`);
+    const origVal = store[appId] ? store[appId]['orig_' + currentField] : '';
+    const isDirty = ta && (ta.value !== origVal);
+    if (dirtyAlert) {
+      dirtyAlert.style.display = isDirty ? 'flex' : 'none';
+    }
+
+    if (loader) {
+      loader.style.display = 'flex';
+      loader.style.opacity = '1';
+    }
+    iframe.src = `${baseUrl}?_t=${Date.now()}`;
+
+    if (typeof modal.showModal === 'function') {
+      modal.showModal();
+    } else {
+      modal.setAttribute('open', '');
+    }
+  }
+
+  function closeExerciseModal() {
+    const modal = document.getElementById('exerciseRunnerModal');
+    const iframe = document.getElementById('runnerIframe');
+    if (iframe) {
+      iframe.src = 'about:blank';
+    }
+    if (modal) {
+      if (typeof modal.close === 'function') {
+        modal.close();
+      } else {
+        modal.removeAttribute('open');
+      }
+    }
+    currentModalAppId = null;
+  }
+
+  function reloadModalIframe() {
+    if (!currentModalAppId) return;
+    const iframe = document.getElementById('runnerIframe');
+    const loader = document.getElementById('runnerLoadingIndicator');
+    const dirtyAlert = document.getElementById('runnerDirtyAlert');
+
+    // Re-check dirty state
+    const ta = document.getElementById(`textarea-${currentModalAppId}`);
+    const origVal = store[currentModalAppId] ? store[currentModalAppId]['orig_' + currentField] : '';
+    const isDirty = ta && (ta.value !== origVal);
+    if (dirtyAlert) {
+      dirtyAlert.style.display = isDirty ? 'flex' : 'none';
+    }
+
+    if (loader) {
+      loader.style.display = 'flex';
+      loader.style.opacity = '1';
+    }
+    if (iframe) {
+      iframe.src = `https://files.le-francais.ru/learning-apps/${currentModalAppId}/index.html?_t=${Date.now()}`;
+    }
+  }
+
+  function handleIframeLoaded() {
+    const loader = document.getElementById('runnerLoadingIndicator');
+    if (loader) {
+      loader.style.opacity = '0';
+      setTimeout(() => {
+        loader.style.display = 'none';
+      }, 150);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('exerciseRunnerModal');
+    if (modal) {
+      modal.addEventListener('close', () => {
+        const iframe = document.getElementById('runnerIframe');
+        if (iframe) iframe.src = 'about:blank';
+        currentModalAppId = null;
+      });
+
+      // Light-dismiss fallback if closedBy is not natively supported
+      if (!('closedBy' in HTMLDialogElement.prototype)) {
+        modal.addEventListener('click', (event) => {
+          if (event.target !== modal) return;
+          const rect = modal.getBoundingClientRect();
+          const isDialogContent = (
+            rect.top <= event.clientY &&
+            event.clientY <= rect.top + rect.height &&
+            rect.left <= event.clientX &&
+            event.clientX <= rect.left + rect.width
+          );
+          if (!isDialogContent) {
+            closeExerciseModal();
+          }
+        });
+      }
+    }
+  });
+
+  // Warn if user attempts to leave or navigate with unsaved edits
+  window.addEventListener('beforeunload', (e) => {
+    if (typeof getPendingChanges === 'function' && getPendingChanges().length > 0) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  // Initialize store and render
+  initStore();
+  renderExercises();
+  updateActiveExerciseOnScroll();
+</script>
+{% endblock %}
+
+{% block footer %}{% endblock %}
