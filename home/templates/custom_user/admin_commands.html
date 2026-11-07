@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container" style="margin-top: 50px">
+	<div class="row" style="margin-bottom: 25px;">
+		<div class="col-12">
+			<a href="{% url 'custom_user:exercise_texts_editor' %}" class="btn btn-success btn-lg">
+				✏️ Редактор текстов упражнений LearningApps
+			</a>
+		</div>
+	</div>
 	<div class="row">
 		<div class="col-12">
 			<form class="form-inline" method="post" action="{% url 'custom_user:admin_commands' %}">{% csrf_token %}
