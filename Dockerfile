@@ -28,8 +28,17 @@ RUN geoipupdate -v -f /etc/GeoIP.conf -d /app/geoip
 
 # Download ffmpeg
 
+# The "latest" release is re-published daily and GitHub occasionally returns an
+# error page; --fail + archive test + retry loop keep that from breaking deploys.
 RUN mkdir -p /tmp/ffmpeg && mkdir -p /app/ffmpeg && \
-    curl -L 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz' -o /tmp/ffmpeg.tar.xz && \
+    for i in 1 2 3 4 5; do \
+      rm -f /tmp/ffmpeg.tar.xz; \
+      curl -fsSL --retry 3 --retry-delay 5 \
+        'https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz' \
+        -o /tmp/ffmpeg.tar.xz && xz -t /tmp/ffmpeg.tar.xz && break; \
+      echo "ffmpeg download attempt $i failed, retrying in 30s" >&2; sleep 30; \
+    done && \
+    xz -t /tmp/ffmpeg.tar.xz && \
     tar -xf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg --strip-components=1 && \
     chmod +x /tmp/ffmpeg/bin/ffmpeg
 
