@@ -1,4 +1,38 @@
 <h4 style='text-align: center;margin-bottom: 0;margin-top: 0.5rem'><b>
     {% if self.show_lesson_number %}{{ page.lesson_number }}.{% endif %}{{ self.number }}{% if not self.show_lesson_number %}.{% endif %} {{ self.title }}</b></h4>
 <iframe src="https://files.le-francais.ru/learning-apps/{{ self.app_id }}/index.html"
-        style="border:0;width: {{ self.width }}; height: {{ self.height }}" loading="lazy"></iframe>
+        class="learning-apps-iframe"
+        data-app-id="{{ self.app_id }}"
+        style="border:0;width: {{ self.width }}; min-height: 280px; height: {{ self.height }}; transition: height 0.2s ease-out;" loading="lazy"></iframe>
+<script>
+if (!window._leFrancaisLaResizeInitialized) {
+  window._leFrancaisLaResizeInitialized = true;
+  window.addEventListener('message', function(e) {
+    if (!e.data || e.data.type !== 'le_francais_la_resize') return;
+    var iframes = document.querySelectorAll('iframe.learning-apps-iframe, iframe[src*="learning-apps"]');
+    for (var i = 0; i < iframes.length; i++) {
+      var iframe = iframes[i];
+      if (iframe.contentWindow === e.source || (e.data.appId && iframe.src.indexOf(e.data.appId) !== -1)) {
+        if (e.data.frameHeight && e.data.frameHeight > 100) {
+          iframe.style.height = e.data.frameHeight + 'px';
+        }
+        break;
+      }
+    }
+  });
+
+  if (window.jQuery) {
+    window.jQuery(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function(e) {
+      var target = window.jQuery(e.target.getAttribute('href'));
+      if (target.length) {
+        var iframes = target.find('iframe.learning-apps-iframe, iframe[src*="learning-apps"]');
+        iframes.each(function() {
+          try {
+            this.contentWindow.postMessage({ type: 'le_francais_request_resize' }, '*');
+          } catch(err) {}
+        });
+      }
+    });
+  }
+}
+</script>
