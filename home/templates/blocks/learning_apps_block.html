@@ -1,4 +1,46 @@
-<h4 style='text-align: center;margin-bottom: 0;margin-top: 0.5rem'><b>
-    {% if self.show_lesson_number %}{{ page.lesson_number }}.{% endif %}{{ self.number }}{% if not self.show_lesson_number %}.{% endif %} {{ self.title }}</b></h4>
-<iframe src="https://files.le-francais.ru/learning-apps/{{ self.app_id }}/index.html"
-        style="border:0;width: {{ self.width }}; height: {{ self.height }}" loading="lazy"></iframe>
+<h4 style="text-align: center; margin: 0.5rem 0 0;"><strong>{% if self.show_lesson_number %}{{ page.lesson_number }}.{{ self.number }}{% else %}{{ self.number }}.{% endif %}{{ self.title }}</strong></h4>
+
+<iframe
+  src="https://files.le-francais.ru/learning-apps/{{ self.app_id }}/"
+  class="learning-apps-iframe"
+  data-app-id="{{ self.app_id }}"
+  title="{{ self.title|default:'Interactive exercise' }}"
+  loading="lazy"
+  style="border: 0; width: {{ self.width }}; min-height: 280px; height: {{ self.height }}; transition: height 0.2s ease-out;">
+</iframe>
+
+<script>
+if (!window._leFrancaisLaResizeInitialized) {
+  window._leFrancaisLaResizeInitialized = true;
+
+  const ALLOWED_ORIGIN = '*';
+  const IFRAME_SELECTOR = 'iframe.learning-apps-iframe, iframe[src*="learning-apps"]';
+
+  window.addEventListener('message', (e) => {
+    if (e.origin !== ALLOWED_ORIGIN || e.data?.type !== 'le_francais_la_resize') return;
+
+    const frameHeight = Number(e.data.frameHeight);
+    if (!frameHeight || frameHeight <= 100) return;
+
+    for (const iframe of document.querySelectorAll(IFRAME_SELECTOR)) {
+      const isSourceMatch = iframe.contentWindow === e.source;
+      const isIdMatch = e.data.appId && iframe.dataset.appId === String(e.data.appId);
+
+      if (isSourceMatch || isIdMatch) {
+        iframe.style.height = `${frameHeight}px`;
+        if (isSourceMatch) break;
+      }
+    }
+  });
+
+  $(document).on('shown.bs.tab', '[data-toggle="tab"], [data-bs-toggle="tab"]', (e) => {
+    const selector = e.target.getAttribute('data-target') || e.target.getAttribute('href');
+    if (!selector || !selector.startsWith('#') || selector.length === 1) return;
+
+    $(selector).find(IFRAME_SELECTOR).each(function () {
+      this.contentWindow?.postMessage({ type: 'le_francais_request_resize' }, ALLOWED_ORIGIN);
+    });
+  });
+}
+</script>
+
