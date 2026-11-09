@@ -1,7 +1,7 @@
 <h4 style="text-align: center; margin: 0.5rem 0 0;"><strong>{% if self.show_lesson_number %}{{ page.lesson_number }}.{{ self.number }}{% else %}{{ self.number }}.{% endif %}{{ self.title }}</strong></h4>
 
 <iframe
-  src="https://files.le-francais.ru/learning-apps/{{ self.app_id }}/index.html"
+  src="https://files.le-francais.ru/learning-apps/{{ self.app_id }}/"
   class="learning-apps-iframe"
   data-app-id="{{ self.app_id }}"
   title="{{ self.title|default:'Interactive exercise' }}"
