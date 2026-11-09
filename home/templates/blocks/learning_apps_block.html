@@ -17,7 +17,8 @@ if (!window._leFrancaisLaResizeInitialized) {
   const IFRAME_SELECTOR = 'iframe.learning-apps-iframe, iframe[src*="learning-apps"]';
 
   window.addEventListener('message', (e) => {
-    if (e.origin !== ALLOWED_ORIGIN || e.data?.type !== 'le_francais_la_resize') return;
+    if (ALLOWED_ORIGIN !== '*' && e.origin !== ALLOWED_ORIGIN) return;
+    if (e.data?.type !== 'le_francais_la_resize') return;
 
     const frameHeight = Number(e.data.frameHeight);
     if (!frameHeight || frameHeight <= 100) return;
@@ -43,4 +44,3 @@ if (!window._leFrancaisLaResizeInitialized) {
   });
 }
 </script>
-
